@@ -50,7 +50,6 @@ const InitiateForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const {
-    masterCodes,
     banks,
     bankAccounts,
     mainAccounts,
@@ -62,8 +61,9 @@ const InitiateForm = () => {
   const validate = (values) => {
     const errors = {};
 
-    if (!values.PettyCashCodes) {
-      errors.PettyCashCodes = t("pettyCash.pettyCashCodeRequiredMsg");
+    // the code may be left empty: the next Petty Cash Code is issued when the fund is established
+    if (!(Number(values.PettyCashSize) > 0)) {
+      errors.PettyCashSize = t("pettyCash.pettyCashSizeRequired");
     }
 
     if (!values.BankCode) {
@@ -116,12 +116,10 @@ const InitiateForm = () => {
     },
   });
 
-  const handlePettyCashDescribtion = (option) => {
-    formik.setFieldValue("PettyCashdescription", option?.description || "");
-    formik.setFieldValue("PettyCashSize", option?.size ?? "");
-    formik.setFieldValue("AvailableCash", option?.size ?? "");
-    formik.setFieldValue("MaxLimit", option?.maxLimit ?? "");
-    formik.setFieldValue("MinimumCashbox", option?.minimumCashbox ?? "");
+  // Initiate owns the fund: the cash available when it is established is its size
+  const handleFundSize = (value) => {
+    formik.setFieldValue("PettyCashSize", value);
+    formik.setFieldValue("AvailableCash", value);
   };
   const handlecurrency = (option) => {
     formik.setFieldValue("Currencydescription", describe(currencies, option?.code));
@@ -205,25 +203,16 @@ const InitiateForm = () => {
 
         <div className="grid mt-1">
           <div className="col-12 md:col-3 lg-col-3 input__view">
-            <DropDowns
-              className="input__filed"
+            <InputField
+              classNames="input__filed"
               label={t("pettyCash.pettyCashCode")}
-              placeholder={t("pettyCash.select")}
+              placeholder={t("pettyCash.pettyCashCodeAuto")}
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
+              length={30}
               value={formik.values.PettyCashCodes}
-              options={masterCodes}
-              onChange={(e) => {
-                formik.setFieldValue("PettyCashCodes", e.value).then(() => {
-                  handlePettyCashDescribtion(e.value);
-                })
-              }}
-              optionLabel="label"
-              error={
-                formik.touched.PettyCashCodes && formik.errors.PettyCashCodes
-              }
+              onChange={formik.handleChange("PettyCashCodes")}
             />
 
           </div>
@@ -231,7 +220,6 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashDescription")}
-              disabled={true}
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
@@ -243,12 +231,13 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.pettyCashSize")}
-              disabled={true}
+              required
+              type="number"
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
               value={formik.values.PettyCashSize}
-              onChange={formik.handleChange("PettyCashSize")}
+              onChange={(e) => handleFundSize(e.target.value)}
               error={
                 formik.touched.PettyCashSize && formik.errors.PettyCashSize
               }
@@ -481,7 +470,7 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.maxLimit")}
-              disabled={true}
+              type="number"
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}
@@ -497,7 +486,7 @@ const InitiateForm = () => {
             <InputField
               classNames="input__filed"
               label={t("pettyCash.minimumCashbox")}
-              disabled={true}
+              type="number"
               textColor={"#111927"}
               textSize={"16"}
               textWeight={500}

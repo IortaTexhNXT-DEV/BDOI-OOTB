@@ -52,7 +52,7 @@ It applies the step-by-step set-up of `docs/onboarding/GO_LIVE_DATA_SETUP.md` to
 | Insurance | Lines of business, products, policy types, covers | Product list (delivered data covers Philippine non-life; load only what is missing) | Master > Generals > Insurance Management |
 | Insurance | Vehicle brands, models, variants, vehicles | Motor tables (delivered data holds vehicle makes) | Master > Generals > Insurance Management > Vehicle |
 | Insurance | Signatories | Authorised signatories | Master > Generals > Insurance Management > Signatories |
-| Commission | Commission rules and sharing by level | Commission tables | Master > Generals > Commission |
+| Commission | Commission rates per insurer, product and line of business | Commission tables | Master > Finance > Commission Rate Matrix |
 | Finance | Chart of accounts | GL account list | Master > Finance > Main Account, Sub Account |
 | Finance | Transaction codes, write-off reasons, petty cash funds | Finance set-up | Master > Finance |
 | Finance | Banks and the broker's bank accounts | Bank list | Master > Finance > Bank |
@@ -90,7 +90,6 @@ All templates were verified against the importers: each was loaded unchanged thr
 | `Users_Provisioning_Template.xlsx` / `.csv` | Users with role and initial password | Server script `backend/scripts/provision-users.js` |
 | `Hierarchy_Upload_Template.xlsx` | Ranks of the employee hierarchy | Employee Management > Hierarchy (API route) |
 | `Designation_Upload_Template.xlsx` | Designations | Employee Management > Designation (API route) |
-| `Employee_Upload_Template.xlsx` | Employees | Employee Management > Employee (API route) |
 | `Country_Upload_Template.xlsx` | Countries | Master > Generals > Location > Country |
 | `State_Upload_Template.xlsx` | States or provinces | Location > State |
 | `City_Upload_Template.xlsx` | Cities with postal code | Location > City Master |
@@ -106,11 +105,9 @@ All templates were verified against the importers: each was loaded unchanged thr
 | `Vehicle_Variant_Upload_Template.xlsx` | Variants with body type and seating | Insurance Management > Vehicle |
 | `Vehicle_Upload_Template.xlsx` | Vehicles | Insurance Management > Vehicle |
 | `Signatories_Upload_Template.xlsx` | Signatories | Insurance Management > Signatories (API route) |
-| `Commission_Upload_Template.xlsx` | Commission rules per insurer, product and cover, sharing by level | Master > Generals > Commission (API route) |
 | `Chart_of_Accounts_Upload_Template.xlsx` | Main and sub accounts with statement group and normal balance | Master > Finance > Main Account > Upload |
 | `Transaction_Code_Upload_Template.xlsx` | Transaction codes with GL accounts and user limits | Master > Finance > Transaction code |
 | `Write_off_Reason_Upload_Template.xlsx` | Write-off reasons with GL account and maximum | Master > Finance > Account Determination (API route) |
-| `Petty_Cash_Upload_Template.xlsx` | Petty cash funds | Master > Finance > Petty cash |
 | `Bank_Upload_Template.xlsx` | Banks | Master > Finance > Bank |
 | `Bank_Account_Upload_Template.xlsx` | The broker's bank accounts with GL cash account, statement format and reconcile-from date | Master > Finance > Bank (Bank accounts) |
 | `Policies_Upload_Template.xlsx` | In-force policies and their clients (go-live mode), or new policies | Operations > Policy > Bulk Upload |

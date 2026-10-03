@@ -17,6 +17,8 @@ import {
 } from "../store/userMiddleware";
 import moment from "moment";
 import userService from "../../../../../services/userService";
+import mastersService from "../../../../../services/mastersService";
+import DropDowns from "../../../../../components/DropDowns";
 import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
 import { TemporaryPasswordDialog } from "../UserMaster/UserSecurityActions";
 import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
@@ -55,6 +57,9 @@ const AddUser = ({ action }) => {
     displayName: "",
     roles: [],
     permissions: [],
+    branchCode: "",
+    designation: "",
+    reportingTo: "",
   };
   const { userDetailList, userEditData } = useSelector(
     ({ userReducers }) => {
@@ -78,6 +83,25 @@ const AddUser = ({ action }) => {
         )
       )
       .catch((error) => toastRef.current?.showToast({ severity: "error", detail: error.message }));
+  }, []);
+  // Users are the staff register: the designation comes from the Designation master, the reporting line from users,
+  // the branch from the Branch master (the Employee master is retired).
+  const [designationOptions, setDesignationOptions] = useState([]);
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [userOptions, setUserOptions] = useState([]);
+  useEffect(() => {
+    mastersService
+      .options("designation")
+      .then((rows) => setDesignationOptions(rows.map((r) => ({ name: `${r.code} - ${r.label}`, value: r.label }))))
+      .catch(() => setDesignationOptions([]));
+    mastersService
+      .options("branch")
+      .then((rows) => setBranchOptions(rows.map((r) => ({ name: `${r.code} - ${r.label}`, value: r.code }))))
+      .catch(() => setBranchOptions([]));
+    userService
+      .getUsers({ limit: 200, sortBy: "displayName", sortOrder: "asc" })
+      .then((r) => setUserOptions((r?.data || []).map((u) => ({ name: u.displayName || u.username, value: u.userId }))))
+      .catch(() => setUserOptions([]));
   }, []);
   const validate = (values) => {
     const errors = {};
@@ -192,6 +216,9 @@ const AddUser = ({ action }) => {
       email: userData?.email,
       displayName: userData?.displayName,
       roles: rolesArray,
+      branchCode: userData?.branchCode || "",
+      designation: userData?.designation || "",
+      reportingTo: userData?.reportingTo || "",
       modifiedBy: userData?.modifiedBy,
       modifiedOn: moment().format("DD/MM/YYYY"),
     };
@@ -330,6 +357,47 @@ const AddUser = ({ action }) => {
               />
             </div>
           )}
+
+          <div className="col-12 md:col-4 lg:col-4">
+            <DropDowns
+              className="dropdown__add__sub"
+              label={t("generalMasters.branch", "Branch")}
+              placeholder={t("generalMasters.select", "Select")}
+              options={branchOptions}
+              optionValue="value"
+              value={formik.values.branchCode || null}
+              onChange={(e) => formik.setFieldValue("branchCode", e.value || "")}
+              disabled={action === "view"}
+            />
+          </div>
+          <div className="col-12 md:col-4 lg:col-4">
+            <DropDowns
+              className="dropdown__add__sub"
+              label={t("generalMasters.designation", "Designation")}
+              placeholder={t("generalMasters.select", "Select")}
+              options={
+                formik.values.designation && !designationOptions.some((o) => o.value === formik.values.designation)
+                  ? [...designationOptions, { name: formik.values.designation, value: formik.values.designation }]
+                  : designationOptions
+              }
+              optionValue="value"
+              value={formik.values.designation || null}
+              onChange={(e) => formik.setFieldValue("designation", e.value || "")}
+              disabled={action === "view"}
+            />
+          </div>
+          <div className="col-12 md:col-4 lg:col-4">
+            <DropDowns
+              className="dropdown__add__sub"
+              label={t("generalMasters.reportingTo", "Reporting To")}
+              placeholder={t("generalMasters.select", "Select")}
+              options={userOptions.filter((u) => u.value !== id)}
+              optionValue="value"
+              value={formik.values.reportingTo || null}
+              onChange={(e) => formik.setFieldValue("reportingTo", e.value || "")}
+              disabled={action === "view"}
+            />
+          </div>
 
           <div className="col-12 md:col-12 lg:col-12">
             <label

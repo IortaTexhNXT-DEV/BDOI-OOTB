@@ -10,9 +10,9 @@ import { Card } from "primereact/card";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import { BreadCrumb } from "primereact/breadcrumb";
-import remittanceService, { masterService } from "../../../services/remittanceService";
+import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
-import { dateBody, downloadCsv, isoDate, showError, showSuccess } from "../shared";
+import { dateBody, downloadCsv, isoDate, loadSettings, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
 import { confirmAction, promptText } from "../../../utility/dialogs";
@@ -43,10 +43,8 @@ const ReconciliationProcess = () => {
   const [tolerance, setTolerance] = useState(0);
   const [loading, setLoading] = useState(false);
   const [unmatchedOnly, setUnmatchedOnly] = useState(false);
-  const [rules, setRules] = useState([]);
   const [recon, setRecon] = useState(emptyRecon);
 
-  const currentRule = rules[0] || {};
   const { bankTransactions, exceptions } = recon;
   const systemTransactions = unmatchedOnly ? recon.systemTransactions.filter((s) => s.status === "unmatched") : recon.systemTransactions;
   const reconciliationStatus = {
@@ -57,10 +55,11 @@ const ReconciliationProcess = () => {
     successRate: recon.summary.successRate
   };
 
-  const matchCriteriaOptions = (currentRule.matchingCriteria || []).map(criteria => ({
-    label: criteria.matchType,
-    value: criteria.matchType
-  }));
+  // the tolerance is the remittance.reconciliation_tolerance setting (Master > Configuration); it may be changed per run
+  const matchCriteriaOptions = [
+    { label: "Exact", value: "Exact" },
+    { label: "Within Tolerance", value: "Within Tolerance" }
+  ];
 
   const items = [
     { label: t("remittance.finance"), url: "#" },
@@ -85,12 +84,8 @@ const ReconciliationProcess = () => {
 
   useEffect(() => {
     loadReconciliation();
-    masterService.list("remittance-reconciliation-rule", { status: "Active" })
-      .then((rows) => {
-        setRules(rows || []);
-        const tol = (rows?.[0]?.matchingCriteria || []).find((c) => c.tolerance !== undefined);
-        if (tol) setTolerance(Number(tol.tolerance));
-      })
+    loadSettings()
+      .then((s) => setTolerance(Number(s["remittance.reconciliation_tolerance"] ?? 0)))
       .catch((e) => showError(toast, e));
   }, []);
 

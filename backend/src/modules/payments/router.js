@@ -72,7 +72,7 @@ const S = 'Accounts > Petty Cash';
 const KINDS = { funds: ['Initiate', pc.fundRow], requests: ['Request', null], disbursements: ['Disbursement', pc.disbursementRow], receipts: ['Receipts', pc.receiptRow], replenishments: ['Replenish', pc.replenishRow] };
 const moneyish = z.union([z.number(), z.string()]);
 const SCHEMAS = {
-  funds: z.object({ code: z.string().min(2), description: z.string().optional(), fundSize: moneyish, maxLimit: moneyish.optional(), minimumCashbox: moneyish.optional(), bankCode: z.string().optional(),
+  funds: z.object({ code: z.string().min(2).optional(), description: z.string().optional(), fundSize: moneyish, maxLimit: moneyish.optional(), minimumCashbox: moneyish.optional(), bankCode: z.string().optional(),
     bankAccountCode: z.string().optional(), mainAccountCode: z.string().optional(), subAccountCode: z.string().optional(), currency: z.string().optional(), branchCode: z.string().optional(),
     departmentCode: z.string().optional(), custodianUserId: z.string().optional(), transactionDate: z.string().optional() }).passthrough(),
   requests: z.object({ fundId: z.string().optional(), pettyCashCode: z.string().optional(), requesterName: z.string().min(2), requestDate: z.string().optional(), departmentCode: z.string().optional(),

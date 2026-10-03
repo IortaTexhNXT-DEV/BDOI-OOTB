@@ -44,7 +44,7 @@ INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
  ('remittance.transfer_methods', $j$[{"label":"InstaPay","value":"InstaPay","limit":50000},{"label":"PESONet","value":"PESONet","limit":10000000},{"label":"RTGS (PhilPaSS)","value":"RTGS","limit":1000000000},{"label":"Wire Transfer","value":"Wire","limit":100000000}]$j$, 'remittance', 'Electronic transfer methods and limits', 'json', true),
  ('remittance.priority_sla_hours', $j${"Urgent":4,"High":12,"Normal":24,"Low":48}$j$, 'remittance', 'Approval SLA hours by priority', 'json', true),
  ('remittance.priority_thresholds', $j$[{"min":1000000,"priority":"Urgent"},{"min":250000,"priority":"High"},{"min":20000,"priority":"Normal"},{"min":0,"priority":"Low"}]$j$, 'remittance', 'Priority by amount', 'json', true),
- ('remittance.approval_levels', $j$[{"level":1,"maxAmount":100000},{"level":2,"maxAmount":1000000},{"level":3,"maxAmount":null}]$j$, 'remittance', 'Approval levels required by amount', 'json', true),
+ ('remittance.approval_levels', $j$[{"level":1,"maxAmount":100000},{"level":2,"maxAmount":1000000},{"level":3,"maxAmount":null}]$j$, 'remittance', 'Fallback approval levels by amount, used only while the Authority Matrix has no remittance limit (Master > User Management > Authority Matrix)', 'json', true),
  ('remittance.default_due_days', '30', 'remittance', 'Default days until a remittance / bill is due', 'number', true),
  ('remittance.kpi_targets', $j${"settlementEfficiency":95,"paymentSuccessRate":95,"averageProcessingHours":24,"exceptionRate":2}$j$, 'remittance', 'Remittance KPI targets', 'json', true),
  ('remittance.reconciliation_tolerance', '0.5', 'remittance', 'Auto-match tolerance (amount, PHP)', 'number', true),

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (871 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (867 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -55290,136 +55290,6 @@
           ]
         },
         {
-          "name": "Approval delegations",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/remittance/approvals/delegations",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "remittance",
-                "approvals",
-                "delegations"
-              ]
-            },
-            "description": "Approval delegations\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegation\n\nAccess: read:remittance, write:remittance"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/remittance/approvals/delegations",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "remittance",
-                    "approvals",
-                    "delegations"
-                  ]
-                },
-                "description": "Approval delegations\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegation\n\nAccess: read:remittance, write:remittance"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"delegatedTo\": \"Finance Head\",\n      \"fromDate\": \"2026-09-25\",\n      \"toDate\": \"2026-09-30\",\n      \"transTypes\": [\n        \"All\"\n      ],\n      \"status\": \"Active\"\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Delegate approval authority for a period",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/remittance/approvals/delegations",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "remittance",
-                "approvals",
-                "delegations"
-              ]
-            },
-            "description": "Delegate approval authority for a period\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegation\n\nAccess: write:remittance",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"delegateTo\": \"finance.head\",\n  \"fromDate\": \"2026-10-01\",\n  \"toDate\": \"2026-10-07\",\n  \"transTypes\": [\n    \"All\"\n  ],\n  \"amountLimit\": 500000,\n  \"reason\": \"Annual leave\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/remittance/approvals/delegations",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "remittance",
-                    "approvals",
-                    "delegations"
-                  ]
-                },
-                "description": "Delegate approval authority for a period\n\nFront-end touchpoint: Accounts > Remittance > Approval > Delegation\n\nAccess: write:remittance",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"delegateTo\": \"finance.head\",\n  \"fromDate\": \"2026-10-01\",\n  \"toDate\": \"2026-10-07\",\n  \"transTypes\": [\n    \"All\"\n  ],\n  \"amountLimit\": 500000,\n  \"reason\": \"Annual leave\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"status\": \"Active\"\n  }\n}"
-            }
-          ]
-        },
-        {
           "name": "Approval actions (approved / rejected / delegated)",
           "request": {
             "method": "GET",
@@ -58141,7 +58011,7 @@
           ]
         },
         {
-          "name": "Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type)",
+          "name": "Remittance Master overview: the remittance configuration types in one list (edit through /masters/:type)",
           "request": {
             "method": "GET",
             "header": [],
@@ -58165,7 +58035,7 @@
                 }
               ]
             },
-            "description": "Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type)\n\nFront-end touchpoint: Master > Finance > Remittance Master\n\nAccess: read:remittance, write:remittance, read:masters"
+            "description": "Remittance Master overview: the remittance configuration types in one list (edit through /masters/:type)\n\nFront-end touchpoint: Master > Finance > Remittance Master\n\nAccess: read:remittance, write:remittance, read:masters"
           },
           "response": [
             {
@@ -58193,7 +58063,7 @@
                     }
                   ]
                 },
-                "description": "Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type)\n\nFront-end touchpoint: Master > Finance > Remittance Master\n\nAccess: read:remittance, write:remittance, read:masters"
+                "description": "Remittance Master overview: the remittance configuration types in one list (edit through /masters/:type)\n\nFront-end touchpoint: Master > Finance > Remittance Master\n\nAccess: read:remittance, write:remittance, read:masters"
               },
               "status": "OK",
               "code": 200,
@@ -59548,186 +59418,7 @@
           ]
         },
         {
-          "name": "Generated remittance reports",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/remittance/reports",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "remittance",
-                "reports"
-              ]
-            },
-            "description": "Generated remittance reports\n\nFront-end touchpoint: Accounts > Remittance > Reports\n\nAccess: read:remittance, write:remittance"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/remittance/reports",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "remittance",
-                    "reports"
-                  ]
-                },
-                "description": "Generated remittance reports\n\nFront-end touchpoint: Accounts > Remittance > Reports\n\nAccess: read:remittance, write:remittance"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"rmi_8\",\n      \"templateCode\": \"RPT-001\",\n      \"generatedOn\": \"2026-09-28T00:00:00Z\",\n      \"period\": \"2026-09-01 to 2026-09-28\",\n      \"fileSize\": \"2 KB\",\n      \"fileUrl\": \"http://host/api/s3/object/...\",\n      \"status\": \"Completed\"\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Generate a remittance report (CSV) from a template for a date range",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/remittance/reports/generate",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "remittance",
-                "reports",
-                "generate"
-              ]
-            },
-            "description": "Generate a remittance report (CSV) from a template for a date range\n\nFront-end touchpoint: Accounts > Remittance > Reports > Generate\n\nAccess: write:remittance",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"templateCode\": \"RPT-001\",\n  \"from\": \"2026-09-01\",\n  \"to\": \"2026-09-28\",\n  \"insurers\": []\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/remittance/reports/generate",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "remittance",
-                    "reports",
-                    "generate"
-                  ]
-                },
-                "description": "Generate a remittance report (CSV) from a template for a date range\n\nFront-end touchpoint: Accounts > Remittance > Reports > Generate\n\nAccess: write:remittance",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"templateCode\": \"RPT-001\",\n  \"from\": \"2026-09-01\",\n  \"to\": \"2026-09-28\",\n  \"insurers\": []\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"referenceNo\": \"RPT-2026-00001\",\n    \"fileUrl\": \"http://host/api/s3/object/...\",\n    \"status\": \"Completed\"\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Remittance report templates (remittance-report-template master)",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/remittance/reports/templates",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "remittance",
-                "reports",
-                "templates"
-              ]
-            },
-            "description": "Remittance report templates (remittance-report-template master)\n\nFront-end touchpoint: Accounts > Remittance > Reports\n\nAccess: read:remittance, write:remittance"
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{baseUrl}}/remittance/reports/templates",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "remittance",
-                    "reports",
-                    "templates"
-                  ]
-                },
-                "description": "Remittance report templates (remittance-report-template master)\n\nFront-end touchpoint: Accounts > Remittance > Reports\n\nAccess: read:remittance, write:remittance"
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"RPT-001\",\n      \"name\": \"Daily Remittance Report\",\n      \"category\": \"Operational\",\n      \"status\": \"Active\"\n    }\n  ]\n}"
-            }
-          ]
-        },
-        {
-          "name": "Scheduled remittance jobs (remittance-schedule master) and upcoming runs",
+          "name": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them",
           "request": {
             "method": "GET",
             "header": [],
@@ -59741,7 +59432,7 @@
                 "schedules"
               ]
             },
-            "description": "Scheduled remittance jobs (remittance-schedule master) and upcoming runs\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
+            "description": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
           },
           "response": [
             {
@@ -59759,7 +59450,7 @@
                     "schedules"
                   ]
                 },
-                "description": "Scheduled remittance jobs (remittance-schedule master) and upcoming runs\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
+                "description": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them\n\nFront-end touchpoint: Accounts > Remittance > Scheduling\n\nAccess: read:remittance, write:remittance"
               },
               "status": "OK",
               "code": 200,
@@ -59771,12 +59462,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"scheduledJobs\": [\n      {\n        \"id\": 1,\n        \"name\": \"Monthly Remittance Schedule\",\n        \"nextRun\": \"2026-10-01 09:00\",\n        \"frequency\": \"Monthly\",\n        \"status\": \"Active\"\n      }\n    ],\n    \"upcomingEvents\": [\n      {\n        \"status\": \"2026-10-01 09:00\",\n        \"date\": \"2026-10-01\",\n        \"content\": \"Monthly Remittance Schedule\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"scheduledJobs\": [\n      {\n        \"id\": 1,\n        \"code\": \"SCH-001\",\n        \"name\": \"Monthly remittance - Malayan\",\n        \"insurers\": [\n          \"MALAYAN\"\n        ],\n        \"cutOffDays\": 5,\n        \"nextRun\": \"2026-10-01\",\n        \"frequency\": \"Monthly\",\n        \"status\": \"Active\"\n      }\n    ],\n    \"upcomingEvents\": [\n      {\n        \"status\": \"2026-10-01\",\n        \"date\": \"2026-10-01\",\n        \"content\": \"Monthly remittance - Malayan\"\n      }\n    ],\n    \"timeZone\": \"Asia/Manila\",\n    \"job\": {\n      \"code\": \"remittance-schedules\",\n      \"cron\": \"15 6 * * *\",\n      \"enabled\": false\n    }\n  }\n}"
             }
           ]
         },
         {
-          "name": "New schedule (stored in the remittance-schedule master)",
+          "name": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)",
           "request": {
             "method": "POST",
             "header": [
@@ -59795,10 +59486,10 @@
                 "schedules"
               ]
             },
-            "description": "New schedule (stored in the remittance-schedule master)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > New Schedule\n\nAccess: write:remittance",
+            "description": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > New Schedule\n\nAccess: write:remittance",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"code\": \"SCH-0003\",\n  \"name\": \"Weekly Settlement - Pioneer\",\n  \"frequency\": \"Weekly\",\n  \"time\": \"14:00\",\n  \"nextRun\": \"2026-10-05\",\n  \"linkedProcesses\": [\n    \"ARM-001\"\n  ]\n}",
+              "raw": "{\n  \"code\": \"SCH-0003\",\n  \"name\": \"Weekly remittance - Pioneer\",\n  \"insurers\": [\n    \"PIONEER\"\n  ],\n  \"cutOffDays\": 3,\n  \"frequency\": \"Weekly\",\n  \"nextRun\": \"2026-10-05\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -59827,10 +59518,10 @@
                     "schedules"
                   ]
                 },
-                "description": "New schedule (stored in the remittance-schedule master)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > New Schedule\n\nAccess: write:remittance",
+                "description": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > New Schedule\n\nAccess: write:remittance",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"code\": \"SCH-0003\",\n  \"name\": \"Weekly Settlement - Pioneer\",\n  \"frequency\": \"Weekly\",\n  \"time\": \"14:00\",\n  \"nextRun\": \"2026-10-05\",\n  \"linkedProcesses\": [\n    \"ARM-001\"\n  ]\n}",
+                  "raw": "{\n  \"code\": \"SCH-0003\",\n  \"name\": \"Weekly remittance - Pioneer\",\n  \"insurers\": [\n    \"PIONEER\"\n  ],\n  \"cutOffDays\": 3,\n  \"frequency\": \"Weekly\",\n  \"nextRun\": \"2026-10-05\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -59853,7 +59544,100 @@
           ]
         },
         {
-          "name": "Run a schedule now (executes its linked automated remittance)",
+          "name": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/remittance/schedules/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "remittance",
+                "schedules",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Edit Schedule\n\nAccess: write:remittance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insurers\": [\n    \"PIONEER\",\n    \"MALAYAN\"\n  ],\n  \"cutOffDays\": 5,\n  \"nextRun\": \"2026-10-12\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/remittance/schedules/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "remittance",
+                    "schedules",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Edit Schedule\n\nAccess: write:remittance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insurers\": [\n    \"PIONEER\",\n    \"MALAYAN\"\n  ],\n  \"cutOffDays\": 5,\n  \"nextRun\": \"2026-10-12\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"code\": \"SCH-0003\",\n    \"status\": \"Active\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)",
           "request": {
             "method": "POST",
             "header": [],
@@ -59876,7 +59660,7 @@
                 }
               ]
             },
-            "description": "Run a schedule now (executes its linked automated remittance)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Run Now\n\nAccess: write:remittance"
+            "description": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Run Now\n\nAccess: write:remittance"
           },
           "response": [
             {
@@ -59903,7 +59687,7 @@
                     }
                   ]
                 },
-                "description": "Run a schedule now (executes its linked automated remittance)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Run Now\n\nAccess: write:remittance"
+                "description": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)\n\nFront-end touchpoint: Accounts > Remittance > Scheduling > Run Now\n\nAccess: write:remittance"
               },
               "status": "OK",
               "code": 200,

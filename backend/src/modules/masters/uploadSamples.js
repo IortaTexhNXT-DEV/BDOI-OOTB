@@ -105,14 +105,6 @@ export const MASTER_TEMPLATES = [
       MainAccountCode: '1203001', MainAccountDescription: 'Commission Receivable – Insurers (Direct Bill)', BranchCode: 'HO', BranchDescription: 'Head Office', DepartmentCode: 'FIN', DepartmentDescription: 'Finance' }],
   },
   {
-    type: 'commission', menu: 'Master > Generals > Commission',
-    formats: { commissionCode: 'Leave empty to take the next number of the Commission Code series', selectCover: 'Covers separated by semicolons, e.g. Fire and Lightning; Earthquake Shock',
-      selectAgent: 'Sales person; leave empty when the commission applies to every sales person', effectiveTo: 'Date YYYY-MM-DD; leave empty when open ended',
-      maxRate: 'Percent, e.g. 25 for 25%', sharing: 'JSON list of sharing levels, e.g. [{"level":"Sales person","sharingRate":60}]; may be left empty' },
-    samples: [{ commissionCode: '', desc: 'Fire - Charter Ping An', insuranceCompany: 'Charter Ping An Insurance Corporation', product: 'Fire and Allied Perils', selectCover: 'Fire and Lightning; Earthquake Shock',
-      maxRate: '25', selectAgent: '', effectiveFrom: '2026-10-01', effectiveTo: '' }],
-  },
-  {
     type: 'hierarchy', menu: 'Master > Generals > Employee Management > Hierarchy',
     samples: [{ rankCode: 'R6', rankName: 'Regional Director', description: 'Heads the sales regions', levelNumber: '6' }],
   },
@@ -121,20 +113,9 @@ export const MASTER_TEMPLATES = [
     samples: [{ designationCode: 'DSG-CLO', designationName: 'Claims Officer', designationDescription: 'Handles claims from notification to settlement', departmentCode: 'CLM', level: '1', reportingtoLevel: '2' }],
   },
   {
-    type: 'employee', menu: 'Master > Generals > Employee Management > Employee',
-    samples: [{ employeeCode: 'EMP-0101', firstName: 'Paolo', middleName: 'Garcia', lastName: 'Mendoza', employeeType: 'Permanent', designation: 'Account Executive', reportingTo: 'EMP-0001',
-      branchCode: 'HO', departmentCode: 'SLS', idProofType: 'PhilSys ID', idNumber: '1234-5678-9012-3456', addressLine1: '45 Kalayaan Ave.', city: 'Quezon City', state: 'Metro Manila',
-      country: 'Philippines', email: 'paolo.mendoza@example.ph' }],
-  },
-  {
     type: 'write-off-reason', menu: 'Master > Finance > Account Determination (write-off reasons)',
     formats: { glAccount: 'GL expense or income account the write-off is charged to', maxAmount: 'Largest amount one write-off may have, in PHP' },
     samples: [{ code: 'COURTESY', name: 'Courtesy adjustment approved by management', glAccount: '4401009', maxAmount: '500', description: 'Small courtesy adjustments on client accounts' }],
-  },
-  {
-    type: 'petty-cash', button: true, menu: 'Master > Finance > Petty cash',
-    formats: { pettycashsize: 'Fund size in PHP', avilabelcash: 'Cash on hand at go-live in PHP', minicashbox: 'Replenish below this amount (PHP)', transactionlimit: 'Largest single payment in PHP' },
-    samples: [{ pettycashcode: 'PC-ILO', pettycashname: 'Iloilo Branch Petty Cash', pettycashsize: '20000', avilabelcash: '20000', minicashbox: '5000', transactionlimit: '2000', custodian: 'Liza Uy', branchCode: 'CEB' }],
   },
 ];
 

@@ -85502,185 +85502,6 @@
         ]
       }
     },
-    "/remittance/approvals/delegations": {
-      "get": {
-        "operationId": "getRemittanceApprovalsDelegations",
-        "summary": "Approval delegations",
-        "tags": [
-          "Remittance"
-        ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval > Delegation\n\nAccess: read:remittance, write:remittance",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "delegatedTo": {
-                            "type": "string"
-                          },
-                          "fromDate": {
-                            "type": "string"
-                          },
-                          "toDate": {
-                            "type": "string"
-                          },
-                          "transTypes": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            }
-                          },
-                          "status": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "delegatedTo": "Finance Head",
-                      "fromDate": "2026-09-25",
-                      "toDate": "2026-09-30",
-                      "transTypes": [
-                        "All"
-                      ],
-                      "status": "Active"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Accounts > Remittance > Approval > Delegation",
-        "x-permissions": [
-          "read:remittance",
-          "write:remittance"
-        ]
-      },
-      "post": {
-        "operationId": "postRemittanceApprovalsDelegations",
-        "summary": "Delegate approval authority for a period",
-        "tags": [
-          "Remittance"
-        ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Approval > Delegation\n\nAccess: write:remittance",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "status": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": 1,
-                    "status": "Active"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Accounts > Remittance > Approval > Delegation",
-        "x-permissions": [
-          "write:remittance"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "delegateTo": {
-                    "type": "string"
-                  },
-                  "fromDate": {
-                    "type": "string"
-                  },
-                  "toDate": {
-                    "type": "string"
-                  },
-                  "transTypes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "amountLimit": {
-                    "type": "integer"
-                  },
-                  "reason": {
-                    "type": "string"
-                  }
-                }
-              },
-              "example": {
-                "delegateTo": "finance.head",
-                "fromDate": "2026-10-01",
-                "toDate": "2026-10-07",
-                "transTypes": [
-                  "All"
-                ],
-                "amountLimit": 500000,
-                "reason": "Annual leave"
-              }
-            }
-          }
-        }
-      }
-    },
     "/remittance/approvals/history": {
       "get": {
         "operationId": "getRemittanceApprovalsHistory",
@@ -90029,7 +89850,7 @@
     "/remittance/masters": {
       "get": {
         "operationId": "getRemittanceMasters",
-        "summary": "Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type)",
+        "summary": "Remittance Master overview: the remittance configuration types in one list (edit through /masters/:type)",
         "tags": [
           "Remittance"
         ],
@@ -92054,260 +91875,10 @@
         }
       }
     },
-    "/remittance/reports": {
-      "get": {
-        "operationId": "getRemittanceReports",
-        "summary": "Generated remittance reports",
-        "tags": [
-          "Remittance"
-        ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Reports\n\nAccess: read:remittance, write:remittance",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "string"
-                          },
-                          "templateCode": {
-                            "type": "string"
-                          },
-                          "generatedOn": {
-                            "type": "string"
-                          },
-                          "period": {
-                            "type": "string"
-                          },
-                          "fileSize": {
-                            "type": "string"
-                          },
-                          "fileUrl": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "id": "rmi_8",
-                      "templateCode": "RPT-001",
-                      "generatedOn": "2026-09-28T00:00:00Z",
-                      "period": "2026-09-01 to 2026-09-28",
-                      "fileSize": "2 KB",
-                      "fileUrl": "http://host/api/s3/object/...",
-                      "status": "Completed"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Accounts > Remittance > Reports",
-        "x-permissions": [
-          "read:remittance",
-          "write:remittance"
-        ]
-      }
-    },
-    "/remittance/reports/generate": {
-      "post": {
-        "operationId": "postRemittanceReportsGenerate",
-        "summary": "Generate a remittance report (CSV) from a template for a date range",
-        "tags": [
-          "Remittance"
-        ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Reports > Generate\n\nAccess: write:remittance",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "object",
-                      "properties": {
-                        "referenceNo": {
-                          "type": "string"
-                        },
-                        "fileUrl": {
-                          "type": "string"
-                        },
-                        "status": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "referenceNo": "RPT-2026-00001",
-                    "fileUrl": "http://host/api/s3/object/...",
-                    "status": "Completed"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Accounts > Remittance > Reports > Generate",
-        "x-permissions": [
-          "write:remittance"
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "templateCode": {
-                    "type": "string"
-                  },
-                  "from": {
-                    "type": "string"
-                  },
-                  "to": {
-                    "type": "string"
-                  },
-                  "insurers": {
-                    "type": "array",
-                    "items": {}
-                  }
-                }
-              },
-              "example": {
-                "templateCode": "RPT-001",
-                "from": "2026-09-01",
-                "to": "2026-09-28",
-                "insurers": []
-              }
-            }
-          }
-        }
-      }
-    },
-    "/remittance/reports/templates": {
-      "get": {
-        "operationId": "getRemittanceReportsTemplates",
-        "summary": "Remittance report templates (remittance-report-template master)",
-        "tags": [
-          "Remittance"
-        ],
-        "description": "Front-end touchpoint: Accounts > Remittance > Reports\n\nAccess: read:remittance, write:remittance",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "data": {
-                      "type": "array",
-                      "items": {
-                        "type": "object",
-                        "properties": {
-                          "id": {
-                            "type": "integer"
-                          },
-                          "code": {
-                            "type": "string"
-                          },
-                          "name": {
-                            "type": "string"
-                          },
-                          "category": {
-                            "type": "string"
-                          },
-                          "status": {
-                            "type": "string"
-                          }
-                        }
-                      }
-                    }
-                  }
-                },
-                "example": {
-                  "success": true,
-                  "data": [
-                    {
-                      "id": 1,
-                      "code": "RPT-001",
-                      "name": "Daily Remittance Report",
-                      "category": "Operational",
-                      "status": "Active"
-                    }
-                  ]
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          }
-        },
-        "x-screen": "Accounts > Remittance > Reports",
-        "x-permissions": [
-          "read:remittance",
-          "write:remittance"
-        ]
-      }
-    },
     "/remittance/schedules": {
       "get": {
         "operationId": "getRemittanceSchedules",
-        "summary": "Scheduled remittance jobs (remittance-schedule master) and upcoming runs",
+        "summary": "Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them",
         "tags": [
           "Remittance"
         ],
@@ -92335,8 +91906,20 @@
                               "id": {
                                 "type": "integer"
                               },
+                              "code": {
+                                "type": "string"
+                              },
                               "name": {
                                 "type": "string"
+                              },
+                              "insurers": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "cutOffDays": {
+                                "type": "integer"
                               },
                               "nextRun": {
                                 "type": "string"
@@ -92366,6 +91949,23 @@
                               }
                             }
                           }
+                        },
+                        "timeZone": {
+                          "type": "string"
+                        },
+                        "job": {
+                          "type": "object",
+                          "properties": {
+                            "code": {
+                              "type": "string"
+                            },
+                            "cron": {
+                              "type": "string"
+                            },
+                            "enabled": {
+                              "type": "boolean"
+                            }
+                          }
                         }
                       }
                     }
@@ -92377,19 +91977,30 @@
                     "scheduledJobs": [
                       {
                         "id": 1,
-                        "name": "Monthly Remittance Schedule",
-                        "nextRun": "2026-10-01 09:00",
+                        "code": "SCH-001",
+                        "name": "Monthly remittance - Malayan",
+                        "insurers": [
+                          "MALAYAN"
+                        ],
+                        "cutOffDays": 5,
+                        "nextRun": "2026-10-01",
                         "frequency": "Monthly",
                         "status": "Active"
                       }
                     ],
                     "upcomingEvents": [
                       {
-                        "status": "2026-10-01 09:00",
+                        "status": "2026-10-01",
                         "date": "2026-10-01",
-                        "content": "Monthly Remittance Schedule"
+                        "content": "Monthly remittance - Malayan"
                       }
-                    ]
+                    ],
+                    "timeZone": "Asia/Manila",
+                    "job": {
+                      "code": "remittance-schedules",
+                      "cron": "15 6 * * *",
+                      "enabled": false
+                    }
                   }
                 }
               }
@@ -92410,7 +92021,7 @@
       },
       "post": {
         "operationId": "postRemittanceSchedules",
-        "summary": "New schedule (stored in the remittance-schedule master)",
+        "summary": "New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)",
         "tags": [
           "Remittance"
         ],
@@ -92481,32 +92092,136 @@
                   "name": {
                     "type": "string"
                   },
-                  "frequency": {
-                    "type": "string"
-                  },
-                  "time": {
-                    "type": "string"
-                  },
-                  "nextRun": {
-                    "type": "string"
-                  },
-                  "linkedProcesses": {
+                  "insurers": {
                     "type": "array",
                     "items": {
                       "type": "string"
                     }
+                  },
+                  "cutOffDays": {
+                    "type": "integer"
+                  },
+                  "frequency": {
+                    "type": "string"
+                  },
+                  "nextRun": {
+                    "type": "string"
                   }
                 }
               },
               "example": {
                 "code": "SCH-0003",
-                "name": "Weekly Settlement - Pioneer",
+                "name": "Weekly remittance - Pioneer",
+                "insurers": [
+                  "PIONEER"
+                ],
+                "cutOffDays": 3,
                 "frequency": "Weekly",
-                "time": "14:00",
-                "nextRun": "2026-10-05",
-                "linkedProcesses": [
-                  "ARM-001"
-                ]
+                "nextRun": "2026-10-05"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/remittance/schedules/{id}": {
+      "put": {
+        "operationId": "putRemittanceSchedulesId",
+        "summary": "Change a remittance schedule (insurers, cut-off days, frequency, next run date)",
+        "tags": [
+          "Remittance"
+        ],
+        "description": "Front-end touchpoint: Accounts > Remittance > Scheduling > Edit Schedule\n\nAccess: write:remittance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "code": "SCH-0003",
+                    "status": "Active"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Remittance > Scheduling > Edit Schedule",
+        "x-permissions": [
+          "write:remittance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "insurers": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cutOffDays": {
+                    "type": "integer"
+                  },
+                  "nextRun": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "insurers": [
+                  "PIONEER",
+                  "MALAYAN"
+                ],
+                "cutOffDays": 5,
+                "nextRun": "2026-10-12"
               }
             }
           }
@@ -92516,7 +92231,7 @@
     "/remittance/schedules/{id}/run": {
       "post": {
         "operationId": "postRemittanceSchedulesIdRun",
-        "summary": "Run a schedule now (executes its linked automated remittance)",
+        "summary": "Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)",
         "tags": [
           "Remittance"
         ],

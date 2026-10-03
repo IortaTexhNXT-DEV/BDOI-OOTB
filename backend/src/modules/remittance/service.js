@@ -18,6 +18,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { companyName } from '../../lib/letterhead.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
+import { assertAuthority } from '../access-control/service.js';
 
 // ---------------- configuration helpers ----------------
 
@@ -40,7 +41,27 @@ export async function priorityFor(amount) {
   return { priority, slaHours: Number(sla[priority]) || 24 };
 }
 
-export async function levelsFor(amount) {
+/**
+ * Authority Matrix transaction type of a remittance approval (Master > User Management > Authority Matrix):
+ * remittances and agency bills are 'remittance'; settlements, adjustments and electronic transfers 'remittance_settlement'.
+ */
+export const authorityTypeOf = (entity) => (entity === 'remittance' ? 'remittance' : 'remittance_settlement');
+
+/** True when the Authority Matrix has an active limit (any role or user) for the transaction type. */
+async function hasAuthorityLimits(db, type) {
+  if (!(await db.query("SELECT to_regclass('authority_limits') IS NOT NULL AS ok")).rows[0].ok) return false;
+  const r = await db.query(`SELECT 1 FROM authority_limits WHERE transaction_type = $1 AND status = 'active'
+    AND effective_from <= $2::date AND (effective_to IS NULL OR effective_to >= $2::date) LIMIT 1`, [type, await businessToday()]);
+  return r.rows.length > 0;
+}
+
+/**
+ * Approvals a transaction needs. The Authority Matrix owns remittance approval limits: when it has a limit for the
+ * transaction type, one approval by a user whose limit covers the amount is enough (decide() checks the limit). Only
+ * while the matrix has no limit for the type do the fallback levels of remittance.approval_levels apply.
+ */
+export async function levelsFor(amount, { authorityType = 'remittance', db = pool } = {}) {
+  if (await hasAuthorityLimits(db, authorityType)) return 1;
   const levels = (await getSetting('remittance.approval_levels', [])) || [];
   const hit = levels.find((l) => l.maxAmount === null || l.maxAmount === undefined || Math.abs(amount) <= l.maxAmount);
   return hit ? Number(hit.level) : 1;
@@ -308,7 +329,7 @@ export async function askApproval({ transactionType, referenceNo, amount, descri
 
 export async function openApproval(c, { entity, entityId, referenceNo, transactionType, amount, description, initiatorId }) {
   const { priority, slaHours } = await priorityFor(amount);
-  const levels = await levelsFor(amount);
+  const levels = await levelsFor(amount, { authorityType: authorityTypeOf(entity), db: c });
   const hist = [{ action: 'Submitted', by: initiatorId, at: new Date().toISOString(), remarks: description || null }];
   const r = await c.query(`INSERT INTO remittance_approvals(entity, entity_id, reference_no, transaction_type, amount, description, priority, sla_hours, required_levels, initiator_id, history)
                            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) RETURNING id`,
@@ -449,6 +470,8 @@ export async function decide(id, action, body, user) {
     if ((a.history || []).some((h) => h.action === 'Approved' && h.by === user.id)) throw forbidden('Maker-checker: you have already approved an earlier level of this transaction');
   }
   if (action === 'reject' && !remarks) throw badRequest('Validation failed', [{ path: 'comments', message: 'A reason is required to reject' }]);
+  // the approver's limit in the Authority Matrix (own, role or delegated through Master > User Management > Delegations)
+  if (action === 'approve') await assertAuthority(pool, user, authorityTypeOf(a.entity), Number(a.amount));
   const hist = [...(a.history || [])];
   await withTransaction(async (c) => {
     if (action === 'delegate') {
@@ -504,29 +527,6 @@ export async function approvers(user) {
         SELECT 1 FROM role_permissions rp JOIN permissions p ON p.id = rp.permission_id WHERE rp.role_id = r.id AND p.code = 'write:remittance')))
     ORDER BY lower(COALESCE(u.display_name, u.username))`, [user?.id || '', ADMIN_ROLES]);
   return rows.map((u) => ({ userId: u.id, username: u.username, displayName: u.display_name || u.username }));
-}
-
-export async function listDelegations() {
-  const rows = await many(`SELECT d.*, (SELECT display_name FROM users u WHERE u.id = d.delegate_id) AS delegate_name, (SELECT display_name FROM users u WHERE u.id = d.delegator_id) AS delegator_name
-                           FROM remittance_delegations d ORDER BY d.from_date DESC`);
-  const today = await businessToday();
-  return rows.map((d) => ({ id: Number(d.id), delegatedTo: d.delegate_name, delegatedBy: d.delegator_name, fromDate: d.from_date, toDate: d.to_date, transTypes: d.trans_types,
-    amountLimit: d.amount_limit, reason: d.reason, status: d.status === 'Active' && d.to_date < today ? 'Expired' : d.status }));
-}
-
-export async function createDelegation(b, user) {
-  const to = await one('SELECT id FROM users WHERE (id = $1 OR lower(username) = lower($1) OR lower(display_name) = lower($1)) AND status = \'active\'', [String(b.delegateTo || '')]);
-  const errors = [];
-  if (!to) errors.push({ path: 'delegateTo', message: 'Delegate user was not found' });
-  else if (to.id === user.id) errors.push({ path: 'delegateTo', message: 'You cannot delegate to yourself' });
-  const from = isoDate(b.fromDate);
-  const until = isoDate(b.toDate);
-  if (!from || !until || until < from) errors.push({ path: 'toDate', message: 'A valid date range is required' });
-  if (!b.reason) errors.push({ path: 'reason', message: 'Reason is required' });
-  if (errors.length) throw badRequest('Validation failed', errors);
-  const r = await one(`INSERT INTO remittance_delegations(delegator_id, delegate_id, from_date, to_date, trans_types, amount_limit, reason) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id`,
-    [user.id, to.id, from, until, JSON.stringify(b.transTypes || ['All']), b.amountLimit == null ? null : toNumber(b.amountLimit), b.reason]);
-  return (await listDelegations()).find((d) => d.id === Number(r.id));
 }
 
 // ---------------- agency bill (direct bill: see directbill.js) ----------------
@@ -627,6 +627,26 @@ export async function automatedCandidates(configCode) {
   return out;
 }
 
+/** Log an execution (automated remittance or schedule run) as a remittance item; returns its summary. */
+async function logExecution({ created, configCode, started, triggeredBy, extra = {} }, user) {
+  const total = round2(created.reduce((s, r) => s + Number(r.netAmount), 0));
+  const records = created.reduce((s, r) => s + r.policyCount, 0);
+  const ref = await nextDocumentNumber('remittance_batch');
+  await query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('execution', $1, $2, $3, $4, $5, $5)`,
+    [ref, total, created.length ? 'Success' : 'No Items', JSON.stringify({ configCode: configCode || 'ALL', executionDate: (await businessToday()), recordsProcessed: records,
+      itemCount: created.length, remittanceIds: created.map((r) => r.id), durationMs: Date.now() - started, triggeredBy, ...extra }), user?.id || null]);
+  return { executionId: ref, remittances: created, recordsProcessed: records, totalAmount: total, duration: `${Math.max(1, Math.round((Date.now() - started) / 1000))}s` };
+}
+
+/** A draft direct-bill remittance of an insurer's eligible policies (inception up to `to`); null when there is none. */
+async function draftForInsurer({ insurerId, to, dueDate, configCode, period }, user) {
+  const pols = await eligiblePolicies({ insurerId, to, kind: 'direct-bill' });
+  if (!pols.length) return null;
+  const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), insurerId);
+  const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId, period, dueDate, lines, configCode, userId: user?.id || null }));
+  return getRemittance(id);
+}
+
 /** Create draft remittances for every ready candidate (optionally limited to candidate ids) and log the execution. */
 export async function executeAutomated(b, user, triggeredBy = 'manual') {
   const started = Date.now();
@@ -634,22 +654,35 @@ export async function executeAutomated(b, user, triggeredBy = 'manual') {
   if (Array.isArray(b.ids) && b.ids.length) cands = cands.filter((x) => b.ids.includes(x.id));
   const created = [];
   for (const cnd of cands) {
-    const pols = await eligiblePolicies({ insurerId: cnd.insurerId, kind: 'direct-bill' });
-    if (!pols.length) continue;
-    const lines = await buildLines(pols.map((p) => ({ policyId: p.id })), cnd.insurerId);
-    const id = await withTransaction((c) => insertRemittance(c, { kind: 'direct-bill', insurerId: cnd.insurerId, period: new Date().toISOString().slice(0, 7), dueDate: cnd.dueDate, lines, configCode: cnd.scheduleCode, userId: user.id }));
-    created.push(await getRemittance(id));
+    const r = await draftForInsurer({ insurerId: cnd.insurerId, dueDate: cnd.dueDate, configCode: cnd.scheduleCode, period: new Date().toISOString().slice(0, 7) }, user);
+    if (r) created.push(r);
   }
-  const total = round2(created.reduce((s, r) => s + Number(r.netAmount), 0));
-  const ref = await nextDocumentNumber('remittance_batch');
-  await query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('execution', $1, $2, $3, $4, $5, $5)`,
-    [ref, total, created.length ? 'Success' : 'No Items', JSON.stringify({ configCode: b.configCode || 'ALL', executionDate: (await businessToday()), recordsProcessed: created.reduce((s, r) => s + r.policyCount, 0),
-      itemCount: created.length, remittanceIds: created.map((r) => r.id), durationMs: Date.now() - started, triggeredBy }), user.id]);
+  const out = await logExecution({ created, configCode: b.configCode, started, triggeredBy }, user);
   for (const code of [...new Set(cands.map((c) => c.scheduleCode))]) {
     await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text, 'nextRun', $3::text), updated_at = now() WHERE type_code = 'remittance-automated' AND code = $1`,
       [code, (await businessToday()), cands.find((c) => c.scheduleCode === code).dueDate]);
   }
-  return { executionId: ref, remittances: created, recordsProcessed: created.reduce((s, r) => s + r.policyCount, 0), totalAmount: total, duration: `${Math.max(1, Math.round((Date.now() - started) / 1000))}s` };
+  return out;
+}
+
+/**
+ * Remit what a remittance schedule names: one draft remittance per insurer, of the policies incepted up to the cut-off
+ * date (`to`), due after the insurer's remittance terms. Unknown or inactive insurer codes are skipped and reported.
+ */
+export async function executeForInsurers({ insurerCodes, to, scheduleCode, runDate }, user, triggeredBy = 'manual') {
+  const started = Date.now();
+  const date = runDate || (await businessToday());
+  const created = [];
+  const skipped = [];
+  for (const code of insurerCodes || []) {
+    const ins = await one('SELECT * FROM insurance_companies WHERE (lower(code) = lower($1) OR id::text = $1) AND status = $2', [String(code), 'active']);
+    if (!ins) { skipped.push({ insurerCode: code, reason: 'Insurer not found or not active' }); continue; }
+    const r = await draftForInsurer({ insurerId: ins.id, to, dueDate: await defaultDueDate(date, ins.id), configCode: scheduleCode, period: date.slice(0, 7) }, user);
+    if (r) created.push(r);
+    else skipped.push({ insurerCode: ins.code, reason: 'Nothing to remit up to the cut-off date' });
+  }
+  const out = await logExecution({ created, configCode: scheduleCode, started, triggeredBy, extra: { cutOffDate: to || null } }, user);
+  return { ...out, skipped };
 }
 
 export async function executionHistory() {

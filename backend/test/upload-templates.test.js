@@ -56,10 +56,12 @@ const csvBuffer = (rows) => Buffer.from(rows.map((r) => r.join(',')).join('\r\n'
 
 describe('generated upload templates', () => {
   it('builds one workbook per upload, Data sheet first, with the importer headers and no duplicate header', () => {
-    expect(defs.length).toBeGreaterThanOrEqual(38);
+    // commission, employee and petty cash masters are retired (Commission Rate Matrix, User Management > User, Petty Cash > Initiate)
+    expect(defs.length).toBeGreaterThanOrEqual(35);
     for (const id of ['leads', 'quotations', 'policies', 'receipts', 'disbursements', 'chart-of-accounts', 'opening-balances', 'open-items', 'bank-statement', 'remittance-bulk',
       'remittance-bank-transactions', 'users', 'master:insurance-company', 'master:branch', 'master:product', 'master:cover', 'master:vehicle-brand', 'master:vehicle-model',
-      'master:vehicle-variant', 'master:city', 'master:bank', 'master:bank-account', 'master:commission']) expect(defs.map((d) => d.id)).toContain(id);
+      'master:vehicle-variant', 'master:city', 'master:bank', 'master:bank-account']) expect(defs.map((d) => d.id)).toContain(id);
+    for (const id of ['master:commission', 'master:employee', 'master:petty-cash']) expect(defs.map((d) => d.id)).not.toContain(id);
     for (const d of defs) {
       const table = readXlsx(fs.readFileSync(path.join(outDir, d.file)));
       expect(table[0], d.file).toEqual(d.columns.map((c) => c.header));

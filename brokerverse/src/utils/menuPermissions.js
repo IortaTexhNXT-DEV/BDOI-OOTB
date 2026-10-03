@@ -56,7 +56,6 @@ export const roleMenuPermissions = {
       "Rating Engine",
       "Acceptance Rules",
       "Document Manager",
-      "Approval Workflows",
       "Market Mapping",
       "Risk Mapping",
       "Product Analytics",

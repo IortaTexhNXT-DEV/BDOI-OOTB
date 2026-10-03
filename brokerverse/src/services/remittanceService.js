@@ -96,9 +96,7 @@ export const remittanceService = {
   approve: (approvalId, comments) => post(`${R}/approvals/${id(approvalId)}/approve`, { comments }),
   reject: (approvalId, comments) => post(`${R}/approvals/${id(approvalId)}/reject`, { comments }),
   delegate: (approvalId, delegateTo, comments) => post(`${R}/approvals/${id(approvalId)}/delegate`, { delegateTo, comments }),
-  listDelegations: () => get(`${R}/approvals/delegations`),
   listApprovers: () => get(`${R}/approvals/approvers`),
-  createDelegation: (payload) => post(`${R}/approvals/delegations`, payload),
 
   // settlements
   settlementPolicies: (insurerCode) => get(`${R}/settlements/available-policies`, { insurerCode }),
@@ -144,6 +142,7 @@ export const remittanceService = {
   // scheduling
   listSchedules: () => get(`${R}/schedules`),
   createSchedule: (payload) => post(`${R}/schedules`, payload),
+  updateSchedule: (scheduleId, payload) => put(`${R}/schedules/${id(scheduleId)}`, payload),
   setScheduleStatus: (scheduleId, status) => patch(`${R}/schedules/${id(scheduleId)}/status`, { status }),
   runSchedule: (scheduleId) => post(`${R}/schedules/${id(scheduleId)}/run`),
 
@@ -166,9 +165,6 @@ export const remittanceService = {
 
   // analytics / reports / history
   analytics: (params) => get(`${R}/analytics`, params),
-  reportTemplates: () => get(`${R}/reports/templates`),
-  listReports: () => get(`${R}/reports`),
-  generateReport: (payload) => post(`${R}/reports/generate`, payload),
   history: (params) => apiRequest("GET", `${R}/history`, { params }),
   auditTrail: (referenceNo) => get(`${R}/history/audit`, { referenceNo }),
   systemLogs: () => get(`${R}/history/system-logs`),

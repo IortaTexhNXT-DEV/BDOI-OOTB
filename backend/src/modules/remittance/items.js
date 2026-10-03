@@ -1,18 +1,18 @@
 /**
  * Remittance work items: settlements, adjustments, electronic transfers, statements, exceptions, notifications,
- * schedules, bulk uploads, bank reconciliation, analytics, reports, history and the master overview.
+ * schedules, bulk uploads, bank reconciliation, analytics, history and the master overview.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
-import { today } from '../../lib/dates.js';
+import { addCalendarMonths, addDays, businessTimeZone, today } from '../../lib/dates.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { assertRowLimit } from '../../lib/uploadLimits.js';
 import { readXlsx } from '../documents/xlsx.js';
 import { fileSize, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
-import { askApproval, createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
+import { askApproval, createRemittance, eligiblePolicies, executeAutomated, executeForInsurers, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { VISIBLE_TO_USER } from '../notifications/service.js';
@@ -330,51 +330,127 @@ export async function inbox(user) {
 }
 
 // ---------------- schedules ----------------
+//
+// A remittance schedule (remittance-schedule master, Accounts > Remittance > Scheduling) says what to remit and how
+// often: the insurers, the cut-off (policies incepted up to cutOffDays before the run date), the frequency and the next
+// run date. It has no timer of its own: the "Remittance schedules" job of Master > Schedules (handler
+// remittanceSchedules, seeded disabled) runs every active schedule whose next run date has come, in the business time
+// zone, then moves the date on by the frequency. "Run now" on the Scheduling screen runs one schedule at once.
 
-const STEP_DAYS = { daily: 1, weekly: 7 };
-/**
- * Next run of a schedule as 'YYYY-MM-DD HH:mm': the stored next run (with its time, or the schedule's time, once) rolled
- * forward by the frequency when it is already past, so "Upcoming events" never lists a run in the past.
- */
-export function nextRunOf(r, now = new Date()) {
-  if (!r.nextRun) return null;
-  const text = String(r.nextRun).trim();
-  const date = text.slice(0, 10);
-  const time = (/\d{2}:\d{2}/.exec(text.slice(10)) || [])[0] || (/^\d{2}:\d{2}/.exec(String(r.time || '')) || [])[0] || '00:00';
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return text;
-  const at = new Date(`${date}T${time}:00`);
-  const freq = String(r.frequency || '').toLowerCase();
-  for (let i = 0; at < now && i < 1000; i += 1) {
-    if (STEP_DAYS[freq]) at.setDate(at.getDate() + STEP_DAYS[freq]);
-    else if (freq === 'monthly') at.setMonth(at.getMonth() + 1);
-    else if (freq === 'quarterly') at.setMonth(at.getMonth() + 3);
-    else break;
+export const SCHEDULE_JOB = 'remittance-schedules';
+const SYSTEM_USER = { id: null, username: 'system', roles: [], permissions: [] };
+const isoDay = (v) => {
+  const d = String(v || '').trim().slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(d) ? d : null;
+};
+/** The run date `k` frequency steps after `iso` (months counted from `iso`, so 31 January stays the month end); null for an unknown frequency. */
+export function stepFrom(iso, frequency, k = 1) {
+  switch (String(frequency || '').toLowerCase()) {
+    case 'daily': return addDays(iso, k);
+    case 'weekly': return addDays(iso, 7 * k);
+    case 'monthly': return addCalendarMonths(iso, k);
+    case 'quarterly': return addCalendarMonths(iso, 3 * k);
+    default: return null;
   }
-  const pad = (n) => String(n).padStart(2, '0');
-  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())} ${pad(at.getHours())}:${pad(at.getMinutes())}`;
 }
+/** First run date of the series starting at `start` that is on or after (or, with `strict`, after) `date`. */
+const firstFrom = (start, frequency, date, strict = false) => {
+  let d = start;
+  for (let k = 1; (strict ? d <= date : d < date) && k < 5000; k += 1) {
+    const n = stepFrom(start, frequency, k);
+    if (!n) return strict ? null : d;
+    d = n;
+  }
+  return d;
+};
+/**
+ * Next run date of a schedule ('YYYY-MM-DD'): the stored next run date rolled forward by the frequency while it is
+ * before `asOf` (the business date), so "Upcoming events" never lists a run in the past. null without a date.
+ */
+export function nextRunOf(r, asOf) {
+  const d = isoDay(r.nextRun);
+  if (!d) return null;
+  return asOf ? firstFrom(d, r.frequency, asOf) : d;
+}
+/** Next run date after a run on `runDate`: the first date of the series after the run date (a later stored date is kept). */
+const afterRun = (r, runDate) => firstFrom(isoDay(r.nextRun) || runDate, r.frequency, runDate, true);
+const insurerCodes = (r) => (Array.isArray(r.insurers) ? r.insurers : r.insurers ? String(r.insurers).split(',') : []).map((x) => String(x).trim()).filter(Boolean);
+/** Cut-off date of a run: policies incepted up to this date are remitted (cutOffDays before the run date). */
+const cutOffDate = (r, runDate) => addDays(runDate, -Math.max(0, Math.floor(Number(r.cutOffDays) || 0)));
 
 export async function schedules() {
+  const asOf = await today();
   const t = await masters.getType('remittance-schedule');
   const { rows } = await masters.listRecords(t, {}, { limit: 500, offset: 0 });
   const runs = await many('SELECT data->>\'scheduleId\' AS sid, max(created_at) AS last FROM remittance_items WHERE kind = \'execution\' AND data ? \'scheduleId\' GROUP BY 1');
-  const jobs = rows.map((r) => ({ ...r, id: r.id, name: r.name, frequency: r.frequency, nextRun: nextRunOf(r),
+  const job = await one('SELECT code, name, cron, enabled, last_run_at, last_status FROM scheduled_jobs WHERE code = $1', [SCHEDULE_JOB]);
+  const jobs = rows.map((r) => ({ ...r, id: r.id, name: r.name, frequency: r.frequency, insurers: insurerCodes(r), cutOffDays: r.cutOffDays ?? 0, nextRun: nextRunOf(r, asOf),
     lastRun: runs.find((x) => Number(x.sid) === r.id)?.last || r.lastRun || null, status: r.status === 'Active' ? 'Active' : 'Paused' }));
   const upcomingEvents = jobs.filter((j) => j.status === 'Active' && j.nextRun).sort((a, b) => String(a.nextRun).localeCompare(String(b.nextRun)))
-    .slice(0, 10).map((j) => ({ status: j.nextRun, date: String(j.nextRun).slice(0, 10), content: j.name, scheduleId: j.id }));
-  return { scheduledJobs: jobs, upcomingEvents };
+    .slice(0, 10).map((j) => ({ status: j.nextRun, date: j.nextRun, content: j.name, scheduleId: j.id }));
+  return { scheduledJobs: jobs, upcomingEvents, timeZone: await businessTimeZone(),
+    job: job ? { code: job.code, name: job.name, cron: job.cron, enabled: job.enabled, lastRunAt: job.last_run_at, lastStatus: job.last_status, link: '/master/configuration/schedules' } : null };
 }
 
-export async function runSchedule(id, user) {
+/** Insurer codes of a schedule body that do not name an active insurer (validation of Scheduling > New / Edit). */
+export async function assertScheduleInsurers(body) {
+  if (body.insurers === undefined) return;
+  const bad = [];
+  for (const code of insurerCodes(body)) {
+    if (!(await one('SELECT 1 FROM insurance_companies WHERE (lower(code) = lower($1) OR id::text = $1) AND status = $2', [code, 'active']))) bad.push(code);
+  }
+  if (bad.length) throw badRequest('Validation failed', [{ path: 'insurers', message: `Unknown or inactive insurer: ${bad.join(', ')}` }]);
+}
+
+/**
+ * Run one schedule: a draft remittance per insurer of the schedule (policies up to the cut-off date), or, for a
+ * schedule without insurers, its linked automated remittance configuration. Records the last run and moves the next
+ * run date past the run date.
+ */
+export async function runSchedule(id, user, { asOf = null, triggeredBy = null } = {}) {
   const t = await masters.getType('remittance-schedule');
   const s = await masters.getRecord(t, id);
   if (s.status !== 'Active') throw conflict('Schedule is paused');
-  const linked = Array.isArray(s.linkedProcesses) ? s.linkedProcesses : [];
-  const configCode = linked.find((x) => /^ARM-/.test(String(x))) || null;
-  const result = await executeAutomated({ configCode }, user, `schedule:${s.code}`);
-  await query('UPDATE remittance_items SET data = data || $2 WHERE reference_no = $1', [result.executionId, JSON.stringify({ scheduleId: String(s.id), scheduleCode: s.code })]);
-  await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text), updated_by = $3, updated_at = now() WHERE id = $1`, [s.id, (await today()), user.id]);
-  return { schedule: await masters.getRecord(t, id), execution: result };
+  const runDate = asOf || (await today());
+  const insurers = insurerCodes(s);
+  const by = triggeredBy || `schedule:${s.code}`;
+  let execution;
+  if (insurers.length) {
+    execution = await executeForInsurers({ insurerCodes: insurers, to: cutOffDate(s, runDate), scheduleCode: s.code, runDate }, user, by);
+  } else {
+    const linked = Array.isArray(s.linkedProcesses) ? s.linkedProcesses : [];
+    const configCode = linked.find((x) => /^ARM-/.test(String(x))) || null;
+    if (!configCode) throw badRequest(`Schedule ${s.code} names no insurers and no automated remittance configuration; choose the insurers to remit`);
+    execution = await executeAutomated({ configCode }, user, by);
+  }
+  await query('UPDATE remittance_items SET data = data || $2 WHERE reference_no = $1', [execution.executionId, JSON.stringify({ scheduleId: String(s.id), scheduleCode: s.code })]);
+  const next = afterRun(s, runDate);
+  await query(`UPDATE master_records SET data = data || jsonb_build_object('lastRun', $2::text) || CASE WHEN $4::text IS NULL THEN '{}'::jsonb ELSE jsonb_build_object('nextRun', $4::text) END,
+    updated_by = $3, updated_at = now() WHERE id = $1`, [s.id, runDate, user?.id || null, next]);
+  return { schedule: await masters.getRecord(t, id), execution };
+}
+
+/**
+ * Scheduled job "Remittance schedules" (Master > Schedules): run every active remittance schedule whose next run date
+ * is on or before the business date (a schedule without a next run date is due at once). One failing schedule does not
+ * stop the others; its error is in the job output.
+ */
+export async function runDueSchedules({ asOf = null } = {}) {
+  const runDate = asOf || (await today());
+  const t = await masters.getType('remittance-schedule');
+  const { rows } = await masters.listRecords(t, {}, { limit: 1000, offset: 0 });
+  const due = rows.filter((r) => r.status === 'Active' && (!isoDay(r.nextRun) || isoDay(r.nextRun) <= runDate));
+  const ran = [];
+  const errors = [];
+  for (const r of due) {
+    try {
+      const { execution, schedule } = await runSchedule(r.id, SYSTEM_USER, { asOf: runDate, triggeredBy: `job:${SCHEDULE_JOB}` });
+      ran.push({ schedule: r.code, executionId: execution.executionId, remittances: execution.remittances.length, totalAmount: execution.totalAmount, nextRun: schedule.nextRun });
+    } catch (e) {
+      errors.push({ schedule: r.code, error: e.message });
+    }
+  }
+  return { asOf: runDate, due: due.length, ran, errors };
 }
 
 // ---------------- bulk processing ----------------
@@ -634,25 +710,6 @@ export async function analytics(qs) {
   return { from, to, kpiData, topClients, monthlyTrend, statusDistribution: Object.fromEntries(dist.map((d) => [labels[d.status] || d.status, d.n])) };
 }
 
-// ---------------- reports ----------------
-
-export async function generateReport(b, user) {
-  requireFields(b, ['templateCode']);
-  const tpl = await one('SELECT data FROM master_records WHERE type_code = \'remittance-report-template\' AND code = $1 AND status = \'active\'', [b.templateCode]);
-  if (!tpl) throw badRequest('Validation failed', [{ path: 'templateCode', message: 'Unknown report template' }]);
-  const from = isoDate(b.from) || `${new Date().toISOString().slice(0, 7)}-01`;
-  const to = isoDate(b.to) || (await today());
-  const rows = await statementRows({ from, to, insurers: b.insurers || [] });
-  const ref = await nextDocumentNumber('remittance_report');
-  const fileName = `${tpl.data.name.replace(/[^A-Za-z0-9]+/g, '_')}_${from}_${to}.csv`;
-  const saved = await saveFile({ category: 'remittance-reports', fileName, content: toCsv(rows, STATEMENT_COLUMNS), contentType: 'text/csv', entity: 'remittance_report', entityId: ref, userId: user.id });
-  await query(`INSERT INTO generated_reports(code, name, params, format, storage_key, row_count, generated_by, status) VALUES ($1,$2,$3,'csv',$4,$5,$6,'done')`,
-    [`remittance:${b.templateCode}`, tpl.data.name, JSON.stringify({ from, to, insurers: b.insurers || [] }), saved.key, rows.length, user.id]);
-  const data = { templateCode: b.templateCode, name: tpl.data.name, period: `${from} to ${to}`, generatedOn: new Date().toISOString(), fileName, fileSize: fileSize(saved.size), fileUrl: saved.url, rowCount: rows.length, downloads: 0, format: 'CSV' };
-  const id = await insertItemNoTx({ kind: 'report', referenceNo: ref, amount: round2(rows.reduce((s, r) => s + r.netAmount, 0)), status: 'Completed', data, userId: user.id });
-  return itemOut(await getItem('report', id));
-}
-
 // ---------------- history ----------------
 
 export async function history(qs, pg) {
@@ -698,16 +755,21 @@ export async function systemLogs() {
 
 // ---------------- master overview ----------------
 
+/**
+ * Configuration types of Master > Finance > Remittance Master. Not listed: remittance-schedule (owned by Accounts >
+ * Remittance > Scheduling, run by Master > Schedules) and the retired types of migration 0241 (approval workflow,
+ * reconciliation rule, electronic transfer, report template, direct bill, history and analytics configuration), whose
+ * live values are the Authority Matrix and the remittance.* / direct_bill.* settings of Master > Configuration.
+ */
 const MASTER_TYPE_LABEL = {
-  'remittance-automated': 'Automated', 'remittance-statement-template': 'Statement', 'remittance-settlement-parameter': 'Settlement', 'remittance-reconciliation-rule': 'Reconciliation',
-  'remittance-bulk-processing': 'BulkProcessing', 'remittance-schedule': 'Schedule', 'remittance-electronic-transfer': 'Electronic', 'remittance-approval-workflow': 'ApprovalWorkflow',
-  'remittance-exception': 'Exception', 'remittance-report-template': 'ReportTemplate', 'remittance-agency-bill': 'AgencyBill', 'remittance-direct-bill': 'DirectBill',
-  'remittance-adjustment-type': 'Adjustment', 'remittance-notification-template': 'Notification', 'remittance-history-config': 'History', 'remittance-analytics-config': 'Analytics',
+  'remittance-automated': 'Automated', 'remittance-statement-template': 'Statement', 'remittance-settlement-parameter': 'Settlement',
+  'remittance-bulk-processing': 'BulkProcessing', 'remittance-exception': 'Exception', 'remittance-agency-bill': 'AgencyBill',
+  'remittance-adjustment-type': 'Adjustment', 'remittance-notification-template': 'Notification',
 };
 
 export async function masterOverview(qs) {
   const p = params();
-  let cond = 'm.type_code LIKE \'remittance-%\' AND m.status <> \'deleted\'';
+  let cond = `m.type_code = ANY(${p.add(Object.keys(MASTER_TYPE_LABEL))}) AND m.status <> 'deleted'`;
   const typeCode = Object.entries(MASTER_TYPE_LABEL).find(([, l]) => l === qs.type)?.[0];
   if (typeCode) cond += ` AND m.type_code = ${p.add(typeCode)}`;
   if (qs.search) cond += ` AND (m.code ILIKE ${p.add(`%${qs.search}%`)} OR m.name ILIKE $${p.values.length})`;

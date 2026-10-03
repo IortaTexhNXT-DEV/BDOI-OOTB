@@ -1,14 +1,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
-import { InputNumber } from "primereact/inputnumber";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Toast } from "primereact/toast";
 import { MasterLookup, deleteAndReturn, saveAndReturn } from "../masterRecord";
@@ -17,7 +15,6 @@ import { confirmAction } from "../../../../utility/dialogs";
 
 const SettlementParameterMaster = () => {
   const { t } = useTranslation();
-  const { currencyCode } = useFormatCurrency();
   const navigate = useNavigate();
   const location = useLocation();
   const { mode } = useParams();
@@ -31,9 +28,6 @@ const SettlementParameterMaster = () => {
     paramName: "",
     settlementType: null,
     autoCalculate: true,
-    level1Limit: 50000.00,
-    level2Limit: 100000.00,
-    level3Limit: 500000.00,
     payableAccount: "",
     clearingAccount: "",
     commissionAccount: "",
@@ -59,15 +53,12 @@ const SettlementParameterMaster = () => {
     if (mode === "edit" || mode === "view") {
       // Load existing data
       if (data) {
-        const levels = data.approvalLevels || [];
+        const { level1Limit, level2Limit, level3Limit, ...form } = data.form || {};
         setFormData((prev) => ({
           ...prev,
-          ...(data.form || {}),
+          ...form,
           paramCode: data.code,
           paramName: data.name,
-          level1Limit: levels[0]?.maxAmount ?? prev.level1Limit,
-          level2Limit: levels[1]?.maxAmount ?? prev.level2Limit,
-          level3Limit: levels[2]?.maxAmount ?? data.maximumAmount ?? prev.level3Limit,
           payableAccount: data.form?.payableAccount || data.glAccounts?.debit || "",
           clearingAccount: data.form?.clearingAccount || data.glAccounts?.credit || "",
         }));
@@ -101,8 +92,6 @@ const SettlementParameterMaster = () => {
     record: {
       code: formData.paramCode,
       name: formData.paramName,
-      approvalLevels: [formData.level1Limit, formData.level2Limit, formData.level3Limit].map((maxAmount, i) => ({ level: i + 1, maxAmount })),
-      maximumAmount: formData.level3Limit,
       glAccounts: { debit: formData.payableAccount, credit: formData.clearingAccount },
       form: formData
     }
@@ -193,57 +182,14 @@ const SettlementParameterMaster = () => {
                   </div>
                 </div>
 
-                <div className="section-title">Approval Limits</div>
-                <div className="form-grid three-column">
-                  <div className="form-field">
-                    <label htmlFor="level1Limit">
-                      Level 1 Limit
-                      <span className="help-text">Supervisor approval</span>
-                    </label>
-                    <InputNumber
-                      id="level1Limit"
-                      value={formData.level1Limit}
-                      onValueChange={(e) => handleInputChange("level1Limit", e.value)}
-                      disabled={isViewMode}
-                      mode="currency"
-                      currency={currencyCode}
-                      locale="en-US"
-                      className="full-width"
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="level2Limit">
-                      Level 2 Limit
-                      <span className="help-text">Manager approval</span>
-                    </label>
-                    <InputNumber
-                      id="level2Limit"
-                      value={formData.level2Limit}
-                      onValueChange={(e) => handleInputChange("level2Limit", e.value)}
-                      disabled={isViewMode}
-                      mode="currency"
-                      currency={currencyCode}
-                      locale="en-US"
-                      className="full-width"
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="level3Limit">
-                      Level 3 Limit
-                      <span className="help-text">Director approval</span>
-                    </label>
-                    <InputNumber
-                      id="level3Limit"
-                      value={formData.level3Limit}
-                      onValueChange={(e) => handleInputChange("level3Limit", e.value)}
-                      disabled={isViewMode}
-                      mode="currency"
-                      currency={currencyCode}
-                      locale="en-US"
-                      className="full-width"
-                    />
+                <div className="info-box">
+                  <i className="pi pi-info-circle"></i>
+                  <div>
+                    <strong>{t("remittance.approvalLimitsTitle")}</strong>
+                    <p>
+                      {t("remittance.approvalLimitsNote")}{" "}
+                      <Link to="/master/generals/usermanagement/authority-matrix">{t("remittance.openAuthorityMatrix")}</Link>
+                    </p>
                   </div>
                 </div>
               </div>

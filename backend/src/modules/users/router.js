@@ -23,6 +23,28 @@ const roleAdmin = [requireAuth, requirePermission('write:roles')];
  * administrator does it (own password: Change password in the profile).
  */
 const hasAdminRole = (roles) => (roles || []).some((r) => ADMIN_ROLES.includes(r));
+
+/**
+ * The staff register is users (the Employee master is retired): the designation is picked from the Designation master
+ * (stored by name; its code is accepted too) and the reporting line from users (stored as the user id). An empty value
+ * clears the field; an unchanged value is accepted as it is. Fills b.designation / b.reportingTo in place.
+ */
+async function resolveStaffFields(b, before = null) {
+  const errors = [];
+  if (b.designation !== undefined && b.designation !== '' && b.designation !== before?.designation) {
+    const d = await one(`SELECT name FROM master_records WHERE type_code = 'designation' AND status = 'active'
+      AND (lower(code) = lower($1) OR lower(name) = lower($1)) ORDER BY id LIMIT 1`, [String(b.designation)]);
+    if (d) b.designation = d.name;
+    else errors.push({ path: 'designation', message: `Designation ${b.designation} is not in the Designation master (Master > Generals > Employee Management > Designation)` });
+  }
+  if (b.reportingTo !== undefined && b.reportingTo !== '' && b.reportingTo !== before?.reporting_to) {
+    const u = await one('SELECT id FROM users WHERE (id = $1 OR lower(username) = lower($1)) AND status <> \'deleted\'', [String(b.reportingTo)]);
+    if (!u) errors.push({ path: 'reportingTo', message: `Reporting to: user ${b.reportingTo} was not found` });
+    else if (before && u.id === before.id) errors.push({ path: 'reportingTo', message: 'A user cannot report to themselves' });
+    else b.reportingTo = u.id;
+  }
+  if (errors.length) throw badRequest('Validation failed', errors);
+}
 function assertCanAssign(req, targetUserId, codes) {
   if (!isAdmin(req.user) && hasAdminRole(codes)) throw forbidden('Only a System Administrator can grant the System Administrator role');
   if (targetUserId && targetUserId === req.user.id) throw forbidden('You cannot change your own roles or access');
@@ -155,6 +177,7 @@ define({
     if (await one('SELECT 1 FROM users WHERE lower(username) = lower($1)', [b.username])) throw conflict('Username already exists');
     if (b.password) await assertPasswordAllowed(b.password);
     assertCanAssign(req, null, b.roles);
+    await resolveStaffFields(b);
     const temporaryPassword = b.password ? null : temporaryPasswordFor(await passwordPolicy());
     if (temporaryPassword) b.mustChangePassword = true;
     const hash = await bcrypt.hash(b.password || temporaryPassword, 10);
@@ -189,6 +212,7 @@ define({
       if (!(before.id === req.user.id && same)) assertCanAssign(req, before.id, b.roles);
     }
     if (before.id === req.user.id && b.status && b.status !== before.status) assertCanAssign(req, before.id, []);
+    await resolveStaffFields(b, before);
     // Details of an administrator account (e-mail, status) only by a System Administrator: a changed e-mail would let
     // the password reset code go elsewhere.
     if (before.id !== req.user.id && !isAdmin(req.user) && hasAdminRole(before.roles)) throw forbidden('Only a System Administrator can change a System Administrator account');

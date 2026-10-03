@@ -49,7 +49,7 @@ What the broker can set without code:
 | Insurers, credit and remittance terms, billing mode | Master > Generals > Insurance Management > Insurance Company |
 | Lines of business, products, covers, vehicles | Master > Generals > Insurance Management |
 | Product templates, motor tariff (CTPL and Auto Passenger PA), rating, acceptance rules, approval workflows | Product Configurator |
-| Commission rules and referrer sharing | Master > Generals > Commission; Master > Finance > Commission Rate Matrix |
+| Commission rates and referrer sharing | Master > Finance > Commission Rate Matrix |
 | Premium taxes and LGU rates, tax codes with BIR ATC | Master > Finance > Premium Taxes & LGU Rates; Master > Finance > Taxation |
 | Chart of accounts, account determination, posting rules | Master > Finance > Main Account, Sub Account, Account Determination, Posting Rules, Configuration Approvals |
 | Document numbering (52 series) | Master > Configuration > Document Numbering |
@@ -143,9 +143,9 @@ Configuration follows the order of `GO_LIVE_DATA_SETUP.md`, steps 1 to 10, first
 | Branches, departments | Master > Generals > Organization > Branch | `Branch_…`, `Department_Upload_Template.xlsx` |
 | Users and roles, security settings | Master > Generals > User Management > User; Master > Configuration > Security | `Users_Provisioning_Template.xlsx` |
 | Insurers, credit and remittance terms | Master > Generals > Insurance Management > Insurance Company | `Insurance_Company_Upload_Template.xlsx` |
-| Commission | Master > Generals > Commission; Master > Finance > Commission Rate Matrix | `Commission_Upload_Template.xlsx` (matrix on screen) |
+| Commission | Master > Finance > Commission Rate Matrix | On screen |
 | Lines of business, products, policy types, covers, vehicles | Master > Generals > Insurance Management | `Line_of_Business_…`, `Product_…`, `Policy_Type_…`, `Cover_…`, `Vehicle_…` templates |
-| Product templates, motor tariff, rating, acceptance rules, approval workflows | Product Configurator | On screen |
+| Product templates, motor tariff, rating, acceptance rules | Product Configurator (approval limits: Master > User Management > Authority Matrix) | On screen |
 | Tax codes, premium taxes and LGU rates | Master > Finance > Taxation; Premium Taxes & LGU Rates | On screen |
 | Chart of accounts | Master > Finance > Main Account, Sub Account | `Chart_of_Accounts_Upload_Template.xlsx` |
 | Account determination and posting rules | Master > Finance > Account Determination, Posting Rules (Simulate), Configuration Approvals | On screen |
