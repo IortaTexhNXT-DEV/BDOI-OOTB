@@ -250,7 +250,7 @@ const DesignationMaster = () => {
                   header="Modified By"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.ModifiedBy?.toUpperCase()}
+                  body={(rowData) => rowData.ModifiedBy}
                 ></Column>
                 <Column body={(row) => formatAppDate(row.modifiedOn)}
                   field="modifiedOn"

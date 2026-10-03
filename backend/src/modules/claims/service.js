@@ -57,7 +57,8 @@ const BASE = `SELECT c.*, p.policy_number, p.inception_date, p.expiry_date, p.su
   cl.country AS client_country, cl.postal_code AS client_postal, ic.name AS insurer_name, ic.contact_email AS insurer_email,
   pr.name AS product_name, pr.line AS product_line, hu.display_name AS handler_name, cl.client_code,
   (SELECT l.lead_number FROM leads l WHERE l.id = COALESCE(c.lead_id, p.lead_id)) AS lead_number,
-  (SELECT q.quote_number FROM quotes q WHERE q.id = COALESCE(c.quote_id, p.quote_id)) AS quote_number
+  (SELECT q.quote_number FROM quotes q WHERE q.id = COALESCE(c.quote_id, p.quote_id)) AS quote_number,
+  (SELECT u.display_name FROM users u WHERE u.id = c.created_by OR u.username = c.created_by ORDER BY (u.id = c.created_by) DESC LIMIT 1) AS reported_by_name
   FROM claims c JOIN policies p ON p.id = c.policy_id
   LEFT JOIN clients cl ON cl.id = COALESCE(c.client_id, p.client_id)
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
@@ -109,7 +110,7 @@ export function toApi(r, labels, todayStr, open) {
     settlement, settlementType: settlement.settlementType || '', settlementAmount: settlement.settlementAmount ?? null,
     settlementIssueDate: settlement.settlementIssueDate || null, settlementDate: settlement.settlementDate || null,
     settlementRequestedBy: r.settlement_requested_by, settlementApprovedBy: r.settlement_approved_by, settlementApprovedAt: r.settlement_approved_at,
-    rejectedReason: r.rejected_reason, handlerUserId: r.handler_user_id, handlerName: r.handler_name,
+    rejectedReason: r.rejected_reason, handlerUserId: r.handler_user_id, handlerName: r.handler_name, reportedByName: r.reported_by_name || null,
     claimDueDate: r.due_date, daysOverdue, isOpen, closedAt: r.closed_at,
     isCoInsurance: false, isCoInsurancePolicy: false, participatingInsurersCount: 0,
     policy: {
@@ -677,7 +678,7 @@ const detailRow = (c) => ({
   claimNumber: c.claimNumber, claimType: c.claimType, claimStatus: c.claimStatus, claimPriority: c.claimPriority, lob: c.lob,
   customerName: c.customerName, policyNumber: c.policyNumber, insuranceCompanyName: c.insuranceCompanyName, province: c.state, city: c.city,
   reportedDate: c.reportedDate, dateOfIncident: c.dateOfIncident, claimDueDate: c.claimDueDate, estimatedClaimAmount: c.estimatedClaimAmount,
-  approvedAmount: c.approvedAmount, settledAmount: c.settledAmount, handlerName: c.handlerName, createdAt: c.createdAt, daysOverdue: c.daysOverdue,
+  approvedAmount: c.approvedAmount, settledAmount: c.settledAmount, handlerName: c.handlerName, reportedByName: c.reportedByName, createdAt: c.createdAt, daysOverdue: c.daysOverdue,
 });
 export const REPORT_COLUMNS = [
   ['claimNumber', 'Claim No.'], ['policyNumber', 'Policy No.'], ['customerName', 'Insured'], ['insuranceCompanyName', 'Insurer'], ['lob', 'LOB'],

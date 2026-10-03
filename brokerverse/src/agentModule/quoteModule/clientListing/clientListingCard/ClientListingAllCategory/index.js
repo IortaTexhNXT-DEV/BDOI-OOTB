@@ -3,9 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import { Button } from "primereact/button";
-import SvgArrow from "../../../../../assets/icons/SvgArrow";
 import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../../assets/agentIcon/SvgDownArrow";
 import { useNavigate } from "react-router-dom";
@@ -84,18 +82,10 @@ const ClientListingAllCategory = ({
     return (
       <div className="btn__container__view__edit">
         <div>
-          <Button
-            icon={<SvgEdit />}
-            className="view__btn"
-            onClick={() => handleEditAction(rowData)}
-          />
+          <Button icon="pi pi-pencil" text rounded size="small" aria-label={t("clients.edit", { defaultValue: "Edit" })} tooltip={t("clients.edit", { defaultValue: "Edit" })} tooltipOptions={{ position: "top" }} onClick={() => handleEditAction(rowData)} />
         </div>
         <div>
-          <Button
-            icon={<SvgArrow />}
-            className="edit__btn"
-            onClick={() => handleViewAction(rowData)}
-          />
+          <Button icon="pi pi-arrow-right" text rounded size="small" aria-label={t("clients.view", { defaultValue: "View" })} tooltip={t("clients.view", { defaultValue: "View" })} tooltipOptions={{ position: "top" }} onClick={() => handleViewAction(rowData)} />
         </div>
       </div>
     );
@@ -132,7 +122,7 @@ const ClientListingAllCategory = ({
       <div className="name__box__container">
         <div>{handleSvg(rowData.DisplayName || rowData.FirstName, rowData.id)}</div>
         <div>
-          <div className="name__text">{(rowData.DisplayName || rowData.FirstName)?.toUpperCase()}</div>
+          <div className="name__text">{rowData.DisplayName || rowData.FirstName}</div>
           <div className="lead__id__text">{t("clients.clientIdLabel")}{rowData.LeadID} </div>
         </div>
       </div>
@@ -141,7 +131,7 @@ const ClientListingAllCategory = ({
 
   const renderCategory = (rowData) => {
     return (
-      <div className="category__text">{rowData.category?.toUpperCase()}</div>
+      <div className="category__text">{rowData.category ? rowData.category.charAt(0).toUpperCase() + rowData.category.slice(1).toLowerCase() : ""}</div>
     );
   };
 

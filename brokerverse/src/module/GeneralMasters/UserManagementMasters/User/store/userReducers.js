@@ -38,7 +38,7 @@ const mapUserData = (user) => {
         : "No Role",
     email: user.email || "",
     phoneNumber: user.agentProfile?.mobile || "",
-    modifiedBy: user.updatedBy || "System",
+    modifiedBy: user.updatedByName || user.updatedBy || "-",
     modifiedOn: formatDate(user.updatedAt || user.createdAt),
     status: user.status || "",
     action: "",

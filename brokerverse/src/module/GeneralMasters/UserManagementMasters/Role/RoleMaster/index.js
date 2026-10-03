@@ -239,7 +239,7 @@ const RoleMaster = () => {
                   header="Modified By"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.modifiedBy?.toUpperCase()}
+                  body={(rowData) => rowData.modifiedBy}
                 ></Column>
                 <Column
                   field="modifiedOn"

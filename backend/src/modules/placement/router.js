@@ -199,7 +199,8 @@ define({
 });
 define({
   method: 'GET', path: '/options', summary: 'Reference data of the placement screens: active insurers (insurer master), products with their LOB, business type, customer segment and journey (businessType=package | non_package filters them), default billing mode',
-  screen: `${PS} / ${BS} (forms)`, middleware: canRead, query: { businessType: 'non_package' },
+  // reference data only: also read by the premium charges calculator (Master > Finance > Premium Taxes & LGU Rates)
+  screen: `${PS} / ${BS} (forms)`, middleware: [requireAuth, requirePermission('read:quotations', 'write:premium-charges')], query: { businessType: 'non_package' },
   response: { success: true, data: { insurers: [{ id: 2, code: 'MALAYAN', name: 'Malayan Insurance Co., Inc.', commissionRate: 0.15 }], products: [{ id: 3, code: 'FIRE', name: 'Fire and Allied Perils', lob: 'FIRE', businessType: 'non_package', customerSegment: 'corporate', journey: { placementSlip: 'required' } }], defaultBillingMode: 'broker' } },
   handler: async (req, res) => {
     const insurers = await many(`SELECT id, code, name, short_name AS "shortName", commission_rate AS "commissionRate", contact_email AS "contactEmail"

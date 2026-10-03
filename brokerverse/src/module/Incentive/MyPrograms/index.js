@@ -62,9 +62,6 @@ const MyPrograms = () => {
     const mine = await incentiveService.myPrograms();
     if (mine.eligible !== false) return mine;
     const all = await incentiveService.agentPrograms();
-    if (all.length) {
-      toast.current.show({ severity: 'info', summary: t("incentive.myPrograms"), detail: all[0].agentName, life: 3000 });
-    }
     return all[0] || mine;
   };
 

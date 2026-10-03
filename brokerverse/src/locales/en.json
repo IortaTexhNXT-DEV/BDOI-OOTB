@@ -3621,7 +3621,8 @@
     "dateOfBirth": "Date of Birth",
     "policies": "Policies",
     "latestPolicyStatus": "Latest Policy Status",
-    "clientSince": "Client Since"
+    "clientSince": "Client Since",
+    "view": "View"
   },
   "executiveDashboard": {
     "title": "Executive Dashboard",

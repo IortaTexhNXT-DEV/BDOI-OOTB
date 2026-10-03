@@ -243,7 +243,7 @@ const City = () => {
             ></Column>
             <Column
               field="Modifiedby"
-              body={(rowData) => rowData.Modifiedby?.toUpperCase()}
+              body={(rowData) => rowData.Modifiedby}
               header={t("generalMasters.modifiedBy")}
               headerStyle={headerStyle}
               className="fieldvalue_container"

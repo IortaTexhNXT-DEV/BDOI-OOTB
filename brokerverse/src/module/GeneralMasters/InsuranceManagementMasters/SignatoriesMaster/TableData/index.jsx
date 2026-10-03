@@ -167,7 +167,7 @@ const TableData = ({ navigate }) => {
           field="modifiedBy"
           header="Modified by"
           className="fieldvalue_container"
-          body={(rowData) => rowData.modifiedBy?.toUpperCase()}
+          body={(rowData) => rowData.modifiedBy}
         ></Column>
         <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"

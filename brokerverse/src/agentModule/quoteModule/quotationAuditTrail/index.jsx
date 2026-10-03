@@ -182,7 +182,7 @@ const QuotationAuditTrail = ({ quotationId: propQuotationId }) => {
     // Fallback to old structure for backward compatibility
     return (
       <div className="audit-user">
-        {rowData.user || rowData.createdBy || rowData.updatedBy || "System"}
+        {rowData.user || rowData.createdBy || rowData.updatedBy || "-"}
       </div>
     );
   };

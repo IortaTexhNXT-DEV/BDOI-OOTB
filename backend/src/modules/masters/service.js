@@ -263,11 +263,11 @@ function tableOut(t, row) {
   return withAudit(t, rec, row);
 }
 
-/** Who last changed a record: the last editor, else its creator; rows loaded at set-up show "System". */
-const lastChangedBy = (row) => {
-  const who = row.updated_by_name || row.updated_by || row.created_by_name || row.created_by || null;
-  return who && ['seed', 'system', 'migration'].includes(String(who).toLowerCase()) ? 'System' : who;
-};
+/** Set-up actors written in created_by / updated_by by seeds, migrations and the chart-of-accounts sync. */
+const SETUP_ACTORS = "('seed', 'system', 'migration', 'gl-sync')";
+
+/** Who last changed a record (display name): the last editor, else its creator. */
+const lastChangedBy = (row) => row.updated_by_name || row.created_by_name || row.updated_by || row.created_by || null;
 
 function withAudit(t, rec, row) {
   const updatedOn = row.updated_at ? new Date(row.updated_at).toISOString().slice(0, 10) : null;
@@ -284,7 +284,9 @@ function withAudit(t, rec, row) {
 
 function selectSql(t) {
   const a = t.storage === 'generic' ? 'm' : 't';
-  const who = (col) => `(SELECT u.display_name FROM users u WHERE u.id = ${a}.${col}) AS ${col}_name`;
+  // rows loaded at set-up (seed, migrations, ledger sync) are shown under the administrator who owns the set-up
+  const who = (col) => `COALESCE((SELECT u.display_name FROM users u WHERE u.id = ${a}.${col}),
+    CASE WHEN ${a}.${col} IN ${SETUP_ACTORS} THEN (SELECT u.display_name FROM users u WHERE u.username = 'BrokerVerse') END) AS ${col}_name`;
   if (t.storage === 'generic') return `SELECT m.*, ${who('created_by')}, ${who('updated_by')} FROM master_records m`;
   const refs = t.fields.filter((f) => f.ref).map((f) => `${refSelect(f)} AS "__ref_${f.name}"`);
   return `SELECT t.*, ${[...refs, who('created_by'), who('updated_by')].join(', ')} FROM ${q(t.table_name)} t`;

@@ -809,3 +809,34 @@ small.p-error {
     overflow: visible !important;
   }
 }
+
+// ---------------------------------------------------------------- typography: one scale on every screen
+// Older screens set their own page-title sizes (28 to 34px) and 16px table text; the newer screens use 24px titles,
+// 14px cells and 13px headers. These rules bring the older screens onto the same scale.
+#{$shell} {
+  :is(.leadlisting__overal__container__title, .main__account__title, .pettycash__title, .posting-rules__title, .page__title,
+    .open_item_title, .payment__heading, .correction__title__reversal, .label_header, .remittance__master__title,
+    .Transaction__Code__Master__title, [class^="add__icon__title"], .header-section > h2) {
+    font-family: $font-heading !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    color: $color-text !important;
+    letter-spacing: 0;
+  }
+
+  .p-datatable .p-datatable-tbody > tr > td {
+    font-size: 14px !important;
+  }
+
+  .p-datatable .p-datatable-thead > tr > th {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  // the label carries the button's size (PrimeReact sets 1rem on it)
+  .p-button .p-button-label {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+}

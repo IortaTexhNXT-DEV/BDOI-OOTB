@@ -171,7 +171,7 @@ const ClaimsDashboard = () => {
         ? formatAppDate(claim.dateOfIncident)
         : "N/A",
       reportedDate: formatAppDate(claim.reportedDate),
-      reporter: "System", // This field is not in the API response
+      reporter: claim.reportedByName || claim.handlerName || "-",
       priority: claim.claimPriority?.toLowerCase() || "low",
       status: claim.claimStatus,
       amount: claim.estimatedClaimAmount
