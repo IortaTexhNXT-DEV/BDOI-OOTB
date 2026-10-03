@@ -289,7 +289,7 @@ Body:
 Subject:
 
 ```
-Premium payment reminder – Policy {{policyNumber}}
+Premium payment reminder - Policy {{policyNumber}}
 ```
 Body:
 
@@ -318,7 +318,7 @@ Body:
 Subject:
 
 ```
-Premium payment reminder – Policy {{policyNumber}} (or the subject typed)
+Premium payment reminder - Policy {{policyNumber}} (or the subject typed)
 ```
 Body:
 
@@ -512,7 +512,7 @@ Body:
 Subject:
 
 ```
-Commission debit note {{dnNumber}} – {{companyName}}
+Commission debit note {{dnNumber}} - {{companyName}}
 ```
 Body:
 
@@ -686,7 +686,7 @@ Messages are quoted as in the code; text in angle brackets is filled from the re
 | Premium payment captured on a policy, not yet verified | Accounting role users except the user who recorded it | approval | Premium payment to verify | <user> recorded <mode> <amount> (ref <reference>) on policy <number> | notification.approval_requests |
 | Captured payment confirmed or rejected | User who recorded it | info / alert | Premium payment <reference> confirmed / rejected | Confirmed by <user> on policy <number>, receipt <OR> / Rejected by <user>: <reason> | notification.approval_requests |
 | Online payment received, failed to apply or amount differs | Link creator and roles in payments.notify_roles_on_error (Accounting) | task | Online payment received / Online payment not applied / Online payment to review | <link number>: ... (amount, target and reason) | None |
-| Collection reminder sent | Policy owner and holders of write:collections | reminder | Premium due <date> – <policy> / Premium overdue <n> day(s) – <policy> | <client>: <amount> outstanding on <bill> | None |
+| Collection reminder sent | Policy owner and holders of write:collections | reminder | Premium due <date> - <policy> / Premium overdue <n> day(s) - <policy> | <client>: <amount> outstanding on <bill> | None |
 | Policy issued over the client credit limit | Holders of write:collections | warning | Client credit limit exceeded | <client>: open premium <exposure> is over the credit limit <limit> by <excess> after <policy> | None |
 | Premium warranty extension requested | Holders of approve:credit-control | approval | Warranty extension <policy> awaiting approval | <user> submitted <policy> (<client>, deadline <date> to <date>: <reason>) | notification.approval_requests |
 | Premium warranty extension decided | Requester | info / alert | Warranty extension <policy> approved / rejected | Deadline moved to <date>; approved by <user> / Rejected by <user>: <remarks> | notification.approval_requests |

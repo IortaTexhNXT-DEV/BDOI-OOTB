@@ -157,7 +157,7 @@ Recomputes, for every open or partly paid bill, the days past the due date and t
 | Purpose | Reminds clients of premiums falling due or overdue and tells the account officer. |
 | Reads | Collection items not Paid or Committed, due within `collections.reminder_days_before` (7) days or already overdue, not reminded in the last `collections.reminder_repeat_days` (7) days. |
 | Writes | `collection_items.last_reminder_at`; a Reminder action on the collection item. |
-| Sends | An e-mail to the client (template `collections.email_subject` / `collections.email_template`) when the client has an e-mail address; an in-app reminder to the policy owner and to holders of `write:collections`: "Premium due <date> – <policy>" or "Premium overdue N day(s) – <policy>". |
+| Sends | An e-mail to the client (template `collections.email_subject` / `collections.email_template`) when the client has an e-mail address; an in-app reminder to the policy owner and to holders of `write:collections`: "Premium due <date> - <policy>" or "Premium overdue N day(s) - <policy>". |
 | Output | candidates, emails, notifications, skipped (clients without e-mail). |
 | On demand | Run now, or the Send Payment Reminders Now button on Accounts > Collections. |
 | Restart safety | The repeat window stops a second reminder within 7 days. |

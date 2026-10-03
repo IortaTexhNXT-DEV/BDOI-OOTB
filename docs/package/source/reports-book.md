@@ -402,7 +402,7 @@ Financial reports read the receivables, receipts, vouchers and the general ledge
 | SOA / Premium Receivable | Reports > Financial Reports > SOA/Premium Receivable | Accounting (and Accounting Manager), Sales & Marketing |
 | Collection Report | Reports > Financial Reports > Collection Report | Accounting (and Accounting Manager) |
 | Receivables Ageing | Reports > All Reports > Receivables Ageing | Accounting (and Accounting Manager), Sales & Marketing |
-| Commission Receivable – Direct Bill | Reports > All Reports > Commission Receivable – Direct Bill | Accounting (and Accounting Manager) |
+| Commission Receivable - Direct Bill | Reports > All Reports > Commission Receivable - Direct Bill | Accounting (and Accounting Manager) |
 | Receipts Register | Reports > All Reports > Receipts Register | Accounting (and Accounting Manager) |
 | Payables / Disbursement Register | Reports > Financial Reports > Payables | Accounting (and Accounting Manager) |
 | Journal Register | Reports > Financial Reports > Journal | Accounting (and Accounting Manager) |
@@ -506,14 +506,14 @@ Sample from the test system (criteria Ageing Bucket, 01 January 2026 to 30 Septe
 
 Report totals for the period: Amount PHP 5,012,253.80; Paid PHP 1,050,031.53; Balance PHP 3,962,222.27.
 
-## Commission Receivable – Direct Bill
+## Commission Receivable - Direct Bill
 
 Commission (with VAT) due from insurers on direct-bill policies, where the client pays the insurer: unbilled, on a debit note, partially collected or collected, with the outstanding share and ageing as of To Date (buckets from limits.receivable_ageing_buckets).
 
 | Item | Detail |
 |---|---|
 | Code | `direct-bill-commission` |
-| Menu | Reports > All Reports > Commission Receivable – Direct Bill (definition screen: Accounts > Remittance > Direct Bill Processing) |
+| Menu | Reports > All Reports > Commission Receivable - Direct Bill (definition screen: Accounts > Remittance > Direct Bill Processing) |
 | Used by | Accounting (and Accounting Manager); System Administrator |
 | Permission | `read:reports` and one of the roles above |
 | Report Criteria | Ageing Bucket, Principle Insurance, Outstanding, Overall (default Ageing Bucket) |
@@ -602,9 +602,9 @@ Sample from the test system (criteria Overall, 01 January 2026 to 30 September 2
 | Account | Account Name | Opening Balance | Debit | Credit | Closing Debit |
 |---|---|---|---|---|---|
 | 1101001 | Cash on Hand | 0.00 | 166,436.18 | 0.00 | 166,436.18 |
-| 1102001 | Cash in Bank – Operating Account | 0.00 | 9,927,367.08 | 2,880,629.78 | 7,046,737.30 |
-| 1102002 | Cash in Bank – E-wallet Clearing (GCash) | 0.00 | 122,009.17 | 0.00 | 122,009.17 |
-| 1202001 | Premiums Receivable – Direct Clients | 0.00 | 10,683,995.70 | 6,689,954.68 | 3,994,041.02 |
+| 1102001 | Cash in Bank - Operating Account | 0.00 | 9,927,367.08 | 2,880,629.78 | 7,046,737.30 |
+| 1102002 | Cash in Bank - E-wallet Clearing (GCash) | 0.00 | 122,009.17 | 0.00 | 122,009.17 |
+| 1202001 | Premiums Receivable - Direct Clients | 0.00 | 10,683,995.70 | 6,689,954.68 | 3,994,041.02 |
 
 Report totals for the period: Opening Balance PHP 0.00; Debit PHP 23,967,498.75; Credit PHP 23,967,498.75; Closing Debit PHP 11,481,693.20; Closing Credit PHP 11,481,693.20.
 
@@ -711,9 +711,9 @@ Sample from the test system (criteria Detailed, 01 January 2026 to 30 September 
 | Type | Statement Group | Account | Account Name | Balance | Prior Year End |
 |---|---|---|---|---|---|
 | asset | Current Assets | 1101001 | Cash on Hand | 166,436.18 | 0.00 |
-| asset | Current Assets | 1102001 | Cash in Bank – Operating Account | 7,046,737.30 | 0.00 |
-| asset | Current Assets | 1102002 | Cash in Bank – E-wallet Clearing (GCash) | 122,009.17 | 0.00 |
-| asset | Current Assets | 1202001 | Premiums Receivable – Direct Clients | 3,994,041.02 | 0.00 |
+| asset | Current Assets | 1102001 | Cash in Bank - Operating Account | 7,046,737.30 | 0.00 |
+| asset | Current Assets | 1102002 | Cash in Bank - E-wallet Clearing (GCash) | 122,009.17 | 0.00 |
+| asset | Current Assets | 1202001 | Premiums Receivable - Direct Clients | 3,994,041.02 | 0.00 |
 
 Summary figures returned: Total assets: PHP 11,479,954.74; Total liabilities: PHP 6,471,369.10; Total equity: PHP 5,008,585.64; Total liabilities and equity: PHP 11,479,954.74; Difference: PHP 0.00; Prior total assets: PHP 0.00; Prior total liabilities and equity: PHP 0.00.
 
