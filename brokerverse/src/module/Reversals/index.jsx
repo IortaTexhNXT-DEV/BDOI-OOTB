@@ -122,9 +122,7 @@ const Reversals = () => {
           <span onClick={() => setStep(step - 1)}>
             {step !== 0 && <SvgBackicon />}
           </span>
-          <label className={step !== 0 ? "label_header" : ""}>
-            Reversal JV Details
-          </label>
+          <label className="label_header">Reversal JV</label>
         </div>
         <div className="col-12 p-0">
           <BreadCrumb

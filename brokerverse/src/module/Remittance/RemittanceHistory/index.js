@@ -14,7 +14,6 @@ import { Timeline } from "primereact/timeline";
 import { Badge } from "primereact/badge";
 import { Tooltip } from "primereact/tooltip";
 import { Toast } from "primereact/toast";
-import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError, statusSeverity } from "../shared";
@@ -52,7 +51,6 @@ const allOption = (values) => [{ label: "All", value: "All" }, ...values.map((v)
 
 const RemittanceHistory = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -201,10 +199,6 @@ const RemittanceHistory = () => {
     );
   };
 
-  const handleBackToMaster = () => {
-    navigate("/master/finance/remittance");
-  };
-
   const handleExportHistory = () => exportRows(visibleHistory, "remittance_history");
 
 
@@ -272,12 +266,6 @@ const RemittanceHistory = () => {
       <Toast ref={toast} />
       <div className="header-section">
         <h2>{t("remittance.remittanceHistoryAuditTrail")}</h2>
-        <Button
-          label="Back to Master"
-          icon="pi pi-arrow-left"
-          className="p-button-secondary"
-          onClick={handleBackToMaster}
-        />
       </div>
 
       <div className="summary-cards">

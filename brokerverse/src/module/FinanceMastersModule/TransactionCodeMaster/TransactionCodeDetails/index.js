@@ -26,7 +26,7 @@ const TransactionCodeDetails = () => {
   const navigate = useNavigate();
   const items = [
     {
-      label: t("sidebar.Transaction code") || "Transaction code",
+      label: t("sidebar.Transaction Code"),
       url: "/master/finance/transactioncode",
     },
     {

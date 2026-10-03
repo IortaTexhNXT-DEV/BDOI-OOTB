@@ -18,8 +18,10 @@ import {
 } from "../store/pettyCashInitiateMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 
 const InitiateTable = () => {
+  const { formatCurrency } = useFormatCurrency();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -193,10 +195,12 @@ const InitiateTable = () => {
             ></Column>
             <Column
               field="Pettycashsize"
-              header="Petty cash size"
+              header="Petty Cash Size"
               headerStyle={headerStyle}
-              className="fieldvalue_container"
-              body={(rowData) => rowData.Pettycashsize?.toUpperCase()}
+              className="fieldvalue_container bv-nowrap"
+              alignHeader="right"
+              bodyStyle={{ textAlign: "right" }}
+              body={(rowData) => formatCurrency(rowData.Pettycashsize)}
               sortable
             ></Column>
             <Column
@@ -211,7 +215,10 @@ const InitiateTable = () => {
               field="MaxLimit"
               header="Max Limit"
               headerStyle={headerStyle}
-              className="fieldvalue_container"
+              className="fieldvalue_container bv-nowrap"
+              alignHeader="right"
+              bodyStyle={{ textAlign: "right" }}
+              body={(rowData) => formatCurrency(rowData.MaxLimit)}
             ></Column>
             <Column
               field="Branchcode"

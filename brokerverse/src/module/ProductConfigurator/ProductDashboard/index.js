@@ -209,7 +209,6 @@ const ProductDashboard = () => {
               <span className="stat-value">
                 {productTemplates.filter((p) => p.status === 'Active').length}
               </span>
-              <span className="stat-change positive">{t('productConfiguratorDashboard.fromLastMonth')}</span>
             </div>
           </Card>
         </div>
@@ -218,7 +217,6 @@ const ProductDashboard = () => {
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.totalPremium')}</span>
               <span className="stat-value">{formatCurrency(analytics?.totals?.premium ?? 0)}</span>
-              <span className="stat-change positive">{t('productConfiguratorDashboard.ytd')}</span>
             </div>
           </Card>
         </div>
@@ -227,7 +225,6 @@ const ProductDashboard = () => {
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.avgLossRatio')}</span>
               <span className="stat-value">{avgLossRatio.toFixed(1)}%</span>
-              <span className="stat-change positive">{t('productConfiguratorDashboard.improved')}</span>
             </div>
           </Card>
         </div>
@@ -236,7 +233,6 @@ const ProductDashboard = () => {
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.avgCommission')}</span>
               <span className="stat-value">{avgCommission.toFixed(1)}%</span>
-              <span className="stat-change neutral">{t('productConfiguratorDashboard.noChange')}</span>
             </div>
           </Card>
         </div>

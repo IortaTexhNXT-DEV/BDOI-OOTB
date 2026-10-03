@@ -15,7 +15,6 @@ import { Badge } from "primereact/badge";
 import { Dialog } from "primereact/dialog";
 import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
-import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { calendarDateFormat, dateBody, downloadCsv, isoDate, showError } from "../shared";
@@ -41,7 +40,6 @@ const pctChange = (current, previous) => (previous ? ((current - previous) / pre
 
 const RemittanceAnalytics = () => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -240,10 +238,6 @@ const RemittanceAnalytics = () => {
     );
   };
 
-  const handleBackToMaster = () => {
-    navigate("/master/finance/remittance");
-  };
-
   const handleExportData = () => {
     downloadCsv(`remittance_analytics_${isoDate(new Date())}.csv`, [
       ...kpiData.map((k) => ({ section: "KPI", name: k.name, value: k.value, target: k.target, trend: k.trend })),
@@ -307,12 +301,6 @@ const RemittanceAnalytics = () => {
       <div className="header-section">
         <h2>{t("remittance.analyticsDashboard")}</h2>
         <div className="header-actions">
-          <Button
-            label="Back to Master"
-            icon="pi pi-arrow-left"
-            className="p-button-secondary mr-2"
-            onClick={handleBackToMaster}
-          />
           <Button
             label="Export"
             icon="pi pi-download"

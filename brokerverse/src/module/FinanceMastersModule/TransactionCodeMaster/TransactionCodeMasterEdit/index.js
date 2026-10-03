@@ -33,7 +33,7 @@ const TransactionCodeEdit = () => {
 
   const items = [
     {
-      label: "Transaction code",
+      label: "Transaction Code",
       url: "/master/finance/transactioncode",
     },
     {

@@ -4,7 +4,7 @@
  * documents, reviewed, settled with maker-checker, some closed without payment).
  */
 import { dataOf, listOf } from '../http.js';
-import { addDays, minDate, maxDate } from '../dates.js';
+import { addDays, daysBetween, minDate, maxDate } from '../dates.js';
 import { businessDay, customerAnswer, payPremium, uploadFile, createLead } from './common.js';
 
 const PDF = (title) => Buffer.from(`%PDF-1.4\n% ${title}\ntrailer << >>\n%%EOF\n`);
@@ -108,7 +108,18 @@ async function endorsements(ctx) {
 async function renewals(ctx) {
   const { rnd, log, as } = ctx;
   const proc = as.processing1;
-  const due = (ctx.migrated || []).filter((m) => m.expiry <= ctx.today);
+  const opts = dataOf(await proc.get('/policy-renewals/options'));
+  const window = Number(opts.graceDays || 0) + Number(opts.lapsedRenewalDays || 0);
+  const expired = (ctx.migrated || []).filter((m) => m.expiry <= ctx.today);
+  // past the grace and lapsed-renewal period a policy is quoted as new business: the renewal must be refused
+  for (const m of expired.filter((x) => daysBetween(x.expiry, ctx.today) > window)) {
+    await log.step(`Renewal of ${m.policyNumber} refused (expired ${daysBetween(m.expiry, ctx.today)} days ago, window ${window} days)`, async () => {
+      const r = await proc.post(`/renewals/policies/${m.id}`, {}).then(() => null, (e) => e);
+      if (!r || r.status !== 422) throw new Error(`expected 422, got ${r ? r.status : 'success'}`);
+      log.count('Renewals refused after the window');
+    });
+  }
+  const due = expired.filter((m) => daysBetween(m.expiry, ctx.today) <= window);
   const upcoming = (ctx.migrated || []).filter((m) => m.expiry > ctx.today);
   for (const [k, m] of due.entries()) {
     const lapse = k % 4 === 3;
@@ -183,10 +194,10 @@ async function claims(ctx) {
   const paid = ctx.policies.filter((p) => p.behaviour === 'full' && !p.cancelled && p.billing === 'broker' && p.issueDate < ctx.months.at(-2).start);
   const byProduct = (code) => paid.filter((p) => p.product === code);
   const cases = [
-    { p: byProduct('MOTOR')[0], type: 'Collision', estimate: 85000, settle: 72500, how: 'Paid by insurer to repair shop' },
-    { p: byProduct('MOTOR')[1], type: 'Windshield breakage', estimate: 18000, settle: 16500, how: 'Paid by insurer to claimant' },
+    { p: byProduct('MOTOR')[0], type: 'Collision', estimate: 85000, settle: 72500, how: 'Repair Shop' },
+    { p: byProduct('MOTOR')[1], type: 'Windshield breakage', estimate: 18000, settle: 16500, how: 'Bank Transfer' },
     { p: byProduct('FIRE')[0], type: 'Fire (electrical short circuit) in the warehouse', estimate: 1250000, settle: 980000, how: 'Paid through broker' },
-    { p: byProduct('PA')[0], type: 'Accident: fractured wrist (medical reimbursement)', estimate: 35000, settle: 28750, how: 'Paid by insurer to claimant' },
+    { p: byProduct('PA')[0], type: 'Accident: fractured wrist (medical reimbursement)', estimate: 35000, settle: 28750, how: 'Bank Transfer' },
     { p: byProduct('HOME')[0], type: 'Typhoon damage to the roof', estimate: 120000, reject: 'Loss below the deductible (2% of the sum insured)' },
     { p: byProduct('MARINE')[0] || byProduct('CGL')[0] || byProduct('MONEY')[0], type: 'Cargo wetted during discharge / third-party property damage', estimate: 340000, open: true },
     { p: byProduct('MOTOR')[3], type: 'Flood damage (engine hydrolock)', estimate: 150000, open: true },

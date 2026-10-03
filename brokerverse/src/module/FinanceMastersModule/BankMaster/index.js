@@ -306,7 +306,7 @@ const BankMaster = () => {
               sortable
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.bankName?.toUpperCase()}
+              body={(rowData) => rowData.bankName}
             ></Column>
             <Column
               field="bankBranch"

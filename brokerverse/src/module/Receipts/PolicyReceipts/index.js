@@ -764,7 +764,7 @@ const PolicyReceipts = () => {
                 header={t("common.name")}
                 headerStyle={headerStyle1}
                 className="fieldvalue_container receipts_name_cell"
-                body={(rowData) => rowData.name?.toUpperCase()}
+                body={(rowData) => rowData.name}
               ></Column>
               <Column
                 sortable

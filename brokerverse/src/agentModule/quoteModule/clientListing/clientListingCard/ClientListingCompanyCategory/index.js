@@ -153,7 +153,7 @@ const ClientListingCompanyCategory = ({
   const renderdes = (rowData) => {
     return (
       <div className="category__text">
-        {rowData.ProductDescription?.toUpperCase()}
+        {rowData.ProductDescription}
       </div>
     );
   };

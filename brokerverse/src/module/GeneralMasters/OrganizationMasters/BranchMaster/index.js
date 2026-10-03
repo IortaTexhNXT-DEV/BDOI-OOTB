@@ -209,7 +209,7 @@ const Index = () => {
               header={t("generalMasters.branchName")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.BranchName?.toUpperCase()}
+              body={(rowData) => rowData.BranchName}
             ></Column>
             <Column
               field="Country"

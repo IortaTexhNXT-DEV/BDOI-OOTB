@@ -221,7 +221,7 @@ const HierarchyMaster = () => {
                   header="Rank Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.rankName?.toUpperCase()}
+                  body={(rowData) => rowData.rankName}
                 ></Column>
                 <Column
                   field="levelNumber"

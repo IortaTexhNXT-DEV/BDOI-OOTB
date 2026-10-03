@@ -64,7 +64,7 @@ const ReceiptListTable = ({ AddReceiptTable }) => {
             header="Remarks"
             headerStyle={headerStyle}
             sortable
-            body={(rowData) => rowData.Remarks?.toUpperCase()}
+            body={(rowData) => rowData.Remarks}
           ></Column>
         </DataTable>
       </div>

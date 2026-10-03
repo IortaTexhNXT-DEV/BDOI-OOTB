@@ -231,7 +231,7 @@ const RoleMaster = () => {
                   header="Role Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.roleName?.toUpperCase()}
+                  body={(rowData) => rowData.roleName}
                 ></Column>
 
                 <Column

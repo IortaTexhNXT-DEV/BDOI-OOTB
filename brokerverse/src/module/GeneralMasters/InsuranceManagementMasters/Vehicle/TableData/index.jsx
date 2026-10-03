@@ -155,7 +155,7 @@ const TableData = ({ navigate }) => {
           field="vehicleName"
           header="Vehicle Name"
           className="fieldvalue_container"
-          body={(rowData) => rowData.vehicleName?.toUpperCase()}
+          body={(rowData) => rowData.vehicleName}
         ></Column>
         <Column
           field="vehicleVariant"

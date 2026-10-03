@@ -135,7 +135,7 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
           field="categoryName"
           header={t("financeMasters.accountCategoryNameHeader")}
           className="fieldvalue_container"
-          body={(rowData) => rowData.categoryName?.toUpperCase()}
+          body={(rowData) => rowData.categoryName}
         ></Column>
         <Column
           field="status"

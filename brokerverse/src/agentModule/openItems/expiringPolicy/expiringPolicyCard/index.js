@@ -133,7 +133,7 @@ const ExpiringPolicyCard = () => {
       <div className="name__box__container">
         <div>{handleSvg(rowData.AssuredName, rowData.id)}</div>
         <div>
-          <div className="name__text">{rowData.AssuredName?.toUpperCase()}</div>
+          <div className="name__text">{rowData.AssuredName}</div>
           <div className="assuredname__sub___text">
             Client ID :{rowData.Actions?.toUpperCase()}{" "}
           </div>

@@ -226,7 +226,7 @@ const Country = () => {
           >
             <Column
               field="CountryName"
-              body={(rowData) => rowData.CountryName?.toUpperCase()}
+              body={(rowData) => rowData.CountryName}
               header={t("generalMasters.countryName")}
               sortable
               headerStyle={headerStyle}

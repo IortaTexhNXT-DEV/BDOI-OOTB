@@ -18,8 +18,10 @@ import {
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 
 const RequestTable = () => {
+  const { formatCurrency } = useFormatCurrency();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -185,7 +187,7 @@ const RequestTable = () => {
               headerStyle={headerStyle}
               className="fieldvalue_container"
               sortable
-              body={(rowData) => rowData.RequesterName?.toUpperCase()}
+              body={(rowData) => rowData.RequesterName}
             ></Column>
             <Column
               field="RequestDate"
@@ -212,7 +214,10 @@ const RequestTable = () => {
               field="TotalAmount"
               header="Total Amount"
               headerStyle={headerStyle}
-              className="fieldvalue_container"
+              className="fieldvalue_container bv-nowrap"
+              alignHeader="right"
+              bodyStyle={{ textAlign: "right" }}
+              body={(row) => formatCurrency(row.TotalAmount)}
               sortable
             ></Column>
             <Column

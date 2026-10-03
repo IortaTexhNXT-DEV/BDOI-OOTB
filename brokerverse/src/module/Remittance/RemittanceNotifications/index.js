@@ -254,10 +254,6 @@ const RemittanceNotifications = () => {
     );
   };
 
-  const handleBackToMaster = () => {
-    navigate("/master/finance/remittance");
-  };
-
   const handleMarkAsRead = () => markAsRead(selectedRows);
 
   const handleBulkDelete = () => deleteRows(selectedRows);
@@ -300,12 +296,6 @@ const RemittanceNotifications = () => {
       <Toast ref={toast} />
       <div className="header-section">
         <h2>{t("remittance.remittanceNotifications")}</h2>
-        <Button
-          label="Back to Master"
-          icon="pi pi-arrow-left"
-          className="p-button-secondary"
-          onClick={handleBackToMaster}
-        />
       </div>
 
       <div className="summary-cards">

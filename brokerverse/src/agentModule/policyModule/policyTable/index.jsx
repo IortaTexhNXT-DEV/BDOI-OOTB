@@ -436,7 +436,7 @@ const LeadListingAllTable = ({
   const renderDes = (rowData) => {
     return (
       <div className="category__text">
-        {rowData.ProductDescription?.toUpperCase()}
+        {rowData.ProductDescription}
       </div>
     );
   };
@@ -453,7 +453,7 @@ const LeadListingAllTable = ({
   };
   const renderClientName = (rowData) => {
     return (
-      <div className="category__text">{rowData.ClientName?.toUpperCase()}</div>
+      <div className="category__text">{rowData.ClientName}</div>
     );
   };
   const renderPolicyNumber = (rowData) => {

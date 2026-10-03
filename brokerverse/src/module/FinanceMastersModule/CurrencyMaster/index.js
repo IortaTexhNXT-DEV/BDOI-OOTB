@@ -239,7 +239,7 @@ const CurrencyMaster = () => {
                   header={t("financeMasters.currencyName")}
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.CurrencyName?.toUpperCase()}
+                  body={(rowData) => rowData.CurrencyName}
                   //   sortable
                 ></Column>
                 <Column
@@ -270,7 +270,7 @@ const CurrencyMaster = () => {
                   header={t("financeMasters.unitDescription")}
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.UnitDescription?.toUpperCase()}
+                  body={(rowData) => rowData.UnitDescription}
                 ></Column>
                 <Column
                   body={(columnData) => <MasterStatusToggle type="currency" record={columnData} onChanged={reloadList} onError={showStatusError} />}

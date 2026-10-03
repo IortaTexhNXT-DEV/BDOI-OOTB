@@ -189,7 +189,7 @@ const PettyCashReceiptsTable = () => {
               headerStyle={headerStyle}
               className="fieldvalue_container"
               sortable
-              body={(rowData) => rowData.RequesterName?.toUpperCase()}
+              body={(rowData) => rowData.RequesterName}
             ></Column>
             <Column
               field="Branchcode"

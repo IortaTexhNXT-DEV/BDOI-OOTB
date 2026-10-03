@@ -155,9 +155,7 @@ const CorrectionJV = () => {
 
               {step !== 0 && <SvgBackicon />}
             </span>
-            <label className={step !== 0?"label_header":""}>
-              Corrections JV Details
-            </label>
+            <label className="label_header">Correction JV</label>
           </div>
         </div>
         <div className="col-12 p-0">

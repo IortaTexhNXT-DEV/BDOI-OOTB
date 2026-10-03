@@ -45,7 +45,7 @@ const TransactionCodeMasterView = () => {
   const DepartmentCode = codeOptions.departments;
   const items = [
     {
-      label: "Transaction code",
+      label: "Transaction Code",
       url: "/master/finance/transactioncode",
     },
     {

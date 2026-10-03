@@ -95,7 +95,7 @@ export const roleMenuPermissions = {
       "Accounting Query",
       "All Clients Accounting",
       "Open Entry Matching",
-      "Open Entry Un-Matching",
+      "Open Entry Unmatching",
       "Disbursement",
       "Petty Cash",
       "Journal Voucher",

@@ -212,7 +212,7 @@ const TaxationMaster = () => {
                   header={t("financeMasters.taxName")}
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.taxName?.toUpperCase()}
+                  body={(rowData) => rowData.taxName}
                   //   sortable
                 ></Column>
                 <Column

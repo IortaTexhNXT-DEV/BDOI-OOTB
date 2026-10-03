@@ -14,7 +14,6 @@ import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
-import { useNavigate } from "react-router-dom";
 import remittanceService from "../../../services/remittanceService";
 import { calendarDateFormat, dateBody, downloadCsv, isoDate, loadMasterOptions, showError, showSuccess, statusSeverity } from "../shared";
 import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
@@ -35,7 +34,6 @@ const ACTIVE_STATUSES = "Pending Approval,Approved";
 const RemittanceAdjustments = () => {
   const { t } = useTranslation();
   const { currencyCode, formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -219,10 +217,6 @@ const RemittanceAdjustments = () => {
     ]);
   };
 
-  const handleBackToMaster = () => {
-    navigate("/master/finance/remittance");
-  };
-
   const adjustmentDialogFooter = (
     <div>
       <Button
@@ -256,12 +250,6 @@ const RemittanceAdjustments = () => {
       <Toast ref={toast} />
       <div className="header-section">
         <h2>{t("remittance.remittanceAdjustments")}</h2>
-        <Button
-          label="Back to Master"
-          icon="pi pi-arrow-left"
-          className="p-button-secondary"
-          onClick={handleBackToMaster}
-        />
       </div>
 
       <div className="summary-cards">

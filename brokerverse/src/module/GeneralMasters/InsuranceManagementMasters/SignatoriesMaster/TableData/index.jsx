@@ -161,7 +161,7 @@ const TableData = ({ navigate }) => {
           field="signatoryName"
           header="Signatory Name"
           className="fieldvalue_container"
-          body={(rowData) => rowData.signatoryName?.toUpperCase()}
+          body={(rowData) => rowData.signatoryName}
         ></Column>
         <Column
           field="modifiedBy"

@@ -199,7 +199,7 @@ const TransactionCodeMasterTable = () => {
               header="Transaction Name"
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.TransactionName?.toUpperCase()}
+              body={(rowData) => rowData.TransactionName}
             ></Column>
             <Column
               field="TransactionBasis"

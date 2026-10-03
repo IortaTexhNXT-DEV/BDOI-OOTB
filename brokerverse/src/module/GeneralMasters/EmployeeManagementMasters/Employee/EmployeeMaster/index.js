@@ -222,7 +222,7 @@ const EmployeeMaster = () => {
                   header="Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.firstName?.toUpperCase()}
+                  body={(rowData) => rowData.firstName}
                 ></Column>
                 <Column
                   field="designation"

@@ -341,7 +341,7 @@ const Index = () => {
   };
 
   const headerStyle = {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
     padding: 6,
@@ -642,13 +642,14 @@ const Index = () => {
                 field="Amount"
                 header={t("paymentVoucher.amount")}
                 headerStyle={headerStyle}
-                className="fieldvalue_container"
+                className="fieldvalue_container bv-nowrap"
               ></Column>
               <Column
                 field="status"
                 header={t("paymentVoucher.status")}
                 headerStyle={headerStyle}
-                className="fieldvalue_container"
+                className="fieldvalue_container bv-nowrap"
+                style={{ minWidth: "6rem" }}
                 body={(rowData) =>
                   rowData.status
                     ? String(rowData.status).replace(/(^|-)(\w)/g, (m, sep, c) => (sep ? " " : "") + c.toUpperCase())
@@ -661,8 +662,6 @@ const Index = () => {
                 )}
                 header={t("paymentVoucher.action")}
                 style={{ textAlign: "center", width: "5rem" }}
-                frozen
-                alignFrozen="right"
                 headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>

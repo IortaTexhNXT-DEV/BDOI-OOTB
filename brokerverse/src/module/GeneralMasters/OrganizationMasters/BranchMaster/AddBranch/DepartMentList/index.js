@@ -201,7 +201,7 @@ const DepartMentList = ({ action, branchCode }) => {
           ></Column>
           <Column
             field="DepartmentName"
-            body={(rowData) => rowData.DepartmentName?.toUpperCase()}
+            body={(rowData) => rowData.DepartmentName}
             header="Department Name"
             headerStyle={headerStyle}
           ></Column>

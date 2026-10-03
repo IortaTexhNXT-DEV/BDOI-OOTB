@@ -25,11 +25,8 @@ export const quotationListDataMiddleWare = createAsyncThunk(
         // Transform API data to match the expected format
         const transformedData = result.data.map((quotation, index) => {
           // Get lead name from lead object
-          const leadName = quotation.lead
-            ? `${quotation.lead.firstName || ""} ${
-                quotation.lead.lastName || ""
-              }`.trim()
-            : quotation.leadName || "Unknown prospect";
+          // the insured party: the prospect (person or company), else the client of a renewal or an existing-client quotation
+          const leadName = quotation.insured?.name || quotation.leadName || "";
 
           return {
             id: quotation.quotationId || quotation.id || (index + 1).toString(),

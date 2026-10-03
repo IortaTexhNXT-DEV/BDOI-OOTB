@@ -236,7 +236,7 @@ const DesignationMaster = () => {
                   header="Designation Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.designationName?.toUpperCase()}
+                  body={(rowData) => rowData.designationName}
                 ></Column>
                 <Column
                   field="departmentCode"

@@ -6,7 +6,7 @@
  * adjustment that the Accounting Manager approves.
  */
 import { dataOf } from '../http.js';
-import { addDays, minDate, monthEnd } from '../dates.js';
+import { addDays, maxDate, minDate, monthEnd } from '../dates.js';
 
 const OPENING_BALANCE = 3500000;
 const money = (n) => (Math.round(n * 100) / 100).toFixed(2);
@@ -105,14 +105,15 @@ async function bankMonth(ctx, month, state) {
 async function currentMonthStatement(ctx, month, state) {
   const acc = ctx.as.accounting1;
   const code = 'BDO-OPS';
-  const cutOff = addDays(ctx.today, -3);
+  // early in the month the cut-off stays inside it: the previous month is already reconciled and approved
+  const cutOff = maxDate(addDays(ctx.today, -3), month.start);
   const ws = dataOf(await acc.get('/bank-reconciliation/workspace', { bankAccount: code, period: month.period }));
   const carriedIds = new Set(state.carried.map((c) => c.id));
   const book = ws.bookLines.filter((b) => !b.matchId && b.date >= month.start && b.date <= cutOff && !carriedIds.has(b.id));
   const st = buildStatement(ctx, { ...month, end: cutOff }, book, state.carried, state.opening);
   // bank-only items of the month so far: an unidentified deposit and the charge for a returned cheque
-  const extra = [{ date: addDays(cutOff, -2), description: 'DEPOSIT - UNIDENTIFIED', reference: '', debit: 0, credit: 12500, bankOnly: 'open' },
-    { date: addDays(cutOff, -1), description: 'RETURNED CHECK CHARGE', reference: '', debit: 500, credit: 0, bankOnly: 'open' }];
+  const extra = [{ date: maxDate(addDays(cutOff, -2), month.start), description: 'DEPOSIT - UNIDENTIFIED', reference: '', debit: 0, credit: 12500, bankOnly: 'open' },
+    { date: maxDate(addDays(cutOff, -1), month.start), description: 'RETURNED CHECK CHARGE', reference: '', debit: 500, credit: 0, bankOnly: 'open' }];
   const lines = [...st.lines.filter((l) => !['BCHG', 'INT', 'FTAX'].includes(l.bankOnly)), ...extra].sort((a, b) => (a.date < b.date ? -1 : a.date > b.date ? 1 : 0));
   let balance = state.opening;
   for (const l of lines) { balance = Math.round((balance + l.credit - l.debit) * 100) / 100; l.balance = balance; }

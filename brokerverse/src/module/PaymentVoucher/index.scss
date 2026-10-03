@@ -88,7 +88,7 @@
 
   .addbutton_container {
     background-color: #0072d8;
-    border-radius: 60px;
+    border-radius: 6px;
     padding: 0px 22px;
     height: 38px;
     display: flex;
@@ -110,7 +110,7 @@
   }
   .bulk_button_container {
     background-color: #0072d8;
-    border-radius: 60px;
+    border-radius: 6px;
     // width: 100px !important;
     height: 38px;
     gap: 10px;
@@ -431,4 +431,9 @@
 
 .p-datatable .p-datatable-tbody > tr.voucher-row--recorded > td {
   background: #eff7f2 !important;
+}
+
+// same text size as the other lists, so every column fits the card
+.paymentvoucher-table-container .p-datatable .p-datatable-tbody > tr > td {
+  font-size: 14px;
 }

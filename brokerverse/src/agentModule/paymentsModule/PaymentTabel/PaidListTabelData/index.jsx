@@ -156,7 +156,7 @@ const PaidListTabelData = () => {
   };
 
   const renderName = (rowData) => {
-    return <div className="category__text">{rowData.name?.toUpperCase()}</div>;
+    return <div className="category__text">{rowData.name}</div>;
   };
   const renderClientId = (rowData) => {
     return (

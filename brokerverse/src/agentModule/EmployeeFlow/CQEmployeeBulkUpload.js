@@ -100,7 +100,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
     );
 
     const renderName = (rowData) => (
-        <div className="category__text">{rowData.Name?.toUpperCase()}</div>
+        <div className="category__text">{rowData.Name}</div>
     );
 
     const renderDOB = (rowData) => (

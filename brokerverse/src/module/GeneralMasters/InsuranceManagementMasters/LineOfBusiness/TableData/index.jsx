@@ -159,7 +159,7 @@ const TableData = ({ navigate }) => {
           field="LOBName"
           header="LOB Name"
           className="fieldvalue_container"
-          body={(rowData) => rowData.LOBName?.toUpperCase()}
+          body={(rowData) => rowData.LOBName}
         ></Column>
 
         <Column

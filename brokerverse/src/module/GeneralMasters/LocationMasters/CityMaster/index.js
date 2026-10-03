@@ -227,7 +227,7 @@ const City = () => {
             ></Column>
             <Column
               field="CityName"
-              body={(rowData) => rowData.CityName?.toUpperCase()}
+              body={(rowData) => rowData.CityName}
               header={t("generalMasters.cityName")}
               sortable
               headerStyle={headerStyle}

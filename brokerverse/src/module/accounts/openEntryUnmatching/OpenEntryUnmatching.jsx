@@ -344,7 +344,7 @@ const OpenEntryUnmatching = () => {
       <div className="col-12"></div>
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__open__entry__matching">
-          Open Entry Un-Matching
+          Open Entry Unmatching
         </div>
         <div className="mt-4">
           <BreadCrumb

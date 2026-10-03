@@ -154,7 +154,7 @@ const TableData = ({ navigate }) => {
           field="coverName"
           header="Cover Name"
           className="fieldvalue_container"
-          body={(rowData) => rowData.coverName?.toUpperCase()}
+          body={(rowData) => rowData.coverName}
         ></Column>
         <Column
           field="modifiedBy"

@@ -146,7 +146,7 @@ const LeadListing = () => {
         <div className="col-12 md:col-6 lg:col-6">
           <div
             className="btn_lable_save_container"
-            style={{ display: "flex", gap: "10px" }}
+            style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}
           >
             <Button
               label={t("leads.bulkUpload")}
@@ -166,8 +166,7 @@ const LeadListing = () => {
               disabled={isGeneratingReport}
               loading={isGeneratingReport}
             />
-            <Button label={t("leads.createLead")} icon="pi pi-plus" onClick={() => setShowCreate(true)} />}
-            />
+            <Button label={t("leads.createLead")} icon="pi pi-plus" onClick={() => setShowCreate(true)} />
           </div>
         </div>
       </div>

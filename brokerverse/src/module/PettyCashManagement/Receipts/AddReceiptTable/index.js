@@ -218,7 +218,7 @@ const AddReceiptsTable = () => {
               header="Remarks"
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.Remarks?.toUpperCase()}
+              body={(rowData) => rowData.Remarks}
             ></Column>
           </DataTable>
         </div>

@@ -11,6 +11,7 @@ import { createApp } from '../src/app.js';
 import { errorHandler } from '../src/lib/errors.js';
 import { query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
+import { addDays, today } from '../src/lib/dates.js';
 import { createOwnBookRole } from './helpers.js';
 
 const FALLBACK = ['auth', 'users', 'notifications', 'settings', 'uploads', 'accounting', 'journal-vouchers', 'receipts', 'collections', 'disbursements', 'commission', 'payments'];
@@ -63,9 +64,11 @@ export async function makePolicy({ net = 10000, insurer = 'MALAYAN', product = '
   const client = (await query(`INSERT INTO clients(client_code, display_name, first_name, last_name, email, created_by) VALUES ($1,$2,'Test','Client ' || $3,$4,'test') RETURNING *`,
     [`CL-T-${tag}`, `Test Client ${tag}`, tag, `client.${tag}@example.ph`])).rows[0];
   const gross = Math.round(net * 1.2525 * 100) / 100;
+  // the business date (Manila), not the database server's date: the two differ for eight hours a day
+  const inception = addDays(await today(), inceptionOffset);
   const policy = (await query(`INSERT INTO policies(policy_number, client_id, product_id, insurance_company_id, owner_user_id, status, inception_date, expiry_date, premium_total, commission_amount, details)
-    VALUES ($1,$2,(SELECT id FROM products WHERE code = $3),(SELECT id FROM insurance_companies WHERE code = $4),$5,'active', current_date + $6::int, current_date + $6::int + 365, $7, $8, $9) RETURNING *`,
-  [`POL-T-${tag}`, client.id, product, insurer, owner, inceptionOffset, gross, Math.round(net * 0.15 * 100) / 100, JSON.stringify({ netPremium: net, ...details })])).rows[0];
+    VALUES ($1,$2,(SELECT id FROM products WHERE code = $3),(SELECT id FROM insurance_companies WHERE code = $4),$5,'active', $6::date, $6::date + 365, $7, $8, $9) RETURNING *`,
+  [`POL-T-${tag}`, client.id, product, insurer, owner, inception, gross, Math.round(net * 0.15 * 100) / 100, JSON.stringify({ netPremium: net, ...details })])).rows[0];
   return { client, policy, gross, net };
 }
 
