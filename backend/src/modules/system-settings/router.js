@@ -18,18 +18,18 @@ const singleFile = (req, res, next) => upload.single('file')(req, res, (e) => ne
 const SCREEN = 'Master > System Settings';
 const example = {
   logoUrl: '/bdoi/iorta-technxt.png', logoPresets: [{ id: 'iorta-technxt', label: 'iorta TechNXT (BrokerVerse)', url: '/bdoi/iorta-technxt.png', builtIn: true }], displayCurrency: 'PHP',
-  primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', faviconUrl: '/favicon.ico', appTitle: 'Brokerverse',
+  primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', faviconUrl: '/favicon.ico', systemName: 'BrokerVerse',
   currencies: [{ code: 'PHP', name: 'Philippine Peso', locale: 'en-PH', region: 'Asia' }], updatedAt: '2026-09-28T00:00:00.000Z',
 };
 
 define({
-  method: 'GET', path: '/', auth: false, summary: 'System settings (branding, display currency, language, title); public because the sign-in page needs them', screen: `${SCREEN}; Sign-in; App shell`,
+  method: 'GET', path: '/', auth: false, summary: 'System settings (branding, display currency, language, application name); public because the sign-in page needs them', screen: `${SCREEN}; Sign-in; App shell`,
   response: { success: true, data: example },
   handler: async (_req, res) => ok(res, await svc.getSystemSettings()),
 });
 define({
-  method: 'PUT', path: '/', summary: 'Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, appTitle)', screen: SCREEN,
-  middleware: canWrite('settings'), request: { appTitle: 'Brokerverse', displayCurrency: 'PHP', primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', logoUrl: '/iorta.png' },
+  method: 'PUT', path: '/', summary: 'Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)', screen: SCREEN,
+  middleware: canWrite('settings'), request: { systemName: 'BrokerVerse', displayCurrency: 'PHP', primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', logoUrl: '/iorta.png' },
   response: { success: true, data: example },
   handler: async (req, res) => {
     const before = await svc.getSystemSettings();
@@ -76,12 +76,12 @@ define({
 define({
   method: 'GET', path: '/configuration', summary: 'Configuration catalogue: every app_settings key with group, label, type and value (drives a Configuration screen)', screen: 'Master > Configuration',
   middleware: canRead('settings'), query: { group: 'tax' },
-  response: { success: true, data: { groups: [{ group: 'tax', label: 'Taxes', items: [{ key: 'tax.vat_rate', value: 0.12, label: 'VAT rate', type: 'number', editable: true }] }], items: [], total: 1 } },
+  response: { success: true, data: { groups: [{ group: 'tax', label: 'Taxes', items: [{ key: 'tax.vat_rate', value: 0.12, label: 'VAT rate', type: 'number', editable: true, managedBy: { screen: 'Master > Finance > Premium Taxes & LGU Rates', path: '/master/finance/premium-taxes' } }] }], items: [], total: 1 } },
   handler: async (req, res) => ok(res, await svc.configurationCatalogue(req.query.group)),
 });
 define({
-  method: 'PUT', path: '/configuration', summary: 'Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked', screen: 'Master > Configuration',
-  middleware: canWrite('settings'), request: { settings: { 'tax.vat_rate': 0.12, 'general.app_title': 'BrokerVerse', 'notification.email_enabled': true } },
+  method: 'PUT', path: '/configuration', summary: 'Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused', screen: 'Master > Configuration',
+  middleware: canWrite('settings'), request: { settings: { 'limits.bulk_upload_max_rows': 1000, 'notification.email_enabled': true } },
   response: { success: true, data: { groups: [], items: [], total: 0 } },
   handler: async (req, res) => {
     const b = req.body || {};

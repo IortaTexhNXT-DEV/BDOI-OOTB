@@ -10,6 +10,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { companyName } from '../../lib/letterhead.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { today, isoDate } from '../../lib/dates.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
@@ -259,7 +260,7 @@ export async function sendPlacement(id, user, { insurerIds = null } = {}) {
   const p = await placementById(id);
   if (!['draft', 'sent'].includes(p.status)) throw conflict(`A ${p.placementStatus} placement slip cannot be sent`);
   const t = await emailTemplate('placement_order');
-  const company = ((await getSetting('general.company_name')) ?? '');
+  const company = await companyName();
   const sent = [];
   const failed = [];
   for (const x of p.participants.filter((r) => r.status !== 'confirmed' && (!insurerIds || insurerIds.map(Number).includes(Number(r.insuranceCompanyId))))) {

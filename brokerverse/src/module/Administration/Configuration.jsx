@@ -126,7 +126,7 @@ const Configuration = () => {
           <label htmlFor={r.key} className="cfg__label" title={`Reference: ${r.key}`}>{r.label}</label>
           <div className="cfg__meta">
             {showGroup ? <span>{groupTitle(r.group)}</span> : null}
-            {r.view.managed ? <span>Changed on <Link to={r.view.managed.path}>{r.view.managed.label}</Link></span> : null}
+            {r.view.managed ? <span><Link to={r.view.managed.path}>Managed in {r.view.managed.label}</Link></span> : null}
             {r.editable === false ? <span>Read only</span> : null}
             {r.updatedBy && !String(r.updatedBy).match(/^(seed|system)$/i) ? <span>Last changed by {r.updatedBy} on {when(r.updatedAt)}</span> : null}
             {dirty ? <Tag value="Not saved" severity="warning" className="cfg__dirty" /> : null}
@@ -255,14 +255,14 @@ const Configuration = () => {
             <details className="cfg__panel cfg__managed">
               <summary>
                 <span className="cfg__managed-title">Set on other screens ({managedRows.length})</span>
-                <span className="cfg__muted">GL accounts and tax codes are changed with a second person's approval on their own screens.</span>
+                <span className="cfg__muted">Read only here: the application name and branding, the company's legal identity, premium tax rates and GL accounts are changed on their own screens.</span>
               </summary>
               <div className="cfg__managed-grid">
                 {managedRows.map((r) => (
                   <div key={r.key} className="cfg__managed-item">
                     <span>{r.label}</span>
                     <span className="cfg__managed-value">{typeof r.value === "object" ? Object.entries(r.value || {}).map(([k, v]) => `${k}: ${v}`).join(", ") : String(r.value ?? "")}</span>
-                    <Link to={r.view.managed.path}>{r.view.managed.label}</Link>
+                    <Link to={r.view.managed.path}>Managed in {r.view.managed.label}</Link>
                   </div>
                 ))}
               </div>

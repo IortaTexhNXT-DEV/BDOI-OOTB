@@ -1,7 +1,8 @@
 -- Configuration keys for System Settings, masters, product configurator, remittance, reinsurance and incentive.
 -- Every value below is editable from the front end (PUT /api/system-settings or PUT /api/system-settings/configuration).
 INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
- ('general.app_title', '"Brokerverse"', 'general', 'Application title (browser tab and header)', 'string', true),
+ -- deprecated and unused (migration 0231): the application name is general.system_name, edited in System Settings
+ ('general.app_title', '"Brokerverse"', 'system', 'Deprecated, not used: the application name is general.system_name (Master > System Settings)', 'string', false),
  ('general.default_language', '"en"', 'general', 'Default language', 'string', true),
  ('general.languages', $j$[{"code":"en","label":"English"},{"code":"th","label":"Thai"},{"code":"fil","label":"Filipino"}]$j$, 'general', 'Available languages', 'json', true),
  ('branding.default_logo_url', '"/bdoi/iorta-technxt.png"', 'branding', 'Default logo (used when no logo is selected)', 'image', true),

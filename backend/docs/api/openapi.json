@@ -56575,7 +56575,7 @@
         "tags": [
           "Placement Slips"
         ],
-        "description": "Front-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations",
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations, write:premium-charges",
         "parameters": [
           {
             "name": "businessType",
@@ -56704,7 +56704,8 @@
         },
         "x-screen": "Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)",
         "x-permissions": [
-          "read:quotations"
+          "read:quotations",
+          "write:premium-charges"
         ]
       }
     },
@@ -97015,11 +97016,11 @@
     "/settings": {
       "get": {
         "operationId": "getSettings",
-        "summary": "All configuration values (grouped)",
+        "summary": "All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere",
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Master > Configuration\n\nAccess: Any authenticated user",
         "parameters": [
           {
             "name": "group",
@@ -97061,6 +97062,17 @@
                           },
                           "type": {
                             "type": "string"
+                          },
+                          "managedBy": {
+                            "type": "object",
+                            "properties": {
+                              "screen": {
+                                "type": "string"
+                              },
+                              "path": {
+                                "type": "string"
+                              }
+                            }
                           }
                         }
                       }
@@ -97075,7 +97087,11 @@
                       "value": 0.12,
                       "group": "tax",
                       "label": "VAT rate",
-                      "type": "number"
+                      "type": "number",
+                      "managedBy": {
+                        "screen": "Master > Finance > Premium Taxes & LGU Rates",
+                        "path": "/master/finance/premium-taxes"
+                      }
                     }
                   ]
                 }
@@ -97092,15 +97108,15 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Settings"
+        "x-screen": "Master > Configuration"
       },
       "put": {
         "operationId": "putSettings",
-        "summary": "Update one or more configuration values",
+        "summary": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",
         "tags": [
           "System Settings"
         ],
-        "description": "Front-end touchpoint: Master > System Settings\n\nAccess: role:system-admin",
+        "description": "Front-end touchpoint: Master > Configuration\n\nAccess: role:system-admin",
         "parameters": [],
         "responses": {
           "200": {
@@ -97131,7 +97147,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > System Settings",
+        "x-screen": "Master > Configuration",
         "requestBody": {
           "required": true,
           "content": {
@@ -97142,11 +97158,11 @@
                   "settings": {
                     "type": "object",
                     "properties": {
-                      "tax.vat_rate": {
-                        "type": "number"
+                      "limits.bulk_upload_max_rows": {
+                        "type": "integer"
                       },
-                      "branding.primary_color": {
-                        "type": "string"
+                      "notification.email_enabled": {
+                        "type": "boolean"
                       }
                     }
                   }
@@ -97154,8 +97170,8 @@
               },
               "example": {
                 "settings": {
-                  "tax.vat_rate": 0.12,
-                  "branding.primary_color": "#0072d8"
+                  "limits.bulk_upload_max_rows": 1000,
+                  "notification.email_enabled": true
                 }
               }
             }
@@ -97341,7 +97357,7 @@
     "/system-settings": {
       "get": {
         "operationId": "getSystemSettings",
-        "summary": "System settings (branding, display currency, language, title); public because the sign-in page needs them",
+        "summary": "System settings (branding, display currency, language, application name); public because the sign-in page needs them",
         "tags": [
           "System Settings"
         ],
@@ -97399,7 +97415,7 @@
                         "faviconUrl": {
                           "type": "string"
                         },
-                        "appTitle": {
+                        "systemName": {
                           "type": "string"
                         },
                         "currencies": {
@@ -97446,7 +97462,7 @@
                     "secondaryColor": "#004ea8",
                     "defaultLanguage": "en",
                     "faviconUrl": "/favicon.ico",
-                    "appTitle": "Brokerverse",
+                    "systemName": "BrokerVerse",
                     "currencies": [
                       {
                         "code": "PHP",
@@ -97467,7 +97483,7 @@
       },
       "put": {
         "operationId": "putSystemSettings",
-        "summary": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, appTitle)",
+        "summary": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)",
         "tags": [
           "System Settings"
         ],
@@ -97525,7 +97541,7 @@
                         "faviconUrl": {
                           "type": "string"
                         },
-                        "appTitle": {
+                        "systemName": {
                           "type": "string"
                         },
                         "currencies": {
@@ -97572,7 +97588,7 @@
                     "secondaryColor": "#004ea8",
                     "defaultLanguage": "en",
                     "faviconUrl": "/favicon.ico",
-                    "appTitle": "Brokerverse",
+                    "systemName": "BrokerVerse",
                     "currencies": [
                       {
                         "code": "PHP",
@@ -97608,7 +97624,7 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "appTitle": {
+                  "systemName": {
                     "type": "string"
                   },
                   "displayCurrency": {
@@ -97629,7 +97645,7 @@
                 }
               },
               "example": {
-                "appTitle": "Brokerverse",
+                "systemName": "BrokerVerse",
                 "displayCurrency": "PHP",
                 "primaryColor": "#0072d8",
                 "secondaryColor": "#004ea8",
@@ -97704,6 +97720,17 @@
                                     },
                                     "editable": {
                                       "type": "boolean"
+                                    },
+                                    "managedBy": {
+                                      "type": "object",
+                                      "properties": {
+                                        "screen": {
+                                          "type": "string"
+                                        },
+                                        "path": {
+                                          "type": "string"
+                                        }
+                                      }
                                     }
                                   }
                                 }
@@ -97735,7 +97762,11 @@
                             "value": 0.12,
                             "label": "VAT rate",
                             "type": "number",
-                            "editable": true
+                            "editable": true,
+                            "managedBy": {
+                              "screen": "Master > Finance > Premium Taxes & LGU Rates",
+                              "path": "/master/finance/premium-taxes"
+                            }
                           }
                         ]
                       }
@@ -97765,7 +97796,7 @@
       },
       "put": {
         "operationId": "putSystemSettingsConfiguration",
-        "summary": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked",
+        "summary": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused",
         "tags": [
           "System Settings"
         ],
@@ -97835,11 +97866,8 @@
                   "settings": {
                     "type": "object",
                     "properties": {
-                      "tax.vat_rate": {
-                        "type": "number"
-                      },
-                      "general.app_title": {
-                        "type": "string"
+                      "limits.bulk_upload_max_rows": {
+                        "type": "integer"
                       },
                       "notification.email_enabled": {
                         "type": "boolean"
@@ -97850,8 +97878,7 @@
               },
               "example": {
                 "settings": {
-                  "tax.vat_rate": 0.12,
-                  "general.app_title": "BrokerVerse",
+                  "limits.bulk_upload_max_rows": 1000,
                   "notification.email_enabled": true
                 }
               }
@@ -97921,7 +97948,7 @@
                         "faviconUrl": {
                           "type": "string"
                         },
-                        "appTitle": {
+                        "systemName": {
                           "type": "string"
                         },
                         "currencies": {
@@ -97968,7 +97995,7 @@
                     "secondaryColor": "#004ea8",
                     "defaultLanguage": "en",
                     "faviconUrl": "/favicon.ico",
-                    "appTitle": "Brokerverse",
+                    "systemName": "BrokerVerse",
                     "currencies": [
                       {
                         "code": "PHP",
@@ -98095,7 +98122,7 @@
                         "faviconUrl": {
                           "type": "string"
                         },
-                        "appTitle": {
+                        "systemName": {
                           "type": "string"
                         },
                         "currencies": {
@@ -98142,7 +98169,7 @@
                     "secondaryColor": "#004ea8",
                     "defaultLanguage": "en",
                     "faviconUrl": "/favicon.ico",
-                    "appTitle": "Brokerverse",
+                    "systemName": "BrokerVerse",
                     "currencies": [
                       {
                         "code": "PHP",
@@ -98243,7 +98270,7 @@
                         "faviconUrl": {
                           "type": "string"
                         },
-                        "appTitle": {
+                        "systemName": {
                           "type": "string"
                         },
                         "currencies": {
@@ -98290,7 +98317,7 @@
                     "secondaryColor": "#004ea8",
                     "defaultLanguage": "en",
                     "faviconUrl": "/favicon.ico",
-                    "appTitle": "Brokerverse",
+                    "systemName": "BrokerVerse",
                     "currencies": [
                       {
                         "code": "PHP",

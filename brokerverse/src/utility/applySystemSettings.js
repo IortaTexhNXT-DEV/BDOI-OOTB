@@ -33,11 +33,11 @@ export function applyFavicon(faviconUrl) {
 }
 
 /**
- * Set document title from app title (login / generic pages).
+ * Set document title from the application name (login / generic pages).
  * Authenticated pages may append more in App.js.
  */
 export function applyAppTitle(appTitle, { authenticated, userName } = {}) {
-  const base = appTitle || DEFAULT_SYSTEM_SETTINGS.appTitle;
+  const base = appTitle || DEFAULT_SYSTEM_SETTINGS.systemName;
   if (authenticated) {
     document.title = `${base} - Dashboard | ${userName || "User"}`;
   } else {
@@ -69,7 +69,7 @@ export function applySystemSettings(settings = {}, options = {}) {
   setQuoteOptions(merged);
   applyThemeColors(merged.primaryColor, merged.secondaryColor);
   applyFavicon(merged.faviconUrl);
-  applyAppTitle(merged.appTitle, options);
+  applyAppTitle(merged.systemName, options);
   applyDefaultLanguage(merged.defaultLanguage);
   return merged;
 }

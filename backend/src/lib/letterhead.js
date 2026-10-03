@@ -1,7 +1,8 @@
 /**
  * The letterhead printed on every document and report: the primary active company of the Company master
  * (master_records type "company", IsPrimary = true), else the first active company, else general.company_name.
- * When the customer changes their company details in the master, every print follows.
+ * When the customer changes their company details in the master, every print follows. The Company master owns the
+ * legal name, TIN, registered address and print logo (lib/settingOwners.js); the settings are fallbacks only.
  *
  * The logo is read from the uploads storage (a logo uploaded through the master form: .../api/s3/object/<key>), or from
  * a file in backend/assets with the same name as the logo path ("/bdoi/iorta-technxt.png"), or, when the company has
@@ -64,6 +65,11 @@ export function companyAddressLines(d) {
   return [str(d.AddressLine1), str(d.AddressLine2), str(d.AddressLine3), cityLine].filter(Boolean);
 }
 
+/** The registered address of a Company master record on one line, without the postal code (BIR forms print it apart). */
+export function companyRegisteredAddress(d) {
+  return [str(d.AddressLine1), str(d.AddressLine2), str(d.AddressLine3), str(d.City), str(d.State), str(d.Country)].filter(Boolean).join(', ');
+}
+
 /** The primary active company record (master_records row) or the first active one; null when there is none. */
 export async function primaryCompany() {
   return one(`SELECT id, code, name, data FROM master_records WHERE type_code = 'company' AND status = 'active'
@@ -89,6 +95,26 @@ export async function getLetterhead({ fresh = false } = {}) {
   }
   cache = { at: Date.now(), value };
   return value;
+}
+
+/**
+ * The broker's legal identity for BIR forms: { name, tin, address, zip, rdoCode }. The primary company of the Company
+ * master owns it (legal name, TIN, registered address, RDO code); the bir.* settings are read only when no company
+ * exists.
+ */
+export async function legalIdentity() {
+  const row = await primaryCompany().catch(() => null);
+  if (row) {
+    const d = row.data || {};
+    return { name: str(d.CompanyName) || str(row.name), tin: str(d.TIN), address: companyRegisteredAddress(d), zip: str(d.PinCode), rdoCode: str(d.RDOCode) };
+  }
+  return {
+    name: str(await getSetting('bir.registered_name', '')) || str(await getSetting('general.company_name')),
+    tin: str(await getSetting('bir.withholding_agent_tin', '')),
+    address: str(await getSetting('bir.registered_address', '')),
+    zip: str(await getSetting('bir.zip_code', '')),
+    rdoCode: '',
+  };
 }
 
 /** The company name printed on documents, e-mails and reports (the letterhead company). */

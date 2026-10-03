@@ -125,14 +125,14 @@ describe('table-backed masters', () => {
     expect(ins.body.data[0].insuranceCompanyCode).toBeTruthy();
     expect(ins.body.data[0].city).toBe('Makati');
   });
-  it('taxation records linked to a setting keep the configuration key in step', async () => {
+  it('the retired taxation master keeps its records for reference but refuses changes', async () => {
     const list = await ctx.api('get', '/masters/taxation?taxCode=VAT');
     const vat = list.body.data[0];
+    expect(vat).toMatchObject({ taxCode: 'VAT', status: 'Inactive' });
+    expect(vat.settingKey).toBeUndefined();
     const u = await ctx.api('put', `/masters/taxation/${vat.id}`).send({ taxRate: 12.5 });
-    expect(u.status).toBe(200);
-    const kv = await ctx.api('get', '/settings?group=tax');
-    expect(kv.body.data.find((s) => s.key === 'tax.vat_rate').value).toBe(0.125);
-    await ctx.api('put', `/masters/taxation/${vat.id}`).send({ taxRate: 12 });
+    expect(u.status).toBe(400);
+    expect(u.body.message).toMatch(/retired/);
   });
 });
 

@@ -7,7 +7,6 @@ import bankMasterReducer from "../module/FinanceMastersModule/BankMaster/store/b
 import accountCategoryReducer from "../module/FinanceMastersModule/AccountCategoryMaster/store/accountCategoryReducer";
 import mainAccoutReducers from "../module/FinanceMastersModule/MainAccountMaster/store/mainAccountReducer";
 import commissionMianReducers from "../module/GeneralMasters/Commission/store/commissionReducers";
-import taxationMainReducers from "../module/FinanceMastersModule/TaxationMaster/store/taxationReducers";
 import subAccountMainReducers from "../module/FinanceMastersModule/SubAccountMaster/store/subAccountReducers";
 import receiptsTableReducers from "../module/Receipts/store/receiptsReducers";
 import pettyCashInitiateReducer from "../module/PettyCashManagement/Initiate/store/pettyCashInitiateReducer";
@@ -75,7 +74,6 @@ const reducers = {
   accountCategoryReducer,
   mainAccoutReducers,
   commissionMianReducers,
-  taxationMainReducers,
   subAccountMainReducers,
   pettyCashMainReducers,
   receiptsTableReducers,

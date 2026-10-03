@@ -25,7 +25,6 @@ const applyPayloadToState = (state, payload) => {
   state.secondaryColor = payload.secondaryColor ?? state.secondaryColor;
   state.defaultLanguage = payload.defaultLanguage ?? state.defaultLanguage;
   state.faviconUrl = payload.faviconUrl ?? state.faviconUrl;
-  state.appTitle = payload.appTitle ?? state.appTitle;
   state.systemName = payload.systemName ?? state.systemName;
   if (payload.currencies) {
     state.currencies = payload.currencies;

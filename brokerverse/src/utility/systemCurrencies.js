@@ -81,7 +81,6 @@ export const DEFAULT_SYSTEM_SETTINGS = {
   secondaryColor: "#004ea8",
   defaultLanguage: "en",
   faviconUrl: "/favicon.ico",
-  appTitle: "BrokerVerse",
   systemName: "BrokerVerse",
   dateFormat: "DD/MM/YYYY",
 };
