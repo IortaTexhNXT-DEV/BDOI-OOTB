@@ -29,8 +29,6 @@ const ClientListingCompanyCategory = ({
     (val) => val?.category === "Corporate"
   );
 
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode] = useState("multiple");
   const [globalFilter, setGlobalFilter] = useState("Name");
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
@@ -187,22 +185,9 @@ const ClientListingCompanyCategory = ({
     border: " none",
   };
 
-  const rendercheckedHeader = (value) => {
-    return selectedProducts.length === 0 ? (
-      value
-    ) : selectedProducts.length === 1 ? (
-      <div className="header__btn__container">
-        <div className="header__delete__btn">{t("clients.delete")}</div>
-        <div className="header__edit__btn">{t("clients.edit")}</div>
-      </div>
-    ) : (
-      <div className="header__delete__btn">{t("clients.delete")}</div>
-    );
-  };
+  const rendercheckedHeader = (value) => value;
 
-  const renderUncheckedHeader = (value) => {
-    return selectedProducts.length == 0 && value;
-  };
+  const renderUncheckedHeader = (value) => value;
 
   return (
     <div>
@@ -240,13 +225,10 @@ const ClientListingCompanyCategory = ({
           value={search ? searchMiddleWareData : companyData}
           paginator
           rows={5}
-          selectionMode={selectionMode}
-          selection={selectedProducts}
           rowsPerPageOptions={[5, 10, 25, 50]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           className="corrections__table__main"
-          onSelectionChange={(e) => setSelectedProducts(e.value)}
           dataKey="id"
           tableStyle={{ minWidth: "50rem" }}
           scrollable={true}

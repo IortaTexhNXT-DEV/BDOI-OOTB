@@ -67,7 +67,6 @@ const QuoteListingCard = () => {
     }
   );
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode] = useState("multiple");
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Company");
@@ -175,45 +174,9 @@ const QuoteListingCard = () => {
     }
   };
 
-  const rendercheckedHeader = (value) => {
-    return selectedProducts.length === 0 ? (
-      value
-    ) : selectedProducts.length === 1 ? (
-      <div className="header__btn__container">
-        <div className="header__delete__btn" onClick={handleDelete}>
-          {t("quoteListing.delete")}
-        </div>
-        <div
-          className="header__edit__btn"
-          onClick={() => handleEdit(selectedProducts[0])}
-        >
-          {t("quoteListing.edit")}
-        </div>
-      </div>
-    ) : (
-      <div className="header__btn__container">
-        <div className="header__delete__btn" onClick={handleDelete}>
-          {t("quoteListing.delete")}
-        </div>
-        {selectedProducts.length === 2 && (
-          <div
-            className="header__edit__btn"
-            onClick={() =>
-              navigate(
-                `/agent/quotecomparisonview?quotationId1=${selectedProducts[0].quotationId}&quotationId2=${selectedProducts[1].quotationId}`
-              )
-            }
-          >
-            {t("quoteListing.compare")}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const rendercheckedHeader = (value) => value;
 
-  const renderUncheckedHeader = (value) => {
-    return selectedProducts.length == 0 && value;
-  };
+  const renderUncheckedHeader = (value) => value;
 
   const handleclick = () => {
     // Clear any existing quote creation state
@@ -791,8 +754,6 @@ const QuoteListingCard = () => {
             rows={rowsPerPage}
             totalRecords={totalQuotations}
             first={(currentPageState - 1) * rowsPerPage}
-            selectionMode={selectionMode}
-            selection={selectedProducts}
             onPage={(e) => {
               setCurrentPageState(e.page + 1);
               setRowsPerPage(e.rows);
@@ -801,14 +762,12 @@ const QuoteListingCard = () => {
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             className="corrections__table__main"
-            onSelectionChange={(e) => setSelectedProducts(e.value)}
             dataKey="quotationId"
             tableStyle={{ minWidth: "50rem" }}
             scrollable={true}
             scrollHeight="60vh"
           >
             <Column
-              selectionMode={selectionMode}
               body={(rowData) => (
                 <Checkbox
                   checked={selectedProducts.includes(rowData)}

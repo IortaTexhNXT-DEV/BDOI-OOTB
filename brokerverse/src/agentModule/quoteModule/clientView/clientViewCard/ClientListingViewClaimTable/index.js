@@ -123,7 +123,6 @@ const normalizeClaimRecord = (record) => {
 
 const LeadListingAllTable = ({ clientId }) => {
   const { t } = useTranslation();
-  const [selectedProducts] = useState([]);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [claims, setClaims] = useState([]);
@@ -426,22 +425,9 @@ const LeadListingAllTable = ({ clientId }) => {
     border: " none",
   };
 
-  const rendercheckedHeader = (value) => {
-    return selectedProducts.length === 0 ? (
-      value
-    ) : selectedProducts.length === 1 ? (
-      <div className="header__btn__container">
-        <div className="header__delete__btn">{t("tables.delete")}</div>
-        <div className="header__edit__btn">{t("tables.edit")}</div>
-      </div>
-    ) : (
-      <div className="header__delete__btn">{t("tables.delete")}</div>
-    );
-  };
+  const rendercheckedHeader = (value) => value;
 
-  const renderUncheckedHeader = (value) => {
-    return selectedProducts.length == 0 && value;
-  };
+  const renderUncheckedHeader = (value) => value;
 
   return (
     <div>

@@ -92,9 +92,7 @@ const normalizeEndorsement = (record) => {
 
 const LeadListingAllTable = ({ clientId }) => {
   const { t } = useTranslation();
-  const [selectedProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectionMode] = useState("multiple");
   const navigate = useNavigate();
   const [globalFilter, setGlobalFilter] = useState("endorsementNumber");
   const [endorsementData, setEndorsementData] = useState([]);
@@ -420,22 +418,9 @@ const LeadListingAllTable = ({ clientId }) => {
     border: " none",
   };
 
-  const rendercheckedHeader = (value) => {
-    return selectedProducts.length === 0 ? (
-      value
-    ) : selectedProducts.length === 1 ? (
-      <div className="header__btn__container">
-        <div className="header__delete__btn">Delete</div>
-        <div className="header__edit__btn">Edit</div>
-      </div>
-    ) : (
-      <div className="header__delete__btn">Delete</div>
-    );
-  };
+  const rendercheckedHeader = (value) => value;
 
-  const renderUncheckedHeader = (value) => {
-    return selectedProducts.length == 0 && value;
-  };
+  const renderUncheckedHeader = (value) => value;
 
   return (
     <div>
@@ -473,8 +458,6 @@ const LeadListingAllTable = ({ clientId }) => {
           value={filteredData}
           paginator
           rows={5}
-          selectionMode={selectionMode}
-          selection={selectedProducts}
           rowsPerPageOptions={[5, 10, 25, 50]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}

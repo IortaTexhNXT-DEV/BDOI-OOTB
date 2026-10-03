@@ -174,22 +174,9 @@ const ReviewingListTabelData = () => {
     border: " none",
   };
 
-  const rendercheckedHeader = (value) => {
-    return selectedProducts.length === 0 ? (
-      value
-    ) : selectedProducts.length === 1 ? (
-      <div className="header__btn__container">
-        <div className="header__delete__btn">{t("tables.delete")}</div>
-        <div className="header__edit__btn">{t("tables.edit")}</div>
-      </div>
-    ) : (
-      <div className="header__delete__btn">{t("tables.delete")}</div>
-    );
-  };
+  const rendercheckedHeader = (value) => value;
 
-  const renderUncheckedHeader = (value) => {
-    return selectedProducts.length == 0 && value;
-  };
+  const renderUncheckedHeader = (value) => value;
 
   return (
     <div>
@@ -227,13 +214,10 @@ const ReviewingListTabelData = () => {
           value={search ? paymentSearchList : paymentRewiwingtabledata}
           paginator
           rows={5}
-          selectionMode={selectionMode}
-          selection={selectedProducts}
           rowsPerPageOptions={[5, 10, 25, 50]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           className="corrections__table__main"
-          onSelectionChange={(e) => setSelectedProducts(e.value)}
           dataKey="id"
           scrollable={true}
           scrollHeight="60vh"
