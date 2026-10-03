@@ -305,3 +305,229 @@ Every journal is built from the posting rule of its business event (Master > Fin
 
 Each payable and commission line carries the insurer, so the remittance, the Co-insurance Register and the Due to Insurers by Co-insurer report show each insurer's part. A rounding difference of a share split goes to the lead insurer.
 
+# System Administrator
+
+## Role summary
+
+The System Administrator (role System Administrator (Super Admin Access)) sets up and looks after BrokerVerse: users and roles, access controls, the company and its letterhead, the masters (insurers, products, covers, locations, banks, chart of accounts, tax codes), document numbering, the configuration settings, the schedules, the e-mail outbox and the audit trail. The role sees every menu and can open every screen of the other personas. Keep it for administration and give each person a business role for daily work; give the System Administrator role to as few people as possible.
+
+![Landing page of the System Administrator](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-landing.png)
+
+## Menus available
+
+Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, Master and Product Configurator. The menus used for administration are:
+
+| Menu | Items |
+|---|---|
+| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox |
+| Master > Generals | Organization (Company, Branch); Insurance Management (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle); Location (Country, State, City); Commission; Employee Management (Hierarchy, Designation, Employee); User Management (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
+| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Petty Cash, Remittance Master |
+| Master | Incentive Programs, Reinsurance Treaty |
+
+## Daily and periodic tasks
+
+| When | Task | Screen |
+|---|---|---|
+| Daily | Unlock users and reset passwords on request | Master > Generals > User Management > User |
+| Daily | Check the e-mail outbox for failed messages | Master > E-mail Outbox |
+| Daily | Check that the schedules ran (Last status) | Master > Schedules |
+| On request | Add a user, change a role, deactivate a leaver | User Management > User |
+| On request | Add or change insurers, products, covers, banks and other masters | Master > Generals, Master > Finance |
+| On request | Change a business setting agreed with the process owner | Master > Configuration |
+| Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | User Management > User Access Matrix |
+| Quarterly | Run an access review | User Management > Access Reviews |
+| Before go-live | Company and letterhead, official receipt numbering to match the Authority to Print, security settings, e-mail settings | Company, Document Numbering, Configuration |
+
+## Users
+
+### Add a user
+
+![Master > Generals > User Management > User > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-user-add.png)
+
+1. Choose Master > Generals > User Management > User and select **Add**.
+2. Enter **Username** (the user ID used to sign in), **E-mail** and **Display Name**. All three are required. The e-mail is where Forgot password? sends its code.
+3. Leave **Password** empty: the system then generates a temporary password ("Leave empty for a temporary password").
+4. Under **Roles**, tick the role or roles. A person normally holds one role. The Accounting Manager role includes Accounting. When `access.sod_enforced` is on, a combination listed on Segregation of Duties with the action Block is refused.
+5. Select **Save**. The temporary password is shown once. Hand it to the user privately.
+
+A duplicate username is refused. At the first sign-in the user must choose a new password (Getting started).
+
+### Account actions
+
+![User list with the account actions of a user](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-user-actions.png)
+
+The user list shows **User Name**, **Assigned Role**, **E-mail**, **Display Name**, **Status** and **Action**. The three dots at the end of a row (**Account actions**) offer the actions that apply to the user:
+
+| Action | Use it when |
+|---|---|
+| Unlock | The user is locked after 5 failed sign-ins. |
+| **Reset password** | The user forgot the password and cannot use Forgot password?. A temporary password is shown once and every session of the user ends. |
+| Turn off two-step verification | The user lost the phone with the authenticator app. |
+| **Sign-in history** | Every sign-in attempt of the user with date, result, method, IP address and browser. |
+
+The eye opens the user, the pencil edits the display name, e-mail and roles (a role change ends the user's open sessions), and the **Status** switch deactivates a leaver. Records of a deactivated user are kept. The daily Dormant accounts job deactivates users who have not signed in for 90 days (`access.dormant_days`).
+
+### Roles and role permissions
+
+**Role** lists the seven roles. **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end), which roles hold it. A role that builds on another (the Accounting Manager on Accounting) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
+
+![Master > Generals > User Management > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
+
+### User Access Matrix
+
+The matrix lists every user with roles, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. The cards at the top count **Active users**, **Dormant (90+ days)**, **Segregation-of-duties conflicts** and **Active without two-factor**; select a card to filter the list. **Export to Excel** downloads the matrix for an access review; **Sign out everywhere** ends every session of a user.
+
+![Master > Generals > User Management > User Access Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-access-matrix.png)
+
+### Authority Matrix
+
+The Authority Matrix holds the approval limits per role and transaction type: amounts in PHP, discounts in percent of premium (for example a quotation discount of 10% for Sales & Marketing, policy issuance up to PHP 1,000,000.00). A role with **Not set** is not restricted by the matrix for that transaction type. **Limit for one person** sets a personal limit for one user. A change applies once a second administrator approves it.
+
+![Master > Generals > User Management > Authority Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-authority.png)
+
+### Delegations
+
+A delegation lets another user approve for an approver who is away.
+
+1. Choose User Management > Delegations and select **New delegation**.
+2. Choose **Approver away** and **Covered by**, the **Transactions** covered (**All transactions** or a type), **From** and **To** dates and the **Reason**.
+3. Select **Save**.
+
+![New delegation](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-delegation-new.png)
+
+### Segregation of Duties
+
+Each rule names two roles that one person should not hold together, what happens when they are assigned (**Block**), the reason and the status. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager). **New rule** adds a rule; **Switch off** disables one.
+
+![Master > Generals > User Management > Segregation of Duties](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-sod.png)
+
+### Access Reviews
+
+Confirm at least every quarter that each active user still needs his or her access. **Start a review** creates the review with every active user; for each user choose **Keep** or **Revoke** (the decision starts as **To review**). The closed review is kept as the audit record.
+
+## Company, branches and the letterhead
+
+![Master > Generals > Organization > Company > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-company-add.png)
+
+Every printed document and report PDF (quotation, request for quotation, placement slip, policy schedule, billing statement, official receipt, payment voucher, debit note, claim letters, BIR forms) carries the letterhead of the company marked as letterhead company.
+
+1. Choose Master > Generals > Organization > Company. Select **Add**, or the pencil on the delivered company to edit it into your own.
+2. Enter **Company Code**, **Company Name**, **License Number** (Insurance Commission licence), **Email ID**, **TIN**, **Logo (printed on documents)** (a link, or **Upload**), **Website link**, **Description**, **Address Line 1** to **3**, **ZIP Code**, **City**, **State**, **Country**, **Phone Number** and **Fax** (+63 numbers).
+3. Tick **Letterhead company - used on documents and reports** for the company whose letterhead the documents use. Only one company holds it.
+4. Select **Save**, then print any statement or report as PDF to check the letterhead.
+
+The application name and logo of the sign-in page and the sidebar come from Master > System Settings, not from the Company master. Branches are kept on Master > Generals > Organization > Branch in the same way.
+
+## Insurers and the other masters
+
+### Insurance companies
+
+![Master > Generals > Insurance Management > Insurance Company > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-insurer-add.png)
+
+1. Choose Master > Generals > Insurance Management > Insurance Company and select **Add**.
+2. Enter **Insurance Company Code**, **Insurance Company Name**, **Insurance Company Description**, the address (**Address Line 1** to **3**, **City**, **State**, **Country**), **Phone Number**, **Email ID** and **TIN**.
+3. Under **Credit terms**, enter **Premium payment warranty (days)** (days the client has to pay: the due date of the premium bill), **Remittance terms (days)** (days after collection within which the broker remits to the insurer) and **Default billing mode** (broker billed or direct bill). Leave them empty to use the system defaults (`collections.default_credit_days`, `remittance.default_due_days`, `direct_bill.default_billing_mode`).
+4. Select **Save**.
+
+Requests for quotation, placement slips, Preliminary Loss Advices and remittance advices go to the insurer's e-mail. Keep it current.
+
+### Masters that work the same way
+
+All masters work alike: a list with search, **Add** (the form opens on its own page or as a panel on the right), **Upload** where offered, the eye to view, the pencil to edit and a status switch to deactivate. Records are not deleted; a deactivated record no longer appears in the lists of the other screens.
+
+| Master | Holds |
+|---|---|
+| Line of Business, Product, Cover | The lines, products and covers offered in the quotation and placement screens. |
+| Signatories | Authorised signatories of quotations and documents. |
+| Vehicle | Vehicle brands, models, variants and seating; **Upload** loads them from a template. |
+| Country, State, City | The address lists (a province is a State). |
+| Commission | The sharing of commission with referrers by insurer, product and cover. |
+| Hierarchy, Designation, Employee | The staff structure. |
+| Transaction Code, Currency, Exchange Rate | Accounting transaction codes, currencies and rates. |
+| Bank | Banks and the broker's bank accounts, each linked to its GL cash account and statement format. |
+| Account Category, Main Account, Sub Account | The chart of accounts. |
+| Petty Cash, Remittance Master | Petty cash funds; remittance schedules per insurer. |
+
+### Uploads
+
+![Upload dialog of a master with Download template](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-upload.png)
+
+1. Select **Upload**. Where a screen holds more than one record type, choose it in the dialog.
+2. Select **Download template**. The workbook has a Data sheet with the header row and sample rows, a Columns sheet with the rules of each column, and an Instructions sheet.
+3. Delete the sample rows, enter your data, save the file.
+4. Choose the file and upload it. The result shows how many rows were created or updated and lists each failed row with its problem. Correct those rows and upload them again; an existing code updates the record.
+
+## Document Numbering
+
+![Master > Document Numbering, editing a series](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-docnum-edit.png)
+
+Every number the system issues comes from a series on Master > Document Numbering: prospect, request for quotation, quotation, placement slip, policy, client, bill, official receipt, payment voucher, journal voucher, claim, endorsement, debit note, close run, reconciliation, BIR Form 2307 and the others. The list shows each series with module, prefix, format, counter reset, last number and next number.
+
+1. Select **Edit** on the series.
+2. Change **Name**, **Prefix** or **Format**. Click a token to add it: {PREFIX}, {YYYY}, {YY}, {MM}, {FY}, {BRANCH}, {LOB}, {SEQ}. {BRANCH} and {LOB} are filled by the transaction; when empty they are left out with their separator.
+3. Set **Sequence digits** (5 gives 00001), **Counter reset** (for example **Every calendar year**) and **Start number (new period)**.
+4. Check **Next number preview** and select **Save**.
+
+**Set next number** continues the numbering of the old system; the counter only moves forward. The official receipt series must match the BIR Authority to Print. A prefix used by another active series is refused. Every change is in the audit trail.
+
+## Configuration
+
+![Master > Configuration: the business areas](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config.png)
+
+Master > Configuration holds every business parameter, grouped in areas: Company & Branding; Sales, Quotations & Placement; Policies, Endorsements & Renewals; Claims; Billing, Collections & Credit; Remittance & Reconciliation; Commission & Incentives; Accounting & Tax; Notifications & E-mail; Security & Access; Reports & Dashboards; Data Retention & Uploads. The search box finds a setting by its words, for example VAT or renewal notice.
+
+1. Select the area. The list on the left switches between areas; **Related screens** link to the screens the settings affect.
+2. Change the value. Numbers and text are typed, switches switched, lists edited as values or small tables, e-mail templates in a text box where you keep the {{placeholders}}. **Show advanced settings** shows the rarely changed ones.
+3. Save. The change applies at once and is recorded in the audit trail with the old and new value.
+
+![Configuration: the Security & Access area](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config-area.png)
+
+> Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
+
+**System Settings** (Master > System Settings) holds the branding and localisation: **App Title**, **Logo Preset**, **Upload Logo**, **Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. **Save** applies them to every user, including the sign-in page.
+
+![Master > System Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-system-settings.png)
+
+## Schedules
+
+![Master > Schedules](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-schedules.png)
+
+Master > Schedules lists the jobs the system runs by itself, with **Job**, **What it does**, **Schedule (Asia/Manila)**, **Status** (Scheduled or **Switched off**), **Next run**, **Last run** and **Last status**. Each row has three actions:
+
+- **Run now** runs the job at once and shows the result.
+- **Run history** lists the last runs with **Started**, **Finished**, **Status**, **Triggered by** and **Result**.
+- **Edit schedule** changes the timetable (cron format, for example 0 6 * * * for 06:00 daily) and switches the job on or off. Check that **Next run** shows a date after every edit.
+
+![Run history of a job](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-schedule-history.png)
+
+The jobs, their times and what they do are listed in the BrokerVerse Schedules and Batch Jobs document.
+
+## E-mail Outbox
+
+![Master > E-mail Outbox](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-outbox.png)
+
+Every e-mail the system queues (quotation approval links, requests for quotation, placement slips, loss advices, renewal notices, reminders, debit notes) is listed with **Status**, **To**, **Subject**, **Record**, **Attempts**, **Last error**, **Created** and **Sent**. The E-mail outbox job sends queued messages every 5 minutes; **Retry** sends a failed message again. Nothing leaves the system until **Send e-mails** (`notification.email_enabled`) is on and the mail server is set on the server; until then the screen says so and messages stay queued. Review the outbox before switching sending on.
+
+## Audit Trail
+
+![Master > Audit Trail](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-audit.png)
+
+1. Enter a **Record type** (for example session for sign-ins, policy, receipt, placement), a **Record ID** or a **User**.
+2. Enter **From date** and **To date**.
+3. Select **Search**. The list shows **When**, **User**, **Record type**, **Record ID**, **Action** and **Change** (before and after values).
+
+Use it for investigations, access reviews and to show that maker and checker were different people.
+
+## Finance set-up shared with the Accounting Manager
+
+The System Administrator can open every Master > Finance screen. The Accounting chapters describe them: Commission Rate Matrix, Posting Rules, Account Determination, Configuration Approvals and Accounting Flow (Accounting Manager chapter), Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types and Insurer Statement Formats (Accounting chapter), and Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates and Payment Gateways (Module reference). Changes to posting rules and account determination wait for a second user on Configuration Approvals.
+
+## Reinsurance treaties and incentive programmes
+
+- **Master > Reinsurance Treaty**: **Add Treaty** with **Treaty Number**, **Treaty Name**, **Treaty Type** (quota share, surplus, excess of loss, stop loss), **Line of Business**, **Reinsurers**, **Effective Date** and **Expiry Date**, then the tabs Coverage & Limits and Commission. A new treaty needs a second user's approval (`reinsurance.treaty_requires_approval`); reinsurers must meet the minimum security rating A- (`reinsurance.min_security_rating`).
+- **Master > Incentive Programs**: **Add Program** with the code, name, type (Target Based, Commission Based, Hybrid, Contest), target metric, base target, frequency and dates. Accounting calculates and pays the programmes but cannot change them.
+
+## Approvals
+
+The System Administrator approves posting rule and account determination changes of another user (Configuration Approvals), Authority Matrix changes of another administrator, and treaties created by another user. Business approvals belong to the business roles.
+
