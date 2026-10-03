@@ -120,6 +120,13 @@ const confirmDelete = (t, name, onAccept) =>
   });
 
 // PC-2: Product Template Management
+/** Template column of the component lists: global rows apply to every product. */
+const TemplateCell = ({ code }) => {
+  const { t } = useTranslation();
+  return code || t("productConfigurator.allProducts", "All products");
+};
+const templateCell = (row) => <TemplateCell code={row.templateCode} />;
+
 export const ProductTemplateManager = () => {
   const { t } = useTranslation();
   const [templates, setTemplates] = useState([]);
@@ -682,6 +689,7 @@ export const CoverageBuilder = () => {
 
         <DataTable value={coverages} loading={loading} paginator rows={20}>
           <Column field="coverageCode" header={t("coverageBuilder.code")} sortable />
+          <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
           <Column field="coverageName" header={t("coverageBuilder.coverageName")} sortable />
           <Column header={t("coverageBuilder.type")} body={typeBodyTemplate} sortable />
           <Column
@@ -947,6 +955,7 @@ export const RatingEngine = () => {
         >
           <Column expander style={{ width: "3em" }} />
           <Column field="factorCode" header={t("ratingEngine.factorCode")} sortable />
+          <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
           <Column field="factorName" header={t("ratingEngine.factorName")} sortable />
           <Column
             field="type"
@@ -1145,6 +1154,7 @@ export const UnderwritingRules = () => {
               }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
+              <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
               <Column field="condition" header={t("ratingEngine.condition")} />
               <Column header={t("underwritingRules.action")} body={actionBodyTemplate} />
@@ -1177,6 +1187,7 @@ export const UnderwritingRules = () => {
               }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
+              <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
               <Column field="condition" header={t("ratingEngine.condition")} />
               <Column header={t("underwritingRules.action")} body={actionBodyTemplate} />
@@ -1197,6 +1208,7 @@ export const UnderwritingRules = () => {
               }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
+              <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
               <Column field="condition" header={t("ratingEngine.condition")} />
               <Column field="message" header={t("underwritingRules.loadingDescription")} />
@@ -1535,6 +1547,7 @@ export const DocumentManager = () => {
         <DataTable value={documents} loading={loading} paginator rows={20}>
           <Column header={t("documentManager.format")} body={formatBodyTemplate} />
           <Column field="documentCode" header={t("documentManager.documentCode")} sortable />
+          <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
           <Column field="documentName" header={t("documentManager.documentName")} sortable />
           <Column field="type" header={t("documentManager.type")} sortable />
           <Column field="stage" header={t("documentManager.stage")} sortable />

@@ -7112,7 +7112,9 @@
     "voucherReference": "Voucher / cheque number"
   },
   "productConfigurator": {
-    "confirmDelete": "Delete {{name}}?"
+    "confirmDelete": "Delete {{name}}?",
+    "template": "Template",
+    "allProducts": "All products"
   },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
