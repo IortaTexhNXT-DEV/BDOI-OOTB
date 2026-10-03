@@ -83,6 +83,7 @@ DOCS = [
     ('out', 'BrokerVerse_Schedules_and_Batch_Jobs', 'docx, pdf', 'Scheduled jobs, batch processes and the operational run book', [D, P], True, [IMP, GO, SUP]),
     ('out', 'BrokerVerse_Test_Cases', 'xlsx', 'Release test cases, traceability and defects', [D, V], True, [IMP, GO]),
     ('out', 'BrokerVerse_Test_Summary_Report', 'docx, pdf', 'Results of the release test', [D, V, M], True, [PRE, GO]),
+    ('out', 'BrokerVerse_Go_No_Go_and_Management_Register', 'docx, pdf', 'Release recommendation, go-live conditions, risks, plans and decisions needed', [M, D, V, P, S], False, [GO]),
     # ---------------------------------------------------------------- development and support
     ('out', 'BrokerVerse_Technical_Reference', 'docx, pdf', 'Code base, modules, security implementation and how to extend', [V, P], True, [IMP, SUP]),
     ('out', 'BrokerVerse_API_and_Dependency_Catalogue', 'xlsx', 'Every API route with its permission and the screens that call it', [V, P], True, [IMP, SUP]),

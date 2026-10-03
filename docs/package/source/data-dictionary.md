@@ -24,17 +24,17 @@ All facts come from the application and the database:
 - the module code in `backend/src/modules` (status vocabularies, validation, posting) and the scheduled jobs in `backend/src/jobs`;
 - the catalogue of a fully migrated and loaded PostgreSQL test database (`golive`): tables, columns, keys, indexes, constraints and row counts.
 
-> Row counts in this document and in the workbook are those of the loaded test database, which holds reference data and the sample data set. They show the relative weight of the tables, not production volumes. A production database starts with reference data only.
+> Row counts in this document are those of the loaded test database at migration 0216, which holds reference data and the sample data set; the workbook, regenerated at migration 0242, holds the counts of the reference data only. They show the relative weight of the tables, not production volumes. A production database starts with reference data only.
 
 ## The companion workbook
 
 | Sheet | Content |
 |---|---|
 | Summary | Counts of tables, columns, keys, indexes, constraints and settings; columns by data type; tables and rows by functional area. |
-| Tables | One row per table and view: functional area, owning module, description, primary key, rows in the test database, number of columns, the migration that created it, retention class and whether it holds personal data. |
-| Columns | One row per column (2,797 rows): position, data type, length or precision, nullable, default, primary key, foreign key target, uniqueness, personal data class, the migration that added it and a business description. |
-| Relationships | All 292 foreign keys: child and parent table and columns, delete and update rule, functional areas and whether an index supports the key. |
-| Indexes | All 520 indexes: kind, method, columns or expression and the condition of partial indexes. |
+| Tables | One row per table and view: functional area, owning module, description, primary key, rows of reference data, number of columns, the migration that created it, retention class and whether it holds personal data. |
+| Columns | One row per column (2,837 rows): position, data type, length or precision, nullable, default, primary key, foreign key target, uniqueness, personal data class, the migration that added it and a business description. |
+| Relationships | All 293 foreign keys: child and parent table and columns, delete and update rule, functional areas and whether an index supports the key. |
+| Indexes | All 564 indexes: kind, method, columns or expression and the condition of partial indexes. |
 | Reference values | Status vocabularies from the code, allowed values of CHECK constraints, values documented in the migrations, all 404 application settings with group, label and seeded value, master types and master records, document number series, roles, tax codes, bank transaction types, the month-end checklist, scheduled jobs and posting rule events. |
 
 ## Database at a glance
@@ -53,7 +53,7 @@ All facts come from the application and the database:
 | Rows in all tables | 7,669 |
 | Columns holding personal data | 137 in 41 tables |
 
-> The figures above describe the loaded test database at migration 0216. The release adds migrations 0217 to 0242; the ones that change the model for users are 0221 (data privacy: tables `privacy_consents` and `data_subject_requests`, columns `anonymised_at` and `anonymised_by` on `clients` and `leads`), 0225 (`email_outbox.attachments`) and 0235 (one base currency and dated exchange rates). These tables and columns are described below where they belong.
+> The figures above describe the loaded test database at migration 0216. The companion workbook was regenerated at migration 0242 from a new database built with the migrations and the reference seed data only (no sample data): 95 migrations, 169 tables and 2 views, 2,796 columns in tables, 293 foreign keys, 564 indexes, 181 check constraints, 414 settings in 45 groups and 145 columns holding personal data in 43 tables. Its row counts are those of the reference data (1,973 rows in all), not of the test database. Of migrations 0217 to 0242, the ones that change the model for users are 0221 (data privacy: tables `privacy_consents` and `data_subject_requests`, columns `anonymised_at` and `anonymised_by` on `clients` and `leads`), 0225 (`email_outbox.attachments`), 0235 (one base currency and dated exchange rates) and 0237 (`commission_referrers.wht_code`). These tables and columns are described below where they belong.
 
 # Conventions
 

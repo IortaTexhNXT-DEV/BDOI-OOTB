@@ -294,7 +294,7 @@ commission_referrers.referrer_type|Type of referrer
 commission_referrers.level|Level in the referral hierarchy
 commission_referrers.parent_referrer_id|Referrer above this one in the hierarchy
 commission_referrers.user_id|User account of the referrer, when the referrer also signs in
-commission_referrers.wht_rate|Withholding tax rate on the referrer's commission; empty means the rate set for the referrer type
+commission_referrers.wht_rate|History only (not read since migration 0237): the withholding tax rate now comes from wht_code
 commission_referrers.wht_applicable|Yes when withholding tax is deducted from the referrer's commission
 commission_referrers.bank_name|Bank of the referrer's payout account
 commission_referrers.bank_account_no|Payout bank account number of the referrer
@@ -1140,6 +1140,37 @@ report_definitions.code|Report code used in addresses and schedules
 scheduled_jobs.code|Job code (for example renewal-notices, housekeeping)
 permissions.code|Permission code in the form read:<module>, write:<module> or approve:<area>
 claim_history.note|Note entered with the status change
+commission_referrers.wht_code|Payee's own withholding tax code (tax_codes.code); empty: the code in commission.wht_code_by_type for the referrer type
+clients.anonymised_at|Date and time the personal data of the client were anonymised (erasure under a data subject request); empty while the data are held
+clients.anonymised_by|User who anonymised the personal data of the client
+leads.anonymised_at|Date and time the personal data of the prospect were anonymised (erasure under a data subject request); empty while the data are held
+leads.anonymised_by|User who anonymised the personal data of the prospect
+email_outbox.attachments|Attachments of the e-mail (JSON list): a document generated as PDF when the message is sent (document type and record), or a file in the uploads store; file name and content type
+privacy_consents.party_type|Kind of party the consent belongs to
+privacy_consents.party_id|Client or prospect (lead) the consent belongs to, by party_type
+privacy_consents.purpose|Purpose consented to: processing (privacy notice acknowledged), marketing, or sharing with insurers and reinsurers
+privacy_consents.granted|Yes when the consent was given, No when it was refused
+privacy_consents.channel|How the consent was obtained
+privacy_consents.notice_version|Version of the privacy notice the party acknowledged (privacy.notice_version)
+privacy_consents.evidence|Evidence of the consent (form reference, e-mail, call note)
+privacy_consents.withdrawn_at|Date and time a granted consent was withdrawn; the current status of a purpose is its latest record
+privacy_consents.withdrawn_by|User who recorded the withdrawal
+privacy_consents.withdrawal_reason|Reason given for the withdrawal
+data_subject_requests.request_number|Request number from the DSR series (DSR-YYYY-NNNNN)
+data_subject_requests.party_type|Kind of party the request concerns, when it is a known client or prospect
+data_subject_requests.party_id|Client or prospect (lead) the request concerns, by party_type
+data_subject_requests.requester_name|Name of the data subject or the person making the request
+data_subject_requests.requester_contact|Contact details of the requester (e-mail or phone)
+data_subject_requests.request_type|Right exercised by the data subject
+data_subject_requests.description|What the data subject asked for
+data_subject_requests.received_on|Date the request was received
+data_subject_requests.due_on|Date the answer is due (received date plus privacy.request_due_days calendar days)
+data_subject_requests.assigned_to|User handling the request
+data_subject_requests.outcome|Outcome of the request
+data_subject_requests.response_notes|Notes on the answer given to the data subject
+data_subject_requests.actions|Exports and anonymisation done for the request (JSON list)
+data_subject_requests.closed_on|Date the request was closed
+data_subject_requests.closed_by|User who closed the request
 """
 TCOL = {}
 for line in T.strip().split('\n'):

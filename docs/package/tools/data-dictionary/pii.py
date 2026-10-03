@@ -46,6 +46,10 @@ PII.update({
     ('package_quotes', 'insured_name'): P, ('cessions', 'insured'): P, ('reinsurance_recoveries', 'insured'): P,
     ('collection_actions', 'notes'): J, ('renewal_activities', 'notes'): J, ('agent_events', 'description'): J,
     ('access_review_items', 'last_login_at'): P, ('commission_referrers', 'address'): P,
+    ('email_outbox', 'attachments'): J,
+    ('privacy_consents', 'evidence'): J, ('privacy_consents', 'withdrawal_reason'): J,
+    ('data_subject_requests', 'requester_name'): P, ('data_subject_requests', 'requester_contact'): P,
+    ('data_subject_requests', 'description'): J, ('data_subject_requests', 'outcome'): J, ('data_subject_requests', 'response_notes'): J,
 })
 
 

@@ -35,8 +35,8 @@ Every statement in this document comes from the repository as it stood on 03 Oct
 
 The full reference lists are in the workbook **BrokerVerse_API_and_Dependency_Catalogue.xlsx**, delivered with this document:
 
-- **APIs**: every endpoint with its back-end module, method, path, summary, permission and screen (854 rows).
-- **Screen dependencies**: every menu screen with its route, front-end file, service files, the endpoints it calls, the back-end modules behind them and the data that must exist first (172 rows).
+- **APIs**: every endpoint with its back-end module, method, path, summary, permission and screen (868 rows).
+- **Screen dependencies**: every menu screen with its route, front-end file, service files, the endpoints it calls, the back-end modules behind them and the data that must exist first (170 rows).
 - **Summary**: endpoints per back-end module by method, the number of menu screens that use each module, and the prerequisites per module.
 
 # Solution layout
@@ -168,7 +168,7 @@ The database is PostgreSQL 16 (the version in `docker-compose.yml` and in CI). A
 |---|---|
 | `index.js`, `App.js` | Entry point; store, router, theme, session renewal; sign-in and public routes (`/login`, `/approve-quote`) |
 | `routes/MainRoute.js` | Every signed-in route (439 `Route` elements), wrapped by `routes/ProtectedRoute` |
-| `components/SideBar/list.js` | The side menu as one tree; 172 menu screens |
+| `components/SideBar/list.js` | The side menu as one tree; 170 menu screens |
 | `utils/menuPermissions.js` | `roleMenuPermissions`: which role sees which menu entry; route guard `isPathAllowed` |
 | `utils/canOpen.js` | `canOpen(path)` and `hasPermission(code)` to hide links and actions |
 | `module/` | Back-office screens: accounts, finance, masters, placement, remittance, reinsurance, commission, incentive, product configurator, reports, system settings |
@@ -485,7 +485,7 @@ These are facts of the current design that the customer's security reviewer shou
 
 The matrix answers, for each menu screen, which front-end file, which service files and which endpoints it uses, which back-end module serves them, and which data must exist before the screen can be used. It was built from the code, not from memory:
 
-1. The 172 menu screens were read from `brokerverse/src/components/SideBar/list.js` (path and the `includes` list of related pages).
+1. The 170 menu screens were read from `brokerverse/src/components/SideBar/list.js` (path and the `includes` list of related pages).
 2. Each path was resolved to its component through `brokerverse/src/routes/MainRoute.js`, and the component to its file.
 3. The import closure of each component (and of the pages in its `includes` list) gave the service files and the service functions the screen uses.
 4. The API call sites in those files were taken from the parser in `brokerverse/scripts/check-api-calls.js` and matched to the route registry. Endpoints whose registry `screen` label names the menu item were added.

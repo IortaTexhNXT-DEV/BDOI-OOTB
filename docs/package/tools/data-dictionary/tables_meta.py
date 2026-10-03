@@ -50,7 +50,8 @@ AREA_TABLES = {
     'Reinsurance': 'reinsurers reinsurance_treaties cessions reinsurance_recoveries reinsurance_bordereaux reinsurance_reconciliations reinsurance_exceptions',
     'Incentives': 'incentive_programs incentive_calculations incentive_results',
     'Security and audit': 'users roles permissions role_permissions user_roles refresh_tokens password_resets password_history login_history audit_log '
-                          'authority_transaction_types authority_limits sod_rules user_delegations access_reviews access_review_items',
+                          'authority_transaction_types authority_limits sod_rules user_delegations access_reviews access_review_items '
+                          'privacy_consents data_subject_requests',
     'Configuration and schedules': 'app_settings master_types master_records currencies document_numbering sequences scheduled_jobs job_runs job_queue '
                                    'notifications email_outbox documents report_definitions report_schedules generated_reports schema_migrations',
 }
@@ -90,6 +91,8 @@ NEW = {
     'quote_customer_responses': ('quotations', "Customer responses to a quotation recorded by staff (phone, Viber, meeting, signed form) as evidence of the status change", 'LOG'),
     'bank_account_links': ('bank-reconciliation', 'View: bank account masters with their GL cash account', 'REF'),
     'bank_book_lines': ('bank-reconciliation', 'View: posted journal lines on bank cash accounts, the book side of bank matching', 'FIN'),
+    'privacy_consents': ('privacy', 'Consent given, refused or withdrawn by a client or prospect per purpose (processing, marketing, sharing), with channel, notice version and evidence; never deleted', 'LOG'),
+    'data_subject_requests': ('privacy', 'Register of data subject requests (DSR-): type, requester, party, date received, due date, status, assignee, outcome and the exports and anonymisation done', 'LOG'),
     'roles': ('users', 'Role catalogue: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager and custom roles; a role may inherit another', 'REF'),
     'permissions': ('users', 'Permission codes read:<module>, write:<module> and approve:<area> granted to roles', 'REF'),
 }

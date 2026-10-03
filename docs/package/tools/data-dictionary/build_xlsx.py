@@ -1,4 +1,4 @@
-import json, re, subprocess, collections
+import json, os, re, subprocess, collections
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
@@ -8,6 +8,12 @@ import tables_meta as tm
 import pii
 
 OUT = '/home/user/BDOI-OOTB/docs/package/out/BrokerVerse_Data_Dictionary.xlsx'
+# Database read by dump_db.py / vals.py (DD_DB, default the loaded test database "golive"). DD_REFERENCE_ONLY=1 when it
+# was built with the migrations and the reference seed data only (SEED_SAMPLE_DATA=false): row counts are then those
+# of the reference data.
+DD_DB = os.environ.get('DD_DB', 'golive')
+REFERENCE_ONLY = os.environ.get('DD_REFERENCE_ONLY') == '1'
+DB_WORDS = 'reference data only' if REFERENCE_ONLY else 'loaded test database'
 D = gen.D
 M = gen.M
 _dyn = ['countries','states','cities','currencies','banks','insurance_companies','products','policy_types',
@@ -20,7 +26,7 @@ for _c in ('name', 'applied_at'):
 
 
 def q(sql):
-    out = subprocess.run(['su', 'postgres', '-c', f'psql -d golive -AtF "\x1f" -c "{sql}"'], capture_output=True, text=True)
+    out = subprocess.run(['su', 'postgres', '-c', f'psql -d {DD_DB} -AtF "\x1f" -c "{sql}"'], capture_output=True, text=True)
     if out.returncode:
         raise Exception(out.stderr)
     return [l.split('\x1f') for l in out.stdout.split('\n') if l]
@@ -217,7 +223,7 @@ for key, vals in sorted(VALS.items()):
     vs = [a for a, b in vals if a not in ("''",)]
     if not vs or len(vs) > 25 or any(len(v) > 60 for v in vs):
         continue
-    ref.append(['Status and code values', t, c, '', 'Values present in the loaded test database (not an exhaustive list)', ', '.join(vs), 'Test data'])
+    ref.append(['Status and code values', t, c, '', f'Values present in the {"reference data" if REFERENCE_ONLY else "loaded test database"} (not an exhaustive list)', ', '.join(vs), 'Reference data' if REFERENCE_ONLY else 'Test data'])
 # 5. application settings
 for key, grp, label, typ, value, editable in D['settings']:
     ref.append(['Application setting (app_settings)', 'app_settings', key, grp, label, value, f'Type {typ}; ' + ('editable' if editable == 'true' else 'maintained by the system') + '; seeded value'])
@@ -250,7 +256,8 @@ n_cols_tables = sum(len(COLS[t]) for t in base_tables)
 n_cols_all = sum(len(COLS[t]) for t in tables_sorted)
 types = collections.Counter(dtype(r) for t in base_tables for r in COLS[t])
 summary = [
-    ['Database', 'PostgreSQL, schema public (loaded test database "golive")'],
+    ['Database', f'PostgreSQL, schema public (database "{DD_DB}" built with the migrations and the reference seed data, no sample data)'
+                 if REFERENCE_ONLY else f'PostgreSQL, schema public (loaded test database "{DD_DB}")'],
     ['Migrations applied', f"{len(q('select name from schema_migrations'))} (0001_core.sql to {q('select max(name) from schema_migrations')[0][0]})"],
     ['Tables', len(base_tables)],
     ['Views', len(VIEWS)],
@@ -266,7 +273,7 @@ summary = [
     ['Unique constraints', sum(1 for c in D['cons'] if c[1] == 'u')],
     ['Triggers', len(D['triggers'])],
     ['Application settings (app_settings)', f"{len(D['settings'])} keys in {len({s[1] for s in D['settings']})} groups"],
-    ['Rows in all tables (loaded test database)', sum(ROWS.values())],
+    [f'Rows in all tables ({DB_WORDS})', sum(ROWS.values())],
     ['Columns flagged as personal data', sum(pii_count.values())],
     ['  ' + pii.P, pii_count[pii.P]],
     ['  ' + pii.S, pii_count[pii.S]],
@@ -275,7 +282,7 @@ summary = [
     ['Tables holding personal data', len(pii_tables)],
     ['', ''],
     ['Data type', 'Columns (tables only)'],
-] + [[k, v] for k, v in types.most_common()] + [['', ''], ['Functional area', 'Tables / rows (loaded test database)']]
+] + [[k, v] for k, v in types.most_common()] + [['', ''], ['Functional area', f'Tables / rows ({DB_WORDS})']]
 for a in tm.AREAS:
     ts = [t for t in base_tables if tm.AREA_OF[t] == a]
     vs = [t for t in tables_sorted if tm.AREA_OF[t] == a and t in VIEWS]
@@ -286,7 +293,8 @@ summary += [['', ''], ['Sheets', ''],
             ['Relationships', 'All foreign keys with delete and update rules and whether an index supports them'],
             ['Indexes', 'All indexes with type, method, columns and partial predicate'],
             ['Reference values', 'Status vocabularies, CHECK constraints, application settings, master types and records, number series, roles, tax codes, jobs, posting events'],
-            ['', ''], ['Note', 'Row counts are those of the loaded test database (reference data and sample data). A production database starts with reference data only.']]
+            ['', ''], ['Note', 'Row counts are those of the reference data a new database starts with (no sample data); transaction tables are empty.'
+                       if REFERENCE_ONLY else 'Row counts are those of the loaded test database (reference data and sample data). A production database starts with reference data only.']]
 
 wb = Workbook()
 ws = wb.active
@@ -312,7 +320,7 @@ ws.column_dimensions['A'].width = 52
 ws.column_dimensions['B'].width = 110
 ws.freeze_panes = 'A5'
 
-sheet(wb, 'Tables', ['Table', 'Type', 'Functional area', 'Owning module', 'Description', 'Primary key', 'Rows (loaded test DB)',
+sheet(wb, 'Tables', ['Table', 'Type', 'Functional area', 'Owning module', 'Description', 'Primary key', 'Rows (reference data)' if REFERENCE_ONLY else 'Rows (loaded test DB)',
                      'Columns', 'Created by migration', 'Retention class', 'Personal data'],
       table_rows, [30, 8, 26, 22, 70, 22, 12, 9, 32, 13, 10], wrap_cols=(4,))
 sheet(wb, 'Columns', ['Table', 'Column', 'Position', 'Data type', 'Length / precision', 'Nullable', 'Default', 'Primary key',

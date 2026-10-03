@@ -24,11 +24,11 @@ Documents are kept in `docs/package`: `out/` holds the built Word, PDF and Excel
 
 | Audience | Start with |
 |---|---|
-| Sales (25 files) | Product Functionality, Demo Script, FAQ and Objection Handling, Rate Card, Battlecard (INTERNAL), Negotiation Playbook (INTERNAL) |
-| Delivery (30 files) | Implementation Approach and Plan, Discovery Workbook Guide, Fit-Gap Register, RAID Log, Data Migration and Cutover Plan, User Manual |
-| Development (9 files) | Technical Reference, API and Dependency Catalogue, Data Dictionary, Release Notes Template |
-| Support (20 files) | Production Support Approach and Standards, Schedules and Batch Jobs, Business Continuity and Disaster Recovery Plan, Communication Templates |
-| Management (37 files) | OOTB Strategy and Playbook (INTERNAL), Commercial Proposal Note (INTERNAL), Release Notes and Roadmap, Architecture, Infrastructure, Security and Data Privacy |
+| Sales (26 files) | Product Functionality, Demo Script, FAQ and Objection Handling, Rate Card, Battlecard (INTERNAL), Negotiation Playbook (INTERNAL) |
+| Delivery (31 files) | Implementation Approach and Plan, Discovery Workbook Guide, Fit-Gap Register, RAID Log, Data Migration and Cutover Plan, User Manual |
+| Development (10 files) | Technical Reference, API and Dependency Catalogue, Data Dictionary, Release Notes Template |
+| Support (21 files) | Production Support Approach and Standards, Schedules and Batch Jobs, Business Continuity and Disaster Recovery Plan, Communication Templates |
+| Management (38 files) | OOTB Strategy and Playbook (INTERNAL), Commercial Proposal Note (INTERNAL), Release Notes and Roadmap, Architecture, Infrastructure, Security and Data Privacy |
 
 # Index by lifecycle stage
 
@@ -37,7 +37,7 @@ Documents are kept in `docs/package`: `out/` holds the built Word, PDF and Excel
 | Pre-sales | Brochure; One Page Brochure; Client Presentation; Product Functionality; Demo Script; FAQ and Objection Handling; Prospect Email Templates; Prospect Email Templates; Commercial Proposal Rate Card; ROI Calculator; Price Book (INTERNAL); Competitive Battlecard INTERNAL (INTERNAL); OOTB Strategy and Playbook (INTERNAL); Commercial Proposal Note (INTERNAL); Commercials and Pricing (INTERNAL); Security Due Diligence Questionnaire; Architecture Infrastructure Security and Privacy; Philippine Regulatory Compliance Matrix; Release Notes and Roadmap; Mutual Non Disclosure Agreement; Implementation Approach and Plan; Test Summary Report; OOTB Documentation Pack Index |
 | Contracting | Prospect Email Templates; Prospect Email Templates; Commercial Proposal Rate Card; Price Book (INTERNAL); Negotiation Playbook INTERNAL (INTERNAL); OOTB Strategy and Playbook (INTERNAL); Commercial Proposal Note (INTERNAL); Commercials and Pricing (INTERNAL); Security Due Diligence Questionnaire; Architecture Infrastructure Security and Privacy; Contract Pack Index and Cover Letter; Letter of Award and Proposal Acceptance; Master Services Agreement; Order Form; Perpetual Software Licence Agreement; Software Subscription Agreement; Implementation Statement of Work; Annual Maintenance Support and SLA; Hosting and Infrastructure Services Agreement; Data Processing Agreement; Service Catalogue and Rate Annex; Customer Responsibilities and RACI Annex; Change Request Procedure and Form; Source Code Escrow Agreement; Exit and Transition Plan; Production Support Approach and Standards; Business Continuity and Disaster Recovery Plan; OOTB Documentation Pack Index |
 | Implementation | OOTB Strategy and Playbook (INTERNAL); Architecture Infrastructure Security and Privacy; Philippine Regulatory Compliance Matrix; Implementation Statement of Work; Customer Responsibilities and RACI Annex; Change Request Procedure and Form; Implementation Approach and Plan; Implementation Plan; Discovery Workbook Guide; Discovery and Configuration Workbook; Fit Gap Register; RAID Log Template; Project Status Report Template; Data Migration and Cutover Plan; Data Dictionary; Privacy Impact Assessment and Records of Processing Templates; Training Plan; User Manual; Reports Book; Communication Templates and Touchpoints; Communication Touchpoints; Schedules and Batch Jobs; Test Cases; Technical Reference; API and Dependency Catalogue; OOTB Documentation Pack Index |
-| Go-live | OOTB Strategy and Playbook (INTERNAL); Release Notes and Roadmap; UAT and Go Live Acceptance Certificates; Hypercare Exit and Handover Certificate; RAID Log Template; Project Status Report Template; Data Migration and Cutover Plan; Privacy Impact Assessment and Records of Processing Templates; User Manual; Schedules and Batch Jobs; Test Cases; Test Summary Report; Production Support Approach and Standards; OOTB Documentation Pack Index |
+| Go-live | OOTB Strategy and Playbook (INTERNAL); Release Notes and Roadmap; UAT and Go Live Acceptance Certificates; Hypercare Exit and Handover Certificate; RAID Log Template; Project Status Report Template; Data Migration and Cutover Plan; Privacy Impact Assessment and Records of Processing Templates; User Manual; Schedules and Batch Jobs; Test Cases; Test Summary Report; Go No Go and Management Register (INTERNAL); Production Support Approach and Standards; OOTB Documentation Pack Index |
 | Support | OOTB Strategy and Playbook (INTERNAL); Release Notes and Roadmap; Annual Maintenance Support and SLA; Hosting and Infrastructure Services Agreement; Service Catalogue and Rate Annex; Change Request Procedure and Form; Exit and Transition Plan; Hypercare Exit and Handover Certificate; Data Dictionary; User Manual; Reports Book; Communication Templates and Touchpoints; Communication Touchpoints; Schedules and Batch Jobs; Technical Reference; API and Dependency Catalogue; Release Notes Template; Production Support Approach and Standards; Business Continuity and Disaster Recovery Plan; OOTB Documentation Pack Index |
 
 # File list
@@ -112,6 +112,7 @@ Documents are kept in `docs/package`: `out/` holds the built Word, PDF and Excel
 | `BrokerVerse_Communication_Touchpoints`<br>xlsx | Companion workbook of the communication templates | Delivery, Support<br>Client-facing | Implementation, Support |
 | `BrokerVerse_Schedules_and_Batch_Jobs`<br>docx, pdf | Scheduled jobs, batch processes and the operational run book | Delivery, Support<br>Client-facing | Implementation, Go-live, Support |
 | `BrokerVerse_Test_Cases`<br>xlsx | Release test cases, traceability and defects | Delivery, Development<br>Client-facing | Implementation, Go-live |
+| `BrokerVerse_Go_No_Go_and_Management_Register`<br>docx, pdf | Release recommendation, go-live conditions, risks, plans and decisions needed | Management, Delivery, Development, Support, Sales<br>**INTERNAL** | Go-live |
 | `BrokerVerse_Technical_Reference`<br>docx, pdf | Code base, modules, security implementation and how to extend | Development, Support<br>Client-facing | Implementation, Support |
 | `BrokerVerse_API_and_Dependency_Catalogue`<br>xlsx | Every API route with its permission and the screens that call it | Development, Support<br>Client-facing | Implementation, Support |
 
@@ -134,6 +135,7 @@ These files never leave iorta TechNXT:
 - `out/iNXT_BrokerVerse_OOTB_Strategy_and_Playbook` (docx, pdf): How iorta TechNXT sells, delivers, supports and evolves the OOTB product.
 - `out/BrokerVerse_Commercial_Proposal_Note` (docx, pdf): Pricing rationale, market positioning and commercial assumptions.
 - `out/BrokerVerse_Commercials_and_Pricing` (xlsx): Formula-driven pricing model behind the rate card.
+- `out/BrokerVerse_Go_No_Go_and_Management_Register` (docx, pdf): Release recommendation, go-live conditions, risks, plans and decisions needed.
 
 # Building the documents
 

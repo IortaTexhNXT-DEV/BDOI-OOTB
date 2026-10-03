@@ -1,6 +1,7 @@
-import subprocess, json
+import subprocess, json, os
+DD_DB = os.environ.get('DD_DB', 'golive')  # database to read; set DD_DB to dump another one
 def q(sql):
-    out=subprocess.run(['su','postgres','-c',f'psql -d golive -AtF "\x1f" -c "{sql}"'],capture_output=True,text=True)
+    out=subprocess.run(['su','postgres','-c',f'psql -d {DD_DB} -AtF "\x1f" -c "{sql}"'],capture_output=True,text=True)
     if out.returncode: raise Exception(out.stderr)
     return [l.split('\x1f') for l in out.stdout.split('\n') if l]
 D={}

@@ -1,4 +1,5 @@
-import json, collections, re
+import json, collections, re, os
+DD_DB = os.environ.get('DD_DB', 'golive')
 from openpyxl import load_workbook
 import tables_meta as tm
 import pii
@@ -14,7 +15,7 @@ Cb = [c for c in C if c[0] not in views]
 migs = sorted(set(json.load(open('mig.json'))['created'].values()))
 import subprocess
 def q(sql):
-    return subprocess.run(['su','postgres','-c',f'psql -d golive -Atc "{sql}"'],capture_output=True,text=True).stdout.split('\n')
+    return subprocess.run(['su','postgres','-c',f'psql -d {DD_DB} -Atc "{sql}"'],capture_output=True,text=True).stdout.split('\n')
 nmig = int(q('select count(*) from schema_migrations')[0]); lastmig = q('select max(name) from schema_migrations')[0]
 ph = {
  'N_MIG': nmig, 'LAST_MIG': lastmig, 'FIRST_MIG': '0001_core.sql',
