@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>iNXT BrokerVerse - One Page Brochure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --navy: #0A1F3D;
+    --navy2: #0F2E57;
+    --blue: #1F75BC;
+    --sky: #0BAEEB;
+    --green: #6CBB45;
+    --teal: #00A79D;
+    --ink: #13233A;
+    --muted: #55667A;
+    --line: #E3EAF2;
+    --paper: #FFFFFF;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: var(--paper); }
+  body {
+    font-family: "Plus Jakarta Sans", "Segoe UI", Arial, sans-serif;
+    color: var(--ink);
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+  .page {
+    width: 210mm; height: 297mm; position: relative; overflow: hidden;
+    background: var(--paper);
+    display: flex; flex-direction: column;
+  }
+
+  /* ---------- hero ---------- */
+  .hero {
+    position: relative; padding: 8mm 11mm 0 11mm; height: 92mm;
+    background:
+      radial-gradient(60mm 50mm at 95% 8%, rgba(11,174,235,.22), transparent 70%),
+      radial-gradient(70mm 60mm at 70% 95%, rgba(108,187,69,.18), transparent 70%),
+      radial-gradient(80mm 60mm at 0% 100%, rgba(31,117,188,.12), transparent 70%),
+      linear-gradient(180deg, #F5F9FE 0%, #EEF5FC 100%);
+  }
+  .topbar { display: flex; align-items: center; justify-content: space-between; }
+  .topbar img { height: 11mm; }
+  .pill {
+    font-size: 8.5pt; font-weight: 800; letter-spacing: .04em;
+    color: var(--blue); background: #fff; border: 1px solid #CFE2F5;
+    padding: 1.6mm 3.4mm; border-radius: 99px;
+  }
+  .hero-grid { display: grid; grid-template-columns: 92mm 1fr; gap: 6mm; margin-top: 6mm; }
+  .eyebrow {
+    font-size: 8.5pt; font-weight: 700; color: var(--teal); letter-spacing: .1em; text-transform: uppercase;
+  }
+  h1 {
+    font-size: 21.5pt; line-height: 1.1; font-weight: 800; color: var(--navy); margin-top: 2.5mm; letter-spacing: -.01em;
+  }
+  h1 .grad {
+    background: linear-gradient(90deg, var(--blue), var(--sky) 55%, var(--teal));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .lede { font-size: 9pt; line-height: 1.5; color: var(--muted); margin-top: 3mm; }
+  .chips { display: flex; flex-wrap: nowrap; gap: 1.3mm; margin-top: 3.5mm; }
+  .chip {
+    font-size: 7pt; font-weight: 600; color: var(--navy2); background: #fff;
+    border: 1px solid var(--line); border-radius: 99px; padding: 1mm 2.3mm; white-space: nowrap;
+  }
+  .chip b { color: var(--green); margin-right: 1mm; }
+
+  .lobs { display: flex; gap: 2.2mm; margin-top: 3.8mm; font-size: 7.6pt; font-weight: 700; color: var(--navy2); white-space: nowrap; }
+  .lobs span { display: inline-flex; align-items: center; gap: 1.2mm; }
+  .lobs span::before { content: ""; width: 1.6mm; height: 1.6mm; border-radius: 50%; background: var(--green); }
+  .shot-wrap { position: relative; height: 74mm; }
+  .browser {
+    position: absolute; right: -16mm; top: 2mm; width: 118mm;
+    background: #fff; border-radius: 3mm; overflow: hidden;
+    box-shadow: 0 18px 40px rgba(10,31,61,.22), 0 2px 6px rgba(10,31,61,.08);
+    border: 1px solid #DCE6F1;
+  }
+  .browser .bar { height: 5mm; background: #F1F5FA; display: flex; align-items: center; gap: 1.3mm; padding-left: 2.5mm; border-bottom: 1px solid #E3EAF2; }
+  .browser .bar i { width: 1.8mm; height: 1.8mm; border-radius: 50%; background: #CBD6E2; display: block; }
+  .browser img { width: 100%; display: block; }
+  .float {
+    position: absolute; width: 62mm; border-radius: 2.5mm; overflow: hidden; background: #fff;
+    box-shadow: 0 14px 30px rgba(10,31,61,.22); border: 1px solid #DCE6F1;
+  }
+  .float img { width: 100%; display: block; }
+  .float.f1 { left: -6mm; top: 38mm; width: 58mm; }
+  .badge {
+    position: absolute; right: 0mm; top: 46mm; background: var(--navy); color: #fff;
+    border-radius: 3mm; padding: 3mm 4mm; box-shadow: 0 12px 26px rgba(10,31,61,.3);
+  }
+  .badge .k { font-size: 17pt; font-weight: 800; line-height: 1; }
+  .badge .k span { color: var(--green); }
+  .badge .l { font-size: 7pt; color: #B9CBE0; margin-top: 1mm; letter-spacing: .02em; }
+
+  /* ---------- stats ---------- */
+  .stats {
+    margin: 0 11mm; margin-top: -1mm; position: relative; z-index: 2;
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    background: linear-gradient(100deg, var(--navy) 0%, var(--navy2) 60%, #114A80 100%);
+    border-radius: 4mm; color: #fff; padding: 3.6mm 2mm;
+    box-shadow: 0 10px 24px rgba(10,31,61,.18);
+  }
+  .stat { text-align: center; border-right: 1px solid rgba(255,255,255,.14); }
+  .stat:last-child { border-right: 0; }
+  .stat .n { font-size: 18pt; font-weight: 800; line-height: 1; }
+  .stat .n small { font-size: 10pt; font-weight: 700; color: var(--sky); }
+  .stat .t { font-size: 7.4pt; color: #BFD0E4; margin-top: 1.4mm; }
+
+  /* ---------- features ---------- */
+  .body { padding: 5mm 11mm 0 11mm; }
+  .sec-h { display: flex; align-items: baseline; justify-content: space-between; }
+  h2 { font-size: 12.5pt; font-weight: 800; color: var(--navy); }
+  .sec-h p { font-size: 8pt; color: var(--muted); }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3mm; margin-top: 3.5mm; }
+  .card {
+    border: 1px solid var(--line); border-radius: 3mm; padding: 3mm 3.4mm 2.8mm 3.8mm; background: #fff;
+    position: relative; overflow: hidden;
+  }
+  .card::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 1.1mm; background: var(--c, var(--blue)); }
+  .card .ic {
+    width: 6.5mm; height: 6.5mm; border-radius: 2mm; display: grid; place-items: center;
+    background: color-mix(in srgb, var(--c, var(--blue)) 12%, white);
+  }
+  .card .ic svg { width: 4.4mm; height: 4.4mm; stroke: var(--c, var(--blue)); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .card h3 { font-size: 9.4pt; font-weight: 800; color: var(--navy); margin-top: 1.8mm; }
+  .card p { font-size: 7.6pt; line-height: 1.45; color: var(--muted); margin-top: 1.2mm; }
+
+  /* ---------- why + models ---------- */
+  .split { display: grid; grid-template-columns: 1.08fr 1fr; gap: 4mm; margin-top: 4mm; }
+  .why { background: #F5F9FE; border-radius: 3.5mm; padding: 3.4mm 4.5mm; border: 1px solid #E1ECF7; }
+  .why ul { list-style: none; margin-top: 2.5mm; }
+  .why li { font-size: 7.9pt; line-height: 1.42; color: var(--ink); padding-left: 5.5mm; position: relative; margin-bottom: 1.3mm; }
+  .why li::before {
+    content: ""; position: absolute; left: 0; top: .7mm; width: 3.4mm; height: 3.4mm; border-radius: 50%;
+    background: var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/2.3mm no-repeat;
+  }
+  .why li b { color: var(--navy); }
+  .models { display: grid; grid-template-rows: auto auto; gap: 2.6mm; }
+  .model { border-radius: 3.5mm; padding: 3mm 4.2mm; color: #fff; position: relative; overflow: hidden; }
+  .model.a { background: linear-gradient(120deg, var(--blue), var(--sky)); }
+  .model.b { background: linear-gradient(120deg, #078B83, var(--green)); }
+  .model .tag { font-size: 7pt; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; opacity: .85; }
+  .model h4 { font-size: 11pt; font-weight: 800; margin-top: .8mm; }
+  .model p { font-size: 7.6pt; line-height: 1.42; margin-top: 1mm; opacity: .95; }
+  .model::after { content: ""; position: absolute; right: -8mm; top: -8mm; width: 24mm; height: 24mm; border-radius: 50%; background: rgba(255,255,255,.12); }
+  .host { display: flex; gap: 1.6mm; flex-wrap: wrap; margin-top: 0; }
+  .host span { font-size: 7.2pt; font-weight: 700; color: var(--navy2); background: #fff; border: 1px solid var(--line); border-radius: 1.6mm; padding: 1mm 2.2mm; }
+
+  /* ---------- footer ---------- */
+  .foot {
+    margin-top: auto; background: var(--navy); color: #fff; padding: 5mm 11mm 5.5mm 11mm;
+    display: grid; grid-template-columns: 1fr auto; gap: 6mm; align-items: center; position: relative; overflow: hidden;
+  }
+  .foot::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 0; height: 1.2mm;
+    background: linear-gradient(90deg, var(--blue), var(--sky), var(--teal), var(--green));
+  }
+  .foot h5 { font-size: 14pt; font-weight: 800; line-height: 1.15; }
+  .foot h5 span { color: var(--sky); }
+  .foot p { font-size: 8pt; color: #BFD0E4; margin-top: 1.6mm; line-height: 1.45; }
+  .foot .cta { display: flex; gap: 2.5mm; margin-top: 3mm; align-items: center; }
+  .btn { background: linear-gradient(90deg, var(--sky), var(--teal)); color: #fff; font-size: 8.4pt; font-weight: 800; padding: 2mm 4.5mm; border-radius: 99px; }
+  .web { font-size: 9pt; font-weight: 700; color: #fff; }
+  .qr { background: #fff; border-radius: 2.5mm; padding: 1.8mm; text-align: center; }
+  .qr img { width: 22mm; height: 22mm; display: block; }
+  .qr div { font-size: 6.4pt; color: var(--navy); font-weight: 700; margin-top: .8mm; }
+  .legal { font-size: 6.2pt; color: #8FA6C2; margin-top: 3mm; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <section class="hero">
+    <div class="topbar">
+      <img src="img/logo.png" alt="iorta TechNXT">
+      <span class="pill">iNXT BrokerVerse</span>
+    </div>
+
+    <div class="hero-grid">
+      <div>
+        <div class="eyebrow">Non-life insurance broking platform</div>
+        <h1>Run your whole brokerage on <span class="grad">one Philippine-ready core.</span></h1>
+        <p class="lede">From the first enquiry to the insurer remittance and the BIR return: sales, placement, policy servicing, claims and accounting in one system, ready on day one.</p>
+        <div class="lobs"><span>Motor and CTPL</span><span>Fire</span><span>Marine</span><span>Engineering</span><span>Casualty</span></div>
+      </div>
+      <div class="shot-wrap">
+        <div class="browser">
+          <div class="bar"><i></i><i></i><i></i></div>
+          <img src="img/s-exec-dashboard.jpg" alt="Executive dashboard">
+        </div>
+        <div class="float f1"><img src="img/p-rfq-compare.jpg" alt="Insurer quotation comparison"></div>
+        <div class="badge"><div class="k">8<span>&nbsp;wks</span></div><div class="l">to go-live, small broker</div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="n">170<small>+</small></div><div class="t">screens across 8 modules</div></div>
+    <div class="stat"><div class="n">80<small>+</small></div><div class="t">operational and financial reports</div></div>
+    <div class="stat"><div class="n">99.5<small>%</small></div><div class="t">availability when we host</div></div>
+    <div class="stat"><div class="n">24<small>x7</small></div><div class="t">Severity 1 support option</div></div>
+  </div>
+
+  <section class="body">
+    <div class="sec-h"><h2>Everything a broker runs on, in one place</h2><p>Out of the box. Configured, not coded.</p></div>
+    <div class="grid">
+      <div class="card" style="--c:#1F75BC">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg></div>
+        <h3>Sell and place</h3>
+        <p>Leads, prospects and pipeline. RFQs to several insurers, side-by-side quote comparison and placement slips.</p>
+      </div>
+      <div class="card" style="--c:#0BAEEB">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></div>
+        <h3>Policy servicing</h3>
+        <p>Issuance, endorsements with correct additional and return premium, instalments, renewals and cancellations.</p>
+      </div>
+      <div class="card" style="--c:#00A79D">
+        <div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>Claims</h3>
+        <p>Notification to settlement with documents, insurer follow-up, repair shop and bank transfer settlements.</p>
+      </div>
+      <div class="card" style="--c:#6CBB45">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18M7 15h3"/></svg></div>
+        <h3>Accounts and BIR</h3>
+        <p>Official receipts, invoices, vouchers, bank reconciliation, petty cash, month-end close, trial balance and BIR 2307.</p>
+      </div>
+      <div class="card" style="--c:#1F75BC">
+        <div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M14.5 9.5c-.5-1-1.5-1.5-2.5-1.5-1.5 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1 2-2.5 2c-1 0-2-.5-2.5-1.5M12 6.5v1.5M12 16v1.5"/></svg></div>
+        <h3>Commission and remittance</h3>
+        <p>Commission by insurer and product, withholding tax, direct bill, insurer remittance with approval matrix.</p>
+      </div>
+      <div class="card" style="--c:#00A79D">
+        <div class="ic"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+        <h3>Compliance and privacy</h3>
+        <p>VAT, DST, LGT and FST per NIRC. Data Privacy Act consent, data-subject requests, anonymisation, audit trail.</p>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="why">
+        <h2>Why brokers choose BrokerVerse</h2>
+        <ul>
+          <li><b>Philippine rules built in.</b> CTPL tariff, DST at P0.50 per P4.00, premium taxes from one tax engine, BIR-ready outputs.</li>
+          <li><b>One version of the numbers.</b> Every receipt, remittance and commission posts to the general ledger as it happens.</li>
+          <li><b>Approvals that notify.</b> Makers and checkers on payments, journals and remittance, with e-mail and in-app alerts.</li>
+          <li><b>Fast, low-risk start.</b> Standard upload templates, a tested go-live checklist and hypercare to the first month-end close.</li>
+          <li><b>Secure by design.</b> Encryption, sign-in lockout, two-factor sign-in, role permissions and daily backups.</li>
+        </ul>
+      </div>
+      <div class="models">
+        <div class="model a">
+          <div class="tag">Subscription</div>
+          <h4>Pay monthly per user</h4>
+          <p>Low entry cost, upgrades and support included, user slabs that grow with you.</p>
+        </div>
+        <div class="model b">
+          <div class="tag">Perpetual licence</div>
+          <h4>Own it outright</h4>
+          <p>One-time licence and implementation, with annual maintenance for updates and support.</p>
+        </div>
+        <div>
+          <div class="host"><span>AWS Singapore</span><span>Azure</span><span>PH partner cloud</span><span>On-premise</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <div>
+      <h5>See your own book of business <span>in BrokerVerse.</span></h5>
+      <p>Book a 45-minute walkthrough. We run a full day in the life of a broker: quote, place, collect, remit and close the month.</p>
+      <div class="cta"><span class="btn">Book a demo</span><span class="web">www.iortatechnxt.com</span></div>
+      <div class="legal">iNXT BrokerVerse is a product of iorta TechNXT. Features and hosting options are subject to the signed order form.</div>
+    </div>
+    <div class="qr"><img src="img/qr.png" alt="QR code to www.iortatechnxt.com"><div>Scan to connect</div></div>
+  </footer>
+
+</div>
+</body>
+</html>
