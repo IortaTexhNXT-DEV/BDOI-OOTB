@@ -44,85 +44,85 @@ Documents are kept in `docs/package`: `out/` holds the built Word, PDF and Excel
 
 ## Sales and pre-sales
 
-| File | Formats | Purpose | Audience | Distribution | Used in |
-|---|---|---|---|---|---|
-| `iNXT_BrokerVerse_Brochure` | docx, pdf | Two-page product brochure | Sales | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_One_Page_Brochure` | docx, pdf, png | One-page summary for a first e-mail or a trade event | Sales | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_Client_Presentation` | pptx, pdf | Client presentation deck for the first meeting | Sales | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_Product_Functionality` | docx, pdf | What the product does, module by module, with the vendor comparison checklist | Sales, Delivery | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_Demo_Script` | docx, pdf | Scripted product demonstration with personas, data and timings | Sales | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_FAQ_and_Objection_Handling` | docx, pdf | Answers to common questions and objections; known limits to disclose | Sales | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_Prospect_Email_Templates` | docx, pdf | E-mails from first contact to the welcome after signing | Sales | Client-facing | Pre-sales, Contracting |
-| `Prospect_Email_Templates` | txt | Plain-text copy of the prospect e-mails for pasting into a mail client | Sales | Client-facing | Pre-sales, Contracting |
-| `iNXT_BrokerVerse_Commercial_Proposal_Rate_Card` | docx, pdf | Rate card and commercial proposal given to the broker | Sales, Management | Client-facing | Pre-sales, Contracting |
-| `iNXT_BrokerVerse_ROI_Calculator` | xlsx | Return on investment calculator filled in with the broker | Sales | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_Price_Book` **INTERNAL** | xlsx | Price book with quick quote, packages and negotiation limits | Sales, Management | **INTERNAL** | Pre-sales, Contracting |
-| `iNXT_BrokerVerse_Competitive_Battlecard_INTERNAL` **INTERNAL** | docx, pdf | Competitor positioning and proof points | Sales | **INTERNAL** | Pre-sales |
-| `iNXT_BrokerVerse_OOTB_Strategy_and_Playbook` **INTERNAL** | docx, pdf | How iorta TechNXT sells, delivers, supports and evolves the OOTB product | Management, Sales, Delivery, Development, Support | **INTERNAL** | Pre-sales, Contracting, Implementation, Go-live, Support |
-| `BrokerVerse_Commercial_Proposal_Note` **INTERNAL** | docx, pdf | Pricing rationale, market positioning and commercial assumptions | Management, Sales | **INTERNAL** | Pre-sales, Contracting |
-| `BrokerVerse_Commercials_and_Pricing` **INTERNAL** | xlsx | Formula-driven pricing model behind the rate card | Management, Sales | **INTERNAL** | Pre-sales, Contracting |
-| `BrokerVerse_Security_Due_Diligence_Questionnaire` | docx, pdf, xlsx | Pre-answered security and outsourcing due diligence questionnaire | Sales, Delivery, Management | Client-facing | Pre-sales, Contracting |
-| `BrokerVerse_Architecture_Infrastructure_Security_and_Privacy` | docx, pdf | Architecture, hosting options, security controls and data privacy | Delivery, Development, Support, Management | Client-facing | Pre-sales, Contracting, Implementation |
-| `BrokerVerse_Philippine_Regulatory_Compliance_Matrix` | docx, pdf | How the product supports IC, BIR, premium tax, CTPL, DPA and AMLA obligations | Sales, Delivery, Management | Client-facing | Pre-sales, Implementation |
-| `BrokerVerse_Release_Notes_and_Roadmap` | docx, pdf | What release 1.0 delivers, known limitations, versioning policy and indicative roadmap | Sales, Delivery, Support, Management | Client-facing | Pre-sales, Go-live, Support |
-| `BrokerVerse_Implementation_Approach_and_Plan` | docx, pdf | Method, phases, plans by size, roles, governance and risks | Delivery, Management | Client-facing | Pre-sales, Implementation |
-| `BrokerVerse_Test_Summary_Report` | docx, pdf | Results of the release test | Delivery, Development, Management | Client-facing | Pre-sales, Go-live |
-| `BrokerVerse_OOTB_Documentation_Pack_Index` | docx, pdf | This index | Sales, Delivery, Development, Support, Management | Client-facing | Pre-sales, Contracting, Implementation, Go-live, Support |
+| File and formats | Purpose | Audience and distribution | Used in |
+|---|---|---|---|
+| `iNXT_BrokerVerse_Brochure`<br>docx, pdf | Two-page product brochure | Sales<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_One_Page_Brochure`<br>docx, pdf, png | One-page summary for a first e-mail or a trade event | Sales<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_Client_Presentation`<br>pptx, pdf | Client presentation deck for the first meeting | Sales<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_Product_Functionality`<br>docx, pdf | What the product does, module by module, with the vendor comparison checklist | Sales, Delivery<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_Demo_Script`<br>docx, pdf | Scripted product demonstration with personas, data and timings | Sales<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_FAQ_and_Objection_Handling`<br>docx, pdf | Answers to common questions and objections; known limits to disclose | Sales<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_Prospect_Email_Templates`<br>docx, pdf | E-mails from first contact to the welcome after signing | Sales<br>Client-facing | Pre-sales, Contracting |
+| `Prospect_Email_Templates`<br>txt | Plain-text copy of the prospect e-mails for pasting into a mail client | Sales<br>Client-facing | Pre-sales, Contracting |
+| `iNXT_BrokerVerse_Commercial_Proposal_Rate_Card`<br>docx, pdf | Rate card and commercial proposal given to the broker | Sales, Management<br>Client-facing | Pre-sales, Contracting |
+| `iNXT_BrokerVerse_ROI_Calculator`<br>xlsx | Return on investment calculator filled in with the broker | Sales<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_Price_Book`<br>xlsx | Price book with quick quote, packages and negotiation limits | Sales, Management<br>**INTERNAL** | Pre-sales, Contracting |
+| `iNXT_BrokerVerse_Competitive_Battlecard_INTERNAL`<br>docx, pdf | Competitor positioning and proof points | Sales<br>**INTERNAL** | Pre-sales |
+| `iNXT_BrokerVerse_OOTB_Strategy_and_Playbook`<br>docx, pdf | How iorta TechNXT sells, delivers, supports and evolves the OOTB product | Management, Sales, Delivery, Development, Support<br>**INTERNAL** | Pre-sales, Contracting, Implementation, Go-live, Support |
+| `BrokerVerse_Commercial_Proposal_Note`<br>docx, pdf | Pricing rationale, market positioning and commercial assumptions | Management, Sales<br>**INTERNAL** | Pre-sales, Contracting |
+| `BrokerVerse_Commercials_and_Pricing`<br>xlsx | Formula-driven pricing model behind the rate card | Management, Sales<br>**INTERNAL** | Pre-sales, Contracting |
+| `BrokerVerse_Security_Due_Diligence_Questionnaire`<br>docx, pdf, xlsx | Pre-answered security and outsourcing due diligence questionnaire | Sales, Delivery, Management<br>Client-facing | Pre-sales, Contracting |
+| `BrokerVerse_Architecture_Infrastructure_Security_and_Privacy`<br>docx, pdf | Architecture, hosting options, security controls and data privacy | Delivery, Development, Support, Management<br>Client-facing | Pre-sales, Contracting, Implementation |
+| `BrokerVerse_Philippine_Regulatory_Compliance_Matrix`<br>docx, pdf | How the product supports IC, BIR, premium tax, CTPL, DPA and AMLA obligations | Sales, Delivery, Management<br>Client-facing | Pre-sales, Implementation |
+| `BrokerVerse_Release_Notes_and_Roadmap`<br>docx, pdf | What release 1.0 delivers, known limitations, versioning policy and indicative roadmap | Sales, Delivery, Support, Management<br>Client-facing | Pre-sales, Go-live, Support |
+| `BrokerVerse_Implementation_Approach_and_Plan`<br>docx, pdf | Method, phases, plans by size, roles, governance and risks | Delivery, Management<br>Client-facing | Pre-sales, Implementation |
+| `BrokerVerse_Test_Summary_Report`<br>docx, pdf | Results of the release test | Delivery, Development, Management<br>Client-facing | Pre-sales, Go-live |
+| `BrokerVerse_OOTB_Documentation_Pack_Index`<br>docx, pdf | This index | Sales, Delivery, Development, Support, Management<br>Client-facing | Pre-sales, Contracting, Implementation, Go-live, Support |
 
 ## Contracting
 
-| File | Formats | Purpose | Audience | Distribution | Used in |
-|---|---|---|---|---|---|
-| `iNXT_BrokerVerse_Contract_Pack_Index_and_Cover_Letter` | docx, pdf | Index of the contract pack and cover letter to the broker | Sales, Management | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Mutual_Non_Disclosure_Agreement` | docx, pdf | Mutual NDA before detailed discussions | Sales, Management | Client-facing | Pre-sales |
-| `iNXT_BrokerVerse_Letter_of_Award_and_Proposal_Acceptance` | docx, pdf | Broker letter of award and acceptance of the proposal | Sales, Management | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Master_Services_Agreement` | docx, pdf | Master Services Agreement | Management | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Order_Form` | docx, pdf | Order Form: size, model, prices, hosting and dates | Sales, Management | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Perpetual_Software_Licence_Agreement` | docx, pdf | Licence schedule for the perpetual model | Management | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Software_Subscription_Agreement` | docx, pdf | Subscription schedule for the SaaS model | Management | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Implementation_Statement_of_Work` | docx, pdf | Implementation scope, milestones, acceptance and governance | Delivery, Management | Client-facing | Contracting, Implementation |
-| `iNXT_BrokerVerse_Annual_Maintenance_Support_and_SLA` | docx, pdf | Annual maintenance, support and service levels | Support, Management | Client-facing | Contracting, Support |
-| `iNXT_BrokerVerse_Hosting_and_Infrastructure_Services_Agreement` | docx, pdf | Hosting services, data location, backups and recovery objectives | Support, Management | Client-facing | Contracting, Support |
-| `iNXT_BrokerVerse_Data_Processing_Agreement` | docx, pdf | Data processing agreement under the Data Privacy Act | Management, Support | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Service_Catalogue_and_Rate_Annex` | docx, pdf | Optional services and day rates | Sales, Management | Client-facing | Contracting, Support |
-| `iNXT_BrokerVerse_Customer_Responsibilities_and_RACI_Annex` | docx, pdf | What the broker provides and who does what | Delivery, Management | Client-facing | Contracting, Implementation |
-| `iNXT_BrokerVerse_Change_Request_Procedure_and_Form` | docx, pdf | Change request procedure and form | Delivery, Management | Client-facing | Contracting, Implementation, Support |
-| `iNXT_BrokerVerse_Source_Code_Escrow_Agreement` | docx, pdf | Optional source code escrow with the perpetual licence | Management | Client-facing | Contracting |
-| `iNXT_BrokerVerse_Exit_and_Transition_Plan` | docx, pdf | Data return and transition at the end of the contract | Management, Support | Client-facing | Contracting, Support |
-| `iNXT_BrokerVerse_UAT_and_Go_Live_Acceptance_Certificates` | docx, pdf | UAT and go-live acceptance certificates | Delivery, Management | Client-facing | Go-live |
-| `iNXT_BrokerVerse_Hypercare_Exit_and_Handover_Certificate` | docx, pdf | Hypercare exit and handover to support | Delivery, Support, Management | Client-facing | Go-live, Support |
+| File and formats | Purpose | Audience and distribution | Used in |
+|---|---|---|---|
+| `iNXT_BrokerVerse_Contract_Pack_Index_and_Cover_Letter`<br>docx, pdf | Index of the contract pack and cover letter to the broker | Sales, Management<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Mutual_Non_Disclosure_Agreement`<br>docx, pdf | Mutual NDA before detailed discussions | Sales, Management<br>Client-facing | Pre-sales |
+| `iNXT_BrokerVerse_Letter_of_Award_and_Proposal_Acceptance`<br>docx, pdf | Broker letter of award and acceptance of the proposal | Sales, Management<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Master_Services_Agreement`<br>docx, pdf | Master Services Agreement | Management<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Order_Form`<br>docx, pdf | Order Form: size, model, prices, hosting and dates | Sales, Management<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Perpetual_Software_Licence_Agreement`<br>docx, pdf | Licence schedule for the perpetual model | Management<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Software_Subscription_Agreement`<br>docx, pdf | Subscription schedule for the SaaS model | Management<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Implementation_Statement_of_Work`<br>docx, pdf | Implementation scope, milestones, acceptance and governance | Delivery, Management<br>Client-facing | Contracting, Implementation |
+| `iNXT_BrokerVerse_Annual_Maintenance_Support_and_SLA`<br>docx, pdf | Annual maintenance, support and service levels | Support, Management<br>Client-facing | Contracting, Support |
+| `iNXT_BrokerVerse_Hosting_and_Infrastructure_Services_Agreement`<br>docx, pdf | Hosting services, data location, backups and recovery objectives | Support, Management<br>Client-facing | Contracting, Support |
+| `iNXT_BrokerVerse_Data_Processing_Agreement`<br>docx, pdf | Data processing agreement under the Data Privacy Act | Management, Support<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Service_Catalogue_and_Rate_Annex`<br>docx, pdf | Optional services and day rates | Sales, Management<br>Client-facing | Contracting, Support |
+| `iNXT_BrokerVerse_Customer_Responsibilities_and_RACI_Annex`<br>docx, pdf | What the broker provides and who does what | Delivery, Management<br>Client-facing | Contracting, Implementation |
+| `iNXT_BrokerVerse_Change_Request_Procedure_and_Form`<br>docx, pdf | Change request procedure and form | Delivery, Management<br>Client-facing | Contracting, Implementation, Support |
+| `iNXT_BrokerVerse_Source_Code_Escrow_Agreement`<br>docx, pdf | Optional source code escrow with the perpetual licence | Management<br>Client-facing | Contracting |
+| `iNXT_BrokerVerse_Exit_and_Transition_Plan`<br>docx, pdf | Data return and transition at the end of the contract | Management, Support<br>Client-facing | Contracting, Support |
+| `iNXT_BrokerVerse_UAT_and_Go_Live_Acceptance_Certificates`<br>docx, pdf | UAT and go-live acceptance certificates | Delivery, Management<br>Client-facing | Go-live |
+| `iNXT_BrokerVerse_Hypercare_Exit_and_Handover_Certificate`<br>docx, pdf | Hypercare exit and handover to support | Delivery, Support, Management<br>Client-facing | Go-live, Support |
 
 ## Implementation and go-live
 
-| File | Formats | Purpose | Audience | Distribution | Used in |
-|---|---|---|---|---|---|
-| `BrokerVerse_Implementation_Plan` | xlsx | Gantt plans for the three sizes and the RACI matrix | Delivery | Client-facing | Implementation |
-| `BrokerVerse_Discovery_Workbook_Guide` | docx, pdf | How to run the discovery and configuration workshops | Delivery | Client-facing | Implementation |
-| `BrokerVerse_Discovery_and_Configuration_Workbook` | xlsx | Configuration decisions captured in discovery | Delivery | Client-facing | Implementation |
-| `BrokerVerse_Fit_Gap_Register` | xlsx | Register of requirements classed Fit, Configure, Procedure or Gap | Delivery, Management | Client-facing | Implementation |
-| `BrokerVerse_RAID_Log_Template` | xlsx | Risks, assumptions, issues and dependencies with scoring and summary | Delivery, Management | Client-facing | Implementation, Go-live |
-| `BrokerVerse_Project_Status_Report_Template` | docx, pdf | Weekly or fortnightly status and steering committee report | Delivery, Management | Client-facing | Implementation, Go-live |
-| `BrokerVerse_Data_Migration_and_Cutover_Plan` | docx, pdf | Go-live data, templates, mock loads, reconciliation and cutover | Delivery | Client-facing | Implementation, Go-live |
-| `BrokerVerse_Data_Dictionary` | docx, pdf, xlsx | Tables, columns, relationships, personal data and retention | Delivery, Development, Support | Client-facing | Implementation, Support |
-| `BrokerVerse_Privacy_Impact_Assessment_and_Records_of_Processing_Templates` | docx, pdf | PIA and records of processing pre-filled for the broker DPO | Delivery, Management | Client-facing | Implementation, Go-live |
-| `BrokerVerse_Training_Plan` | docx, pdf | Training and change management by role | Delivery | Client-facing | Implementation |
-| `BrokerVerse_User_Manual` | docx, pdf | User manual for the seven roles | Delivery, Support | Client-facing | Implementation, Go-live, Support |
-| `BrokerVerse_Reports_Book` | docx, pdf, xlsx | Every report, dashboard and export with its columns and rules | Delivery, Support | Client-facing | Implementation, Support |
-| `BrokerVerse_Communication_Templates_and_Touchpoints` | docx, pdf | Every e-mail, notification and printed document the system sends | Delivery, Support | Client-facing | Implementation, Support |
-| `BrokerVerse_Communication_Touchpoints` | xlsx | Companion workbook of the communication templates | Delivery, Support | Client-facing | Implementation, Support |
-| `BrokerVerse_Schedules_and_Batch_Jobs` | docx, pdf | Scheduled jobs, batch processes and the operational run book | Delivery, Support | Client-facing | Implementation, Go-live, Support |
-| `BrokerVerse_Test_Cases` | xlsx | Release test cases, traceability and defects | Delivery, Development | Client-facing | Implementation, Go-live |
-| `BrokerVerse_Technical_Reference` | docx, pdf | Code base, modules, security implementation and how to extend | Development, Support | Client-facing | Implementation, Support |
-| `BrokerVerse_API_and_Dependency_Catalogue` | xlsx | Every API route with its permission and the screens that call it | Development, Support | Client-facing | Implementation, Support |
+| File and formats | Purpose | Audience and distribution | Used in |
+|---|---|---|---|
+| `BrokerVerse_Implementation_Plan`<br>xlsx | Gantt plans for the three sizes and the RACI matrix | Delivery<br>Client-facing | Implementation |
+| `BrokerVerse_Discovery_Workbook_Guide`<br>docx, pdf | How to run the discovery and configuration workshops | Delivery<br>Client-facing | Implementation |
+| `BrokerVerse_Discovery_and_Configuration_Workbook`<br>xlsx | Configuration decisions captured in discovery | Delivery<br>Client-facing | Implementation |
+| `BrokerVerse_Fit_Gap_Register`<br>xlsx | Register of requirements classed Fit, Configure, Procedure or Gap | Delivery, Management<br>Client-facing | Implementation |
+| `BrokerVerse_RAID_Log_Template`<br>xlsx | Risks, assumptions, issues and dependencies with scoring and summary | Delivery, Management<br>Client-facing | Implementation, Go-live |
+| `BrokerVerse_Project_Status_Report_Template`<br>docx, pdf | Weekly or fortnightly status and steering committee report | Delivery, Management<br>Client-facing | Implementation, Go-live |
+| `BrokerVerse_Data_Migration_and_Cutover_Plan`<br>docx, pdf | Go-live data, templates, mock loads, reconciliation and cutover | Delivery<br>Client-facing | Implementation, Go-live |
+| `BrokerVerse_Data_Dictionary`<br>docx, pdf, xlsx | Tables, columns, relationships, personal data and retention | Delivery, Development, Support<br>Client-facing | Implementation, Support |
+| `BrokerVerse_Privacy_Impact_Assessment_and_Records_of_Processing_Templates`<br>docx, pdf | PIA and records of processing pre-filled for the broker DPO | Delivery, Management<br>Client-facing | Implementation, Go-live |
+| `BrokerVerse_Training_Plan`<br>docx, pdf | Training and change management by role | Delivery<br>Client-facing | Implementation |
+| `BrokerVerse_User_Manual`<br>docx, pdf | User manual for the seven roles | Delivery, Support<br>Client-facing | Implementation, Go-live, Support |
+| `BrokerVerse_Reports_Book`<br>docx, pdf, xlsx | Every report, dashboard and export with its columns and rules | Delivery, Support<br>Client-facing | Implementation, Support |
+| `BrokerVerse_Communication_Templates_and_Touchpoints`<br>docx, pdf | Every e-mail, notification and printed document the system sends | Delivery, Support<br>Client-facing | Implementation, Support |
+| `BrokerVerse_Communication_Touchpoints`<br>xlsx | Companion workbook of the communication templates | Delivery, Support<br>Client-facing | Implementation, Support |
+| `BrokerVerse_Schedules_and_Batch_Jobs`<br>docx, pdf | Scheduled jobs, batch processes and the operational run book | Delivery, Support<br>Client-facing | Implementation, Go-live, Support |
+| `BrokerVerse_Test_Cases`<br>xlsx | Release test cases, traceability and defects | Delivery, Development<br>Client-facing | Implementation, Go-live |
+| `BrokerVerse_Technical_Reference`<br>docx, pdf | Code base, modules, security implementation and how to extend | Development, Support<br>Client-facing | Implementation, Support |
+| `BrokerVerse_API_and_Dependency_Catalogue`<br>xlsx | Every API route with its permission and the screens that call it | Development, Support<br>Client-facing | Implementation, Support |
 
 ## Development and support
 
-| File | Formats | Purpose | Audience | Distribution | Used in |
-|---|---|---|---|---|---|
-| `iNXT_BrokerVerse_Negotiation_Playbook_INTERNAL` **INTERNAL** | docx, pdf | Discount limits, trade-offs and approval rules in negotiation | Sales, Management | **INTERNAL** | Contracting |
-| `BrokerVerse_Release_Notes_Template` | docx, pdf | Release notes for each patch, minor or major release | Development, Support | Client-facing | Support |
-| `BrokerVerse_Production_Support_Approach_and_Standards` | docx, pdf | Support model, severities, change and release management, monitoring | Support, Management | Client-facing | Contracting, Go-live, Support |
-| `BrokerVerse_Business_Continuity_and_Disaster_Recovery_Plan` | docx, pdf | Backups, recovery objectives, scenarios and DR tests | Support, Management | Client-facing | Contracting, Support |
+| File and formats | Purpose | Audience and distribution | Used in |
+|---|---|---|---|
+| `iNXT_BrokerVerse_Negotiation_Playbook_INTERNAL`<br>docx, pdf | Discount limits, trade-offs and approval rules in negotiation | Sales, Management<br>**INTERNAL** | Contracting |
+| `BrokerVerse_Release_Notes_Template`<br>docx, pdf | Release notes for each patch, minor or major release | Development, Support<br>Client-facing | Support |
+| `BrokerVerse_Production_Support_Approach_and_Standards`<br>docx, pdf | Support model, severities, change and release management, monitoring | Support, Management<br>Client-facing | Contracting, Go-live, Support |
+| `BrokerVerse_Business_Continuity_and_Disaster_Recovery_Plan`<br>docx, pdf | Backups, recovery objectives, scenarios and DR tests | Support, Management<br>Client-facing | Contracting, Support |
 
 # INTERNAL documents
 

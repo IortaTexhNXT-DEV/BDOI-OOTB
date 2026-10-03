@@ -126,15 +126,14 @@ def where(d):
 
 
 def name_cell(d):
-    tag = '' if d[5] else ' **INTERNAL**'
-    return f'`{d[1]}`{tag}'
+    return f'`{d[1]}`'
 
 
 def rows_for(group_fn):
     out = []
     for d in DOCS:
         if group_fn(d):
-            out.append(f"| {name_cell(d)} | {d[2]} | {d[3]} | {', '.join(d[4])} | {'Client-facing' if d[5] else '**INTERNAL**'} | {', '.join(d[6])} |")
+            out.append(f"| {name_cell(d)}<br>{d[2]} | {d[3]} | {', '.join(d[4])}<br>{'Client-facing' if d[5] else '**INTERNAL**'} | {', '.join(d[6])} |")
     return out
 
 
@@ -172,7 +171,7 @@ def body(for_readme):
     L += [f'{h1} Index by lifecycle stage', ''] + by_stage() + ['']
     L += [f'{h1} File list', '']
     for title, fn in GROUPS:
-        L += [f'{h2} {title}', '', '| File | Formats | Purpose | Audience | Distribution | Used in |', '|---|---|---|---|---|---|'] + rows_for(fn) + ['']
+        L += [f'{h2} {title}', '', '| File and formats | Purpose | Audience and distribution | Used in |', '|---|---|---|---|'] + rows_for(fn) + ['']
     L += [f'{h1} INTERNAL documents', '', 'These files never leave iorta TechNXT:', '']
     L += [f'- `{d[0]}/{d[1]}` ({d[2]}): {d[3]}.' for d in DOCS if not d[5]] + ['']
     L += [f'{h1} Building the documents', '',
