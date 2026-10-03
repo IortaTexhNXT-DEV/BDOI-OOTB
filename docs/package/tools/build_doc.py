@@ -3,7 +3,8 @@
     python3 build_doc.py source/user-manual.md out/BrokerVerse_User_Manual.docx
 
 Source format (one block per line group):
-  front matter between --- lines: title, subtitle, version, date, prepared, reviewed, approved, acronyms (A=B; C=D)
+  front matter between --- lines: title, subtitle, version, date, prepared, reviewed, approved, acronyms (A=B; C=D),
+  open_item, open_item_owner, open_item_status (default Open when open_item is given, else empty)
   # Heading 1   ## Heading 2   ### Heading 3
   - bullet (two leading spaces per extra level)    1. numbered step
   | table | rows |  (first row is the header; a |---| row after it is ignored)
@@ -349,7 +350,11 @@ class Builder:
                     for r in p.runs:
                         r._r.getparent().remove(r._r)
         cells = items.rows[1].cells
-        for j, v in enumerate(['1', m.get('open_item', 'No open items at the time of issue'), 'iorta TechNXT', 'Closed']):
+        # status of the open item: from the front matter (open_item_status), else Open when an open item is named,
+        # and empty when the document has none
+        has_item = bool(m.get('open_item'))
+        status = m.get('open_item_status', 'Open' if has_item else '')
+        for j, v in enumerate(['1', m.get('open_item', 'No open items at the time of issue'), m.get('open_item_owner', 'iorta TechNXT'), status]):
             set_font(cells[j].paragraphs[0].add_run(v), 8)
         so = tables[-1]
         for row in so.rows[1:]:
@@ -357,6 +362,15 @@ class Builder:
                 for p in cell.paragraphs:
                     for r in p.runs:
                         r._r.getparent().remove(r._r)
+        # the template ends the sign-off page with two page breaks, which left a blank page before the back cover:
+        # keep only the last of the paragraphs that hold nothing but a page break
+        body = list(self.d.element.body.iterchildren())
+        last_tbl = max(i for i, e in enumerate(body) if e.tag == qn('w:tbl'))
+        breaks = [e for e in body[last_tbl + 1:] if e.tag == qn('w:p') and e.find('.//' + qn('w:drawing')) is None
+                  and not ''.join(t.text or '' for t in e.iter(qn('w:t'))).strip()
+                  and any(br.get(qn('w:type')) == 'page' for br in e.iter(qn('w:br')))]
+        for e in breaks[:-1]:
+            e.getparent().remove(e)
         # table of contents: a field Word and LibreOffice refresh, replacing the sample entries
         body = list(self.d.element.body.iterchildren())
         tocs = [e for e in body if e.tag == qn('w:p') and e.find('.//' + qn('w:pStyle')) is not None and e.find('.//' + qn('w:pStyle')).get(qn('w:val')) == 'TOC1']

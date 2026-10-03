@@ -53,6 +53,8 @@ All facts come from the application and the database:
 | Rows in all tables | 7,669 |
 | Columns holding personal data | 137 in 41 tables |
 
+> The figures above describe the loaded test database at migration 0216. The release adds migrations 0217 to 0242; the ones that change the model for users are 0221 (data privacy: tables `privacy_consents` and `data_subject_requests`, columns `anonymised_at` and `anonymised_by` on `clients` and `leads`), 0225 (`email_outbox.attachments`) and 0235 (one base currency and dated exchange rates). These tables and columns are described below where they belong.
+
 # Conventions
 
 ## Naming
@@ -471,6 +473,8 @@ Users sign in with a username and password (bcrypt hash only) and, where require
 | `sod_rules`, `user_delegations` | Segregation-of-duties rules and delegations. |
 | `access_reviews`, `access_review_items` | Access reviews and the decision per user. |
 | `audit_log` | Audit trail of every change. |
+| `privacy_consents` | Consent given, refused or withdrawn by a client or prospect per purpose (processing, marketing, sharing), with channel, notice version and evidence; never deleted. |
+| `data_subject_requests` | Register of data subject requests (DSR-): type, requester, party, date received, due date, status, assignee, outcome and the exports and anonymisation done. |
 
 | From | To | Meaning |
 |---|---|---|
@@ -612,7 +616,9 @@ In the table, Personal, Sensitive, Credential and May contain refer to the four 
 | `refresh_tokens` | Personal: device_id<br>Credential: jti |
 | `users` | Personal: username, display_name, first_name, last_name, email, phone, employee_code, department, designation, reporting_to, last_login_at<br>Credential: password_hash, totp_secret, totp_pending_secret |
 | `documents` | May contain: storage_key, file_name |
-| `email_outbox` | Personal: to_address, cc<br>May contain: body_html |
+| `email_outbox` | Personal: to_address, cc<br>May contain: body_html, attachments |
+| `privacy_consents` | May contain: evidence, withdrawal_reason |
+| `data_subject_requests` | Personal: requester_name, requester_contact<br>May contain: description, outcome, response_notes |
 
 ## Protection in the database
 
@@ -623,7 +629,7 @@ In the table, Personal, Sensitive, Credential and May contain refer to the four 
 
 ## Retention
 
-The system has two kinds of retention. Operational rows are deleted by the daily housekeeping job after the number of days set in System Settings > Housekeeping (0 means keep forever). Business and financial records are never deleted by the system.
+The system has two kinds of retention. Operational rows are deleted by the daily housekeeping job after the number of days set in System Settings > Housekeeping (0 means keep forever). Business and financial records are never deleted by the system. The personal data of a client or prospect can be anonymised from a data subject request once `privacy.retention_years` (10 years after the last policy expiry) has passed: names are replaced by an anonymised label and contact details, addresses, ID numbers, birth date and personal notes are cleared in the party and its prospects, policies, quotations, claims and slips, while numbers, amounts and dates stay (`clients.anonymised_at`, `leads.anonymised_at`).
 
 | Table | Rows deleted | Setting | Seeded days |
 |---|---|---|---|
