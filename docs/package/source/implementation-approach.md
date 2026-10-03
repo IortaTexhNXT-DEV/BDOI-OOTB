@@ -155,7 +155,7 @@ Configuration follows the order of `GO_LIVE_DATA_SETUP.md`, steps 1 to 10, first
 | E-mail texts, notification recipients | Master > Configuration | On screen |
 | Scheduled jobs | Master > Schedules | On screen |
 
-The delivered data already holds Philippine lines of business, products, covers, vehicle makes, the 2025 motor tariff, the tax codes (VAT 12%, DST 12.5%, LGT 0.75% and expanded withholding codes with ATC) and a Philippine broker chart of accounts. Configuration therefore reviews and adjusts more than it builds. The broker's accountant and tax adviser confirm tax rates, ATC and GL accounts.
+The delivered data already holds Philippine lines of business, products, covers, vehicle makes, the 2025 motor tariff, the tax codes (VAT 12%, DST PHP 0.50 per PHP 4.00 or fraction, LGT 0.75% and expanded withholding codes with ATC) and a Philippine broker chart of accounts. Configuration therefore reviews and adjusts more than it builds. The broker's accountant and tax adviser confirm tax rates, ATC and GL accounts.
 
 ## Data migration
 

@@ -34,8 +34,8 @@ For each module it gives what the module does, its key features, the Philippine 
 | Screens | 173 menu screens checked per role in the release test |
 | Reports | 39 catalogue reports in Excel, CSV and PDF, plus dashboards and document outputs |
 | APIs | 854 registered API routes, documented in OpenAPI, a Postman collection and an Excel touchpoint list |
-| Scheduled jobs | 16 jobs in Asia/Manila time in the tested release, plus the overdue data subject request reminder of the data privacy module |
-| Number series | 52 document number series, counters only move forward |
+| Scheduled jobs | 18 jobs in Asia/Manila time; the remittance schedules job and the overdue data subject request reminder are delivered switched off |
+| Number series | 61 document number series, counters only move forward |
 | Release test | 497 test cases (480 passed, 8 failed, 3 blocked, 6 not run); 634 automated business rule tests; a full UAT cycle of 371 business steps |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
 | User documentation | User manual of 199 pages for the seven roles, seven role decks |
@@ -138,7 +138,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 | Aspect | Detail |
 |---|---|
-| Philippine specifics | DST counted per PHP 4.00 unit with the fraction rounded up where package pricing is set that way; LGT per city or municipality |
+| Philippine specifics | DST of PHP 0.50 per PHP 4.00 of premium, a fraction counting as a whole unit; LGT per city or municipality |
 | Personas | Sales & Marketing, Operations |
 | Key reports | Production Register, Premium by Product / Month / Insurer |
 | Controls | Commission is never printed on the package quotation or insurer comparison sent to the client |
@@ -160,7 +160,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 | Aspect | Detail |
 |---|---|
-| Philippine specifics | Vehicle class per Insurance Commission tariff; CTPL 1-year and 3-year amounts, inclusive of taxes and never discounted; VAT 12%, DST 12.5%, LGT 0.75% on the net premium |
+| Philippine specifics | Vehicle class per Insurance Commission tariff; CTPL 1-year and 3-year amounts, inclusive of taxes and never discounted; VAT 12%, DST PHP 0.50 per PHP 4.00 or fraction, LGT 0.75% on the net premium |
 | Personas | Sales & Marketing, Operations prepare; Processing Team is notified (`quotations.approval_notify_roles`) |
 | Key reports | Production Register, New Business vs Renewals, Lead Conversion Funnel |
 | Controls | The server prices every quotation again from the configured rates; a premium changed in the browser is refused. A quotation cannot be approved by its creator (`workflow.quote_maker_checker`) |
@@ -328,9 +328,9 @@ Every business event posts a balanced journal through its posting rule. On a co-
 **What it does.** Remits collected premium, net of commission, to each insurer by its share; for direct-bill policies, bills the broker's commission to the insurer.
 
 - Automated Processing creates draft remittances per insurer from collected, unremitted premium; due date from the insurer's Remittance Terms, else `remittance.default_due_days` (30).
-- Approval Workflow with levels by amount (level 1 up to PHP 100,000, level 2 up to PHP 1,000,000, level 3 above).
+- Approval Workflow: each approver acts within the Remittance approval and Remittance settlement limits of the Authority Matrix (delivered: Accounting up to PHP 1,000,000, Accounting Manager without limit); cover during absence through User Management > Delegations.
 - Settlement: premium less commission less tax plus or minus adjustments gives the net settlement; the insurer payment voucher is raised in Disbursement.
-- Tracking, Statements, Reconciliation of bank transactions (tolerance PHP 0.50), Bulk Processing, Scheduling, Electronic Transfer records (InstaPay, PESONet, RTGS, wire), Exception Management, Adjustments, Notifications, History, Analytics.
+- Tracking, Statements, Reconciliation of bank transactions (tolerance PHP 0.50), Bulk Processing, Scheduling (due schedules run by the `remittance-schedules` job once switched on in Master > Schedules), Electronic Transfer records (InstaPay, PESONet, RTGS, wire), Exception Management, Adjustments, Notifications, History, Analytics.
 - Direct Bill Processing: commission debit notes (DN-) with 12% output VAT, 10% EWT and net cash expected; due 30 days later; collection with tax withheld; change of billing mode with a reason.
 - Commission debit note e-mailed to the insurer with the PDF attached.
 
@@ -341,7 +341,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Philippine specifics | Premium held for insurers kept apart from commission income; VAT and EWT on direct-bill commission; Form 2307 received from insurers |
 | Personas | Accounting, Accounting Manager |
 | Key reports | Remittance Summary, Due to Insurers by Co-insurer, Aged Payables to Insurers, Commission Receivable - Direct Bill |
-| Controls | Initiator cannot approve; approval levels by amount; debit notes maker-checker; billing mode change refused once premium was collected or remitted |
+| Controls | Initiator cannot approve; approval limits from the Authority Matrix; debit notes maker-checker; billing mode change refused once premium was collected or remitted |
 | Integrations | Remittance statements and debit notes as PDF, CSV or XLSX; e-mail; transfers executed in the bank's own portal |
 
 ## Commission and referrers
@@ -487,7 +487,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 **What it does.** Holds the products the broker places and the rules that price them, including the motor tariff.
 
 - Product Templates with versions and statuses (Draft, Active, Inactive, Retired); motor template MOT-003-2025 with the CTPL and Auto Passenger PA tariff per vehicle class.
-- Coverage Builder, Rating Engine with Test Calculator, Acceptance Rules, Document Manager, Approval Workflows, Market Mapping, Risk Mapping, Product Analytics.
+- Coverage Builder, Rating Engine with Test Calculator, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping, Product Analytics.
 
 ![Product Templates](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-pc-templates.png)
 
@@ -562,10 +562,10 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 **What it does.** Sets up the broker's organisation, reference data, users and rules, and keeps the record of who did what.
 
-- Masters: Company (letterhead, TIN, IC licence number), Branch, Insurance Company (credit and remittance terms, billing mode, placement and claims e-mails), Line of Business, Product, Cover, Signatories, Vehicle, locations, Commission, employees, finance masters.
+- Masters: Company (letterhead, TIN, IC licence number), Branch, Insurance Company (credit and remittance terms, billing mode, placement and claims e-mails), Line of Business, Product, Cover, Signatories, Vehicle, locations, designations and hierarchy, finance masters. Staff details (branch, designation, reporting to) are on the user record.
 - Uploads for masters and go-live data from about 40 templates (10 MB per file, 20,000 rows).
 - User Management: User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews.
-- Master > Configuration: business parameters by tab, applied at once and audited; Document Numbering with 52 series; Schedules with run now and history; System Settings for title, logo and theme.
+- Master > Configuration: business parameters by business area, applied at once and audited; Master > Document Numbering with 61 series; Master > Schedules with run now and history; Master > System Settings for title, logo and theme.
 - Audit Trail of every create, update, approval, report run and sign-in, with before and after values.
 
 ![Authority Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-authority.png)
@@ -660,7 +660,7 @@ Prices of optional services and day rates for change requests are in the commerc
 | Area | Capability |
 |---|---|
 | Audit trail | Every create, update, approval, report run and sign-in with before and after values, user, IP and time; kept by default |
-| Document control | 52 number series; financial documents cancelled or reversed, never deleted |
+| Document control | 61 number series; financial documents cancelled or reversed, never deleted |
 | Period control | Open, soft-closed, closed and locked periods; reopening recorded with remarks |
 | History | Claim field changes and status history, bank reconciliation history, remittance approvals, sign-in history |
 
@@ -668,7 +668,7 @@ Prices of optional services and day rates for change requests are in the commerc
 
 - Browser application, no installation on user devices; Nunito font bundled.
 - English screens; Philippine formats for money, dates, mobile numbers, ZIP codes and IDs; business time zone Asia/Manila.
-- Lists with search, filters and paging; add and edit forms as side panels; status tags by colour.
+- Lists paged by the server (20, 50 or 100 rows per page) with search and filters, so long lists open quickly; add and edit forms as side panels; status tags by colour.
 
 ## Maintainability and interfaces
 
@@ -750,7 +750,7 @@ The table lists capabilities a Philippine non-life broker typically compares. Th
 | 25 | Instalment plans and premium warranty monitor | Yes |  | | |
 | 26 | Client credit limits | Yes |  | | |
 | 27 | Remittance to insurers net of commission, by co-insurer share | Yes |  | | |
-| 28 | Remittance approval levels by amount | Configurable |  | | |
+| 28 | Remittance approval limits per role or user in the Authority Matrix | Configurable |  | | |
 | 29 | Direct bill commission debit notes with VAT and EWT | Yes |  | | |
 | 30 | Commission rate matrix by insurer, product and policy type | Yes |  | | |
 | 31 | Referrer commission payable on full collection, less WHT | Configurable |  | | |

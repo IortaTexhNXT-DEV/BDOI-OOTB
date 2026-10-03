@@ -180,7 +180,7 @@ Most screens open on a list. The lists work the same way everywhere:
 - **Filters**: select **Show Filters** where offered, choose the values (status, product, insurer, dates, amounts) and select **Apply Filters**. **Clear Filters** removes them; **Hide Filters** closes the panel.
 - **Tabs and cards**: many lists have status cards or tabs at the top (for example **Motor**, **Fire and Allied Perils**, **Industrial All Risks** on Prospects). Select a card or tab to narrow the list.
 - **Sorting**: select a column heading to sort by it; select it again to reverse the order.
-- **Paging**: use the arrows at the bottom right (first, previous, next, last page) and **Rows per page** to see more rows. The text next to the arrows shows the rows on screen and the total, for example 1 - 5 of 82.
+- **Paging**: lists are paged by the server, 20, 50 or 100 rows per page (**Rows per page**). Use the arrows at the bottom right (first, previous, next, last page). The text next to the arrows shows the rows on screen and the total, for example 1 - 20 of 82. Search and filters apply to the whole list, not only to the page on screen.
 - **Row actions**: at the end of the row. The arrow or eye opens the record, the pencil edits it, the three dots (**More Actions**) open the other actions. An action that does not apply to the row is greyed out.
 - **Export**: lists that can be exported have **Export**, **Export CSV**, **Excel** or **Generate Report**. The file downloads to your computer.
 
@@ -571,7 +571,7 @@ The Executive Dashboard is described in the chapter Reports, dashboards, schedul
 
 ![Operations > Sales & Marketing > Prospects](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospects.png)
 
-Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prospects**, **Last 7 Days**, **Last 30 Days**, **Converted Prospects** (with the conversion rate), **With Quotations** and **Active Prospects**. The tabs **Motor**, **Fire and Allied Perils** and **Industrial All Risks** list the prospects of each line as cards with **Prospect ID**, **Category**, **Date**, **Quotes**, **Email** and **Phone**, and the actions **View**, **Edit** and **Delete**. Use the search box (name or prospect ID) and **Show Filters** to narrow the list.
+Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prospects**, **Last 7 Days**, **Last 30 Days**, **Converted Prospects** (with the conversion rate), **With Quotations** and **Active Prospects**. The tabs **Motor**, **Fire and Allied Perils** and **Industrial All Risks** list the prospects of each line in a table with the columns **Prospect ID**, **Name**, **Category**, **Product line**, **Mobile**, **E-mail**, **Quotations**, **Created on**, **Status** and **Actions** (**View**, **Edit** and **Delete**). Use the search box (name or prospect ID), the **Category** filter and **Show Filters** (country, province, city) to narrow the list. The search, filters, tab and page are kept when you open a prospect and come back.
 
 ### Create a prospect
 
@@ -670,9 +670,9 @@ On the coverage step, own damage is priced from the sum insured (the market valu
 | Line | How it is calculated |
 |---|---|
 | NET Premium | Sum of the cover premiums, without CTPL. |
-| VAT (12%) | 12% of the net premium (`tax.vat_rate`). |
-| DST (12.5%) | 12.5% of the net premium (`tax.dst_rate`). |
-| LGT (0.75%) | 0.75% of the net premium (`tax.lgt_rate`), or the rate of the city or municipality when the tax and charge engine is used. |
+| VAT | 12% of the net premium (VAT rule of Master > Finance > Premium Taxes & LGU Rates), for products under the VAT regime. |
+| DST | PHP 0.50 on each PHP 4.00 of net premium, a fraction counting as a whole PHP 4.00 (DST rule). |
+| LGT | 0.75% of the net premium (LGT rule), or the rate of the client's city or municipality in Premium Taxes & LGU Rates. |
 | CTPL | The tariff amount, not taxed again and never discounted. |
 | Discount | The discount given to the client, limited by the Authority Matrix of your role. |
 | Gross premium | Net premium + taxes + CTPL + other premium - discount. |
@@ -2190,7 +2190,7 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | CTPL | Compulsory Third Party Liability: the motor cover required for LTO registration, priced at the Insurance Commission tariff per vehicle class. |
 | Debit note | The broker's bill to an insurer for commission on direct-bill policies. |
 | Direct bill | The client pays the premium directly to the insurer; the broker bills its commission to the insurer. |
-| DST | Documentary stamp tax on the premium (12.5% of the net premium in the delivered set-up). |
+| DST | Documentary stamp tax on the premium (PHP 0.50 on each PHP 4.00 of premium or fraction, NIRC section 184). |
 | Endorsement | A change to an issued policy: details, cover, period or cancellation, with additional or return premium. |
 | EWT | Expanded withholding tax: income tax withheld at source on commission and other income payments, creditable against the payee's income tax. |
 | FST | Fire service tax on fire premium (2% in the delivered set-up). |

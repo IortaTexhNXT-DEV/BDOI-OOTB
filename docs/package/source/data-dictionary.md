@@ -76,7 +76,7 @@ Business numbers (QT-2026-00001, POL-2026-00001, OR-2026-00019, JV-, BS-, PS-, R
 ## Money, rates and shares
 
 - Amounts are `numeric`: 232 columns are `numeric(14,2)` and 61 are `numeric(16,2)` (sums insured, credit limits, bank statement and reconciliation figures, statement and certificate totals, treaty capacity). The application rounds every result to two decimals with half away from zero, the same rule as PostgreSQL `round(numeric, 2)`.
-- The currency of a document is in a `currency` column (`PHP` by default) where a document can be in another currency; `journal_lines` carry `currency_code`, `exchange_rate` and `foreign_amount`. All ledger amounts are in PHP.
+- The currency of a document is in a `currency` column (`PHP` by default) where a document can be in another currency; `journal_lines` carry `currency_code`, `exchange_rate` and `foreign_amount`. All ledger amounts are in the base currency of the Currency master (PHP); journal vouchers convert at the dated Exchange Rate in force on the voucher date.
 - Commission rates are fractions: `commission_rate` 0.15 means 15% (`insurance_companies`, `commission_rates`, `insurer_rate_tables`, `risk_participants`). Tax rates in `tax_codes.rate` and `premium_charge_rules.rate` are percent (12 means 12%). Co-insurance shares (`share_percent`, `offered_share`) are percent from 0 to 100.
 - Debit and credit are separate non-negative columns on `journal_lines` and `bank_statement_lines`; a journal line has either a debit or a credit (CHECK constraint).
 
@@ -488,7 +488,7 @@ Business parameters are keys of `app_settings` (404 keys in 42 groups), edited i
 |---|---|
 | `app_settings` | Configuration keys with JSON value, group, label and type. |
 | `master_types`, `master_records` | Master screen registry and generic master records. |
-| `currencies` | Currencies with base flag, decimals and exchange rate. |
+| `currencies` | Currencies with the base flag (exactly one base currency, locked once a journal exists) and decimals. Exchange rates come only from the dated Exchange Rate master; the old `exchange_rate` column is kept for history and not read. |
 | `document_numbering`, `sequences` | Number series and their counters per period. |
 | `scheduled_jobs`, `job_runs`, `job_queue` | Cron jobs, run history and the background queue. |
 | `notifications`, `email_outbox`, `documents` | In-app notifications, queued e-mails, registry of stored files. |
@@ -892,7 +892,7 @@ This appendix lists every table and view with a one-line description and the num
 | Table | Description | Rows |
 |---|---|---|
 | `app_settings` | Configuration keys (JSONB value, group, label, type); every business parameter | 404 |
-| `currencies` | Currencies (base flag, decimals, exchange rate) | 5 |
+| `currencies` | Currencies (one base currency, decimals) | 5 |
 | `document_numbering` | Document number series: prefix, pattern, width, reset rule, start number | 60 |
 | `documents` | Registry of stored files: storage key, name, type, size, owning entity, uploader | 125 |
 | `email_outbox` | Queued e-mails (to, subject, HTML body, status, attempts, error) | 260 |

@@ -85,7 +85,7 @@ The broker issues invoices (bills) and official receipts from their own number s
 
 ## How are premium taxes calculated?
 
-On every quotation, policy, endorsement and renewal: VAT 12% on the lines that carry it, documentary stamp tax 12.5% of net premium, local government tax (0.75% default, and a rate per city or municipality in Premium Taxes & LGU Rates), and fire service tax 2% on fire and IAR. Rates and the lines they apply to are settings. CTPL comes from the tariff and is not taxed again.
+On every quotation, policy, endorsement and renewal: VAT 12% on the lines that carry it, documentary stamp tax of PHP 0.50 on each PHP 4.00 of net premium or fraction (NIRC section 184), local government tax (0.75% default, and a rate per city or municipality in Premium Taxes & LGU Rates), and fire service tax 2% on fire and IAR. Rates and the lines they apply to are settings. CTPL comes from the tariff and is not taxed again.
 
 ## What does it do for the Data Privacy Act?
 

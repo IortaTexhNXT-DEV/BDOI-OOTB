@@ -174,7 +174,7 @@ Compare against Philippine work the broker does every day, not against feature c
 
 | Point | Show | Reference |
 |---|---|---|
-| Philippine premium taxes on a quotation | Order Summary of a quotation with VAT 12%, DST 12.5%, LGT 0.75% and CTPL | Demo Script 0:09 Prospect and quotation |
+| Philippine premium taxes on a quotation | Order Summary of a quotation with VAT 12%, DST of PHP 0.50 per PHP 4.00 or fraction, LGT 0.75% and CTPL | Demo Script 0:09 Prospect and quotation |
 | BIR outputs | Form 2307, VAT Summary, SAWT, QAP | Demo Script 0:45 Close and tax |
 | Price certainty | Package totals over 5 years | Rate Card; Price Book workbook |
 | Regulatory mapping | Philippine Regulatory Compliance Matrix | Package document |

@@ -30,7 +30,7 @@ Every e-mail is first written to the outbox (`email_outbox`): recipient, cc, sub
 
 While sending is off, e-mails still queue (the test system holds 260 queued e-mails), and the send and share dialogs tell the user that the message was only queued. When sending is switched on, the queue is delivered by the next run, so review the outbox before switching on in a system that held test data.
 
-> E-mails carry no attachments. Documents travel as download links (scheduled reports, remittance statements) or are printed and sent separately. Several bodies refer to a document ("Please find our commission debit note") that is not attached.
+Four e-mails carry their document as a PDF attachment: the official receipt (E20), the premium invoice (E21), the policy issued e-mail (E07, with the policy schedule) and the commission debit note (E14). The PDF is generated when the e-mail is sent, so it shows the record as it is then, and Master > E-mail Outbox names the attachment on each message. One message may carry at most `email.max_attachment_mb` (10 MB) of attachments; a larger message fails at once with the reason in the outbox. Scheduled reports and remittance statements still travel as download links.
 
 ## Templates and merge fields
 
@@ -52,8 +52,8 @@ Two-factor authentication uses an authenticator app (time-based codes); the syst
 |---|---|---|---|
 | Quotation | Quotation approval request (E01), share quotation (E02, E03) | Quotation submitted to insurer (E04) | Quotation sent for approval, customer accepted, quotation approved |
 | Placement | | Request for quotation (E05), placement slip firm order (E06) | |
-| Policy issue and servicing | Policy issued (E07), endorsement / cancellation (E08) | | Policy issued, endorsement completed |
-| Billing and collection | Payment reminder (E11), collection follow-up (E12) | | Payment to verify, online payments, credit limit, warranty, collection reminders |
+| Policy issue and servicing | Policy issued with schedule attached (E07), endorsement / cancellation (E08) | | Policy issued, endorsement completed |
+| Billing and collection | Payment reminder (E11), collection follow-up (E12), official receipt (E20), premium invoice (E21) | | Payment to verify, online payments, credit limit, warranty, collection reminders |
 | Claims | PLA copy (cc of E13) | Preliminary Loss Advice (E13) | New claim, status changes, settlement approval |
 | Renewal | Renewal notices (E09), renewal reminder (E10) | | Renewal reminders and approvals, renewed, lapsed |
 | Remittance and commission | | Commission debit note (E14), remittance bill / statement (E15, E16), composed notifications (E17) | Remittance, debit note, incentive approvals |
@@ -73,6 +73,8 @@ Two-factor authentication uses an authenticator app (time-based codes); the syst
 | E10 | Renewal reminder | Renewal | Client e-mail |
 | E11 | Premium payment reminder | Billing and collection | Client e-mail (clients without one are skipped and listed) |
 | E12 | Collection follow-up e-mail | Billing and collection | Client e-mail, or the address typed |
+| E20 | Official receipt | Billing and collection | Client e-mail, or the address typed (with optional cc) |
+| E21 | Premium invoice / statement of account | Billing and collection | Client e-mail, or the address typed (with optional cc) |
 
 ## E01 Quotation approval request
 
@@ -108,7 +110,7 @@ Body:
 | Item | Detail |
 |---|---|
 | Trigger | Staff share a quotation from the Share dialog, or e-mail it from the coverage detailed view before a policy exists. |
-| Screen | Operations > Quotation > Quote detail > Share; Operations > Sales & Marketing > Quotations > Coverage detailed view |
+| Screen | Operations > Sales & Marketing > Quotations > Quote detail > Share; Operations > Sales & Marketing > Quotations > Coverage detailed view |
 | Recipient | The address typed in the Share dialog; lead e-mail from the coverage view |
 | Channel | E-mail through the outbox |
 | Template code (outbox) | `share_quote` |
@@ -136,7 +138,7 @@ Body:
 | Item | Detail |
 |---|---|
 | Trigger | Staff edit the generated text in the Share dialog and send it. |
-| Screen | Operations > Quotation > Quote detail > Share |
+| Screen | Operations > Sales & Marketing > Quotations > Quote detail > Share |
 | Recipient | Any address typed (with optional cc) |
 | Channel | E-mail through the outbox |
 | Template code (outbox) | `custom` |
@@ -167,7 +169,7 @@ Body:
 | Template code (outbox) | `policy_issued` |
 | Configured in | email.template.policy_issued; Master > Configuration > Notifications & E-mail > E-mail templates |
 | Merge fields | customerName, policyNumber, productType, quotationNumber, currency, grossPremium |
-| Attachments | None (policy schedule PDF downloaded from Policy detail > Policy schedule) |
+| Attachments | Policy schedule PDF (`policy-schedule-<policy number>.pdf`) when the quotation has a policy |
 | On / off | `notification.email_enabled` on and SMTP configured (applies to every e-mail) |
 
 Subject:
@@ -324,6 +326,48 @@ Body:
 The notes typed on screen, or the collection template above
 ```
 
+## E20 Official receipt
+
+| Item | Detail |
+|---|---|
+| Trigger | Staff click E-mail receipt on a receipt, or automatically when a receipt is recorded and `receipts.email_on_record` is on. |
+| Screen | Accounts > Receipts > View > E-mail receipt |
+| Recipient | The address typed, else the client e-mail; refused with "The client has no e-mail address; enter one" when there is none |
+| Channel | E-mail through the outbox |
+| Template code (outbox) | `official-receipt` (`official-receipt-auto` when sent automatically) |
+| Configured in | receipts.email_subject, receipts.email_template, receipts.email_on_record; Master > Configuration > Billing, Collections & Credit > Receipts |
+| Merge fields | clientName, receiptNumber, policyNumber, amount, receiptDate, paymentMode, referenceNo, balance, customerCode, note, companyName |
+| Attachments | Official receipt PDF (`receipt-<OR number>.pdf`) |
+| On / off | `receipts.email_on_record` (false) for the automatic e-mail; `notification.email_enabled` on and SMTP configured |
+
+Subject:
+
+```
+Official receipt {{receiptNumber}} for policy {{policyNumber}}
+```
+Body (summary): thanks the client for the payment, names the attached receipt, then a table of amount received, date received, mode of payment, reference and balance remaining, the note typed on screen, and the company name.
+
+## E21 Premium invoice / statement of account
+
+| Item | Detail |
+|---|---|
+| Trigger | Staff click E-mail invoice on a collection item, or automatically when a bill is issued from a policy, endorsement or renewal and `billing.email_on_issue` is on. |
+| Screen | Accounts > Collections > Detail > E-mail invoice |
+| Recipient | The address typed, else the client e-mail |
+| Channel | E-mail through the outbox |
+| Template code (outbox) | `premium-invoice` (`premium-invoice-auto` when sent automatically) |
+| Configured in | billing.email_subject, billing.email_template, billing.payment_instructions, billing.email_on_issue; Master > Configuration > Other settings > Billing |
+| Merge fields | clientName, billNumber, policyNumber, productName, insurerName, netPremium, taxes, grossPremium, amountDue, billDate, dueDate, paymentInstructions, note, companyName |
+| Attachments | Premium invoice PDF (`invoice-<bill number>.pdf`) |
+| On / off | `billing.email_on_issue` (false) for the automatic e-mail; `notification.email_enabled` on and SMTP configured |
+
+Subject:
+
+```
+Premium invoice {{billNumber}} for policy {{policyNumber}}
+```
+Body (summary): names the attached invoice, then a table of net premium, taxes and charges, gross premium, amount due and due date, the payment instructions, the note, and the company name.
+
 # E-mails to insurers and agents
 
 | No. | E-mail | Stage | Recipient |
@@ -462,7 +506,7 @@ Body:
 | Template code (outbox) | `commission-debit-note` |
 | Configured in | direct_bill.email_subject, direct_bill.email_body; Master > Configuration > Remittance & Reconciliation > Direct bill |
 | Merge fields | dnNumber, insurerName, amount (currency and amount), dueDate, companyName |
-| Attachments | None, although the body says "Please find our commission debit note"; the PDF is printed from Debit Notes > Print |
+| Attachments | Commission debit note PDF (`debit-note-<DN number>.pdf`) |
 | On / off | `notification.email_enabled` on and SMTP configured (applies to every e-mail) |
 
 Subject:
@@ -736,7 +780,7 @@ These documents are produced as PDF on the screens and handed or sent to the cli
 
 | Document | Where | For | Format | Configured by |
 |---|---|---|---|---|
-| Quotation (motor; fire / IAR) | Operations > Quotation > Quote detail > Share > Download | Client | PDF | Company master letterhead, documents.* settings |
+| Quotation (motor; fire / IAR) | Operations > Sales & Marketing > Quotations > Quote detail > Share > Download | Client | PDF | Company master letterhead, documents.* settings |
 | Package quotation; insurer comparison | Master > Finance > Package Bundles > Print; Compare Insurers | Client | PDF | Letterhead; commission never printed |
 | Broker slip (to the market or one insurer) | Request for Quotation > Detail > Broker Slip PDF | Insurer | PDF | Letterhead |
 | Placement slip (lead, whole security, co-insurer share) | Placement Slips > Detail > Placement Slip PDF | Insurer | PDF | Letterhead |
@@ -769,6 +813,9 @@ Seeded wording used on documents:
 | `notification.approval_requests` | true | Every approval notification: the requests to the approvers (type approval) and the decisions sent to the makers, in every maker-checker flow listed above. |
 | `notification.claim_status` | true | Claim registration and status notifications to the handler and owner. |
 | `notification.renewal_reminder` | true | The Renewal notices job (in-app reminders 60, 30, 15 days before expiry). |
+| `receipts.email_on_record` | false | E-mail the official receipt (PDF attached) automatically when a receipt is recorded. |
+| `billing.email_on_issue` | false | E-mail the premium invoice (PDF attached) automatically when a bill is issued. |
+| `email.max_attachment_mb` | 10 | Largest total size of the attachments of one e-mail. |
 | `claims.pla_enabled` | true | Preliminary Loss Advice e-mail on claim registration. |
 | `claims.pla_default_recipient` | claims@brokerverse.local | PLA recipient when the insurer has no e-mail. Replace before go-live. |
 | `renewals.enforce_notice_order` | true | First, second and final notice must go in order. |
@@ -783,8 +830,7 @@ Seeded wording used on documents:
 
 | No. | Observation | Effect | Suggested action |
 |---|---|---|---|
-| 1 | E-mails carry no attachments; the debit note e-mail says "Please find our commission debit note" without the PDF. | Insurers receive a reference only. | Attach the PDF, or change the wording to say the note follows. |
-| 2 | No e-mail is sent to the client for the official receipt, the billing statement (invoice / SOA), the policy schedule at issue, or the claim acknowledgement. The documents exist as PDFs (see Printed documents). The "Policy issued" e-mail is sent only from the coverage detailed view and carries no schedule. | Clients get these documents only when staff send them by hand. | Add e-mail templates for OR, billing statement, policy schedule and claim acknowledgement. |
+| 2 | No e-mail is sent to the client for the claim acknowledgement, and the "Policy issued" e-mail (with the schedule attached) is sent only from the coverage detailed view, not at issue. The official receipt and the premium invoice are e-mailed with the PDF (E20, E21). | Claim acknowledgement letters are printed and sent by hand. | Add a claim acknowledgement e-mail if the broker wants it. |
 | 3 | No commission statement e-mail to agents or referrers; the Broker Commission Statement and the incentive statement are on screen only. | Agents receive statements outside the system. | Add a commission statement template, or schedule the report per agent. |
 | 4 | Remittance notification templates NTF-001 (trigger "Due Date - 5 days") and NTF-002 (SMS, trigger "Payment Received") are not automated, and SMS is not sent. | Templates suggest automation that does not exist. | Remove the triggers from the templates or implement them. |
 | 5 | No welcome or credentials e-mail when a user is created or provisioned; initial passwords are handed over outside the system. | Manual step at user creation. | Keep the handover procedure in the security policy. |

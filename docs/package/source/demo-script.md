@@ -134,7 +134,7 @@ The UAT data set creates one or two users per role. All of them sign in with the
 1. Operations > Sales & Marketing > Prospects. Point to the cards (total, last 7 days, converted, with quotations) and the tabs per line.
 2. Open Gregorio Evangelista with the eye icon. Show Personal Information, Contact Information and Address. Mention Bulk Upload for a list of prospects from Excel.
 3. Select Create Quote. Fill step 1 (vehicle) quickly, select Next through Plan Recommendations, and on Coverage Details select Calculate. Do not save unless the run sheet allows it.
-4. Show the Order Summary: net premium, VAT 12%, documentary stamp tax 12.5%, local government tax 0.75%, CTPL, discount, brokerage, comsub and margin.
+4. Show the Order Summary: net premium, VAT 12%, documentary stamp tax (PHP 0.50 on each PHP 4.00 of premium or fraction), local government tax 0.75%, CTPL, discount, brokerage, comsub and margin.
 5. Select Back and open Operations > Sales & Marketing > Quotations. Show the cards (Converted to Policy, Pending Customer, Rejected) and open a quotation in Pending Customer.
 6. Point to Share (Download, Email, WhatsApp, Send to Insurer, Copy Link) and Send for Customer Approval.
 
