@@ -2538,7 +2538,7 @@
     }
   }
 }"
-154,Clients,GET,/api/clients,"List clients (search, leadCategory, status; paging)",Operations > Clients,Bearer JWT,read:clients,Query: ?page=1&pageSize=10&search=juan,"{
+154,Clients,GET,/api/clients,"List clients (search, leadCategory, clientType individual / corporate, status; paging)",Operations > Clients,Bearer JWT,read:clients,Query: ?page=1&pageSize=10&search=juan,"{
   ""success"": true,
   ""data"": {
     ""clients"": [
@@ -16219,7 +16219,7 @@
 }","{
   ""success"": true
 }"
-843,System Settings,GET,/api/settings/audit,"Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)",Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",Query: ?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&limit=100,"{
+843,System Settings,GET,/api/settings/audit,"Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone; newest first; with page / pageSize a page of the log and its total, else the latest `limit` entries)",Master > Audit trail,Bearer JWT,"role:system-admin, read:audit",Query: ?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&page=1&pageSize=20,"{
   ""success"": true,
   ""data"": [
     {
@@ -16228,7 +16228,11 @@
       ""entity"": ""policy"",
       ""action"": ""create""
     }
-  ]
+  ],
+  ""total"": 1,
+  ""page"": 1,
+  ""pageSize"": 20,
+  ""totalPages"": 1
 }"
 844,System Settings,GET,/api/settings/public,"Branding settings needed before sign-in (logo, colours, names)",Sign-in,Public,Public,,"{
   ""success"": true,

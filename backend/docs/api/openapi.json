@@ -16443,7 +16443,7 @@
     "/clients": {
       "get": {
         "operationId": "getClients",
-        "summary": "List clients (search, leadCategory, status; paging)",
+        "summary": "List clients (search, leadCategory, clientType individual / corporate, status; paging)",
         "tags": [
           "Clients"
         ],
@@ -99039,7 +99039,7 @@
     "/settings/audit": {
       "get": {
         "operationId": "getSettingsAudit",
-        "summary": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)",
+        "summary": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone; newest first; with page / pageSize a page of the log and its total, else the latest `limit` entries)",
         "tags": [
           "System Settings"
         ],
@@ -99091,13 +99091,22 @@
             "example": "2026-09-30"
           },
           {
-            "name": "limit",
+            "name": "page",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer"
             },
-            "example": 100
+            "example": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
           }
         ],
         "responses": {
@@ -99130,6 +99139,18 @@
                           }
                         }
                       }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
                     }
                   }
                 },
@@ -99142,7 +99163,11 @@
                       "entity": "policy",
                       "action": "create"
                     }
-                  ]
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20,
+                  "totalPages": 1
                 }
               }
             }

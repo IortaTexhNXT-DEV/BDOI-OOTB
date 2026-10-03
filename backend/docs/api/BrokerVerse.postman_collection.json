@@ -11674,7 +11674,7 @@
       "name": "Clients",
       "item": [
         {
-          "name": "List clients (search, leadCategory, status; paging)",
+          "name": "List clients (search, leadCategory, clientType individual / corporate, status; paging)",
           "request": {
             "method": "GET",
             "header": [],
@@ -11701,7 +11701,7 @@
                 }
               ]
             },
-            "description": "List clients (search, leadCategory, status; paging)\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
+            "description": "List clients (search, leadCategory, clientType individual / corporate, status; paging)\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
           },
           "response": [
             {
@@ -11732,7 +11732,7 @@
                     }
                   ]
                 },
-                "description": "List clients (search, leadCategory, status; paging)\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
+                "description": "List clients (search, leadCategory, clientType individual / corporate, status; paging)\n\nFront-end touchpoint: Operations > Clients\n\nAccess: read:clients"
               },
               "status": "OK",
               "code": 200,
@@ -64035,12 +64035,12 @@
           ]
         },
         {
-          "name": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)",
+          "name": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone; newest first; with page / pageSize a page of the log and its total, else the latest `limit` entries)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&limit=100",
+              "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&page=1&pageSize=20",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -64070,12 +64070,16 @@
                   "value": "2026-09-30"
                 },
                 {
-                  "key": "limit",
-                  "value": "100"
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
                 }
               ]
             },
-            "description": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
+            "description": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone; newest first; with page / pageSize a page of the log and its total, else the latest `limit` entries)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
           },
           "response": [
             {
@@ -64084,7 +64088,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&limit=100",
+                  "raw": "{{baseUrl}}/settings/audit?entity=policy&entityId=pol_1&username=BrokerVerse&from=2026-09-01&to=2026-09-30&page=1&pageSize=20",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -64114,12 +64118,16 @@
                       "value": "2026-09-30"
                     },
                     {
-                      "key": "limit",
-                      "value": "100"
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20"
                     }
                   ]
                 },
-                "description": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
+                "description": "Audit trail (filter by entity / entityId / user and a from / to business-date range, general.timezone; newest first; with page / pageSize a page of the log and its total, else the latest `limit` entries)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
               },
               "status": "OK",
               "code": 200,
@@ -64131,7 +64139,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"username\": \"BrokerVerse\",\n      \"entity\": \"policy\",\n      \"action\": \"create\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"username\": \"BrokerVerse\",\n      \"entity\": \"policy\",\n      \"action\": \"create\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"pageSize\": 20,\n  \"totalPages\": 1\n}"
             }
           ]
         },
