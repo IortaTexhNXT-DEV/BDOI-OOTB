@@ -333,6 +333,12 @@ class UserService {
     return json.data;
   }
 
+  /** Picker list of active users { userId, name, branchCode } (GET /users/lookup; open to petty cash roles). */
+  lookupUsers(search = "") {
+    const q = search ? `?search=${encodeURIComponent(search)}` : "";
+    return this.request(`/users/lookup${q}`);
+  }
+
   /** Roles with their permission codes and user counts (GET /roles). */
   getRoles() {
     return this.request("/roles");

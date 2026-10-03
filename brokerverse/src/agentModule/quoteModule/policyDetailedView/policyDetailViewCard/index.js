@@ -4,26 +4,23 @@ import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
 import { useSelector, useDispatch } from "react-redux";
-import { useFormik } from "formik";
 import { getpolicyDetailedMiddleware } from "../store/policyDetailedMiddleware";
+import { formatDate } from "../../../../utility/dateFormat";
 
-const handleSubmit = () => {
-  // TODO: integrate policy updates when API is ready
-};
-
-const PolicyDetailedViewCard = ({ action, state, policyId }) => {
+const PolicyDetailedViewCard = ({ policyId }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const dispatch = useDispatch();
 
-  const { policydetailedlist, loading } = useSelector(
-    ({ policyDetailedViewMainReducers }) => {
-      return {
-        loading: policyDetailedViewMainReducers?.loading,
-        policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
-      };
-    }
+  const { policydetailedlist: loaded, loading } = useSelector(
+    ({ policyDetailedViewMainReducers }) => ({
+      loading: policyDetailedViewMainReducers?.loading,
+      policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
+    })
   );
+  // The page loads its own policy (GET /policies/:id); a policy left in the store by another page is not shown.
+  const matches = (p) => p && (!policyId || [p.policyId, p.id, p.policyNumber].includes(policyId));
+  const policydetailedlist = matches(loaded) ? loaded : null;
 
   // Fetch policy details when component mounts
   useEffect(() => {
@@ -32,19 +29,18 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
     }
   }, [dispatch, policyId]);
 
-  const formik = useFormik({
-    initialValues: {
-      PolicyNumber: policydetailedlist?.policyNumber || "",
-      Production: policydetailedlist?.production || "",
-      Inception: policydetailedlist?.inception || "",
-      IssueDate: policydetailedlist?.issuedDate || "",
-      Expiry: policydetailedlist?.expiry || "",
-    },
-    enableReinitialize: true, // Allow formik to reinitialize when policydetailedlist changes
-    onSubmit: () => {
-      handleSubmit();
-    },
-  });
+  const participants = policydetailedlist?.participants || [];
+  const insurerName =
+    participants.find((p) => p.isLead)?.insuranceCompanyName ||
+    policydetailedlist?.insuranceCompanyName ||
+    policydetailedlist?.quotation?.participantDetails?.[0]?.insuranceCompanyName ||
+    "";
+  const productName =
+    policydetailedlist?.productType || policydetailedlist?.product || policydetailedlist?.quotation?.productType || "";
+  // Totals of the policy record (sum insured and gross premium as issued)
+  const totalCoverage = Number(policydetailedlist?.totalSumInsured ?? policydetailedlist?.sumInsured ?? 0);
+  const grossPremium = Number(policydetailedlist?.grossPremium ?? policydetailedlist?.premiumTotal ?? 0);
+  const dateOf = (value) => (value ? formatDate(value, { empty: "" }) : "");
 
   if (loading) {
     return (
@@ -68,23 +64,19 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
           <div className="col-12">
             <InputTextField
               label={t("coverageDetailsReview.insuranceCompany")}
-              value={
-                policydetailedlist?.quotation?.participantDetails?.[0]
-                  ?.insuranceCompanyName || "SecureGuard Insurance"
-              }
+              value={insurerName}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.product")}
-              value={policydetailedlist?.quotation?.productType || "Motor"}
+              value={productName}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.policyNumber")}
               value={policydetailedlist?.policyNumber || ""}
-              onChange={formik.handleChange("PolicyNumber")}
             />
           </div>
         </div>
@@ -93,13 +85,13 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.production")}
-              value={policydetailedlist?.production || ""}
+              value={dateOf(policydetailedlist?.production)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.inception")}
-              value={policydetailedlist?.inception || ""}
+              value={dateOf(policydetailedlist?.inception)}
             />
           </div>
         </div>
@@ -108,45 +100,25 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.issueDate")}
-              value={policydetailedlist?.issuedDate || ""}
+              value={dateOf(policydetailedlist?.issuedDate)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.expiry")}
-              value={policydetailedlist?.expiry || ""}
+              value={dateOf(policydetailedlist?.expiry)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.totalCoverage")}
-              value={formatCurrency(
-                policydetailedlist?.quotation?.participantDetails?.reduce(
-                  (sum, participant) => {
-                    const coverage = parseFloat(
-                      participant.sumInsuredCurrency?.replace(/[^0-9.-]/g, "") || 0
-                    );
-                    return sum + coverage;
-                  },
-                  0
-                ) || 0
-              )}
+              value={formatCurrency(totalCoverage)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.grossPremium")}
-              value={formatCurrency(
-                policydetailedlist?.quotation?.participantDetails?.reduce(
-                  (sum, participant) => {
-                    const premium = parseFloat(
-                      participant.premiumCurrency?.replace(/[^0-9.-]/g, "") || 0
-                    );
-                    return sum + premium;
-                  },
-                  0
-                ) || 0
-              )}
+              value={formatCurrency(grossPremium)}
             />
           </div>
         </div>

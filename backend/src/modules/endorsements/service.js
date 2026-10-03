@@ -1,6 +1,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { notFound, badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
 import { num, round2, renderTemplate, emailTemplate } from '../documents/common.js';
@@ -313,7 +314,7 @@ export async function completeEndorsement(body, userId) {
   const owner = policy.owner_user_id || e0.created_by;
   if (owner) {
     await notify({ userId: owner, type: 'info', title: after.is_cancel ? 'Policy cancelled by endorsement' : 'Endorsement completed',
-      message: `Endorsement ${after.endorsement_number} on policy ${after.policy_number} was completed (premium change ${Number(after.premium_delta).toFixed(2)})`,
+      message: `Endorsement ${after.endorsement_number} on policy ${after.policy_number} was completed (premium change ${await formatMoney(after.premium_delta)})`,
       link: `/agent/endorsementdetailedview/${after.id}`, entity: 'endorsement', entityId: after.id });
   }
   return { before: e0, after };

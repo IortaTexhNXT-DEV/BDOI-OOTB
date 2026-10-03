@@ -1,6 +1,22 @@
 import authService from './authService';
 import { BASE_URL } from '../utility/constant';
 
+const OBJECT_PATH = "/api/s3/object/";
+
+/**
+ * Stored-file URL as this browser reaches the API. The server signs file URLs with its configured public address
+ * (PUBLIC_BASE_URL), which need not be the address the browser uses (another host name, a proxy, a local run), so the
+ * image never loaded; the object path and signature are kept and the API address of this front end (BASE_URL) is used.
+ * @param {string} url signed or plain object URL (or any other URL, returned unchanged)
+ * @returns {string}
+ */
+export const browserFileUrl = (url) => {
+  if (typeof url !== "string") return url;
+  const at = url.indexOf(OBJECT_PATH);
+  if (at < 0) return url;
+  return `${BASE_URL}/s3/object/${url.slice(at + OBJECT_PATH.length)}`;
+};
+
 /**
  * S3 Service - Handles file uploads/downloads to AWS S3
  */
@@ -291,7 +307,7 @@ class S3Service {
 
       return {
         success: true,
-        url: data.url,
+        url: browserFileUrl(data.url),
         data: data
       };
     } catch (error) {
@@ -332,7 +348,7 @@ class S3Service {
 
       return {
         success: true,
-        url: data.url,
+        url: browserFileUrl(data.url),
         data: data
       };
     } catch (error) {
@@ -422,7 +438,8 @@ class S3Service {
 
       return {
         success: true,
-        data: data.data // URL mapping object
+        // URL mapping object (original URL or key -> signed URL this browser can open)
+        data: Object.fromEntries(Object.entries(data.data || {}).map(([k, v]) => [k, browserFileUrl(v)]))
       };
     } catch (error) {
       return {

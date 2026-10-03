@@ -211,6 +211,8 @@ const CoverageChange = ({
   );
 
   const text = (v) => (v === undefined || v === null ? "" : String(v));
+  // amounts always with two decimals (the policy's own figures may be stored as 6100.2)
+  const amount = (v) => (v === undefined || v === null || String(v).trim() === "" ? "" : money(parseNumericValue(v)));
   const premiumChange =
     coverageDetails.Grosspremium !== "" && coverageDetails.Grosspremium !== undefined
       ? round2(parseNumericValue(coverageDetails.Grosspremium) - parseNumericValue(currentGrossPremium))
@@ -246,7 +248,7 @@ const CoverageChange = ({
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.ownDamageCoveragePremium")}
-            value={coverageDetails.LossandDamagecoveragepremium}
+            value={amount(coverageDetails.LossandDamagecoveragepremium)}
           />
         </div>
         <div className={half}>
@@ -255,7 +257,7 @@ const CoverageChange = ({
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.actsOfNaturePremium")}
-            value={coverageDetails.ActsofNaturepremium}
+            value={amount(coverageDetails.ActsofNaturepremium)}
           />
         </div>
         <div className="col-12 mt-2">
@@ -278,7 +280,7 @@ const CoverageChange = ({
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.bodilyInjuryCoveragePremium")}
-            value={coverageDetails.BodilyInjuryCoveragePremium}
+            value={amount(coverageDetails.BodilyInjuryCoveragePremium)}
           />
         </div>
         <div className={half}>
@@ -294,7 +296,7 @@ const CoverageChange = ({
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.propertyDamageCoveragePremium", "Property damage coverage premium")}
-            value={coverageDetails.PropertyDamageCoveragePremium}
+            value={amount(coverageDetails.PropertyDamageCoveragePremium)}
           />
         </div>
         <div className="col-12 mt-2">
@@ -313,61 +315,61 @@ const CoverageChange = ({
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.appaCoveragePremium", "APPA coverage premium")}
-            value={coverageDetails.APPAcoveragePremium}
+            value={amount(coverageDetails.APPAcoveragePremium)}
           />
         </div>
         <div className="col-12 mt-2">
           <CalculaitionTextInputs
             label={t("endorsement.totalSumInsured", "Total Sum Insured")}
-            value={coverageDetails.TotalSumInsured}
+            value={amount(coverageDetails.TotalSumInsured)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.netPremium")}
-            value={coverageDetails.NETpremium}
+            value={amount(coverageDetails.NETpremium)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={`${t("endorsement.valueAddedTax", "Value Added Tax")} ( ${percentOf(taxRates.valueAddedTax)}% )`}
-            value={coverageDetails.ValueAddedTax}
+            value={amount(coverageDetails.ValueAddedTax)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.othersAccPremium", "Others(Acc. premium)")}
-            value={coverageDetails.OthersPremium}
+            value={amount(coverageDetails.OthersPremium)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={`${t("endorsement.documentaryStampTax", "Documentary Stamp Tax")} ( ${percentOf(taxRates.documentaryStampTax)}% )`}
-            value={coverageDetails.DocumentaryStampTax}
+            value={amount(coverageDetails.DocumentaryStampTax)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={`${t("endorsement.localGovtTax", "Local Gov’t Tax")} ( ${percentOf(taxRates.localGovernmentTax)}% )`}
-            value={coverageDetails.LocalGovtTax}
+            value={amount(coverageDetails.LocalGovtTax)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.discount")}
-            value={coverageDetails.Discount}
+            value={amount(coverageDetails.Discount)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.others")}
-            value={coverageDetails.Others}
+            value={amount(coverageDetails.Others)}
           />
         </div>
         <div className={half}>
           <CalculaitionTextInputs
             label={t("endorsement.grossPremium")}
-            value={coverageDetails.Grosspremium}
+            value={amount(coverageDetails.Grosspremium)}
           />
         </div>
         <div className={half}>

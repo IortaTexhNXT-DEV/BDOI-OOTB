@@ -1,6 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
+import { formatDate } from "../../utility/dateFormat";
 
 /** Labels of the access control screens (en.json "accessControl"), with the English text as the fallback. */
 export const useLabels = () => {
@@ -18,9 +19,9 @@ export const limitText = (measure, value, unlimited, noLimit) => {
   return measure === "percent" ? `${Number(value)}%` : formatPeso(value);
 };
 
-export const shortDate = (d) => (d ? new Date(d).toLocaleDateString("en-PH", { year: "numeric", month: "short", day: "2-digit" }) : "");
-export const dateTime = (d) =>
-  d ? new Date(d).toLocaleString("en-PH", { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
+/** Dates and date-times in the configured format (System Settings general.date_format), like every other screen. */
+export const shortDate = (d) => formatDate(d, { empty: "" });
+export const dateTime = (d) => formatDate(d, { withTime: true, empty: "" });
 
 /** Page frame shared by the screens: breadcrumb, title, one-line purpose and the actions on the right. */
 export const PageHeader = ({ title, intro, actions }) => {

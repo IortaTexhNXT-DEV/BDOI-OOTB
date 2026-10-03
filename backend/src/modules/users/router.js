@@ -101,6 +101,23 @@ define({
     ok(res, { totalUsers: t.total, activeUsers: t.active, byRole: Object.fromEntries(by.map((b) => [b.code, b.n])) });
   },
 });
+/**
+ * Minimal people picker for operational forms (petty cash requester / custodian). It returns only the id, name and branch
+ * of active users, so the roles that keep the petty cash (read:disbursements) can pick a person without user
+ * administration rights (GET /users stays with read:users).
+ */
+define({
+  method: 'GET', path: '/lookup', summary: 'Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)',
+  screen: 'Accounts > Petty Cash > Initiate; Request; Receipts', middleware: [requireAuth, requirePermission('read:users', 'read:disbursements')],
+  query: { search: 'ana' }, response: { success: true, data: [{ userId: 'usr_1', name: 'Ana Reyes', branchCode: 'MKT' }] },
+  handler: async (req, res) => {
+    const search = String(req.query.search || '').trim() || null;
+    const rows = await many(`SELECT id, display_name, username, branch_code FROM users
+      WHERE status = 'active' AND ($1::text IS NULL OR display_name ILIKE '%' || $1 || '%' OR username ILIKE '%' || $1 || '%')
+      ORDER BY lower(COALESCE(display_name, username)) LIMIT 500`, [search]);
+    ok(res, rows.map((u) => ({ userId: u.id, name: u.display_name || u.username, branchCode: u.branch_code || null })));
+  },
+});
 define({
   method: 'POST', path: '/:id/password', summary: 'Set a user password (administrator; password policy and history apply)', screen: 'Master > User Management > User > Edit', middleware: [...admin, validate(z.object({ password: z.string().min(1) }))],
   request: { password: 'Welcome@123' }, response: { success: true, data: { userId: 'usr_1' } },

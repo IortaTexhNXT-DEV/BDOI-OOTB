@@ -40,8 +40,10 @@ export function toPolicy(r) {
     sumInsured: Number(r.sum_insured), totalSumInsured: Number(r.sum_insured), netPremium: Number(r.net_premium), grossPremium: Number(r.premium_total),
     premiumTotal: Number(r.premium_total), commissionAmount: Number(r.commission_amount), currency: r.currency, billNumber: r.bill_number,
     billingMode: r.billing_mode || 'broker', isDirectBilled: r.billing_mode === 'direct',
-    valueAddedTax: quote?.valueAddedTax, documentaryStampTax: quote?.documentaryStampTax, localGovernmentTax: quote?.localGovernmentTax,
-    fireServiceTax: quote?.fireServiceTax, discount: quote?.discount, accountPremiumOthers: quote?.accountPremiumOthers,
+    // premium taxes as priced on the quotation, else as stored on the policy itself (placement slip, package, upload)
+    valueAddedTax: quote?.valueAddedTax ?? doc.valueAddedTax, documentaryStampTax: quote?.documentaryStampTax ?? doc.documentaryStampTax,
+    localGovernmentTax: quote?.localGovernmentTax ?? doc.localGovernmentTax, fireServiceTax: quote?.fireServiceTax ?? doc.fireServiceTax,
+    discount: quote?.discount ?? doc.discount, accountPremiumOthers: quote?.accountPremiumOthers ?? doc.accountPremiumOthers,
     renewedFrom: r.renewed_from, renewedTo: r.renewed_to, client, lead: r.lead_row ? toLead(r.lead_row) : null, quotation: quote,
     fireRiskDetails: doc.fireRiskDetails || quote?.fireRiskDetails, firePremiumDetails: doc.firePremiumDetails || quote?.firePremiumDetails,
     createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
@@ -53,9 +55,34 @@ export const POLICY_SELECT = `SELECT p.*, ic.name AS insurer_name, pr.name AS pr
   FROM policies p LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN leads l ON l.id = p.lead_id LEFT JOIN quotes q ON q.id = p.quote_id
   LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN products pr ON pr.id = p.product_id`;
 
+const TAX_KEYS = ['valueAddedTax', 'documentaryStampTax', 'localGovernmentTax', 'fireServiceTax'];
+const hasTaxes = (p) => TAX_KEYS.some((k) => p[k] !== undefined && p[k] !== null);
+
+/**
+ * Premium taxes of a policy that only has its net and gross premium (bulk upload, go-live migration): the premium tax
+ * engine (Master > Premium Taxes & LGU Rates) priced on the net premium of its line. Returned only when net + taxes +
+ * charges agree with the recorded gross premium (to the peso), so a policy priced on other terms never shows invented
+ * figures; otherwise null.
+ */
+export async function derivedPremiumTaxes({ lob, productId = null, netPremium, grossPremium }, db = null) {
+  const net = round2(num(netPremium));
+  const gross = round2(num(grossPremium));
+  if (!(net > 0) || !(gross > net)) return null;
+  const { quotationCharges } = await import('../premium-charges/service.js');
+  const c = await quotationCharges({ productId }, net, lobOf(lob), db);
+  const others = round2(c.others);
+  const total = round2(net + TAX_KEYS.reduce((s, k) => s + num(c.tax[k]), 0) + others);
+  if (Math.abs(total - gross) > 1) return null;
+  return { ...Object.fromEntries(TAX_KEYS.map((k) => [k, round2(num(c.tax[k]))])), accountPremiumOthers: others, discount: 0 };
+}
+
 /** Policy API shape with its co-insurance participants (risk_participants) and the placement it was issued from. */
 export async function policyWithParticipants(row, db = null) {
-  const p = toPolicy(row);
+  let p = toPolicy(row);
+  if (!hasTaxes(p)) {
+    const derived = await derivedPremiumTaxes({ lob: p.lob, productId: row.product_id, netPremium: p.netPremium, grossPremium: p.grossPremium }, db);
+    if (derived) p = { ...p, ...derived, premiumTaxesDerived: true };
+  }
   const participants = await participantsOf('policy', row.id, db);
   return { ...p, participants, isCoInsurance: participants.length > 1 || Boolean(p.isCoInsurance), placementId: row.placement_id || null };
 }
@@ -363,7 +390,9 @@ export async function importPolicy(db, p, userId, { migration = false } = {}) {
     clientId: cl.rows[0].id, insuranceCompanyId: icId, sumInsured: p.sumInsured, netPremium: p.netPremium, grossPremium: p.grossPremium,
     commissionAmount: round2(p.netPremium * rate), commissionRate: rate, currency: await baseCurrency(),
     insuredName: p.insuredName, productType: p.productType, lob: lobOf(p.productType), agentUserId: userId, ownerUserId: userId,
-    doc: { plateNumber: p.plateNumber, source: migration ? 'go-live-migration' : 'bulk-upload' }, migration,
+    doc: { plateNumber: p.plateNumber, source: migration ? 'go-live-migration' : 'bulk-upload',
+      // the premium breakdown the uploaded net and gross agree with (VAT, DST, LGT, FST of the line)
+      ...((await derivedPremiumTaxes({ lob: lobOf(p.productType), netPremium: p.netPremium, grossPremium: p.grossPremium }, db)) || {}) }, migration,
   }, { policyNumber: p.policyNumber, inception: p.inception, expiry: p.expiry, issuedDate: p.issuedDate, paymentStatus: p.paymentStatus, insuranceCompanyName: p.insuranceCompanyName }, userId);
 }
 

@@ -281,7 +281,7 @@ export async function acceptanceCheck(policy, lossDate) {
   if (await getSetting('claims.block_unpaid_premium', true)) {
     const due = (await one(`SELECT COALESCE(sum(balance), 0)::numeric AS due FROM receivables
       WHERE policy_id = $1 AND balance > 0 AND status NOT IN ('paid', 'written-off')`, [policy.id])).due;
-    if (due > 0) problems.push({ code: 'UNPAID_PREMIUM', message: `Policy ${policy.policy_number} has unpaid premium of ${due}`, outstanding: due });
+    if (due > 0) problems.push({ code: 'UNPAID_PREMIUM', message: `Policy ${policy.policy_number} has unpaid premium of ${await formatMoney(due)}`, outstanding: due });
   }
   return problems;
 }
@@ -529,17 +529,17 @@ export async function settleClaim(id, input, user, files) {
   await saveFiles(files, row.id, user);
   if (from === 'approved') {
     const final = settlement.settlementAmount ?? row.approved_amount;
-    if (row.approved_amount != null && final > row.approved_amount) throw unprocessable(`Settlement amount exceeds the approved amount ${row.approved_amount}`);
+    if (row.approved_amount != null && final > row.approved_amount) throw unprocessable(`Settlement amount exceeds the approved amount ${await formatMoney(row.approved_amount)}`);
     await transition(row, 'settled', user, { note: 'Settlement paid', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), settled_amount: final, settled_at: await settledAt(settlement) } });
     await postBrokerSettlement(row.id, user);
     return { from, claim: await getClaim(row.id) };
   }
   if (from !== 'in-review') throw conflict(`Claim is ${from}; settlement can be submitted only while it is in review`);
   if (!(amount > 0)) throw badRequest('settlementAmount must be greater than zero');
-  if (row.policy_sum_insured > 0 && amount > row.policy_sum_insured) throw unprocessable(`Settlement amount exceeds the policy sum insured ${row.policy_sum_insured}`);
+  if (row.policy_sum_insured > 0 && amount > row.policy_sum_insured) throw unprocessable(`Settlement amount exceeds the policy sum insured ${await formatMoney(row.policy_sum_insured)}`);
   settlement.requestedBy = user?.username; settlement.requestedAt = new Date().toISOString();
   if (await getSetting('claims.settlement_maker_checker', true)) {
-    await transition(row, 'pending-approval', user, { note: `Settlement of ${amount} submitted for approval`, action: 'Settlement Submitted', sets: { settlement: JSON.stringify(settlement), settlement_requested_by: user?.id ?? null } });
+    await transition(row, 'pending-approval', user, { note: `Settlement of ${await formatMoney(amount)} submitted for approval`, action: 'Settlement Submitted', sets: { settlement: JSON.stringify(settlement), settlement_requested_by: user?.id ?? null } });
     // decided by the Claims role (write:claims and role claims): each claims user but the requester
     const approvers = (await usersWithRole('claims')).map((u) => u.id).filter((u) => u !== user?.id);
     await notifyApprovers({ users: approvers, document: 'Claim settlement', number: row.claim_number, by: user?.username || 'system',
@@ -567,7 +567,7 @@ export async function approveSettlement(id, { decision = 'approve', approvedAmou
   const amount = toNum(approvedAmount) ?? row.settlement?.settlementAmount;
   await assertAuthority(pool, user, 'claim_settlement', amount);
   const settlement = { ...(row.settlement || {}), approvedBy: user?.username, approvedAt: new Date().toISOString() };
-  await transition(row, 'approved', user, { note: note || `Settlement of ${amount} approved`, action: 'Settlement Approved', sets: { approved_amount: round2(amount), settlement: JSON.stringify(settlement), settlement_approved_by: user?.id ?? null, settlement_approved_at: new Date() } });
+  await transition(row, 'approved', user, { note: note || `Settlement of ${await formatMoney(amount)} approved`, action: 'Settlement Approved', sets: { approved_amount: round2(amount), settlement: JSON.stringify(settlement), settlement_approved_by: user?.id ?? null, settlement_approved_at: new Date() } });
   if (await getSetting('claims.auto_settle_on_approval', true)) {
     const settledAmount = Math.min(round2(settlement.settlementAmount ?? amount), round2(amount));
     await transition(row, 'settled', user, { note: 'Settlement released', action: 'Claim Settled', sets: { settled_amount: settledAmount, settled_at: await settledAt(settlement) } });

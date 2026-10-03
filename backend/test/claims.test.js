@@ -122,8 +122,14 @@ describe('claims', () => {
     expect((await as('c.maker', 'put', `/claims/${claim.id}`).send({ description: 'late edit' })).status).toBe(409);
     const cl = await as('c.maker', 'put', `/claims/updatestatus/${claim.id}`).send({ claimStatus: 'Closed' });
     expect(cl.body.data.lifecycleStatus).toBe('closed');
-    const hist = (await ctx.api('get', `/claims/${claim.id}`)).body.data.history.map((h) => h.status);
+    const history = (await ctx.api('get', `/claims/${claim.id}`)).body.data.history;
+    const hist = history.map((h) => h.status);
     expect(hist).toEqual(['registered', 'in-review', 'pending-approval', 'approved', 'settled', 'closed']);
+    // amounts in the notes (and the notifications made from them) read as money, not 65000
+    const { formatMoney } = await import('../src/lib/money.js');
+    expect(history.find((h) => h.status === 'pending-approval').note).toBe(`Settlement of ${await formatMoney(70000)} submitted for approval`);
+    expect(history.find((h) => h.status === 'approved').note).toBe(`Settlement of ${await formatMoney(65000)} approved`);
+    expect(await formatMoney(65000)).toMatch(/65,000\.00/);
     expect((await as('c.maker', 'put', `/claims/updatestatus/${claim.id}`).send({ claimStatus: 'Approved' })).status).toBe(409);
   });
   it('rejects a claim and returns the field-level audit trail', async () => {

@@ -150,6 +150,9 @@ export async function getDisbursement(db, id) {
   const inv = (await db.query(`SELECT * FROM invoice_lists WHERE disbursement_id = $1
     OR (disbursement_id IS NULL AND status = 'open' AND $2::text IS NOT NULL AND customer_code = $2) ORDER BY created_at`, [d.id, d.payee_type === AGENT ? null : d.customer_code])).rows;
   out.invoiceList = await invoiceRowsWithCheckbooks(db, inv);
+  // every cheque of the voucher: issued against one of its invoice-list lines or on the voucher itself
+  out.cheques = (await db.query(`SELECT * FROM checkbooks WHERE disbursement_id = $1 OR invoice_list_id = ANY($2::text[]) ORDER BY created_at`,
+    [d.id, inv.filter((i) => i.disbursement_id === d.id).map((i) => i.id)])).rows.map(checkbookRow);
   if (d.payee_type === AGENT) {
     const lines = (await db.query('SELECT * FROM commissions WHERE disbursement_id = $1 ORDER BY cycle_date', [d.id])).rows;
     out.commissionLines = await Promise.all(lines.map(lineView));

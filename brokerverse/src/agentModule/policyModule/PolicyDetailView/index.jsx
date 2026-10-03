@@ -17,7 +17,7 @@ import { policyDetailsDataMiddleWare } from "../store/policyMiddleWare";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
 import { isFireLob } from "../../endorsementModule/constants/endorsementCategories";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import s3Service from "../../../services/s3Service";
+import s3Service, { browserFileUrl } from "../../../services/s3Service";
 import billingService from "../../../services/billingService";
 import documentTemplateService from "../../../services/documentTemplateService";
 import authService from "../../../services/authService";
@@ -283,6 +283,23 @@ HighlightCard.defaultProps = {
   helper: null,
   tone: undefined,
 };
+
+
+/** Vehicle photo; a photo that cannot be loaded (missing file, expired link) shows a placeholder, not the alt text. */
+const VehiclePhoto = ({ src, alt, className }) => {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+  if (failed) {
+    return (
+      <div className={`${className} vehicle-photo-placeholder`} role="img" aria-label={alt}>
+        <i className="pi pi-image" aria-hidden="true" />
+        <span>{alt}</span>
+      </div>
+    );
+  }
+  return <img className={className} src={src} alt={alt} onError={() => setFailed(true)} />;
+};
+VehiclePhoto.propTypes = { src: PropTypes.string.isRequired, alt: PropTypes.string, className: PropTypes.string };
 
 const PolicyDetailView = () => {
   const { t } = useTranslation();
@@ -858,53 +875,29 @@ const PolicyDetailView = () => {
   ];
   const breadcrumbHome = { label: t("policyDetail.breadcrumbHome") };
 
+  // A stored photo is shown through its signed URL; a bare storage key cannot be opened by the browser.
+  const photoSrc = (key) => {
+    if (!key) return null;
+    const signed = vehiclePhotoUrls[key];
+    if (signed) return signed;
+    return /^(https?:)?\/\//.test(key) || key.startsWith("/") ? browserFileUrl(key) : null;
+  };
   const vehicleImages = [
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleLeftSidePhoto] ||
-        rawPolicyData?.vehicleLeftSidePhoto,
-      alt: t("policyDetail.vehiclePhotoLeftSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleRightSidePhoto] ||
-        rawPolicyData?.vehicleRightSidePhoto,
-      alt: t("policyDetail.vehiclePhotoRightSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleFrontSidePhoto] ||
-        rawPolicyData?.vehicleFrontSidePhoto,
-      alt: t("policyDetail.vehiclePhotoFrontSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleRearSidePhoto] ||
-        rawPolicyData?.vehicleRearSidePhoto,
-      alt: t("policyDetail.vehiclePhotoRearSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleInteriorDashboardPhoto] ||
-        rawPolicyData?.vehicleInteriorDashboardPhoto,
-      alt: t("policyDetail.vehiclePhotoInterior"),
-    },
-  ].filter((image) => image.itemImageSrc);
+    [rawPolicyData?.vehicleLeftSidePhoto, t("policyDetail.vehiclePhotoLeftSide")],
+    [rawPolicyData?.vehicleRightSidePhoto, t("policyDetail.vehiclePhotoRightSide")],
+    [rawPolicyData?.vehicleFrontSidePhoto, t("policyDetail.vehiclePhotoFrontSide")],
+    [rawPolicyData?.vehicleRearSidePhoto, t("policyDetail.vehiclePhotoRearSide")],
+    [rawPolicyData?.vehicleInteriorDashboardPhoto, t("policyDetail.vehiclePhotoInterior")],
+  ]
+    .map(([key, alt]) => ({ itemImageSrc: photoSrc(key), alt }))
+    .filter((image) => image.itemImageSrc);
 
   const galleryItemTemplate = (item) => (
-    <img
-      className="vehicle-gallery-image"
-      src={item.itemImageSrc}
-      alt={item.alt}
-    />
+    <VehiclePhoto className="vehicle-gallery-image" src={item.itemImageSrc} alt={item.alt} />
   );
 
   const galleryThumbnailTemplate = (item) => (
-    <img
-      className="vehicle-gallery-thumbnail"
-      src={item.itemImageSrc}
-      alt={item.alt}
-    />
+    <VehiclePhoto className="vehicle-gallery-thumbnail" src={item.itemImageSrc} alt={item.alt} />
   );
 
   if (loading) {
