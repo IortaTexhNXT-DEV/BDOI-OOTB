@@ -617,7 +617,7 @@ Incentive programme results for programmes active in the period: target, achieve
 | Item | Detail |
 |---|---|
 | Code | `incentive-results` |
-| Menu | Reports > All Reports > Incentive Results (definition screen: Accounts > Incentive > Reports) |
+| Menu | Reports > All Reports > Incentive Results (definition screen: incentive reports, /incentive/reports) |
 | Used by | Accounting (and Accounting Manager), Sales & Marketing; System Administrator |
 | Permission | `read:reports` and one of the roles above |
 | Report Criteria | Overall, Program, Agent, Branch (default Overall) |
@@ -1230,10 +1230,9 @@ These outputs are produced on the module screens. They are not in the report cat
 | Accounting entries export | Accounts > Accounting Query > Export | CSV | `read:journal-vouchers`, `read:receipts` or `read:disbursements` | Entries matching the search filters (dates, account, reference). |
 | Renewal batch report | Operations > Renewals > Renewal Batch > Generate Report | Excel or CSV | `read:renewals` | Policies of the batch with notice and quote status. |
 | Remittance statement | Accounts > Remittance > Statements > Generate | CSV (optionally e-mailed as a link) | `read:remittance` / `write:remittance` | Transaction Date, Remittance No, Policy Number, Insured Name, Insurer, Premium, Commission, Taxes, Net Amount, Status for a period and insurers. |
-| Remittance reports | Accounts > Remittance > Reports > Generate | CSV | `write:remittance` | Templates Daily Remittance Summary (RPT-001) and Monthly Commission Analysis (RPT-002) for a date range. |
-| Reinsurance bordereaux | Reinsurance > Reports > Bordereau; Reinsurance > Reconciliation | CSV | `read:reinsurance` / `write:reinsurance` | Premium bordereau (confirmed cessions) or claims bordereau (recoveries) for a period. |
-| Reinsurance reports | Reinsurance > Reports | CSV | `write:reinsurance` | Templates Monthly Premium Bordereau (RPT001), Quarterly Claims Report (RPT002), Annual Treaty Performance (RPT003), IC Quarterly Submission (RPT004). |
-| Incentive reports | Accounts > Incentive > Reports | CSV | `write:incentive` | Templates Monthly Payout Summary, Agent Payout Details, Target Achievement Report, Top Performers, Program Effectiveness. |
+| Reinsurance bordereaux | Reinsurance > Treaty Dashboard > Generate Report > Bordereau; Reinsurance > Reconciliation | CSV | `read:reinsurance` / `write:reinsurance` | Premium bordereau (confirmed cessions) or claims bordereau (recoveries) for a period. |
+| Reinsurance reports | Reinsurance > Treaty Dashboard > Generate Report | CSV | `write:reinsurance` | Templates Monthly Premium Bordereau (RPT001), Quarterly Claims Report (RPT002), Annual Treaty Performance (RPT003), IC Quarterly Submission (RPT004). |
+| Incentive reports | Incentive reports screen (address /incentive/reports; no menu entry) | CSV | `write:incentive` | Templates Monthly Payout Summary, Agent Payout Details, Target Achievement Report, Top Performers, Program Effectiveness. |
 | Incentive statement | Accounts > Incentive > Statement | Screen | `read:incentive` or `read:profile` (own statement) | An agent's incentive statement for a period. |
 | Official receipts print | Accounts > Receipts > Bulk print / Print | PDF, one receipt per page | `read:receipts` | One receipt, or a customer code and date range. |
 | Payment vouchers print | Accounts > Disbursement > Bulk print | PDF, one voucher per page | `read:disbursements` | One voucher, or a customer code and date range. |

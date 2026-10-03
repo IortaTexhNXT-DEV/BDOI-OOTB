@@ -46,13 +46,13 @@ The screen lists every job with: Job, What it does, Schedule (in words, with the
 
 | Action | What it does | Who may use it |
 |---|---|---|
-| Run now (play icon) | Runs the job at once on the server you are connected to, records a run with Triggered by = your user name, and shows the result as a message. | Accounting role or an administrator role |
+| Run now (play icon) | Runs the job at once on the server you are connected to, records a run with Triggered by = your user name, and shows the result as a message. | Permission `write:schedules` (Accounting, System Administrator) |
 | Run history (clock icon) | Shows the last 100 runs: Started, Finished, Status, Triggered by, Result (the output in words, or the error). | Permission `read:schedules` (Accounting, System Administrator) |
-| Edit schedule (pencil icon) | Changes Schedule (cron) and Enabled. The dialog explains the cron format: minute hour day month weekday, for example `0 6 * * *` runs daily at 06:00 Asia/Manila time. Save reloads the timetable at once. | Accounting role or an administrator role |
+| Edit schedule (pencil icon) | Changes Schedule (cron) and Enabled. The dialog explains the cron format: minute hour day month weekday, for example `0 6 * * *` runs daily at 06:00 Asia/Manila time. Save reloads the timetable at once. | Permission `write:schedules` (Accounting, System Administrator) |
 
 > Job parameters (for example the days before period end of the month-end reminder, or the list of reports of the daily-reports job) are not on the Edit dialog. A System Administrator changes them through the API: `PUT /api/schedules/<code>` with `{"params": {...}}`.
 
-> The Edit dialog does not check the cron expression. An invalid expression is saved, and the job is then left out of the timetable with only a warning in the server log. After every edit, check that Next run shows a date.
+> Save refuses an invalid cron expression with the message "... is not a valid schedule (five fields: minute hour day month weekday, e.g. 0 6 * * *)". After every edit, check that Next run shows the expected date.
 
 To run a job on demand:
 
@@ -83,6 +83,7 @@ A job switched off can still be run with Run now. This is the way to use the per
 | Bank reconciliation auto-match (`bank-auto-match`) | Daily 05:45 | Off | `bankAutoMatch` | `bank_reconciliation.date_window_days`, `bank_reconciliation.group_max_lines`, match rules |
 | Renewal notices (`renewal-notices`) | Daily 06:00 | On | `renewalNotices` | `notification.renewal_reminder`, `limits.renewal_notice_days` (60, 30, 15) |
 | Remittance schedules (`remittance-schedules`) | Daily 06:15 | Off | `remittanceSchedules` | the schedules of Accounts > Remittance > Scheduling (insurers, cut-off days, frequency, next run date) |
+| Overdue data subject requests (`privacy-requests-due`) | Daily 07:00 | Off | `privacyRequestsDue` | `privacy.request_due_days` (15) sets the due dates |
 | Receivable ageing (`receivable-ageing`) | Daily 07:00 | On | `receivableAgeing` | `limits.receivable_ageing_buckets` (30, 60, 90, 120) |
 | Month-end close reminder (`month-end-reminder`) | Daily 08:00 | Off | `monthEndReminder` | job parameter `daysBefore` (3) |
 | Collection reminders (`collection-reminders`) | Daily 08:00 | On | `collectionReminders` | `collections.reminder_days_before` (7), `collections.reminder_repeat_days` (7), `collections.email_subject`, `collections.email_template` |
@@ -207,6 +208,14 @@ On day 1 of the month, posts the reversal of every accrual, commission deferral 
 
 Soft-closes every open regular period that ended more than `graceDays` (5) days ago, when none of the automatic blocking month-end checks fails (no unposted or pending journals, trial balance balances, suspense account cleared). Manual sign-offs are not considered. Periods with failing checks are skipped and listed with the reasons. In a soft-closed period only users with `approve:period-end` may post.
 
+## Remittance schedules (off)
+
+Runs the active remittance schedules of Accounts > Remittance > Scheduling whose next run date has come: draft remittances per insurer for the policies up to the cut-off date, then the next run date moves on by the frequency (Daily, Weekly, Monthly, Quarterly). The schedules have no timer of their own; this job is their only timer and runs them in the business time zone. Run Now on the Scheduling screen runs one schedule at once. The drafts still go through Accounts > Remittance > Approval Workflow.
+
+## Overdue data subject requests (off)
+
+Notifies the holders of `read:privacy` (high priority, link to Master > Data Privacy > Data Subject Requests) of every open data subject request past its due date: "Data subject request DSR-2026-00001 is overdue". A request is reminded at most once in 20 hours, so a rerun on the same day sends nothing new. Output: overdue, notified.
+
 ## Bank reconciliation auto-match (off)
 
 Runs the automatic matching rules (adjustment, contra, reference, amount and date, one-to-many, many-to-one) on every active bank account linked to a GL cash account that has unmatched statement lines. Each account is processed on its own; an error on one account does not stop the others. It never matches into a period whose reconciliation is approved. Output: accounts, matches per account. Safe to rerun: it only looks at unmatched lines. Matching also runs right after each statement import when `bank_reconciliation.auto_match_on_import` is on (default), which is why the job ships switched off.
@@ -261,8 +270,8 @@ Rules common to all uploads:
 
 | Upload | Screen | Rule | Notes |
 |---|---|---|---|
-| Leads | Operations > Leads/Prospects > Bulk Upload | Row by row | First Name or Company Name required. |
-| Quotations | Operations > Quotation > Bulk Upload | Row by row | With a Lead Id the quotation joins that lead, else a new lead is created; premiums are recalculated from the rate and tariff. |
+| Leads | Operations > Sales & Marketing > Prospects > Bulk Upload | Row by row | First Name or Company Name required. |
+| Quotations | Operations > Sales & Marketing > Quotations > Bulk Upload | Row by row | With a Lead Id the quotation joins that lead, else a new lead is created; premiums are recalculated from the rate and tariff. |
 | Policies | Operations > Policy > Bulk Upload | Row by row | New business: client, policy (insurer at 100%), premium bill, booking journal and commission. Go-live mode ("Existing policies (go-live)"): client and policy only. Co-insured policies cannot be uploaded. |
 | Official receipts | Accounts > Receipts > Bulk upload | Row by row | Each row issues an OR, applies it to the oldest open bills of the policy and posts the journal; the receipt date must be in an open period. |
 | Payment vouchers | Accounts > Disbursement > Bulk upload | Row by row | Each row creates a draft voucher, then approved and paid on screen (maker-checker). |
@@ -307,7 +316,7 @@ The full column lists are in the templates and in `docs/templates/README.md`.
 | Approval | Accounts > Remittance > Approval Workflow | Submitted remittances | Approve or reject (the approver must not be the submitter); the initiator is notified. |
 | Statements | Accounts > Remittance > Statements | Period and insurers | CSV statement, optionally e-mailed as a link. |
 
-> The remittance schedules on Accounts > Remittance > Scheduling are not connected to the scheduler: they do not run on their own and do not appear on Master > Schedules. Their Next Run date is information only (the seeded schedules even carry the time zone EST). Run them with Run Now, or execute Automated Processing on the agreed day.
+> The remittance schedules on Accounts > Remittance > Scheduling run only through the job `remittance-schedules` on Master > Schedules, delivered switched off. Until it is switched on, run them with Run Now or execute Automated Processing on the agreed day.
 
 ## Month-end close run
 
@@ -377,7 +386,8 @@ The run book lists what happens on its own and what the team checks or starts. T
 | 05:30 | Renewal pipeline | Policy expiry has run |
 | 05:45 | Bank auto-match (if switched on) | Statements imported |
 | 06:00 | Renewal notices (in-app) | Renewal pipeline |
-| 07:00 | Receivable ageing | |
+| 06:15 | Remittance schedules (if switched on) | Collected premium up to the cut-off date |
+| 07:00 | Receivable ageing; overdue data subject requests (if switched on) | |
 | 08:00 | Collection reminders; month-end reminder (if switched on) | E-mail outbox for delivery |
 
 ## Daily checklist
@@ -410,12 +420,9 @@ The run book lists what happens on its own and what the team checks or starts. T
 | No. | Observation | Suggested action |
 |---|---|---|
 | 1 | No alert when a scheduled job fails; failures are visible only on Master > Schedules and in the server log. | Add an alert on the log line or a notification on failure; meanwhile check the screen daily. |
-| 2 | The Edit dialog on Master > Schedules does not validate the cron expression; an invalid one silently drops the job from the timetable. | Validate on save; check Next run after each edit. |
-| 3 | Job parameters (`daysBefore`, `graceDays`, `reports`) can only be changed through the API, though the period-end notes refer to Master > Schedules. | Add a parameters field to the Edit dialog. |
-| 4 | Edit and Run now check the Accounting role, not the permission `write:schedules` that the System Administrator role holds. | Align the check with the permission. |
-| 5 | The Renewal notices job only reaches policies expiring exactly 60, 30 or 15 days ahead; a missed day is not caught up. The job creates in-app reminders only. | Run the Renewal Queue daily; consider a window instead of an exact day. |
-| 6 | The Receivable ageing job description says it notifies collections; it does not. | Correct the description or add the notification. |
-| 7 | Quotation expiry counts from the creation date, not from Valid Until. | Decide which rule the broker wants. |
-| 8 | Remittance schedules (Accounts > Remittance > Scheduling) are not run by the scheduler; seeded with time zone EST. | Run with Run Now, or connect them to `scheduled_jobs`. |
-| 9 | Report schedules have no screen (API only). | See the Reports Book. |
-| 10 | Missed runs during downtime are not caught up by the scheduler. | After an outage, use Run now for the daily jobs of the missed day. |
+| 2 | Job parameters (`daysBefore`, `graceDays`, `reports`) can only be changed through the API, though the period-end notes refer to Master > Schedules. | Add a parameters field to the Edit dialog. |
+| 3 | The Renewal notices job only reaches policies expiring exactly 60, 30 or 15 days ahead; a missed day is not caught up. The job creates in-app reminders only. | Run the Renewal Queue daily; consider a window instead of an exact day. |
+| 4 | The Receivable ageing job description says it notifies collections; it does not. | Correct the description or add the notification. |
+| 5 | Quotation expiry counts from the creation date, not from Valid Until. | Decide which rule the broker wants. |
+| 6 | Report schedules have no screen (API only). | See the Reports Book. |
+| 7 | Missed runs during downtime are not caught up by the scheduler. | After an outage, use Run now for the daily jobs of the missed day. |

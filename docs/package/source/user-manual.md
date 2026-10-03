@@ -211,7 +211,7 @@ Maker-checker means that the user who enters a transaction cannot approve it. Br
 | Claim settlement | The Claims user who submits it | Another Claims user | `claims.settlement_maker_checker` |
 | Journal voucher, correction and reversal | Accounting | Another Accounting user or the Accounting Manager | `journal.require_approval`, `finance.maker_checker_enabled` |
 | Payment voucher, cheque, commission payout, petty cash | Accounting | Another Accounting user | `finance.maker_checker_enabled` |
-| Remittance, settlement and adjustment | Accounting | Another Accounting user; level by amount | `remittance.approval_levels` |
+| Remittance, settlement and adjustment | Accounting | Another user within the Remittance approval or Remittance settlement limit (Accounting up to PHP 1,000,000.00, Accounting Manager without limit) | Authority Matrix |
 | Commission debit note (direct bill) | Accounting | Another Accounting user | built in |
 | Incentive calculation batch | Accounting | Another Accounting user | built in |
 | Month-end and year-end close | Accounting | Accounting Manager | `accounting.period_close_requires_approval` |
@@ -319,10 +319,9 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 
 | Menu | Items |
 |---|---|
-| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox |
-| Master > Generals | Organization (Company, Branch); Insurance Management (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle); Location (Country, State, City); Commission; Employee Management (Hierarchy, Designation, Employee); User Management (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
-| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Petty Cash, Remittance Master |
-| Master | Incentive Programs, Reinsurance Treaty |
+| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Data Privacy (Data Subject Requests, Consent Register) |
+| Master > Generals | Organization (Company, Branch); Insurance Management (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle); Location (Country, State, City); Employee Management (Hierarchy, Designation); User Management (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
+| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Remittance Master, Incentive Programs, Reinsurance Treaty |
 
 ## Daily and periodic tasks
 
@@ -441,12 +440,11 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Signatories | Authorised signatories of quotations and documents. |
 | Vehicle | Vehicle brands, models, variants and seating; **Upload** loads them from a template. |
 | Country, State, City | The address lists (a province is a State). |
-| Commission | The sharing of commission with referrers by insurer, product and cover. |
-| Hierarchy, Designation, Employee | The staff structure. |
+| Hierarchy, Designation | The staff structure. A staff member's branch, designation and reporting line are kept on the user (Master > Generals > User Management > User). |
 | Transaction Code, Currency, Exchange Rate | Accounting transaction codes, currencies and rates. |
 | Bank | Banks and the broker's bank accounts, each linked to its GL cash account and statement format. |
 | Account Category, Main Account, Sub Account | The chart of accounts. |
-| Petty Cash, Remittance Master | Petty cash funds; remittance schedules per insurer. |
+| Remittance Master | Automated remittance, statement templates, settlement parameters, bulk processing formats, exceptions, agency bill, adjustment and notification templates. |
 
 ### Uploads
 
@@ -506,7 +504,7 @@ The jobs, their times and what they do are listed in the BrokerVerse Schedules a
 
 ![Master > E-mail Outbox](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-outbox.png)
 
-Every e-mail the system queues (quotation approval links, requests for quotation, placement slips, loss advices, renewal notices, reminders, debit notes) is listed with **Status**, **To**, **Subject**, **Record**, **Attempts**, **Last error**, **Created** and **Sent**. The E-mail outbox job sends queued messages every 5 minutes; **Retry** sends a failed message again. Nothing leaves the system until **Send e-mails** (`notification.email_enabled`) is on and the mail server is set on the server; until then the screen says so and messages stay queued. Review the outbox before switching sending on.
+Every e-mail the system queues (quotation approval links, requests for quotation, placement slips, loss advices, renewal notices, reminders, official receipts, premium invoices, debit notes) is listed with **Status**, **To**, **Subject**, **Record**, **Attachments**, **Attempts**, **Last error**, **Created** and **Sent**. **Attachments** names the PDF files sent with the message (official receipt, premium invoice, policy schedule, commission debit note); the PDF is produced when the message is sent. A message whose attachments exceed `email.max_attachment_mb` (10 MB) fails with the reason in **Last error**. The E-mail outbox job sends queued messages every 5 minutes; **Retry** sends a failed message again. Nothing leaves the system until **Send e-mails** (`notification.email_enabled`) is on and the mail server is set on the server; until then the screen says so and messages stay queued. Review the outbox before switching sending on.
 
 ## Audit Trail
 
@@ -517,6 +515,22 @@ Every e-mail the system queues (quotation approval links, requests for quotation
 3. Select **Search**. The list shows **When**, **User**, **Record type**, **Record ID**, **Action** and **Change** (before and after values).
 
 Use it for investigations, access reviews and to show that maker and checker were different people.
+
+## Data privacy
+
+The Data Privacy menu supports the broker's Data Protection Officer under the Data Privacy Act. The System Administrator and Operations roles hold the privacy permissions (`read:privacy`, `write:privacy`).
+
+**Consent.** Consent is recorded on the client (tab **Data privacy**) and on the prospect view, per purpose: **Processing** (privacy notice acknowledged), **Marketing** and **Sharing with insurers**. Select **Record consent**, choose the purpose, **Given** or **Refused**, the channel (Form, E-mail, Phone, Portal, In person), the evidence and the notice version (the version in force, `privacy.notice_version`, by default). **Withdraw** ends a consent with a reason; the record stays in the history. Master > Data Privacy > Consent Register lists every consent of every client and prospect, with **Current status only** to see the latest per purpose.
+
+**Requests.** Master > Data Privacy > Data Subject Requests is the register of requests:
+
+1. Select **Log request**. Enter the requester name and contact, the request type (Access, Rectification, Erasure or blocking, Objection, Data portability, Withdraw consent), the request details and the date received. Search the client or prospect, or leave it empty while the requester is not yet identified.
+2. Save. The request takes a number from the DSR series and a due date `privacy.request_due_days` (15) calendar days after the date received. The cards count **Open**, **Overdue**, **Completed** and **Rejected**.
+3. Use the download icon (**Export personal data**) to give the data subject a copy, as JSON or Excel; the export is noted on the request.
+4. For an erasure, use **Anonymise**. The dry run shows what would be cleared per record type, or why the data must be kept for now (for example policies in force, open bills or claims, or less than `privacy.retention_years` (10) years since the last policy expiry). Names are replaced by an anonymised label and contact details, addresses, ID numbers, birth date and personal notes are cleared; policy, receipt and claim numbers, amounts and dates are kept for the books.
+5. Select **Close**, record the outcome told to the data subject, and close the request as Completed or Rejected.
+
+The job `privacy-requests-due` (Master > Schedules, delivered switched off) notifies the privacy team every morning of open requests past their due date.
 
 ## Finance set-up shared with the Accounting Manager
 
@@ -559,7 +573,7 @@ The account executive (role Sales & Marketing (Account Executive)) finds and rec
 | Daily | Record the client's payment | Policy > **Proceed to Payment** |
 | Daily | Work the quotations still with the customer and the pending payments | Open Items |
 | Weekly | Follow up the renewals of your clients | Renewals > Renewal Queue, At-Risk Policies, Negotiations |
-| Monthly | Check your production, commission and incentives | Sales Dashboard, Commission Dashboard, Reports > Production |
+| Monthly | Check your production, commission and incentives | Sales Dashboard, Commission Dashboard, Reports > Operational Reports > Production |
 
 ## Sales Dashboard
 
@@ -818,7 +832,7 @@ The Processing Team (role Processing Team (Placement & Policy Processing)) works
 | Operations | Home; Sales & Marketing (Prospects, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (all items); Open Items; Payments |
 | Reinsurance | Treaty Dashboard, Cession Tracking, Claims Recovery, Reconciliation, Analytics |
 | Reports | All Reports; Operational Reports |
-| Product Configurator | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Approval Workflows, Market Mapping, Risk Mapping, Product Analytics |
+| Product Configurator | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping, Product Analytics |
 
 The Processing Team reads prospects but does not create them, and has no Quick Quote: Quick Quote creates prospects and quotations, which is Sales and Operations work.
 
@@ -1002,7 +1016,6 @@ Renewal terms submitted from Renewals > Negotiations with **Request approval** c
 | Rating Engine | Keep the rating factors (vehicle age, driver age, no claim bonus, vehicle use, region and others) with their rules, and test them with the **Test Calculator**. |
 | Acceptance Rules | Keep the insurers' underwriting guidelines as acceptance, validation and loading rules (**Add Rule**). |
 | Document Manager | Keep the document templates per stage, for example the motor policy schedule and the CTPL certificate (**Upload Template**). |
-| Approval Workflows | Keep the approval steps for new products and rate changes, with their SLA (**Create Workflow**). |
 | Market Mapping | Map products to insurers with the insurer's code, commission, override and target (**Map Product**). |
 | Risk Mapping | Product definitions per line; Industrial All Risks is defined by risk sections. |
 | Product Analytics | Policies, premium, loss ratio and margin by product. |
@@ -1085,7 +1098,7 @@ A client is a person or company that holds or has held a policy. BrokerVerse cre
 | **Claim** | The client's claims with status. |
 | **Renewal** | Renewals due and quoted. |
 | **Endorsement** | The client's endorsements with number, type, policy, status and payment. |
-| **Data privacy** | The client's data privacy record. |
+| **Data privacy** | Consent per purpose (Processing, Marketing, Sharing with insurers) with channel, evidence and notice version; **Record consent**, **Withdraw**, **Show history**. |
 
 To correct the name, address or contact details of a client with an issued policy, raise a Personal Details Change endorsement, so the change is recorded against the policy and sent to the insurer.
 
@@ -1232,7 +1245,7 @@ The Claims role lands on the Claims Dashboard.
 | Daily | Follow open claims with the insurer and adjuster | Operations > Claims |
 | Daily | Approve settlements entered by another Claims user | Notification; claim in Pending Approval |
 | Daily | Watch overdue claims | Claims Dashboard |
-| Weekly | Review the claims position and ageing | Reports > Claims Position, Claims Ageing |
+| Weekly | Review the claims position and ageing | Reports > Operational Reports > Claims; Reports > All Reports > Claims Ageing |
 | As needed | Register reinsurance recoveries | Reinsurance > Claims Recovery |
 
 ## Claims Dashboard
@@ -1399,6 +1412,8 @@ The receipt gets the next number of the official receipt series (OR-YYYY-NNNNN, 
 
 The list shows **Receipt Number**, **Transaction Code**, **Transaction Number**, **Policy Number**, **Name**, **Customer Code**, **Date**, **Amount**, **Paid**, **UnPaid**, **Status** and **Payments**. **Bulk Print** prints receipts for a customer and date range on the company letterhead; **Bulk Upload** posts many receipts from a template (at most 1,000 rows, `limits.bulk_upload_max_rows`).
 
+**E-mail receipt** on the receipt view sends the official receipt to the client with its PDF attached. The side panel offers **To** (the client's e-mail address by default), **Cc** and a note; the message is queued in Master > E-mail Outbox. With `receipts.email_on_record` switched on, every recorded receipt is e-mailed automatically.
+
 ## Collections
 
 ![Accounts > Collections](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-collections.png)
@@ -1408,6 +1423,7 @@ Accounts > Collections lists every open premium with **Client Name**, **Policy N
 - The due date follows the insurer's premium payment warranty, else `collections.default_credit_days` (30 days).
 - Reminders are e-mailed to clients 7 days before the due date and then at most every 7 days by the Collection reminders job at 08:00 (`collections.reminder_days_before`, `collections.reminder_repeat_days`). **Send Payment Reminders Now** sends them at once.
 - The aging report (Collections > Aging Report) shows the total outstanding per bucket, a chart and the detail by client.
+- **E-mail invoice** on a collection item sends the premium invoice / statement of account of the bill to the client with its PDF attached (To, Cc and a note). With `billing.email_on_issue` switched on, a bill is e-mailed automatically when it is issued from a policy, endorsement or renewal.
 
 ![Collections aging report](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-ageing.png)
 
@@ -1457,7 +1473,7 @@ For broker-billed policies Accounting remits the collected premium, net of the b
 
 1. **Automated Processing**: the **Scheduled Remittances** list shows each insurer's remittance schedule, policies and estimated amount (Below minimum when there is nothing to remit). Tick the insurers that are ready, select **Validate**, then **Process Selected**. Draft remittances (REM-YYYY-NNNNN) are created. The due date follows the insurer's remittance terms, else `remittance.default_due_days` (30 days).
 2. **Tracking**: find the remittance (filters **Remittance No**, **Insurer**, **Date Range**, **Status**) and process it; it goes for approval.
-3. **Approval Workflow**: a second Accounting user approves it. The level depends on the amount: level 1 up to PHP 100,000.00, level 2 up to PHP 1,000,000.00, level 3 above (`remittance.approval_levels`). The initiator cannot approve.
+3. **Approval Workflow**: another user approves it within his or her limit for Remittance approval in Master > Generals > User Management > Authority Matrix. The delivered limits let an Accounting user approve up to PHP 1,000,000.00 and an Accounting Manager without limit; a larger remittance waits for the Accounting Manager. Cover during leave is given in User Management > Delegations. The initiator cannot approve.
 4. **Settlement**: choose the **Insurer code**, select **Add policies** (or **Import**), then **Calculate**: premium - commission - tax ± adjustments = **NET SETTLEMENT**. Select **Submit for approval** (or **Save draft**).
 5. The checker approves the settlement (SET-). The system raises the insurer payment voucher in Disbursement for the net amount.
 6. Approve and pay the voucher in Disbursement. The voucher becomes Paid and the remittance **Completed**.
@@ -1557,7 +1573,7 @@ The write-off reasons and their GL accounts are kept on Master > Finance > Accou
 | Receipts | Record money returned to the fund. |
 | Replenish | Top the fund back up from the bank. |
 
-The funds are defined on Master > Finance > Petty Cash. Requests are maker-checker. After a save the screen returns to its list.
+A fund is opened on Initiate, which issues its code (PCF-) when left empty and holds the fund size, the available cash, the maximum limit and the minimum cash box. Requests are maker-checker. After a save the screen returns to its list.
 
 ![Accounts > Petty Cash > Initiate: Add Petty Cash](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-pc-initiate-add.png)
 
@@ -1906,9 +1922,9 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Settlement | Insurer settlements (SET-): insurer, policies, calculation, adjustments, payment, workflow; **Save draft**, **Submit for approval**, **Print**. |
 | Reconciliation | Match imported bank transactions with remittances within PHP 0.50 (`remittance.reconciliation_tolerance`); **Import**, **Auto Match**, **Match Selected**, **Force Match**. |
 | Bulk Processing | Upload remittance data in bulk. |
-| Scheduling | Remittance schedules per insurer; **New schedule**, **Run now**. |
+| Scheduling | Remittance schedules per insurer (insurers, cut-off days, frequency, next run date); **New schedule**, **Run now**. The `remittance-schedules` job in Master > Schedules runs the due schedules daily once it is switched on. |
 | Electronic Transfer | Transfers by InstaPay, PESONet or RTGS (PhilPaSS) within their limits; **New transfer**, **Batch process**, **Export**. |
-| Approval Workflow | Approvals of remittances, settlements, transfers and adjustments by level (PHP 100,000.00; PHP 1,000,000.00; above); pending, overdue, history, delegation. |
+| Approval Workflow | Approvals of remittances, settlements, transfers and adjustments within the approver's Authority Matrix limit; pending, overdue and history. |
 | Exception Management | Remittance exceptions; assignment and reports. |
 | Agency Bill Processing | Statements of account (bills) to agencies; **Load agencies**, **Validate**, **Process bills**. |
 | Direct Bill Processing | Commission debit notes (DN-) to insurers; tabs Raise Debit Note, Debit Notes, Billing Mode. |
@@ -1959,7 +1975,9 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Document Numbering | Number series: prefix, format tokens, digits, counter reset, next number. |
 | Schedules | Scheduled jobs: timetable, status, next and last run; **Run now**, **Run history**, **Edit schedule**. |
 | Audit Trail | Every audited action by record type, record ID, user and dates. |
-| E-mail Outbox | Queued, sent and failed e-mails; **Retry**. |
+| E-mail Outbox | Queued, sent and failed e-mails with their attachments; **Retry**. |
+| Data Privacy > Data Subject Requests | Requests of data subjects (DSR-) with due dates; **Log request**, **Export personal data**, **Anonymise**, **Close**. |
+| Data Privacy > Consent Register | Consents given, refused and withdrawn by clients and prospects. |
 
 ### Generals
 
@@ -1972,8 +1990,7 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Insurance Management > Signatories | Authorised signatories of quotations and documents. |
 | Insurance Management > Vehicle | Vehicle brands, models, variants, seating; **Upload**. |
 | Location > Country, State, City | Address lists; **Upload**. |
-| Commission | Commission sharing with referrers by insurer, product and cover. |
-| Employee Management > Hierarchy, Designation, Employee | Staff structure. |
+| Employee Management > Hierarchy, Designation | Staff structure; branch, designation and reporting line are set on the user. |
 | User Management > User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews | Users and access controls (System Administrator chapter). |
 
 ### Finance
@@ -1995,8 +2012,7 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Taxation | Tax codes with rate, BIR ATC, GL account and effective date. |
 | Close Checklist | Month-end checklist items, automatic or manual, blocking or warning. |
 | Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats | How statement files are read; bank items and matching rules. |
-| Petty Cash | Petty cash funds. |
-| Remittance Master | Remittance schedules and settings per insurer. |
+| Remittance Master | Automated remittance, statement templates, settlement parameters, bulk processing formats, exceptions, agency bill, adjustment and notification templates. |
 
 ![Master > Finance > Premium Taxes & LGU Rates](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-premium-taxes.png)
 
@@ -2017,7 +2033,6 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Rating Engine | Rating factors with rules; Test Calculator. |
 | Acceptance Rules | Acceptance, validation and loading rules. |
 | Document Manager | Document templates per stage. |
-| Approval Workflows | Approval steps with SLA for product and rate changes. |
 | Market Mapping | Products mapped to insurers with commission, override and target. |
 | Risk Mapping | Product definitions per line; IAR risk sections. |
 | Product Analytics | Policies, premium, loss ratio and margin by product. |
@@ -2047,6 +2062,7 @@ Numbers follow their series on Master > Document Numbering. The delivered format
 | CWT | BIR Form 2307 |
 | PC, PCR, PCRC | Petty cash transaction, request, receipt |
 | CALC, INC | Incentive calculation, incentive programme |
+| DSR | Data subject request |
 | CES, RCL, REC, BDX, TRT | Cession, recovery, reinsurance reconciliation, bordereau, treaty |
 
 # Reports, dashboards, schedules and notifications
@@ -2096,7 +2112,7 @@ Dashboards show live figures; they change as soon as a transaction is saved. The
 
 ## Schedules
 
-BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy expiry (00:15), quotation expiry (00:30), dormant accounts (01:45), housekeeping (02:45), daily reports (05:00), renewal pipeline (05:30), renewal notices (06:00), receivable ageing (07:00), collection reminders (08:00), the e-mail outbox (every 5 minutes) and the renewal notice queue (every minute). Five finance jobs are delivered switched off: accrual auto-reversal, recurring journals, period auto soft-close, bank reconciliation auto-match and the month-end close reminder; Accounting decides whether to switch them on or run them from the screens. The System Administrator sees and runs the jobs on Master > Schedules. The BrokerVerse Schedules and Batch Jobs document describes each job, what it reads and writes, and what to do when it fails.
+BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy expiry (00:15), quotation expiry (00:30), dormant accounts (01:45), housekeeping (02:45), daily reports (05:00), renewal pipeline (05:30), renewal notices (06:00), receivable ageing (07:00), collection reminders (08:00), the e-mail outbox (every 5 minutes) and the renewal notice queue (every minute). Five finance jobs are delivered switched off: accrual auto-reversal, recurring journals, period auto soft-close, bank reconciliation auto-match and the month-end close reminder; Accounting decides whether to switch them on or run them from the screens. The remittance schedules job (06:15) and the overdue data subject requests job (07:00) are also delivered switched off. The System Administrator sees and runs the jobs on Master > Schedules. The BrokerVerse Schedules and Batch Jobs document describes each job, what it reads and writes, and what to do when it fails.
 
 ## Notifications and e-mails
 

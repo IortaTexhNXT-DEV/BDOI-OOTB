@@ -86,7 +86,7 @@ All templates were verified against the importers: each was loaded unchanged thr
 |---|---|---|
 | `Company_Upload_Template.xlsx` | Companies (letterhead, TIN, IC licence) | Master > Generals > Organization > Company (API route) |
 | `Branch_Upload_Template.xlsx` | Branches | Master > Generals > Organization > Branch (API route) |
-| `Department_Upload_Template.xlsx` | Departments | Master > Finance > Department (API route) |
+| `Department_Upload_Template.xlsx` | Departments | Master > Generals > Organization > Branch, departments of the branch (API route) |
 | `Users_Provisioning_Template.xlsx` / `.csv` | Users with role and initial password | Server script `backend/scripts/provision-users.js` |
 | `Hierarchy_Upload_Template.xlsx` | Ranks of the employee hierarchy | Employee Management > Hierarchy (API route) |
 | `Designation_Upload_Template.xlsx` | Designations | Employee Management > Designation (API route) |
@@ -106,7 +106,7 @@ All templates were verified against the importers: each was loaded unchanged thr
 | `Vehicle_Upload_Template.xlsx` | Vehicles | Insurance Management > Vehicle |
 | `Signatories_Upload_Template.xlsx` | Signatories | Insurance Management > Signatories (API route) |
 | `Chart_of_Accounts_Upload_Template.xlsx` | Main and sub accounts with statement group and normal balance | Master > Finance > Main Account > Upload |
-| `Transaction_Code_Upload_Template.xlsx` | Transaction codes with GL accounts and user limits | Master > Finance > Transaction code |
+| `Transaction_Code_Upload_Template.xlsx` | Transaction codes with GL accounts and user limits | Master > Finance > Transaction Code |
 | `Write_off_Reason_Upload_Template.xlsx` | Write-off reasons with GL account and maximum | Master > Finance > Account Determination (API route) |
 | `Bank_Upload_Template.xlsx` | Banks | Master > Finance > Bank |
 | `Bank_Account_Upload_Template.xlsx` | The broker's bank accounts with GL cash account, statement format and reconcile-from date | Master > Finance > Bank (Bank accounts) |
@@ -117,7 +117,7 @@ All templates were verified against the importers: each was loaded unchanged thr
 | `Quotations_Upload_Template.xlsx` | Quotations in progress | Operations > Sales & Marketing > Quotations > Bulk Upload |
 | `Receipts_Upload_Template.xlsx` | Official receipts against open bills (day-to-day use) | Accounts > Receipts > Bulk upload |
 | `Disbursements_Upload_Template.xlsx` | Payment vouchers, for example to pay amounts due to insurers at go-live | Accounts > Disbursement > Bulk upload |
-| `Bank_Statement_Generic_Upload_Template.xlsx` | Bank statements of banks without a delivered format | Accounts > Bank Reconciliation > Import statement |
+| `Bank_Statement_Generic_Upload_Template.xlsx` | Bank statements of banks without a delivered format | Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement |
 | `Remittance_Bank_Transactions_Template.xlsx` / `.csv` | Bank transactions for remittance reconciliation | Accounts > Remittance > Reconciliation > Import |
 | `Remittance_Bulk_Upload_Template.xlsx` | Policies for bulk remittance processing | Accounts > Remittance > Bulk Processing |
 
