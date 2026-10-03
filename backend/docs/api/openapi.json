@@ -77624,7 +77624,7 @@
     "/quotations/calculate-premium": {
       "post": {
         "operationId": "postQuotationsCalculatePremium",
-        "summary": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission) from rates in settings and the coverages master",
+        "summary": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission): cover rates from settings and the coverages master, taxes from Premium Taxes & LGU Rates",
         "tags": [
           "Quotations"
         ],
@@ -99286,6 +99286,15 @@
                               "name": {
                                 "type": "string"
                               },
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "decimals": {
+                                "type": "integer"
+                              },
+                              "isBase": {
+                                "type": "boolean"
+                              },
                               "locale": {
                                 "type": "string"
                               },
@@ -99294,6 +99303,9 @@
                               }
                             }
                           }
+                        },
+                        "baseCurrency": {
+                          "type": "string"
                         },
                         "updatedAt": {
                           "type": "string"
@@ -99324,10 +99336,14 @@
                       {
                         "code": "PHP",
                         "name": "Philippine Peso",
+                        "symbol": "₱",
+                        "decimals": 2,
+                        "isBase": true,
                         "locale": "en-PH",
                         "region": "Asia"
                       }
                     ],
+                    "baseCurrency": "PHP",
                     "updatedAt": "2026-09-28T00:00:00.000Z"
                   }
                 }
@@ -99412,6 +99428,15 @@
                               "name": {
                                 "type": "string"
                               },
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "decimals": {
+                                "type": "integer"
+                              },
+                              "isBase": {
+                                "type": "boolean"
+                              },
                               "locale": {
                                 "type": "string"
                               },
@@ -99420,6 +99445,9 @@
                               }
                             }
                           }
+                        },
+                        "baseCurrency": {
+                          "type": "string"
                         },
                         "updatedAt": {
                           "type": "string"
@@ -99450,10 +99478,14 @@
                       {
                         "code": "PHP",
                         "name": "Philippine Peso",
+                        "symbol": "₱",
+                        "decimals": 2,
+                        "isBase": true,
                         "locale": "en-PH",
                         "region": "Asia"
                       }
                     ],
+                    "baseCurrency": "PHP",
                     "updatedAt": "2026-09-28T00:00:00.000Z"
                   }
                 }
@@ -99819,6 +99851,15 @@
                               "name": {
                                 "type": "string"
                               },
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "decimals": {
+                                "type": "integer"
+                              },
+                              "isBase": {
+                                "type": "boolean"
+                              },
                               "locale": {
                                 "type": "string"
                               },
@@ -99827,6 +99868,9 @@
                               }
                             }
                           }
+                        },
+                        "baseCurrency": {
+                          "type": "string"
                         },
                         "updatedAt": {
                           "type": "string"
@@ -99857,10 +99901,14 @@
                       {
                         "code": "PHP",
                         "name": "Philippine Peso",
+                        "symbol": "₱",
+                        "decimals": 2,
+                        "isBase": true,
                         "locale": "en-PH",
                         "region": "Asia"
                       }
                     ],
+                    "baseCurrency": "PHP",
                     "updatedAt": "2026-09-28T00:00:00.000Z"
                   }
                 }
@@ -99993,6 +100041,15 @@
                               "name": {
                                 "type": "string"
                               },
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "decimals": {
+                                "type": "integer"
+                              },
+                              "isBase": {
+                                "type": "boolean"
+                              },
                               "locale": {
                                 "type": "string"
                               },
@@ -100001,6 +100058,9 @@
                               }
                             }
                           }
+                        },
+                        "baseCurrency": {
+                          "type": "string"
                         },
                         "updatedAt": {
                           "type": "string"
@@ -100031,10 +100091,14 @@
                       {
                         "code": "PHP",
                         "name": "Philippine Peso",
+                        "symbol": "₱",
+                        "decimals": 2,
+                        "isBase": true,
                         "locale": "en-PH",
                         "region": "Asia"
                       }
                     ],
+                    "baseCurrency": "PHP",
                     "updatedAt": "2026-09-28T00:00:00.000Z"
                   }
                 }
@@ -100141,6 +100205,15 @@
                               "name": {
                                 "type": "string"
                               },
+                              "symbol": {
+                                "type": "string"
+                              },
+                              "decimals": {
+                                "type": "integer"
+                              },
+                              "isBase": {
+                                "type": "boolean"
+                              },
                               "locale": {
                                 "type": "string"
                               },
@@ -100149,6 +100222,9 @@
                               }
                             }
                           }
+                        },
+                        "baseCurrency": {
+                          "type": "string"
                         },
                         "updatedAt": {
                           "type": "string"
@@ -100179,10 +100255,14 @@
                       {
                         "code": "PHP",
                         "name": "Philippine Peso",
+                        "symbol": "₱",
+                        "decimals": 2,
+                        "isBase": true,
                         "locale": "en-PH",
                         "region": "Asia"
                       }
                     ],
+                    "baseCurrency": "PHP",
                     "updatedAt": "2026-09-28T00:00:00.000Z"
                   }
                 }
@@ -101535,6 +101615,85 @@
             }
           }
         }
+      }
+    },
+    "/users/lookup": {
+      "get": {
+        "operationId": "getUsersLookup",
+        "summary": "Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)",
+        "tags": [
+          "User Management"
+        ],
+        "description": "Front-end touchpoint: Accounts > Petty Cash > Initiate; Request; Receipts\n\nAccess: read:users, read:disbursements",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "ana"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "userId": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "branchCode": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "userId": "usr_1",
+                      "name": "Ana Reyes",
+                      "branchCode": "MKT"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Petty Cash > Initiate; Request; Receipts",
+        "x-permissions": [
+          "read:users",
+          "read:disbursements"
+        ]
       }
     },
     "/users/stats": {

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (867 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (868 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -50251,7 +50251,7 @@
           ]
         },
         {
-          "name": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission) from rates in settings and the coverages master",
+          "name": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission): cover rates from settings and the coverages master, taxes from Premium Taxes & LGU Rates",
           "request": {
             "method": "POST",
             "header": [
@@ -50270,7 +50270,7 @@
                 "calculate-premium"
               ]
             },
-            "description": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission) from rates in settings and the coverages master\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Coverage details / Order summary\n\nAccess: read:quotations",
+            "description": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission): cover rates from settings and the coverages master, taxes from Premium Taxes & LGU Rates\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Coverage details / Order summary\n\nAccess: read:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"productType\": \"Motor\",\n  \"lossAndDamageCoverage\": 1000000,\n  \"lossAndDamageCoverageRate\": 1.5,\n  \"actsOfNatureRate\": 0.5,\n  \"bodilyInjury\": 200000,\n  \"propertyDamage\": 200000,\n  \"APPAtotalCoverage\": 250000,\n  \"discount\": 0\n}",
@@ -50302,7 +50302,7 @@
                     "calculate-premium"
                   ]
                 },
-                "description": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission) from rates in settings and the coverages master\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Coverage details / Order summary\n\nAccess: read:quotations",
+                "description": "Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission): cover rates from settings and the coverages master, taxes from Premium Taxes & LGU Rates\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Coverage details / Order summary\n\nAccess: read:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"productType\": \"Motor\",\n  \"lossAndDamageCoverage\": 1000000,\n  \"lossAndDamageCoverageRate\": 1.5,\n  \"actsOfNatureRate\": 0.5,\n  \"bodilyInjury\": 200000,\n  \"propertyDamage\": 200000,\n  \"APPAtotalCoverage\": 250000,\n  \"discount\": 0\n}",
@@ -64239,7 +64239,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"symbol\": \"₱\",\n        \"decimals\": 2,\n        \"isBase\": true,\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"baseCurrency\": \"PHP\",\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -64314,7 +64314,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"symbol\": \"₱\",\n        \"decimals\": 2,\n        \"isBase\": true,\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"baseCurrency\": \"PHP\",\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -64529,7 +64529,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"symbol\": \"₱\",\n        \"decimals\": 2,\n        \"isBase\": true,\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"baseCurrency\": \"PHP\",\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -64594,7 +64594,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"symbol\": \"₱\",\n        \"decimals\": 2,\n        \"isBase\": true,\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"baseCurrency\": \"PHP\",\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -64687,7 +64687,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"symbol\": \"₱\",\n        \"decimals\": 2,\n        \"isBase\": true,\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"baseCurrency\": \"PHP\",\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         }
@@ -65856,6 +65856,67 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"status\": \"active\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/lookup?search=ana",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users",
+                "lookup"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "ana"
+                }
+              ]
+            },
+            "description": "Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate; Request; Receipts\n\nAccess: read:users, read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/users/lookup?search=ana",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "users",
+                    "lookup"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "ana"
+                    }
+                  ]
+                },
+                "description": "Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)\n\nFront-end touchpoint: Accounts > Petty Cash > Initiate; Request; Receipts\n\nAccess: read:users, read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"userId\": \"usr_1\",\n      \"name\": \"Ana Reyes\",\n      \"branchCode\": \"MKT\"\n    }\n  ]\n}"
             }
           ]
         },

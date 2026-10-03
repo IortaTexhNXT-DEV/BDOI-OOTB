@@ -12723,7 +12723,7 @@
   ],
   ""total"": 1
 }"
-658,Quotations,POST,/api/quotations/calculate-premium,"Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission) from rates in settings and the coverages master",Operations > Sales & Marketing > Quotations > Coverage details / Order summary,Bearer JWT,read:quotations,"{
+658,Quotations,POST,/api/quotations/calculate-premium,"Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission): cover rates from settings and the coverages master, taxes from Premium Taxes & LGU Rates",Operations > Sales & Marketing > Quotations > Coverage details / Order summary,Bearer JWT,read:quotations,"{
   ""productType"": ""Motor"",
   ""lossAndDamageCoverage"": 1000000,
   ""lossAndDamageCoverageRate"": 1.5,
@@ -16259,10 +16259,14 @@
       {
         ""code"": ""PHP"",
         ""name"": ""Philippine Peso"",
+        ""symbol"": ""₱"",
+        ""decimals"": 2,
+        ""isBase"": true,
         ""locale"": ""en-PH"",
         ""region"": ""Asia""
       }
     ],
+    ""baseCurrency"": ""PHP"",
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
@@ -16295,10 +16299,14 @@
       {
         ""code"": ""PHP"",
         ""name"": ""Philippine Peso"",
+        ""symbol"": ""₱"",
+        ""decimals"": 2,
+        ""isBase"": true,
         ""locale"": ""en-PH"",
         ""region"": ""Asia""
       }
     ],
+    ""baseCurrency"": ""PHP"",
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
@@ -16367,10 +16375,14 @@
       {
         ""code"": ""PHP"",
         ""name"": ""Philippine Peso"",
+        ""symbol"": ""₱"",
+        ""decimals"": 2,
+        ""isBase"": true,
         ""locale"": ""en-PH"",
         ""region"": ""Asia""
       }
     ],
+    ""baseCurrency"": ""PHP"",
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
@@ -16396,10 +16408,14 @@
       {
         ""code"": ""PHP"",
         ""name"": ""Philippine Peso"",
+        ""symbol"": ""₱"",
+        ""decimals"": 2,
+        ""isBase"": true,
         ""locale"": ""en-PH"",
         ""region"": ""Asia""
       }
     ],
+    ""baseCurrency"": ""PHP"",
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
@@ -16427,10 +16443,14 @@
       {
         ""code"": ""PHP"",
         ""name"": ""Philippine Peso"",
+        ""symbol"": ""₱"",
+        ""decimals"": 2,
+        ""isBase"": true,
         ""locale"": ""en-PH"",
         ""region"": ""Asia""
       }
     ],
+    ""baseCurrency"": ""PHP"",
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
@@ -16600,7 +16620,17 @@
     ""status"": ""active""
   }
 }"
-867,User Management,GET,/api/users/stats,"User counts (total, active, by role)",Master > User Management > User,Bearer JWT,read:users,,"{
+867,User Management,GET,/api/users/lookup,"Active users as a picker list { userId, name, branchCode } (search; petty cash requester / custodian)",Accounts > Petty Cash > Initiate; Request; Receipts,Bearer JWT,"read:users, read:disbursements",Query: ?search=ana,"{
+  ""success"": true,
+  ""data"": [
+    {
+      ""userId"": ""usr_1"",
+      ""name"": ""Ana Reyes"",
+      ""branchCode"": ""MKT""
+    }
+  ]
+}"
+868,User Management,GET,/api/users/stats,"User counts (total, active, by role)",Master > User Management > User,Bearer JWT,read:users,,"{
   ""success"": true,
   ""data"": {
     ""totalUsers"": 12,
