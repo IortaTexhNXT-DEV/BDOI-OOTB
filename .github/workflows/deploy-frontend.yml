@@ -193,6 +193,8 @@ jobs:
             sudo su - root -c 'bash -s' << 'EOF'
             set -euo pipefail
             APP=/home/ubuntu/appdata/brokerverse
+            # deploy the branch that was pushed (main holds an older code base without deploy/ec2)
+            BRANCH="${{ github.ref_name }}"
             REPO="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
             if ! command -v git >/dev/null; then
               apt-get update
@@ -201,12 +203,13 @@ jobs:
             mkdir -p /home/ubuntu/appdata
             git config --global --add safe.directory "$APP"
             if [ ! -d "$APP/.git" ]; then
-              git clone --branch main --depth 1 "$REPO" "$APP"
+              git clone --branch "$BRANCH" --depth 1 "$REPO" "$APP"
             fi
             cd "$APP"
             git remote set-url origin "$REPO"
-            git fetch origin main
-            git checkout -f -B main origin/main
+            # explicit refspec: an earlier clone may be shallow and limited to another branch
+            git fetch --depth 1 origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+            git checkout -f -B "$BRANCH" "origin/$BRANCH"
             git remote set-url origin "https://github.com/${{ github.repository }}.git"
             BROKERVERSE_ROOT="$APP" bash deploy/ec2/deploy.sh
             EOF
