@@ -87,8 +87,8 @@ This document is not legal advice. The broker's compliance officer and DPO decid
 | DPA-02 | Is a data processing agreement signed | Yes | Template DPA covering subject matter, instructions, confidentiality, security measures, sub-processors, assistance, breach notice, return and deletion, and audits | DPA |
 | DPA-03 | What personal data does the system hold | Yes | Leads, clients, insured risks, KYC IDs and images, claimants and payees, payment references (no card numbers), referrers and their bank accounts, staff users and sign-in history | AIS, Personal data held |
 | DPA-04 | Does it hold sensitive personal information | Yes | Government-issued ID numbers and images; some claim details (for example injury in a personal accident claim) | AIS, Personal data held |
-| DPA-05 | Can consent be recorded | Yes | Master > Data Privacy > Consent Register and consent per purpose on the client and prospect (processing, marketing, sharing with insurers), with channel, notice version and evidence. Delivered after the release test of 03 October 2026; re-test of BV-SEC-034 pending [to confirm re-test date] | PF, Data privacy; TSR, BV-DEF-002 |
-| DPA-06 | Can data subject requests be logged and answered | Yes | Master > Data Privacy > Data Subject Requests (DSR- numbers), due date 15 calendar days (`privacy.request_due_days`), personal data export as JSON or Excel. Re-test of BV-SEC-035 pending [to confirm] | PF, Data privacy |
+| DPA-05 | Can consent be recorded | Yes | Master > Data Privacy > Consent Register and consent per purpose on the client and prospect (processing, marketing, sharing with insurers), with channel, notice version and evidence. Delivered after the release test and re-tested on 03 October 2026 (BV-SEC-034 passed) | PF, Data privacy; TSR, BV-DEF-002 |
+| DPA-06 | Can data subject requests be logged and answered | Yes | Master > Data Privacy > Data Subject Requests (DSR- numbers), due date 15 calendar days (`privacy.request_due_days`), personal data export as JSON or Excel. Re-tested on 03 October 2026 (BV-SEC-035 passed) | PF, Data privacy |
 | DPA-07 | Can personal data be erased or anonymised | Yes | Anonymisation of a client or prospect with a dry run, refused while policies are in force, items are open, or within 10 years of the last expiry (`privacy.retention_years`); every action in the audit trail | PF, Data privacy |
 | DPA-08 | Is personal data encrypted | Partial | In transit: TLS. At rest: storage encryption of the database, file store and backups (included in hosted options; recommended when the broker hosts). Inside the application only two-step verification secrets are encrypted (AES-256-GCM); field-level encryption of personal identifiers is on the backlog (BV-DEF-003) | AIS, Encryption; TSR |
 | DPA-09 | Where is the data stored | Yes | Chosen per broker: AWS or Azure in Singapore, a Philippine hosting partner, or the broker's own data centre. Stated in the Order Form; not moved without the broker's written consent | HSA, Data location; AIS, Cross-border transfer |
@@ -239,7 +239,5 @@ This document is not legal advice. The broker's compliance officer and DPO decid
 | 4 | Staff screening and training (GOV-10, GOV-12, SDL-09) | iorta TechNXT HR |
 | 5 | Production access list and approval, cloud audit logging, log shipping (ACC-16, ACC-17, LOG-06) | iorta TechNXT DevOps |
 | 6 | Key ownership per hosting option, TLS minimum, antivirus on uploads (CRY-01, CRY-05, APP-06) | iorta TechNXT DevOps |
-| 7 | One patching standard across DPA and AIS (VUL-02) | iorta TechNXT engineering |
-| 8 | Philippine hosting partner and support team location (SUB-03, SUB-05) | iorta TechNXT management |
-| 9 | IC circular numbers and IC examination right (REG-01, REG-03, AUD-03) | Broker compliance officer with iorta TechNXT legal |
-| 10 | Re-test of the data privacy cases BV-SEC-034 and BV-SEC-035 (DPA-05, DPA-06) | iorta TechNXT QA |
+| 7 | Philippine hosting partner and support team location (SUB-03, SUB-05) | iorta TechNXT management |
+| 8 | IC circular numbers and IC examination right (REG-01, REG-03, AUD-03) | Broker compliance officer with iorta TechNXT legal |

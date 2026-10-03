@@ -149,7 +149,7 @@ Every hosting option includes daily backups with point-in-time restore, and prod
 
 ## Has it been tested?
 
-Yes. For this release, 497 test cases were prepared and 480 passed; the remaining cases are failed, blocked or not run, each tracked in the defect register. The backend business-rule regression has 634 tests. An end-to-end UAT cycle of 371 business steps ran on a fresh database with one user per role, from set-up to month-end close. An external penetration test was not part of this cycle and is recommended before go-live.
+Yes. For this release, 497 test cases were prepared and, after the re-test of 03 October 2026, 486 passed; the remaining 11 are 2 open Medium items, 3 cases that need a mail server and 6 not yet run, each tracked in the test workbook. The backend business-rule regression has 717 tests. An end-to-end UAT cycle of 371 business steps ran on a fresh database with one user per role, from set-up to month-end close. An external penetration test was not part of this cycle and is recommended before go-live.
 
 # Implementation
 

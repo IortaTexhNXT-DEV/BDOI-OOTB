@@ -89,7 +89,7 @@ Besides conditions C1 to C8:
 
 | ID | Item | Owner | Target |
 |---|---|---|---|
-| A1 | Fill the [to confirm] facts: 33 in the continuity plan, 30 in the security questionnaire, 5 in the release notes, 5 in the sales FAQ, 3 in the battlecard | Management, CTO | Before the first proposal that includes these documents |
+| A1 | Fill the [to confirm] facts: 33 in the continuity plan, 28 in the security questionnaire, 4 in the release notes, 5 in the sales FAQ, 3 in the battlecard | Management, CTO | Before the first proposal that includes these documents |
 | A2 | Verify the market figures used in the commercials (competitor price ranges, broker rankings) before quoting them to a prospect | Sales head | Before the first proposal |
 | A3 | Add the sales contact e-mail and telephone to the one-page brochure and the brochure back cover | Marketing | Before distribution |
 | A4 | Decide on the October incentive recalculation in the demonstration data (N5) | Sales head | Before the next demonstration |

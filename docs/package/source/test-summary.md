@@ -1,12 +1,13 @@
 ---
 title: Test Summary Report
 subtitle: BrokerVerse OOTB release readiness
-version: 1.0
+version: 1.1
 date: 03 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-open_item: 8 defects and observations open (Medium 3, Low 5); see the chapter Defects and observations
+open_item: 2 defects open (Medium 2: BV-DEF-001, BV-DEF-003); 3 cases blocked until SMTP is available; 6 cases not run; see the chapter Defects and observations
+open_item_status: Open
 acronyms: OOTB=Out of the box; UAT=User acceptance test; QA=Quality assurance; API=Application programming interface; OR=Official receipt; JV=Journal voucher; PV=Payment voucher; RFQ=Request for quotation; CTPL=Compulsory third party liability; APPA=Auto passenger personal accident; BIR=Bureau of Internal Revenue; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; TB=Trial balance; GL=General ledger; 2FA=Two-step verification; TOTP=Time-based one-time password; SMTP=Simple Mail Transfer Protocol
 ---
 
@@ -69,15 +70,15 @@ The data set is fictional and follows Philippine formats: 7 insurers with their 
 
 # Test execution summary by module
 
-497 test cases were prepared. 480 passed, 8 failed, 3 are blocked by the environment and 6 were not run in this cycle. The pass rate over all cases is 97%; over the cases executed it is 98%.
+497 test cases were prepared. After the re-test of 03 October 2026 (chapter Re-test and regression after fixes), 486 passed, 2 failed, 3 are blocked by the environment and 6 were not run in this cycle. The pass rate over all cases is 98%; over the cases executed it is 99.6%. The first run gave 480 passed and 8 failed.
 
 | Module | Total | Pass | Fail | Blocked | Not Run |
 |---|---|---|---|---|---|
-| Sign-in and security | 35 | 28 | 4 | 1 | 2 |
+| Sign-in and security | 35 | 30 | 2 | 1 | 2 |
 | User and role administration | 16 | 16 | 0 | 0 | 0 |
-| Masters | 21 | 20 | 1 | 0 | 0 |
+| Masters | 21 | 21 | 0 | 0 | 0 |
 | Configuration and numbering | 17 | 17 | 0 | 0 | 0 |
-| Product configurator | 10 | 9 | 1 | 0 | 0 |
+| Product configurator | 10 | 10 | 0 | 0 | 0 |
 | Go-live data load | 8 | 8 | 0 | 0 | 0 |
 | Prospects and clients | 12 | 12 | 0 | 0 | 0 |
 | Quick quote and compare insurers | 9 | 9 | 0 | 0 | 0 |
@@ -108,20 +109,20 @@ The data set is fictional and follows Philippine formats: 7 insurers with their 
 | Audit trail | 4 | 4 | 0 | 0 | 0 |
 | End-to-end life cycle | 23 | 23 | 0 | 0 | 0 |
 | Screen checks (all menus) | 20 | 20 | 0 | 0 | 0 |
-| Role-based access | 19 | 17 | 2 | 0 | 0 |
-| **Total** | **497** | **480** | **8** | **3** | **6** |
+| Role-based access | 19 | 19 | 0 | 0 | 0 |
+| **Total** | **497** | **486** | **2** | **3** | **6** |
 
 ## By test type
 
 | Test type | Total | Pass | Fail | Blocked | Not Run |
 |---|---|---|---|---|---|
-| Functional | 172 | 163 | 5 | 3 | 1 |
+| Functional | 172 | 166 | 2 | 3 | 1 |
 | Negative | 75 | 73 | 0 | 0 | 2 |
 | Validation | 39 | 37 | 0 | 0 | 2 |
 | Integration | 38 | 38 | 0 | 0 | 0 |
-| Role access | 39 | 36 | 2 | 0 | 1 |
+| Role access | 39 | 38 | 0 | 0 | 1 |
 | Report | 69 | 69 | 0 | 0 | 0 |
-| Accounting | 65 | 64 | 1 | 0 | 0 |
+| Accounting | 65 | 65 | 0 | 0 | 0 |
 
 ## Cases not passed
 
@@ -132,18 +133,12 @@ The data set is fictional and follows Philippine formats: 7 insurers with their 
 | BV-SEC-020 | Idle session signs out after the configured minutes | Not Run | - |
 | BV-SEC-032 | Dependency audit of the release build | Fail | BV-DEF-001 |
 | BV-SEC-033 | Personal data encrypted at application level | Fail | BV-DEF-003 |
-| BV-SEC-034 | Record client consent under the Data Privacy Act | Fail | BV-DEF-002 |
-| BV-SEC-035 | Log and answer a data subject access or erasure request | Fail | BV-DEF-002 |
-| BV-MST-019 | Premium taxes and LGU rates maintained by Accounting | Fail | BV-DEF-006 |
-| BV-PCF-005 | Rating factors list shows which template each factor belongs to | Fail | BV-DEF-004 |
 | BV-QUO-010 | Customer approves through the link | Blocked | - |
 | BV-CLM-008 | Settle date before issue date refused on screen | Not Run | - |
 | BV-REM-004 | Settlement below minimum amount held | Not Run | - |
 | BV-PCH-006 | Request above the max limit | Not Run | - |
 | BV-RPT-006 | Own production only for a scoped agent | Not Run | - |
 | BV-EML-003 | Retry while sending is on | Blocked | - |
-| BV-RBA-016 | Accounting: every permitted screen loads its data without error | Fail | BV-DEF-006, BV-OBS-008 |
-| BV-RBA-019 | Accounting Manager: every permitted screen loads its data without error | Fail | BV-DEF-006, BV-OBS-008 |
 
 > Blocked cases need an SMTP server (password reset by e-mail, customer approval link by e-mail, outbox retry while sending is on). Not Run cases are screen-only checks or timed checks planned for the next manual cycle.
 
@@ -251,13 +246,13 @@ No load or stress test was run. The following timings were observed during the f
 | ID | Title | Module | Severity | Type | Status |
 |---|---|---|---|---|---|
 | BV-DEF-001 | Front-end library react-router has a moderate security advisory (open redirect) | Sign-in and security | Medium | Defect | Open |
-| BV-DEF-002 | Data privacy features not built: consent capture, data subject request register, anonymisation | Sign-in and security | Medium | Gap | Open |
+| BV-DEF-002 | Data privacy features not built: consent capture, data subject request register, anonymisation | Sign-in and security | Medium | Gap | Closed |
 | BV-DEF-003 | Application-level encryption covers only two-step verification secrets | Sign-in and security | Medium | Gap | Open |
-| BV-DEF-004 | Product configurator component list does not show the template; per-template rating factors look duplicated | Product configurator | Low | Defect | Open |
-| BV-OBS-005 | Renewal of a policy expired beyond the grace plus lapsed-renewal window is refused | Renewals | Low | Observation | Open |
-| BV-DEF-006 | Premium Taxes & LGU Rates: product list of the charges calculator does not load for Accounting | Masters | Low | Defect | Open |
-| BV-OBS-007 | Menu group Master > Generals > Organization has an address that opens "Page not found" | Screen checks (all menus) | Low | Observation | Open |
-| BV-OBS-008 | Accounts > Incentive > My Programs: Achievement Overview card extends past the right edge at 1440 px | Incentives | Low | Observation | Open |
+| BV-DEF-004 | Product configurator component list does not show the template; per-template rating factors look duplicated | Product configurator | Low | Defect | Closed |
+| BV-OBS-005 | Renewal of a policy expired beyond the grace plus lapsed-renewal window is refused | Renewals | Low | Observation | Closed |
+| BV-DEF-006 | Premium Taxes & LGU Rates: product list of the charges calculator does not load for Accounting | Masters | Low | Defect | Closed |
+| BV-OBS-007 | Menu group Master > Generals > Organization has an address that opens "Page not found" | Screen checks (all menus) | Low | Observation | Closed |
+| BV-OBS-008 | Accounts > Incentive > My Programs: Achievement Overview card extends past the right edge at 1440 px | Incentives | Low | Observation | Closed |
 
 ## BV-DEF-001: Front-end library react-router has a moderate security advisory (open redirect)
 
@@ -272,6 +267,7 @@ No screen records client consent (date, purpose, channel), no register tracks da
 
 - Workaround: Keep consent forms and the request log outside the system (signed forms filed against the client code; request register kept by the Data Protection Officer).
 - Target: Product backlog; to be scheduled with the client
+- Status: Closed. Delivered on 03 October 2026: Master > Data Privacy (consent register, data subject requests with due dates, personal data export, anonymisation with a dry run) and the client Data privacy tab. Re-tested BV-SEC-034 and BV-SEC-035.
 
 ## BV-DEF-003: Application-level encryption covers only two-step verification secrets
 
@@ -286,6 +282,7 @@ On Product Configurator > Rating Engine (and the other component lists) the rows
 
 - Workaround: Open the factor to see its template, or filter by template where the screen offers it.
 - Target: Next minor release
+- Status: Closed. The component lists show a Template column (global rows read All products). Re-tested BV-PCF-005.
 
 ## BV-OBS-005: Renewal of a policy expired beyond the grace plus lapsed-renewal window is refused
 
@@ -293,6 +290,7 @@ A renewal requested for a policy that expired more than grace days plus lapsed-r
 
 - Workaround: Quote the client as new business from the prospect or client record.
 - Target: No change planned; confirm the window settings with the client at configuration
+- Status: Closed as by design.
 
 ## BV-DEF-006: Premium Taxes & LGU Rates: product list of the charges calculator does not load for Accounting
 
@@ -300,6 +298,7 @@ Screen check of 03 October 2026: signed in as liza.quiambao (accounting) or tere
 
 - Workaround: Run the charges calculation as the System Administrator, or check the charges on a test quotation.
 - Target: Next patch: let the screen read the product list through a permission Accounting holds
+- Status: Closed. The screen reads the product list with a permission Accounting holds. Re-tested BV-MST-019, BV-RBA-016 and BV-RBA-019.
 
 ## BV-OBS-007: Menu group Master > Generals > Organization has an address that opens "Page not found"
 
@@ -307,6 +306,7 @@ The menu group Organization carries its own address (/master/generals/organizati
 
 - Workaround: Open Company or Branch from the menu.
 - Target: Next minor release: remove the address from the group or open the Company screen
+- Status: Closed. Menu groups no longer carry an address of their own.
 
 ## BV-OBS-008: Accounts > Incentive > My Programs: Achievement Overview card extends past the right edge at 1440 px
 
@@ -314,8 +314,9 @@ Screen check at 1440 x 900: the Achievement Overview card on My Programs is wide
 
 - Workaround: Collapse the side menu or zoom the browser to 90%.
 - Target: Next minor release
+- Status: Closed. The card fits the content area at 1440 px. Re-tested BV-RBA-016 and BV-RBA-019.
 
-Open items by severity: Critical 0, High 0, Medium 3, Low 5.
+Open items by severity: Critical 0, High 0, Medium 2, Low 0. Six items were closed on 03 October 2026.
 
 # Entry and exit criteria
 
@@ -336,10 +337,27 @@ Open items by severity: Critical 0, High 0, Medium 3, Low 5.
 | All High priority cases executed | Met |
 | No open Critical or High defect | Met |
 | End-to-end cycle without failed step | Met (371 of 371) |
-| Backend regression run without failure | Met (634 of 634) |
+| Backend regression run without failure | Met (717 of 717 after the fixes; 634 of 634 in the first run) |
+| Front-end tests without failure | Met (53 of 53) |
+| Every menu screen loads without error for the administrator and the Accounting roles | Met (173, 96 and 96 screens) |
 | Every menu screen opens for the administrator | Met |
 | Open Medium and Low items have a workaround and a target | Met |
 
+# Re-test and regression after fixes
+
+After the first run, the open defects and the gaps found in the user manual walk-through were fixed on 03 October 2026, together with the e-mail attachments, the approval notifications, the single source of currency and tax settings, the consolidation of duplicated screens and the screen stability pass. The fixed cases were then re-tested on a fresh database loaded with the UAT data set:
+
+| Check | Result |
+|---|---|
+| Backend regression suite | 717 of 717 tests passed (72 test files) |
+| Front-end tests | 53 of 53 passed; lint without errors; production build compiles |
+| End-to-end UAT scenario on a fresh database | 371 of 371 steps passed; two remittances above PHP 1,000,000.00 were refused for Accounting and approved by an Accounting Manager, as the Authority Matrix requires |
+| Screen sweep at 1440 px | Administrator 173 screens, Accounting 96, Accounting Manager 96: no refused request, no console error, no clipped element, no horizontal scroll |
+| Data privacy through the API | Consent recorded and read back; request DSR-2026-00001 logged with a due date 15 days after receipt; personal data export produced; anonymisation refused for a client with a policy in force |
+| Product configurator | Template column shown on the Rating Engine, Coverage Builder, Acceptance Rules and Document Manager lists |
+
+Six test cases moved from Fail to Pass (BV-SEC-034, BV-SEC-035, BV-MST-019, BV-PCF-005, BV-RBA-016, BV-RBA-019) and six items were closed (BV-DEF-002, BV-DEF-004, BV-OBS-005, BV-DEF-006, BV-OBS-007, BV-OBS-008).
+
 # Release recommendation
 
-To be completed by the release manager.
+From the test point of view the release can go to market: no Critical or High defect is open, the two open Medium items have a workaround and a target release, and the end-to-end cycle passes without a failed step. The conditions for the first production go-live (mail server, external penetration and load tests, client configuration and acceptance) are set out in the Go/No-Go Recommendation and Management Register.

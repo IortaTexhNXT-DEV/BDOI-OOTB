@@ -34,7 +34,7 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | Scheduled jobs (Asia/Manila time) | 18, of which 7 are delivered switched off (including the remittance schedules and the overdue data subject request reminder) |
 | Document number series | 61, counters that only move forward |
 | Upload templates for go-live data | About 40, each verified against its importer |
-| Test cases | 497 prepared: 480 passed, 8 failed, 3 blocked, 6 not run |
+| Test cases | 497 prepared: 486 passed, 2 failed, 3 blocked, 6 not run after the re-test of 03 October 2026 (first run: 480 passed, 8 failed) |
 | Automated business-rule tests | 634, all passed |
 | End-to-end UAT cycle | 371 business steps, 0 failed |
 
@@ -122,18 +122,18 @@ These changes were made on the release branch after the release test of 03 and 0
 
 # Known limitations and open items
 
-## Open defects and observations from the release test
+## Defects and observations from the release test
 
 | ID | Item | Severity | Workaround | Target |
 |---|---|---|---|---|
 | BV-DEF-001 | react-router carries a moderate security advisory (open redirect) | Medium | Navigation targets come from the application's own routes; web server allows only the application origin | Next minor release |
-| BV-DEF-002 | Data privacy features were not built at the release test | Medium | Consent Register, Data Subject Requests, export and anonymisation were delivered after the test (Master > Data Privacy); cases BV-SEC-034 and BV-SEC-035 to be re-run | Re-test [to confirm date] |
+| BV-DEF-002 | Data privacy features were not built at the release test | Medium | Closed: delivered (Master > Data Privacy) and re-tested on 03 October 2026 | Closed |
 | BV-DEF-003 | Application-level encryption covers only two-step verification secrets | Medium | Encrypted database storage and backups; restricted database access | Product backlog |
-| BV-DEF-004 | Product configurator component lists do not show the template; factors look duplicated | Low | Open the factor or filter by template | Next minor release |
-| BV-OBS-005 | Renewal refused for a policy expired beyond grace plus lapsed-renewal days | Low | Quote as new business (by design) | No change |
-| BV-DEF-006 | Premium Taxes & LGU Rates: charges calculator product list empty for Accounting roles | Low | Run the calculator as System Administrator, or check on a test quotation | Next patch |
-| BV-OBS-007 | Address of the menu group Master > Generals > Organization opens "Page not found" | Low | Open Company or Branch from the menu | Next minor release |
-| BV-OBS-008 | Incentive > My Programs: Achievement Overview card cut off at 1440 px | Low | Collapse the side menu or zoom to 90% | Next minor release |
+| BV-DEF-004 | Product configurator component lists did not show the template | Low | Closed: Template column added and re-tested on 03 October 2026 | Closed |
+| BV-OBS-005 | Renewal refused for a policy expired beyond grace plus lapsed-renewal days | Low | Closed as by design: quote as new business | Closed |
+| BV-DEF-006 | Premium Taxes & LGU Rates: charges calculator product list empty for Accounting roles | Low | Closed: fixed and re-tested on 03 October 2026 | Closed |
+| BV-OBS-007 | Address of the menu group Master > Generals > Organization opened "Page not found" | Low | Closed: menu groups carry no address | Closed |
+| BV-OBS-008 | Incentive > My Programs: Achievement Overview card cut off at 1440 px | Low | Closed: fixed and re-tested on 03 October 2026 | Closed |
 
 Cases not run or blocked in the release test (SMTP-dependent checks, idle sign-out timing, some screen-only negative checks) are listed in the Test Summary Report and are planned for the next manual cycle.
 
@@ -200,10 +200,7 @@ Releases are numbered MAJOR.MINOR.PATCH and tagged in the repository (for exampl
 | Item | Why |
 |---|---|
 | Upgrade react-router to the fixed major version (BV-DEF-001) | Close the moderate advisory |
-| Product list of the charges calculator readable by Accounting (BV-DEF-006) | Accounting maintains premium taxes without the administrator |
-| Template shown on Product Configurator component lists (BV-DEF-004) | Clearer rating factors |
-| Menu group address and incentive card layout (BV-OBS-007, BV-OBS-008) | Screen fixes |
-| Re-run of the data privacy test cases and of the blocked SMTP cases | Close the release test |
+| Re-run of the blocked SMTP cases and the cases not run | Close the release test |
 | QR code for two-step enrolment | Easier enrolment |
 | Upload buttons on the masters that only have an API route | Self-service go-live loads |
 | Automated dependency and image scanning in the pipeline; tests restored in the deployment workflow; branch protection | Secure development lifecycle gaps of the architecture review |

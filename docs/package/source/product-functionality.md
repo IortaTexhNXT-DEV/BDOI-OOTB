@@ -36,7 +36,7 @@ For each module it gives what the module does, its key features, the Philippine 
 | APIs | 868 registered API routes, documented in OpenAPI, a Postman collection and an Excel touchpoint list |
 | Scheduled jobs | 18 jobs in Asia/Manila time; the remittance schedules job and the overdue data subject request reminder are delivered switched off |
 | Number series | 61 document number series, counters only move forward |
-| Release test | 497 test cases (480 passed, 8 failed, 3 blocked, 6 not run); 634 automated business rule tests; a full UAT cycle of 371 business steps |
+| Release test | 497 test cases (486 passed, 2 failed, 3 blocked, 6 not run, after the re-test of 03 October 2026); 717 automated business rule tests; a full UAT cycle of 371 business steps |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
 | User documentation | User manual of 199 pages for the seven roles, seven role decks |
 
