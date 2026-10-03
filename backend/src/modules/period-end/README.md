@@ -43,8 +43,9 @@ and expense to Current Year P/L, then to Retained Earnings), writes the balance-
 
 `accounting.fiscal_year_start_month`, `accounting.period_close_requires_approval`, `period_end.tieout_tolerance`,
 `accounting.fx_revaluation_account_types`, `accounting.account.current_year_pl`,
-`accounting.account.retained_earnings`, `bir.atc_by_payee`, `bir.sawt_default_atc`, `bir.withholding_agent_tin`,
-`bir.registered_name`, `bir.registered_address`, `bir.zip_code`. Job parameters (days before period end, grace days)
+`accounting.account.retained_earnings`, `bir.atc_by_payee`, `bir.sawt_default_atc`. The broker's name, TIN, registered
+address, zip code and RDO code on BIR forms come from the primary company of Master > Company; `bir.withholding_agent_tin`,
+`bir.registered_name`, `bir.registered_address` and `bir.zip_code` are used only when no company exists. Job parameters (days before period end, grace days)
 are on Master > Schedules.
 
 ## Debugging

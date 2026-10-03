@@ -26,16 +26,12 @@ import ExchangeRateMaster from "../module/FinanceMastersModule/ExchangeRateMaste
 import ChartOfAccounts from "../module/FinanceMastersModule/ChartOfAccounts";
 import PettyCashMaster from "../module/FinanceMastersModule/PettyCashMaster";
 import PaymentDetails from "../module/Receipts/PaymentDetails";
-import TaxationMaster from "../module/FinanceMastersModule/TaxationMaster";
 import TransactionCodeMaster from "../module/FinanceMastersModule/TransactionCodeMaster";
 import DepartmentMasterInitial from "../module/FinanceMastersModule/DepartmentMaster/DepartmentMasterInitial";
 import DepartmentAdding from "../module/FinanceMastersModule/DepartmentMaster/DepartmentAdding";
 import DepartmentDetailsView from "../module/FinanceMastersModule/DepartmentMaster/DepartmentDetailsView";
 import AccountCategoryMaster from "../module/FinanceMastersModule/AccountCategoryMaster";
 import AddCurrency from "../module/FinanceMastersModule/CurrencyMaster/AddCurrency";
-import AddTaxation from "../module/FinanceMastersModule/TaxationMaster/AddTaxation";
-import TaxationDetails from "../module/FinanceMastersModule/TaxationMaster/TaxationDetails";
-import TaxationEdit from "../module/FinanceMastersModule/TaxationMaster/TaxationEdit";
 import AddExchange from "../module/FinanceMastersModule/ExchangeRateMaster/AddExchange";
 import SaveAndEditExchange from "../module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange";
 
@@ -1013,23 +1009,10 @@ const Maincomponent = () => {
           />
           {/* Taxation: the tax codes master (VAT, EWT / FWT with BIR ATC, DST, LGT) */}
           <Route path="master/finance/taxation" element={<TaxCodes />} />
-          <Route path="master/finance/taxation-legacy" element={<TaxationMaster />} />
           <Route path="master/finance/close-checklist" element={<CloseChecklist />} />
           <Route path="master/finance/bank-statement-formats" element={<BankStatementFormats />} />
           <Route path="master/finance/insurer-statement-formats" element={<InsurerStatementFormats />} />
           <Route path="master/finance/bank-transaction-types" element={<BankTransactionTypes />} />
-          <Route
-            path="master/finance/taxation/addtaxation"
-            element={<AddTaxation />}
-          />
-          <Route
-            path="master/finance/taxation/taxationedit"
-            element={<TaxationEdit />}
-          />
-          <Route
-            path="master/finance/taxation/taxationdetails"
-            element={<TaxationDetails />}
-          />
 
           {/* Transactioncode */}
 

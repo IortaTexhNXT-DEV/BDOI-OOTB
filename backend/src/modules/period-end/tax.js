@@ -5,12 +5,14 @@
  *   received  creditable tax withheld from the broker: insurers on direct-bill commission (debit-note collections,
  *             ewt_amount) and clients on receipts (receipt_lines.ewt), per payor and quarter (for reconciliation and SAWT)
  * The ATC of an issued line comes from bir.atc_by_payee (referrer type, else payee type); received lines use
- * bir.sawt_default_atc. Certificates are numbered with the bir_2307 series (prefix CWT) when issued.
+ * bir.sawt_default_atc. Certificates are numbered with the bir_2307 series (prefix CWT) when issued. The broker's name,
+ * TIN, registered address and RDO code come from the primary company of the Company master (lib/letterhead.js).
  */
 import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { legalIdentity } from '../../lib/letterhead.js';
 import { addMonths, iso, monthEnd } from './fiscal.js';
 
 export const TAX_TYPES = ['VAT', 'EWT', 'FWT', 'DST', 'LGT', 'PT', 'FST', 'OTHER'];
@@ -63,15 +65,6 @@ export const quarterRange = (year, quarter) => {
   const from = `${y}-${String((q - 1) * 3 + 1).padStart(2, '0')}-01`;
   return { from, to: monthEnd(addMonths(from, 2)), months: [0, 1, 2].map((i) => addMonths(from, i).slice(0, 7)) };
 };
-
-async function brokerParty() {
-  return {
-    name: (await getSetting('bir.registered_name', '')) || (await getSetting('general.company_name')) || '',
-    tin: (await getSetting('bir.withholding_agent_tin', '')) || '',
-    address: (await getSetting('bir.registered_address', '')) || '',
-    zip: (await getSetting('bir.zip_code', '')) || '',
-  };
-}
 
 /** Withholding lines of a quarter: [{ key, name, tin, address, date, atc, income, tax, reference }]. */
 async function withholdingLines(db, direction, from, to) {
@@ -142,7 +135,8 @@ export async function certificate2307(db, { year, quarter, direction = 'issued',
   const { from, to, months } = quarterRange(year, quarter);
   const lines = (await withholdingLines(db, direction, from, to)).filter((l) => l.key === payeeKey);
   if (!lines.length) throw notFound(`No withholding for ${payeeKey} in ${year} Q${quarter}`);
-  const broker = await brokerParty();
+  // the broker: the primary company of the Company master (bir.* settings only when no company exists)
+  const broker = await legalIdentity();
   const other = { name: lines[0].name, tin: lines[0].tin, address: lines[0].address, zip: '' };
   const rows = certificateLines(lines, months, await natures(db));
   const existing = (await db.query('SELECT cert_number, id, created_at FROM bir_2307_certificates WHERE direction = $1 AND payee_key = $2 AND year = $3 AND quarter = $4 AND status = \'issued\'',

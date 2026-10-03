@@ -8,13 +8,16 @@ import { ok } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
 import { businessTimeZone } from '../../lib/dates.js';
 import { assertNotControlled } from '../posting-rules/service.js';
+import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
 
 const { router, define } = moduleRouter('System Settings', '/settings');
+/** Settings with the screen that owns them (managedBy: { screen, path }; null when Master > Configuration edits it). */
+const withOwners = (rows) => rows.map((r) => ({ ...r, managedBy: settingOwner(r.key) }));
 
 define({
-  method: 'GET', path: '/', summary: 'All configuration values (grouped)', screen: 'Master > System Settings', middleware: [requireAuth],
-  query: { group: 'tax' }, response: { success: true, data: [{ key: 'tax.vat_rate', value: 0.12, group: 'tax', label: 'VAT rate', type: 'number' }] },
-  handler: async (req, res) => ok(res, await getSettings(req.query.group)),
+  method: 'GET', path: '/', summary: 'All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere', screen: 'Master > Configuration', middleware: [requireAuth],
+  query: { group: 'tax' }, response: { success: true, data: [{ key: 'tax.vat_rate', value: 0.12, group: 'tax', label: 'VAT rate', type: 'number', managedBy: { screen: 'Master > Finance > Premium Taxes & LGU Rates', path: '/master/finance/premium-taxes' } }] },
+  handler: async (req, res) => ok(res, withOwners(await getSettings(req.query.group))),
 });
 define({
   method: 'GET', path: '/public', auth: false, summary: 'Branding settings needed before sign-in (logo, colours, names)', screen: 'Sign-in',
@@ -25,19 +28,21 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/', summary: 'Update one or more configuration values', screen: 'Master > System Settings', roles: [ADMIN_ROLE],
+  method: 'PUT', path: '/', summary: 'Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen\'s name)', screen: 'Master > Configuration', roles: [ADMIN_ROLE],
   middleware: [requireAuth, requireRole(ADMIN_ROLE), validate(z.object({ settings: z.record(z.any()) }))],
-  request: { settings: { 'tax.vat_rate': 0.12, 'branding.primary_color': '#0072d8' } }, response: { success: true },
+  request: { settings: { 'limits.bulk_upload_max_rows': 1000, 'notification.email_enabled': true } }, response: { success: true },
   handler: async (req, res) => {
     const before = Object.fromEntries((await getSettings()).map((s) => [s.key, s.value]));
-    await assertNotControlled(Object.entries(req.body.settings).map(([k, v]) => [k, v, before[k]]));
+    const changes = Object.entries(req.body.settings).map(([k, v]) => [k, v, before[k]]);
+    assertNotOwnedElsewhere(changes);
+    await assertNotControlled(changes);
     for (const [k, v] of Object.entries(req.body.settings)) {
       const exists = (await query('SELECT editable FROM app_settings WHERE key = $1', [k])).rows[0];
       if (!exists || !exists.editable) continue;
       await setSetting(k, v, req.user.id);
     }
     await audit(req, { entity: 'settings', action: 'update', before, after: req.body.settings });
-    ok(res, await getSettings(), 'Settings updated');
+    ok(res, withOwners(await getSettings()), 'Settings updated');
   },
 });
 define({

@@ -20,7 +20,7 @@ describe('system settings', () => {
     const r = await request(ctx.app).get('/api/system-settings');
     expect(r.status).toBe(200);
     const d = r.body.data;
-    expect(d).toMatchObject({ displayCurrency: 'PHP', defaultLanguage: 'en', appTitle: 'Brokerverse', faviconUrl: '/favicon.ico' });
+    expect(d).toMatchObject({ displayCurrency: 'PHP', defaultLanguage: 'en', systemName: 'BrokerVerse', faviconUrl: '/favicon.ico' });
     expect(d.logoPresets.find((p) => p.id === 'iorta-technxt').builtIn).toBe(true);
     expect(d.logoPresets.find((p) => p.id === 'bdo')).toBeUndefined(); // not a built-in of the OOTB product
     expect(d.currencies.find((c) => c.code === 'PHP').locale).toBe('en-PH');
@@ -35,21 +35,21 @@ describe('system settings', () => {
   });
 
   it('PUT saves fields and /settings (key-value) stays consistent', async () => {
-    const r = await ctx.api('put', '/system-settings').send({ appTitle: 'BrokerVerse PH', primaryColor: '#123abc', secondaryColor: '#004ea8', displayCurrency: 'SGD', defaultLanguage: 'en', logoUrl: '/iorta.png', ignored: 1 });
+    const r = await ctx.api('put', '/system-settings').send({ systemName: 'BrokerVerse PH', primaryColor: '#123abc', secondaryColor: '#004ea8', displayCurrency: 'SGD', defaultLanguage: 'en', logoUrl: '/iorta.png', ignored: 1 });
     expect(r.status).toBe(200);
-    expect(r.body.data).toMatchObject({ appTitle: 'BrokerVerse PH', primaryColor: '#123abc', displayCurrency: 'SGD', logoUrl: '/iorta.png' });
+    expect(r.body.data).toMatchObject({ systemName: 'BrokerVerse PH', primaryColor: '#123abc', displayCurrency: 'SGD', logoUrl: '/iorta.png' });
     const kv = await ctx.api('get', '/settings?group=branding');
     expect(kv.body.data.find((s) => s.key === 'branding.primary_color').value).toBe('#123abc');
-    await ctx.api('put', '/system-settings').send({ displayCurrency: 'PHP' });
+    await ctx.api('put', '/system-settings').send({ displayCurrency: 'PHP', systemName: 'BrokerVerse' });
   });
 
   it('rejects invalid values and unauthorised users', async () => {
     const bad = await ctx.api('put', '/system-settings').send({ primaryColor: 'blue', displayCurrency: 'XXX' });
     expect(bad.status).toBe(400);
     expect(bad.body.errors.map((e) => e.path)).toEqual(expect.arrayContaining(['primaryColor', 'displayCurrency']));
-    const denied = await request(ctx.app).put('/api/system-settings').set('Authorization', `Bearer ${claimsToken}`).send({ appTitle: 'x' });
+    const denied = await request(ctx.app).put('/api/system-settings').set('Authorization', `Bearer ${claimsToken}`).send({ systemName: 'x' });
     expect(denied.status).toBe(403);
-    expect((await request(ctx.app).put('/api/system-settings').send({ appTitle: 'x' })).status).toBe(401);
+    expect((await request(ctx.app).put('/api/system-settings').send({ systemName: 'x' })).status).toBe(401);
   });
 
   it('adds a logo preset by URL and by file upload, then removes it', async () => {

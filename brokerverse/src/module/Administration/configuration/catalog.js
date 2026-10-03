@@ -11,11 +11,11 @@ export const AREAS = [
     id: "company",
     title: "Company & Branding",
     icon: "pi pi-building",
-    summary: "Company name, time zone, currency, date format, logo and colours, and the look of printed documents.",
+    summary: "Time zone, date format and the look of printed documents. The application name, logo and colours are set in System Settings; the company's legal identity in the Company master.",
     groups: ["general", "branding", "currency", "documents", "system"],
     links: [
-      { label: "System Settings (logo, colours, languages)", path: "/master/configuration/system-settings" },
-      { label: "Company master", path: "/master/generals/organization/companymaster" },
+      { label: "System Settings (application name, logo, colours, language, currency)", path: "/master/configuration/system-settings" },
+      { label: "Company master (legal name, TIN, registered address, print logo)", path: "/master/generals/organization/companymaster" },
       { label: "Branch master", path: "/master/generals/organization/branchmaster" },
     ],
   },
@@ -168,14 +168,23 @@ export const CHOICES = {
   "reinsurance.min_security_rating": [["AAA", "AAA"], ["AA", "AA"], ["A+", "A+"], ["A", "A"], ["A-", "A-"], ["BBB", "BBB"]],
 };
 
-/** Settings kept on their own screens (maker-checker there): shown read-only with a link. */
+/**
+ * Settings kept on their own screens: shown read-only with a link "Managed in <screen>". The API names the owner of
+ * most of them (GET /settings managedBy, back end lib/settingOwners.js: System Settings, Company master, Premium
+ * Taxes & LGU Rates) and refuses a change sent from here; the GL account settings below are changed with a second
+ * person's approval on Account determination.
+ */
 export const MANAGED_ELSEWHERE = [
   { test: (k) => k.startsWith("accounting.account.") || ["accounting.cash_account_by_payment_mode", "accounting.payable_account_by_payee"].includes(k),
     label: "Account determination", path: "/master/finance/account-determination" },
   { test: (k) => k.startsWith("tax.commission_"), label: "Account determination", path: "/master/finance/account-determination" },
   { test: (k) => k.startsWith("tax.charge_engine."), label: "Premium taxes & LGU rates", path: "/master/finance/premium-taxes" },
 ];
-export const managedElsewhere = (key) => MANAGED_ELSEWHERE.find((m) => m.test(key)) || null;
+/** The screen a setting is managed in ({ label, path }), from the API's managedBy or the list above; null when edited here. */
+export const managedElsewhere = (key, managedBy = null) => {
+  if (managedBy?.path) return { label: managedBy.screen === "Master > System Settings" ? "System Settings" : managedBy.screen, path: managedBy.path };
+  return MANAGED_ELSEWHERE.find((m) => m.test(key)) || null;
+};
 
 /** Workflow and integration settings for the system administrator: shown under "Advanced". */
 const ADVANCED_KEYS = /(statuses|transitions|aliases|status_labels|journey|lob_keywords|metric_map|endorsements\.types|component_kinds|upload_document_names|payments\.payment_modes|mobile_pattern|frontend_url|pricing_template_code|logo_presets|general\.languages|claims\.documents|default_logo_path|payment_gateway_url|kyc_required_fields|currency\.allowed|limits\.password_min_length)/;
@@ -212,7 +221,7 @@ const unitOf = (key) => {
 export function presentationOf(r) {
   const key = r.key;
   const v = r.value;
-  const managed = managedElsewhere(key);
+  const managed = managedElsewhere(key, r.managedBy);
   const advanced = ADVANCED_GROUPS.includes(r.group) || ADVANCED_KEYS.test(key);
   if (r.type === "boolean") return { editor: "switch", advanced, managed };
   if (r.type === "number") return { editor: "number", unit: unitOf(key), percent: isFractionKey(key, v), advanced, managed };

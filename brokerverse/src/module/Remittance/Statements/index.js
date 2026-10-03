@@ -33,7 +33,7 @@ const StatementGeneration = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const companyName = useSelector(
-    (state) => state.systemSettingsReducer?.systemName || state.systemSettingsReducer?.appTitle || DEFAULT_SYSTEM_SETTINGS.systemName
+    (state) => state.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName
   );
   const [activeStep, setActiveStep] = useState(0);
   const [statementType, setStatementType] = useState(null);

@@ -19,8 +19,9 @@ const App = () => {
   });
 
   const dispatch = useDispatch();
+  // The application name (general.system_name, Master > System Settings) in the browser tab
   const appTitle = useSelector(
-    (state) => state.systemSettingsReducer?.appTitle || "BrokerVerse"
+    (state) => state.systemSettingsReducer?.systemName || "BrokerVerse"
   );
 
   const { hasToken, userData } = authState;

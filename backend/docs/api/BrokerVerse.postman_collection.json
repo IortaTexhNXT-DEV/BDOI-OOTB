@@ -64117,7 +64117,7 @@
       "name": "System Settings",
       "item": [
         {
-          "name": "All configuration values (grouped)",
+          "name": "All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere",
           "request": {
             "method": "GET",
             "header": [],
@@ -64136,7 +64136,7 @@
                 }
               ]
             },
-            "description": "All configuration values (grouped)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: Any authenticated user"
+            "description": "All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere\n\nFront-end touchpoint: Master > Configuration\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -64159,7 +64159,7 @@
                     }
                   ]
                 },
-                "description": "All configuration values (grouped)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: Any authenticated user"
+                "description": "All configuration values (grouped); managedBy names the screen that changes a setting owned elsewhere\n\nFront-end touchpoint: Master > Configuration\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -64171,12 +64171,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"tax.vat_rate\",\n      \"value\": 0.12,\n      \"group\": \"tax\",\n      \"label\": \"VAT rate\",\n      \"type\": \"number\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"tax.vat_rate\",\n      \"value\": 0.12,\n      \"group\": \"tax\",\n      \"label\": \"VAT rate\",\n      \"type\": \"number\",\n      \"managedBy\": {\n        \"screen\": \"Master > Finance > Premium Taxes & LGU Rates\",\n        \"path\": \"/master/finance/premium-taxes\"\n      }\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Update one or more configuration values",
+          "name": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)",
           "request": {
             "method": "PUT",
             "header": [
@@ -64194,10 +64194,10 @@
                 "settings"
               ]
             },
-            "description": "Update one or more configuration values\n\nFront-end touchpoint: Master > System Settings\n\nAccess: role:system-admin",
+            "description": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)\n\nFront-end touchpoint: Master > Configuration\n\nAccess: role:system-admin",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"branding.primary_color\": \"#0072d8\"\n  }\n}",
+              "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -64225,10 +64225,10 @@
                     "settings"
                   ]
                 },
-                "description": "Update one or more configuration values\n\nFront-end touchpoint: Master > System Settings\n\nAccess: role:system-admin",
+                "description": "Update one or more configuration values (a setting owned by another screen, e.g. branding.* or tax.vat_rate, is refused with that screen's name)\n\nFront-end touchpoint: Master > Configuration\n\nAccess: role:system-admin",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"branding.primary_color\": \"#0072d8\"\n  }\n}",
+                  "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -64407,7 +64407,7 @@
           ]
         },
         {
-          "name": "System settings (branding, display currency, language, title); public because the sign-in page needs them",
+          "name": "System settings (branding, display currency, language, application name); public because the sign-in page needs them",
           "request": {
             "method": "GET",
             "header": [],
@@ -64420,7 +64420,7 @@
                 "system-settings"
               ]
             },
-            "description": "System settings (branding, display currency, language, title); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
+            "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
             "auth": {
               "type": "noauth"
             }
@@ -64440,7 +64440,7 @@
                     "system-settings"
                   ]
                 },
-                "description": "System settings (branding, display currency, language, title); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
+                "description": "System settings (branding, display currency, language, application name); public because the sign-in page needs them\n\nFront-end touchpoint: Master > System Settings; Sign-in; App shell\n\nAccess: Public",
                 "auth": {
                   "type": "noauth"
                 }
@@ -64455,12 +64455,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, appTitle)",
+          "name": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)",
           "request": {
             "method": "PUT",
             "header": [
@@ -64478,10 +64478,10 @@
                 "system-settings"
               ]
             },
-            "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, appTitle)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
+            "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"appTitle\": \"Brokerverse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
+              "raw": "{\n  \"systemName\": \"BrokerVerse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -64509,10 +64509,10 @@
                     "system-settings"
                   ]
                 },
-                "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, appTitle)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
+                "description": "Save system settings (logoUrl, displayCurrency, primaryColor, secondaryColor, defaultLanguage, faviconUrl, systemName)\n\nFront-end touchpoint: Master > System Settings\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"appTitle\": \"Brokerverse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
+                  "raw": "{\n  \"systemName\": \"BrokerVerse\",\n  \"displayCurrency\": \"PHP\",\n  \"primaryColor\": \"#0072d8\",\n  \"secondaryColor\": \"#004ea8\",\n  \"defaultLanguage\": \"en\",\n  \"logoUrl\": \"/iorta.png\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -64530,7 +64530,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -64591,12 +64591,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"groups\": [\n      {\n        \"group\": \"tax\",\n        \"label\": \"Taxes\",\n        \"items\": [\n          {\n            \"key\": \"tax.vat_rate\",\n            \"value\": 0.12,\n            \"label\": \"VAT rate\",\n            \"type\": \"number\",\n            \"editable\": true\n          }\n        ]\n      }\n    ],\n    \"items\": [],\n    \"total\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"groups\": [\n      {\n        \"group\": \"tax\",\n        \"label\": \"Taxes\",\n        \"items\": [\n          {\n            \"key\": \"tax.vat_rate\",\n            \"value\": 0.12,\n            \"label\": \"VAT rate\",\n            \"type\": \"number\",\n            \"editable\": true,\n            \"managedBy\": {\n              \"screen\": \"Master > Finance > Premium Taxes & LGU Rates\",\n              \"path\": \"/master/finance/premium-taxes\"\n            }\n          }\n        ]\n      }\n    ],\n    \"items\": [],\n    \"total\": 1\n  }\n}"
             }
           ]
         },
         {
-          "name": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked",
+          "name": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused",
           "request": {
             "method": "PUT",
             "header": [
@@ -64615,10 +64615,10 @@
                 "configuration"
               ]
             },
-            "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
+            "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"general.app_title\": \"BrokerVerse\",\n    \"notification.email_enabled\": true\n  }\n}",
+              "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -64647,10 +64647,10 @@
                     "configuration"
                   ]
                 },
-                "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
+                "description": "Update configuration values ({ settings: { key: value } } or { items: [{ key, value }] }); values are type-checked; settings owned by another screen are refused\n\nFront-end touchpoint: Master > Configuration\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"settings\": {\n    \"tax.vat_rate\": 0.12,\n    \"general.app_title\": \"BrokerVerse\",\n    \"notification.email_enabled\": true\n  }\n}",
+                  "raw": "{\n  \"settings\": {\n    \"limits.bulk_upload_max_rows\": 1000,\n    \"notification.email_enabled\": true\n  }\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -64745,7 +64745,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -64810,7 +64810,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         },
@@ -64903,7 +64903,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"appTitle\": \"Brokerverse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"logoPresets\": [\n      {\n        \"id\": \"iorta-technxt\",\n        \"label\": \"iorta TechNXT (BrokerVerse)\",\n        \"url\": \"/bdoi/iorta-technxt.png\",\n        \"builtIn\": true\n      }\n    ],\n    \"displayCurrency\": \"PHP\",\n    \"primaryColor\": \"#0072d8\",\n    \"secondaryColor\": \"#004ea8\",\n    \"defaultLanguage\": \"en\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"systemName\": \"BrokerVerse\",\n    \"currencies\": [\n      {\n        \"code\": \"PHP\",\n        \"name\": \"Philippine Peso\",\n        \"locale\": \"en-PH\",\n        \"region\": \"Asia\"\n      }\n    ],\n    \"updatedAt\": \"2026-09-28T00:00:00.000Z\"\n  }\n}"
             }
           ]
         }

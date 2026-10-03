@@ -46,7 +46,7 @@ const Login = () => {
   const currentLanguage =
     languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value || "en";
   const systemName = useSelector(
-    (state) => state.systemSettingsReducer?.systemName || state.systemSettingsReducer?.appTitle || DEFAULT_SYSTEM_SETTINGS.systemName
+    (state) => state.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName
   );
   const logoUrl = useSelector(
     (state) =>

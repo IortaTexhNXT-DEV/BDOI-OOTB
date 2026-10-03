@@ -1337,12 +1337,7 @@ export const menuList = [
             id: 8,
             name: "Taxation",
             path: "/master/finance/taxation",
-            includes: [
-              "/master/finance/taxation",
-              "/master/finance/taxation/addtaxation",
-              "/master/finance/taxation/taxationedit",
-              "/master/finance/taxation/taxationdetails",
-            ],
+            includes: ["/master/finance/taxation"],
           },
           {
             id: 20,

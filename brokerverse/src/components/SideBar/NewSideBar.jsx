@@ -21,7 +21,7 @@ const NewSideBar = ({ onNavigate }) => {
   const { t } = useTranslation();
   // Product name and logo from System Settings (general.system_name, branding.logo_url)
   const systemName = useSelector(
-    (state) => state.systemSettingsReducer?.systemName || state.systemSettingsReducer?.appTitle || DEFAULT_SYSTEM_SETTINGS.systemName
+    (state) => state.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName
   );
   const logoUrl = useSelector(
     (state) =>

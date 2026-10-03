@@ -6,6 +6,7 @@
 import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { companyName } from '../../lib/letterhead.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { addDays, today, isoDate } from '../../lib/dates.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
@@ -209,7 +210,7 @@ export async function updateSlip(id, body, userId) {
 async function slipVars(slip, offer) {
   const covers = (slip.requested_covers || []).map((c) => c.cover || c.name).filter(Boolean).join(', ');
   return {
-    companyName: ((await getSetting('general.company_name')) ?? ''), slipNumber: slip.slip_number, productType: slip.product_type || slip.product_name || slip.lob,
+    companyName: await companyName(), slipNumber: slip.slip_number, productType: slip.product_type || slip.product_name || slip.lob,
     insuredName: slip.insured_name || '', currency: slip.currency, sumInsured: amountText(slip.sum_insured), covers: covers || 'as per the broker slip',
     period: slip.inception_date ? `${slip.inception_date} to ${slip.expiry_date || '-'}` : 'to be agreed', responseDueDate: slip.response_due_date || '-',
     insurerName: offer.insuranceCompanyName, offerNumber: offer.offerNumber,

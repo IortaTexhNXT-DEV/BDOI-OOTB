@@ -59,7 +59,7 @@ const SystemSettingsPage = () => {
     secondaryColor: "#004ea8",
     defaultLanguage: "en",
     faviconUrl: "/favicon.ico",
-    appTitle: "Brokerverse",
+    systemName: "BrokerVerse",
   });
   const [addLogoVisible, setAddLogoVisible] = useState(false);
   const [newLogoLabel, setNewLogoLabel] = useState("");
@@ -79,7 +79,7 @@ const SystemSettingsPage = () => {
         secondaryColor: settings.secondaryColor,
         defaultLanguage: settings.defaultLanguage,
         faviconUrl: settings.faviconUrl,
-        appTitle: settings.appTitle,
+        systemName: settings.systemName,
       });
     }
   }, [
@@ -90,7 +90,7 @@ const SystemSettingsPage = () => {
     settings.secondaryColor,
     settings.defaultLanguage,
     settings.faviconUrl,
-    settings.appTitle,
+    settings.systemName,
   ]);
 
   const home = { label: t("systemSettings.masters", "Master") };
@@ -360,15 +360,17 @@ const SystemSettingsPage = () => {
           </div>
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-3 field">
-              <label>{t("systemSettings.appTitle", "App Title")}</label>
+              <label htmlFor="system-name">{t("systemSettings.applicationName", "Application name")}</label>
               <InputText
-                value={form.appTitle}
-                onChange={(e) => updateField("appTitle", e.target.value)}
+                id="system-name"
+                value={form.systemName}
+                onChange={(e) => updateField("systemName", e.target.value)}
                 maxLength={80}
               />
+              <small className="block mt-1">{t("systemSettings.applicationNameHint", "Shown on the sign-in page, the side bar and the browser tab.")}</small>
             </div>
             <div className="col-12 md:col-6 lg:col-3 field">
-              <label>{t("systemSettings.logoPreset", "Logo Preset")}</label>
+              <label>{t("systemSettings.logoPreset", "Application logo (screen)")}</label>
               <Dropdown
                 value={
                   logoPresetOptions.some((p) => p.value === form.logoUrl)
@@ -386,6 +388,9 @@ const SystemSettingsPage = () => {
                 onChange={(e) => updateField("logoUrl", e.target.value)}
                 placeholder="/bdoi/iorta-technxt.png"
               />
+              <small className="block mt-1">
+                {t("systemSettings.applicationLogoHint", "Shown on screen. Printed documents use the logo of the primary company in Master > Company.")}
+              </small>
               <div className="logo-preset-actions mt-2">
                 <Button
                   type="button"

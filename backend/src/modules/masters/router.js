@@ -2,8 +2,6 @@ import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
 import { badRequest } from '../../lib/errors.js';
 import { created, ok, paging } from '../../lib/respond.js';
-import { setSetting } from '../../lib/settings.js';
-import { one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { parseUploadedRows, pick, uploadFile } from '../documents/tabular.js';
 import { masterTemplate } from '../documents/uploadTemplates.js';
@@ -17,11 +15,6 @@ import * as svc from './service.js';
 const { router, define } = moduleRouter('Masters', '/masters');
 const SCREEN = 'Master > (any master screen)';
 
-/** Taxation records linked to a configuration key keep that key in step (rate in % -> fraction). */
-async function syncLinkedSetting(t, rec, user) {
-  if (t.code !== 'taxation' || !rec.settingKey || rec.taxRate === null || rec.taxRate === undefined || rec.status !== 'Active') return;
-  if (await one('SELECT 1 FROM app_settings WHERE key = $1 AND editable', [rec.settingKey])) await setSetting(rec.settingKey, Number(rec.taxRate) / 100, user.id);
-}
 const sample = { id: 1, CountryName: 'Philippines', ISOCode: 'PH', Description: 'Republic of the Philippines', PhoneCode: '+63', status: 'Active' };
 
 define({
@@ -103,7 +96,6 @@ define({
     for (const [i, row] of rows.entries()) {
       try {
         const rec = await svc.createRecord(t, svc.bodyFromRow(t, row, pick), req.user);
-        await syncLinkedSetting(t, rec, req.user);
         await audit(req, { entity: `master:${t.code}`, entityId: rec.id, action: 'bulk-create', after: rec });
         createdCount += 1;
       } catch (e) {
@@ -126,7 +118,6 @@ define({
   handler: async (req, res) => {
     const t = await svc.getType(req.params.type);
     const rec = await svc.createRecord(t, req.body || {}, req.user);
-    await syncLinkedSetting(t, rec, req.user);
     await audit(req, { entity: `master:${t.code}`, entityId: rec.id, action: 'create', after: rec });
     created(res, rec, `${t.label} created`);
   },
@@ -137,7 +128,6 @@ define({
   handler: async (req, res) => {
     const t = await svc.getType(req.params.type);
     const { before, after } = await svc.updateRecord(t, req.params.id, req.body || {}, req.user);
-    await syncLinkedSetting(t, after, req.user);
     await audit(req, { entity: `master:${t.code}`, entityId: req.params.id, action: 'update', before, after });
     ok(res, after, `${t.label} updated`);
   },

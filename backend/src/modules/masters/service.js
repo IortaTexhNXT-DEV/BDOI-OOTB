@@ -412,6 +412,7 @@ async function tableColumns(t, values) {
 }
 
 export async function createRecord(t, body, user) {
+  assertNotRetired(t);
   const valid = validateRecord(t, body);
   assertDateOrder(t, valid.values);
   const values = await withIssuedCodes(t, valid.values);
@@ -439,6 +440,7 @@ export async function createRecord(t, body, user) {
 }
 
 export async function updateRecord(t, id, body, user) {
+  assertNotRetired(t);
   const before = await getRecord(t, id);
   const { values, status } = validateRecord(t, body, { partial: true });
   assertDateOrder(t, { ...before, ...values });
@@ -463,6 +465,7 @@ export async function updateRecord(t, id, body, user) {
 }
 
 export async function setRecordStatus(t, id, status, user) {
+  assertNotRetired(t);
   const before = await getRecord(t, id);
   await assertSinglePrimary(t, before, status, id);
   const table = t.storage === 'generic' ? 'master_records' : q(t.table_name);
@@ -474,6 +477,16 @@ export async function setRecordStatus(t, id, status, user) {
 // ---------- bulk upload ----------
 
 /** Master types that are copies of another register and are never uploaded here (the chart of accounts is). */
+/**
+ * Master types withdrawn from use, with the screen that replaced them. Their records are kept for reference (read
+ * only); creating, changing or (de)activating a record is refused. taxation: the legacy taxation master, whose records
+ * also wrote tax.* settings, replaced by the tax codes master and Premium Taxes & LGU Rates (migration 0233).
+ */
+export const RETIRED_TYPES = new Map([['taxation', 'Master > Finance > Taxation (tax codes) and Master > Finance > Premium Taxes & LGU Rates']]);
+function assertNotRetired(t) {
+  if (RETIRED_TYPES.has(t.code)) throw badRequest(`The ${t.label} master is retired and can no longer be changed; use ${RETIRED_TYPES.get(t.code)}`);
+}
+
 export const NOT_UPLOADABLE = new Map([['main-account', 'the Chart of Accounts upload'], ['sub-account', 'the Chart of Accounts upload']]);
 
 const FORMAT = {

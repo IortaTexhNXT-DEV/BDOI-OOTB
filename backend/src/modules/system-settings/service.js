@@ -8,8 +8,12 @@ import { getSetting, setSetting } from '../../lib/settings.js';
 import { badRequest } from '../../lib/errors.js';
 import { saveFile } from '../masters/helpers.js';
 import { detectType } from '../uploads/fileTypes.js';
+import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
 
-/** Front-end field -> app_settings key. */
+/**
+ * Front-end field -> app_settings key. System Settings owns these keys (lib/settingOwners.js): the generic configuration
+ * endpoints refuse them. systemName is the one application name (sign-in page, side bar, browser tab).
+ */
 export const FIELD_KEYS = {
   logoUrl: 'branding.logo_url',
   faviconUrl: 'branding.favicon_url',
@@ -17,7 +21,7 @@ export const FIELD_KEYS = {
   secondaryColor: 'branding.secondary_color',
   displayCurrency: 'currency.default',
   defaultLanguage: 'general.default_language',
-  appTitle: 'general.app_title',
+  systemName: 'general.system_name',
 };
 /** Upload targets: POST /system-settings/upload/:field */
 export const UPLOAD_FIELDS = { logo: 'logoUrl', favicon: 'faviconUrl', logoUrl: 'logoUrl', faviconUrl: 'faviconUrl' };
@@ -44,7 +48,6 @@ export async function getSystemSettings() {
     secondaryColor: map['branding.secondary_color'],
     defaultLanguage: map['general.default_language'],
     faviconUrl: map['branding.favicon_url'],
-    appTitle: map['general.app_title'],
     currencies: Array.isArray(map['currency.allowed']) ? map['currency.allowed'] : [],
     languages: map['general.languages'] || [],
     companyName: map['general.company_name'],
@@ -72,7 +75,7 @@ export async function updateSystemSettings(body, userId) {
     if (body[field] === undefined) continue;
     const v = typeof body[field] === 'string' ? body[field].trim() : body[field];
     if (['primaryColor', 'secondaryColor'].includes(field) && !HEX.test(v)) errors.push({ path: field, message: 'must be a hex colour such as #0072d8' });
-    if (field === 'appTitle' && (!v || String(v).length > 120)) errors.push({ path: field, message: 'App title is required (max 120 characters)' });
+    if (field === 'systemName' && (!v || String(v).length > 120)) errors.push({ path: field, message: 'Application name is required (max 120 characters)' });
     if (field === 'defaultLanguage' && !/^[a-z]{2,3}(-[A-Za-z]{2})?$/.test(String(v))) errors.push({ path: field, message: 'must be a language code such as en' });
     if (['logoUrl', 'faviconUrl'].includes(field) && v && String(v).length > 1000) errors.push({ path: field, message: 'URL is too long' });
     changes[key] = v;
@@ -134,7 +137,7 @@ export async function configurationCatalogue(group) {
   const rows = await many(`SELECT s.key, s.value, s."group", s.label, s.type, s.editable, s.updated_at, s.updated_by,
                                   (SELECT display_name FROM users u WHERE u.id = s.updated_by) AS updated_by_name
                            FROM app_settings s WHERE ($1::text IS NULL OR s."group" = $1) ORDER BY s."group", s.key`, [group || null]);
-  const items = rows.map((r) => ({ key: r.key, value: r.value, group: r.group, label: r.label, type: r.type, editable: r.editable, updatedAt: r.updated_at, updatedBy: r.updated_by_name || r.updated_by }));
+  const items = rows.map((r) => ({ key: r.key, value: r.value, group: r.group, label: r.label, type: r.type, editable: r.editable, managedBy: settingOwner(r.key), updatedAt: r.updated_at, updatedBy: r.updated_by_name || r.updated_by }));
   const groups = [];
   for (const it of items) {
     let g = groups.find((x) => x.group === it.group);
@@ -161,7 +164,10 @@ function coerceSetting(row, value) {
   }
 }
 
-/** Apply { key: value } changes; every key must exist and be editable, values are coerced by type. */
+/**
+ * Apply { key: value } changes; every key must exist and be editable, values are coerced by type. A setting owned by
+ * another screen (System Settings, Company master, Premium Taxes) is refused with the name of that screen.
+ */
 export async function updateConfiguration(changes, userId) {
   const keys = Object.keys(changes);
   if (!keys.length) throw badRequest('No settings to update');
@@ -177,6 +183,7 @@ export async function updateConfiguration(changes, userId) {
     else apply.push([k, c.value, row.value]);
   }
   if (errors.length) throw badRequest('Validation failed', errors);
+  assertNotOwnedElsewhere(apply);
   const { assertNotControlled } = await import('../posting-rules/service.js');
   await assertNotControlled(apply);
   for (const [k, v] of apply) await setSetting(k, v, userId);

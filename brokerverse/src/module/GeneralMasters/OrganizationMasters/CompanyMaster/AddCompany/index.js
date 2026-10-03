@@ -67,6 +67,7 @@ function AddCompany({ action }) {
     CompanyName: "",
     LicenseNumber: "",
     TIN: "",
+    RDOCode: "",
     IsPrimary: false,
     EmailID: "",
     Logo: "",
@@ -108,8 +109,9 @@ function AddCompany({ action }) {
     if (!values.CompanyName) {
       errors.CompanyName = "This field is required";
     }
-    // Licence, TIN, e-mail, website, description, postal code, phone and fax are optional: what is filled in is
-    // printed on the letterhead of documents and reports (primary company).
+    // Licence, TIN, RDO code, e-mail, website, description, postal code, phone and fax are optional: what is filled in
+    // is printed on the letterhead of documents and reports (primary company). The primary company's name, TIN, address
+    // (registered address), postal code and RDO code are also the broker's details on BIR forms such as Form 2307.
     if (values.EmailID && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
       errors.EmailID = "Invalid email address";
     }
@@ -146,6 +148,7 @@ function AddCompany({ action }) {
         CompanyName: getcompanyEdit?.CompanyName,
         LicenseNumber: getcompanyEdit?.LicenseNumber,
         TIN: getcompanyEdit?.TIN || "",
+        RDOCode: getcompanyEdit?.RDOCode || "",
         IsPrimary: getcompanyEdit?.IsPrimary === true || getcompanyEdit?.IsPrimary === "true",
         EmailID: getcompanyEdit?.EmailID,
         Logo: getcompanyEdit?.Logo,
@@ -324,14 +327,24 @@ function AddCompany({ action }) {
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
               classNames="field__container"
-              label="TIN"
+              label="TIN (BIR forms)"
               placeholder={t("generalMasters.enter")}
               value={record.TIN || ""}
               onChange={formik.handleChange("TIN")}
               disabled={view}
             />
           </div>
-          <div class="col-12 md:col-6 lg:col-6" style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 28 }}>
+          <div class="col-12 md:col-6 lg:col-3">
+            <InputField
+              classNames="field__container"
+              label="RDO Code"
+              placeholder={t("generalMasters.enter")}
+              value={record.RDOCode || ""}
+              onChange={formik.handleChange("RDOCode")}
+              disabled={view}
+            />
+          </div>
+          <div class="col-12 md:col-6 lg:col-3" style={{ display: "flex", alignItems: "center", gap: 8, paddingTop: 28 }}>
             <Checkbox
               inputId="company-is-primary"
               checked={record.IsPrimary === true || record.IsPrimary === "true"}
@@ -412,6 +425,9 @@ function AddCompany({ action }) {
           </div>
         </div>
 
+        <div style={{ fontSize: 13, fontWeight: 600, margin: "8px 0 4px" }}>
+          Registered address (letterhead and BIR forms)
+        </div>
         <div class="grid">
           <div class="col-12 md:col-6 lg:col-3">
             <InputField
