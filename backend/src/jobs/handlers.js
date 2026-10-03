@@ -85,6 +85,9 @@ export { monthEndReminder, recurringJournals, accrualReversal, periodAutoSoftClo
 // Bank reconciliation: daily automatic matching (disabled by default)
 export { bankAutoMatch } from '../modules/bank-reconciliation/jobs.js';
 
+// Data privacy: remind the privacy team (read:privacy) of overdue data subject requests (daily, disabled by default)
+export { privacyRequestsDue } from '../modules/privacy/jobs.js';
+
 // Housekeeping: purge operational rows past the retention periods in System Settings, Housekeeping tab (daily)
 export { housekeeping } from './housekeeping.js';
 

@@ -11,6 +11,7 @@ import { Toast } from 'primereact/toast';
 import { getLeadByIdMiddleware, deleteLeadMiddleware } from '../Store/leadMiddleware';
 import { isFireLob, isIarLob } from '../../endorsementModule/constants/endorsementCategories';
 import { formatDate as formatConfiguredDate } from '../../../utility/dateFormat';
+import PartyPrivacyPanel from '../../../module/DataPrivacy/PartyPrivacyPanel';
 import './index.scss';
 
 const LeadDetail = () => {
@@ -275,6 +276,12 @@ const LeadDetail = () => {
                 <span className="value">{currentLeadDetails.quotationsCount || '0'}</span>
               </div>
             </Card>
+        </div>
+
+        <div className="col-12">
+          <Card className="detail-card">
+            <PartyPrivacyPanel partyType="lead" partyId={currentLeadDetails.leadId || leadId} />
+          </Card>
         </div>
       </div>
     </div>
