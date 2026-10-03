@@ -251,7 +251,27 @@ class Builder:
                     add_inline(par, chunk.strip(), size, i == 0, NAVY if i == 0 else TEXT)
                 if i == 0:
                     shade(cell._tc.get_or_add_tcPr(), 'DCE9F7')
+        self.fit_columns(t, rows)
         self.para().paragraph_format.space_after = Pt(4)
+
+    def fit_columns(self, t, rows, total_cm=15.9):
+        """Column widths in proportion to the longest text of each column (bounded), instead of equal columns."""
+        lens = []
+        for j in range(len(rows[0])):
+            longest = max((max((len(part) for part in r[j].split('<br>')), default=0) for r in rows), default=0)
+            header_words = max((len(w) for w in rows[0][j].split()), default=0)
+            lens.append(min(max(longest, header_words, 4), 48))
+        weight = sum(lens)
+        widths = [total_cm * n / weight for n in lens]
+        # no column narrower than 1.6 cm: take the difference from the widest
+        short = sum(max(0, 1.6 - w) for w in widths)
+        widths = [max(w, 1.6) for w in widths]
+        widths[widths.index(max(widths))] -= short
+        tblpr = t._tbl.tblPr
+        lay = OxmlElement('w:tblLayout'); lay.set(qn('w:type'), 'fixed'); tblpr.append(lay)
+        for row in t.rows:
+            for j, cell in enumerate(row.cells):
+                cell.width = Cm(widths[j])
 
     def image(self, caption, path):
         if not os.path.exists(path):

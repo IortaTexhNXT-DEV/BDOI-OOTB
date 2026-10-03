@@ -68,45 +68,47 @@ In this Agreement and in every Order Form and schedule, unless the context requi
 4. A reference to a clause by name refers to the clause of that name in this Agreement.
 5. Amounts are in Philippine pesos and exclude VAT unless stated.
 
-# Structure of the agreement
+# Services and responsibilities
 
-## Order Forms
+## Structure of the agreement
+
+### Order Forms
 
 1. The Client buys products and Services by signing an Order Form. Each Order Form is a separate contract that incorporates this Agreement and the schedules named in it.
 2. The schedules available under this Agreement are: the Perpetual Software Licence Agreement, the Software Subscription Agreement, the Implementation Statement of Work, the Change Request Procedure, the Annual Maintenance and Support Agreement and Service Level Agreement, the Hosting and Infrastructure Services Agreement and the Data Processing Agreement.
 3. An Order Form binds the Parties only when signed by authorised representatives of both.
 
-## Order of precedence
+### Order of precedence
 
 If documents conflict, the following order applies, the first prevailing: (a) the Data Processing Agreement on matters of Personal Data; (b) the Order Form, but only for the specific purchase and only where it expressly states that it overrides this Agreement; (c) this Agreement; (d) the schedules named in the Order Form; (e) the SOW; (f) the Documentation.
 
-## Affiliates
+### Affiliates
 
 An Affiliate of the Client may sign an Order Form under this Agreement with the written consent of iorta TechNXT. The Affiliate is then the Client for that Order Form.
 
-# Services
+## Scope of services
 
-## Scope
+### Scope
 
 1. iorta TechNXT provides the Platform and the Services described in each Order Form and its schedules.
 2. The Platform is provided as the OOTB version: the delivered screens, workflows, reports, printed documents and integrations, configured with the Client's settings and master data. Changes to the Platform are Change Requests.
 3. iorta TechNXT performs the Services with reasonable skill and care, by suitably qualified personnel, in line with good industry practice.
 
-## Personnel
+### Personnel
 
 1. Each Party names a project manager or account manager as its main contact in the Order Form.
 2. iorta TechNXT may replace its personnel with persons of similar skill and informs the Client in advance where the person is named in the SOW.
 3. While on the Client's premises, iorta TechNXT personnel follow the Client's reasonable site, security and conduct rules notified in advance.
 
-## Subcontractors
+### Subcontractors
 
 iorta TechNXT may use subcontractors, including cloud and hosting providers, to perform the Services. iorta TechNXT remains responsible for its subcontractors. Sub-processors of Personal Data are governed by the Data Processing Agreement.
 
-## Change control
+### Change control
 
 Any change to the scope, plan, Deliverables or Fees of an Order Form is made through the Change Request Procedure. No change binds a Party until a Change Request or an amendment is signed by both Parties.
 
-# Client responsibilities
+## Client responsibilities
 
 The Client shall:
 
@@ -121,15 +123,17 @@ The Client shall:
 
 iorta TechNXT is not liable for delay or failure caused by the Client not meeting these responsibilities. In that case the timeline moves by the time lost and iorta TechNXT may charge the extra effort at the day rates of the Order Form, after giving written notice.
 
-# Fees and payment
+# Fees and taxes
 
-## Fees
+## Fees and payment
+
+### Fees
 
 1. The Client pays the Fees in each Order Form. Fees are stated in Philippine pesos and exclude VAT.
 2. Recurring Fees (subscription, AMC, hosting and yearly support) increase by 5% at each anniversary of their start date, unless the Order Form states otherwise.
 3. Day rates for Change Requests and optional services are fixed for 12 months from the date of the Order Form and may then be reviewed once a year with 60 days' written notice.
 
-## Invoicing and payment
+### Invoicing and payment
 
 1. iorta TechNXT invoices on the milestones and periods stated in the Order Form.
 2. The Client pays each undisputed invoice within 30 days of the invoice date, by bank transfer to the account stated on the invoice, without set-off.
@@ -138,19 +142,19 @@ iorta TechNXT is not liable for delay or failure caused by the Client not meetin
 5. If an undisputed amount remains unpaid 60 days after the due date, iorta TechNXT may, after 10 Business Days' written notice, suspend the affected subscription, hosting or support Services until payment. Suspension does not reduce the Fees due.
 6. Bank charges of the Client's bank are for the Client's account.
 
-# Taxes
+## Taxes
 
-## VAT
+### VAT
 
 All Fees exclude value-added tax. iorta TechNXT adds VAT at the rate in force (currently 12%) to each invoice and issues a VAT invoice in the form required by the National Internal Revenue Code as amended, including by RA 11976 (Ease of Paying Taxes Act).
 
-## Withholding taxes
+### Withholding taxes
 
 1. Where the Client is required by law to withhold creditable withholding tax on a payment to iorta TechNXT, the Client withholds it at the rate that applies to the payment and to iorta TechNXT's status, remits it to the Bureau of Internal Revenue on time, and gives iorta TechNXT a BIR Form 2307 (Certificate of Creditable Tax Withheld at Source) for each quarter within the period required by the regulations, and in any case within 20 days after the end of the quarter.
 2. Withholding does not reduce the invoice price. If the Client does not deliver a BIR Form 2307 for an amount withheld, the Client pays that amount to iorta TechNXT on demand.
 3. The tax treatment of the perpetual licence fee (as a sale of software or as a royalty) is confirmed by both Parties' tax advisers before the Order Form is signed, and stated in the Order Form.
 
-## Other taxes
+### Other taxes
 
 Each Party bears its own income tax. Documentary stamp tax on this Agreement, if any, is for the account of [the Client / both Parties in equal shares]. Taxes that a new law imposes on the Services after the Effective Date are added to the Fees.
 
@@ -180,34 +184,36 @@ A Party may terminate this Agreement or an affected Order Form by written notice
 4. Transition assistance requested by the Client is provided at the day rates of the Order Form.
 5. The clauses on Fees and payment, Taxes, Intellectual property, Confidentiality, Data protection, Limitation of liability, Indemnities, Non-solicitation, Dispute resolution, Governing law and every clause that by its nature should survive, survive termination.
 
-# Intellectual property
+# Rights in the platform and in data
 
-## Platform
+## Intellectual property
+
+### Platform
 
 1. iorta TechNXT and its licensors own all Intellectual Property Rights in the Platform, the Documentation, the upload templates, configurations that are generic to the Platform, tools, methods and know-how, and all improvements, modifications and derivative works of them, whoever makes them, including those made under a Change Request.
 2. Nothing in this Agreement transfers any of those rights to the Client. The Client receives only the licence or right of use stated in the applicable schedule.
 3. The Client shall not remove proprietary notices, reverse engineer, decompile or disassemble the Platform, except to the extent that RA 8293 (Intellectual Property Code) allows it despite this restriction.
 
-## Client Data
+### Client Data
 
 1. The Client owns all Client Data. iorta TechNXT acquires no right in Client Data except the right to process it to perform the Services, under the Data Processing Agreement.
 2. The Client's own trademarks, letterheads, policy wordings, forms and content remain the property of the Client. The Client grants iorta TechNXT a licence to use them only to perform the Services.
 
-## Feedback and statistics
+### Feedback and statistics
 
 iorta TechNXT may use suggestions from the Client to improve the Platform without obligation. iorta TechNXT may use technical and usage statistics that do not identify the Client, its clients or any individual, to operate and improve the Platform.
 
-# Licence grant
+## Licence grant
 
 The right of the Client to use the Platform is granted in, and limited by, the Perpetual Software Licence Agreement or the Software Subscription Agreement named in the Order Form, for the number of Users, environments and term stated there. Use beyond that scope requires an additional Order Form.
 
-# Confidentiality
+## Confidentiality
 
-## Confidential Information
+### Confidential Information
 
 Confidential Information means all information disclosed by a Party (the discloser) to the other (the recipient), in any form, that is marked as confidential or would be understood to be confidential, including the Platform, its source code, prices and discounts, business plans, Client Data, the clients and insurers of the Client, and the terms of this Agreement.
 
-## Obligations
+### Obligations
 
 The recipient shall:
 
@@ -215,15 +221,15 @@ The recipient shall:
 2. disclose it only to its directors, officers, employees, Affiliates, professional advisers and subcontractors who need to know it and who are bound by confidentiality duties no less protective than this clause;
 3. protect it with at least the care it uses for its own confidential information, and no less than reasonable care.
 
-## Exceptions
+### Exceptions
 
 The obligations do not apply to information that: (a) is or becomes public without breach of this Agreement; (b) was lawfully known to the recipient before disclosure; (c) is received from a third party without a duty of confidence; or (d) is independently developed without use of the Confidential Information. A recipient may disclose Confidential Information when required by law, a court, the Insurance Commission, the Bureau of Internal Revenue, the National Privacy Commission or another regulator, after giving the discloser prompt notice where lawful, and only to the extent required.
 
-## Duration
+### Duration
 
 These obligations last during this Agreement and for 5 years after its termination, and for trade secrets and source code for as long as they remain trade secrets. Personal Data remains protected as stated in the Data Processing Agreement without time limit.
 
-# Data protection
+## Data protection
 
 1. Each Party complies with the Data Privacy Act of 2012 (RA 10173), its Implementing Rules and Regulations and the circulars and issuances of the National Privacy Commission.
 2. For Personal Data in Client Data, the Client is the personal information controller and iorta TechNXT is the personal information processor. The Parties sign the Data Processing Agreement, which forms part of this Agreement and of each Order Form under which iorta TechNXT processes Personal Data.
@@ -231,13 +237,15 @@ These obligations last during this Agreement and for 5 years after its terminati
 4. iorta TechNXT processes Personal Data only on the Client's documented instructions, keeps it secure, notifies the Client of a personal data breach without undue delay and within the period in the Data Processing Agreement, and assists the Client as stated there.
 5. Where the Platform is hosted outside the Philippines, the Client decides on and documents the transfer as required by section 21 of the Data Privacy Act. The hosting location is stated in the Order Form.
 
-# Warranties
+# Warranties, liability and indemnities
 
-## Mutual warranties
+## Warranties
+
+### Mutual warranties
 
 Each Party warrants that it is duly organised and validly existing, that it has the power and authority to sign and perform this Agreement, and that its signatory is duly authorised.
 
-## iorta TechNXT warranties
+### iorta TechNXT warranties
 
 iorta TechNXT warrants that:
 
@@ -246,19 +254,19 @@ iorta TechNXT warrants that:
 3. it has the right to grant the licence or right of use in the applicable schedule;
 4. it will use industry-standard measures to keep the Platform free of viruses and malicious code at delivery.
 
-## Remedies
+### Remedies
 
 If the Platform does not meet the warranty in point 2 above, iorta TechNXT will, at its option and cost, correct the defect, provide a workaround or, if it cannot do either in a reasonable time, the Client may terminate the affected Order Form and receive a refund of the licence or subscription Fees paid for the period of non-conformity. This is the Client's sole remedy for breach of that warranty.
 
-## Exclusions
+### Exclusions
 
 The warranties do not apply to defects caused by: use not in line with the Documentation; changes not made by iorta TechNXT; the Client's data, systems, network or third-party products; or use of a release more than two planned releases behind the current one.
 
-## Disclaimer
+### Disclaimer
 
 Except as stated in this Agreement, and to the extent permitted by law, iorta TechNXT gives no other warranty, express or implied, including any warranty that the Platform will be error-free or uninterrupted, or that it meets requirements that are not in the Documentation or the SOW. The Platform supports the Client's compliance with the laws and regulations that apply to it but does not replace the Client's own legal, tax, actuarial and compliance judgement.
 
-# Limitation of liability
+## Limitation of liability
 
 1. Neither Party is liable for loss of profit, revenue, business, goodwill or anticipated savings, or for indirect, incidental, special or consequential loss, however arising, even if advised of its possibility.
 2. The total liability of each Party for all claims arising out of or in connection with an Order Form, in any year, is limited to the Fees paid and payable under that Order Form in the 12 months before the event giving rise to the claim.
@@ -266,64 +274,66 @@ Except as stated in this Agreement, and to the extent permitted by law, iorta Te
 4. Points 1 and 2 do not limit: (a) the Client's duty to pay the Fees; (b) liability under the Indemnities clause for infringement of Intellectual Property Rights; (c) liability for breach of the Confidentiality clause; (d) liability for fraud, gross negligence or wilful misconduct; or (e) any liability that cannot be limited under Philippine law, including under Article 1171 of the Civil Code.
 5. Each Party must take reasonable steps to mitigate its loss.
 
-# Indemnities
+## Indemnities
 
-## Intellectual property indemnity
+### Intellectual property indemnity
 
 1. iorta TechNXT shall defend the Client against any third-party claim that the Platform, used in line with this Agreement, infringes that third party's Intellectual Property Rights in the Philippines, and shall pay the damages and costs finally awarded or agreed in settlement.
 2. If such a claim is made or likely, iorta TechNXT may, at its option and cost, obtain the right for the Client to continue using the Platform, modify or replace it so that it no longer infringes without material loss of function, or, if neither is reasonably possible, terminate the affected Order Form and refund the Fees paid for the remaining term (for a perpetual licence, the licence fee less one fifth for each year since Go-Live).
 3. iorta TechNXT has no obligation for claims arising from changes not made by iorta TechNXT, combination with items not supplied by iorta TechNXT, Client Data or content, or use after iorta TechNXT has provided a non-infringing alternative.
 
-## Client indemnity
+### Client indemnity
 
 The Client shall defend iorta TechNXT against any third-party claim arising from Client Data, the Client's use of the Platform in breach of law or of this Agreement, or the Client's dealings with its own clients, insurers and regulators, and shall pay the damages and costs finally awarded or agreed in settlement.
 
-## Procedure
+### Procedure
 
 The indemnified Party notifies the claim promptly in writing, gives the indemnifying Party sole control of the defence and settlement (no settlement may admit fault of the indemnified Party without its consent), and provides reasonable cooperation at the indemnifying Party's cost.
 
-# Force majeure
+# Other terms
+
+## Force majeure
 
 1. A Party is not liable for delay or failure to perform caused by an event beyond its reasonable control that it could not have foreseen or, if foreseeable, could not have avoided, including natural disasters, typhoons, earthquakes, floods, fire, epidemics, war, civil unrest, acts of government, widespread power or telecommunications failure and failures of the public internet, in line with Article 1174 of the Civil Code.
 2. The affected Party notifies the other promptly, describes the event and its likely effect, and uses reasonable efforts to reduce its effect and to resume performance. iorta TechNXT applies its disaster recovery arrangements in the hosting schedule where they apply.
 3. Force majeure does not excuse payment obligations for Services already performed.
 4. If the event continues for more than 60 days, either Party may terminate the affected Order Form by written notice, with payment for Services performed up to termination.
 
-# Non-solicitation
+## Non-solicitation
 
 During the term of an Order Form and for 12 months after it ends, neither Party shall, directly or indirectly, solicit for employment or engage any employee of the other Party who was involved in the Services, without the other Party's written consent. General advertisements not aimed at those employees are not a breach. If a Party breaches this clause, it pays the other Party, as liquidated damages and not as a penalty, an amount equal to [six months'] gross salary of the person concerned at the time of leaving.
 
-# Assignment and subcontracting
+## Assignment and subcontracting
 
 1. Neither Party may assign or transfer this Agreement or an Order Form without the other Party's written consent, which shall not be unreasonably withheld.
 2. iorta TechNXT may assign this Agreement to an Affiliate or to a successor of its business on written notice, provided the assignee assumes all its obligations.
-3. Subcontracting is governed by the Subcontractors section of the Services clause.
+3. Subcontracting is governed by the Subcontractors part of the Scope of services clause.
 
-# Dispute resolution
+## Dispute resolution
 
-## Negotiation
+### Negotiation
 
 A Party that has a dispute arising out of or in connection with this Agreement notifies the other in writing. The project managers meet within 10 Business Days. If they cannot resolve it within 15 Business Days of the notice, the dispute is referred to a senior executive of each Party (for iorta TechNXT its [CEO]; for the Client its [President]), who meet within a further 15 Business Days.
 
-## Mediation
+### Mediation
 
 If the senior executives do not resolve the dispute within 30 days of the referral, either Party may refer it to mediation administered by [the Philippine Dispute Resolution Center, Inc. (PDRC) under its mediation rules / a mediator agreed by the Parties], in line with RA 9285 (Alternative Dispute Resolution Act of 2004). The mediation takes place in [Makati City / Taguig City], in English. Each Party bears its own costs and half of the mediator's fees.
 
-## Final resolution: choose one option
+### Final resolution: choose one option
 
 [Option A: Arbitration. If the dispute is not settled within 60 days of the start of mediation, it shall be finally resolved by arbitration administered by the Philippine Dispute Resolution Center, Inc. under its arbitration rules in force at the time. The seat of arbitration is [Makati City], Philippines. The tribunal consists of [one arbitrator / three arbitrators]. The language is English. The award is final and binding and may be enforced in any competent court under RA 9285 and RA 876 (Arbitration Law).]
 
 [Option B: Courts. If the dispute is not settled within 60 days of the start of mediation, it shall be submitted to the proper courts of [Makati City / Taguig City], Philippines, to the exclusion of all other venues.]
 
-## Interim relief and continued performance
+### Interim relief and continued performance
 
 Nothing in this clause prevents a Party from seeking urgent interim relief from a competent court to protect its Confidential Information or Intellectual Property Rights. Unless the Agreement is terminated, the Parties continue to perform their obligations during the dispute, and iorta TechNXT does not suspend Services for an amount the Client disputes in good faith under the Fees and payment clause.
 
-# Governing law
+## Governing law
 
 This Agreement and every Order Form are governed by and construed in accordance with the laws of the Republic of the Philippines.
 
-# Notices
+## Notices
 
 1. Notices under this Agreement are in writing in English and are delivered by hand, by courier, or by e-mail to the addresses below (or another address notified in writing).
 2. A notice is received: on delivery if by hand or courier; on the next Business Day after sending if by e-mail, unless the sender receives a delivery failure message. Notices of breach, termination or a dispute sent by e-mail are also sent by courier.
@@ -333,7 +343,7 @@ This Agreement and every Order Form are governed by and construed in accordance 
 | iorta TechNXT Corp. | [address] | [e-mail] | [name, title] |
 | [Client legal name] | [address] | [e-mail] | [name, title] |
 
-# General
+## General
 
 1. **Entire agreement.** This Agreement, the Order Forms and their schedules are the entire agreement on their subject matter and replace all earlier proposals, representations and understandings. Terms printed on purchase orders of the Client do not apply.
 2. **Amendment.** Changes are valid only if in writing and signed by authorised representatives of both Parties.
@@ -348,6 +358,8 @@ This Agreement and every Order Form are governed by and construed in accordance 
 
 # Signatures
 
+## Signature blocks
+
 Signed by the authorised representatives of the Parties on the date first written above.
 
 | For iorta TechNXT Corp. | For [Client legal name] |
@@ -358,11 +370,12 @@ Signed by the authorised representatives of the Parties on the date first writte
 | Date: [date] | Date: [date] |
 | Witness: ____________________ | Witness: ____________________ |
 
-# Acknowledgment
+## Acknowledgment
 
 [Optional: notarial acknowledgment where the Parties choose to notarise this Agreement.]
 
-REPUBLIC OF THE PHILIPPINES )<br>
+REPUBLIC OF THE PHILIPPINES )
+
 [CITY OF MAKATI / TAGUIG] ) S.S.
 
 Before me, a Notary Public for and in [city], this [date], personally appeared:
