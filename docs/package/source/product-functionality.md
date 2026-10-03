@@ -785,10 +785,8 @@ The table lists capabilities a Philippine non-life broker typically compares. Th
 | 60 | IC-format regulatory reports | Partial | Figures from reports | | |
 | 61 | AML transaction monitoring and sanctions screening | No | KYC data held | | |
 | 62 | Filipino user interface | No | English | | |
-| 63 | Hosting in the Philippines | Yes | Partner or on-premise | | |
-| 64 | Cloud hosting on AWS or Azure | Yes |  | | |
-| 65 | Open API documentation | Yes | OpenAPI | | |
-| 66 | Implementation in 8 to 20 weeks by size | Yes |  | | |
+| 63 | Hosting on AWS, Azure, a Philippine partner or on-premise | Yes | | | |
+| 64 | Open API documentation | Yes | OpenAPI | | |
 
 # Points to note in this release
 
