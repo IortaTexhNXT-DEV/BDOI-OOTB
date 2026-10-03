@@ -327,21 +327,21 @@ const AtRiskAnalysis = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleViewDetails(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         <Button
           icon="pi pi-cog"
           className="p-button-text"
           onClick={() => handleCreateActionPlan(rowData)}
           tooltip={t("renewal.createActionPlan")}
-          disabled={rowData.actionPlan && rowData.actionPlan.status === 'Active'}
+          disabled={rowData.actionPlan && rowData.actionPlan.status === 'Active'} aria-label={t("renewal.createActionPlan")}
         />
         <Button
           icon="pi pi-arrow-up"
           className="p-button-text"
           onClick={() => handleEscalate(rowData)}
           tooltip="Escalate"
-          disabled={rowData.escalated}
+          disabled={rowData.escalated} aria-label="Escalate"
         />
       </div>
     );
@@ -486,7 +486,7 @@ const AtRiskAnalysis = () => {
                   icon="pi pi-refresh"
                   className="p-button-text"
                   onClick={loadInitialData}
-                  tooltip="Refresh"
+                  tooltip="Refresh" aria-label="Refresh"
                 />
                 <Button
                   icon="pi pi-file-excel"
@@ -499,7 +499,7 @@ const AtRiskAnalysis = () => {
                       life: 3000
                     });
                   }}
-                  tooltip="Export to Excel"
+                  tooltip="Export to Excel" aria-label="Export to Excel"
                 />
               </div>
             </div>
@@ -509,7 +509,7 @@ const AtRiskAnalysis = () => {
               className="risk-table"
               stripedRows
               paginator
-              rows={10}
+              rows={20}
               loading={loading}
               emptyMessage="No at-risk policies found"
               sortMode="multiple"

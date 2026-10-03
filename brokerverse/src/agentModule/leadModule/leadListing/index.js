@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
-import LeadListingCard from "./leadListingCard";
+import ProspectTable from "./ProspectTable";
 import LeadStatsCards from "./LeadStatsCards";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
@@ -28,7 +28,7 @@ const LeadListing = () => {
   const items = [
     { label: t("leads.title"), command: () => navigate("/agent/leadlisting") },
   ];
-  const Initiate = { label: t("sidebar.Home") };
+  const Initiate = { label: t("sidebar.Operations") };
 
 
   // an existing customer picked in the Create prospect dialog travels to the prospect form
@@ -140,10 +140,10 @@ const LeadListing = () => {
     <div className="leadlisting__overal__container">
       <Toast ref={toast} />
       <div className="grid mt-3">
-        <div className="col-12 md:col-6 lg:col-6">
+        <div className="col-12 md:col-4 lg:col-4">
           <label className="leadlisting__overal__container__title">{t("leads.title")}</label>
         </div>
-        <div className="col-12 md:col-6 lg:col-6">
+        <div className="col-12 md:col-8 lg:col-8">
           <div
             className="btn_lable_save_container"
             style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}
@@ -179,7 +179,7 @@ const LeadListing = () => {
         />
       </div>
       <LeadStatsCards />
-      <LeadListingCard key={refreshKey} />
+      <ProspectTable key={refreshKey} />
       <CreateProspectDialog visible={showCreate} onHide={() => setShowCreate(false)} products={prospectProducts} />
       <BulkUploadModal
         visible={showBulkUpload}

@@ -2776,7 +2776,7 @@
     "viewAll": "View All"
   },
   "dashboard": {
-    "goodDay": "Good Day to You !",
+    "goodDay": "Dashboard",
     "createQuote": "Create Quote",
     "chooseQuoteFor": "Choose a Quote for",
     "newLead": "New Prospect",
@@ -3067,7 +3067,25 @@
     "unexpectedError": "An unexpected error occurred",
     "selectReportCategory": "Select Report Category",
     "selectCategoryPlaceholder": "Select a category",
-    "reportCategoryHelp": "Select a category to filter the report, or leave as \"All Categories\" for complete report"
+    "reportCategoryHelp": "Select a category to filter the report, or leave as \"All Categories\" for complete report",
+    "col": {
+      "prospectId": "Prospect ID",
+      "name": "Name",
+      "category": "Category",
+      "productLine": "Product line",
+      "mobile": "Mobile",
+      "email": "E-mail",
+      "quotations": "Quotations",
+      "createdOn": "Created on",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "allCountries": "All countries",
+    "allProvinces": "All provinces",
+    "allCities": "All cities"
   },
   "quotes": {
     "title": "Quotations",
@@ -3104,7 +3122,7 @@
     "policyNumberFilter": "Policy Number",
     "viewDetails": "View Details",
     "viewClaim": "View Claim",
-    "auditTrail": "Audit Trail",
+    "auditTrail": "Audit trail",
     "provinceOfIncident": "Province of Incident:",
     "typeOfIncident": "Type of Incident:",
     "reportedDate": "Reported Date:",
@@ -3151,7 +3169,27 @@
     "updatedBy": "Updated By:",
     "claimDueDate": "Claim Due Date:",
     "claimRunDate": "Claim Run Date:",
-    "reviewSettlement": "Review settlement"
+    "reviewSettlement": "Review settlement",
+    "allStatuses": "All statuses",
+    "searchPlaceholder": "Search by claim number, policy number or client",
+    "noClaims": "No claims found",
+    "colClaimNumber": "Claim Number",
+    "colClientName": "Client Name",
+    "colPolicyNumber": "Policy Number",
+    "colReported": "Reported",
+    "colProduct": "Product",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "statusFilter": {
+      "open": "Open",
+      "registered": "Registered",
+      "in-review": "Processing",
+      "pending-approval": "Pending approval",
+      "approved": "Approved",
+      "settled": "Settled",
+      "closed": "Closed",
+      "rejected": "Rejected"
+    }
   },
   "claimAuditTrail": {
     "title": "Claim Audit Trail",
@@ -3625,7 +3663,8 @@
     "policies": "Policies",
     "latestPolicyStatus": "Latest Policy Status",
     "clientSince": "Client Since",
-    "view": "View"
+    "view": "View",
+    "client": "Client"
   },
   "executiveDashboard": {
     "title": "Executive Dashboard",
@@ -4892,7 +4931,14 @@
     "failed": "Failed",
     "motorComprehensive": "Motor Comprehensive",
     "motorCTPL": "Motor CTPL",
-    "motorThirdParty": "Motor Third Party"
+    "motorThirdParty": "Motor Third Party",
+    "claim": "Claim",
+    "renewal": "Renewal",
+    "viewPolicy": "View policy",
+    "moreActions": "More actions",
+    "expired": "Expired",
+    "expiresInDays_one": "Expires in {{count}} day",
+    "expiresInDays_other": "Expires in {{count}} days"
   },
   "approveQuote": {
     "invalidLink": "Invalid approval link",
@@ -5066,7 +5112,7 @@
   },
   "openItems": {
     "activityTracker": "Activity Tracker",
-    "home": "HOME",
+    "home": "Home",
     "newEvent": "New Event",
     "eventAddedSuccess": "Event Added Successfully",
     "policiesExpiringSoon": "Policies Expiring soon",
@@ -5100,7 +5146,14 @@
     "policyType": "Policy Type",
     "date": "Date",
     "leadId": "Prospect ID",
-    "category": "Category"
+    "category": "Category",
+    "none": "Nothing open",
+    "type": {
+      "expiring": "Policies expiring soon",
+      "payment": "Pending payments",
+      "quote": "Quotes pending",
+      "renewal": "Renewal requests"
+    }
   },
   "payments": {
     "title": "Payments",
@@ -5110,7 +5163,11 @@
     "endorsement": "Endorsement",
     "paid": "Paid",
     "pending": "Pending",
-    "reviewing": "Reviewing"
+    "reviewing": "Reviewing",
+    "viewPolicy": "View policy",
+    "searchPlaceholder": "Search by policy number, bill number or client",
+    "billDate": "Bill date",
+    "dueDate": "Due date"
   },
   "clientView": {
     "clientDetails": "Client Details",
@@ -5504,7 +5561,8 @@
     "payment": "Payment",
     "actions": "Actions",
     "proceed": "Proceed",
-    "grossPremiumHeader": "Gross Premium"
+    "grossPremiumHeader": "Gross Premium",
+    "status": "Status"
   },
   "collectionsList": {
     "view": "View",
@@ -8160,5 +8218,13 @@
     "searchParty": "Client or prospect name or code",
     "currentOnly": "Current status only",
     "noConsents": "No consents recorded"
+  },
+  "listCommon": {
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "search": "Search",
+    "noRecords": "No records found",
+    "loadFailed": "The list could not be loaded: {{message}}"
   }
 }

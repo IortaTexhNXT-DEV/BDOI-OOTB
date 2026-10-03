@@ -22,20 +22,20 @@ export const shortDate = (d) => (d ? new Date(d).toLocaleDateString("en-PH", { y
 export const dateTime = (d) =>
   d ? new Date(d).toLocaleString("en-PH", { year: "numeric", month: "short", day: "2-digit", hour: "2-digit", minute: "2-digit" }) : "";
 
-/** Page frame shared by the screens: breadcrumb, title, one-line purpose and the actions on the right. */
+/** Page frame shared by the screens: breadcrumb, title (with a facts line on a detail page) and the actions on the right. */
 export const PageHeader = ({ title, intro, actions }) => {
   const k = useLabels();
   return (
     <>
       <BreadCrumb
-        model={[{ label: k("master", "Master") }, { label: k("userManagement", "User Management") }, { label: title }]}
-        home={{ icon: "pi pi-home", url: "/" }}
+        model={[{ label: k("userManagement", "User Management") }, { label: title }]}
+        home={{ label: k("master", "Master") }}
         className="admin__breadcrumb"
       />
       <div className="admin__header">
         <div>
           <h2>{title}</h2>
-          <p>{intro}</p>
+          {intro ? <p>{intro}</p> : null}
         </div>
         {actions ? <div className="admin__actions">{actions}</div> : null}
       </div>

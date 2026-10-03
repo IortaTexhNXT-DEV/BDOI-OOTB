@@ -131,13 +131,13 @@ const TreatyDashboard = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text p-button-primary"
           tooltip={t('reinsurance.viewDetails')}
-          onClick={() => navigate(`/reinsurance/treaty/${rowData.id}`)}
+          onClick={() => navigate(`/reinsurance/treaty/${rowData.id}`)} aria-label={t('reinsurance.viewDetails')}
         />
         <Button
           icon="pi pi-file"
           className="p-button-rounded p-button-text"
           tooltip="Generate Report"
-          onClick={() => navigate('/reinsurance/reports')}
+          onClick={() => navigate('/reinsurance/reports')} aria-label="Generate Report"
         />
       </div>
     );
@@ -283,7 +283,7 @@ const TreatyDashboard = () => {
             value={treaties}
             loading={loading}
             paginator
-            rows={10}
+            rows={20}
             className="treaty-table"
             emptyMessage={t('common.noData')}
             responsiveLayout="scroll"

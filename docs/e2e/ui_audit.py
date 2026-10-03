@@ -2,7 +2,9 @@
 
 For each screen it records:
   - layout shift (the Cumulative Layout Shift score from the browser; above 0.1 the page visibly jumps),
-  - flicker: how many times a loading mask, skeleton or spinner appears and disappears in the first 4 seconds,
+  - flicker: how many times a loading mask, skeleton or spinner appears and disappears in the first 4 seconds
+    ("flicker" counts them in the page at all, "shown" only those a user can see: painted, past their reveal delay),
+  - toasts: pop-up messages shown while the screen opens,
   - console errors and failed API calls (HTTP 400 and above),
   - an empty main area or the error-boundary message,
 and keeps one screenshot per screen for a visual review.
@@ -25,7 +27,7 @@ os.makedirs(f'{OUT}/shots', exist_ok=True)
 
 # Runs in the page before any script: records layout shifts and every appearance of a loading indicator.
 OBSERVER = """
-window.__audit = { cls: 0, flicker: 0, visible: false };
+window.__audit = { cls: 0, flicker: 0, visible: false, shown: 0, seen: false, toasts: 0, toastOn: false };
 new PerformanceObserver((list) => {
   // only shifts inside the page content: the sidebar opening the current menu group follows the user's click
   for (const e of list.getEntries()) {
@@ -34,17 +36,31 @@ new PerformanceObserver((list) => {
   }
 }).observe({ type: 'layout-shift', buffered: true });
 const LOADING = '.p-datatable-loading-overlay, .p-skeleton, .p-progress-spinner, .p-blockui, .loading-overlay, .spinner';
+// "shown" counts only indicators a user can actually see (painted, not held back by the delayed-reveal rule)
+const seen = (el) => {
+  const st = getComputedStyle(el);
+  const r = el.getBoundingClientRect();
+  return st.visibility !== 'hidden' && st.display !== 'none' && parseFloat(st.opacity) > 0.05 && r.width > 0 && r.height > 0;
+};
 setInterval(() => {
-  const on = !!document.querySelector(LOADING);
+  const all = Array.from(document.querySelectorAll(LOADING));
+  const on = all.length > 0;
   if (on && !window.__audit.visible) window.__audit.flicker += 1;
   window.__audit.visible = on;
+  const vis = all.some(seen);
+  if (vis && !window.__audit.seen) window.__audit.shown += 1;
+  window.__audit.seen = vis;
+  // a toast or message pop-up on opening a screen (none is expected)
+  const toast = !!document.querySelector('.p-toast-message');
+  if (toast && !window.__audit.toastOn) window.__audit.toasts += 1;
+  window.__audit.toastOn = toast;
 }, 40);
 """
 
 CHECK = """() => {
   const main = document.querySelector('.main__content') || document.body;
   const text = (main.innerText || '').trim();
-  return { cls: +window.__audit.cls.toFixed(3), flicker: window.__audit.flicker,
+  return { cls: +window.__audit.cls.toFixed(3), flicker: window.__audit.flicker, shown: window.__audit.shown, toasts: window.__audit.toasts,
            crashed: text.includes('Something went wrong on this screen'), empty: text.length < 30,
            title: (document.querySelector('.page-header h1, .page-title, h1, h2') || {}).innerText || '' };
 }"""
@@ -79,7 +95,7 @@ def main():
             failed.clear()
             try:
                 # in-app navigation, as a user clicking the menu (a full reload only happens on refresh)
-                page.evaluate("(p) => { window.__audit.cls = 0; window.__audit.flicker = 0; history.pushState({}, '', p); dispatchEvent(new PopStateEvent('popstate')); }", path)
+                page.evaluate("(p) => { window.__audit.cls = 0; window.__audit.flicker = 0; window.__audit.shown = 0; window.__audit.toasts = 0; history.pushState({}, '', p); dispatchEvent(new PopStateEvent('popstate')); }", path)
                 page.wait_for_timeout(4000)
                 info = page.evaluate(CHECK)
             except Exception as e:  # a screen that does not load is itself a finding
@@ -87,12 +103,12 @@ def main():
             shot = f'{i:03d}{re.sub(r"[^a-z0-9]+", "-", path.lower())[:60]}.png'
             page.screenshot(path=f'{OUT}/shots/{shot}')
             rows.append({'path': path, **info, 'consoleErrors': sorted(set(errors))[:5], 'apiErrors': sorted(set(failed))[:5], 'shot': shot})
-            print(f"{i:03d} {path} cls={info.get('cls')} flicker={info.get('flicker')} "
+            print(f"{i:03d} {path} cls={info.get('cls')} flicker={info.get('flicker')} shown={info.get('shown')} toasts={info.get('toasts')} "
                   f"{'CRASH ' if info.get('crashed') else ''}{'EMPTY ' if info.get('empty') else ''}"
                   f"{len(errors)} console / {len(failed)} api errors", flush=True)
         browser.close()
     json.dump(rows, open(f'{OUT}/audit.json', 'w'), indent=1)
-    bad = [r for r in rows if r['crashed'] or r['empty'] or (r['cls'] or 0) > 0.1 or (r['flicker'] or 0) > 1 or r['consoleErrors'] or r['apiErrors']]
+    bad = [r for r in rows if r['crashed'] or r['empty'] or (r['cls'] or 0) > 0.1 or (r['flicker'] or 0) > 1 or (r.get('toasts') or 0) > 0 or r['consoleErrors'] or r['apiErrors']]
     print(f'{len(rows)} screens, {len(bad)} with findings')
     return 0 if not bad else 1
 

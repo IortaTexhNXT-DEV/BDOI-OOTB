@@ -45,11 +45,11 @@ const MyPrograms = () => {
 
   // Breadcrumb items
   const items = [
-    { label: t("incentive.incentive"), url: "/incentive" },
-    { label: t("incentive.myPrograms"), url: "/incentive/myprograms" }
+    { label: t("incentive.incentive") },
+    { label: t("incentive.myPrograms"), url: "/incentive/my-programs" }
   ];
 
-  const home = { label: t("incentive.dashboard") };
+  const home = { label: t("sidebar.Accounts") };
 
   // Initialize data
   useEffect(() => {
@@ -195,7 +195,7 @@ const MyPrograms = () => {
         icon={<SvgEyeIcon />}
         className="view-details-button"
         onClick={() => handleViewDetails(rowData)}
-        tooltip="View Details"
+        tooltip="View Details" aria-label="View Details"
       />
     );
   };

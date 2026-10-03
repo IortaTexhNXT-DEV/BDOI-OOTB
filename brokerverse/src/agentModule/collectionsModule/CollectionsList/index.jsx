@@ -26,7 +26,7 @@ const CollectionsList = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [lazyState, setLazyState] = useState({
     first: 0,
-    rows: 10,
+    rows: 20,
     page: 1,
     sortField: null,
     sortOrder: null,

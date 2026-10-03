@@ -63,11 +63,11 @@ const Reports = () => {
 
   // Breadcrumb items
   const items = [
-    { label: "Incentive", url: "/incentive" },
-    { label: "Reports", url: "/incentive/reports" }
+    { label: t("incentive.incentive") },
+    { label: t("incentive.reports", { defaultValue: "Reports" }), url: "/incentive/reports" }
   ];
 
-  const home = { label: "Dashboard" };
+  const home = { label: t("sidebar.Accounts") };
 
   // Steps for report generation
   const generationSteps = [
@@ -219,14 +219,14 @@ const Reports = () => {
           className="view-button"
           onClick={() => handleViewReport(rowData)}
           tooltip="View Report"
-          disabled={rowData.status !== "Completed"}
+          disabled={rowData.status !== "Completed"} aria-label="View Report"
         />
         <Button
           icon="pi pi-download"
           className="download-button"
           onClick={() => handleDownload(rowData)}
           tooltip="Download"
-          disabled={rowData.status !== "Completed"}
+          disabled={rowData.status !== "Completed"} aria-label="Download"
         />
       </div>
     );
@@ -289,8 +289,7 @@ const Reports = () => {
           <Button
             icon={<div className="pr-2"><SvgAdd /></div>}
             className="main__btn__action"
-            onClick={handleGenerateReport}
-          >
+            onClick={handleGenerateReport} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             Generate Report
           </Button>
         </div>
@@ -367,7 +366,7 @@ const Reports = () => {
                   icon="pi pi-refresh"
                   className="p-button-text"
                   onClick={loadReports}
-                  tooltip="Refresh"
+                  tooltip="Refresh" aria-label="Refresh"
                 />
               </div>
 
@@ -376,7 +375,7 @@ const Reports = () => {
                 className="reports-table"
                 stripedRows
                 paginator
-                rows={10}
+                rows={20}
                 loading={loading}
                 emptyMessage="No reports generated yet"
               >

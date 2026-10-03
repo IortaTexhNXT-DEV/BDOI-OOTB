@@ -25,7 +25,6 @@ import {
   loadQuotationForEdit,
   clearCurrentQuoteCreation,
 } from "../../Store/quotationReducer";
-import { getLeadByIdMiddleware } from "../../../leadModule/Store/leadMiddleware";
 import {
   canConvertToPolicy,
   canEditQuotation,
@@ -71,18 +70,13 @@ const QuoteListingCard = () => {
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Company");
   const [currentPageState, setCurrentPageState] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
   const cities = [
     { name: t("quoteListing.company"), code: "Company" },
     { name: t("quoteListing.quoteId"), code: "QuoteID" },
   ];
 
-  // Fetch lead details when leadRefId is available
-  useEffect(() => {
-    if (leadRefId) {
-      dispatch(getLeadByIdMiddleware(leadRefId));
-    }
-  }, [dispatch, leadRefId]);
+  // (the prospect itself is loaded once by the page, quoteListing/index.js)
 
   // Fetch quotations on component mount and when pagination changes
   useEffect(() => {
@@ -111,10 +105,9 @@ const QuoteListingCard = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -376,7 +369,7 @@ const QuoteListingCard = () => {
             className="view__btn"
             onClick={() => handleEdit(rowData)}
             tooltip={t("quoteListing.editQuote")}
-            tooltipOptions={{ position: "top" }}
+            tooltipOptions={{ position: "top" }} aria-label={t("quoteListing.editQuote")}
           />
         )}
 
@@ -398,7 +391,7 @@ const QuoteListingCard = () => {
           className="edit__btn"
           onClick={() => handleView(rowData)}
           tooltip={t("quoteListing.viewDetails")}
-          tooltipOptions={{ position: "top" }}
+          tooltipOptions={{ position: "top" }} aria-label={t("quoteListing.viewDetails")}
         />
       </div>
     );
@@ -751,6 +744,8 @@ const QuoteListingCard = () => {
           <DataTable
             value={search ? quoteSearchList : quotetabledata}
             paginator
+            // the server sends one page at a time (the search results are filtered here)
+            lazy={!search}
             rows={rowsPerPage}
             totalRecords={totalQuotations}
             first={(currentPageState - 1) * rowsPerPage}
@@ -758,7 +753,7 @@ const QuoteListingCard = () => {
               setCurrentPageState(e.page + 1);
               setRowsPerPage(e.rows);
             }}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             className="corrections__table__main"

@@ -114,8 +114,7 @@ const RiskMappingList = () => {
     <Button
       icon="pi pi-arrow-right"
       className="p-button-rounded p-button-text p-button-primary"
-      onClick={() => navigate(`/product-configurator/risk-mapping/${row.id}`)}
-    />
+      onClick={() => navigate(`/product-configurator/risk-mapping/${row.id}`)} aria-label="Open" tooltip="Open" tooltipOptions={{ position: "top" }} />
   );
 
   return (
@@ -170,7 +169,7 @@ const RiskMappingList = () => {
           value={rows}
           loading={loading}
           paginator
-          rows={10}
+          rows={20}
           emptyMessage={t("productRiskMapping.noRows", "No products found")}
           onRowClick={(e) =>
             navigate(`/product-configurator/risk-mapping/${e.data.id}`)

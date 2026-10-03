@@ -85,7 +85,6 @@ const UserAccessMatrix = () => {
       <ConfirmDialog />
       <PageHeader
         title={k("userMatrixTitle", "User Access Matrix")}
-        intro={k("userMatrixIntro", "Who has access to what: roles, branch, status and sign-in facts of every user, for access reviews and audit.")}
         actions={<>
           <Button icon="pi pi-refresh" label={k("refresh", "Refresh")} outlined onClick={load} disabled={loading} />
           <Button icon="pi pi-file-excel" label={k("exportExcel", "Export to Excel")} onClick={exportFile} />
@@ -116,7 +115,7 @@ const UserAccessMatrix = () => {
           options={[{ label: k("allStatuses", "All statuses"), value: null }, ...["active", "inactive", "locked"].map((s) => ({ label: k(`status.${s}`, s), value: s }))]} />
       </div>
 
-      <DataTable value={rows} dataKey="id" loading={loading} paginator rows={15} rowsPerPageOptions={[15, 30, 60]} size="small" stripedRows
+      <DataTable value={rows} dataKey="id" loading={loading} paginator rows={20} rowsPerPageOptions={[20, 50, 100]} size="small" stripedRows
         scrollable emptyMessage={k("noUsers", "No users match the filters")} className="access__table">
         <Column header={k("colUser", "User")} sortable sortField="displayName" style={{ minWidth: "14rem" }} body={(u) => (
           <div className="access__user">

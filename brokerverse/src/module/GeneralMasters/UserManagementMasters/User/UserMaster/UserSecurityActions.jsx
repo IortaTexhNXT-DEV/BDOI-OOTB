@@ -122,7 +122,7 @@ const LoginHistoryDialog = ({ user, onHide }) => {
         first={(state.page - 1) * state.perPage}
         totalRecords={state.total}
         onPage={(e) => load(e.page + 1, e.rows)}
-        rowsPerPageOptions={[10, 20, 50]}
+        rowsPerPageOptions={[20, 50, 100]}
         loading={state.loading}
         emptyMessage={t("security.noSignIns")}
         size="small"

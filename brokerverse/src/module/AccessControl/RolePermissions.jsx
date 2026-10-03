@@ -42,7 +42,6 @@ const RolePermissions = () => {
       <Toast ref={toast} />
       <PageHeader
         title={k("roleMatrixTitle", "Role Permissions")}
-        intro={k("roleMatrixIntro", "What each role may do. A role that builds on another (for example the Accounting Manager on Accounting) also has that role's permissions.")}
         actions={<Button icon="pi pi-pencil" label={k("editRoles", "Edit roles")} outlined onClick={() => navigate("/master/generals/usermanagement/role")} />}
       />
       <div className="admin__filters access__filters">

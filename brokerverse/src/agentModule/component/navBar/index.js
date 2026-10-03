@@ -385,8 +385,7 @@ const AgentNavBar = () => {
               padding: "0.5rem",
               borderRadius: "50%",
               transition: "all 0.3s ease",
-            }}
-          />
+            }} aria-label="Notifications" tooltip="Notifications" tooltipOptions={{ position: "top" }} />
           {unreadCount > 0 && (
             <span className="notification-badge">
               {unreadCount > 99 ? "99+" : unreadCount}

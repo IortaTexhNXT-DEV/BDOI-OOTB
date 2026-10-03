@@ -334,7 +334,7 @@ const ReportTemplateMaster = () => {
                             detail: `Downloading report ${rowData.templateCode}`,
                             life: 3000
                           });
-                        }}
+                        }} aria-label="Download"
                       />
                     </div>
                   )}

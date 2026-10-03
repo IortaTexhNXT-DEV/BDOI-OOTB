@@ -75,7 +75,6 @@ const SodRules = () => {
       <Toast ref={toast} />
       <PageHeader
         title={k("sodTitle", "Segregation of Duties")}
-        intro={k("sodIntro", "Roles that one person should not hold together, such as placing business and releasing the premium for it.")}
         actions={<Button icon="pi pi-plus" label={k("newRule", "New rule")} onClick={() => setForm({ ...EMPTY })} />}
       />
       <DataTable value={rules} dataKey="id" loading={loading} size="small" stripedRows className="access__table" emptyMessage={k("noRules", "No rules")}>
@@ -87,7 +86,7 @@ const SodRules = () => {
         <Column header={k("colStatus", "Status")} body={(r) => <Tag value={r.active ? k("on", "On") : k("off", "Off")} severity={r.active ? "success" : "secondary"} />} />
         <Column header="" style={{ width: "11rem" }} body={(r) => (
           <div className="access__row-actions">
-            <Button icon="pi pi-pencil" text rounded aria-label={k("edit", "Edit")} onClick={() => setForm({ ...r, reason: r.reason || "" })} />
+            <Button icon="pi pi-pencil" text rounded aria-label={k("edit", "Edit")} onClick={() => setForm({ ...r, reason: r.reason || "" })} tooltip={k("edit", "Edit")} tooltipOptions={{ position: "top" }} />
             {r.active ? <Button label={k("switchOff", "Switch off")} text size="small" onClick={() => switchOff(r)} /> : null}
           </div>
         )} />

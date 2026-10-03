@@ -1,74 +1,37 @@
 import { useEffect } from "react";
-import { useFormatCurrency } from "../../hooks/useFormatCurrency";
-import { Card } from "primereact/card";
-import "./index.scss";
-import SvgGross from "../../assets/agentIcon/SvgGross";
-import SvgCollected from "../../assets/agentIcon/SvgCollected";
-import SvgCommission from "../../assets/agentIcon/SvgCommission";
-import SvgReceivables from "../../assets/agentIcon/SvgReceivables";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
+import { BreadCrumb } from "primereact/breadcrumb";
+import { useFormatCurrency } from "../../hooks/useFormatCurrency";
+import StatCards from "../../components/StatCards";
+import SvgDot from "../../assets/agentIcon/SvgDots";
 import { postpaymentdataMiddleWare } from "./store/paymentMiddleware";
-import PyamentTabelCard from "./PaymentTabel";
+import PaymentTableCard from "./PaymentTabel";
+import "./index.scss";
 
+/** Operations > Payments: premium totals and the premium bills by payment status. */
 const Payments = () => {
+  const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-
-  // const template2 = {
-  //   layout:
-  //     "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-  //   RowsPerPageDropdown: (options) => {
-  //     const dropdownOptions = [
-  //     ];
-
-
   const dispatch = useDispatch();
-  const totals = useSelector(
-    ({ agentPaymentMainReducers }) => agentPaymentMainReducers?.postpaymentdata || {}
-  );
+  const totals = useSelector(({ agentPaymentMainReducers }) => agentPaymentMainReducers?.postpaymentdata || null);
   useEffect(() => {
     dispatch(postpaymentdataMiddleWare());
   }, [dispatch]);
+  const loaded = totals && Object.keys(totals).length > 0;
+  const money = (v) => (loaded ? formatCurrency(v || 0) : null);
 
   return (
-    <div>
-      <div className="payment__dashboard__container">
-        <div className="payment__heading">Payments</div>
-        <div class="grid">
-          <div class="col-12 md:col-6 lg:col-3">
-            <Card className="paymentcard_eachcontainer">
-              <SvgGross />
-              <div className="price__listing">{formatCurrency(totals.gross || 0)}</div>
-              <div>Gross Premium</div>
-            </Card>
-          </div>
-
-          <div class="col-12 md:col-6 lg:col-3">
-            <Card className="paymentcard_eachcontainer">
-              <SvgCollected />
-              <div className="price__listing">{formatCurrency(totals.collected || 0)}</div>
-              <div>Collected Premium</div>
-            </Card>
-          </div>
-
-          <div class="col-12 md:col-6 lg:col-3">
-            <Card className="paymentcard_eachcontainer">
-              <SvgReceivables />
-              <div className="price__listing">{formatCurrency(totals.receivables || 0)}</div>
-              <div>Receivables</div>
-            </Card>
-          </div>
-          <div class="col-12 md:col-6 lg:col-3">
-            <Card className="paymentcard_eachcontainer">
-              <div className="mt-3">
-                <SvgCommission />
-              </div>
-              <div className="price__listing">{formatCurrency(totals.commission || 0)}</div>
-              <div>Earned Commission</div>
-            </Card>
-          </div>
-        </div>
-        <PyamentTabelCard />
-      </div>
+    <div className="payment__dashboard__container">
+      <div className="payment__heading">{t("payments.title", { defaultValue: "Payments" })}</div>
+      <BreadCrumb model={[{ label: t("payments.title", { defaultValue: "Payments" }) }]} home={{ label: t("sidebar.Operations") }} className="breadCrums" separatorIcon={<SvgDot color={"#000"} />} />
+      <StatCards items={[
+        { key: "gross", label: t("dashboard.grossPremium"), value: money(totals?.gross) },
+        { key: "collected", label: t("dashboard.collectedPremium"), value: money(totals?.collected) },
+        { key: "receivables", label: t("dashboard.receivables"), value: money(totals?.receivables) },
+        { key: "commission", label: t("dashboard.earnedCommission"), value: money(totals?.commission) },
+      ]} />
+      <PaymentTableCard />
     </div>
   );
 };

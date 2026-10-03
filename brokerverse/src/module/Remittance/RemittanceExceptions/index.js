@@ -154,9 +154,9 @@ const RemittanceExceptions = () => {
   const actionsBodyTemplate = (rowData) => {
     return (
       <div className="action-buttons">
-        <Button icon="pi pi-play" className="p-button-rounded p-button-text" tooltip={t("remittance.start")} disabled={rowData.status !== 'Open'} onClick={() => startException(rowData)} />
-        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.resolve")} disabled={!['In Progress', 'Escalated'].includes(rowData.status)} onClick={() => resolveException(rowData)} />
-        <Button icon="pi pi-arrow-up" className="p-button-rounded p-button-warning p-button-text" tooltip={t("remittance.escalate")} disabled={['Resolved', 'Escalated'].includes(rowData.status)} onClick={() => escalateException(rowData)} />
+        <Button icon="pi pi-play" className="p-button-rounded p-button-text" tooltip={t("remittance.start")} disabled={rowData.status !== 'Open'} onClick={() => startException(rowData)} aria-label={t("remittance.start")} />
+        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.resolve")} disabled={!['In Progress', 'Escalated'].includes(rowData.status)} onClick={() => resolveException(rowData)} aria-label={t("remittance.resolve")} />
+        <Button icon="pi pi-arrow-up" className="p-button-rounded p-button-warning p-button-text" tooltip={t("remittance.escalate")} disabled={['Resolved', 'Escalated'].includes(rowData.status)} onClick={() => escalateException(rowData)} aria-label={t("remittance.escalate")} />
       </div>
     );
   };

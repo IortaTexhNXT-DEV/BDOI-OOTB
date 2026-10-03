@@ -59,7 +59,6 @@ const AccountingFlow = () => {
       <div className="posting-rules__title">{t("postingRules.flow.title")}</div>
       <BreadCrumb home={{ label: t("postingRules.master") }} className="posting-rules__crumbs" separatorIcon={<SvgDot color={"#000"} />}
         model={[{ label: t("postingRules.finance") }, { label: t("postingRules.flow.title"), url: "/master/finance/accounting-flow" }]} />
-      <p className="posting-rules__intro">{t("postingRules.flow.intro", { date: data?.asOf || "" })}</p>
       <div className="flex flex-wrap gap-2 mb-3">
         <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("postingRules.searchEvents")} className="w-20rem" />
         <Dropdown value={module} options={modules.map((m) => ({ label: m, value: m }))} onChange={(e) => setModule(e.value)} showClear placeholder={t("postingRules.flow.allModules")} className="w-15rem" />

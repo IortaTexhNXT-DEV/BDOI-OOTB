@@ -155,8 +155,7 @@ const AutomatedRemittanceMaster = () => {
             <Button
               icon="pi pi-arrow-left"
               className="back__button"
-              onClick={handleClose}
-            />
+              onClick={handleClose} aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
             <span className="page__title">{t("automatedRemittance.pageTitle")}</span>
             <span className="mode-badge">{mode?.toUpperCase() || "ADD"}</span>
           </div>

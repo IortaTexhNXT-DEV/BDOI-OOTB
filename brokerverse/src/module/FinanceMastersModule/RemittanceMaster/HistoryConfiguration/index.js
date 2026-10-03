@@ -212,13 +212,13 @@ const HistoryConfiguration = () => {
           icon="pi pi-pencil"
           className="p-button-rounded p-button-text"
           tooltip="Edit"
-          disabled={isViewMode}
+          disabled={isViewMode} aria-label="Edit"
         />
         <Button
           icon="pi pi-cog"
           className="p-button-rounded p-button-text"
           tooltip="Configure"
-          disabled={isViewMode}
+          disabled={isViewMode} aria-label="Configure"
         />
       </div>
     );
@@ -231,19 +231,19 @@ const HistoryConfiguration = () => {
           icon="pi pi-play"
           className="p-button-rounded p-button-success p-button-text"
           tooltip="Run Now"
-          disabled={isViewMode}
+          disabled={isViewMode} aria-label="Run Now"
         />
         <Button
           icon="pi pi-pencil"
           className="p-button-rounded p-button-text"
           tooltip="Edit"
-          disabled={isViewMode}
+          disabled={isViewMode} aria-label="Edit"
         />
         <Button
           icon="pi pi-pause"
           className="p-button-rounded p-button-warning p-button-text"
           tooltip="Pause"
-          disabled={isViewMode}
+          disabled={isViewMode} aria-label="Pause"
         />
       </div>
     );

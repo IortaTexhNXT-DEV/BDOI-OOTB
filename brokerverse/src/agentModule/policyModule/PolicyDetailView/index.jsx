@@ -452,8 +452,10 @@ const PolicyDetailView = () => {
     return daysUntilExpiry <= 5;
   };
 
+  // back to where the policy was opened from (the list reopens with its search and page), or to the list itself
   const handleBack = () => {
-    navigate(-1);
+    if ((window.history.state?.idx || 0) > 0) navigate(-1);
+    else navigate("/agent/policy");
   };
 
   const handleRenew = () => {

@@ -453,21 +453,21 @@ const LapseManagement = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleViewDetails(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         <Button
           icon="pi pi-send"
           className="p-button-text"
           onClick={() => handleWinBack(rowData)}
           tooltip="Send Win-back"
-          disabled={!rowData.reinstatementEligible || rowData.winBackStatus === 'Converted'}
+          disabled={!rowData.reinstatementEligible || rowData.winBackStatus === 'Converted'} aria-label="Send Win-back"
         />
         {rowData.status === 'In Grace Period' ? (
           <Button
             icon="pi pi-ban"
             className="p-button-text p-button-danger"
             onClick={() => openLapse(rowData)}
-            tooltip={t("renewal.lapsed")}
+            tooltip={t("renewal.lapsed")} aria-label={t("renewal.lapsed")}
           />
         ) : (
           <Button
@@ -475,7 +475,7 @@ const LapseManagement = () => {
             className="p-button-text p-button-success"
             onClick={() => handleReinstate(rowData)}
             tooltip={t("renewal.reinstated")}
-            disabled={!rowData.reinstatementEligible}
+            disabled={!rowData.reinstatementEligible} aria-label={t("renewal.reinstated")}
           />
         )}
       </div>
@@ -637,7 +637,7 @@ const LapseManagement = () => {
                         icon="pi pi-refresh"
                         className="p-button-text"
                         onClick={loadInitialData}
-                        tooltip="Refresh"
+                        tooltip="Refresh" aria-label="Refresh"
                       />
                       <Button
                         icon="pi pi-file-excel"
@@ -650,7 +650,7 @@ const LapseManagement = () => {
                             life: 3000
                           });
                         }}
-                        tooltip="Export to Excel"
+                        tooltip="Export to Excel" aria-label="Export to Excel"
                       />
                     </div>
                   </div>
@@ -660,7 +660,7 @@ const LapseManagement = () => {
                     className="lapse-table"
                     stripedRows
                     paginator
-                    rows={10}
+                    rows={20}
                     loading={loading}
                     emptyMessage="No lapsed policies found"
                     sortMode="multiple"

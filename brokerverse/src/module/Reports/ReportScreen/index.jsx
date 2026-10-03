@@ -182,7 +182,6 @@ const ReportScreen = ({ code, group, groupPath }) => {
         <div>
           <h1 className="page-title">{title || t("reports.heading")}</h1>
           <BreadCrumb model={crumbs} home={{ label: t("reports.heading"), command: () => navigate("/reports/catalogue") }} separatorIcon={<SvgDot color={"#000"} />} />
-          {definition?.description && <p className="report-screen__description">{definition.description}</p>}
         </div>
       </div>
 

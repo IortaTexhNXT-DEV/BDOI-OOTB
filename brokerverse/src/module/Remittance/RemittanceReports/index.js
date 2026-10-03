@@ -271,7 +271,7 @@ const RemittanceReports = () => {
                   <div className="item-meta">{report.createdDate} • {report.fileSize}</div>
                 </div>
                 <div className="item-actions">
-                  <Button icon="pi pi-download" className="p-button-text p-button-sm" onClick={() => window.open(report.fileUrl, "_blank", "noopener")} />
+                  <Button icon="pi pi-download" className="p-button-text p-button-sm" onClick={() => window.open(report.fileUrl, "_blank", "noopener")} aria-label="Download" tooltip="Download" tooltipOptions={{ position: "top" }} />
                 </div>
               </div>
             ))}
@@ -287,8 +287,8 @@ const RemittanceReports = () => {
                 </div>
                 <div className="item-actions">
                   <Button icon="pi pi-pencil" className="p-button-text p-button-sm"
-                    onClick={() => navigate(`${SCHEDULE_ROUTE}/edit`, { state: { data: report, mode: "edit" } })} />
-                  <Button icon={report.status === "Active" ? "pi pi-pause" : "pi pi-play"} className="p-button-text p-button-sm" onClick={() => pauseSchedule(report)} />
+                    onClick={() => navigate(`${SCHEDULE_ROUTE}/edit`, { state: { data: report, mode: "edit" } })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
+                  <Button icon={report.status === "Active" ? "pi pi-pause" : "pi pi-play"} className="p-button-text p-button-sm" onClick={() => pauseSchedule(report)} aria-label="Run" tooltip="Run" tooltipOptions={{ position: "top" }} />
                 </div>
               </div>
             ))}

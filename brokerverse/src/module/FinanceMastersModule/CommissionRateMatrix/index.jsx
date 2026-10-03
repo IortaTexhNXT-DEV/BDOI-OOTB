@@ -154,8 +154,8 @@ const CommissionRateMatrix = () => {
   const any = (label) => <span className="dn__muted">{label}</span>;
   const actions = (r) => (
     <div className="admin__actions">
-      <Button icon="pi pi-pencil" rounded text title={t("numberingMasters.edit")} aria-label={t("numberingMasters.edit")} onClick={() => openEdit(r)} />
-      <Button icon="pi pi-trash" rounded text severity="danger" title={t("numberingMasters.delete")} aria-label={t("numberingMasters.delete")} onClick={() => remove(r)} />
+      <Button icon="pi pi-pencil" rounded text aria-label={t("numberingMasters.edit")} onClick={() => openEdit(r)} tooltip={t("numberingMasters.edit")} tooltipOptions={{ position: "top" }} />
+      <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("numberingMasters.delete")} onClick={() => remove(r)} tooltip={t("numberingMasters.delete")} tooltipOptions={{ position: "top" }} />
     </div>
   );
 
@@ -164,14 +164,13 @@ const CommissionRateMatrix = () => {
       <Toast ref={toast} />
       <ConfirmDialog />
       <BreadCrumb
-        model={[{ label: t("numberingMasters.master") }, { label: t("numberingMasters.finance") }, { label: k("title") }]}
-        home={{ icon: "pi pi-home", url: "/" }}
+        model={[{ label: t("numberingMasters.finance") }, { label: k("title") }]}
+        home={{ label: t("numberingMasters.master") }}
         className="admin__breadcrumb"
       />
       <div className="admin__header">
         <div>
           <h2>{k("title")}</h2>
-          <p>{k("subtitle")}</p>
         </div>
         <Button label={k("add")} icon="pi pi-plus" onClick={openAdd} />
       </div>
@@ -215,7 +214,7 @@ const CommissionRateMatrix = () => {
             />
           </div>
           <p className="cr__note">{k("precedence")}</p>
-          <DataTable value={visible} dataKey="id" loading={loading} stripedRows size="small" paginator rows={15} emptyMessage={k("empty")} className="dn__table" responsiveLayout="scroll">
+          <DataTable value={visible} dataKey="id" loading={loading} stripedRows size="small" paginator rows={20} emptyMessage={k("empty")} className="dn__table" responsiveLayout="scroll">
             <Column header={k("insurer")} body={(r) => r.insurerName || any(k("anyInsurer"))} sortable sortField="insurerName" />
             <Column header={k("product")} body={(r) => r.productName || any(k("anyProduct"))} sortable sortField="productName" />
             <Column header={k("lob")} body={(r) => (r.lineOfBusiness ? lobLabel(r.lineOfBusiness) : any(k("anyLob")))} />

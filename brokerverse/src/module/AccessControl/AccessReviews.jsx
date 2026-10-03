@@ -158,7 +158,6 @@ const AccessReviews = () => {
       <Toast ref={toast} />
       <PageHeader
         title={k("reviewsTitle", "Access Reviews")}
-        intro={k("reviewsIntro", "Confirm at least every quarter that each active user still needs their access. The closed review is kept as the audit record.")}
         actions={<Button icon="pi pi-plus" label={k("startReview", "Start a review")} onClick={() => setStarting({ name: "", dueDate: null })} />}
       />
       <DataTable value={reviews} dataKey="id" loading={loading} size="small" stripedRows className="access__table" emptyMessage={k("noReviews", "No access reviews yet")}

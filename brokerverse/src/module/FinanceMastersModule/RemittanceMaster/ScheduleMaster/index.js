@@ -600,7 +600,7 @@ const ScheduleMaster = () => {
                             detail: `Execution ${rowData.scheduleCode} processed ${rowData.recordsProcessed} records`,
                             life: 3000
                           });
-                        }}
+                        }} aria-label="View Details"
                       />
                     </div>
                   )}

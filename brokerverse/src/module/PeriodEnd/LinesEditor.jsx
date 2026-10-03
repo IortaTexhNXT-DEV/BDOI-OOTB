@@ -44,7 +44,7 @@ const LinesEditor = ({ lines, onChange }) => {
               <td><InputText value={l.memo || ""} onChange={(e) => set(i, { memo: e.target.value })} className="w-full" /></td>
               <td className="num"><InputNumber value={l.debit || null} onValueChange={(e) => set(i, { debit: e.value || 0, credit: e.value ? 0 : l.credit })} minFractionDigits={2} maxFractionDigits={2} inputStyle={{ width: 130, textAlign: "right" }} /></td>
               <td className="num"><InputNumber value={l.credit || null} onValueChange={(e) => set(i, { credit: e.value || 0, debit: e.value ? 0 : l.debit })} minFractionDigits={2} maxFractionDigits={2} inputStyle={{ width: 130, textAlign: "right" }} /></td>
-              <td><Button icon="pi pi-trash" text severity="danger" disabled={lines.length <= 2} onClick={() => onChange(lines.filter((_, j) => j !== i))} /></td>
+              <td><Button icon="pi pi-trash" text severity="danger" disabled={lines.length <= 2} onClick={() => onChange(lines.filter((_, j) => j !== i))} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} /></td>
             </tr>
           ))}
           <tr className="pe-subtotal">

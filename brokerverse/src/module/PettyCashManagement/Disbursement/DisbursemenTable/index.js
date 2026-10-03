@@ -66,10 +66,9 @@ const DisbursementTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -99,8 +98,7 @@ const DisbursementTable = () => {
         <Button
           icon={<SvgEyeIcon />}
           className="eye__btn"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -158,8 +156,8 @@ const DisbursementTable = () => {
             scrollable={true}
             scrollHeight="40vh"
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}

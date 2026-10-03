@@ -155,8 +155,7 @@ const StatementTemplateMaster = () => {
               icon={<SvgBackArrow />}
               className="back-button"
               onClick={handleClose}
-              text
-            />
+              text aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
             <h1 className="page__title">Statement Template Master</h1>
             <span className="mode-badge">{mode?.toUpperCase() || "ADD"}</span>
           </div>

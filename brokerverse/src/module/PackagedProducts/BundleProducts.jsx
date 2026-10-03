@@ -77,7 +77,7 @@ const BundleProducts = () => {
 
   return (
     <div className="placement-page pkg-page">
-      <PageHeader title={k("title")} subtitle={k("subtitle")}>
+      <PageHeader title={k("title")}>
         <Button label={k("add")} icon="pi pi-plus" onClick={() => setEdit(JSON.parse(JSON.stringify(EMPTY)))} />
       </PageHeader>
       <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows emptyMessage={k("empty")} responsiveLayout="scroll">
@@ -90,8 +90,8 @@ const BundleProducts = () => {
         <Column header={k("status")} body={(b) => <Tag value={t(`packagedProducts.${b.status}`)} severity={b.status === "active" ? "success" : "danger"} />} />
         <Column body={(b) => (
           <div className="admin__actions">
-            <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setEdit(JSON.parse(JSON.stringify({ ...b, description: b.description || "" })))} />
-            <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => remove(b)} />
+            <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setEdit(JSON.parse(JSON.stringify({ ...b, description: b.description || "" })))} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
+            <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => remove(b)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />
           </div>
         )} style={{ width: "7rem" }} />
       </DataTable>
@@ -133,7 +133,8 @@ const BundleProducts = () => {
                       <td style={{ minWidth: "14rem" }}><MultiSelect value={s.insurerIds} options={insurers} filter display="chip" onChange={(e) => setSection(i, { insurerIds: e.value })} className="w-full" aria-label={k("insurers")} /></td>
                       <td style={{ minWidth: "12rem" }}><Chips value={s.benefits} onChange={(e) => setSection(i, { benefits: e.value })} separator="," aria-label={k("benefits")} /></td>
                       <td><Button icon="pi pi-trash" text rounded severity="danger" disabled={edit.sections.length < 2} aria-label={t("common.delete")}
-                        onClick={() => setEdit({ ...edit, sections: edit.sections.filter((_, j) => j !== i) })} /></td>
+                        onClick={() => setEdit({ ...edit, sections: edit.sections.filter((_, j) => j !== i) })} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }}
+                        /></td>
                     </tr>
                   ))}
                 </tbody>

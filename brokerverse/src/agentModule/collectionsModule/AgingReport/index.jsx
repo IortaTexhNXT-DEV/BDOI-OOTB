@@ -177,7 +177,7 @@ const AgingReport = () => {
         <DataTable
           value={collections}
           paginator
-          rows={10}
+          rows={20}
           dataKey="id"
           emptyMessage={t("agingReport.noCollectionsFound")}
         >

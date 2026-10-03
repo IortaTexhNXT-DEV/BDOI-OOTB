@@ -215,7 +215,7 @@ const UnderwritingDashboard = () => {
 
   const actionBodyTemplate = (rowData) => (
     <div className="flex gap-2">
-      <Button icon="pi pi-eye" rounded text severity="info" onClick={() => openCase(rowData)} />
+      <Button icon="pi pi-eye" rounded text severity="info" onClick={() => openCase(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
     </div>
   );
 
@@ -381,8 +381,8 @@ const UnderwritingDashboard = () => {
           <DataTable
             value={myCases}
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25]}
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             className="submissions-table"
           >
             <Column field="caseId" header={t("underwritingDashboard.caseId")} />
@@ -474,7 +474,7 @@ const UnderwritingDashboard = () => {
                     <span className="task-meta">{`${task.caseId} • ${formatAppDate(task.requirementDue)}`}</span>
                   </div>
                 </div>
-                <Button icon="pi pi-eye" rounded text severity="info" size="small" onClick={() => openCase(task)} />
+                <Button icon="pi pi-eye" rounded text severity="info" size="small" onClick={() => openCase(task)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
               </div>
             ))}
           </div>

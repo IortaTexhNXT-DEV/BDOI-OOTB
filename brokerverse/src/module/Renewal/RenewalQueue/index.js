@@ -355,34 +355,34 @@ const RenewalQueue = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleView(rowData)}
-          tooltip={t("renewal.viewDetails")}
+          tooltip={t("renewal.viewDetails")} aria-label={t("renewal.viewDetails")}
         />
         <Button
           icon="pi pi-file-o"
           className="p-button-text"
           onClick={() => handleGenerateQuote(rowData)}
           tooltip={t("renewal.generateQuote")}
-          disabled={!rowData.isOpen || rowData.statusCode === 'pending-approval'}
+          disabled={!rowData.isOpen || rowData.statusCode === 'pending-approval'} aria-label={t("renewal.generateQuote")}
         />
         <Button
           icon="pi pi-send"
           className="p-button-text"
           onClick={() => handleSendReminder(rowData)}
-          tooltip={t("renewal.sendReminder")}
+          tooltip={t("renewal.sendReminder")} aria-label={t("renewal.sendReminder")}
         />
         <Button
           icon="pi pi-envelope"
           className="p-button-text"
           onClick={() => handleSendNotice(rowData)}
           tooltip={rowData.nextNotice?.label || t("renewal.allNoticesSent", "All notices sent")}
-          disabled={!rowData.nextNotice}
+          disabled={!rowData.nextNotice} aria-label={rowData.nextNotice?.label || t("renewal.allNoticesSent", "All notices sent")}
         />
         {rowData.statusCode === 'approved' && (
           <Button
             icon="pi pi-check-circle"
             className="p-button-text p-button-success"
             onClick={() => handleComplete(rowData)}
-            tooltip={t("renewal.completeRenewal", "Complete Renewal")}
+            tooltip={t("renewal.completeRenewal", "Complete Renewal")} aria-label={t("renewal.completeRenewal", "Complete Renewal")}
           />
         )}
       </div>
@@ -540,7 +540,7 @@ const RenewalQueue = () => {
                   icon="pi pi-refresh"
                   className="p-button-text"
                   onClick={handleRefresh}
-                  tooltip={t("renewal.refresh")}
+                  tooltip={t("renewal.refresh")} aria-label={t("renewal.refresh")}
                 />
                 <Button
                   icon="pi pi-file-excel"
@@ -553,7 +553,7 @@ const RenewalQueue = () => {
                       life: 3000
                     });
                   }}
-                  tooltip={t("renewal.exportToExcel")}
+                  tooltip={t("renewal.exportToExcel")} aria-label={t("renewal.exportToExcel")}
                 />
               </div>
             </div>
@@ -563,7 +563,7 @@ const RenewalQueue = () => {
               className="renewal-table"
               stripedRows
               paginator
-              rows={10}
+              rows={20}
               loading={loading}
               emptyMessage={t("renewal.noPoliciesFound")}
               sortMode="multiple"

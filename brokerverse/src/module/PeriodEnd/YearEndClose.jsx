@@ -80,7 +80,7 @@ const YearEndClose = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.yearEndClose")} trail={[t("periodEnd.yearEndClose")]} subtitle={t("periodEnd.yearEndHelp")}>
+      <PageHeader title={t("periodEnd.yearEndClose")} trail={[t("periodEnd.yearEndClose")]}>
         <Dropdown value={selected} options={years.map((y) => ({ label: `${y.code} (${t(`periodEnd.status.${y.status}`)})`, value: y.code }))} onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} />
         {fy && fy.status !== "closed" && (!latest || ["reversed", "cancelled"].includes(latest.status)) && (
           <Button icon="pi pi-play" label={t("periodEnd.startYearEnd")} loading={busy === "create"} onClick={() => act("create", () => periodEndService.createYearEnd(selected), t("periodEnd.yearEndStarted"))} />
@@ -149,7 +149,7 @@ const YearEndClose = () => {
           <div className="col-12 lg:col-7">
             <div className="pe-card">
               <div className="pe-card-title">{t("periodEnd.openingBalances")} {run.nextFiscalYear || ""}</div>
-              <DataTable value={run.openingBalances} size="small" stripedRows paginator rows={12} emptyMessage={t("periodEnd.openingBalancesHelp")}>
+              <DataTable value={run.openingBalances} size="small" stripedRows paginator rows={20} emptyMessage={t("periodEnd.openingBalancesHelp")}>
                 <Column field="accountCode" header={t("periodEnd.account")} />
                 <Column field="accountName" header={t("periodEnd.accountName")} />
                 <Column header={t("periodEnd.debit")} body={(r) => (r.balance > 0 ? money(r.balance) : "")} className="bv-num" headerClassName="bv-num" />

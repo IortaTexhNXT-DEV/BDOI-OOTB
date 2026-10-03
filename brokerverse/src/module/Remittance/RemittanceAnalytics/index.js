@@ -351,6 +351,8 @@ const RemittanceAnalytics = () => {
 
       <div className="kpi-section">
         <div className="kpi-grid">
+          {/* four cards hold their places until the figures arrive, so the charts below do not move */}
+          {!kpiData.length && [0, 1, 2, 3].map((i) => <Card key={`placeholder-${i}`} className="kpi-card" aria-hidden="true" />)}
           {kpiData.map(kpi => (
             <Card key={kpi.id} className="kpi-card">
               <div className="kpi-content">

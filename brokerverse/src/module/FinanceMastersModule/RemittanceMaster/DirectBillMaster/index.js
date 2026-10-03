@@ -335,7 +335,7 @@ const DirectBillMaster = () => {
                 {!isViewMode && (
                   <Column header="" style={{ width: "5%" }}
                     body={() => (
-                      <Button icon="pi pi-trash" className="p-button-text p-button-danger" />
+                      <Button icon="pi pi-trash" className="p-button-text p-button-danger" aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                     )}
                   />
                 )}
@@ -420,7 +420,7 @@ const DirectBillMaster = () => {
                     style={{ width: "10%" }}
                     body={(rowData) => (
                       <div>
-                        <Button icon="pi pi-send" className="p-button-text p-button-sm" onClick={() => sendBills([rowData])} />
+                        <Button icon="pi pi-send" className="p-button-text p-button-sm" onClick={() => sendBills([rowData])} aria-label="Send" tooltip="Send" tooltipOptions={{ position: "top" }} />
                       </div>
                     )}
                   />

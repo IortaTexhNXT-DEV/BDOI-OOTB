@@ -65,7 +65,7 @@ const CloseChecklist = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.closeChecklist")} trail={[t("periodEnd.closeChecklist")]} subtitle={t("periodEnd.checklistHelp")}>
+      <PageHeader title={t("periodEnd.closeChecklist")} trail={[t("periodEnd.closeChecklist")]}>
         <Button icon="pi pi-plus" label={t("periodEnd.addItem")} onClick={() => setEditing({ isNew: true, values: { ...EMPTY } })} />
       </PageHeader>
       <div className="pe-card">
@@ -78,8 +78,8 @@ const CloseChecklist = () => {
           <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.active ? "active" : "inactive"} />} />
           <Column header={t("periodEnd.actions")} body={(r) => (
             <div className="flex gap-1">
-              <Button icon="pi pi-pencil" text size="small" onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "" } })} />
-              {!r.isSystem && <Button icon="pi pi-trash" text size="small" severity="danger" onClick={() => remove(r)} />}
+              <Button icon="pi pi-pencil" text size="small" onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "" } })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
+              {!r.isSystem && <Button icon="pi pi-trash" text size="small" severity="danger" onClick={() => remove(r)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />}
             </div>
           )} />
         </DataTable>

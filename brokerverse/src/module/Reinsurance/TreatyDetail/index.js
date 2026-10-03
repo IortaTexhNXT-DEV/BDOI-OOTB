@@ -80,13 +80,13 @@ const TreatyDetail = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text p-button-primary"
           tooltip={t('reinsurance.viewDetails')}
-          onClick={() => handleCessionDetails(rowData)}
+          onClick={() => handleCessionDetails(rowData)} aria-label={t('reinsurance.viewDetails')}
         />
         <Button
           icon="pi pi-file-pdf"
           className="p-button-rounded p-button-text"
           tooltip="Generate Bordereau"
-          onClick={() => navigate('/reinsurance/cessions')}
+          onClick={() => navigate('/reinsurance/cessions')} aria-label="Generate Bordereau"
         />
       </div>
     );
@@ -207,7 +207,7 @@ const TreatyDetail = () => {
           <DataTable
             value={cessions}
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             className="cessions-table"
           >
@@ -229,7 +229,7 @@ const TreatyDetail = () => {
           <DataTable
             value={claims}
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             className="claims-table"
           >
@@ -255,8 +255,7 @@ const TreatyDetail = () => {
                     icon="pi pi-download"
                     className="p-button-text"
                     disabled={!doc.fileUrl}
-                    onClick={() => window.open(doc.fileUrl, '_blank', 'noopener')}
-                  />
+                    onClick={() => window.open(doc.fileUrl, '_blank', 'noopener')} aria-label="Download" tooltip="Download" tooltipOptions={{ position: "top" }} />
                 </div>
               ))}
             </div>

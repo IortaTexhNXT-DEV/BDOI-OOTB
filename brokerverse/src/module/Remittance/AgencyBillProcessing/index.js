@@ -276,8 +276,9 @@ const AgencyBillProcessing = () => {
               <Column header={t("remittance.actions")} body={(rowData) => (
                 <div className="action-buttons">
                   <Button icon="pi pi-send" className="p-button-rounded p-button-text" tooltip={t("remittance.sendToAgencies")}
-                    onClick={() => handleSendBill(rowData)} disabled={["rejected", "cancelled"].includes(rowData.statusCode)} />
-                  <Button icon="pi pi-print" className="p-button-rounded p-button-text" tooltip={t("remittance.print")} onClick={() => window.print()} />
+                    onClick={() => handleSendBill(rowData)} disabled={["rejected", "cancelled"].includes(rowData.statusCode)} aria-label={t("remittance.sendToAgencies")}
+                    />
+                  <Button icon="pi pi-print" className="p-button-rounded p-button-text" tooltip={t("remittance.print")} onClick={() => window.print()} aria-label={t("remittance.print")} />
                 </div>
               )} />
             </DataTable>

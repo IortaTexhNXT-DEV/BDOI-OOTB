@@ -130,7 +130,7 @@ const AccountingQuery = () => {
   const [entries, setEntries] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
-    pageSize: 50,
+    pageSize: 20,
     total: 0,
     totalPages: 0,
   });
@@ -245,7 +245,7 @@ const AccountingQuery = () => {
     setEntries([]);
     setPagination({
       page: 1,
-      pageSize: 50,
+      pageSize: 20,
       total: 0,
       totalPages: 0,
     });
@@ -324,9 +324,6 @@ const AccountingQuery = () => {
       {/* Header */}
       <div className="page-header">
         <h1>{t("accounting.entriesQuery")}</h1>
-        <p className="subtitle">
-          {t("accounting.entriesQuerySubtitle")}
-        </p>
       </div>
 
       {/* Search Form */}
@@ -463,7 +460,7 @@ const AccountingQuery = () => {
             first={(pagination.page - 1) * pagination.pageSize}
             totalRecords={pagination.total}
             onPage={(e) => handleSearch(e.page + 1, e.rows)}
-            rowsPerPageOptions={[10, 25, 50, 100]}
+            rowsPerPageOptions={[20, 50, 100]}
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             emptyMessage={t("accounting.noEntriesFound")}

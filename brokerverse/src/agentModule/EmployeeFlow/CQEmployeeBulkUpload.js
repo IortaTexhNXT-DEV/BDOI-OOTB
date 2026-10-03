@@ -30,11 +30,10 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
             "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
         RowsPerPageDropdown: (options) => {
             const dropdownOptions = [
-                { label: 5, value: 5 },
-                { label: 10, value: 10 },
-                { label: 20, value: 20 },
-                { label: 120, value: 120 },
-            ];
+        { label: 20, value: 20 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
+      ];
 
             return (
                 <div className="table__selector">
@@ -279,8 +278,8 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                     <DataTable
                         value={employeeList}
                         paginator
-                        rows={5}
-                        rowsPerPageOptions={[5, 10, 25, 50]}
+                        rows={20}
+                        rowsPerPageOptions={[20, 50, 100]}
                         currentPageReportTemplate="{first} - {last} of {totalRecords}"
                         paginatorTemplate={template2}
                         className="corrections__table__main"
@@ -310,12 +309,10 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             body={(rowData, { rowIndex }) => (
                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                     <Button
-                                        icon={<SvgEdit />}
-                                    />
+                                        icon={<SvgEdit />} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                                     <Button
                                         icon={<SvgDeleteIcon />}
-                                        severity="danger"
-                                    />
+                                        severity="danger" aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                                 </div>
                             )}
                             style={{ textAlign: 'center', width: '150px' }}

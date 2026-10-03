@@ -95,7 +95,7 @@ const DirectPlacementForm = ({ mode = "placement" }) => {
   return (
     <div className="placement-page">
       <Toast ref={toast} />
-      <PageHeader title={t(record ? "placement.recordPolicy.title" : "placement.placementSlip.newTitle")} subtitle={t(record ? "placement.recordPolicy.subtitle" : "placement.placementSlip.newSubtitle")}
+      <PageHeader title={t(record ? "placement.recordPolicy.title" : "placement.placementSlip.newTitle")}
         onBack={() => navigate("/placement/placement-slips")} />
 
       <div className="placement-card">

@@ -41,7 +41,7 @@ const ConsentRegister = () => {
   return (
     <div className="admin__page access__page privacy__page">
       <Toast ref={toast} />
-      <PageHeader title={t("privacy.registerTitle")} intro={t("privacy.registerIntro")} />
+      <PageHeader title={t("privacy.registerTitle")} />
       <div className="admin__filters">
         <Dropdown value={filters.purpose} options={options.purposes} showClear placeholder={t("privacy.colPurpose")} onChange={(e) => setFilter({ purpose: e.value || null })} />
         <Dropdown value={filters.status} options={options.consentStatuses} showClear placeholder={t("privacy.colStatus")} onChange={(e) => setFilter({ status: e.value || null })} />

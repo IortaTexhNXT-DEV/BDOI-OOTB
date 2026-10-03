@@ -46,7 +46,7 @@ const QuickQuote = () => {
 
   return (
     <div className="placement-page quick-quote">
-      <PageHeader title={t("salesMarketing.quickQuote.title")} subtitle={t("salesMarketing.quickQuote.subtitle")}>
+      <PageHeader title={t("salesMarketing.quickQuote.title")}>
         <Button label={t("salesMarketing.quickQuote.nonPackage")} icon="pi pi-send" outlined onClick={() => navigate("/placement/broker-slips/new")} />
       </PageHeader>
       {products && !products.length && <div className="placement-card muted">{t("salesMarketing.quickQuote.none")}</div>}

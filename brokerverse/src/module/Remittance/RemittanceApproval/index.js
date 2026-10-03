@@ -168,19 +168,19 @@ const RemittanceApproval = () => {
             setApprovalAction("");
             setComments("");
             setShowDetailDialog(true);
-          }}
+          }} aria-label={t("remittance.view")}
         />
         <Button
           icon="pi pi-check"
           className="p-button-rounded p-button-success p-button-text"
           tooltip={t("remittance.approve")}
-          onClick={() => approveRows([rowData])}
+          onClick={() => approveRows([rowData])} aria-label={t("remittance.approve")}
         />
         <Button
           icon="pi pi-times"
           className="p-button-rounded p-button-danger p-button-text"
           tooltip={t("common.reject")}
-          onClick={() => rejectRows([rowData])}
+          onClick={() => rejectRows([rowData])} aria-label={t("common.reject")}
         />
       </div>
     );

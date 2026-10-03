@@ -43,7 +43,7 @@ const Dashboard = () => {
     setVisible(true);
   };
 
-  const userName = localStorage.getItem("USER_NAME");
+
   const { userDetails, commissionList } = useSelector(({ homeReducers }) => {
     return {
       userDetails: homeReducers?.dashboardDetails?.userDetails,
@@ -207,11 +207,6 @@ const Dashboard = () => {
       <div className="grid  mt-2">
         <div className="col-12 md:col-6 lg:col-6">
           <div className="dasboard__container__title">{t("dashboard.goodDay")}</div>
-          <div className="dasboard__container__sub__title">
-            {t("dashboard.welcomeUser", {
-              name: userDetails?.name || userName || "User",
-            })}
-          </div>
         </div>
         <div className="col-12 md:col-6 lg:col-6">
           <div className="btn_lable_save_container">

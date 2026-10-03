@@ -145,7 +145,7 @@ const RemittanceAdjustments = () => {
           onClick={() => {
             setSelectedAdjustment(rowData);
             setShowDetailDialog(true);
-          }}
+          }} aria-label="View Details"
         />
         {rowData.status === 'Pending Approval' && (
           <>
@@ -153,13 +153,13 @@ const RemittanceAdjustments = () => {
               icon="pi pi-check"
               className="p-button-rounded p-button-success p-button-text"
               tooltip="Approve"
-              onClick={() => approveRows([rowData])}
+              onClick={() => approveRows([rowData])} aria-label="Approve"
             />
             <Button
               icon="pi pi-times"
               className="p-button-rounded p-button-danger p-button-text"
               tooltip="Reject"
-              onClick={() => rejectRows([rowData])}
+              onClick={() => rejectRows([rowData])} aria-label="Reject"
             />
           </>
         )}
@@ -168,7 +168,7 @@ const RemittanceAdjustments = () => {
           className="p-button-rounded p-button-text"
           tooltip="Mark as Processed"
           disabled={rowData.status !== 'Approved'}
-          onClick={() => completeRow(rowData)}
+          onClick={() => completeRow(rowData)} aria-label="Mark as Processed"
         />
       </div>
     );

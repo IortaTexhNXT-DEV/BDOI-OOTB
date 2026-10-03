@@ -89,7 +89,7 @@ const ClientPaymentDialog = ({ policy, paymentModes, toast, onClose, onChanged }
             <Column header="Proof" body={(r) => (r.proofKey ? <a href={r.proofKey} target="_blank" rel="noopener noreferrer">{r.proofFileName || "View"}</a> : "-")} />
             <Column field="createdBy" header="Recorded by" />
             <Column field="status" header="Status" body={(r) => <Tag value={r.status} severity={r.status === "recorded" ? "success" : "secondary"} />} />
-            <Column body={(r) => (r.status === "recorded" ? <Button icon="pi pi-ban" className="p-button-text p-button-sm" tooltip="Void" onClick={() => voidPayment(r)} /> : null)} />
+            <Column body={(r) => (r.status === "recorded" ? <Button icon="pi pi-ban" className="p-button-text p-button-sm" tooltip="Void" onClick={() => voidPayment(r)} aria-label="Void" /> : null)} />
           </DataTable>
           <div className="grid">
             <div className="col-12 md:col-4">

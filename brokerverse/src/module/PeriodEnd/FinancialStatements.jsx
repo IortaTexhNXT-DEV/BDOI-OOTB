@@ -98,7 +98,7 @@ const FinancialStatements = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.financialStatements")} trail={[t("periodEnd.financialStatements")]} subtitle={t("periodEnd.statementsHelp")}>
+      <PageHeader title={t("periodEnd.financialStatements")} trail={[t("periodEnd.financialStatements")]}>
         <Button icon="pi pi-download" outlined label={t("periodEnd.exportReport")} onClick={() => navigate(`/reports/run/${REPORT_CODE[type]}`)} />
       </PageHeader>
       <div className="pe-card pe-filters">
@@ -107,7 +107,7 @@ const FinancialStatements = () => {
           <div><label htmlFor="fs-from">{t("periodEnd.fromDate")}</label><Calendar inputId="fs-from" value={from} onChange={(e) => e.value && setFrom(e.value)} dateFormat={calendarDateFormat()} showIcon maxDate={to} /></div>
         )}
         <div><label htmlFor="fs-to">{type === "balance-sheet" ? t("periodEnd.asOf") : t("periodEnd.toDate")}</label><Calendar inputId="fs-to" value={to} onChange={(e) => e.value && setTo(e.value)} dateFormat={calendarDateFormat()} showIcon /></div>
-        <Button icon="pi pi-refresh" text onClick={load} loading={loading} />
+        <Button icon="pi pi-refresh" text onClick={load} loading={loading} aria-label="Refresh" tooltip="Refresh" tooltipOptions={{ position: "top" }} />
       </div>
 
       {data && type === "income-statement" && (

@@ -97,7 +97,7 @@ const PaymentGateways = () => {
 
   return (
     <div className="placement-page pkg-page">
-      <PageHeader title={k("title")} subtitle={k("subtitle")} />
+      <PageHeader title={k("title")} />
       <TabView>
         <TabPanel header={k("gatewaysTab")}>
           <p className="muted">{k("secretsNote")}</p>

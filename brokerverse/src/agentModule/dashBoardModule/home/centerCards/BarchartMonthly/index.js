@@ -81,7 +81,8 @@ export default function BarchartMonthly({ year, data: commissionByYear }) {
 
     return (
         <div className="card">
-            <Chart type="bar" data={chartData} options={chartOptions} />
+            {/* a fixed height: the chart does not grow when its options and figures arrive */}
+            <Chart type="bar" data={chartData} options={chartOptions} style={{ height: "21rem" }} />
             <div className='mt-2' style={{ textAlign: "center", fontFamily: "Nunito, Arial, sans-serif", fontSize: "12px", fontWeight: 400 }}>{year}</div>
         </div>
     )

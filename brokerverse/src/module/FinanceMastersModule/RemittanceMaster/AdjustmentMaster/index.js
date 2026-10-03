@@ -189,8 +189,7 @@ const AdjustmentMaster = () => {
             life: 3000
           });
         }}
-        disabled={isViewMode}
-      />
+        disabled={isViewMode} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
     );
   };
 
@@ -270,7 +269,7 @@ const AdjustmentMaster = () => {
                     <div className="p-inputgroup">
                       <span>{rowData.glAccount}</span>
                       {!isViewMode && (
-                        <Button icon="pi pi-search" className="p-button-text p-button-sm" />
+                        <Button icon="pi pi-search" className="p-button-text p-button-sm" aria-label="Search" tooltip="Search" tooltipOptions={{ position: "top" }} />
                       )}
                     </div>
                   )}
@@ -333,7 +332,7 @@ const AdjustmentMaster = () => {
                   <div className="rule-card">
                     <div className="rule-header">
                       <span>Rule 1: Late Payment Penalty</span>
-                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} />
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                     </div>
                     <div className="rule-content">
                       <strong>Condition:</strong> Payment Delay {'>'} 30 Days<br />
@@ -343,7 +342,7 @@ const AdjustmentMaster = () => {
                   <div className="rule-card">
                     <div className="rule-header">
                       <span>Rule 2: Small Balance Write-off</span>
-                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} />
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                     </div>
                     <div className="rule-content">
                       <strong>Condition:</strong> Amount Difference {'<'} {"\u20B1"}10<br />
@@ -353,7 +352,7 @@ const AdjustmentMaster = () => {
                   <div className="rule-card">
                     <div className="rule-header">
                       <span>Rule 3: Loyalty Discount</span>
-                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} />
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                     </div>
                     <div className="rule-content">
                       <strong>Condition:</strong> Customer Category = Gold<br />

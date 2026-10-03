@@ -191,7 +191,7 @@ const DataSubjectRequests = () => {
     <div className="admin__page access__page privacy__page">
       <Toast ref={toast} />
       <Menu model={exportItems} popup ref={exportMenu} />
-      <PageHeader title={t("privacy.requestsTitle")} intro={t("privacy.requestsIntro")}
+      <PageHeader title={t("privacy.requestsTitle")}
         actions={<Button icon="pi pi-plus" label={t("privacy.logRequest")} onClick={openNew} />} />
 
       <div className="access__stats">
@@ -215,7 +215,7 @@ const DataSubjectRequests = () => {
         </div>
       </div>
 
-      <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={15} className="access__table" emptyMessage={t("privacy.noRequests")}>
+      <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={20} className="access__table" emptyMessage={t("privacy.noRequests")}>
         <Column field="requestNumber" header={t("privacy.colNumber")} sortable />
         <Column field="receivedOn" header={t("privacy.colReceived")} sortable body={(r) => showDate(r.receivedOn)} />
         <Column field="dueOn" header={t("privacy.colDue")} sortable body={(r) => (

@@ -165,7 +165,7 @@ const Workspace = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("bankReconciliation.title")} trail={[t("bankReconciliation.workspace")]} subtitle={t("bankReconciliation.workspaceHelp")}>
+      <PageHeader title={t("bankReconciliation.title")} trail={[t("bankReconciliation.workspace")]}>
         <Button icon="pi pi-list" outlined label={t("bankReconciliation.reconciliations")} onClick={() => navigate("/accounts/bank-reconciliation/reconciliations")} />
         <Button icon="pi pi-cog" outlined label={t("bankReconciliation.accountSetup")} disabled={!current}
           onClick={() => { setForm({ glAccountCode: current?.glAccountCode || null, statementFormat: current?.statementFormat || null, reconcileFrom: current?.reconcileFrom || "" }); setDialog("setup"); }} />

@@ -117,9 +117,9 @@ const ElectronicTransfer = () => {
   const actionBodyTemplate = (rowData) => {
     return (
       <div className="action-buttons">
-        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.approve", "Approve")} onClick={() => handleApprove(rowData)} />
-        <Button icon="pi pi-times" className="p-button-rounded p-button-danger p-button-text" tooltip={t("common.reject", "Reject")} onClick={() => handleReject(rowData)} />
-        <Button icon="pi pi-eye" className="p-button-rounded p-button-text" tooltip={t("remittance.view", "View")} onClick={() => handleView(rowData)} />
+        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.approve", "Approve")} onClick={() => handleApprove(rowData)} aria-label={t("remittance.approve", "Approve")} />
+        <Button icon="pi pi-times" className="p-button-rounded p-button-danger p-button-text" tooltip={t("common.reject", "Reject")} onClick={() => handleReject(rowData)} aria-label={t("common.reject", "Reject")} />
+        <Button icon="pi pi-eye" className="p-button-rounded p-button-text" tooltip={t("remittance.view", "View")} onClick={() => handleView(rowData)} aria-label={t("remittance.view", "View")} />
       </div>
     );
   };

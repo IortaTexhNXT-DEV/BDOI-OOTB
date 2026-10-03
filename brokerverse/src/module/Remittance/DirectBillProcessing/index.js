@@ -271,7 +271,7 @@ const DirectBillProcessing = () => {
   const clientPaymentBody = (row) => (
     <div className="flex align-items-center gap-1">
       <Tag value={row.clientPaymentStatus || "Unpaid"} severity={PAYMENT_SEVERITY[row.clientPaymentStatus] || "danger"} />
-      <Button icon="pi pi-credit-card" className="p-button-text p-button-sm" tooltip="Record client payment to insurer" onClick={() => setPaymentPolicy({ policyId: row.policyId, policyNo: row.policyNo })} />
+      <Button icon="pi pi-credit-card" className="p-button-text p-button-sm" tooltip="Record client payment to insurer" onClick={() => setPaymentPolicy({ policyId: row.policyId, policyNo: row.policyNo })} aria-label="Record client payment to insurer" />
     </div>
   );
   const reloadAfterPayment = async () => {
@@ -282,26 +282,27 @@ const DirectBillProcessing = () => {
 
   const noteActions = (row) => (
     <div className="flex flex-wrap gap-1">
-      <Button icon="pi pi-eye" className="p-button-text p-button-sm" tooltip="View" onClick={() => openView(row)} />
-      <Button icon="pi pi-print" className="p-button-text p-button-sm" tooltip="Print debit note" onClick={() => printNote(row)} />
+      <Button icon="pi pi-eye" className="p-button-text p-button-sm" tooltip="View" onClick={() => openView(row)} aria-label="View" />
+      <Button icon="pi pi-print" className="p-button-text p-button-sm" tooltip="Print debit note" onClick={() => printNote(row)} aria-label="Print debit note" />
       {row.statusCode === "draft" && (
-        <Button icon="pi pi-send" className="p-button-text p-button-sm" tooltip="Submit for approval" onClick={() => run(() => remittanceService.submitDebitNote(row.id), `${row.dnNumber} submitted for approval`)} />
+        <Button icon="pi pi-send" className="p-button-text p-button-sm" tooltip="Submit for approval" onClick={() => run(() => remittanceService.submitDebitNote(row.id), `${row.dnNumber} submitted for approval`)} aria-label="Submit for approval" />
       )}
       {row.statusCode === "for-approval" && (
         <>
-          <Button icon="pi pi-check" className="p-button-text p-button-success p-button-sm" tooltip="Approve" onClick={() => setDecision({ note: row, action: "approve", text: "" })} />
-          <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip="Reject" onClick={() => setDecision({ note: row, action: "reject", text: "" })} />
+          <Button icon="pi pi-check" className="p-button-text p-button-success p-button-sm" tooltip="Approve" onClick={() => setDecision({ note: row, action: "approve", text: "" })} aria-label="Approve" />
+          <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip="Reject" onClick={() => setDecision({ note: row, action: "reject", text: "" })} aria-label="Reject" />
         </>
       )}
       {["open", "partial"].includes(row.statusCode) && (
         <>
-          <Button icon="pi pi-wallet" className="p-button-text p-button-sm" tooltip="Record insurer payment" onClick={() => openCollect(row)} />
+          <Button icon="pi pi-wallet" className="p-button-text p-button-sm" tooltip="Record insurer payment" onClick={() => openCollect(row)} aria-label="Record insurer payment" />
           <Button icon="pi pi-envelope" className="p-button-text p-button-sm" tooltip="E-mail to the insurer"
-            onClick={() => run(() => remittanceService.sendDebitNote(row.id), (dn) => `${dn.dnNumber} e-mailed to ${dn.emailedTo}`)} />
+            onClick={() => run(() => remittanceService.sendDebitNote(row.id), (dn) => `${dn.dnNumber} e-mailed to ${dn.emailedTo}`)} aria-label="E-mail to the insurer"
+            />
         </>
       )}
       {["draft", "for-approval", "open"].includes(row.statusCode) && !(Number(row.collectedAmount) > 0) && (
-        <Button icon="pi pi-ban" className="p-button-text p-button-sm" tooltip="Cancel" onClick={() => setDecision({ note: row, action: "cancel", text: "" })} />
+        <Button icon="pi pi-ban" className="p-button-text p-button-sm" tooltip="Cancel" onClick={() => setDecision({ note: row, action: "cancel", text: "" })} aria-label="Cancel" />
       )}
     </div>
   );
@@ -316,10 +317,6 @@ const DirectBillProcessing = () => {
       <Toast ref={toast} />
       <div className="header-section">
         <h2>{t("remittance.directBillProcessing")}</h2>
-        <p className="subtitle">
-          Direct bill: the client pays the premium directly to the insurer. The broker bills its commission (with VAT) to the insurer with a commission
-          debit note and collects it net of the insurer&apos;s expanded withholding tax (BIR Form 2307).
-        </p>
       </div>
 
       <div className="grid summary-cards mb-2">
@@ -543,7 +540,7 @@ const DirectBillProcessing = () => {
               <Column field="appliedAmount" header="Applied" body={money("appliedAmount")} className="text-right" />
               <Column field="journalNumber" header="Journal" />
               <Column field="status" header="Status" body={(r) => <Tag value={r.status} severity={r.status === "posted" ? "success" : "secondary"} />} />
-              <Column body={(r) => (r.status === "posted" ? <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip="Reverse" onClick={() => reverseCollection(viewNote, r)} /> : null)} />
+              <Column body={(r) => (r.status === "posted" ? <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip="Reverse" onClick={() => reverseCollection(viewNote, r)} aria-label="Reverse" /> : null)} />
             </DataTable>
             <div className="action-buttons mt-3">
               <Button label="Print" icon="pi pi-print" className="p-button-outlined" onClick={() => printNote(viewNote)} />

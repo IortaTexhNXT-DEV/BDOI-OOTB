@@ -352,8 +352,7 @@ const SettlementProcessing = () => {
         icon="pi pi-trash"
         className="p-button-danger p-button-text p-button-sm"
         onClick={() => handleDeletePolicy(rowData)}
-        disabled={!editable}
-      />
+        disabled={!editable} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
     );
   };
 

@@ -82,14 +82,14 @@ const AccountingTable = ({ type }) => {
             <DataTable
                 value={type == "Quarterly" ? data1 : data}
                 // paginator
-                rows={5}
+                rows={20}
                 style={{
                     textAlign: "left",
                     border: "1px solid #e5e7eb",
                     borderWidth: "0 0 1px 0",
                     padding: "0"
                 }}
-                rowsPerPageOptions={[5, 10, 25, 50]}
+                rowsPerPageOptions={[20, 50, 100]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
                 className="corrections__table__main"
                 dataKey="id"

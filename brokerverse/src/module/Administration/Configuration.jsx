@@ -153,12 +153,11 @@ const Configuration = () => {
 
   const header = (
     <>
-      <BreadCrumb model={[{ label: "Master" }, { label: "Configuration", command: () => openArea(null) }, ...(area ? [{ label: area.title }] : [])]}
-        home={{ icon: "pi pi-home", url: "/" }} className="admin__breadcrumb" />
+      <BreadCrumb model={[{ label: "Configuration", command: () => openArea(null), className: area ? "bv-crumb-link" : undefined }, ...(area ? [{ label: area.title }] : [])]}
+        home={{ label: "Master" }} className="admin__breadcrumb" />
       <div className="admin__header">
         <div>
           <h2>{q ? "Search results" : area ? area.title : "Configuration"}</h2>
-          <p>{area ? area.summary : "How the platform works for your brokerage: choose an area, or search for a setting. Changes apply as soon as they are saved and are recorded in the audit trail."}</p>
         </div>
         <span className="p-input-icon-left cfg__search">
           <i className="pi pi-search" />

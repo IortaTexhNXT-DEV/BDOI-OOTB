@@ -52,7 +52,7 @@ const Reconciliations = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("bankReconciliation.reconciliations")} trail={[t("bankReconciliation.reconciliations")]} subtitle={t("bankReconciliation.reconciliationsHelp")}>
+      <PageHeader title={t("bankReconciliation.reconciliations")} trail={[t("bankReconciliation.reconciliations")]}>
         <Button icon="pi pi-arrow-left" text label={t("bankReconciliation.workspace")} onClick={() => navigate("/accounts/bank-reconciliation")} />
         <Button icon="pi pi-plus" label={t("bankReconciliation.newReconciliation")} onClick={() => setCreating({ bankAccount: linked[0]?.code || null, period: previousPeriod() })} />
       </PageHeader>

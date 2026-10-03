@@ -249,8 +249,7 @@ const BulkProcessingMaster = () => {
         icon="pi pi-trash"
         className="p-button-rounded p-button-danger p-button-text"
         onClick={() => deleteMapping(rowData)}
-        disabled={mode === "view"}
-      />
+        disabled={mode === "view"} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
     );
   };
 

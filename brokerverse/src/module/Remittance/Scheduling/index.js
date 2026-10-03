@@ -90,11 +90,12 @@ const SchedulingDashboard = () => {
     return (
       <div className="action-buttons">
         <Button icon="pi pi-play" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.runNow")}
-          disabled={rowData.status !== "Active"} onClick={() => runNow(rowData)} />
+          disabled={rowData.status !== "Active"} onClick={() => runNow(rowData)} aria-label={t("remittance.runNow")}
+          />
         <Button icon={rowData.status === "Active" ? "pi pi-pause" : "pi pi-refresh"} className="p-button-rounded p-button-warning p-button-text"
-          onClick={() => togglePause(rowData)} />
+          onClick={() => togglePause(rowData)} aria-label="Refresh" tooltip="Refresh" tooltipOptions={{ position: "top" }} />
         <Button icon="pi pi-pencil" className="p-button-rounded p-button-text"
-          onClick={() => navigate(`${SCHEDULE_ROUTE}/edit`, { state: { data: rowData, mode: "edit" } })} />
+          onClick={() => navigate(`${SCHEDULE_ROUTE}/edit`, { state: { data: rowData, mode: "edit" } })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };

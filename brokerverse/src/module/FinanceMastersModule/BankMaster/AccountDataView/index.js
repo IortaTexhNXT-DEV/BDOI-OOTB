@@ -163,8 +163,8 @@ const BankAccounts = () => {
           loading={loading}
           dataKey="id"
           paginator
-          rows={10}
-          rowsPerPageOptions={[10, 25, 50]}
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           emptyMessage="No bank accounts yet. Add the accounts the company receives premiums into and pays insurers from."
         >
           <Column field="accountCode" header="Account Code" sortable />
@@ -177,7 +177,7 @@ const BankAccounts = () => {
           <Column header={t("common.status")} body={(r) => <MasterStatusToggle type={TYPE} record={r} onChanged={load} onError={(e) => toast.current?.show({ severity: "error", detail: e.message })} />} />
           <Column
             header={t("financeMasters.action")}
-            body={(r) => <Button icon="pi pi-pencil" text rounded aria-label={`Edit ${r.accountCode}`} onClick={() => open(r)} />}
+            body={(r) => <Button icon="pi pi-pencil" text rounded aria-label={`Edit ${r.accountCode}`} onClick={() => open(r)} tooltip={`Edit ${r.accountCode}`} tooltipOptions={{ position: "top" }} />}
           />
         </DataTable>
       </Card>

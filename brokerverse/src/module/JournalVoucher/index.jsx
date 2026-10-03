@@ -52,84 +52,32 @@ const JournalVoucher = () => {
 
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  const [currentPage, setCurrentPage] = useState(1);
-  const isInitialMount = useRef(true);
+  const loadedOnce = useRef(false);
 
   const handleEdit = () => {
     setVisible(true);
   };
   const dispatch = useDispatch();
 
-  // Load data on component mount
+  // One request per change of page, page size or search (the search is debounced while typing).
   useEffect(() => {
-    if (isInitialMount.current) {
-      dispatch(
-        getJournalVoucherHistory({
-          page: 1,
-          pageSize: rowsPerPage,
-        })
-      );
-      isInitialMount.current = false;
-    }
-  }, [dispatch, rowsPerPage]);
+    const params = { page: Math.floor(first / rowsPerPage) + 1, pageSize: rowsPerPage };
+    if (globalFilter && search) params[globalFilter] = search;
+    const h = setTimeout(() => dispatch(getJournalVoucherHistory(params)), loadedOnce.current ? 250 : 0);
+    loadedOnce.current = true;
+    return () => clearTimeout(h);
+  }, [dispatch, first, rowsPerPage, search, globalFilter]);
 
-  // Handle pagination changes
-  useEffect(() => {
-    if (!isInitialMount.current) {
-      const params = {
-        page: currentPage,
-        pageSize: rowsPerPage,
-      };
-
-      // Add filters if search is active
-      if (globalFilter && search) {
-        params[globalFilter] = search;
-      }
-
-      dispatch(getJournalVoucherHistory(params));
-    }
-  }, [dispatch, currentPage, rowsPerPage]);
-
-  // Handle search/filter changes - reset to page 1
-  useEffect(() => {
-    if (!isInitialMount.current) {
-      setCurrentPage(1);
-      setFirst(0);
-      const params = {
-        page: 1,
-        pageSize: rowsPerPage,
-      };
-
-      if (globalFilter && search) {
-        params[globalFilter] = search;
-      }
-
-      dispatch(getJournalVoucherHistory(params));
-    }
-  }, [search, globalFilter, dispatch, rowsPerPage]);
-
-
-  const onPageChange = (event) => {
-    const newPage = event.page + 1; // PrimeReact uses 0-based indexing
-    const newPageSize = event.rows;
-    setFirst(event.first);
-    setRowsPerPage(newPageSize);
-    setCurrentPage(newPage);
-
-    // Build params for API call
-    const params = {
-      page: newPage,
-      pageSize: newPageSize,
-    };
-
-    // Include filters if search is active
-    if (globalFilter && search) {
-      params[globalFilter] = search;
-    }
-
-    dispatch(getJournalVoucherHistory(params));
+  // a new search starts on the first page
+  const onSearch = (value) => {
+    setSearch(value);
+    setFirst(0);
   };
 
+  const onPageChange = (event) => {
+    setFirst(event.first);
+    setRowsPerPage(event.rows);
+  };
 
   return (
     <div className="grid  container__Journal__Voture">
@@ -193,10 +141,10 @@ const JournalVoucher = () => {
               <span className="p-input-icon-left" style={{ width: "100%" }}>
                 <i className="pi pi-search" />
                 <InputText
-                  placeholder="Search Transactions"
+                  placeholder={t("accounts.searchTransactions", { defaultValue: "Search transactions" })}
                   className="searchinput_left"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => onSearch(e.target.value)}
                 />
               </span>
             </div>
@@ -204,7 +152,7 @@ const JournalVoucher = () => {
             <div className="col-12 md:col-2 lg:col-2">
               <Dropdown
                 value={globalFilter}
-                onChange={(e) => setGlobalFilter(e.value)}
+                onChange={(e) => { setGlobalFilter(e.value); setFirst(0); }}
                 options={cities}
                 optionValue="code"
                 optionLabel="name"
@@ -219,7 +167,7 @@ const JournalVoucher = () => {
               className="main__tabel__title__Journal__Voture "
               style={{ paddingLeft: 10, paddingRight: 10 }}
             >
-              Journal Voucher history
+              {t("accounts.journalVoucherHistory", { defaultValue: "Journal voucher history" })}
             </div>
           </div>
           <div

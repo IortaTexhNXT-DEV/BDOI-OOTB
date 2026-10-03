@@ -47,11 +47,11 @@ const Statement = () => {
 
   // Breadcrumb items
   const items = [
-    { label: "Incentive", url: "/incentive" },
-    { label: "Statement", url: "/incentive/statement" }
+    { label: t("incentive.incentive") },
+    { label: t("incentive.statement", { defaultValue: "Statement" }), url: "/incentive/statement" }
   ];
 
-  const home = { label: "Dashboard" };
+  const home = { label: t("sidebar.Accounts") };
 
   // Users who are not agents (managers) pick an agent; agents see their own statement.
   const loadAgentChoices = async () => {
@@ -214,13 +214,13 @@ const Statement = () => {
             icon="pi pi-print"
             className="p-button-outlined"
             onClick={handlePrintStatement}
-            tooltip="Print Statement"
+            tooltip="Print Statement" aria-label="Print Statement"
           />
           <Button
             icon="pi pi-download"
             className="p-button-outlined"
             onClick={handleExportStatement}
-            tooltip="Export to PDF"
+            tooltip="Export to PDF" aria-label="Export to PDF"
           />
         </div>
         <BreadCrumb

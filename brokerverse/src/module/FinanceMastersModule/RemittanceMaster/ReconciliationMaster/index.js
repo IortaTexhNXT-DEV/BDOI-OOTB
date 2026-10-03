@@ -195,8 +195,7 @@ const ReconciliationMaster = () => {
       <Button
         icon="pi pi-trash"
         className="p-button-rounded p-button-danger p-button-text"
-        onClick={() => deleteExceptionRule(rowData)}
-      />
+        onClick={() => deleteExceptionRule(rowData)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
     );
   };
 

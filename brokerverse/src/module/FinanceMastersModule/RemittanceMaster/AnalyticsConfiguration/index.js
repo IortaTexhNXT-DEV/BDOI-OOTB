@@ -228,24 +228,24 @@ const AnalyticsConfiguration = () => {
           onClick={() => {
             setSelectedWidget(rowData);
             setShowWidgetDialog(true);
-          }}
+          }} aria-label="Preview"
         />
         {!isViewMode && (
           <>
             <Button
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
-              tooltip="Edit"
+              tooltip="Edit" aria-label="Edit"
             />
             <Button
               icon="pi pi-copy"
               className="p-button-rounded p-button-text"
-              tooltip="Duplicate"
+              tooltip="Duplicate" aria-label="Duplicate"
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
-              tooltip="Delete"
+              tooltip="Delete" aria-label="Delete"
             />
           </>
         )}
@@ -263,24 +263,24 @@ const AnalyticsConfiguration = () => {
           onClick={() => {
             setSelectedKpi(rowData);
             setShowKpiDialog(true);
-          }}
+          }} aria-label="View"
         />
         {!isViewMode && (
           <>
             <Button
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
-              tooltip="Edit"
+              tooltip="Edit" aria-label="Edit"
             />
             <Button
               icon="pi pi-chart-line"
               className="p-button-rounded p-button-success p-button-text"
-              tooltip="View Trend"
+              tooltip="View Trend" aria-label="View Trend"
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
-              tooltip="Delete"
+              tooltip="Delete" aria-label="Delete"
             />
           </>
         )}
@@ -298,24 +298,24 @@ const AnalyticsConfiguration = () => {
           onClick={() => {
             setSelectedReport(rowData);
             setShowReportDialog(true);
-          }}
+          }} aria-label="Preview"
         />
         {!isViewMode && (
           <>
             <Button
               icon="pi pi-play"
               className="p-button-rounded p-button-success p-button-text"
-              tooltip="Generate Now"
+              tooltip="Generate Now" aria-label="Generate Now"
             />
             <Button
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
-              tooltip="Edit"
+              tooltip="Edit" aria-label="Edit"
             />
             <Button
               icon="pi pi-clone"
               className="p-button-rounded p-button-text"
-              tooltip="Clone"
+              tooltip="Clone" aria-label="Clone"
             />
           </>
         )}

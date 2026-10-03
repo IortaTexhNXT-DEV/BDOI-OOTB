@@ -635,8 +635,7 @@ const ProductConfiguratorTab = ({
                   label=""
                   icon="pi pi-trash"
                   onClick={() => handleDeleteField(field.id)}
-                  className="p-button-text p-button-danger"
-                />
+                  className="p-button-text p-button-danger" aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
               </div>
             </div>
           ))}

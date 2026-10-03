@@ -10,6 +10,7 @@ import { NotificationProvider } from "./context/NotificationContext";
 import { fetchSystemSettings } from "./module/SystemSettings/store/systemSettingsSlice";
 import { applyAppTitle } from "./utility/applySystemSettings";
 import AppDialogs from "./components/AppDialogs";
+import InAppLinks from "./components/InAppLinks";
 
 const App = () => {
   const [authState, setAuthState] = useState(() => {
@@ -66,6 +67,7 @@ const App = () => {
     <NotificationProvider>
       <div className="App">
         <AppDialogs />
+        <InAppLinks />
         <Routes>
           <Route
             path="/login"

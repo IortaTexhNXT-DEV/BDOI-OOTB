@@ -214,7 +214,7 @@ const SettlementDetails = () => {
                     onClick={() => {
                       formik.setFieldValue("settlementDocument", null);
                       fileUploadRef.current?.clear();
-                    }}
+                    }} tooltip={t("claimJourney.removeFile")} tooltipOptions={{ position: "top" }}
                   />
                 </span>
               ) : (

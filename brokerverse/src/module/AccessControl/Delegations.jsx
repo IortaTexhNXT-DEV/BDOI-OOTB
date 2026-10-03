@@ -81,14 +81,13 @@ const Delegations = () => {
       <Toast ref={toast} />
       <PageHeader
         title={k("delegationsTitle", "Delegations")}
-        intro={k("delegationsIntro", "Cover for approvers on leave: the delegate approves with the delegator's authority for the chosen transactions and dates.")}
         actions={<Button icon="pi pi-plus" label={k("newDelegation", "New delegation")} onClick={() => setForm({ ...EMPTY })} />}
       />
       <div className="access__toggle">
         <InputSwitch inputId="ac-current" checked={currentOnly} onChange={(e) => setCurrentOnly(e.value)} />
         <label htmlFor="ac-current">{k("currentOnly", "Current and upcoming only")}</label>
       </div>
-      <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={15} className="access__table" emptyMessage={k("noDelegations", "No delegations")}>
+      <DataTable value={rows} dataKey="id" loading={loading} size="small" stripedRows paginator rows={20} className="access__table" emptyMessage={k("noDelegations", "No delegations")}>
         <Column field="delegatorName" header={k("colDelegator", "Approver away")} />
         <Column field="delegateName" header={k("colDelegate", "Covered by")} />
         <Column header={k("colTransactions", "Transactions")} body={(d) => (d.transactionTypes.length

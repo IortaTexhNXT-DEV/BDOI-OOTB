@@ -1,53 +1,40 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
-import { Toast } from "primereact/toast";
 import adminService from "../../services/adminService";
+import { useListState, useServerList } from "../../hooks/useServerList";
 import "./index.scss";
 
 import { formatDate as formatAppDate } from "../../utility/dateFormat";
 const short = (v) => (v ? JSON.stringify(v).slice(0, 160) : "");
+const NO_FILTERS = { entity: "", entityId: "", username: "", from: "", to: "" };
 
-/** Master > Audit Trail: who changed what, from the audit log the backend writes on every change. */
+/** Master > Audit Trail: who changed what, newest first, paged by the server however long the log grows. */
 const AuditTrail = () => {
-  const toast = useRef(null);
-  const [rows, setRows] = useState([]);
-  const [filters, setFilters] = useState({ entity: "", entityId: "", username: "", from: "", to: "" });
-  const [loading, setLoading] = useState(false);
+  const [state, patch] = useListState("audit-trail", { applied: NO_FILTERS });
+  const [filters, setFilters] = useState(state.applied);
 
-  const load = async () => {
-    setLoading(true);
-    try {
-      setRows(await adminService.getAudit({ ...filters, limit: 500 }));
-    } catch (e) {
-      toast.current?.show({ severity: "error", summary: "Audit trail", detail: e.message });
-    } finally {
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const fetchPage = useCallback(({ page, pageSize }) => adminService.getAuditPage(state.applied, { page, pageSize }), [state.applied]);
+  const list = useServerList(fetchPage, { key: "audit-trail" });
+  const search = () => (JSON.stringify(filters) === JSON.stringify(state.applied) ? list.reload() : patch({ applied: { ...filters } }));
 
   const field = (key, label, type = "text") => (
     <div className="admin__field">
       <label htmlFor={`audit-${key}`}>{label}</label>
-      <InputText id={`audit-${key}`} type={type} value={filters[key]} onChange={(e) => setFilters({ ...filters, [key]: e.target.value })} />
+      <InputText id={`audit-${key}`} type={type} value={filters[key]} onChange={(e) => setFilters({ ...filters, [key]: e.target.value })}
+        onKeyDown={(e) => { if (e.key === "Enter") search(); }} />
     </div>
   );
 
   return (
     <div className="admin__page">
-      <Toast ref={toast} />
-      <BreadCrumb model={[{ label: "Master" }, { label: "Audit Trail" }]} home={{ icon: "pi pi-home", url: "/" }} className="admin__breadcrumb" />
+      <BreadCrumb model={[{ label: "Audit Trail" }]} home={{ label: "Master" }} className="admin__breadcrumb" />
       <div className="admin__header">
         <div>
           <h2>Audit Trail</h2>
-          <p>Every create, update, approval and sign-in, newest first.</p>
         </div>
       </div>
       <div className="admin__filters">
@@ -56,9 +43,9 @@ const AuditTrail = () => {
         {field("username", "User")}
         {field("from", "From date", "date")}
         {field("to", "To date", "date")}
-        <Button label="Search" icon="pi pi-search" onClick={load} />
+        <Button label="Search" icon="pi pi-search" onClick={search} />
       </div>
-      <DataTable value={rows} loading={loading} paginator rows={20} size="small" stripedRows emptyMessage="No entries">
+      <DataTable {...list.tableProps} dataKey="id" size="small" stripedRows emptyMessage={list.error || "No entries"}>
         <Column header="When" body={(r) => formatAppDate(r.at, { withTime: true })} />
         <Column field="username" header="User" />
         <Column field="entity" header="Record type" />

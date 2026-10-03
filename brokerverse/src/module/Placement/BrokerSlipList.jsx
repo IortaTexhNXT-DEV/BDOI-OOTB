@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
+import StatCards from "../../components/StatCards";
 import { PageHeader, StatusTag, formatDate } from "./shared";
 import "./index.scss";
 
@@ -23,7 +24,8 @@ const BrokerSlipList = () => {
   const [rows, setRows] = useState([]);
   const [total, setTotal] = useState(0);
   const [counts, setCounts] = useState({});
-  const [page, setPage] = useState({ first: 0, rows: 10 });
+  const [countsLoaded, setCountsLoaded] = useState(false);
+  const [page, setPage] = useState({ first: 0, rows: 20 });
   const [status, setStatus] = useState("all");
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +36,10 @@ const BrokerSlipList = () => {
       const res = await placementService.listSlips({ page: page.first / page.rows + 1, pageSize: page.rows, status: status && status !== "all" ? status : undefined, search: search || undefined });
       setRows(res.data || []);
       setTotal(res.total || 0);
-      if ((!status || status === "all") && !search) setCounts(res.counts || {});
+      if ((!status || status === "all") && !search) {
+        setCounts(res.counts || {});
+        setCountsLoaded(true);
+      }
     } catch (e) {
       toast.current?.show({ severity: "error", summary: t("common.error"), detail: e.message, life: 4000 });
     } finally {
@@ -51,18 +56,15 @@ const BrokerSlipList = () => {
   return (
     <div className="placement-page">
       <Toast ref={toast} />
-      <PageHeader title={t("placement.brokerSlip.listTitle")} subtitle={t("placement.brokerSlip.listSubtitle")}>
+      <PageHeader title={t("placement.brokerSlip.listTitle")}>
         <Button label={t("placement.brokerSlip.new")} icon="pi pi-plus" onClick={() => navigate("/placement/broker-slips/new")} />
       </PageHeader>
 
-      <div className="kpi-row">
-        {["submitted", "responses-in", "draft", "closed"].map((s) => (
-          <button type="button" key={s} className={`kpi-card ${status === s ? "active" : ""}`} onClick={() => { setStatus(status === s ? "all" : s); setPage({ ...page, first: 0 }); }}>
-            <span className="kpi-value">{counts[s] || 0}</span>
-            <span className="kpi-label">{t(`placement.status.${s}`)}</span>
-          </button>
-        ))}
-      </div>
+      {/* the counts per status double as a status filter */}
+      <StatCards items={["submitted", "responses-in", "draft", "closed"].map((s) => ({
+        key: s, label: t(`placement.status.${s}`), value: countsLoaded ? counts[s] || 0 : null, active: status === s,
+        onClick: () => { setStatus(status === s ? "all" : s); setPage({ ...page, first: 0 }); },
+      }))} />
 
       <div className="placement-card">
         <div className="toolbar">
@@ -72,7 +74,7 @@ const BrokerSlipList = () => {
           </span>
           <Dropdown value={status} options={statusOptions} onChange={(e) => { setStatus(e.value); setPage({ ...page, first: 0 }); }} className="status-filter" />
         </div>
-        <DataTable value={rows} lazy paginator first={page.first} rows={page.rows} totalRecords={total} onPage={(e) => setPage({ first: e.first, rows: e.rows })} rowsPerPageOptions={[10, 25, 50]}
+        <DataTable value={rows} lazy paginator first={page.first} rows={page.rows} totalRecords={total} onPage={(e) => setPage({ first: e.first, rows: e.rows })} rowsPerPageOptions={[20, 50, 100]}
           loading={loading} dataKey="id" stripedRows size="small" className="placement-grid" emptyMessage={t("placement.list.emptySlips")}
           onRowClick={(e) => navigate(`/placement/broker-slips/${e.data.id}`)} rowClassName={() => "clickable"}>
           <Column field="slipNumber" header={t("placement.fields.slipNumber")} body={(r) => <span className="doc-number">{r.slipNumber}</span>} />

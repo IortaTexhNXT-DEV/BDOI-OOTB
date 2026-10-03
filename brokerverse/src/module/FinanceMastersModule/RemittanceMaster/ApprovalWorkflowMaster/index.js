@@ -215,8 +215,7 @@ const ApprovalWorkflowMaster = () => {
         onClick={() => {
           const newStages = approvalStages.filter((_, index) => index !== rowIndex);
           setApprovalStages(newStages);
-        }}
-      />
+        }} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
     );
   };
 

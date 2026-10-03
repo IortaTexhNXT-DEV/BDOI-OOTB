@@ -313,14 +313,12 @@ const ClaimsDashboard = () => {
           rounded
           text
           severity="info"
-          onClick={() => navigate(`/agent/claimdetail/${rowData.claimId}`)}
-        />
+          onClick={() => navigate(`/agent/claimdetail/${rowData.claimId}`)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
         <Button
           icon="pi pi-pencil"
           rounded
           text
-          onClick={() => navigate(`/agent/claimaudittrail/${rowData.claimId}`)}
-        />
+          onClick={() => navigate(`/agent/claimaudittrail/${rowData.claimId}`)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -432,7 +430,7 @@ const ClaimsDashboard = () => {
               ></i>
               <div className="kpi-details">
                 <span className="kpi-label">{t("claimsDashboard.maxClaimsByState")}</span>
-                <span className="kpi-value">{kpiData.maxClaimsByState}</span>
+                <span className="kpi-value" title={kpiData.maxClaimsByState}>{kpiData.maxClaimsByState}</span>
                 <span className="kpi-percentage">
                   {formatPercent(kpiData.statePercentage)}
                 </span>
@@ -452,8 +450,8 @@ const ClaimsDashboard = () => {
                 value={recentClaims}
                 loading={loading}
                 paginator
-                rows={10}
-                rowsPerPageOptions={[5, 10, 25]}
+                rows={20}
+                rowsPerPageOptions={[20, 50, 100]}
                 className="claims-table"
               >
                 <Column field="claimId" header={t("claimsDashboard.claimId")} />

@@ -15,7 +15,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
  * - { data: { data: [], total, page?, pageSize? } } (nested)
  * - { results: [], total } or { content: [], totalElements }
  */
-function extractPolicyListFromResponse(apiResponse, requestPage = 1, requestPageSize = 10) {
+export function extractPolicyListFromResponse(apiResponse, requestPage = 1, requestPageSize = 10) {
   const data = apiResponse?.data;
   let policies = [];
   let total = 0;

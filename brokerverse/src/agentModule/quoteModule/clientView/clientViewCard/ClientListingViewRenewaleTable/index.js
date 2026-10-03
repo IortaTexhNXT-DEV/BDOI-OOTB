@@ -337,10 +337,9 @@ const Index = ({ clientId, action }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -411,8 +410,7 @@ const Index = ({ clientId, action }) => {
         <Button
           icon={<SvgDot />}
           className="view__btn"
-          onClick={(event) => handleMenuToggle(event, menu, rowData)}
-        />
+          onClick={(event) => handleMenuToggle(event, menu, rowData)} aria-label="More actions" tooltip="More actions" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -577,10 +575,10 @@ const Index = ({ clientId, action }) => {
         <DataTable
           value={filteredRenewals}
           paginator
-          rows={5}
+          rows={20}
           selectionMode={selectionMode}
           selection={selectedProducts}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           className="corrections__table__main"
