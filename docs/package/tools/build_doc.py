@@ -263,12 +263,28 @@ class Builder:
             lens.append(min(max(longest, header_words, 4), 48))
         weight = sum(lens)
         widths = [total_cm * n / weight for n in lens]
-        # no column narrower than 1.6 cm: take the difference from the widest
-        short = sum(max(0, 1.6 - w) for w in widths)
-        widths = [max(w, 1.6) for w in widths]
+        # no column narrower than 1.6 cm or than its longest header word: take the difference from the widest
+        def longest_word(j, rs):
+            return max((min(len(w), 16) for r in rs for w in r[j].replace('<br>', ' ').split()), default=0)
+        mins = [max(1.6, 0.21 * longest_word(j, rows[:1]) + 0.3, 0.17 * longest_word(j, rows[1:]) + 0.3) for j in range(len(widths))]
+        if sum(mins) > total_cm:  # too many wide columns: scale the minimums down
+            mins = [m * total_cm / sum(mins) * 0.9 for m in mins]
+        short = sum(max(0, m - w) for m, w in zip(mins, widths))
+        widths = [max(w, m) for m, w in zip(mins, widths)]
+        # take the shortfall from the columns that are above their minimum, in proportion
+        spare = [w - m for m, w in zip(mins, widths)]
+        if short and sum(spare) > 0:
+            widths = [w - short * sp / sum(spare) for w, sp in zip(widths, spare)]
+            short = 0
         widths[widths.index(max(widths))] -= short
         tblpr = t._tbl.tblPr
         lay = OxmlElement('w:tblLayout'); lay.set(qn('w:type'), 'fixed'); tblpr.append(lay)
+        # LibreOffice reads the table grid rather than the cell widths: set both
+        grid = t._tbl.tblGrid
+        if grid is not None:
+            for j, gc in enumerate(grid.findall(qn('w:gridCol'))):
+                if j < len(widths):
+                    gc.set(qn('w:w'), str(int(Cm(widths[j]).twips)))
         for row in t.rows:
             for j, cell in enumerate(row.cells):
                 cell.width = Cm(widths[j])

@@ -125,7 +125,7 @@ The Client owns its Client Data. During the Subscription Term, the Client can ex
 ## Data return
 
 1. On expiry or termination, the Client may request, within 60 days, a full export of the Client Data. iorta TechNXT delivers it within 30 days of the request as: (a) a PostgreSQL database dump of the Client's database; (b) an archive of the uploaded documents in their original formats; and (c) CSV extracts of the main registers listed in the Documentation, with the data dictionary.
-2. One full export is included. Further exports, data mapping to a new system and transition assistance are provided at the day rates of the Order Form.
+2. One full export is included. Further exports, data mapping to a new system and transition assistance are provided at the day rates of the Order Form. The steps, formats, timelines and the certificate of deletion are set out in the Exit and Transition Plan.
 3. During the 60-day period, iorta TechNXT keeps the Client Data and may keep read-only access open for the System Administrator at [no charge / the Monthly Fee prorated].
 
 ## Data deletion

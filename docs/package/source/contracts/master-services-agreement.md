@@ -75,12 +75,12 @@ In this Agreement and in every Order Form and schedule, unless the context requi
 ### Order Forms
 
 1. The Client buys products and Services by signing an Order Form. Each Order Form is a separate contract that incorporates this Agreement and the schedules named in it.
-2. The schedules available under this Agreement are: the Perpetual Software Licence Agreement, the Software Subscription Agreement, the Implementation Statement of Work, the Change Request Procedure, the Annual Maintenance and Support Agreement and Service Level Agreement, the Hosting and Infrastructure Services Agreement and the Data Processing Agreement.
+2. The schedules available under this Agreement are: the Perpetual Software Licence Agreement, the Software Subscription Agreement, the Implementation Statement of Work, the Change Request Procedure, the Annual Maintenance and Support Agreement and Service Level Agreement, the Hosting and Infrastructure Services Agreement and the Data Processing Agreement. The following annexes apply with them: the Service Catalogue and Rate Annex, the Customer Responsibilities and RACI Annex and the Exit and Transition Plan. The Source Code Escrow Agreement is an optional three-party agreement under the Perpetual Software Licence Agreement. The UAT Sign-off, Go-live Acceptance and Hypercare Exit certificates are the forms used under the Implementation Statement of Work.
 3. An Order Form binds the Parties only when signed by authorised representatives of both.
 
 ### Order of precedence
 
-If documents conflict, the following order applies, the first prevailing: (a) the Data Processing Agreement on matters of Personal Data; (b) the Order Form, but only for the specific purchase and only where it expressly states that it overrides this Agreement; (c) this Agreement; (d) the schedules named in the Order Form; (e) the SOW; (f) the Documentation.
+If documents conflict, the following order applies, the first prevailing: (a) the Data Processing Agreement on matters of Personal Data; (b) the Order Form, but only for the specific purchase and only where it expressly states that it overrides this Agreement; (c) this Agreement; (d) the schedules named in the Order Form, with their annexes; (e) the SOW; (f) the Documentation. Rates in the Order Form prevail over the Service Catalogue and Rate Annex. A signed acceptance certificate or Change Request form records a fact or an approval and does not amend this Agreement.
 
 ### Affiliates
 
@@ -130,7 +130,7 @@ iorta TechNXT is not liable for delay or failure caused by the Client not meetin
 ### Fees
 
 1. The Client pays the Fees in each Order Form. Fees are stated in Philippine pesos and exclude VAT.
-2. Recurring Fees (subscription, AMC, hosting and yearly support) increase by 5% at each anniversary of their start date, unless the Order Form states otherwise.
+2. Recurring Fees for the subscription, the AMC and the 24x7 Severity 1 support increase by 5% at each anniversary of their start date, unless the Order Form states otherwise. Hosting fees, including additional hosted environments, do not increase yearly; they change only as stated in the Pass-through and adjustments clause of the Hosting and Infrastructure Services Agreement.
 3. Day rates for Change Requests and optional services are fixed for 12 months from the date of the Order Form and may then be reviewed once a year with 60 days' written notice.
 
 ### Invoicing and payment
@@ -180,8 +180,8 @@ A Party may terminate this Agreement or an affected Order Form by written notice
 
 1. The Client pays all Fees due up to the date of termination. Fees paid in advance for a period after termination for iorta TechNXT's uncured breach are refunded pro rata.
 2. Each Party returns or destroys the other's Confidential Information, except copies that law or a retention policy requires it to keep.
-3. Client Data is returned and deleted as stated in the Data Processing Agreement and in the subscription or hosting schedule. iorta TechNXT provides an export of the Client Data in a standard format (CSV, XLSX or a PostgreSQL dump) within 30 days of the Client's request made within 60 days of termination.
-4. Transition assistance requested by the Client is provided at the day rates of the Order Form.
+3. Client Data is returned and deleted as stated in the Data Processing Agreement, the subscription or hosting schedule and the Exit and Transition Plan. iorta TechNXT provides an export of the Client Data in a standard format (CSV, XLSX or a PostgreSQL dump) within 30 days of the Client's request made within 60 days of termination.
+4. Transition assistance requested by the Client is provided under the Exit and Transition Plan, at the day rates of the Order Form beyond any assistance that the Plan includes.
 5. The clauses on Fees and payment, Taxes, Intellectual property, Confidentiality, Data protection, Limitation of liability, Indemnities, Non-solicitation, Dispute resolution, Governing law and every clause that by its nature should survive, survive termination.
 
 # Rights in the platform and in data
@@ -404,4 +404,11 @@ Notary Public. Doc. No. [ ]; Page No. [ ]; Book No. [ ]; Series of [year].
 | Annual Maintenance and Support Agreement and SLA | AMC for the perpetual model; service levels for both models |
 | Hosting and Infrastructure Services Agreement | When iorta TechNXT hosts the Platform |
 | Data Processing Agreement | Whenever iorta TechNXT processes Personal Data |
+| Service Catalogue and Rate Annex | Every Order Form: services, units, rates and out-of-scope list |
+| Customer Responsibilities and RACI Annex | With the SOW and the Annual Maintenance and Support Agreement |
+| Exit and Transition Plan | Subscription and hosting: data return, deletion and transition |
+| Source Code Escrow Agreement | Optional, perpetual licence only; three parties |
+| UAT Sign-off and Go-live Acceptance Certificates | UAT sign-off and go-live under the SOW |
+| Hypercare Exit and Handover to Support Certificate | End of hypercare, start of support |
 | Mutual Non-Disclosure Agreement | Before demonstrations and discovery |
+| Contract Pack Index and Cover Letter | Which documents apply, signing order and checklists |

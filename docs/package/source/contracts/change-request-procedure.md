@@ -72,7 +72,7 @@ An impact assessment that takes more than 2 man-days of analysis (for example fo
 | Project manager | 22,000.00 |
 | Blended rate | 16,100.00 |
 
-A man-day is 8 hours. Day rates are fixed for 12 months from the date of the Order Form and may then be reviewed once a year with 60 days' written notice. The rates of the signed Order Form prevail over this table.
+A man-day is 8 hours. Day rates are fixed for 12 months from the date of the Order Form and may then be reviewed once a year with 60 days' written notice. The rates of the signed Order Form prevail over this table. The same rates, with the optional services, are listed in the Service Catalogue and Rate Annex.
 
 ## Estimation method
 

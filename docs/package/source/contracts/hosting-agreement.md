@@ -21,7 +21,7 @@ This Hosting and Infrastructure Services Agreement (the **Hosting Agreement**) s
 
 ## Parties and documents
 
-This Hosting Agreement is made on [date] under the MSA dated [date] and Order Form no. [number]. The technical basis is the iorta TechNXT Architecture, Infrastructure, Security and Privacy document for iNXT BrokerVerse.
+This Hosting Agreement is made on [date] under the MSA dated [date] and Order Form no. [number]. **Support Agreement** means the Annual Maintenance and Support Agreement and Service Level Agreement that forms part of the same Order Form. The technical basis is the iorta TechNXT Architecture, Infrastructure, Security and Privacy document for iNXT BrokerVerse.
 
 ## Hosting options
 
@@ -167,7 +167,7 @@ The monthly hosting fee (production plus one UAT environment) is stated in the O
 | Large | 112,000.00 | 118,000.00 | 107,000.00 |
 | Enterprise | 244,000.00 | 256,000.00 | 232,000.00 |
 
-The fee includes the provider's charges for the sized resources and a margin for exchange rate movement, monitoring, patching and backup checks. Additional environments are PHP 11,000.00 a month each, with a one-time set-up fee of PHP 100,000.00.
+The fee includes the provider's charges for the sized resources and a margin for exchange rate movement, monitoring, patching and backup checks. Additional environments are PHP 11,000.00 a month each, with a one-time set-up fee of PHP 100,000.00. The hosting fee and the fee for additional environments do not increase at each anniversary; they change only under the Pass-through and adjustments clause.
 
 ## Billing
 
@@ -190,6 +190,8 @@ The hosting fee is invoiced monthly in advance from the date the environment is 
 6. Tell iorta TechNXT in advance of large data loads, new branches or volume growth.
 
 # Exit and transition
+
+The Exit and Transition Plan sets out the steps, formats, timelines and forms of this clause.
 
 1. On expiry or termination, or earlier at the Client's request for a planned move, iorta TechNXT provides: (a) a full export of the Client Data (PostgreSQL dump, document archive and CSV extracts with the data dictionary) within 30 days of the request; (b) the configuration export of the Platform; (c) reasonable cooperation with the Client's new hosting provider, including a handover meeting and answers to questions for up to [5] man-days at no charge, then at day rates.
 2. Where the Client holds a perpetual licence and will host the Platform itself, iorta TechNXT supplies the deployment guide and the container images or build artefacts of the current release, and supports the move at day rates.

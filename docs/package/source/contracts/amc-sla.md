@@ -21,7 +21,7 @@ This Annual Maintenance and Support Agreement and Service Level Agreement (the *
 
 ## Parties and documents
 
-This Support Agreement is made on [date] under the MSA dated [date] and Order Form no. [number]. Capitalised terms have the meaning given in the MSA. The service levels are based on the iorta TechNXT Production Support Approach and Standards.
+This Support Agreement is made on [date] under the MSA dated [date] and Order Form no. [number]. Capitalised terms have the meaning given in the MSA. The service levels are based on the iorta TechNXT Production Support Approach and Standards. Support under this Support Agreement takes over from the implementation team on the date stated in the signed Hypercare Exit and Handover to Support Certificate. The Customer Responsibilities and RACI Annex sets out who does what in support.
 
 ## Maintenance
 
@@ -58,7 +58,7 @@ Only named L1 contacts of the Client raise tickets (up to [5] contacts, named in
 2. The first 12 months from Go-Live are the warranty period, during which maintenance and support are provided at no charge. The AMC starts on the first day of Year 2.
 3. The AMC fee is invoiced yearly in advance at the start of each AMC year and is payable within 30 days.
 4. The AMC fee increases by 5% at each anniversary of the AMC start.
-5. The AMC covers all Licensed Users. Additional users add AMC from their licence date, prorated to the next AMC anniversary.
+5. The AMC covers all Licensed Users. Additional users add AMC from the later of their licence date and the AMC start, prorated to the next AMC anniversary.
 
 ## Subscription
 
@@ -66,7 +66,7 @@ For a subscription, the services of this Support Agreement are included in the m
 
 ## Extended P1 support (optional)
 
-24x7 support for P1 incidents is an option stated in the Order Form, priced yearly by size (Year 1 list prices: Small PHP 240,000.00; Medium PHP 480,000.00; Large PHP 900,000.00; Enterprise PHP 1,500,000.00), invoiced yearly in advance and increasing 5% a year.
+24x7 support for P1 incidents (called 24x7 Severity 1 support in the Order Form and the price book) is an option stated in the Order Form, priced yearly by size (Year 1 list prices: Small PHP 240,000.00; Medium PHP 480,000.00; Large PHP 900,000.00; Enterprise PHP 1,500,000.00), invoiced yearly in advance and increasing 5% a year.
 
 ## Work outside this Support Agreement
 

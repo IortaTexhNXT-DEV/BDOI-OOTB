@@ -55,7 +55,9 @@ This Order Form records one purchase of iNXT BrokerVerse OOTB under the Master S
 |---|---|
 | Planned mobilisation date | [date] |
 | Target go-live date | [date] |
-| Subscription Initial Term, or AMC and hosting term | [12 / 36 / 60] months from go-live |
+| Subscription Initial Term | [12 / 36 / 60] months from go-live |
+| AMC | Warranty of 12 months from go-live; AMC from the start of Year 2, renewed yearly |
+| Hosting term | [12 / 36 / 60] months from environment handover |
 | Renewal | [12-month renewals, 90 days' notice of non-renewal] |
 | Early termination right | [None during the Initial Term / as in the MSA Option B, fee: details] |
 
@@ -83,7 +85,7 @@ All amounts in PHP, excluding VAT. VAT at 12% is added on each invoice.
 | Subscription, per month | [billable users] users, graduated slabs | [amount] | [amount] ([lever]) | [amount] | 5% at each anniversary |
 | AMC, per year from Year 2 | 22% of the licence fee | [amount] | Not discounted | [amount] | 5% at each anniversary |
 | Hosting, per month | [provider], [size], production and UAT | [amount] | [amount] | [amount] | As in the Hosting Agreement |
-| Additional environments hosted, per month | [number] x PHP 11,000.00 | [amount] | | [amount] | 5% a year |
+| Additional environments hosted, per month | [number] x PHP 11,000.00 | [amount] | | [amount] | As in the Hosting Agreement |
 | 24x7 Severity 1 support, per year | [size] | [amount] | [amount] | [amount] | 5% a year |
 
 ## Contract value
@@ -132,6 +134,10 @@ Invoices are payable within 30 days. The Client withholds tax as required and is
 | Annual Maintenance and Support Agreement and SLA | Yes |
 | Hosting and Infrastructure Services Agreement | [Yes / No] |
 | Data Processing Agreement | Yes |
+| Service Catalogue and Rate Annex | Yes |
+| Customer Responsibilities and RACI Annex | Yes |
+| Exit and Transition Plan | [Yes, if subscription or hosting / No] |
+| Source Code Escrow Agreement (perpetual only, three parties) | [Yes / No] |
 
 ## Special terms
 

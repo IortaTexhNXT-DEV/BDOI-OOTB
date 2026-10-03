@@ -88,7 +88,7 @@ The implementation follows the iorta TechNXT Implementation Approach and Plan: c
 ## Acceptance procedure
 
 1. iorta TechNXT submits each Deliverable with a sign-off request that lists the acceptance criteria and the evidence.
-2. The Client reviews the Deliverable within 5 Business Days of submission and either signs the acceptance certificate (Annex A) or gives a written list of the criteria not met, with reasons.
+2. The Client reviews the Deliverable within 5 Business Days of submission and either signs the acceptance certificate (Annex A; for UAT, go-live and hypercare exit, the forms of the UAT Sign-off and Go-live Acceptance Certificates and of the Hypercare Exit and Handover to Support Certificate) or gives a written list of the criteria not met, with reasons.
 3. iorta TechNXT corrects the items listed and resubmits. The Client then reviews only the corrected items, within 3 Business Days.
 4. A Deliverable is deemed accepted if the Client does not give a written objection within the review period, or if the Client uses it in production for its business.
 5. A Deliverable is not rejected for defects of severity 3 or 4 alone. Those are logged and corrected under an agreed plan.
@@ -105,7 +105,7 @@ The implementation follows the iorta TechNXT Implementation Approach and Plan: c
 
 # Client responsibilities
 
-The Client shall provide:
+The Customer Responsibilities and RACI Annex gives the full list of Client responsibilities, the RACI by activity and the effect of a late dependency. The Client shall provide:
 
 | Dependency | Needed by |
 |---|---|
@@ -181,7 +181,7 @@ The detailed weekly plan is the plan of the Implementation Approach and Plan for
 
 # Governance
 
-1. **Steering committee:** the Client's sponsor, the Client's project manager, the iorta TechNXT head of delivery and project manager. Meets monthly and at each go/no-go. Approves changes that affect cost or the go-live date.
+1. **Steering committee:** the Client's sponsor (chair), the Client's project manager, the Accounting Manager and a business head; the iorta TechNXT account manager and project manager, with the head of delivery when a decision on cost or the go-live date is due. Meets every two weeks and at each go/no-go, as in the Implementation Approach and Plan. Approves changes that affect cost or the go-live date.
 2. **Weekly status meeting:** both project managers and the key users concerned. Reviews progress, the RAID log and the next week's plan.
 3. **RAID log:** kept by the iorta TechNXT project manager and shared with the Client.
 4. **Escalation:** project managers, then the steering committee, then the dispute steps of the MSA.

@@ -52,7 +52,7 @@ This Licence Agreement is made on [date] between **iorta TechNXT Corp.**, SEC re
 
 ## Additional users
 
-The Client may license additional Named Users at any time through an Order Form. Additional users are priced at the slab rates of the current price list for the slabs they fall into, counting from the existing Licensed Users, less any discount that the original Order Form states applies to additional users. AMC on additional users starts on their licence date, prorated to the next AMC anniversary.
+The Client may license additional Named Users at any time through an Order Form. Additional users are priced at the slab rates of the current price list for the slabs they fall into, counting from the existing Licensed Users, less any discount that the original Order Form states applies to additional users. AMC on additional users starts on the later of their licence date and the AMC start, prorated to the next AMC anniversary.
 
 ## Environments
 
@@ -112,7 +112,7 @@ iorta TechNXT supports the current release and the two previous planned releases
 
 ## Escrow deposit
 
-[Option, if selected in the Order Form.] Within 60 days of Go-Live, iorta TechNXT deposits the source code of the Licensed Software, with build instructions, with [name of escrow agent] (the **Escrow Agent**) under a three-party escrow agreement in the Escrow Agent's standard form, and updates the deposit after each major release and at least once a year while the AMC is in force.
+[Option, if selected in the Order Form.] Within 60 days of Go-Live, iorta TechNXT deposits the source code of the Licensed Software, with build instructions, with [name of escrow agent] (the **Escrow Agent**) under the iNXT BrokerVerse Source Code Escrow Agreement signed by iorta TechNXT, the Client and the Escrow Agent (or the Escrow Agent's standard form, adapted so that it states the same deposit, release and use terms as this clause), and updates the deposit after each major release and at least once a year while the AMC is in force.
 
 ## Release events
 
@@ -137,12 +137,12 @@ This Licence Agreement starts on the date of the Order Form and continues in per
 
 ## Termination
 
-1. iorta TechNXT may terminate the licence by written notice if the Client: (a) fails to pay the Licence Fee within 30 days of a written notice of non-payment; or (b) materially breaches the Restrictions and does not cure the breach within 30 days of a written notice.
+1. iorta TechNXT may terminate the licence by written notice if the Client: (a) fails to pay the Licence Fee within 10 Business Days of a written notice of non-payment, as in the Termination for cause clause of the MSA; or (b) materially breaches the Restrictions and does not cure the breach within 30 days of a written notice.
 2. The Client may terminate the licence at any time by written notice. No Licence Fee is refunded, except as stated in the MSA for infringement claims or warranty failure.
 
 ## Effect of termination
 
-On termination of the licence, the Client stops using the Licensed Software, uninstalls it from all environments and certifies this in writing within 30 days. The Client keeps its Client Data. iorta TechNXT assists with an export of the Client Data under the MSA. Termination of the AMC alone does not terminate the licence.
+On termination of the licence, the Client stops using the Licensed Software, uninstalls it from all environments and certifies this in writing within 30 days. The Client keeps its Client Data. iorta TechNXT assists with an export of the Client Data under the MSA and, where iorta TechNXT hosts, under the Exit and Transition Plan. Termination of the AMC alone does not terminate the licence.
 
 # Signatures
 

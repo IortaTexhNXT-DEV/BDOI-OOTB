@@ -65,7 +65,7 @@ The Processor implements the organisational, physical and technical security mea
 
 ## Assistance
 
-Taking into account the nature of the processing, the Processor assists the Controller, by appropriate measures and at the day rates of the MSA where the assistance goes beyond what iNXT BrokerVerse provides by its own screens and exports, with:
+Taking into account the nature of the processing, the Processor assists the Controller, by appropriate measures and at the day rates of the Order Form where the assistance goes beyond what iNXT BrokerVerse provides by its own screens and exports, with:
 
 1. responses to data subjects exercising their rights;
 2. security of processing;
@@ -119,9 +119,9 @@ Each Party bears its own costs of a breach. Where the breach is caused by the Pr
 # Return and deletion
 
 1. On expiry or termination of the Services, the Processor, at the Controller's choice, returns all Personal Data to the Controller in the formats stated in the Software Subscription Agreement or the Hosting and Infrastructure Services Agreement, and then deletes it, or deletes it.
-2. Deletion from production and non-production environments takes place within 30 days after the Controller confirms the return, or 60 days after expiry or termination if the Controller makes no request.
+2. Deletion from production and non-production environments takes place within 30 days after the Controller confirms the return or, if the Controller makes no request within 60 days after expiry or termination, within 30 days after the end of that 60-day period.
 3. Personal Data in backups is deleted when the backups expire under the retention in the Hosting and Infrastructure Services Agreement and is not restored in the meantime except to comply with law.
-4. The Processor gives the Controller a certificate of deletion signed by its DPO.
+4. The Processor gives the Controller a certificate of deletion signed by its DPO within 10 Business Days of completing the deletion, in the form of the Exit and Transition Plan.
 5. The Processor may keep Personal Data only where Philippine law requires it, in which case it keeps it confidential, protected and used only for that legal purpose.
 
 # Controller obligations
