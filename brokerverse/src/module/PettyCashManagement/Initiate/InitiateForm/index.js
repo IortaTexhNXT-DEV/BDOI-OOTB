@@ -1,4 +1,5 @@
 import { useRef } from "react";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -87,10 +88,8 @@ const InitiateForm = () => {
       toastRef.current.showToast({ severity: "error", detail: result.payload });
       return;
     }
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/accounts/pettycash/pettycashcodeinitiate");
-    }, 2000);
+    showSuccessMessage(t("pettyCash.initiatedSuccessfully"));
+    navigate("/accounts/pettycash/pettycashcodeinitiate");
   };
   const items = [
     { label: t("pettyCash.pettyCashLabel"), command: () => navigate("/accounts/pettycash/pettycashcodeinitiate") },

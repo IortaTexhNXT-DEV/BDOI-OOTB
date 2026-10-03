@@ -1,4 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
+import { showSuccessMessage } from "../../../utility/toastUtils";
 import { useEffect, useState, useRef } from "react";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
@@ -205,13 +206,8 @@ const AddJournalVocture = () => {
             result.payload?.data?.message ||
             "Journal voucher approved successfully";
         }
-        setToastMessage(message);
-        toastRef.current.showToast();
-        setTimeout(() => {
-          setButtonShow(1);
-          // Navigate back to journal voucher list page after showing success message
-          navigate("/accounts/journalvoucher");
-        }, 3000);
+        showSuccessMessage(message);
+        navigate("/accounts/journalvoucher");
       } else {
         // Error - show error message
         const errorMessage =

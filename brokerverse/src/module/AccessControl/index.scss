@@ -175,11 +175,6 @@
     margin-top: 0.5rem;
   }
 
-  .access__two {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
-  }
 
   .access__toggle {
     display: flex;
@@ -201,4 +196,11 @@
   .access__clickable {
     cursor: pointer;
   }
+}
+
+// used in the delegation and limit forms, which open outside the page (side panel)
+.access__two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
 }

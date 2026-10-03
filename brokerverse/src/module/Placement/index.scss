@@ -195,7 +195,24 @@
   td:nth-child(8), td:nth-child(9) { min-width: 11rem; }
 }
 
-.participant-table.readonly td:first-child, .participant-table.readonly td:nth-child(2) { white-space: nowrap; }
+.participant-table.readonly td:first-child { min-width: 12rem; }
+.participant-table.readonly .participant-role { display: block; color: #6b7280; font-size: 12px; }
+
+// the row actions stay in view when the table scrolls sideways on narrower screens
+.participant-table.readonly {
+  td.num { white-space: nowrap; }
+
+  .actions-cell {
+    position: sticky;
+    right: 0;
+    width: 1%;
+    background: #fff;
+    box-shadow: inset 1px 0 0 #e5e7eb;
+  }
+
+  th:last-child:empty { position: sticky; right: 0; background: #f8f9fb; }
+  tr.lead-row .actions-cell { background: #f5f9ff; }
+}
 
 .journey-timeline {
   display: flex;

@@ -2,7 +2,9 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "primereact/button";
+import { Message } from "primereact/message";
 import SvgDot from "../../assets/icons/SvgDot";
 import SvgAdd from "../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
@@ -339,8 +341,7 @@ const Index = () => {
   };
 
   const headerStyle = {
-    width: "19%",
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
     padding: 6,
@@ -359,6 +360,13 @@ const Index = () => {
   const home = { label: t("paymentVoucher.accounts") };
 
   const navigate = useNavigate();
+  const location = useLocation();
+  // the voucher just approved on the payment step: confirmed here and highlighted in the list
+  const [recorded, setRecorded] = useState(location.state?.recorded || null);
+  const dismissRecorded = () => {
+    setRecorded(null);
+    navigate(location.pathname, { replace: true, state: null });
+  };
   const [globalFilter, setGlobalFilter] = useState();
   const [search, setSearch] = useState("");
   const cities = [
@@ -535,6 +543,24 @@ const Index = () => {
 
           </div>
         </div>
+        {recorded && (
+          <Message
+            severity="success"
+            className="w-full justify-content-start mb-3"
+            content={
+              <div className="voucher-recorded">
+                <div>
+                  <strong>{t(recorded.printed ? "paymentVoucher.recordedPrintedTitle" : "paymentVoucher.recordedTitle", { voucher: recorded.voucherNumber || "" })}</strong>
+                  {recorded.payee && <span className="block">{t("paymentVoucher.recordedPayee", { payee: recorded.payee })}</span>}
+                </div>
+                <div className="voucher-recorded__actions">
+                  <Button type="button" size="small" outlined icon="pi pi-plus" label={t("paymentVoucher.recordAnother")} onClick={handlePolicy} />
+                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("paymentVoucher.dismiss")} onClick={dismissRecorded} />
+                </div>
+              </div>
+            }
+          />
+        )}
         <div className="headlist_lable">{t("paymentVoucher.disbursementHistory")}</div>
 
         {/* </div> */}
@@ -548,6 +574,11 @@ const Index = () => {
                   : paymentVocherList
               }
               tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+              rowClassName={(row) =>
+                recorded && ((recorded.disbursementId && (row.id || row.disbursementId) === recorded.disbursementId) || (recorded.voucherNumber && row.VoucherNumber === recorded.voucherNumber))
+                  ? "voucher-row--recorded"
+                  : ""
+              }
               paginator
               rows={pagination?.pageSize || 10}
               rowsPerPageOptions={[5, 10, 25, 50]}
@@ -555,7 +586,6 @@ const Index = () => {
               currentPageReportTemplate="{first} - {last} of {totalRecords}"
               paginatorTemplate={template2}
               scrollable={true}
-              scrollHeight="40vh"
               onPage={(e) => {
                 const newPage = e.page + 1; // PrimeReact uses 0-based indexing
                 const newPageSize = e.rows;
@@ -630,7 +660,9 @@ const Index = () => {
                   <SvgIconeye onClick={() => handleView(columnData)} />
                 )}
                 header={t("paymentVoucher.action")}
-                style={{ textAlign: "center" }}
+                style={{ textAlign: "center", width: "5rem" }}
+                frozen
+                alignFrozen="right"
                 headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>

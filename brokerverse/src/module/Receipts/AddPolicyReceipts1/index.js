@@ -21,7 +21,7 @@ import {
   getDraftReceiptsMiddleware,
   getReceiptByIdMiddleware,
 } from "../store/receiptsMiddleware";
-import { showErrorMessage, showSuccessMessage } from "../../../utility/toastUtils";
+import { showErrorMessage } from "../../../utility/toastUtils";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { receiptsService } from "../../../services/receiptsService";
 import mastersService from "../../../services/mastersService";
@@ -72,7 +72,6 @@ function BranchAdding() {
   const [selectedBillId, setSelectedBillId] = useState(null);
   const [amountReceived, setAmountReceived] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [lastReceipt, setLastReceipt] = useState(null);
 
   const drafts = useMemo(() => (Array.isArray(draftReceiptsList) ? draftReceiptsList : []), [draftReceiptsList]);
 
@@ -306,21 +305,10 @@ function BranchAdding() {
       });
       const receipt = response?.data || response;
       const remaining = round2(bill.balance - amount);
-      setLastReceipt({ receiptNumber: receipt?.receiptNumber, billNumber: bill.billNumber, amount, remaining });
-      showSuccessMessage(
-        remaining > 0
-          ? t("accounts.addReceipts.paymentRecordedPartial", {
-              receipt: receipt?.receiptNumber,
-              bill: bill.billNumber,
-              balance: formatCurrency(remaining),
-            })
-          : t("accounts.addReceipts.paymentRecordedPaid", { receipt: receipt?.receiptNumber, bill: bill.billNumber }),
-        t("accounts.addReceipts.paymentRecordedTitle")
-      );
-      setAmountReceived(null);
-      setFieldValue("chequeNumber", "");
-      setFieldValue("referenceNo", "");
-      await loadOpenReceivables();
+      // back to the receipts list, where the new receipt is shown first and highlighted
+      navigate("/accounts/receipts", {
+        state: { recorded: { receiptId: receipt?.receiptId, receiptNumber: receipt?.receiptNumber, billNumber: bill.billNumber, amount, remaining, customerName: values.customerName } },
+      });
     } catch (error) {
       showErrorMessage(apiError(error) || t("accounts.addReceipts.paymentFailed"), t("accounts.receipts.error"));
     } finally {
@@ -698,16 +686,6 @@ function BranchAdding() {
                 />
               </div>
             </div>
-          )}
-          {lastReceipt && (
-            <p className="field_hint" role="status">
-              {t("accounts.addReceipts.lastReceipt", {
-                receipt: lastReceipt.receiptNumber,
-                amount: formatCurrency(lastReceipt.amount),
-                bill: lastReceipt.billNumber,
-                balance: formatCurrency(lastReceipt.remaining),
-              })}
-            </p>
           )}
         </Card>
       )}

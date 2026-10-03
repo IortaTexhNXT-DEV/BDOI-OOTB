@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -41,6 +43,7 @@ const initialValue = {
 };
 
 const AddDisbursementTable = () => {
+  const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
   const [addvisible, setaddVisible] = useState(false);
   const [, setModuleData] = useState();
@@ -79,10 +82,8 @@ const AddDisbursementTable = () => {
       toastRef.current.showToast({ severity: "error", detail: result.payload });
       return;
     }
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/accounts/pettycash/disbursement");
-    }, 2000);
+    showSuccessMessage(t("pettyCash.disbursementRecorded"));
+    navigate("/accounts/pettycash/disbursement");
   };
 
   const emptyTableIcon = (

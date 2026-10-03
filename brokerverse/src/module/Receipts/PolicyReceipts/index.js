@@ -3,7 +3,9 @@ import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { BreadCrumb } from "primereact/breadcrumb";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Message } from "primereact/message";
+import documentTemplateService from "../../../services/documentTemplateService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
@@ -204,6 +206,17 @@ const PolicyReceipts = () => {
   const home = { label: t("sidebar.Accounts") };
 
   const navigate = useNavigate();
+  const location = useLocation();
+  // the receipt just recorded on Record Receipt: confirmed here, shown first in the list and highlighted
+  const [recorded, setRecorded] = useState(location.state?.recorded || null);
+  const dismissRecorded = () => {
+    setRecorded(null);
+    navigate(location.pathname + location.search, { replace: true, state: null });
+  };
+  const printRecorded = async () => {
+    const r = await documentTemplateService.getReceiptPdf(recorded.receiptId, { fileName: `receipt-${recorded.receiptNumber}.pdf` });
+    if (!r.success) toast.current?.show({ severity: "error", summary: t("accounts.receipts.error"), detail: r.error });
+  };
 
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
@@ -662,6 +675,29 @@ const PolicyReceipts = () => {
             />
           </div>
         </div>
+        {recorded && (
+          <Message
+            severity="success"
+            className="w-full justify-content-start mb-3"
+            content={
+              <div className="receipt-recorded">
+                <div>
+                  <strong>{t("accounts.receipts.recordedTitle", { receipt: recorded.receiptNumber })}</strong>
+                  <span className="block">
+                    {recorded.remaining > 0
+                      ? t("accounts.receipts.recordedPartial", { amount: formatCurrency(recorded.amount), bill: recorded.billNumber, balance: formatCurrency(recorded.remaining) })
+                      : t("accounts.receipts.recordedPaid", { amount: formatCurrency(recorded.amount), bill: recorded.billNumber })}
+                  </span>
+                </div>
+                <div className="receipt-recorded__actions">
+                  {recorded.receiptId && <Button type="button" size="small" outlined icon="pi pi-print" label={t("accounts.receipts.printReceipt")} onClick={printRecorded} />}
+                  <Button type="button" size="small" outlined icon="pi pi-plus" label={t("accounts.receipts.recordAnother")} onClick={() => navigate("/accounts/receipts/addreceipts")} />
+                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("accounts.receipts.dismiss")} onClick={dismissRecorded} />
+                </div>
+              </div>
+            }
+          />
+        )}
         <div className="listlable_textcontainer">
           <label className="listlable_text">{t("accounts.receipts.receiptsHistory")}</label>
         </div>
@@ -682,6 +718,7 @@ const PolicyReceipts = () => {
               }}
               scrollable={true}
               scrollHeight="40vh"
+              rowClassName={(row) => (recorded && row.receiptNumber === recorded.receiptNumber ? "receipt-row--recorded" : "")}
               paginator
               lazy
               rows={rows}

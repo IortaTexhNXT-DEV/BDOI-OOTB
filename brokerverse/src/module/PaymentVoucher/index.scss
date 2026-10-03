@@ -413,3 +413,22 @@
     }
   }
 }
+
+// banner after a voucher is approved, and its row in the list
+.voucher-recorded {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  width: 100%;
+}
+
+.voucher-recorded__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.p-datatable .p-datatable-tbody > tr.voucher-row--recorded > td {
+  background: #eff7f2 !important;
+}

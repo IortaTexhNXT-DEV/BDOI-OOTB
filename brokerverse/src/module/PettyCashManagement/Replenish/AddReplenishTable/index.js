@@ -1,4 +1,6 @@
 import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -17,6 +19,7 @@ import { postAddReplenishMiddleware } from "../store/pettyCashReplenishMiddlewar
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReplenishTable = () => {
+  const { t } = useTranslation();
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
@@ -43,10 +46,8 @@ const AddReplenishTable = () => {
       toastRef.current.showToast({ severity: "error", detail: result.payload });
       return;
     }
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/accounts/pettycash/replenish");
-    }, 2000);
+    showSuccessMessage(t("pettyCash.replenishmentRecorded"));
+    navigate("/accounts/pettycash/replenish");
   };
   const emptyTableIcon = (
     <div className="empty-table-icon">

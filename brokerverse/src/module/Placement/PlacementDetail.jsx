@@ -68,8 +68,8 @@ const PlacementDetail = () => {
   const participantActions = (x) => (
     <>
       {canBind && x.status !== "confirmed" && <Button label={t("placement.actions.confirm")} icon="pi pi-check" size="small" text onClick={() => setConfirming({ ...x, insurerReference: x.insurerReference || "" })} />}
-      {["draft", "sent"].includes(p.status) && x.status !== "confirmed" && <Button icon="pi pi-ban" size="small" text rounded severity="danger" tooltip={t("placement.actions.recordDecline")} aria-label={t("placement.actions.recordDecline")} onClick={() => setDeclining({ ...x, reason: "" })} />}
-      <Button icon="pi pi-file-pdf" size="small" text rounded onClick={() => pdf(x.insuranceCompanyId)} tooltip={t("placement.actions.participantSlip")} aria-label={t("placement.actions.participantSlip")} />
+      {["draft", "sent"].includes(p.status) && x.status !== "confirmed" && <Button icon="pi pi-ban" size="small" text rounded severity="danger" tooltip={t("placement.actions.recordDecline")} tooltipOptions={{ position: "top" }} aria-label={t("placement.actions.recordDecline")} onClick={() => setDeclining({ ...x, reason: "" })} />}
+      <Button icon="pi pi-file-pdf" size="small" text rounded onClick={() => pdf(x.insuranceCompanyId)} tooltip={t("placement.actions.participantSlip")} tooltipOptions={{ position: "top" }} aria-label={t("placement.actions.participantSlip")} />
     </>
   );
 

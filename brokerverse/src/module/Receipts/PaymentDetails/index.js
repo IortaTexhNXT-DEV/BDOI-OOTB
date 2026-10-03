@@ -119,9 +119,7 @@ function PolicyReceipts() {
           t("common.success")
         );
 
-        setTimeout(() => {
-          navigate("/accounts/receipts");
-        }, 1000);
+        navigate("/accounts/receipts");
       } catch (error) {
         showErrorMessage(
           error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),

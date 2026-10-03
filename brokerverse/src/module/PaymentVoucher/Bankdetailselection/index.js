@@ -301,14 +301,9 @@ function Bankdetailselection() {
         if (result.success) {
           const voucherNo =
             result.data?.data?.voucherNumber || result.data?.voucherNumber;
-          setactionToast(
-            voucherNo
-              ? `Approved — voucher ${voucherNo}`
-              : t("paymentVoucher.disbursementCreatedSuccess")
-          );
-          setTimeout(() => {
-            Navigate("/accounts/paymentvoucher");
-          }, 1500);
+          Navigate("/accounts/paymentvoucher", {
+            state: { recorded: { disbursementId, voucherNumber: voucherNo, payee: disbursementDataFromState?.PayeeName || disbursementDataFromState?.payeeName || "" } },
+          });
         } else {
           toastRef.current?.showToast(
             "error",
@@ -433,6 +428,10 @@ function Bankdetailselection() {
         await fetchCheckbookDetails();
         if (newStatus === "Printed") {
           await openVoucherPrint(checkbookData.disbursementId);
+          // the voucher is complete: back to the list, where it shows as printed
+          Navigate("/accounts/paymentvoucher", {
+            state: { recorded: { printed: true, disbursementId: checkbookData.disbursementId || currentDisbursementId, voucherNumber: checkbookData.voucherNumber || "", payee: disbursementDataFromState?.PayeeName || "" } },
+          });
         }
       } else {
         toastRef.current?.showToast({

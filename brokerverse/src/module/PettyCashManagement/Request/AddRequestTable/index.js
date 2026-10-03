@@ -1,4 +1,5 @@
 import { useState, useRef } from "react";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -57,17 +58,11 @@ const AddRequestTable = () => {
       return;
     }
     if (actionName === "save") {
-      toastRef.current.showToast();
+      showSuccessMessage(t("pettyCash.successfullySaved"));
     } else {
-      toastRefApprove.current.showToast({
-        detail: t("pettyCash.transactionCreated", {
-          number: result.payload.RequestNumber,
-        }),
-      });
+      showSuccessMessage(t("pettyCash.transactionCreated", { number: result.payload.RequestNumber }));
     }
-    setTimeout(() => {
-      navigate("/accounts/pettycash/pettycashrequest");
-    }, 2000);
+    navigate("/accounts/pettycash/pettycashrequest");
   };
   const emptyTableIcon = (
     <div>

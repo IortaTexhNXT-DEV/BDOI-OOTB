@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -68,13 +69,17 @@ const EditRequestForm = ({ action }) => {
             toastRef.current.showToast({ severity: "error", detail: result.payload });
             return;
         }
+        if (onSuccess) {
+            showSuccessMessage(message);
+            onSuccess();
+            return;
+        }
         toastRef.current.showToast({ detail: message });
-        if (onSuccess) onSuccess();
     };
     const handleSubmit = async (value) => {
         const result = await dispatch(patchupdateRequestMiddleware({ ...value, id }));
         showResult(result, patchupdateRequestMiddleware, t("pettyCash.updateSuccessfully"), () =>
-            setTimeout(() => navigate("/accounts/pettycash/pettycashrequest"), 2000)
+            navigate("/accounts/pettycash/pettycashrequest")
         );
     };
     const handleTransition = async (transition, reason) => {

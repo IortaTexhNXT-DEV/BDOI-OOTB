@@ -363,7 +363,13 @@
       "noReceiptsFound": "No receipts found matching the provided filters",
       "receiptsExportedSuccessfully": "Receipts exported successfully",
       "success": "Success",
-      "error": "Error"
+      "error": "Error",
+      "recordedTitle": "Receipt {{receipt}} recorded",
+      "recordedPaid": "{{amount}} received against bill {{bill}}; the bill is fully paid.",
+      "recordedPartial": "{{amount}} received against bill {{bill}}; {{balance}} remains to be paid.",
+      "printReceipt": "Print receipt",
+      "recordAnother": "Record another",
+      "dismiss": "Dismiss"
     },
     "addReceipts": {
       "title": "Add Receipts",
@@ -690,7 +696,12 @@
     "uploading": "Uploading...",
     "upload": "Upload",
     "processing": "Processing...",
-    "fileBeingProcessed": "Your file is being processed. Disbursements will be created shortly."
+    "fileBeingProcessed": "Your file is being processed. Disbursements will be created shortly.",
+    "recordedTitle": "Payment voucher {{voucher}} approved",
+    "recordedPrintedTitle": "Payment voucher {{voucher}} printed",
+    "recordedPayee": "Payee: {{payee}}. The voucher is listed below with its current status.",
+    "recordAnother": "Create another voucher",
+    "dismiss": "Dismiss"
   },
   "renewal": {
     "renewals": "Renewals",
@@ -1071,7 +1082,10 @@
     "narrationRequired": "Narration is required",
     "amountRequired": "Amount is required",
     "enter": "Enter",
-    "rejectReason": "Reason"
+    "rejectReason": "Reason",
+    "disbursementRecorded": "Petty cash disbursement recorded",
+    "receiptRecorded": "Petty cash receipt recorded",
+    "replenishmentRecorded": "Petty cash replenishment recorded"
   },
   "employeeBenefit": {
     "lead": "Prospect",

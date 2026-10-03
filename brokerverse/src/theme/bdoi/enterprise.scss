@@ -335,6 +335,113 @@ $text-strong: #1f2937;
   }
 }
 
+// Add / edit forms open as a side panel: a dialog with Save / Cancel in its footer slides in from the right at full
+// height, at least 36rem wide (wider when the screen asks for it), with the header and footer fixed and the form
+// scrolling between them. Confirmation questions and read-only viewers keep the centred dialog.
+.p-dialog-mask:has(> .p-dialog:not(.p-confirm-dialog):not(.bv-centered) > .p-dialog-footer) {
+  justify-content: flex-end !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  background-color: rgba(17, 24, 39, 0.32) !important;
+}
+
+.p-dialog:not(.p-confirm-dialog):not(.bv-centered):has(> .p-dialog-footer) {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  min-width: min(36rem, 100vw) !important;
+  max-width: min(72rem, 100vw) !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: -8px 0 32px rgba(17, 24, 39, 0.16);
+  display: flex;
+  flex-direction: column;
+
+  .p-dialog-header {
+    flex: 0 0 auto;
+    border-radius: 0;
+    padding: 16px 24px;
+    background: $color-surface;
+
+    .p-dialog-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+  }
+
+  .p-dialog-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 20px 24px !important;
+    border-radius: 0;
+  }
+
+  .p-dialog-footer {
+    flex: 0 0 auto;
+    border-radius: 0;
+    background: #fafbfc;
+  }
+
+  // labels above fields and every field the full width of the panel
+  .p-dialog-content > label,
+  .p-dialog-content .field > label,
+  .p-dialog-content > div > label {
+    display: block;
+    margin: 14px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  .p-dialog-content > label:first-child,
+  .p-dialog-content > div:first-child > label:first-child {
+    margin-top: 0;
+  }
+
+  .p-dialog-content :is(.p-inputtext, .p-dropdown, .p-multiselect, .p-calendar, .p-inputnumber, .p-autocomplete, .p-chips):not(.p-paginator *) {
+    width: 100%;
+  }
+}
+
+// date fields: the calendar button is part of the field, not a separate coloured block
+.p-calendar.p-calendar-w-btn {
+  align-items: stretch;
+
+  .p-inputtext {
+    height: auto !important;
+    border-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .p-datepicker-trigger {
+    width: 2.75rem;
+    height: auto !important;
+    background: $color-surface !important;
+    border: 1px solid $brand-field-blue !important;
+    border-left: 0 !important;
+    color: $color-text-muted !important;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    &:hover {
+      background: $brand-blue-050 !important;
+      color: $brand-blue !important;
+    }
+  }
+}
+
+// tooltips read as one line or a short paragraph, never a narrow column of words
+.p-tooltip {
+  max-width: 22rem;
+
+  .p-tooltip-text {
+    min-width: 8rem;
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 6px 10px;
+  }
+}
+
 // Dialog forms. Dialogs are rendered outside the page container (a portal on <body>), so form rules nested
 // under a screen's stylesheet never reach them and label + input ended up side by side at random widths.
 // Labels above fields, full-width inputs, a two-column grid that folds to one column on narrow screens.

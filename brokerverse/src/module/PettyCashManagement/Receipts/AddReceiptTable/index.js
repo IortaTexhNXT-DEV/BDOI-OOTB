@@ -1,4 +1,6 @@
 import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -18,6 +20,7 @@ import usePettyCashOptions from "../../usePettyCashOptions";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReceiptsTable = () => {
+  const { t } = useTranslation();
 
   const toastRef = useRef(null);
   const navigate = useNavigate();
@@ -29,10 +32,8 @@ const AddReceiptsTable = () => {
       toastRef.current.showToast({ severity: "error", detail: result.payload });
       return;
     }
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigate("/accounts/pettycash/receipts");
-    }, 2000);
+    showSuccessMessage(t("pettyCash.receiptRecorded"));
+    navigate("/accounts/pettycash/receipts");
   };
   const headaction = {
     justifyContent: "center",
