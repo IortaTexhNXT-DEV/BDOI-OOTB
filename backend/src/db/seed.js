@@ -31,7 +31,9 @@ const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endor
 const ROLE_PERMS = {
   sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read'],
   processing: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
-  operations: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read'],
+  operations: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read',
+    // data privacy: data subject requests, consent register, personal data export and anonymisation (permissions of migration 0221)
+    'privacy:read', 'privacy:write'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
   // Accounting calculates, approves (maker-checker) and pays incentives; program set-up stays with the system administrator.
   accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read'],

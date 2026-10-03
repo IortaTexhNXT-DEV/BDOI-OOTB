@@ -116,11 +116,14 @@ export const AREAS = [
   },
   {
     id: "maintenance",
-    title: "Data Retention & Uploads",
+    title: "Data Retention, Privacy & Uploads",
     icon: "pi pi-database",
-    summary: "How long logs and messages are kept, and the size limits of uploaded files.",
-    groups: ["housekeeping", "uploads"],
-    links: [{ label: "Audit trail", path: "/master/configuration/audit-trail" }],
+    summary: "How long logs and messages are kept, the data privacy notice version, request due days and record retention, and the size limits of uploaded files.",
+    groups: ["housekeeping", "privacy", "uploads"],
+    links: [
+      { label: "Audit trail", path: "/master/configuration/audit-trail" },
+      { label: "Data subject requests", path: "/master/data-privacy/requests" },
+    ],
   },
 ];
 
@@ -138,7 +141,7 @@ export const GROUP_TITLES = {
   commission: "Commission", incentive: "Incentives", accounting: "Accounting", finance: "Finance", tax: "Taxes",
   bir: "BIR forms", period_end: "Month-end close", notification: "Notifications", email: "E-mail templates",
   security: "Security", access: "Approval authority and accounts", limits: "Limits and validity",
-  reports: "Reports", dashboard: "Dashboard", housekeeping: "Data retention", uploads: "Uploads",
+  reports: "Reports", dashboard: "Dashboard", housekeeping: "Data retention", privacy: "Data privacy", uploads: "Uploads",
 };
 
 export const groupTitle = (group) =>

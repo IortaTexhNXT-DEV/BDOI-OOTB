@@ -917,6 +917,24 @@ export const menuList = [
         includes: ["/master/configuration/email-outbox"],
       },
       {
+        id: 25,
+        name: "Data Privacy",
+        submenu: [
+          {
+            id: 1,
+            name: "Data Subject Requests",
+            path: "/master/data-privacy/requests",
+            includes: ["/master/data-privacy/requests"],
+          },
+          {
+            id: 2,
+            name: "Consent Register",
+            path: "/master/data-privacy/consents",
+            includes: ["/master/data-privacy/consents"],
+          },
+        ],
+      },
+      {
         id: 1,
         name: "Generals",
         submenu: [

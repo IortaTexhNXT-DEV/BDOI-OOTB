@@ -77,6 +77,8 @@ export const roleMenuPermissions = {
     "product configurator": ["Dashboard", "Product Templates"],
     operations: OPERATIONS_ALL,
     reports: ["All Reports", "Operational Reports"],
+    // data subject requests and the consent register (read:privacy / write:privacy)
+    master: ["Data Privacy"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],

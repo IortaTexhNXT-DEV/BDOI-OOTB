@@ -63,6 +63,9 @@
       "name": "Dashboards"
     },
     {
+      "name": "Data Privacy"
+    },
+    {
       "name": "Disbursements"
     },
     {
@@ -26151,6 +26154,1865 @@
           "read:leads",
           "read:quotations"
         ]
+      }
+    },
+    "/privacy/assignees": {
+      "get": {
+        "operationId": "getPrivacyAssignees",
+        "summary": "Active users who work the data privacy registers (read:privacy)",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "usr_1",
+                      "name": "Ana Reyes",
+                      "username": "ana.reyes"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      }
+    },
+    "/privacy/consents": {
+      "get": {
+        "operationId": "getPrivacyConsents",
+        "summary": "Consent status of a client or prospect per purpose (processing, marketing, sharing) with the full history",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: read:clients, read:leads, read:privacy",
+        "parameters": [
+          {
+            "name": "partyType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "client"
+          },
+          {
+            "name": "partyId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cl_1"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "noticeVersion": {
+                          "type": "string"
+                        },
+                        "purposes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "partyType": {
+                                "type": "string"
+                              },
+                              "partyId": {
+                                "type": "string"
+                              },
+                              "purpose": {
+                                "type": "string"
+                              },
+                              "granted": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "channel": {
+                                "type": "string"
+                              },
+                              "noticeVersion": {
+                                "type": "string"
+                              },
+                              "evidence": {
+                                "type": "string"
+                              },
+                              "recordedBy": {
+                                "type": "string"
+                              },
+                              "recordedAt": {
+                                "type": "string"
+                              },
+                              "withdrawnAt": {}
+                            }
+                          }
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "partyType": {
+                                "type": "string"
+                              },
+                              "partyId": {
+                                "type": "string"
+                              },
+                              "purpose": {
+                                "type": "string"
+                              },
+                              "granted": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "channel": {
+                                "type": "string"
+                              },
+                              "noticeVersion": {
+                                "type": "string"
+                              },
+                              "evidence": {
+                                "type": "string"
+                              },
+                              "recordedBy": {
+                                "type": "string"
+                              },
+                              "recordedAt": {
+                                "type": "string"
+                              },
+                              "withdrawnAt": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "partyName": "Juan Dela Cruz",
+                    "noticeVersion": "1.0",
+                    "purposes": [
+                      {
+                        "id": 1,
+                        "partyType": "client",
+                        "partyId": "cl_1",
+                        "purpose": "marketing",
+                        "granted": true,
+                        "status": "granted",
+                        "channel": "Form",
+                        "noticeVersion": "1.0",
+                        "evidence": "Signed client information sheet",
+                        "recordedBy": "Ana Reyes",
+                        "recordedAt": "2026-10-01T02:00:00.000Z",
+                        "withdrawnAt": null
+                      }
+                    ],
+                    "history": [
+                      {
+                        "id": 1,
+                        "partyType": "client",
+                        "partyId": "cl_1",
+                        "purpose": "marketing",
+                        "granted": true,
+                        "status": "granted",
+                        "channel": "Form",
+                        "noticeVersion": "1.0",
+                        "evidence": "Signed client information sheet",
+                        "recordedBy": "Ana Reyes",
+                        "recordedAt": "2026-10-01T02:00:00.000Z",
+                        "withdrawnAt": null
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view",
+        "x-permissions": [
+          "read:clients",
+          "read:leads",
+          "read:privacy"
+        ]
+      },
+      "post": {
+        "operationId": "postPrivacyConsents",
+        "summary": "Record consent given or refused for a purpose (the notice version defaults to privacy.notice_version)",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "purpose": {
+                          "type": "string"
+                        },
+                        "granted": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "noticeVersion": {
+                          "type": "string"
+                        },
+                        "evidence": {
+                          "type": "string"
+                        },
+                        "recordedBy": {
+                          "type": "string"
+                        },
+                        "recordedAt": {
+                          "type": "string"
+                        },
+                        "withdrawnAt": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "purpose": "marketing",
+                    "granted": true,
+                    "status": "granted",
+                    "channel": "Form",
+                    "noticeVersion": "1.0",
+                    "evidence": "Signed client information sheet",
+                    "recordedBy": "Ana Reyes",
+                    "recordedAt": "2026-10-01T02:00:00.000Z",
+                    "withdrawnAt": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view",
+        "x-permissions": [
+          "write:clients",
+          "write:leads",
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "partyType": {
+                    "type": "string"
+                  },
+                  "partyId": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string"
+                  },
+                  "granted": {
+                    "type": "boolean"
+                  },
+                  "channel": {
+                    "type": "string"
+                  },
+                  "evidence": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "partyType": "client",
+                "partyId": "cl_1",
+                "purpose": "marketing",
+                "granted": true,
+                "channel": "Form",
+                "evidence": "Signed client information sheet"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/consents/{id}/withdraw": {
+      "post": {
+        "operationId": "postPrivacyConsentsIdWithdraw",
+        "summary": "Withdraw a consent in force (the record stays in the history)",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "purpose": {
+                          "type": "string"
+                        },
+                        "granted": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "noticeVersion": {
+                          "type": "string"
+                        },
+                        "evidence": {
+                          "type": "string"
+                        },
+                        "recordedBy": {
+                          "type": "string"
+                        },
+                        "recordedAt": {
+                          "type": "string"
+                        },
+                        "withdrawnAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "purpose": "marketing",
+                    "granted": true,
+                    "status": "withdrawn",
+                    "channel": "Form",
+                    "noticeVersion": "1.0",
+                    "evidence": "Signed client information sheet",
+                    "recordedBy": "Ana Reyes",
+                    "recordedAt": "2026-10-01T02:00:00.000Z",
+                    "withdrawnAt": "2026-10-03T01:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view",
+        "x-permissions": [
+          "write:clients",
+          "write:leads",
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Client asked by e-mail to stop marketing messages"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/consents/register": {
+      "get": {
+        "operationId": "getPrivacyConsentsRegister",
+        "summary": "Consent register across clients and prospects (filters: purpose, status granted / withdrawn / refused, partyType, channel, current, from, to, search)",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Consent Register\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "purpose",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "marketing"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "granted"
+          },
+          {
+            "name": "current",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "partyType": {
+                            "type": "string"
+                          },
+                          "partyId": {
+                            "type": "string"
+                          },
+                          "purpose": {
+                            "type": "string"
+                          },
+                          "granted": {
+                            "type": "boolean"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "channel": {
+                            "type": "string"
+                          },
+                          "noticeVersion": {
+                            "type": "string"
+                          },
+                          "evidence": {
+                            "type": "string"
+                          },
+                          "recordedBy": {
+                            "type": "string"
+                          },
+                          "recordedAt": {
+                            "type": "string"
+                          },
+                          "withdrawnAt": {},
+                          "partyCode": {
+                            "type": "string"
+                          },
+                          "partyName": {
+                            "type": "string"
+                          },
+                          "current": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "partyType": "client",
+                      "partyId": "cl_1",
+                      "purpose": "marketing",
+                      "granted": true,
+                      "status": "granted",
+                      "channel": "Form",
+                      "noticeVersion": "1.0",
+                      "evidence": "Signed client information sheet",
+                      "recordedBy": "Ana Reyes",
+                      "recordedAt": "2026-10-01T02:00:00.000Z",
+                      "withdrawnAt": null,
+                      "partyCode": "CL-2026-00001",
+                      "partyName": "Juan Dela Cruz",
+                      "current": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Consent Register",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      }
+    },
+    "/privacy/parties": {
+      "get": {
+        "operationId": "getPrivacyParties",
+        "summary": "Clients and prospects by name, code, e-mail or phone (at least 2 characters), for the request register",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "dela cruz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "partyType": {
+                            "type": "string"
+                          },
+                          "partyId": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "email": {
+                            "type": "string"
+                          },
+                          "phone": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "partyType": "client",
+                      "partyId": "cl_1",
+                      "code": "CL-2026-00001",
+                      "name": "Juan Dela Cruz",
+                      "email": "juan@example.com",
+                      "phone": "09171234567"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      }
+    },
+    "/privacy/parties/{type}/{id}/anonymise": {
+      "post": {
+        "operationId": "postPrivacyPartiesTypeIdAnonymise",
+        "summary": "Anonymise a client or prospect: personal fields overwritten in the party, its prospects, policies, quotations, claims and slips; amounts, numbers and dates kept. Refused (409, with the reasons) while records must be kept",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyCode": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "cleared": {
+                          "type": "object",
+                          "properties": {
+                            "clients": {
+                              "type": "object",
+                              "properties": {
+                                "rows": {
+                                  "type": "integer"
+                                },
+                                "fields": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "partyType": "client",
+                    "partyCode": "CL-2014-00001",
+                    "label": "Anonymised client CL-2014-00001",
+                    "cleared": {
+                      "clients": {
+                        "rows": 1,
+                        "fields": [
+                          "email",
+                          "phone"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests > Anonymise",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  },
+                  "requestId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Erasure request DSR-2026-00004; retention period over",
+                "requestId": "DSR-2026-00004"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/parties/{type}/{id}/anonymise/dry-run": {
+      "get": {
+        "operationId": "getPrivacyPartiesTypeIdAnonymiseDryRun",
+        "summary": "What anonymising the party would do: the reasons it is refused (open business, retention period) and the fields that would be cleared",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "allowed": {
+                          "type": "boolean"
+                        },
+                        "blockers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "retention": {
+                          "type": "object",
+                          "properties": {
+                            "years": {
+                              "type": "integer"
+                            },
+                            "lastPolicyExpiry": {
+                              "type": "string"
+                            },
+                            "retainedUntil": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "cleared": {
+                          "type": "object",
+                          "properties": {
+                            "clients": {
+                              "type": "object",
+                              "properties": {
+                                "rows": {
+                                  "type": "integer"
+                                },
+                                "fields": {
+                                  "type": "array",
+                                  "items": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "allowed": false,
+                    "blockers": [
+                      {
+                        "code": "retention-period",
+                        "message": "Insurance and tax records are kept until 2035-10-01"
+                      }
+                    ],
+                    "retention": {
+                      "years": 10,
+                      "lastPolicyExpiry": "2025-10-01",
+                      "retainedUntil": "2035-10-01"
+                    },
+                    "cleared": {
+                      "clients": {
+                        "rows": 1,
+                        "fields": [
+                          "email",
+                          "phone"
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests > Anonymise",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      }
+    },
+    "/privacy/parties/{type}/{id}/export": {
+      "get": {
+        "operationId": "getPrivacyPartiesTypeIdExport",
+        "summary": "Personal data held about a client or prospect (access / portability): JSON, or ?format=xlsx; ?requestId= notes it on the request",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests > Export personal data\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "json"
+          },
+          {
+            "name": "requestId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "DSR-2026-00001"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "party": {
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string"
+                            },
+                            "code": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "personalData": {
+                          "type": "object",
+                          "properties": {
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "email": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "consents": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "policies": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "claims": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "receipts": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "party": {
+                      "type": "client",
+                      "code": "CL-2026-00001",
+                      "name": "Juan Dela Cruz"
+                    },
+                    "personalData": {
+                      "firstName": "Juan",
+                      "email": "juan@example.com"
+                    },
+                    "consents": [],
+                    "policies": [],
+                    "claims": [],
+                    "receipts": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests > Export personal data",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      }
+    },
+    "/privacy/requests": {
+      "get": {
+        "operationId": "getPrivacyRequests",
+        "summary": "Data subject requests (filters: status, requestType, overdue=true, partyType, partyId, assignedTo, search) with counts",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "open,in-progress"
+          },
+          {
+            "name": "overdue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "requestNumber": {
+                                "type": "string"
+                              },
+                              "partyType": {
+                                "type": "string"
+                              },
+                              "partyId": {
+                                "type": "string"
+                              },
+                              "partyName": {
+                                "type": "string"
+                              },
+                              "requesterName": {
+                                "type": "string"
+                              },
+                              "requesterContact": {
+                                "type": "string"
+                              },
+                              "requestType": {
+                                "type": "string"
+                              },
+                              "receivedOn": {
+                                "type": "string"
+                              },
+                              "dueOn": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "overdue": {
+                                "type": "boolean"
+                              },
+                              "assignedTo": {},
+                              "outcome": {}
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "open": {
+                              "type": "integer"
+                            },
+                            "overdue": {
+                              "type": "integer"
+                            },
+                            "completed": {
+                              "type": "integer"
+                            },
+                            "rejected": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "today": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "id": "dsr_1",
+                        "requestNumber": "DSR-2026-00001",
+                        "partyType": "client",
+                        "partyId": "cl_1",
+                        "partyName": "Juan Dela Cruz",
+                        "requesterName": "Juan Dela Cruz",
+                        "requesterContact": "juan@example.com",
+                        "requestType": "access",
+                        "receivedOn": "2026-10-01",
+                        "dueOn": "2026-10-16",
+                        "status": "open",
+                        "overdue": false,
+                        "assignedTo": null,
+                        "outcome": null
+                      }
+                    ],
+                    "summary": {
+                      "open": 1,
+                      "overdue": 0,
+                      "completed": 0,
+                      "rejected": 0
+                    },
+                    "today": "2026-10-03"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      },
+      "post": {
+        "operationId": "postPrivacyRequests",
+        "summary": "Log a data subject request; numbered from the DSR series, due privacy.request_due_days after receipt",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "requestNumber": {
+                          "type": "string"
+                        },
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "requesterName": {
+                          "type": "string"
+                        },
+                        "requesterContact": {
+                          "type": "string"
+                        },
+                        "requestType": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "dueOn": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {},
+                        "outcome": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "dsr_1",
+                    "requestNumber": "DSR-2026-00001",
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "partyName": "Juan Dela Cruz",
+                    "requesterName": "Juan Dela Cruz",
+                    "requesterContact": "juan@example.com",
+                    "requestType": "access",
+                    "receivedOn": "2026-10-01",
+                    "dueOn": "2026-10-16",
+                    "status": "open",
+                    "overdue": false,
+                    "assignedTo": null,
+                    "outcome": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "partyType": {
+                    "type": "string"
+                  },
+                  "partyId": {
+                    "type": "string"
+                  },
+                  "requesterName": {
+                    "type": "string"
+                  },
+                  "requesterContact": {
+                    "type": "string"
+                  },
+                  "requestType": {
+                    "type": "string"
+                  },
+                  "receivedOn": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "partyType": "client",
+                "partyId": "cl_1",
+                "requesterName": "Juan Dela Cruz",
+                "requesterContact": "juan@example.com",
+                "requestType": "access",
+                "receivedOn": "2026-10-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/requests/{id}": {
+      "get": {
+        "operationId": "getPrivacyRequestsId",
+        "summary": "One data subject request (by id or number)",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "requestNumber": {
+                          "type": "string"
+                        },
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "requesterName": {
+                          "type": "string"
+                        },
+                        "requesterContact": {
+                          "type": "string"
+                        },
+                        "requestType": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "dueOn": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {},
+                        "outcome": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "dsr_1",
+                    "requestNumber": "DSR-2026-00001",
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "partyName": "Juan Dela Cruz",
+                    "requesterName": "Juan Dela Cruz",
+                    "requesterContact": "juan@example.com",
+                    "requestType": "access",
+                    "receivedOn": "2026-10-01",
+                    "dueOn": "2026-10-16",
+                    "status": "open",
+                    "overdue": false,
+                    "assignedTo": null,
+                    "outcome": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      },
+      "put": {
+        "operationId": "putPrivacyRequestsId",
+        "summary": "Update an open request: party, requester, type, date received (due date follows), status open / in-progress, assignee, notes",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "requestNumber": {
+                          "type": "string"
+                        },
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "requesterName": {
+                          "type": "string"
+                        },
+                        "requesterContact": {
+                          "type": "string"
+                        },
+                        "requestType": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "dueOn": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {},
+                        "outcome": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "dsr_1",
+                    "requestNumber": "DSR-2026-00001",
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "partyName": "Juan Dela Cruz",
+                    "requesterName": "Juan Dela Cruz",
+                    "requesterContact": "juan@example.com",
+                    "requestType": "access",
+                    "receivedOn": "2026-10-01",
+                    "dueOn": "2026-10-16",
+                    "status": "in-progress",
+                    "overdue": false,
+                    "assignedTo": null,
+                    "outcome": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "assignedTo": {
+                    "type": "string"
+                  },
+                  "responseNotes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "in-progress",
+                "assignedTo": "usr_1",
+                "responseNotes": "Identity verified with a valid ID"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/requests/{id}/close": {
+      "post": {
+        "operationId": "postPrivacyRequestsIdClose",
+        "summary": "Close a request as completed or rejected, with the outcome told to the data subject",
+        "tags": [
+          "Data Privacy"
+        ],
+        "description": "Front-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "requestNumber": {
+                          "type": "string"
+                        },
+                        "partyType": {
+                          "type": "string"
+                        },
+                        "partyId": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "requesterName": {
+                          "type": "string"
+                        },
+                        "requesterContact": {
+                          "type": "string"
+                        },
+                        "requestType": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "dueOn": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {},
+                        "outcome": {},
+                        "closedOn": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "dsr_1",
+                    "requestNumber": "DSR-2026-00001",
+                    "partyType": "client",
+                    "partyId": "cl_1",
+                    "partyName": "Juan Dela Cruz",
+                    "requesterName": "Juan Dela Cruz",
+                    "requesterContact": "juan@example.com",
+                    "requestType": "access",
+                    "receivedOn": "2026-10-01",
+                    "dueOn": "2026-10-16",
+                    "status": "completed",
+                    "overdue": false,
+                    "assignedTo": null,
+                    "outcome": null,
+                    "closedOn": "2026-10-05"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Data Privacy > Data Subject Requests",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  },
+                  "outcome": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "completed",
+                "outcome": "Personal data sent to the client by e-mail on 2026-10-05"
+              }
+            }
+          }
+        }
       }
     },
     "/disbursements": {
@@ -56751,7 +58613,7 @@
         "tags": [
           "Placement Slips"
         ],
-        "description": "Front-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations",
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations, write:premium-charges",
         "parameters": [
           {
             "name": "businessType",
@@ -56880,7 +58742,8 @@
         },
         "x-screen": "Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)",
         "x-permissions": [
-          "read:quotations"
+          "read:quotations",
+          "write:premium-charges"
         ]
       }
     },

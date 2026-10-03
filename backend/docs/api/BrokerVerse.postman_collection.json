@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (857 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (871 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -16863,6 +16863,1127 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": {\n      \"from\": \"2026-09-01\",\n      \"to\": \"2026-09-30\"\n    },\n    \"kpis\": {\n      \"prospects\": 61,\n      \"newProspects\": 12,\n      \"quotations\": 9,\n      \"policies\": 4,\n      \"premium\": 125000,\n      \"prospectConversionRate\": 25,\n      \"pipelineValue\": 350000\n    },\n    \"pipeline\": {\n      \"prospects\": [\n        {\n          \"stage\": \"New\",\n          \"count\": 7\n        }\n      ],\n      \"quotations\": [\n        {\n          \"stage\": \"Draft\",\n          \"count\": 2,\n          \"premium\": 45000\n        }\n      ]\n    },\n    \"bySalesPerson\": [\n      {\n        \"userId\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\",\n        \"prospects\": 5,\n        \"quotations\": 3,\n        \"policies\": 2,\n        \"premium\": 64000,\n        \"conversionRate\": 40\n      }\n    ],\n    \"salesPersons\": [\n      {\n        \"id\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\"\n      }\n    ],\n    \"scoped\": false\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Data Privacy",
+      "item": [
+        {
+          "name": "Active users who work the data privacy registers (read:privacy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/assignees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "assignees"
+              ]
+            },
+            "description": "Active users who work the data privacy registers (read:privacy)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/assignees",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "assignees"
+                  ]
+                },
+                "description": "Active users who work the data privacy registers (read:privacy)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Ana Reyes\",\n      \"username\": \"ana.reyes\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Consent status of a client or prospect per purpose (processing, marketing, sharing) with the full history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/consents?partyType=client&partyId=cl_1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "consents"
+              ],
+              "query": [
+                {
+                  "key": "partyType",
+                  "value": "client"
+                },
+                {
+                  "key": "partyId",
+                  "value": "cl_1"
+                }
+              ]
+            },
+            "description": "Consent status of a client or prospect per purpose (processing, marketing, sharing) with the full history\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: read:clients, read:leads, read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/consents?partyType=client&partyId=cl_1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "consents"
+                  ],
+                  "query": [
+                    {
+                      "key": "partyType",
+                      "value": "client"
+                    },
+                    {
+                      "key": "partyId",
+                      "value": "cl_1"
+                    }
+                  ]
+                },
+                "description": "Consent status of a client or prospect per purpose (processing, marketing, sharing) with the full history\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: read:clients, read:leads, read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"noticeVersion\": \"1.0\",\n    \"purposes\": [\n      {\n        \"id\": 1,\n        \"partyType\": \"client\",\n        \"partyId\": \"cl_1\",\n        \"purpose\": \"marketing\",\n        \"granted\": true,\n        \"status\": \"granted\",\n        \"channel\": \"Form\",\n        \"noticeVersion\": \"1.0\",\n        \"evidence\": \"Signed client information sheet\",\n        \"recordedBy\": \"Ana Reyes\",\n        \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n        \"withdrawnAt\": null\n      }\n    ],\n    \"history\": [\n      {\n        \"id\": 1,\n        \"partyType\": \"client\",\n        \"partyId\": \"cl_1\",\n        \"purpose\": \"marketing\",\n        \"granted\": true,\n        \"status\": \"granted\",\n        \"channel\": \"Form\",\n        \"noticeVersion\": \"1.0\",\n        \"evidence\": \"Signed client information sheet\",\n        \"recordedBy\": \"Ana Reyes\",\n        \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n        \"withdrawnAt\": null\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record consent given or refused for a purpose (the notice version defaults to privacy.notice_version)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/consents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "consents"
+              ]
+            },
+            "description": "Record consent given or refused for a purpose (the notice version defaults to privacy.notice_version)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"purpose\": \"marketing\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed client information sheet\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/consents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "consents"
+                  ]
+                },
+                "description": "Record consent given or refused for a purpose (the notice version defaults to privacy.notice_version)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"purpose\": \"marketing\",\n  \"granted\": true,\n  \"channel\": \"Form\",\n  \"evidence\": \"Signed client information sheet\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"purpose\": \"marketing\",\n    \"granted\": true,\n    \"status\": \"granted\",\n    \"channel\": \"Form\",\n    \"noticeVersion\": \"1.0\",\n    \"evidence\": \"Signed client information sheet\",\n    \"recordedBy\": \"Ana Reyes\",\n    \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n    \"withdrawnAt\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Withdraw a consent in force (the record stays in the history)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/consents/:id/withdraw",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "consents",
+                ":id",
+                "withdraw"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Withdraw a consent in force (the record stays in the history)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Client asked by e-mail to stop marketing messages\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/consents/:id/withdraw",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "consents",
+                    ":id",
+                    "withdraw"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Withdraw a consent in force (the record stays in the history)\n\nFront-end touchpoint: Operations > Clients > Client view > Data privacy; Sales & Marketing > Prospects > Prospect view\n\nAccess: write:clients, write:leads, write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Client asked by e-mail to stop marketing messages\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"purpose\": \"marketing\",\n    \"granted\": true,\n    \"status\": \"withdrawn\",\n    \"channel\": \"Form\",\n    \"noticeVersion\": \"1.0\",\n    \"evidence\": \"Signed client information sheet\",\n    \"recordedBy\": \"Ana Reyes\",\n    \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n    \"withdrawnAt\": \"2026-10-03T01:00:00.000Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Consent register across clients and prospects (filters: purpose, status granted / withdrawn / refused, partyType, channel, current, from, to, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/consents/register?purpose=marketing&status=granted&current=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "consents",
+                "register"
+              ],
+              "query": [
+                {
+                  "key": "purpose",
+                  "value": "marketing"
+                },
+                {
+                  "key": "status",
+                  "value": "granted"
+                },
+                {
+                  "key": "current",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Consent register across clients and prospects (filters: purpose, status granted / withdrawn / refused, partyType, channel, current, from, to, search)\n\nFront-end touchpoint: Master > Data Privacy > Consent Register\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/consents/register?purpose=marketing&status=granted&current=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "consents",
+                    "register"
+                  ],
+                  "query": [
+                    {
+                      "key": "purpose",
+                      "value": "marketing"
+                    },
+                    {
+                      "key": "status",
+                      "value": "granted"
+                    },
+                    {
+                      "key": "current",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Consent register across clients and prospects (filters: purpose, status granted / withdrawn / refused, partyType, channel, current, from, to, search)\n\nFront-end touchpoint: Master > Data Privacy > Consent Register\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"partyType\": \"client\",\n      \"partyId\": \"cl_1\",\n      \"purpose\": \"marketing\",\n      \"granted\": true,\n      \"status\": \"granted\",\n      \"channel\": \"Form\",\n      \"noticeVersion\": \"1.0\",\n      \"evidence\": \"Signed client information sheet\",\n      \"recordedBy\": \"Ana Reyes\",\n      \"recordedAt\": \"2026-10-01T02:00:00.000Z\",\n      \"withdrawnAt\": null,\n      \"partyCode\": \"CL-2026-00001\",\n      \"partyName\": \"Juan Dela Cruz\",\n      \"current\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Clients and prospects by name, code, e-mail or phone (at least 2 characters), for the request register",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/parties?search=dela cruz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "parties"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "dela cruz"
+                }
+              ]
+            },
+            "description": "Clients and prospects by name, code, e-mail or phone (at least 2 characters), for the request register\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/parties?search=dela cruz",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "parties"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "dela cruz"
+                    }
+                  ]
+                },
+                "description": "Clients and prospects by name, code, e-mail or phone (at least 2 characters), for the request register\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"partyType\": \"client\",\n      \"partyId\": \"cl_1\",\n      \"code\": \"CL-2026-00001\",\n      \"name\": \"Juan Dela Cruz\",\n      \"email\": \"juan@example.com\",\n      \"phone\": \"09171234567\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Anonymise a client or prospect: personal fields overwritten in the party, its prospects, policies, quotations, claims and slips; amounts, numbers and dates kept. Refused (409, with the reasons) while records must be kept",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "parties",
+                ":type",
+                ":id",
+                "anonymise"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Anonymise a client or prospect: personal fields overwritten in the party, its prospects, policies, quotations, claims and slips; amounts, numbers and dates kept. Refused (409, with the reasons) while records must be kept\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Erasure request DSR-2026-00004; retention period over\",\n  \"requestId\": \"DSR-2026-00004\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "parties",
+                    ":type",
+                    ":id",
+                    "anonymise"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    },
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Anonymise a client or prospect: personal fields overwritten in the party, its prospects, policies, quotations, claims and slips; amounts, numbers and dates kept. Refused (409, with the reasons) while records must be kept\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Erasure request DSR-2026-00004; retention period over\",\n  \"requestId\": \"DSR-2026-00004\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"partyType\": \"client\",\n    \"partyCode\": \"CL-2014-00001\",\n    \"label\": \"Anonymised client CL-2014-00001\",\n    \"cleared\": {\n      \"clients\": {\n        \"rows\": 1,\n        \"fields\": [\n          \"email\",\n          \"phone\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "What anonymising the party would do: the reasons it is refused (open business, retention period) and the fields that would be cleared",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise/dry-run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "parties",
+                ":type",
+                ":id",
+                "anonymise",
+                "dry-run"
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "What anonymising the party would do: the reasons it is refused (open business, retention period) and the fields that would be cleared\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/parties/:type/:id/anonymise/dry-run",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "parties",
+                    ":type",
+                    ":id",
+                    "anonymise",
+                    "dry-run"
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    },
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "What anonymising the party would do: the reasons it is refused (open business, retention period) and the fields that would be cleared\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Anonymise\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"allowed\": false,\n    \"blockers\": [\n      {\n        \"code\": \"retention-period\",\n        \"message\": \"Insurance and tax records are kept until 2035-10-01\"\n      }\n    ],\n    \"retention\": {\n      \"years\": 10,\n      \"lastPolicyExpiry\": \"2025-10-01\",\n      \"retainedUntil\": \"2035-10-01\"\n    },\n    \"cleared\": {\n      \"clients\": {\n        \"rows\": 1,\n        \"fields\": [\n          \"email\",\n          \"phone\"\n        ]\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Personal data held about a client or prospect (access / portability): JSON, or ?format=xlsx; ?requestId= notes it on the request",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/parties/:type/:id/export?format=json&requestId=DSR-2026-00001",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "parties",
+                ":type",
+                ":id",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "json"
+                },
+                {
+                  "key": "requestId",
+                  "value": "DSR-2026-00001"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Personal data held about a client or prospect (access / portability): JSON, or ?format=xlsx; ?requestId= notes it on the request\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Export personal data\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/parties/:type/:id/export?format=json&requestId=DSR-2026-00001",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "parties",
+                    ":type",
+                    ":id",
+                    "export"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "json"
+                    },
+                    {
+                      "key": "requestId",
+                      "value": "DSR-2026-00001"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    },
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Personal data held about a client or prospect (access / portability): JSON, or ?format=xlsx; ?requestId= notes it on the request\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests > Export personal data\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"party\": {\n      \"type\": \"client\",\n      \"code\": \"CL-2026-00001\",\n      \"name\": \"Juan Dela Cruz\"\n    },\n    \"personalData\": {\n      \"firstName\": \"Juan\",\n      \"email\": \"juan@example.com\"\n    },\n    \"consents\": [],\n    \"policies\": [],\n    \"claims\": [],\n    \"receipts\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Data subject requests (filters: status, requestType, overdue=true, partyType, partyId, assignedTo, search) with counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/requests?status=open,in-progress&overdue=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "requests"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "open,in-progress"
+                },
+                {
+                  "key": "overdue",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Data subject requests (filters: status, requestType, overdue=true, partyType, partyId, assignedTo, search) with counts\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/requests?status=open,in-progress&overdue=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "requests"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "open,in-progress"
+                    },
+                    {
+                      "key": "overdue",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Data subject requests (filters: status, requestType, overdue=true, partyType, partyId, assignedTo, search) with counts\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": \"dsr_1\",\n        \"requestNumber\": \"DSR-2026-00001\",\n        \"partyType\": \"client\",\n        \"partyId\": \"cl_1\",\n        \"partyName\": \"Juan Dela Cruz\",\n        \"requesterName\": \"Juan Dela Cruz\",\n        \"requesterContact\": \"juan@example.com\",\n        \"requestType\": \"access\",\n        \"receivedOn\": \"2026-10-01\",\n        \"dueOn\": \"2026-10-16\",\n        \"status\": \"open\",\n        \"overdue\": false,\n        \"assignedTo\": null,\n        \"outcome\": null\n      }\n    ],\n    \"summary\": {\n      \"open\": 1,\n      \"overdue\": 0,\n      \"completed\": 0,\n      \"rejected\": 0\n    },\n    \"today\": \"2026-10-03\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Log a data subject request; numbered from the DSR series, due privacy.request_due_days after receipt",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "requests"
+              ]
+            },
+            "description": "Log a data subject request; numbered from the DSR series, due privacy.request_due_days after receipt\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"requesterName\": \"Juan Dela Cruz\",\n  \"requesterContact\": \"juan@example.com\",\n  \"requestType\": \"access\",\n  \"receivedOn\": \"2026-10-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "requests"
+                  ]
+                },
+                "description": "Log a data subject request; numbered from the DSR series, due privacy.request_due_days after receipt\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"partyType\": \"client\",\n  \"partyId\": \"cl_1\",\n  \"requesterName\": \"Juan Dela Cruz\",\n  \"requesterContact\": \"juan@example.com\",\n  \"requestType\": \"access\",\n  \"receivedOn\": \"2026-10-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One data subject request (by id or number)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/requests/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "requests",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One data subject request (by id or number)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/requests/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "requests",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One data subject request (by id or number)\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update an open request: party, requester, type, date received (due date follows), status open / in-progress, assignee, notes",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/requests/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "requests",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update an open request: party, requester, type, date received (due date follows), status open / in-progress, assignee, notes\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"in-progress\",\n  \"assignedTo\": \"usr_1\",\n  \"responseNotes\": \"Identity verified with a valid ID\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/requests/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "requests",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update an open request: party, requester, type, date received (due date follows), status open / in-progress, assignee, notes\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"in-progress\",\n  \"assignedTo\": \"usr_1\",\n  \"responseNotes\": \"Identity verified with a valid ID\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"in-progress\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close a request as completed or rejected, with the outcome told to the data subject",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/requests/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "requests",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close a request as completed or rejected, with the outcome told to the data subject\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"completed\",\n  \"outcome\": \"Personal data sent to the client by e-mail on 2026-10-05\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/requests/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "requests",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close a request as completed or rejected, with the outcome told to the data subject\n\nFront-end touchpoint: Master > Data Privacy > Data Subject Requests\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"completed\",\n  \"outcome\": \"Personal data sent to the client by e-mail on 2026-10-05\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"completed\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null,\n    \"closedOn\": \"2026-10-05\"\n  }\n}"
             }
           ]
         }
@@ -36128,7 +37249,7 @@
                 }
               ]
             },
-            "description": "Reference data of the placement screens: active insurers (insurer master), products with their LOB, business type, customer segment and journey (businessType=package | non_package filters them), default billing mode\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations"
+            "description": "Reference data of the placement screens: active insurers (insurer master), products with their LOB, business type, customer segment and journey (businessType=package | non_package filters them), default billing mode\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations, write:premium-charges"
           },
           "response": [
             {
@@ -36152,7 +37273,7 @@
                     }
                   ]
                 },
-                "description": "Reference data of the placement screens: active insurers (insurer master), products with their LOB, business type, customer segment and journey (businessType=package | non_package filters them), default billing mode\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations"
+                "description": "Reference data of the placement screens: active insurers (insurer master), products with their LOB, business type, customer segment and journey (businessType=package | non_package filters them), default billing mode\n\nFront-end touchpoint: Operations > Sales & Marketing > Placement Slips / Operations > Sales & Marketing > Request for Quotation (Broker Slip) (forms)\n\nAccess: read:quotations, write:premium-charges"
               },
               "status": "OK",
               "code": 200,
