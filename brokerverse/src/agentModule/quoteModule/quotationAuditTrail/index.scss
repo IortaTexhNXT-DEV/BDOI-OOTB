@@ -294,7 +294,7 @@ $tablet-md: 1024px;
       }
 
       .audit-old-value {
-        color: #dc3545;
+        color: var(--color-danger);
         border-left: 3px solid #dc3545;
         background: #fff5f5;
 
@@ -303,7 +303,7 @@ $tablet-md: 1024px;
         }
 
         .value-item {
-          color: #dc3545;
+          color: var(--color-danger);
         }
       }
 

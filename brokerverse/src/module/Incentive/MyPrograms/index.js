@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
@@ -14,16 +14,17 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { Chart } from "primereact/chart";
 import { Knob } from "primereact/knob";
 import { Badge } from "primereact/badge";
-import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
-import { incentiveMockData } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { showError } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { formatPercent, progressValue, roundTo } from "../../../utility/numberFormat";
 
 const MyPrograms = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
 
   // State management
@@ -44,30 +45,38 @@ const MyPrograms = () => {
 
   // Breadcrumb items
   const items = [
-    { label: t("incentive.incentive"), url: "/incentive" },
-    { label: t("incentive.myPrograms"), url: "/incentive/myprograms" }
+    { label: t("incentive.incentive") },
+    { label: t("incentive.myPrograms"), url: "/incentive/my-programs" }
   ];
 
-  const home = { label: t("incentive.dashboard") };
+  const home = { label: t("sidebar.Accounts") };
 
   // Initialize data
   useEffect(() => {
     loadMyPrograms();
-    initializeCharts();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Signed-in agent's programs; users who are not agents (managers) see the first eligible agent.
+  const fetchAgentData = async () => {
+    const mine = await incentiveService.myPrograms();
+    if (mine.eligible !== false) return mine;
+    const all = await incentiveService.agentPrograms();
+    return all[0] || mine;
+  };
 
   const loadMyPrograms = async () => {
     setLoading(true);
     try {
-      // Simulate loading current user's data (using first agent from mock data)
-      const currentAgentData = incentiveMockData.agentPrograms[0];
+      const currentAgentData = await fetchAgentData();
+      const programs = currentAgentData.assignedPrograms || [];
       setAgentData(currentAgentData);
+      initializeCharts(programs);
 
-      // Calculate dashboard metrics
-      const totalPrograms = currentAgentData.assignedPrograms.length;
-      const activePrograms = currentAgentData.assignedPrograms.filter(p => p.daysRemaining > 0).length;
-      const totalPotentialEarning = currentAgentData.assignedPrograms.reduce((sum, p) => sum + p.potentialEarning, 0);
-      const avgAchievement = currentAgentData.assignedPrograms.reduce((sum, p) => sum + p.achievementPercent, 0) / totalPrograms;
+      const totalPrograms = programs.length;
+      const activePrograms = programs.filter(p => p.daysRemaining > 0).length;
+      const totalPotentialEarning = programs.reduce((sum, p) => sum + Number(p.potentialEarning || 0), 0);
+      const avgAchievement = totalPrograms ? programs.reduce((sum, p) => sum + Number(p.achievementPercent || 0), 0) / totalPrograms : 0;
 
       setDashboardData({
         totalPrograms,
@@ -75,35 +84,23 @@ const MyPrograms = () => {
         totalPotentialEarning,
         avgAchievement: Math.round(avgAchievement)
       });
-
-      toast.current.show({
-        severity: 'success',
-        summary: t("incentive.dataLoaded"),
-        detail: t("incentive.programsLoadedSuccess"),
-        life: 3000
-      });
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("incentive.failedToLoadProgramData"),
-        life: 3000
-      });
+      showError(toast, error, t("incentive.failedToLoadProgramData"));
     } finally {
       setLoading(false);
     }
   };
 
-  const initializeCharts = () => {
+  const initializeCharts = (programs) => {
     const documentStyle = getComputedStyle(document.documentElement);
 
     // Achievement chart data
     const data = {
-      labels: ['Q1 Premium Achievers', 'New Business Champion', 'Renewal Excellence'],
+      labels: programs.map((p) => p.programName),
       datasets: [
         {
           label: 'Achievement %',
-          data: [85, 90, 103.5],
+          data: programs.map((p) => p.achievementPercent),
           backgroundColor: [
             documentStyle.getPropertyValue('--blue-500'),
             documentStyle.getPropertyValue('--green-500'),
@@ -162,10 +159,11 @@ const MyPrograms = () => {
     return (
       <div className="achievement-progress">
         <ProgressBar
-          value={percentage}
+          value={progressValue(percentage)}
+          showValue={false}
           className={`progress-${getSeverity()}`}
         />
-        <span className="achievement-text">{percentage}%</span>
+        <span className="achievement-text">{formatPercent(percentage)}</span>
       </div>
     );
   };
@@ -197,7 +195,7 @@ const MyPrograms = () => {
         icon={<SvgEyeIcon />}
         className="view-details-button"
         onClick={() => handleViewDetails(rowData)}
-        tooltip="View Details"
+        tooltip="View Details" aria-label="View Details"
       />
     );
   };
@@ -250,7 +248,7 @@ const MyPrograms = () => {
 
           <Card className="dashboard-card">
             <div className="card-content">
-              <i className="pi pi-dollar card-icon blue"></i>
+              <i className="pi pi-wallet card-icon blue"></i>
               <div className="card-info">
                 <span className="card-value">
                   {formatCurrency(dashboardData.totalPotentialEarning)}
@@ -264,7 +262,7 @@ const MyPrograms = () => {
             <div className="card-content">
               <div className="knob-container">
                 <Knob
-                  value={dashboardData.avgAchievement}
+                  value={roundTo(dashboardData.avgAchievement, 0) ?? 0}
                   size={60}
                   strokeWidth={8}
                   valueTemplate={"{value}%"}
@@ -367,12 +365,12 @@ const MyPrograms = () => {
               {agentData?.recentActivities?.map((activity, index) => (
                 <div key={index} className="activity-item">
                   <div className="activity-date">
-                    {new Date(activity.date).toLocaleDateString()}
+                    {formatAppDate(activity.date)}
                   </div>
                   <div className="activity-content">
                     <div className="activity-title">{activity.activity}</div>
                     <div className="activity-details">
-                      <span className="impact">{activity.impact}</span>
+                      <span className="impact">+{formatCurrency(activity.impact)}</span>
                       <span className="points">+{activity.points} points</span>
                     </div>
                   </div>
@@ -399,6 +397,15 @@ const MyPrograms = () => {
                     <label>Program Name:</label>
                     <span>{selectedProgram.programName}</span>
                   </div>
+                  {selectedProgram.periodFrom && (
+                    <div className="detail-item">
+                      <label>{t("incentive.currentPeriod", "Current period")}:</label>
+                      <span>
+                        {formatAppDate(selectedProgram.periodFrom)} – {formatAppDate(selectedProgram.periodTo)}
+                        {selectedProgram.calculationFrequency ? ` (${selectedProgram.calculationFrequency})` : ""}
+                      </span>
+                    </div>
+                  )}
                   <div className="detail-item">
                     <label>Target:</label>
                     <span>{formatCurrency(selectedProgram.target)}</span>
@@ -432,7 +439,7 @@ const MyPrograms = () => {
                 <div className="progress-chart">
                   <div className="progress-circle">
                     <Knob
-                      value={selectedProgram.achievementPercent}
+                      value={roundTo(selectedProgram.achievementPercent, 0) ?? 0}
                       size={120}
                       strokeWidth={10}
                       valueTemplate={"{value}%"}

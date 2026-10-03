@@ -1,12 +1,11 @@
-import React, { useState, useRef } from "react";
 import "./index.scss";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const ReplenishtDetailViewTable = ({ AddReplenishTable }) => {
   const isEmpty = AddReplenishTable.length === 0;
-  console.log(AddReplenishTable, "AddReplenishTable");
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -48,7 +47,7 @@ const ReplenishtDetailViewTable = ({ AddReplenishTable }) => {
             header="Narration"
             headerStyle={headerStyle}
           ></Column>
-          <Column field="Date" header="Date" headerStyle={headerStyle}></Column>
+          <Column body={(row) => formatAppDate(row.Date)} field="Date" header="Date" headerStyle={headerStyle}></Column>
           <Column
             field="Remarks"
             header="Remarks"

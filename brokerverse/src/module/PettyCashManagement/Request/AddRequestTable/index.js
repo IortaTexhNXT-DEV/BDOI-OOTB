@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useFormik } from "formik";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import CustomToast from "../../../../components/Toast";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
@@ -21,6 +21,7 @@ import {
   postAddRequestMiddleware,
   postEditRequestMiddleware,
 } from "../store/pettyCashRequestMiddleware";
+import { removeRequestLine } from "../store/pettyCashRequestReducer";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 
 const initialValue = {
@@ -36,9 +37,8 @@ const AddRequestTable = () => {
   const toastRef = useRef(null);
   const toastRefApprove = useRef(null);
   const navigate = useNavigate();
-  const [toastMessage, setToastMessage] = useState("");
 
-  const { AddRequestTable, loading } = useSelector(
+  const { AddRequestTable } = useSelector(
     ({ pettyCashRequestReducer }) => {
       return {
         loading: pettyCashRequestReducer?.loading,
@@ -47,35 +47,23 @@ const AddRequestTable = () => {
     }
   );
 
-  const isEmpty = AddRequestTable.length === 0;
+  const isEmpty = !AddRequestTable?.length;
 
-  useEffect(() => {
-    if (toastMessage != null) {
+  const handleapprove = async (actionName) => {
+    const result = await dispatch(
+      postAddRequestMiddleware({ submit: actionName === "approve" })
+    );
+    if (postAddRequestMiddleware.rejected.match(result)) {
+      toastRef.current.showToast({ severity: "error", detail: result.payload });
+      return;
     }
-  }, [toastMessage]);
-
-  const handleapprove = (actionName) => {
-    console.log("first6", totalAmount)
-    dispatch(postAddRequestMiddleware(totalAmount));
     if (actionName === "save") {
-      toastRef.current.showToast();
-      // setToastMessage("Successfully saved");
-    } else if (actionName === "approve") {
-      toastRefApprove.current.showToast();
-      // dispatch(postAddRequestMiddleware(valueWithId));
-      // setToastMessage("Transaction Number 1234 is created");
-      setTimeout(() => {
-        navigate("/accounts/pettycash/request");
-      }, 2000);
+      showSuccessMessage(t("pettyCash.successfullySaved"));
+    } else {
+      showSuccessMessage(t("pettyCash.transactionCreated", { number: result.payload.RequestNumber }));
     }
-    // toastRef.current.showToast();
-    // {
-    //   setTimeout(() => {
-    //     navigate("/accounts/pettycash/request");
-    //   }, 2000);
-    // }
+    navigate("/accounts/pettycash/pettycashrequest");
   };
-
   const emptyTableIcon = (
     <div>
       <div className="empty-table-icon">
@@ -150,17 +138,17 @@ const AddRequestTable = () => {
   });
 
   const totalAmount = AddRequestTable.reduce(
-    (total, item) => total + parseInt(item.Amount),
+    (total, item) => total + (parseFloat(item.Amount) || 0),
     0
   );
 
-  const handleDelete = (id) => { };
+  const handleDelete = (id) => dispatch(removeRequestLine(id));
 
   return (
     <div className="add__request__table">
 
       <CustomToast ref={toastRef} message={t("pettyCash.successfullySaved")} />
-      <CustomToast ref={toastRefApprove} message={t("pettyCash.transactionCreated", { number: "1234" })} />
+      <CustomToast ref={toastRefApprove} />
 
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
@@ -234,8 +222,7 @@ const AddRequestTable = () => {
                   <Button
                     icon={<SvgDelete />}
                     className="delete__btn"
-                    onClick={() => handleDelete(rowData.id)}
-                  />
+                    onClick={() => handleDelete(rowData.id)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                 </div>
               )}
             ></Column>
@@ -297,7 +284,6 @@ const AddRequestTable = () => {
         <div className="grid">
           <div className="col-12 md:col-8 lg:col-8">
             <InputField
-              // classNames="input__filed"
               classNames="fielduniqueone__container"
               label={t("pettyCash.narration")}
               placeholder={t("pettyCash.enter")}
@@ -306,7 +292,6 @@ const AddRequestTable = () => {
               textWeight={500}
               value={formik.values.Narration}
               onChange={formik.handleChange("Narration")}
-            // error={formik.touched.Narration && formik.errors.Narration}
             />
           </div>
           <div className="col-12 md:col-4 lg:col-4">
@@ -319,7 +304,6 @@ const AddRequestTable = () => {
               textWeight={500}
               value={formik.values.Amount}
               onChange={formik.handleChange("Amount")}
-            // error={formik.touched.Amount && formik.errors.Amount}
             />
           </div>
         </div>

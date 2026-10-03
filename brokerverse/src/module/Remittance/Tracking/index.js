@@ -14,12 +14,10 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { Timeline } from "primereact/timeline";
-import { Badge } from "primereact/badge";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { TabView, TabPanel } from "primereact/tabview";
-import mockRemittanceService from "../../../services/mockRemittanceService";
+import remittanceService from "../../../services/remittanceService";
+import { calendarDateFormat, downloadCsv, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadSettings, showError, showSuccess, statusSeverity } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import "./index.scss";
 
 const RemittanceTracking = () => {
@@ -39,76 +37,17 @@ const RemittanceTracking = () => {
     completedToday: 0,
     requiresAction: 0
   });
-  const [filteredRemittances, setFilteredRemittances] = useState([]);
+  const [remittances, setRemittances] = useState([]);
+  const [statusLabels, setStatusLabels] = useState({});
+  const [insurers, setInsurers] = useState([]);
   const toast = useRef(null);
-
-  // Initial remittances data
-  const [remittances, setRemittances] = useState([
-    {
-      id: 1,
-      remittanceNo: "REM-2025-001",
-      remittanceDate: new Date("2025-09-25"),
-      insurerCode: "INS001",
-      insurerName: "ABC Insurance Co.",
-      policyCount: 45,
-      grossAmount: 125000.00,
-      commission: 12500.00,
-      netAmount: 112500.00,
-      status: "Completed"
-    },
-    {
-      id: 2,
-      remittanceNo: "REM-2025-002",
-      remittanceDate: new Date("2025-09-26"),
-      insurerCode: "INS002",
-      insurerName: "XYZ Life Insurance",
-      policyCount: 38,
-      grossAmount: 98500.00,
-      commission: 9850.00,
-      netAmount: 88650.00,
-      status: "Pending"
-    },
-    {
-      id: 3,
-      remittanceNo: "REM-2025-003",
-      remittanceDate: new Date("2025-09-27"),
-      insurerCode: "INS003",
-      insurerName: "Global Health Insurance",
-      policyCount: 22,
-      grossAmount: 67300.00,
-      commission: 6730.00,
-      netAmount: 60570.00,
-      status: "Processing"
-    },
-    {
-      id: 4,
-      remittanceNo: "REM-2025-004",
-      remittanceDate: new Date("2025-09-28"),
-      insurerCode: "INS004",
-      insurerName: "Premier Auto Insurance",
-      policyCount: 15,
-      grossAmount: 45200.00,
-      commission: 4520.00,
-      netAmount: 40680.00,
-      status: "Draft"
-    }
-  ]);
 
   const statusOptions = [
     { label: t("remittance.all"), value: "All" },
-    { label: t("remittance.draft"), value: "Draft" },
-    { label: t("remittance.pending"), value: "Pending" },
-    { label: t("remittance.processing"), value: "Processing" },
-    { label: t("remittance.completed"), value: "Completed" }
+    ...Object.entries(statusLabels).map(([code, label]) => ({ label, value: code }))
   ];
 
-  const insurerOptions = [
-    { label: "All Insurers", value: null },
-    { label: "ABC Insurance Co.", value: "INS001" },
-    { label: "XYZ Life Insurance", value: "INS002" },
-    { label: "Global Health Insurance", value: "INS003" },
-    { label: "Premier Auto Insurance", value: "INS004" }
-  ];
+  const insurerOptions = [{ label: "All Insurers", value: null }, ...insurers];
 
   const items = [
     { label: t("remittance.finance"), url: "#" },
@@ -118,138 +57,52 @@ const RemittanceTracking = () => {
 
   const home = { icon: <SvgDot />, url: "#" };
 
-  // Initialize data on component mount
   useEffect(() => {
-    loadInitialData();
+    loadSettings().then((s) => setStatusLabels(s["remittance.status_labels"] || {})).catch((e) => showError(toast, e));
+    loadInsurerOptions().then(setInsurers).catch((e) => showError(toast, e));
+    loadRemittances();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Apply filters when search criteria change
-  useEffect(() => {
-    applyFilters();
-  }, [search, status, dateRange, insurerCode, remittances]);
+  const calculateDashboard = (data) => {
+    const today = isoDate(new Date());
+    setDashboardData({
+      totalCount: data.length,
+      pendingAmount: data.filter(r => r.statusCode === 'for-approval').reduce((sum, r) => sum + Number(r.netAmount || 0), 0),
+      completedToday: data.filter(r => r.statusCode === 'settled' && isoDate(r.settledAt) === today).length,
+      requiresAction: data.filter(r => ['draft', 'for-approval'].includes(r.statusCode)).length
+    });
+  };
 
-  const loadInitialData = async () => {
+  const loadRemittances = async (filters = {}) => {
     setLoading(true);
     try {
-      // Simulate loading additional remittances
-      const additionalData = await mockRemittanceService.searchRemittances({});
-      const combinedData = [...remittances, ...additionalData];
-      setRemittances(combinedData);
-      calculateDashboard(combinedData);
-      toast.current.show({
-        severity: 'success',
-        summary: 'Data Loaded',
-        detail: 'Remittance data loaded successfully',
-        life: 3000
-      });
+      const res = await remittanceService.listRemittances({ perPage: 500, ...filters });
+      setRemittances(res.data || []);
+      calculateDashboard(res.data || []);
+      return res.data || [];
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load remittance data',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to load remittance data');
+      return [];
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateDashboard = (data) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const pending = data.filter(r => r.status === 'Pending');
-    const completedToday = data.filter(r => {
-      if (r.status !== 'Completed') return false;
-      const remDate = new Date(r.remittanceDate);
-      remDate.setHours(0, 0, 0, 0);
-      return remDate.getTime() === today.getTime();
-    });
-    const requiresAction = data.filter(r => ['Pending', 'Draft'].includes(r.status));
-
-    setDashboardData({
-      totalCount: data.length,
-      pendingAmount: pending.reduce((sum, r) => sum + r.netAmount, 0),
-      completedToday: completedToday.length,
-      requiresAction: requiresAction.length
-    });
-  };
-
-  const applyFilters = () => {
-    let filtered = [...remittances];
-
-    // Filter by search term
-    if (search) {
-      filtered = filtered.filter(r =>
-        r.remittanceNo.toLowerCase().includes(search.toLowerCase()) ||
-        r.insurerName.toLowerCase().includes(search.toLowerCase())
-      );
-    }
-
-    // Filter by status
-    if (status !== 'All') {
-      filtered = filtered.filter(r => r.status === status);
-    }
-
-    // Filter by insurer
-    if (insurerCode) {
-      filtered = filtered.filter(r => r.insurerCode === insurerCode);
-    }
-
-    // Filter by date range
-    if (dateRange[0] && dateRange[1]) {
-      filtered = filtered.filter(r => {
-        const remDate = new Date(r.remittanceDate);
-        return remDate >= dateRange[0] && remDate <= dateRange[1];
-      });
-    }
-
-    setFilteredRemittances(filtered);
-    calculateDashboard(filtered);
+  const currentFilters = (overrides = {}) => {
+    const f = { search, status, insurerCode, dateRange, ...overrides };
+    return {
+      search: f.search || undefined,
+      status: f.status !== 'All' ? f.status : undefined,
+      insurer: f.insurerCode || undefined,
+      from: isoDate(f.dateRange?.[0]),
+      to: isoDate(f.dateRange?.[1])
+    };
   };
 
   const handleSearch = async () => {
-    setLoading(true);
-    try {
-      // Simulate search with filters
-      const results = await mockRemittanceService.searchRemittances({
-        search,
-        status: status !== 'All' ? status : undefined,
-        insurerCode,
-        dateRange
-      });
-
-      // Merge with existing data (avoiding duplicates)
-      const existingIds = remittances.map(r => r.id);
-      const newData = results.filter(r => !existingIds.includes(r.id));
-
-      if (newData.length > 0) {
-        const combinedData = [...remittances, ...newData];
-        setRemittances(combinedData);
-        toast.current.show({
-          severity: 'info',
-          summary: 'Search Complete',
-          detail: `Found ${newData.length} new remittances`,
-          life: 3000
-        });
-      } else {
-        toast.current.show({
-          severity: 'info',
-          summary: 'Search Complete',
-          detail: 'No new remittances found',
-          life: 3000
-        });
-      }
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Search Failed',
-        detail: error.message,
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
-    }
+    // the list itself shows the result: no pop-up
+    await loadRemittances(currentFilters());
   };
 
   const handleClear = () => {
@@ -257,55 +110,33 @@ const RemittanceTracking = () => {
     setStatus("All");
     setDateRange([null, null]);
     setInsurerCode(null);
-    toast.current.show({
-      severity: 'info',
-      summary: 'Filters Cleared',
-      detail: 'All filters have been reset',
-      life: 2000
-    });
+    loadRemittances();
+  };
+
+  const handleStatusCard = (code) => {
+    setStatus(code);
+    loadRemittances(currentFilters({ status: code }));
   };
 
   const handleView = async (rowData) => {
     setSelectedRemittance(rowData);
     setLoading(true);
     try {
-      const details = await mockRemittanceService.getRemittanceDetails(rowData.id);
+      const details = await remittanceService.getRemittance(rowData.id);
       setRemittanceDetails(details);
       setDetailsVisible(true);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load remittance details',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to load remittance details');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleEdit = (rowData) => {
-    confirmDialog({
-      message: `Are you sure you want to edit remittance ${rowData.remittanceNo}?`,
-      header: 'Confirm Edit',
-      icon: 'pi pi-pencil',
-      accept: () => {
-        toast.current.show({
-          severity: 'info',
-          summary: 'Edit Mode',
-          detail: `Editing ${rowData.remittanceNo}`,
-          life: 3000
-        });
-        // In real app, would navigate to edit form
-      }
-    });
   };
 
   const handleProcess = async (rowData) => {
     confirmDialog({
       message: (
         <div>
-          <p>Process remittance {rowData.remittanceNo}?</p>
+          <p>Submit remittance {rowData.remittanceNo} for approval?</p>
           <p><strong>Amount: {formatCurrency(rowData.netAmount)}</strong></p>
         </div>
       ),
@@ -314,41 +145,11 @@ const RemittanceTracking = () => {
       accept: async () => {
         setLoading(true);
         try {
-          const result = await mockRemittanceService.processRemittances([rowData], {});
-
-          // Update status in local state
-          const updatedRemittances = remittances.map(r =>
-            r.id === rowData.id ? { ...r, status: 'Processing' } : r
-          );
-          setRemittances(updatedRemittances);
-
-          toast.current.show({
-            severity: 'success',
-            summary: 'Processing Started',
-            detail: `${rowData.remittanceNo} is being processed`,
-            life: 3000
-          });
-
-          // Simulate status update after delay
-          setTimeout(() => {
-            const finalRemittances = updatedRemittances.map(r =>
-              r.id === rowData.id ? { ...r, status: 'Completed' } : r
-            );
-            setRemittances(finalRemittances);
-            toast.current.show({
-              severity: 'success',
-              summary: 'Processing Complete',
-              detail: `${rowData.remittanceNo} has been processed successfully`,
-              life: 3000
-            });
-          }, 3000);
+          const result = await remittanceService.processRemittances([rowData.id]);
+          showSuccess(toast, `${rowData.remittanceNo} submitted for approval (batch ${result.batchId})`, 'Processing Started');
+          await loadRemittances(currentFilters());
         } catch (error) {
-          toast.current.show({
-            severity: 'error',
-            summary: 'Processing Failed',
-            detail: error.message,
-            life: 3000
-          });
+          showError(toast, error, 'Processing Failed');
         } finally {
           setLoading(false);
         }
@@ -357,54 +158,39 @@ const RemittanceTracking = () => {
   };
 
   const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'Completed': return 'success';
-        case 'Processing': return 'info';
-        case 'Pending': return 'warning';
-        case 'Draft': return 'secondary';
-        default: return null;
-      }
-    };
-
-    return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
+    return <Tag value={rowData.status} severity={statusSeverity(rowData.statusCode)} />;
   };
 
   const dateBodyTemplate = (rowData) => {
-    return rowData.remittanceDate.toLocaleDateString();
+    return formatDate(rowData.remittanceDate);
   };
 
   const amountBodyTemplate = (rowData, field) => {
     return formatCurrency(rowData[field]);
   };
 
-  const handlePrint = (rowData) => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Print Preview',
-      detail: `Preparing ${rowData.remittanceNo} for printing...`,
-      life: 3000
-    });
+  const handlePrint = async (rowData) => {
+    await handleView(rowData);
+    setTimeout(() => window.print(), 300);
   };
 
   const handleExport = () => {
-    confirmDialog({
-      message: 'Export remittance data to Excel?',
-      header: 'Export Data',
-      icon: 'pi pi-file-excel',
-      accept: () => {
-        toast.current.show({
-          severity: 'success',
-          summary: 'Export Started',
-          detail: 'Remittance data exported successfully',
-          life: 3000
-        });
-      }
-    });
+    downloadCsv(`remittances_${isoDate(new Date())}.csv`, remittances, [
+      { field: 'remittanceNo', header: 'Remittance No' },
+      { field: 'remittanceDate', header: 'Date' },
+      { field: 'insurerCode', header: 'Insurer Code' },
+      { field: 'insurerName', header: 'Insurer Name' },
+      { field: 'policyCount', header: 'Policies' },
+      { field: 'grossAmount', header: 'Gross Amount' },
+      { field: 'commission', header: 'Commission' },
+      { field: 'netAmount', header: 'Net Amount' },
+      { field: 'status', header: 'Status' }
+    ]);
+    showSuccess(toast, `${remittances.length} remittances exported`, 'Export Complete');
   };
 
   const handleRefresh = async () => {
-    await loadInitialData();
+    await loadRemittances(currentFilters());
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -414,29 +200,21 @@ const RemittanceTracking = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleView(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
-        {rowData.status === 'Draft' && (
-          <Button
-            icon="pi pi-pencil"
-            className="p-button-text"
-            onClick={() => handleEdit(rowData)}
-            tooltip="Edit"
-          />
-        )}
-        {rowData.status === 'Pending' && (
+        {rowData.statusCode === 'draft' && (
           <Button
             icon="pi pi-play"
             className="p-button-text"
             onClick={() => handleProcess(rowData)}
-            tooltip="Process"
+            tooltip="Process" aria-label="Process"
           />
         )}
         <Button
           icon="pi pi-print"
           className="p-button-text"
           onClick={() => handlePrint(rowData)}
-          tooltip="Print"
+          tooltip="Print" aria-label="Print"
         />
       </div>
     );
@@ -468,7 +246,7 @@ const RemittanceTracking = () => {
           setDetailsVisible(false);
           handleProcess(selectedRemittance);
         }}
-        disabled={selectedRemittance?.status !== 'Pending'}
+        disabled={selectedRemittance?.statusCode !== 'draft'}
       />
     </div>
   );
@@ -511,7 +289,7 @@ const RemittanceTracking = () => {
                   value={dateRange}
                   onChange={(e) => setDateRange(e.value)}
                   selectionMode="range"
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   placeholder="Select date range"
                 />
               </div>
@@ -552,15 +330,11 @@ const RemittanceTracking = () => {
                   </div>
                   <div className="detail-item">
                     <label>Status:</label>
-                    <Tag value={selectedRemittance?.status} severity={
-                      selectedRemittance?.status === 'Completed' ? 'success' :
-                      selectedRemittance?.status === 'Processing' ? 'info' :
-                      selectedRemittance?.status === 'Pending' ? 'warning' : 'secondary'
-                    } />
+                    <Tag value={remittanceDetails.status} severity={statusSeverity(remittanceDetails.statusCode)} />
                   </div>
                   <div className="detail-item">
                     <label>Created Date:</label>
-                    <span>{new Date(remittanceDetails.createdDate).toLocaleDateString()}</span>
+                    <span>{formatDate(remittanceDetails.createdDate)}</span>
                   </div>
                   <div className="detail-item">
                     <label>Created By:</label>
@@ -611,7 +385,7 @@ const RemittanceTracking = () => {
                     <div className="timeline-content">
                       <div className="timeline-header">
                         <strong>{item.action}</strong>
-                        <small>{new Date(item.at).toLocaleString()}</small>
+                        <small>{formatDateTime(item.at)}</small>
                       </div>
                       <div className="timeline-details">
                         <p>By: {item.by}</p>
@@ -658,7 +432,7 @@ const RemittanceTracking = () => {
             </div>
           </Card>
 
-          <Card className="dashboard-card clickable" onClick={() => setStatus('Pending')}>
+          <Card className="dashboard-card clickable" onClick={() => handleStatusCard('for-approval')}>
             <div className="card-content">
               <i className="pi pi-exclamation-triangle card-icon red"></i>
               <div className="card-info">
@@ -678,22 +452,22 @@ const RemittanceTracking = () => {
                   icon="pi pi-refresh"
                   className="p-button-text"
                   onClick={handleRefresh}
-                  tooltip="Refresh"
+                  tooltip="Refresh" aria-label="Refresh"
                 />
                 <Button
                   icon="pi pi-file-excel"
                   className="p-button-text"
                   onClick={handleExport}
-                  tooltip="Export to Excel"
+                  tooltip="Export to Excel" aria-label="Export to Excel"
                 />
               </div>
             </div>
             <DataTable
-              value={filteredRemittances.length > 0 ? filteredRemittances : remittances}
+              value={remittances}
               className="remittance-table"
               stripedRows
               paginator
-              rows={10}
+              rows={20}
               loading={loading}
               emptyMessage="No remittances found"
             >

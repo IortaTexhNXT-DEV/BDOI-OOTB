@@ -1,0 +1,863 @@
+@import "../../../Color.scss";
+
+.coverage__container {
+  .p-card {
+    background: $card-background;
+    color: #111927;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    background-color: $card-background !important;
+    filter: drop-shadow(0px 0px 20px rgba(0, 0, 0, 0.08)) !important;
+    margin-top: 10px;
+    .p-card-body {
+      padding: 24px 16px;
+    }
+  }
+  .coverage__container__titles {
+    font-size: 34px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+    line-height: 51px;
+    color: #111927;
+  }
+  .coverage__container__back__btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: max-content;
+    .coverage__container__back__btn__title {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .coverage__details__card__container {
+    .coverage__details__card__container__title {
+      font-size: 34px;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 51px;
+      color: #111927 !important;
+      padding: 0px 10px !important;
+    }
+    .coverage__details__card__container__sub__title {
+      font-size: 24px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 36px;
+      color: #111927;
+      padding: 0px 10px !important;
+    }
+  }
+  .calculation__btn__container {
+    .p-button {
+      color: #0072d8;
+      background: $card-background;
+      border: 1px solid #0072d8;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+    }
+    .p-button-label {
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #0072d8;
+    }
+  }
+  .back__next__btn__container {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 24px;
+  }
+  .back__btn__container {
+    .p-button {
+      color: #111927;
+      background: $card-background;
+      border: 1px solid #ffffff;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400 !important;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #111927;
+    }
+  }
+  .next__btn__container {
+    .p-button {
+      color: #ffffff;
+      background: #0072d8;
+      border: 1px solid #0072d8;
+      padding: 8px 16px 8px 16px;
+      font-size: 1rem;
+      transition: background-color 0.2s, color 0.2s, border-color 0.2s,
+        box-shadow 0.2s;
+      border-radius: 6px;
+      font-size: 16px;
+      font-weight: 400;
+      font-family: "Nunito", Arial, sans-serif;
+      line-height: 24px;
+      color: #ffffff;
+    }
+  }
+
+  .total-gross-premium-field {
+    .p-inputtext {
+      background-color: #e8f4f8 !important;
+      font-weight: 600 !important;
+      font-size: 16px !important;
+      color: #1976d2 !important;
+      border: 2px solid #1976d2 !important;
+    }
+  }
+
+  .premium-summary-card {
+    background: $main-background;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+
+    .premium-summary-title {
+      font-size: 18px;
+      font-weight: 600;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #2c3e50;
+      margin-bottom: 16px;
+      border-bottom: 2px solid #0072d8;
+      padding-bottom: 8px;
+    }
+
+    .premium-summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #e9ecef;
+
+      span {
+        font-size: 14px;
+        font-family: "Nunito", Arial, sans-serif;
+        color: #495057;
+      }
+
+      .premium-value {
+        font-weight: 500;
+        color: #212529;
+
+        &.negative {
+          color: var(--color-danger);
+        }
+      }
+
+      &.total {
+        border-bottom: none;
+        border-top: 2px solid #0072d8;
+        margin-top: 8px;
+        padding-top: 16px;
+
+        span {
+          font-size: 18px;
+          font-weight: 700;
+          color: #0072d8;
+        }
+      }
+    }
+  }
+
+  // Product Recommendation Styles
+  .product__recommendation__loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 160px 0;
+    animation: fadeIn 0.3s ease-in;
+
+    &__spinner {
+      position: relative;
+      width: 64px;
+      height: 64px;
+
+      &__outer {
+        width: 64px;
+        height: 64px;
+        border: 4px solid #f1f5f9;
+        border-radius: 50%;
+      }
+
+      &__inner {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 64px;
+        height: 64px;
+        border: 4px solid #0072d8;
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+    }
+
+    &__text {
+      color: #0072d8;
+      font-weight: 700;
+      font-size: 20px;
+      margin-top: 32px;
+      font-family: "Nunito", Arial, sans-serif;
+      letter-spacing: -0.02em;
+    }
+  }
+
+  .product__recommendation__wrapper {
+    padding-bottom: 96px;
+    animation: fadeIn 0.3s ease-in;
+  }
+
+  .product__recommendation__header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid #f1f5f9;
+    gap: 24px;
+
+    @media (min-width: 768px) {
+      flex-direction: row;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    &__left {
+      flex: 1;
+    }
+
+    &__right {
+      display: none;
+
+      @media (min-width: 1024px) {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+
+  .product__recommendation__badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+
+    span {
+      background: rgba(0, 114, 216, 0.1);
+      color: #0072d8;
+      font-size: 9px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      padding: 2px 8px;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+  }
+
+  .product__recommendation__title {
+    font-size: 30px;
+    font-weight: 900;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #1e293b;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+
+    @media (min-width: 768px) {
+      font-size: 36px;
+    }
+  }
+
+  .product__recommendation__subtitle {
+    font-size: 13px;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #64748b;
+    margin-top: 4px;
+
+    &__highlight {
+      color: #0072d8;
+      font-weight: 700;
+    }
+  }
+
+  .product__recommendation__verified {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: $card-background;
+    border: 1px solid #f1f5f9;
+    padding: 12px 20px;
+    border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    &__dot {
+      width: 8px;
+      height: 8px;
+      background: #10b981;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    span {
+      font-size: 9px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      text-align: center;
+      line-height: 1.2;
+    }
+  }
+
+  .product__recommendation__primary {
+    margin-bottom: 80px;
+  }
+
+  .product__recommendation__plans__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: stretch;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .product__recommendation__alternatives__header {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 48px;
+  }
+
+  .product__recommendation__alternatives__title {
+    font-size: 10px;
+    font-weight: 900;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #0072d8;
+    text-transform: uppercase;
+    letter-spacing: 0.5em;
+    flex-shrink: 0;
+  }
+
+  .product__recommendation__alternatives__divider {
+    height: 2px;
+    flex: 1;
+    background: linear-gradient(to right, rgba(0, 114, 216, 0.2), transparent);
+  }
+
+  .product__recommendation__alternatives__trigger {
+    display: flex;
+    justify-content: center;
+    padding: 40px 0;
+  }
+
+  .product__recommendation__alternatives__button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s;
+
+    &:hover {
+      transform: scale(1.05);
+    }
+
+    span {
+      font-size: 12px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.4em;
+      color: #94a3b8;
+      transition: color 0.2s;
+    }
+
+    &:hover span {
+      color: #0072d8;
+    }
+  }
+
+  .product__recommendation__alternatives__icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    border: 2px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #0072d8;
+    transition: border-color 0.2s;
+  }
+
+  .product__recommendation__alternatives__button:hover
+    .product__recommendation__alternatives__icon {
+    border-color: #0072d8;
+  }
+
+  .product__recommendation__alternatives__arrow {
+    width: 24px;
+    height: 24px;
+    animation: bounce 2s infinite;
+  }
+
+  .product__recommendation__alternatives__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 24px;
+    animation: slideUp 0.3s ease-out;
+
+    @media (min-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (min-width: 1024px) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .product__recommendation__plan__card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: $card-background;
+    border: 2px solid #f1f5f9;
+    border-radius: 32px;
+    padding: 32px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+    &:hover {
+      border-color: rgba(0, 114, 216, 0.4);
+    }
+
+    &--primary {
+      border-radius: 40px;
+      padding: 32px;
+      box-shadow: 0 20px 25px -5px rgba(0, 114, 216, 0.05),
+        0 10px 10px -5px rgba(0, 114, 216, 0.02);
+    }
+
+    &--active {
+      border-color: #0072d8;
+      transform: scale(1.02);
+      box-shadow: 0 0 0 4px rgba(0, 114, 216, 0.3),
+        0 20px 25px -5px rgba(0, 114, 216, 0.1),
+        0 10px 10px -5px rgba(0, 114, 216, 0.04);
+    }
+  }
+
+  .product__recommendation__plan__badge {
+    position: absolute;
+    top: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    animation: fadeIn 0.3s ease-in;
+
+    &__content {
+      background: #0072d8;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 12px;
+      font-size: 9px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      white-space: nowrap;
+      box-shadow: 0 10px 15px -3px rgba(0, 114, 216, 0.3);
+    }
+
+    &__arrow {
+      width: 0;
+      height: 0;
+      border-left: 8px solid transparent;
+      border-right: 8px solid transparent;
+      border-top: 8px solid #0072d8;
+      margin: 0 auto;
+      opacity: 0.5;
+    }
+  }
+
+  .product__recommendation__plan__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .product__recommendation__plan__company {
+    font-size: 10px;
+    font-weight: 900;
+    font-family: "Nunito", Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #0072d8;
+  }
+
+  .product__recommendation__plan__star {
+    color: #e2e8f0;
+    transition: color 0.2s;
+    width: 20px;
+    height: 20px;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    &--active {
+      color: #fbbf24;
+    }
+  }
+
+  .product__recommendation__plan__name {
+    font-weight: 900;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #1e293b;
+    margin-bottom: 8px;
+    line-height: 1.2;
+
+    &--primary {
+      font-size: 24px;
+    }
+
+    &--secondary {
+      font-size: 20px;
+    }
+  }
+
+  .product__recommendation__plan__description {
+    font-size: 11px;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 24px;
+    font-style: italic;
+    min-height: 3rem;
+  }
+
+  .product__recommendation__plan__insights {
+    margin-bottom: 32px;
+    padding: 16px;
+    border: 1px solid #f1f5f9;
+    border-radius: 16px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #f8fafc;
+    transition: all 0.2s;
+
+    &--active {
+      background: rgba(0, 114, 216, 0.05);
+      border-color: rgba(0, 114, 216, 0.2);
+    }
+
+    &__icon {
+      width: 28px;
+      height: 28px;
+      flex-shrink: 0;
+      background: #0072d8;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      box-shadow: 0 4px 6px -1px rgba(0, 114, 216, 0.2);
+      margin-top: 2px;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+    }
+
+    &__content {
+      flex: 1;
+    }
+
+    &__label {
+      font-size: 8px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #0072d8;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 4px;
+    }
+
+    &__text {
+      font-size: 10px;
+      font-weight: 700;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #475569;
+      line-height: 1.6;
+      min-height: 5.5rem;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
+    }
+  }
+
+  .product__recommendation__plan__features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 32px;
+    flex-grow: 1;
+  }
+
+  .product__recommendation__plan__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: "Nunito", Arial, sans-serif;
+    color: #475569;
+    line-height: 1.4;
+
+    &__dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      margin-top: 6px;
+      flex-shrink: 0;
+      transition: background-color 0.2s;
+
+      &--active {
+        background: #0072d8;
+      }
+    }
+  }
+
+  .product__recommendation__plan__deductible {
+    margin-bottom: 32px;
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    background: #f8fafc;
+    transition: all 0.2s;
+
+    &--active {
+      background: rgba(0, 114, 216, 0.05);
+      border-color: rgba(0, 114, 216, 0.2);
+    }
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+
+      p {
+        font-size: 9px;
+        font-weight: 900;
+        font-family: "Nunito", Arial, sans-serif;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+      }
+
+      svg {
+        width: 16px;
+        height: 16px;
+        color: #cbd5e1;
+      }
+    }
+
+    &__amount {
+      font-size: 14px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #1e293b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .product__recommendation__plan__pricing {
+    padding-top: 24px;
+    margin-bottom: 32px;
+    border-top: 1px solid #f1f5f9;
+
+    &__label {
+      font-size: 10px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 4px;
+    }
+
+    &__amount {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    &__value {
+      font-size: 30px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #1e293b;
+      font-variant-numeric: tabular-nums;
+    }
+
+    &__currency {
+      font-size: 10px;
+      font-weight: 900;
+      font-family: "Nunito", Arial, sans-serif;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+    }
+  }
+
+  .product__recommendation__plan__button {
+    width: 100%;
+    padding: 20px;
+    border-radius: 6px;
+    font-weight: 900;
+    font-size: 11px;
+    font-family: "Nunito", Arial, sans-serif;
+    text-transform: uppercase;
+    letter-spacing: 0.4em;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 2px solid #0072d8;
+    box-shadow: 0 10px 15px -3px rgba(0, 114, 216, 0.1),
+      0 4px 6px -2px rgba(0, 114, 216, 0.05);
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &--active {
+      background: #0072d8;
+      color: white;
+      box-shadow: 0 10px 15px -3px rgba(0, 114, 216, 0.3),
+        0 4px 6px -2px rgba(0, 114, 216, 0.1);
+    }
+
+    &:not(&--active) {
+      background: $card-background;
+      color: #0072d8;
+
+      &:hover {
+        background: rgba(0, 114, 216, 0.05);
+      }
+    }
+  }
+
+  .product__recommendation__footer {
+    margin-top: 80px;
+    display: flex;
+    justify-content: center;
+  }
+
+  .product__recommendation__back__button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #94a3b8;
+    font-weight: 700;
+    font-family: "Nunito", Arial, sans-serif;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    background: #f8fafc;
+    padding: 16px 40px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+      color: #0072d8;
+      border-color: rgba(0, 114, 216, 0.2);
+    }
+  }
+
+  .product__recommendation__back__icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+// Animations
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

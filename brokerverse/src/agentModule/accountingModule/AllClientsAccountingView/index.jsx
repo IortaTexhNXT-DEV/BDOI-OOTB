@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { useNavigate } from "react-router-dom";
@@ -12,10 +12,11 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import { Accordion, AccordionTab } from "primereact/accordion";
 import { Paginator } from "primereact/paginator";
 import accountingService from "../../../services/accountingService";
+import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const EntryTypeBadge = ({ entryType, t }) => {
   const getEntryTypeConfig = (type) => {
@@ -100,18 +101,8 @@ const AmountCell = ({ amount, debitCredit }) => {
   );
 };
 
-const DateCell = ({ dateString }) => {
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  return formatDate(dateString);
-};
+// Dates in the configured display format (System Settings, general.date_format), not ISO
+const DateCell = ({ dateString }) => formatDate(dateString, { empty: "" });
 
 const AllClientsAccountingView = () => {
   const { t } = useTranslation();
@@ -194,7 +185,7 @@ const AllClientsAccountingView = () => {
         );
       }
     } catch (error) {
-      console.error("Error fetching all clients accounting:", error);
+      logger.error("Error fetching all clients accounting:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),
@@ -312,7 +303,7 @@ const AllClientsAccountingView = () => {
         life: 3000,
       });
     } catch (error) {
-      console.error("Error exporting data:", error);
+      logger.error("Error exporting data:", error);
       toast.current?.show({
         severity: "error",
         summary: "Export Failed",
@@ -353,9 +344,6 @@ const AllClientsAccountingView = () => {
         <div className="header-content">
           <div>
             <h1>{t("accounting.allClientsTitle")}</h1>
-            <p className="subtitle">
-              {t("accounting.allClientsSubtitle")}
-            </p>
           </div>
           <Button
             label={t("accounting.exportCsv")}
@@ -446,7 +434,7 @@ const AllClientsAccountingView = () => {
                   setStartDate(e.value);
                   setPagination({ ...pagination, page: 1 });
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 className="w-full"
               />
@@ -459,7 +447,7 @@ const AllClientsAccountingView = () => {
                   setEndDate(e.value);
                   setPagination({ ...pagination, page: 1 });
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
                 className="w-full"
               />
@@ -670,7 +658,7 @@ const AllClientsAccountingView = () => {
               });
             }}
             template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            rowsPerPageOptions={[10, 20, 50, 100]}
+            rowsPerPageOptions={[20, 50, 100]}
             onRowsChange={(e) => {
               setPagination({
                 ...pagination,

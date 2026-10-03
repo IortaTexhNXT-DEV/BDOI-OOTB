@@ -2,19 +2,16 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../components/NavBar";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { Button } from "primereact/button";
+import { Message } from "primereact/message";
 import SvgDot from "../../assets/icons/SvgDot";
-import SvgFilters from "../../assets/icons/SvgFilters";
 import SvgAdd from "../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import Productdata from "./mock";
-import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgIconeye from "../../assets/icons/SvgIconeye";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
@@ -22,21 +19,21 @@ import DropDowns from "../../components/DropDowns";
 import { useDispatch, useSelector } from "react-redux";
 import LabelWrapper from "../../components/LabelWrapper";
 import { Calendar } from "primereact/calendar";
-import { useFormik } from "formik";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import {
-  getPaymentVocherListBySearchMiddleware,
   paymentVocherMiddleware,
   bulkPrintDisbursementsMiddleware,
   filterPaymentVoucherMiddleware,
 } from "./store/paymentVocherMiddleware";
 import clientService from "../../services/clientService";
 import BulkUploadModal from "./BulkUploadModal";
+import { PAGE_SIZE, PAGE_SIZES } from "../../hooks/useServerList";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
+import logger from "../../utility/logger";
 
 const Index = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [code, setCode] = useState("");
   const [codeTo, setCodeTo] = useState("");
@@ -53,19 +50,19 @@ const Index = () => {
   const [dateTo, setDateTo] = useState(new Date());
   const [clientsData, setClientsData] = useState([]);
   const [clientsLoading, setClientsLoading] = useState(false);
-  const [visible, setVisible] = useState(false);
   const [visibleBulkUploadPopup, setVisibleBulkUploadPopup] = useState(false);
   const toast = useRef(null);
 
   const dispatch = useDispatch();
   const {
     paymentVocherList,
-    paymentVocherSearchList,
     paymentVocherFilterList,
     pagination,
     bulkPrintLoading,
+    loading,
   } = useSelector(({ paymentVoucherReducers }) => {
     return {
+      loading: paymentVoucherReducers?.loading,
       paymentVocherList: paymentVoucherReducers?.paymentVocherList,
       paymentVocherSearchList: paymentVoucherReducers?.paymentVocherSearchList,
       paymentVocherFilterList: paymentVoucherReducers?.paymentVocherFilterList,
@@ -82,6 +79,16 @@ const Index = () => {
       payload: disbursementId,
     });
 
+    // A voucher still being prepared (agent payout lines, or an insurer voucher raised by a settlement)
+    // opens its invoice list so the cheque / payout can be raised and approved
+    const status = String(columnData?.status || "").toLowerCase();
+    const inPreparation =
+      ["draft", "for-approval"].includes(status) &&
+      (columnData?.payeeType === "Agent/Referrer" || columnData?.referrerId || columnData?.payeeType === "Insurer");
+    if (inPreparation) {
+      navigate(`/accounts/paymentvoucher/invoicelist/${disbursementId}`);
+      return;
+    }
     navigate(`/accounts/paymentvoucher/detailview/${disbursementId}`);
   };
 
@@ -142,14 +149,10 @@ const Index = () => {
       createdAtTo: dateTo.toISOString().split("T")[0], // Format as YYYY-MM-DD
     };
 
-    console.log("Disbursement bulk print filters:", filters);
-
     try {
       const result = await dispatch(
         bulkPrintDisbursementsMiddleware(filters)
       ).unwrap();
-
-      console.log("Bulk print result:", result);
 
       if (result.success && result.data.url) {
         toast.current?.show({
@@ -209,7 +212,6 @@ const Index = () => {
         setDateFrom(yesterday);
         setDateTo(new Date());
       } else {
-        console.log("Bulk print failed - no URL in result:", result);
         toast.current?.show({
           severity: "error",
           summary: t("common.error"),
@@ -220,7 +222,7 @@ const Index = () => {
         });
       }
     } catch (error) {
-      console.error("Bulk print error:", error);
+      logger.error("Bulk print error:", error);
 
       // Extract error information from various error structures
       let errorPayload = null;
@@ -311,18 +313,14 @@ const Index = () => {
     { name: "CASH002", code: "CASH002" },
     { name: "CASH003", code: "CASH003" },
   ];
-  const initialValue = {
-    receiptDate: new Date(),
-  };
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -345,8 +343,7 @@ const Index = () => {
   };
 
   const headerStyle = {
-    width: "19%",
-    fontSize: 16,
+    fontSize: 14,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
     padding: 6,
@@ -365,8 +362,13 @@ const Index = () => {
   const home = { label: t("paymentVoucher.accounts") };
 
   const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
+  const location = useLocation();
+  // the voucher just approved on the payment step: confirmed here and highlighted in the list
+  const [recorded, setRecorded] = useState(location.state?.recorded || null);
+  const dismissRecorded = () => {
+    setRecorded(null);
+    navigate(location.pathname, { replace: true, state: null });
+  };
   const [globalFilter, setGlobalFilter] = useState();
   const [search, setSearch] = useState("");
   const cities = [
@@ -381,7 +383,7 @@ const Index = () => {
     dispatch({ type: "paymentVoucher/clearData" });
 
     // Dispatch the middleware
-    dispatch(paymentVocherMiddleware({ page: 1, pageSize: 10 }));
+    dispatch(paymentVocherMiddleware({ page: 1, pageSize: PAGE_SIZE }));
   }, [dispatch]);
 
   // Fetch clients data from API for bulk print modal
@@ -393,10 +395,10 @@ const Index = () => {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }
@@ -413,7 +415,7 @@ const Index = () => {
             field: globalFilter,
             value: search,
             page: 1,
-            pageSize: 10,
+            pageSize: PAGE_SIZE,
           })
         );
       }
@@ -433,7 +435,7 @@ const Index = () => {
 
   const handleBulkUploadSuccess = () => {
     // Refresh the disbursements list after successful upload
-    dispatch(paymentVocherMiddleware({ page: 1, pageSize: 10 }));
+    dispatch(paymentVocherMiddleware({ page: 1, pageSize: PAGE_SIZE }));
   };
 
   return (
@@ -471,10 +473,10 @@ const Index = () => {
             </div>
           </div>
           <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
+            <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
               <SvgAdd />
               <p className="addtext">{t("paymentVoucher.create")}</p>
-            </div>
+            </button>
           </div>
         </div>
         <div className="mobile-header-actions">
@@ -500,10 +502,10 @@ const Index = () => {
             </div>
           </div>
           <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
+            <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
               <SvgAdd />
               <p className="addtext">{t("paymentVoucher.create")}</p>
-            </div>
+            </button>
           </div>
         </div>
       </div>
@@ -511,7 +513,6 @@ const Index = () => {
       <Card
         className="mt-3"
 
-        //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 
@@ -530,7 +531,6 @@ const Index = () => {
           </div>
           {/* </div> */}
           <div className="col-12 md:col-6 lg:col-2">
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" /> */}
 
             <Dropdown
               value={globalFilter}
@@ -543,15 +543,26 @@ const Index = () => {
               dropdownIcon={<SvgDropdownicon />}
             />
 
-            {/* <Button
-              label="Search by"
-              outlined
-              icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
           </div>
         </div>
+        {recorded && (
+          <Message
+            severity="success"
+            className="w-full justify-content-start mb-3"
+            content={
+              <div className="voucher-recorded">
+                <div>
+                  <strong>{t(recorded.printed ? "paymentVoucher.recordedPrintedTitle" : "paymentVoucher.recordedTitle", { voucher: recorded.voucherNumber || "" })}</strong>
+                  {recorded.payee && <span className="block">{t("paymentVoucher.recordedPayee", { payee: recorded.payee })}</span>}
+                </div>
+                <div className="voucher-recorded__actions">
+                  <Button type="button" size="small" outlined icon="pi pi-plus" label={t("paymentVoucher.recordAnother")} onClick={handlePolicy} />
+                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("paymentVoucher.dismiss")} onClick={dismissRecorded} tooltip={t("paymentVoucher.dismiss")} tooltipOptions={{ position: "top" }} />
+                </div>
+              </div>
+            }
+          />
+        )}
         <div className="headlist_lable">{t("paymentVoucher.disbursementHistory")}</div>
 
         {/* </div> */}
@@ -565,14 +576,22 @@ const Index = () => {
                   : paymentVocherList
               }
               tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
+              rowClassName={(row) =>
+                recorded && ((recorded.disbursementId && (row.id || row.disbursementId) === recorded.disbursementId) || (recorded.voucherNumber && row.VoucherNumber === recorded.voucherNumber))
+                  ? "voucher-row--recorded"
+                  : ""
+              }
+              // paged by the server: the table shows the page it was given
+              lazy
               paginator
-              rows={pagination?.pageSize || 10}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              totalRecords={pagination?.totalRecords || 0}
+              first={((pagination?.currentPage || pagination?.page || 1) - 1) * (pagination?.pageSize || PAGE_SIZE)}
+              rows={pagination?.pageSize || PAGE_SIZE}
+              rowsPerPageOptions={PAGE_SIZES}
+              totalRecords={pagination?.totalRecords ?? pagination?.total ?? 0}
+              loading={loading}
               currentPageReportTemplate="{first} - {last} of {totalRecords}"
               paginatorTemplate={template2}
               scrollable={true}
-              scrollHeight="40vh"
               onPage={(e) => {
                 const newPage = e.page + 1; // PrimeReact uses 0-based indexing
                 const newPageSize = e.rows;
@@ -618,7 +637,7 @@ const Index = () => {
                 className="fieldvalue_container"
                 body={(rowData) => rowData.CustomerCode?.toUpperCase()}
               ></Column>
-              <Column
+              <Column body={(row) => formatAppDate(row.VoucheDate)}
                 field="VoucheDate"
                 header={t("paymentVoucher.disbursementDate")}
                 sortable
@@ -629,14 +648,26 @@ const Index = () => {
                 field="Amount"
                 header={t("paymentVoucher.amount")}
                 headerStyle={headerStyle}
-                className="fieldvalue_container"
+                className="fieldvalue_container bv-nowrap"
+              ></Column>
+              <Column
+                field="status"
+                header={t("paymentVoucher.status")}
+                headerStyle={headerStyle}
+                className="fieldvalue_container bv-nowrap"
+                style={{ minWidth: "6rem" }}
+                body={(rowData) =>
+                  rowData.status
+                    ? String(rowData.status).replace(/(^|-)(\w)/g, (m, sep, c) => (sep ? " " : "") + c.toUpperCase())
+                    : "-"
+                }
               ></Column>
               <Column
                 body={(columnData) => (
                   <SvgIconeye onClick={() => handleView(columnData)} />
                 )}
                 header={t("paymentVoucher.action")}
-                style={{ textAlign: "center" }}
+                style={{ textAlign: "center", width: "5rem" }}
                 headerStyle={headerStyle}
                 className="fieldvalue_container"
               ></Column>
@@ -787,7 +818,7 @@ const Index = () => {
                 onChange={(e) => {
                   setDateFrom(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -801,7 +832,7 @@ const Index = () => {
                 onChange={(e) => {
                   setDateTo(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>

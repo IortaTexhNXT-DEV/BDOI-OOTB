@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -6,17 +6,17 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getReplenishListMiddleware,
   getReplenishSearchMiddleware,
   getViewReplenishMiddleware,
 } from "../store/pettyCashReplenishMiddleware";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const PettyCashReplenishTable = () => {
   const dispatch = useDispatch();
@@ -24,7 +24,7 @@ const PettyCashReplenishTable = () => {
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Pettycashcode");
 
-  const { ReplenishList, loading, ReplenishSearch } = useSelector(
+  const { ReplenishList, ReplenishSearch } = useSelector(
     ({ pettyCashReplenishReducer }) => {
       return {
         loading: pettyCashReplenishReducer?.loading,
@@ -44,7 +44,11 @@ const PettyCashReplenishTable = () => {
     { name: "Date", code: "Date" },
   ];
 
-  const isEmpty = ReplenishList.length === 0;
+  useEffect(() => {
+    dispatch(getReplenishListMiddleware());
+  }, [dispatch]);
+
+  const isEmpty = !ReplenishList?.length;
 
   const emptyTableIcon = (
     <div className="empty-table-icon">
@@ -56,10 +60,9 @@ const PettyCashReplenishTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -89,15 +92,13 @@ const PettyCashReplenishTable = () => {
         <Button
           icon={<SvgEyeIcon />}
           className="eye__btn"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
 
   const handleView = (rowData) => {
     dispatch(getViewReplenishMiddleware(rowData));
-    console.log("View clicked:", rowData);
     navigate("/accounts/pettycash/replenishtdetailview");
   };
   const headerStyle = {
@@ -110,12 +111,6 @@ const PettyCashReplenishTable = () => {
     color: "#000",
     border: "none",
   };
-  const [selectedCity, setSelectedCity] = useState(null);
-  const cities = [
-    { name: "Name", code: "NY" },
-    { name: "Edit", code: "RM" },
-    { name: "Voucher Number", code: "LDN" },
-  ];
   const headeraction = {
     justifyContent: "center",
     // textalign: center,
@@ -127,21 +122,8 @@ const PettyCashReplenishTable = () => {
     border: " none",
     display: "flex",
   };
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
 
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(
@@ -170,7 +152,6 @@ const PettyCashReplenishTable = () => {
             </span>
           </div>
           <div class="col-12 md:col-6 lg:col-2">
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" /> */}
 
             <Dropdown
               value={search}
@@ -195,9 +176,8 @@ const PettyCashReplenishTable = () => {
             scrollable={true}
             scrollHeight="40vh"
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -239,7 +219,7 @@ const PettyCashReplenishTable = () => {
               body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
               sortable
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

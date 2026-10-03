@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { Chart } from "primereact/chart";
@@ -9,21 +9,120 @@ import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Tag } from "primereact/tag";
+import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
+import { useFormatCurrency } from "../../hooks/useFormatCurrency";
+import dashboardService from "../../services/dashboardService";
+import reportsService from "../../services/reportsService";
 import "./index.scss";
+
+import { numberLocale } from "../../utility/currencyConverter";
+import { menuList } from "../../components/SideBar/list";
+import { getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
+import { formatPercent, progressValue } from "../../utility/numberFormat";
+
+const SETTINGS_PATH = "/master/configuration/system-settings";
+/**
+ * [from, today] of the calendar period the KPIs use: This Month = 1st of the month, This Quarter = 1st of the
+ * calendar quarter, This Year = 1 January (the server sends the same range in Manila time as data.period).
+ */
+const rangeFor = (period) => {
+  const to = new Date();
+  const firstMonth = period === "year" ? 0 : period === "quarter" ? Math.floor(to.getMonth() / 3) * 3 : to.getMonth();
+  return [new Date(to.getFullYear(), firstMonth, 1), to];
+};
+
+/** Quick actions of the dashboard; each is shown only when the user's roles may open its screen (same rules as the side menu). */
+const QUICK_ACTIONS = [
+  { label: "executiveDashboard.viewClaims", icon: "pi pi-file", path: "/claims/dashboard" },
+  { label: "executiveDashboard.processing", icon: "pi pi-check-square", path: "/processing/dashboard" },
+  { label: "executiveDashboard.newQuote", icon: "pi pi-plus", severity: "success", path: "/agent/createlead" },
+  { label: "executiveDashboard.reports", icon: "pi pi-chart-bar", severity: "info", path: "/reports/operationalreports/production" },
+  { label: "executiveDashboard.policiesLabel", icon: "pi pi-briefcase", path: "/agent/policy" },
+  { label: "executiveDashboard.analytics", icon: "pi pi-chart-line", severity: "warning", path: "/sales/dashboard" },
+];
+
+const CHART_COLORS = [
+  "#0066CC",
+  "#E65100",
+  "#4CAF50",
+  "#00C851",
+  "#FFA500",
+  "#9C27B0",
+  "#00BCD4",
+  "#FF5252",
+  "#607D8B",
+];
+
+const CLAIM_STATUS_COLORS = ["#00C851", "#FFA500", "#2196F3", "#FF5252", "#9C27B0", "#607D8B", "#00BCD4"];
+
+const CURRENCY_KPIS = ["totalRevenue", "newBusiness"];
+const PERCENT_KPIS = ["claimsRatio", "retentionRate", "customerSatisfaction"];
+
+const formatChange = (change) =>
+  change === undefined || change === null ? null : `${change >= 0 ? "+" : ""}${formatPercent(change)}`;
 
 const ExecutiveDashboard = () => {
   const { t } = useTranslation();
-  const currencySymbol = "₱";
+  const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
+  const [quickActions] = useState(() => {
+    const roles = getUserRoles();
+    return QUICK_ACTIONS.filter((a) => isPathAllowed(a.path, menuList, roles));
+  });
+  const toast = useRef(null);
+  // Settings opens System Settings (dashboard targets live there); only for roles that may open it
+  const [canOpenSettings] = useState(() => isPathAllowed(SETTINGS_PATH, menuList, getUserRoles()));
   const [selectedPeriod, setSelectedPeriod] = useState("month");
-  const [dateRange, setDateRange] = useState([
-    new Date(2025, 0, 1),
-    new Date(),
-  ]);
+  // export range: follows the chosen period (the KPIs cover the same rolling window) and can be changed
+  const [dateRange, setDateRange] = useState(() => rangeFor("month"));
+  const [dashboard, setDashboard] = useState(null);
+  const [claimsSummary, setClaimsSummary] = useState(null);
+
+  const showError = (error) =>
+    toast.current?.show({ severity: "error", summary: "Error", detail: error.message });
+
+  useEffect(() => {
+    setDateRange(rangeFor(selectedPeriod));
+    dashboardService
+      .getExecutive(selectedPeriod)
+      .then((data) => {
+        setDashboard(data);
+        // the period as the server computed it (business time zone)
+        if (data?.period?.from && data?.period?.to) setDateRange([toDate(data.period.from), toDate(data.period.to)]);
+      })
+      .catch(showError);
+  }, [selectedPeriod]);
+
+  useEffect(() => {
+    dashboardService.getClaims().then(setClaimsSummary).catch(showError);
+  }, []);
+
+  const handleExport = async () => {
+    const [from, to] = dateRange || [];
+    try {
+      const report = await reportsService.generateReport("production-register", {
+        ReportCriteria: "Overall",
+        FromDate: from ? toIsoDate(from) : "",
+        ToDate: to ? toIsoDate(to) : "",
+      });
+      window.open(report.downloadUrl, "_blank", "noopener");
+    } catch (error) {
+      showError(error);
+    }
+  };
+
+  const money = (value) => formatCurrency(value, { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+
+  const formatKpiValue = (key, value) => {
+    if (value === null || value === undefined) return "-";
+    if (CURRENCY_KPIS.includes(key)) return money(value);
+    if (PERCENT_KPIS.includes(key)) return formatPercent(value);
+    return Number(value).toLocaleString(numberLocale());
+  };
 
   const periodOptions = [
-    { label: t("executiveDashboard.thisWeek"), value: "week" },
     { label: t("executiveDashboard.thisMonth"), value: "month" },
     { label: t("executiveDashboard.thisQuarter"), value: "quarter" },
     { label: t("executiveDashboard.thisYear"), value: "year" },
@@ -39,298 +138,78 @@ const ExecutiveDashboard = () => {
     retentionRate: "executiveDashboard.retentionRate",
   };
 
-  // Executive KPIs
-  const executiveKPIs = {
-    totalRevenue: {
-      value: "₱45.8M",
-      change: "+12.5%",
-      trend: "up",
-      target: "₱50M",
-      achievement: 91.6,
-    },
-    activePolicies: {
-      value: "8,247",
-      change: "+8.3%",
-      trend: "up",
-      target: "10,000",
-      achievement: 82.47,
-    },
-    customerSatisfaction: {
-      value: "94.2%",
-      change: "+2.1%",
-      trend: "up",
-      target: "95%",
-      achievement: 99.16,
-    },
-    claimsRatio: {
-      value: "68.5%",
-      change: "-3.2%",
-      trend: "down",
-      target: "70%",
-      achievement: 102.14,
-    },
-    newBusiness: {
-      value: "₱12.3M",
-      change: "+18.7%",
-      trend: "up",
-      target: "₱15M",
-      achievement: 82.0,
-    },
-    retentionRate: {
-      value: "87.4%",
-      change: "+1.8%",
-      trend: "up",
-      target: "90%",
-      achievement: 97.11,
-    },
-  };
+  const executiveKPIs = Object.fromEntries(
+    Object.entries(dashboard?.executiveKPIs || {}).map(([key, kpi]) => [
+      key,
+      {
+        value: formatKpiValue(key, kpi.value),
+        change: formatChange(kpi.change),
+        trend: kpi.trend || "up",
+        target: formatKpiValue(key, kpi.target),
+        achievement: kpi.achievement ?? 0,
+      },
+    ])
+  );
 
   // Revenue by Product Line
   const revenueByProductData = {
-    labels: [
-      "Motor",
-      "Fire and Allied Perils",
-      "Industrial All Risks",
-      "Employee Benefits",
-      "Health",
-      "Property",
-      "Life",
-      "Travel",
-      "Marine",
-      "Others",
-    ],
+    labels: dashboard?.revenueByProduct?.labels || [],
     datasets: [
       {
-        label: "Revenue (₱M)",
-        data: [18.5, 10.2, 15.8, 12.3, 8.7, 6.2, 3.8, 2.9, 2.1],
-        backgroundColor: [
-          "#0066CC",
-          "#E65100",
-          "#4CAF50",
-          "#00C851",
-          "#FFA500",
-          "#9C27B0",
-          "#00BCD4",
-          "#FF5252",
-          "#607D8B",
-        ],
+        label: t("executiveDashboard.premium"),
+        data: dashboard?.revenueByProduct?.data || [],
+        backgroundColor: CHART_COLORS,
       },
     ],
   };
 
   // Monthly Performance Trend
   const monthlyTrendData = {
-    labels: [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
-    ],
+    labels: dashboard?.monthlyTrend?.labels || [],
     datasets: [
       {
         label: t("executiveDashboard.grossWrittenPremium"),
-        data: [3.8, 4.2, 4.5, 4.1, 4.8, 5.2, 5.5, 5.1, 5.8, 6.2, 6.5, 7.1],
+        data: dashboard?.monthlyTrend?.premium || [],
         borderColor: "#0066CC",
         backgroundColor: "rgba(0, 102, 204, 0.1)",
         tension: 0.4,
         fill: true,
       },
-      {
-        label: t("executiveDashboard.netPremium"),
-        data: [3.2, 3.5, 3.8, 3.4, 4.0, 4.3, 4.6, 4.2, 4.8, 5.1, 5.4, 5.9],
-        borderColor: "#00C851",
-        backgroundColor: "rgba(0, 200, 81, 0.1)",
-        tension: 0.4,
-        fill: true,
-      },
-      {
-        label: t("executiveDashboard.claimsPaid"),
-        data: [2.1, 2.3, 2.5, 2.2, 2.6, 2.8, 3.0, 2.7, 3.1, 3.3, 3.5, 3.8],
-        borderColor: "#FF5252",
-        backgroundColor: "rgba(255, 82, 82, 0.1)",
-        tension: 0.4,
-        fill: true,
-      },
     ],
   };
 
-  // Regional Performance
-  const regionalPerformance = [
-    {
-      region: "Metro Manila",
-      premium: "₱18.5M",
-      policies: 3241,
-      growth: "+15.2%",
-      marketShare: 40.4,
-    },
-    {
-      region: "Cebu",
-      premium: "₱8.3M",
-      policies: 1456,
-      growth: "+12.8%",
-      marketShare: 18.1,
-    },
-    {
-      region: "Davao",
-      premium: "₱6.7M",
-      policies: 1175,
-      growth: "+10.5%",
-      marketShare: 14.6,
-    },
-    {
-      region: "Laguna",
-      premium: "₱4.2M",
-      policies: 737,
-      growth: "+8.3%",
-      marketShare: 9.2,
-    },
-    {
-      region: "Cavite",
-      premium: "₱3.8M",
-      policies: 667,
-      growth: "+6.7%",
-      marketShare: 8.3,
-    },
-    {
-      region: "Batangas",
-      premium: "₱2.1M",
-      policies: 368,
-      growth: "+5.2%",
-      marketShare: 4.6,
-    },
-    {
-      region: "Others",
-      premium: "₱2.2M",
-      policies: 603,
-      growth: "+4.8%",
-      marketShare: 4.8,
-    },
-  ];
-
-  // Top Performing Products
-  const topProducts = [
-    {
-      product: "Motor Comprehensive",
-      premium: "₱12.8M",
-      policies: 2845,
-      claimRatio: "65%",
-      profit: "₱4.48M",
-    },
-    {
-      product: "Group Life Insurance",
-      premium: "₱9.2M",
-      policies: 342,
-      claimRatio: "28%",
-      profit: "₱6.62M",
-    },
-    {
-      product: "Health Plus",
-      premium: "₱8.5M",
-      policies: 1892,
-      claimRatio: "72%",
-      profit: "₱2.38M",
-    },
-    {
-      product: "Group Medical & HMO",
-      premium: "₱6.6M",
-      policies: 285,
-      claimRatio: "68%",
-      profit: "₱2.11M",
-    },
-    {
-      product: "Property All Risk",
-      premium: "₱6.3M",
-      policies: 456,
-      claimRatio: "45%",
-      profit: "₱3.47M",
-    },
-    {
-      product: "Group Personal Accident",
-      premium: "₱4.8M",
-      policies: 458,
-      claimRatio: "35%",
-      profit: "₱3.12M",
-    },
-  ];
-
-  // Agent Performance
-  const agentPerformance = [
-    {
-      name: "Juan Dela Cruz",
-      branch: "Makati",
-      premium: "₱3.2M",
-      policies: 145,
-      conversion: "78%",
-      rating: 4.8,
-    },
-    {
-      name: "Maria Santos",
-      branch: "Quezon City",
-      premium: "₱2.8M",
-      policies: 132,
-      conversion: "75%",
-      rating: 4.7,
-    },
-    {
-      name: "Pedro Garcia",
-      branch: "Cebu",
-      premium: "₱2.5M",
-      policies: 118,
-      conversion: "72%",
-      rating: 4.6,
-    },
-    {
-      name: "Rosa Fernandez",
-      branch: "Davao",
-      premium: "₱2.1M",
-      policies: 98,
-      conversion: "68%",
-      rating: 4.5,
-    },
-    {
-      name: "Carlos Mendoza",
-      branch: "Laguna",
-      premium: "₱1.8M",
-      policies: 87,
-      conversion: "65%",
-      rating: 4.4,
-    },
-  ];
+  const regionalPerformance = dashboard?.regionalPerformance || [];
+  const topProducts = dashboard?.topProducts || [];
+  const agentPerformance = dashboard?.agentPerformance || [];
 
   // Claims Analytics
+  const claimsByStatus = claimsSummary?.claimsByStatus || [];
   const claimsAnalytics = {
-    labels: ["Approved", "Pending", "Under Review", "Rejected"],
+    labels: claimsByStatus.map((row) => row.status),
     datasets: [
       {
-        data: [65, 20, 10, 5],
-        backgroundColor: ["#00C851", "#FFA500", "#2196F3", "#FF5252"],
+        data: claimsByStatus.map((row) => row.count),
+        backgroundColor: CLAIM_STATUS_COLORS,
       },
     ],
   };
 
-  // Customer Segmentation
+  // Premium share by product line (policies count)
   const customerSegmentData = {
-    labels: ["Retail", "Corporate", "SME", "Government"],
+    labels: dashboard?.revenueByProduct?.labels || [],
     datasets: [
       {
-        label: "Premium Contribution",
-        data: [45, 30, 20, 5],
-        backgroundColor: ["#0066CC", "#00C851", "#FFA500", "#9C27B0"],
+        label: t("executiveDashboard.policies"),
+        data: dashboard?.revenueByProduct?.policies || [],
+        backgroundColor: CHART_COLORS,
       },
     ],
   };
 
   const growthTemplate = (rowData, field) => {
     const value = rowData[field];
-    const isPositive = value.startsWith("+");
+    if (!value) return "-";
+    const isPositive = String(value).startsWith("+");
     return (
       <Tag
         value={value}
@@ -340,19 +219,10 @@ const ExecutiveDashboard = () => {
     );
   };
 
-  const ratingTemplate = (rowData) => {
-    return (
-      <div className="rating-cell">
-        <i className="pi pi-star-fill" style={{ color: "#FFD700" }}></i>
-        <span>{rowData.rating}</span>
-      </div>
-    );
-  };
-
   const marketShareTemplate = (rowData) => {
     return (
       <ProgressBar
-        value={rowData.marketShare}
+        value={progressValue(rowData.marketShare, 1)}
         showValue={true}
         style={{ height: "20px" }}
       />
@@ -361,15 +231,16 @@ const ExecutiveDashboard = () => {
 
   return (
     <div className="executive-dashboard">
+      <Toast ref={toast} />
       {/* Header */}
       <div className="dashboard-header">
         <div className="header-content">
           <div className="header-left">
             <h1>{t("executiveDashboard.title")}</h1>
-            <p>{t("executiveDashboard.subtitle")}</p>
           </div>
           <div className="header-right">
             <Calendar
+              dateFormat={calendarDateFormat()}
               value={dateRange}
               onChange={(e) => setDateRange(e.value)}
               selectionMode="range"
@@ -384,13 +255,22 @@ const ExecutiveDashboard = () => {
               label={t("executiveDashboard.exportReport")}
               icon="pi pi-download"
               severity="info"
+              onClick={handleExport}
             />
-            <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" />
+            {canOpenSettings && (
+              <Button
+                label={t("executiveDashboard.settings")}
+                icon="pi pi-cog"
+                severity="secondary"
+                onClick={() => navigate(SETTINGS_PATH)}
+              />
+            )}
           </div>
         </div>
         {/* Mobile/Tablet Actions - moved below title */}
         <div className="mobile-header-actions">
           <Calendar
+            dateFormat={calendarDateFormat()}
             value={dateRange}
             onChange={(e) => setDateRange(e.value)}
             selectionMode="range"
@@ -401,8 +281,10 @@ const ExecutiveDashboard = () => {
             options={periodOptions}
             onChange={(e) => setSelectedPeriod(e.value)}
           />
-          <Button label={t("executiveDashboard.exportReport")} icon="pi pi-download" severity="info" />
-          <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" />
+          <Button label={t("executiveDashboard.exportReport")} icon="pi pi-download" severity="info" onClick={handleExport} />
+          {canOpenSettings && (
+            <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" onClick={() => navigate(SETTINGS_PATH)} />
+          )}
         </div>
       </div>
 
@@ -415,15 +297,17 @@ const ExecutiveDashboard = () => {
                 <span className="kpi-title">
                   {t(kpiTitleKeys[key] || key)}
                 </span>
-                <Tag
-                  value={kpi.change}
-                  severity={kpi.trend === "up" ? "success" : "danger"}
-                  icon={`pi pi-arrow-${kpi.trend}`}
-                />
+                {kpi.change && (
+                  <Tag
+                    value={kpi.change}
+                    severity={kpi.trend === "up" ? "success" : "danger"}
+                    icon={`pi pi-arrow-${kpi.trend}`}
+                  />
+                )}
               </div>
-              <div className="kpi-value">{String(kpi.value).replace("₱", currencySymbol)}</div>
+              <div className="kpi-value">{kpi.value}</div>
               <div className="kpi-target">
-                <span>{t("executiveDashboard.target")}: {String(kpi.target).replace("₱", currencySymbol)}</span>
+                <span>{t("executiveDashboard.target")}: {kpi.target}</span>
                 <ProgressBar
                   value={kpi.achievement}
                   showValue={false}
@@ -432,6 +316,37 @@ const ExecutiveDashboard = () => {
               </div>
             </Card>
           ))}
+          {/* before the figures arrive the cards hold their places, so the charts below do not move */}
+          {!dashboard && [...Object.keys(kpiTitleKeys), "receivableClients", "receivableInsurers"].map((key) => (
+            <Card key={`placeholder-${key}`} className="kpi-card" aria-hidden="true">
+              <div className="kpi-header"><span className="kpi-title">{kpiTitleKeys[key] ? t(kpiTitleKeys[key]) : "\u00a0"}</span></div>
+              <div className="kpi-value">-</div>
+              <div className="kpi-target"><span>{"\u00a0"}</span></div>
+            </Card>
+          ))}
+          {dashboard?.receivables && (
+            <>
+              {/* broker-billed premium owed by clients; direct-bill policies owe nothing to us (the client pays the insurer) */}
+              <Card className="kpi-card">
+                <div className="kpi-header">
+                  <span className="kpi-title">Premium receivable (clients)</span>
+                </div>
+                <div className="kpi-value">{money(dashboard.receivables.premiumFromClients)}</div>
+                <div className="kpi-target">
+                  <span>Overdue: {money(dashboard.receivables.premiumOverdue)}</span>
+                </div>
+              </Card>
+              <Card className="kpi-card">
+                <div className="kpi-header">
+                  <span className="kpi-title">Commission receivable (insurers, direct bill)</span>
+                </div>
+                <div className="kpi-value">{money(dashboard.receivables.commissionFromInsurers)}</div>
+                <div className="kpi-target">
+                  <span>Unbilled: {money(dashboard.receivables.commissionUnbilled)} · Overdue: {money(dashboard.receivables.commissionOverdue)}</span>
+                </div>
+              </Card>
+            </>
+          )}
         </div>
       </div>
 
@@ -473,7 +388,7 @@ const ExecutiveDashboard = () => {
                     beginAtZero: true,
                     ticks: {
                       callback: function (value) {
-                        return currencySymbol + value + "M";
+                        return money(value);
                       },
                     },
                   },
@@ -512,7 +427,7 @@ const ExecutiveDashboard = () => {
                 tooltip: {
                   callbacks: {
                     label: function (context) {
-                      return context.label + ": " + currencySymbol + context.parsed + "M";
+                      return context.label + ": " + money(context.parsed);
                     },
                   },
                 },
@@ -530,7 +445,7 @@ const ExecutiveDashboard = () => {
             className="regional-table"
           >
             <Column field="region" header={t("executiveDashboard.region")} />
-            <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => String(row.premium || "").replace("₱", currencySymbol)} />
+            <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => money(row.premium)} />
             <Column field="policies" header={t("executiveDashboard.policies")} />
             <Column
               field="growth"
@@ -553,10 +468,9 @@ const ExecutiveDashboard = () => {
             className="products-table"
           >
             <Column field="product" header={t("executiveDashboard.product")} />
-            <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => String(row.premium || "").replace("₱", currencySymbol)} />
+            <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => money(row.premium)} />
             <Column field="policies" header={t("executiveDashboard.policies")} />
-            <Column field="claimRatio" header={t("executiveDashboard.claimRatio")} />
-            <Column field="profit" header={t("executiveDashboard.profit")} body={(row) => String(row.profit || "").replace("₱", currencySymbol)} />
+            <Column field="claimRatio" header={t("executiveDashboard.claimRatio")} body={(row) => formatPercent(row.claimRatio)} />
           </DataTable>
         </Card>
 
@@ -569,9 +483,9 @@ const ExecutiveDashboard = () => {
           >
             <Column field="name" header={t("executiveDashboard.agent")} />
             <Column field="branch" header={t("executiveDashboard.branch")} />
-            <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => String(row.premium || "").replace("₱", currencySymbol)} />
-            <Column field="conversion" header={t("executiveDashboard.conversion")} />
-            <Column field="rating" header={t("executiveDashboard.rating")} body={ratingTemplate} />
+            <Column field="premium" header={t("executiveDashboard.premium")} body={(row) => money(row.premium)} />
+            <Column field="conversion" header={t("executiveDashboard.conversion")} body={(row) => formatPercent(row.conversion)} />
+            <Column field="policies" header={t("executiveDashboard.policies")} />
           </DataTable>
         </Card>
 
@@ -613,7 +527,7 @@ const ExecutiveDashboard = () => {
                     beginAtZero: true,
                     ticks: {
                       callback: function (value) {
-                        return value + "%";
+                        return value;
                       },
                     },
                   },
@@ -625,46 +539,24 @@ const ExecutiveDashboard = () => {
         </div>
       </div>
 
-      {/* Quick Actions */}
-      <div className="quick-actions">
-        <Card title={t("executiveDashboard.quickActions")} className="actions-card">
-          <div className="actions-grid">
-            <Button
-              label={t("executiveDashboard.viewClaims")}
-              icon="pi pi-file"
-              onClick={() => navigate("/claims/dashboard")}
-            />
-            <Button
-              label={t("executiveDashboard.underwriting")}
-              icon="pi pi-check-square"
-              onClick={() => navigate("/underwriting/dashboard")}
-            />
-            <Button
-              label={t("executiveDashboard.newQuote")}
-              icon="pi pi-plus"
-              severity="success"
-              onClick={() => navigate("/quotes/new")}
-            />
-            <Button
-              label={t("executiveDashboard.reports")}
-              icon="pi pi-chart-bar"
-              severity="info"
-              onClick={() => navigate("/reports")}
-            />
-            <Button
-              label={t("executiveDashboard.policiesLabel")}
-              icon="pi pi-briefcase"
-              onClick={() => navigate("/policies")}
-            />
-            <Button
-              label={t("executiveDashboard.analytics")}
-              icon="pi pi-chart-line"
-              severity="warning"
-              onClick={() => navigate("/analytics")}
-            />
-          </div>
-        </Card>
-      </div>
+      {/* Quick Actions: only the screens the signed-in user's roles may open */}
+      {quickActions.length > 0 && (
+        <div className="quick-actions">
+          <Card title={t("executiveDashboard.quickActions")} className="actions-card">
+            <div className="actions-grid">
+              {quickActions.map((a) => (
+                <Button
+                  key={a.path}
+                  label={t(a.label)}
+                  icon={a.icon}
+                  severity={a.severity}
+                  onClick={() => navigate(a.path)}
+                />
+              ))}
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

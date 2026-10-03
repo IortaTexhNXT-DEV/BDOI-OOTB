@@ -20,8 +20,6 @@ class LeadService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
 
-      console.log("Creating lead with data:", leadData);
-
       const response = await fetch(`${this.baseURL}/leads`, {
         method: "POST",
         headers: {
@@ -42,14 +40,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Lead created successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Create lead error:", error);
       return {
         success: false,
         error:
@@ -94,8 +90,6 @@ class LeadService {
 
       const url = `${this.baseURL}/leads?${queryParams.toString()}`;
 
-      console.log("Fetching leads from:", url);
-
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -113,7 +107,6 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Leads fetched successfully:", data);
 
       return {
         success: true,
@@ -123,7 +116,6 @@ class LeadService {
         total: data.total || 0,
       };
     } catch (error) {
-      console.error("Get leads error:", error);
       return {
         success: false,
         error:
@@ -149,8 +141,6 @@ class LeadService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("Updating lead:", leadId, "with data:", leadData);
-
       const response = await fetch(`${this.baseURL}/leads/${leadId}`, {
         method: "PUT",
         headers: {
@@ -171,14 +161,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Lead updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update lead error:", error);
       return {
         success: false,
         error:
@@ -199,8 +187,6 @@ class LeadService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("Fetching lead by ID:", leadId);
-
       const response = await fetch(`${this.baseURL}/leads/${leadId}`, {
         method: "GET",
         headers: {
@@ -218,14 +204,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Lead fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get lead by ID error:", error);
       return {
         success: false,
         error:
@@ -251,8 +235,6 @@ class LeadService {
         queryString ? `?${queryString}` : ""
       }`;
 
-      console.log("Searching leads with:", searchParams);
-
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -270,14 +252,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Lead search completed:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Search leads error:", error);
       return {
         success: false,
         error:
@@ -297,8 +277,6 @@ class LeadService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for file upload
-
-      console.log("Uploading leads file:", file.name);
 
       const formData = new FormData();
       formData.append("file", file);
@@ -321,14 +299,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Leads bulk upload completed:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Bulk upload leads error:", error);
       return {
         success: false,
         error:
@@ -349,8 +325,6 @@ class LeadService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log("Deleting lead:", leadId);
-
       const response = await fetch(`${this.baseURL}/leads/${leadId}`, {
         method: "DELETE",
         headers: {
@@ -368,14 +342,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Lead deleted successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Delete lead error:", error);
       return {
         success: false,
         error:
@@ -407,8 +379,6 @@ class LeadService {
         queryParams.toString() ? `?${queryParams.toString()}` : ""
       }`;
 
-      console.log("Fetching lead stats from:", url);
-
       const response = await fetch(url, {
         method: "GET",
         headers: {
@@ -426,14 +396,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Lead stats fetched successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get lead stats error:", error);
       return {
         success: false,
         error:
@@ -461,8 +429,6 @@ class LeadService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      console.log("Creating Fire lead with data:", payload);
-
       const response = await fetch(`${this.baseURL}/leads`, {
         method: "POST",
         headers: {
@@ -483,14 +449,12 @@ class LeadService {
       }
 
       const data = await response.json();
-      console.log("Fire lead created successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Create Fire lead error:", error);
       return {
         success: false,
         error:
@@ -575,8 +539,6 @@ class LeadService {
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url_blob);
 
-      console.log("Lead report generated successfully:", filename);
-
       return {
         success: true,
         data: {
@@ -586,7 +548,6 @@ class LeadService {
         },
       };
     } catch (error) {
-      console.error("Generate lead report error:", error);
       return {
         success: false,
         error:

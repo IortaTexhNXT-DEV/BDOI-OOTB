@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 import "./index.scss";
 import SvgTable from "../../../../../assets/icons/SvgTable";
 import { DataTable } from "primereact/datatable";
@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { Dropdown } from "primereact/dropdown";
 
 const DisbursementDetailviewTable = () => {
-  const { AddDisbursmentTable, loading } = useSelector(
+  const { AddDisbursmentTable } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -15,7 +15,6 @@ const DisbursementDetailviewTable = () => {
       };
     }
   );
-  console.log(AddDisbursmentTable, "AddDisbursmentTable");
   const isEmpty = AddDisbursmentTable.length === 0;
   const emptyTableIcon = (
     <div className="empty-table-icon">
@@ -38,10 +37,9 @@ const DisbursementDetailviewTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -75,9 +73,8 @@ const DisbursementDetailviewTable = () => {
           scrollable={true}
           scrollHeight="40vh"
           paginator
-          rows={5}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
         >

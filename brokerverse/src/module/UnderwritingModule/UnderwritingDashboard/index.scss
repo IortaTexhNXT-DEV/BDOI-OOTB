@@ -38,6 +38,7 @@
     .header-left {
       h2 {
         margin: 0;
+        color: #fff;
         font-size: 1.5rem;
         font-weight: 600;
 
@@ -339,7 +340,8 @@
 
     .charts-row {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      // minmax(0, 1fr): a chart never widens the page
+      grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 1.5rem;
 
       @media (max-width: 1200px) {

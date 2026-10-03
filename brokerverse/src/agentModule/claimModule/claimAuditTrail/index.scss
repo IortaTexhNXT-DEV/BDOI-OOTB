@@ -358,7 +358,7 @@ $tablet-md: 1024px;
       }
 
       .audit-old-value {
-        color: #dc3545;
+        color: var(--color-danger);
         border-left: 3px solid #dc3545;
         background: #fff5f5;
 
@@ -367,7 +367,7 @@ $tablet-md: 1024px;
         }
 
         .value-item {
-          color: #dc3545;
+          color: var(--color-danger);
         }
       }
 
@@ -481,8 +481,8 @@ $tablet-md: 1024px;
   }
 }
 
-// Empty state styling
-.p-datatable .p-datatable-tbody > tr > td {
+// Empty state styling (the "no records" row only; an unscoped td rule made every table in the app italic)
+.p-datatable .p-datatable-tbody > tr.p-datatable-emptymessage > td {
   text-align: center;
   padding: 2rem;
   color: #6c757d;

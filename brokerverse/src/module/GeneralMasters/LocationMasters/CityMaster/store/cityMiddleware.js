@@ -1,92 +1,26 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
+import mastersService, { searchText } from "../../../../../services/mastersService";
+import masterThunk from "../../../common/masterThunk";
 import {
-  GET_CITY_DETAILS,
   GET_CITY_BY_ID,
-  POST_ADD_CITY,
-  PATCH_CITY_EDIT,
+  GET_CITY_DETAILS,
   GET_SERACH_CITY,
-
+  PATCH_CITY_EDIT,
+  POST_ADD_CITY,
 } from "../../../../../redux/actionTypes";
 
-export const getCityMiddleware = createAsyncThunk(
-  GET_CITY_DETAILS,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const getCityListByIdMiddleware = createAsyncThunk(
-  GET_CITY_BY_ID,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload,"getCityListByIdMiddleware");
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const postAddCityMiddleware = createAsyncThunk(
-  POST_ADD_CITY,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload,"postAddCityMiddleware");
-    const tableData = {
-      "Citycode": payload?.CityCode,
-      "CityName": payload?.CityName,
-      "State": payload?.State,
-      "Modifiedby": payload?.Modifiedby,
-      "ModifiedOn": payload?.ModifiedOn
-    }
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return tableData;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const patchCityEditMiddleware = createAsyncThunk(
-  PATCH_CITY_EDIT,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload,"patchCityEditMiddleware");
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
+const TYPE = "city";
 
+export const getCityMiddleware = masterThunk(GET_CITY_DETAILS, (params) =>
+  mastersService.list(TYPE, params));
 
-export const getSearchCityMiddleware = createAsyncThunk(
-  GET_SERACH_CITY,
-  async (payload, { rejectWithValue, getState }) => {
-    const { textSearch } = payload;
-    const { cityReducers } = getState();
+export const getCityListByIdMiddleware = masterThunk(GET_CITY_BY_ID, (row) =>
+  mastersService.get(TYPE, row?.id ?? row));
 
-    const { cityTableList } = cityReducers;
-    console.log(cityTableList, "1234")
+export const postAddCityMiddleware = masterThunk(POST_ADD_CITY, (values) =>
+  mastersService.create(TYPE, values));
 
-    try {
-      if (textSearch.trim() !== "") {
-        const searchResults = cityTableList.filter(item => {
-          return item.CityName.toLowerCase().includes(textSearch.toLowerCase())
-        });
-        console.log(searchResults, "searchResults")
-        return searchResults;
-      } else {
-        return cityTableList;
-      }
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  },
-);
+export const patchCityEditMiddleware = masterThunk(PATCH_CITY_EDIT, (values) =>
+  mastersService.update(TYPE, values.id, values));
 
-
+export const getSearchCityMiddleware = masterThunk(GET_SERACH_CITY, (query) =>
+  mastersService.list(TYPE, { search: searchText(query) }));

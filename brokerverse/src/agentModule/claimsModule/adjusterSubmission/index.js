@@ -1,1014 +1,506 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import "./index.scss";
-import { Card } from "primereact/card";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
-import InputTextField from "../../component/inputText";
-import DatepickerField from "../../component/datePicker";
 import { FileUpload } from "primereact/fileupload";
-import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
-import customHistory from "../../../routes/customHistory";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
+import DropdownField from "../../component/DropdownField";
+import InputTextField from "../../component/inputText";
+import DatepickerField from "../../component/datePicker";
+import FieldError from "../../../components/FieldError";
 import {
   postAdjusterSubmission,
   getClaimDetails,
 } from "./store/adjusterSubmissionMiddleWare";
-import { isFireLob } from "../../endorsementModule/constants/endorsementCategories";
-import countriesData from "./data";
+import addressService from "../../../services/addressService";
+import {
+  addressOptionsWithSaved,
+  canonicalAddressValue,
+  findAddressItem,
+  isPhilippines,
+  isValidPhilippineZip,
+  normalizeCountryName,
+} from "../../../utility/addressHelpers";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import FormErrorSummary from "../shared/FormErrorSummary";
+import useClaimsConfig from "../shared/useClaimsConfig";
+import {
+  EDITABLE_STATUSES,
+  claimLobOf,
+  errorText,
+  fromIsoDate,
+  lobUses,
+  toIsoDate,
+} from "../shared/claimJourney";
+
+const EMPTY_VALUES = {
+  adjusterName: "",
+  insuranceCompanyClaimNumber: "",
+  dateOfReported: "",
+  dateOfLoss: "",
+  placeOfAccident: "",
+  driversName: "",
+  houseNumber: "",
+  barangay: "",
+  country: "",
+  province: "",
+  city: "",
+  zipCode: "",
+  name: "",
+  contactNumber: "",
+  plateNumber: "",
+  unit: "",
+  shop: "",
+  insuranceCompanyName: "",
+  file: null,
+};
+
+const text = (v) => String(v ?? "").trim();
+
+/** Form values from the saved claim: what was entered at notification and any earlier adjuster report. */
+const valuesFromClaim = (claim) => {
+  const tp = claim?.thirdPartyDetails || {};
+  const hasDriverAddress = ["driverHouseNo", "driverBarangay", "driverCountry", "driverProvince", "driverCity", "driverZipCode"].some((k) => text(claim?.[k]));
+  // no driver address saved and the holder drove: the holder address of the claim
+  const holderDrove = claim?.isPolicyHolderTheDriver === true || !text(claim?.driverName);
+  const address = hasDriverAddress
+    ? { houseNo: claim.driverHouseNo, barangay: claim.driverBarangay, country: claim.driverCountry, province: claim.driverProvince, city: claim.driverCity, zipCode: claim.driverZipCode }
+    : holderDrove
+    ? { houseNo: claim?.houseNo, barangay: claim?.barangay, country: claim?.country, province: claim?.province, city: claim?.city, zipCode: claim?.zipCode }
+    : {};
+  return {
+    ...EMPTY_VALUES,
+    adjusterName: text(claim?.adjusterName),
+    insuranceCompanyClaimNumber: text(claim?.insuranceCompanyClaimNumber),
+    dateOfReported: toIsoDate(claim?.reportedDate) || toIsoDate(new Date()),
+    dateOfLoss: toIsoDate(claim?.dateOfIncident),
+    placeOfAccident: text(claim?.addressOfIncident),
+    driversName: text(claim?.driverName) || (holderDrove ? text(claim?.policyHolderName) : ""),
+    houseNumber: text(address.houseNo),
+    barangay: text(address.barangay),
+    country: normalizeCountryName(text(address.country)),
+    province: text(address.province),
+    city: text(address.city),
+    zipCode: text(address.zipCode),
+    name: text(tp.thirdPartyName),
+    contactNumber: text(tp.thirdPartyContactNumber),
+    plateNumber: text(tp.thirdPartyPlateNumber),
+    unit: text(tp.thirdPartyUnit),
+    shop: text(tp.thirdPartyShop),
+    insuranceCompanyName: text(tp.thirdPartyInsuranceCompanyName),
+  };
+};
 
 const AdjusterSubmission = () => {
   const { t } = useTranslation();
-  const Navigate = useNavigate();
+  const navigate = useNavigate();
   const params = useParams();
   const location = useLocation();
-  const fileUploadRef = useRef(null);
-  const [uploadImage, setuploadImage] = useState(null);
-  const [formInitialized, setFormInitialized] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Get claim ID from URL params or navigation state
-  const claimId =
-    params.id ||
-    params.claimId ||
-    location.state?.claimId ||
-    location.state?.id;
-
-  console.log("=== ADJUSTER SUBMISSION PAGE DATA ===");
-  console.log("URL Params:", params);
-  console.log("Navigation State:", location.state);
-  console.log("Claim ID:", claimId);
-  console.log("=== END ADJUSTER SUBMISSION PAGE DATA ===");
-
-  // Redux state - memoized to prevent unnecessary rerenders
-  const { claimDetails, claimDetailsLoading, claimDetailsError } = useSelector(
-    useMemo(
-      () =>
-        ({ adjusterSubmissionReducers }) => ({
-          claimDetails: adjusterSubmissionReducers?.claimDetails || {},
-          claimDetailsLoading:
-            adjusterSubmissionReducers?.claimDetailsLoading || false,
-          claimDetailsError:
-            adjusterSubmissionReducers?.claimDetailsError || "",
-        }),
-      []
-    )
-  );
-
-  // Derive LOB from claim details - Fire policies should not show motor-specific fields
-  const claimData = claimDetails?.data || claimDetails;
-  const lobSource =
-    claimData?.lob ||
-    claimData?.productType ||
-    claimData?.policy?.productType ||
-    claimData?.policy?.lob ||
-    location.state?.lob ||
-    location.state?.productType;
-  const isFireClaim = isFireLob(lobSource);
-  const isMotorClaim = !isFireClaim;
-
-  const coInsuranceParticipantRows = useMemo(() => {
-    const claim = claimDetails?.data || claimDetails || {};
-    const participants = claim?.quotation?.participantDetails || [];
-    const isCoInsurance = Boolean(
-      claim?.isCoInsurancePolicy ||
-        claim?.isCoInsurance ||
-        claim?.quotation?.isCoInsurance ||
-        claim?.policy?.isCoInsurance
-    );
-
-    if (!isCoInsurance || participants.length === 0) {
-      return [];
-    }
-
-    return participants.map((participant, index) => {
-      const rawShare = String(participant.sharePercentage ?? "").trim();
-      const shareDisplay = rawShare
-        ? rawShare.endsWith("%")
-          ? rawShare
-          : `${rawShare}%`
-        : "0%";
-
-      return {
-        id: participant.id || `participant-${index}`,
-        insurer:
-          participant.insuranceCompanyName ||
-          participant.participantName ||
-          "N/A",
-        role:
-          index === 0
-            ? t("agent.leadInsurer")
-            : t("agent.coInsurer"),
-        share: shareDisplay,
-      };
-    });
-  }, [claimDetails, t]);
-
-  // Get policy holder data from Redux
-  const {
-    policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
-    claimNumber: reduxClaimNumber,
-  } = useSelector(({ claimDetailsMainReducers }) => ({
-    policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
-    policyNumber: claimDetailsMainReducers?.policyNumber || "",
-    claimNumber: claimDetailsMainReducers?.claimNumber || "",
-  }));
-
-  // Try to get policy holder name from Redux first, then claim details, then fallback
-  const policyHolderName =
-    reduxPolicyHolderName ||
-    claimDetails?.policyHolderName ||
-    claimDetails?.PolicyHolderName ||
-    "Loading...";
-
-  const claimNumber =
-    reduxClaimNumber ||
-    claimDetails?.claimNumber ||
-    claimDetails?.claim_number ||
-    "Loading...";
-
-  console.log("=== ADJUSTER SUBMISSION REDUX DATA ===");
-  console.log("Claim Details:", claimDetails);
-  console.log("Claim Details Type:", typeof claimDetails);
-  console.log(
-    "Claim Details Keys:",
-    claimDetails ? Object.keys(claimDetails) : "No claim details"
-  );
-  console.log("Loading:", claimDetailsLoading);
-  console.log("Error:", claimDetailsError);
-  console.log("=== REDUX POLICY HOLDER DATA ===");
-  console.log("Redux Policy Holder Name:", reduxPolicyHolderName);
-  console.log("Redux Policy Number:", reduxPolicyNumber);
-  console.log("Redux Claim Number:", reduxClaimNumber);
-  console.log("Final Policy Holder Name:", policyHolderName);
-  console.log("Final Claim Number:", claimNumber);
-  console.log("=== END REDUX POLICY HOLDER DATA ===");
-  console.log("=== END ADJUSTER SUBMISSION REDUX DATA ===");
-
   const dispatch = useDispatch();
+  const config = useClaimsConfig();
+  const fileUploadRef = useRef(null);
+  const [initializedFor, setInitializedFor] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [serverError, setServerError] = useState("");
 
-  // Fetch claim details on component mount
+  const claimId = params.id || params.claimId || location.state?.claimId || location.state?.id;
+
+  const { claimDetails, claimDetailsLoading, claimDetailsError } = useSelector(
+    ({ adjusterSubmissionReducers }) => ({
+      claimDetails: adjusterSubmissionReducers?.claimDetails,
+      claimDetailsLoading: adjusterSubmissionReducers?.claimDetailsLoading || false,
+      claimDetailsError: adjusterSubmissionReducers?.claimDetailsError || "",
+    })
+  );
+  const loaded = claimDetails?.data || null;
+  // the store may still hold another claim while this one loads
+  const claim = loaded && [loaded.id, loaded.claimNumber].includes(claimId) ? loaded : null;
+
+  const lob = claimLobOf(claim?.lob, claim?.policy?.lob, claim?.productType, location.state?.lob);
+  const usesDriver = lobUses(config, lob, "driver");
+  const usesVehicle = lobUses(config, lob, "vehicle");
+  const editable = !claim || EDITABLE_STATUSES.includes(claim.lifecycleStatus);
+
   useEffect(() => {
-    if (claimId) {
-      console.log("=== DISPATCHING GET CLAIM DETAILS ===");
-      console.log("Dispatching getClaimDetails with ID:", claimId);
-      dispatch(getClaimDetails(claimId));
-      console.log("=== END DISPATCHING GET CLAIM DETAILS ===");
-    }
+    if (claimId) dispatch(getClaimDetails(claimId));
   }, [dispatch, claimId]);
 
-  // Cleanup object URL on component unmount
-  useEffect(() => {
-    return () => {
-      if (uploadImage?.startsWith("blob:")) {
-        URL.revokeObjectURL(uploadImage);
-      }
-    };
-  }, [uploadImage]);
-
-  const handleUppendImg = (name, src) => {
-    console.log("=== FILE UPLOAD DEBUG ===");
-    console.log("Name:", name);
-    console.log("Source:", src);
-    console.log("Source objectURL:", src?.objectURL);
-    console.log("Source type:", typeof src);
-    console.log("Source name:", src?.name);
-    console.log("=== END FILE UPLOAD DEBUG ===");
-
-    // Create object URL for file preview
-    const fileURL = src?.objectURL || (src ? URL.createObjectURL(src) : null);
-    setuploadImage(fileURL);
-  };
-  const handleCancelUplaoded = () => {
-    // Clean up object URL to prevent memory leaks
-    if (uploadImage?.startsWith("blob:")) {
-      URL.revokeObjectURL(uploadImage);
-    }
-    setuploadImage(null);
-    fileUploadRef.current.clear();
-  };
-  const handleBackNavigation = () => {
-    customHistory.back();
-  };
-  const City = countriesData.city.map((city) => ({
-    label: city,
-  }));
-
-  const State = countriesData.state.map((state) => ({
-    label: state,
-  }));
-
-  const Country = countriesData.countries.map((country) => ({
-    label: country,
-  }));
-  // Default form values - will be updated when API data is available
-  const formInitialValue = {
-    adjusterName: "",
-    claimNumber: "",
-    insuranceCompanyClaimNumber: "",
-    dateOfReported: new Date().toISOString().split("T")[0],
-    dateOfLoss: new Date().toISOString().split("T")[0],
-    placeOfAccident: "",
-    driversName: "",
-    houseNumber: "",
-    barangay: "",
-    country: null,
-    province: null,
-    city: null,
-    zipCode: "",
-    name: "",
-    contactNumber: "",
-    plateNumber: "",
-    unit: "",
-    shop: "",
-    insuranceCompanyName: "",
-    file: null,
+  const labels = {
+    adjusterName: t("claimJourney.adjusterName"),
+    insuranceCompanyClaimNumber: t("claimJourney.insurerClaimNumber"),
+    dateOfReported: t("claimJourney.dateReported"),
+    dateOfLoss: t("claimJourney.dateOfLoss"),
+    placeOfAccident: usesDriver ? t("claimJourney.placeOfAccident") : t("claimJourney.placeOfLoss"),
+    driversName: t("claimJourney.driverName"),
+    zipCode: t("claimJourney.zipCode"),
+    file: t("claimJourney.proofOfDocuments"),
   };
 
-  const customValidation = (values) => {
-    console.log("=== VALIDATION CALLED ===");
-    console.log("Validation values:", values);
-    console.log(
-      "Country validation:",
-      values.country,
-      "Truthy:",
-      !!values.country
-    );
-    console.log(
-      "Province validation:",
-      values.province,
-      "Truthy:",
-      !!values.province
-    );
-    console.log("City validation:", values.city, "Truthy:", !!values.city);
-    console.log("=== END VALIDATION CALLED ===");
-
+  const validate = (values) => {
     const errors = {};
-    if (!values.adjusterName) {
-      errors.adjusterName = t("validation.fieldRequired");
+    if (!editable) return errors; // nothing is saved once the claim has moved on
+    const required = t("claimJourney.required");
+    if (!text(values.adjusterName)) errors.adjusterName = required;
+    if (!values.dateOfReported) errors.dateOfReported = required;
+    if (!values.dateOfLoss) errors.dateOfLoss = required;
+    if (!text(values.placeOfAccident)) errors.placeOfAccident = required;
+    const today = toIsoDate(new Date());
+    if (values.dateOfLoss && values.dateOfLoss > today) errors.dateOfLoss = t("claimJourney.lossInFuture");
+    if (values.dateOfReported && values.dateOfReported > today) errors.dateOfReported = t("claimJourney.reportedInFuture");
+    if (values.dateOfLoss && values.dateOfReported && values.dateOfReported < values.dateOfLoss) {
+      errors.dateOfReported = t("claimJourney.reportedBeforeLoss");
     }
-    if (!values.claimNumber) {
-      errors.claimNumber = t("validation.fieldRequired");
-    }
-    if (!values.dateOfReported) {
-      errors.dateOfReported = t("validation.fieldRequired");
-    }
-    if (!values.dateOfLoss) {
-      errors.dateOfLoss = t("validation.fieldRequired");
-    }
-    if (!values.placeOfAccident) {
-      errors.placeOfAccident = t("validation.fieldRequired");
-    }
-    if (!values.driversName) {
-      errors.driversName = t("validation.fieldRequired");
-    }
-    if (!values.houseNumber) {
-      errors.houseNumber = t("validation.fieldRequired");
-    }
-    if (!values.barangay) {
-      errors.barangay = t("validation.fieldRequired");
-    }
-
-    if (!values?.country) {
-      errors.country = t("validation.fieldRequired");
-    }
-
-    if (!values?.province) {
-      errors.province = t("validation.fieldRequired");
-    }
-
-    if (!values?.city) {
-      errors.city = t("validation.fieldRequired");
-    }
-    if (!values.zipCode) {
-      errors.zipCode = t("validation.fieldRequired");
-    }
-
-    if (!values.zipCode) {
-      errors.zipCode = t("validation.fieldRequired");
+    if (usesDriver) {
+      if (!text(values.driversName)) errors.driversName = required;
+      if (text(values.zipCode) && isPhilippines(values.country) && !isValidPhilippineZip(values.zipCode)) {
+        errors.zipCode = t("validation.zipCodePhilippines", "ZIP code must be 4 digits");
+      }
     }
     return errors;
   };
-  const handleSubmit = async (values) => {
-    console.log("=== HANDLE SUBMIT CALLED ===");
-    console.log("Claim ID:", claimId);
-    console.log("Form Values:", values);
-    console.log("Country value:", values.country);
-    console.log("Province value:", values.province);
-    console.log("City value:", values.city);
-    console.log("=== END HANDLE SUBMIT CALLED ===");
 
-    if (!claimId) {
-      console.error("No claim ID available for adjuster submission");
+  const goNext = () =>
+    navigate(`/agent/claimrequest/settlementapproval/${claim?.id || claimId}`, {
+      state: { claimId: claim?.id || claimId, clientId: location.state?.clientId || claim?.clientId },
+    });
+
+  const handleSubmit = async (values) => {
+    setServerError("");
+    if (!editable) {
+      goNext();
       return;
     }
-
     setIsSubmitting(true);
-    console.log("=== SUBMITTING ADJUSTER DATA ===");
-    console.log("Claim ID:", claimId);
-    console.log("Form Values:", values);
-    console.log("=== END SUBMITTING ADJUSTER DATA ===");
-
-    try {
-      // Prepare adjuster data for API
-      const adjusterData = {
-        insuranceCompanyClaimNumber: values.insuranceCompanyClaimNumber || "",
-        reportedDate: values.dateOfReported
-          ? new Date(values.dateOfReported).toISOString()
-          : "",
-        dateOfIncident: values.dateOfLoss
-          ? new Date(values.dateOfLoss).toISOString()
-          : "",
-        addressOfIncident: values.placeOfAccident || "",
-        driverName: values.driversName || "",
-        adjusterName: values.adjusterName || "",
-        adjusterStatus: "Assigned", // Default status
-        thirdPartyName: values.name || "",
-        thirdPartyContactNumber: values.contactNumber || "",
-        file: values.file || null,
-      };
-
-      const result = await dispatch(
-        postAdjusterSubmission({
-          claimId: claimId,
-          adjusterData: adjusterData,
-        })
-      );
-
-      if (result.type.endsWith("/fulfilled")) {
-        console.log("Adjuster submission successful:", result.payload);
-        console.log("Navigating to settlement approval with claimId:", claimId);
-        Navigate(`/agent/claimrequest/settlementapproval/${claimId}`, {
-          state: {
-            claimId,
-            clientId:
-              location.state?.clientId ||
-              claimDetails?.data?.policy?.clientId ||
-              claimDetails?.data?.clientId,
-          },
-        });
-      } else {
-        console.error("Adjuster submission failed:", result.payload);
-        // You can add error handling here
-      }
-    } catch (error) {
-      console.error("Error submitting adjuster data:", error);
-      // You can add error handling here
-    } finally {
-      setIsSubmitting(false);
+    const adjusterData = {
+      insuranceCompanyClaimNumber: text(values.insuranceCompanyClaimNumber),
+      reportedDate: values.dateOfReported,
+      dateOfIncident: values.dateOfLoss,
+      addressOfIncident: text(values.placeOfAccident),
+      adjusterName: text(values.adjusterName),
+      adjusterStatus: claim?.adjusterStatus || "Assigned",
+      thirdPartyName: text(values.name),
+      thirdPartyContactNumber: text(values.contactNumber),
+      thirdPartyInsuranceCompanyName: text(values.insuranceCompanyName),
+      file: values.file || null,
+      ...(usesDriver
+        ? {
+            driverName: text(values.driversName),
+            driverDetails: {
+              driverName: text(values.driversName),
+              driverHouseNo: text(values.houseNumber),
+              driverBarangay: text(values.barangay),
+              driverCountry: text(values.country),
+              driverProvince: text(values.province),
+              driverCity: text(values.city),
+              driverZipCode: text(values.zipCode),
+            },
+          }
+        : {}),
+      ...(usesVehicle
+        ? {
+            thirdPartyPlateNumber: text(values.plateNumber),
+            thirdPartyUnit: text(values.unit),
+            thirdPartyShop: text(values.shop),
+          }
+        : {}),
+    };
+    const result = await dispatch(postAdjusterSubmission({ claimId: claim?.id || claimId, adjusterData }));
+    setIsSubmitting(false);
+    if (result.type.endsWith("/fulfilled")) {
+      goNext();
+    } else {
+      setServerError(errorText(result.payload, t("claimJourney.saveFailed")));
     }
   };
-  const formik = useFormik({
-    initialValues: formInitialValue,
-    validate: customValidation,
-    onSubmit: handleSubmit,
-  });
 
-  // Update form values when claim details are loaded (only once)
+  const formik = useFormik({ initialValues: EMPTY_VALUES, validate, onSubmit: handleSubmit });
+
   useEffect(() => {
-    if (
-      claimDetails &&
-      Object.keys(claimDetails).length > 0 &&
-      claimDetails.data &&
-      !formInitialized
-    ) {
-      console.log("=== UPDATING FORM WITH API DATA ===");
-      console.log("Claim Details:", claimDetails);
-
-      const claimData = claimDetails?.data || {};
-      const leadData = claimData?.lead || {};
-      const thirdPartyData = claimData?.thirdPartyWitnessDetails?.[0] || {};
-
-      // Helper function to map API values to dropdown options
-      const mapDropdownValue = (apiValue, dropdownOptions) => {
-        if (!apiValue) return null;
-
-        // Try exact match first
-        const exactMatch = dropdownOptions.find(
-          (option) => option.label.toLowerCase() === apiValue.toLowerCase()
-        );
-        if (exactMatch) return exactMatch;
-
-        // Try partial match
-        const partialMatch = dropdownOptions.find(
-          (option) =>
-            option.label.toLowerCase().includes(apiValue.toLowerCase()) ||
-            apiValue.toLowerCase().includes(option.label.toLowerCase())
-        );
-        if (partialMatch) return partialMatch;
-
-        // Return null if no match found
-        return null;
-      };
-
-      const updatedValues = {
-        adjusterName: "",
-        claimNumber: claimData?.claimNumber || "",
-        insuranceCompanyClaimNumber: "",
-        dateOfReported: claimData?.reportedDate
-          ? new Date(claimData.reportedDate).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        dateOfLoss: claimData?.dateOfIncident
-          ? new Date(claimData.dateOfIncident).toISOString().split("T")[0]
-          : new Date().toISOString().split("T")[0],
-        placeOfAccident: claimData?.addressOfIncident || "",
-        driversName:
-          claimData?.driverName ||
-          (leadData?.firstName && leadData?.lastName
-            ? `${leadData.firstName} ${leadData.lastName}`
-            : "") ||
-          "",
-        houseNumber: claimData?.driverHouseNo || leadData?.houseNo || "",
-        barangay: claimData?.driverBarangay || leadData?.barangay || "",
-        country: mapDropdownValue(
-          claimData?.driverCountry || leadData?.country || "",
-          Country
-        ),
-        province: mapDropdownValue(
-          claimData?.driverProvince || leadData?.province || "",
-          State
-        ),
-        city: mapDropdownValue(
-          claimData?.driverCity || leadData?.city || "",
-          City
-        ),
-        zipCode: claimData?.driverZipCode || leadData?.zipCode || "",
-        name: thirdPartyData?.thirdPartyName || "",
-        contactNumber: thirdPartyData?.thirdPartyContactNumber || "",
-        plateNumber: thirdPartyData?.thirdPartyPlateNumber || "",
-        unit: thirdPartyData?.thirdPartyUnit || "",
-        shop: thirdPartyData?.thirdPartyShop || "",
-        insuranceCompanyName:
-          thirdPartyData?.thirdPartyInsuranceCompanyName ||
-          claimData?.insuranceCompanyName ||
-          claimData?.policy?.insuranceCompanyName ||
-          "",
-        file: null,
-      };
-
-      console.log("=== DROPDOWN MAPPING DEBUG ===");
-      console.log(
-        "API Country:",
-        claimData?.driverCountry || leadData?.country
-      );
-      console.log(
-        "API Province:",
-        claimData?.driverProvince || leadData?.province
-      );
-      console.log("API City:", claimData?.driverCity || leadData?.city);
-      console.log("Mapped Country:", updatedValues.country);
-      console.log("Mapped Province:", updatedValues.province);
-      console.log("Mapped City:", updatedValues.city);
-      console.log("=== END DROPDOWN MAPPING DEBUG ===");
-
-      console.log("Updated Form Values:", updatedValues);
-
-      // Check if form already has the same data to avoid unnecessary updates
-      const currentValues = formik.values;
-      const hasChanges = Object.keys(updatedValues).some(
-        (key) => currentValues[key] !== updatedValues[key]
-      );
-
-      if (hasChanges) {
-        // Ensure no undefined values are passed to formik
-        const safeValues = Object.keys(updatedValues).reduce((acc, key) => {
-          acc[key] = updatedValues[key] !== undefined ? updatedValues[key] : "";
-          return acc;
-        }, {});
-
-        // Update formik values
-        formik.setValues(safeValues);
-        setFormInitialized(true);
-        console.log("Form values updated successfully!");
-      } else {
-        console.log("Form already has the same data, skipping update");
-        setFormInitialized(true);
-      }
-
-      console.log("=== END UPDATING FORM WITH API DATA ===");
+    if (claim && initializedFor !== claim.id) {
+      formik.resetForm({ values: valuesFromClaim(claim) });
+      setInitializedFor(claim.id);
     }
-  }, [claimDetails, formInitialized]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claim, initializedFor]);
 
-  // Show loading state
-  if (claimDetailsLoading) {
-    return (
-      <div className="claim__request__upload__container">
-      <div className="claim__request__upload__main__title">{t("agent.clients")}</div>
-      <div 
-        className="claim__request__upload__back__btn mt-3 cursor-pointer"
-        onClick={handleBackNavigation}
-      >
-        <SvgLeftArrow />
-        <div className="claim__request__upload__back__btn__title">
-          {(() => {
-            console.log("=== ADJUSTER SUBMISSION LOADING DISPLAY LOGIC ===");
-              console.log("Policy Holder Name:", policyHolderName);
-              console.log("Claim Number:", claimNumber);
-              console.log(
-                "Displaying:",
-                `${policyHolderName} / ${
-                  claimNumber ? `Claim: ${claimNumber}` : "Loading..."
-                }`
-              );
-              console.log(
-                "=== END ADJUSTER SUBMISSION LOADING DISPLAY LOGIC ==="
-              );
+  // Address master: Country -> Province -> City
+  const [countryList, setCountryList] = useState([]);
+  const [provinceList, setProvinceList] = useState([]);
+  const [cityList, setCityList] = useState([]);
 
-              return `${policyHolderName} / ${
-                claimNumber ? `${t("agent.claimLabel")}: ${claimNumber}` : t("agent.loading")
-              }`;
-            })()}
-          </div>
-        </div>
-        <Card className="mt-4">
-          <div className="claim__request__upload__title">{t("agent.claimRequest")}</div>
-          <div className="text-center p-4">
-            <div>{t("agent.loadingClaimDetails")}</div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!usesDriver) return undefined;
+    let cancelled = false;
+    addressService.getCountries().then((res) => {
+      if (!cancelled && res.success && Array.isArray(res.data)) setCountryList(res.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [usesDriver]);
 
-  // Show error state
-  if (claimDetailsError) {
-    return (
-      <div className="claim__request__upload__container">
-      <div className="claim__request__upload__main__title">{t("agent.clients")}</div>
-      <div 
-        className="claim__request__upload__back__btn mt-3 cursor-pointer"
-        onClick={handleBackNavigation}
-      >
-        <SvgLeftArrow />
-        <div className="claim__request__upload__back__btn__title">
-          {(() => {
-            console.log("=== ADJUSTER SUBMISSION ERROR DISPLAY LOGIC ===");
-              console.log("Policy Holder Name:", policyHolderName);
-              console.log("Claim Number:", claimNumber);
-              console.log(
-                "Displaying:",
-                `${policyHolderName} / ${
-                  claimNumber ? `Claim: ${claimNumber}` : "Loading..."
-                }`
-              );
-              console.log(
-                "=== END ADJUSTER SUBMISSION ERROR DISPLAY LOGIC ==="
-              );
+  const countryKey = findAddressItem(countryList, formik.values.country)?.id ?? (formik.values.country || "");
+  const provinceKey = findAddressItem(provinceList, formik.values.province)?.id ?? (formik.values.province || "");
 
-              return `${policyHolderName} / ${
-                claimNumber ? `${t("agent.claimLabel")}: ${claimNumber}` : t("agent.loading")
-              }`;
-            })()}
-          </div>
-        </div>
-        <Card className="mt-4">
-          <div className="claim__request__upload__title">{t("agent.claimRequest")}</div>
-          <div className="text-center p-4" style={{ color: "red" }}>
-            <div>{t("agent.errorLoadingClaimDetails")} {claimDetailsError}</div>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!countryKey || !usesDriver) {
+      setProvinceList([]);
+      return undefined;
+    }
+    let cancelled = false;
+    addressService.getProvincesByCountry(countryKey).then((res) => {
+      if (!cancelled) setProvinceList(res.success && Array.isArray(res.data) ? res.data : []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [countryKey, usesDriver]);
+
+  useEffect(() => {
+    if (!provinceKey || !usesDriver) {
+      setCityList([]);
+      return undefined;
+    }
+    let cancelled = false;
+    addressService.getCitiesByProvince(provinceKey).then((res) => {
+      if (!cancelled) setCityList(res.success && Array.isArray(res.data) ? res.data : []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [provinceKey, usesDriver]);
+
+  // saved values that match the master by code or another spelling take the master name
+  useEffect(() => {
+    [
+      ["country", countryList],
+      ["province", provinceList],
+      ["city", cityList],
+    ].forEach(([field, list]) => {
+      const current = formik.values[field];
+      if (!current || !list.length) return;
+      const canonical = canonicalAddressValue(list, current);
+      if (canonical !== current) formik.setFieldValue(field, canonical, false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countryList, provinceList, cityList, formik.values.country, formik.values.province, formik.values.city]);
+
+  const countryOptions = useMemo(() => addressOptionsWithSaved(countryList, formik.values.country), [countryList, formik.values.country]);
+  const provinceOptions = useMemo(() => addressOptionsWithSaved(provinceList, formik.values.province), [provinceList, formik.values.province]);
+  const cityOptions = useMemo(() => addressOptionsWithSaved(cityList, formik.values.city), [cityList, formik.values.city]);
+
+  const coInsuranceRows = (claim?.participatingInsurers || []).map((p) => ({
+    id: String(p.insurerId),
+    insurer: p.insuranceCompanyName,
+    role: p.isLead ? t("claimJourney.leadInsurer") : t("claimJourney.coInsurer"),
+    share: `${Number(p.sharePercentage) || 0}%`,
+  }));
+
+  const showErrors = formik.submitCount > 0;
+  const fieldError = (name) => (showErrors || formik.touched[name] ? formik.errors[name] : undefined);
+  const req = (label) => (
+    <>
+      {label}
+      <span className="required-mark">*</span>
+    </>
+  );
+  const input = (name, label, props = {}) => (
+    <div className="col-12 md:col-6">
+      <InputTextField
+        label={label}
+        value={formik.values[name]}
+        onChange={formik.handleChange(name)}
+        onBlur={() => formik.setFieldTouched(name, true, false)}
+        disabled={!editable}
+        {...props}
+      />
+      <FieldError error={fieldError(name)} />
+    </div>
+  );
+  const dateField = (name, label) => (
+    <div className="col-12 md:col-6">
+      <DatepickerField
+        label={label}
+        value={fromIsoDate(formik.values[name])}
+        onChange={(e) => formik.setFieldValue(name, toIsoDate(e.value))}
+        maxDate={new Date()}
+        disabled={!editable}
+      />
+      <FieldError error={fieldError(name)} />
+    </div>
+  );
+
+  const backToReview = () =>
+    navigate(`/agent/claimrequest/requestapproval/${claim?.id || claimId}`, {
+      state: { claimId: claim?.id || claimId, clientId: location.state?.clientId || claim?.clientId },
+    });
 
   return (
-    <div className="claim__request__upload__container">
-      <div className="claim__request__upload__main__title">{t("agent.clients")}</div>
-      <div 
-        className="claim__request__upload__back__btn mt-3 cursor-pointer"
-        onClick={handleBackNavigation}
-      >
-        <SvgLeftArrow />
-        <div className="claim__request__upload__back__btn__title">
-          {(() => {
-            console.log("=== ADJUSTER SUBMISSION MAIN DISPLAY LOGIC ===");
-            console.log("Policy Holder Name:", policyHolderName);
-            console.log("Claim Number:", claimNumber);
-            console.log(
-              "Displaying:",
-              `${policyHolderName} / ${
-                claimNumber ? `Claim: ${claimNumber}` : "Loading..."
-              }`
-            );
-            console.log("=== END ADJUSTER SUBMISSION MAIN DISPLAY LOGIC ===");
+    <ClaimJourneyLayout
+      step="adjuster"
+      holderName={claim?.policyHolderName}
+      reference={claim?.claimNumber ? t("claimJourney.claimRef", { number: claim.claimNumber }) : ""}
+      status={claim?.claimStatus}
+      onBack={() => navigate(claim?.clientId ? `/agent/clientview/${claim.clientId}` : "/agent/claim")}
+      title={t("claimJourney.adjusterTitle")}
+    >
+      {claimDetailsLoading && !claim && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
+      {claimDetailsError && !claim && (
+        <FormErrorSummary serverError={claimDetailsError} />
+      )}
+      {claim && !editable && (
+        <div className="claim-journey__notice">{t("claimJourney.adjusterLocked", { status: claim.claimStatus })}</div>
+      )}
+      {claim && (
+        <>
+          <ClaimSection title={t("claimJourney.adjusterReport")}>
+            <div className="grid">
+              {input("adjusterName", req(labels.adjusterName))}
+              {input("insuranceCompanyClaimNumber", labels.insuranceCompanyClaimNumber)}
+              {dateField("dateOfLoss", req(labels.dateOfLoss))}
+              {dateField("dateOfReported", req(labels.dateOfReported))}
+              {input("placeOfAccident", req(labels.placeOfAccident))}
+            </div>
+          </ClaimSection>
 
-return `${policyHolderName} / ${
-                claimNumber ? `${t("agent.claimLabel")}: ${claimNumber}` : t("agent.loading")
-              }`;
-            })()}
-        </div>
-      </div>
-      <Card className="mt-4">
-        <div className="claim__request__upload__title">{t("agent.claimRequest")}</div>
-
-        <div className="grid mt-2">
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={`${t("agent.adjusterName")}*`}
-              value={formik.values.adjusterName}
-              onChange={formik.handleChange("adjusterName")}
-            />
-            {formik.touched.adjusterName && formik.errors.adjusterName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.adjusterName}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={`${t("agent.claimNumber")}*`}
-              value={formik.values.claimNumber}
-              onChange={formik.handleChange("claimNumber")}
-            />
-            {formik.touched.claimNumber && formik.errors.claimNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.claimNumber}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={t("agent.insuranceCompanyClaimNumber")}
-              value={formik.values.insuranceCompanyClaimNumber}
-              onChange={formik.handleChange("insuranceCompanyClaimNumber")}
-            />
-            {formik.touched.insuranceCompanyClaimNumber &&
-              formik.errors.insuranceCompanyClaimNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.insuranceCompanyClaimNumber}
+          {usesDriver && (
+            <ClaimSection title={t("claimJourney.driverSection")}>
+              <div className="grid">
+                {input("driversName", req(labels.driversName))}
+                {input("houseNumber", t("claimJourney.houseNo"))}
+                {input("barangay", t("claimJourney.barangay"))}
+                <div className="col-12 md:col-6">
+                  <DropdownField
+                    label={t("claimJourney.country")}
+                    value={formik.values.country}
+                    onChange={(e) => {
+                      formik.setFieldValue("country", e.value || "");
+                      formik.setFieldValue("province", "");
+                      formik.setFieldValue("city", "");
+                    }}
+                    options={countryOptions}
+                    optionLabel="label"
+                    optionValue="value"
+                    disabled={!editable}
+                  />
                 </div>
-              )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <DatepickerField
-              label={`${t("agent.dateOfReported")}*`}
-              // value={
-              //   formik.values.dateOfReported
-              //     ?
-              //      new Date(formik.values.dateOfReported)
-              //     : null
-              // }
-              // onChange={(e) => {
-              //   formik.handleChange("dateOfReported")(
-              //     e.value.toISOString().split("T")[0]
-              //   );
-              // }}
-              value={new Date(formik?.values?.dateOfReported)}
-              onChange={(e) =>
-                formik.setFieldValue(
-                  "dateOfReported",
-                  e.value.toISOString().split("T")
-                )
-              }
-              dateFormat="yy-mm-dd"
-            />
-            {formik.touched.dateOfReported && formik.errors.dateOfReported && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.dateOfReported}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <DatepickerField
-              label={`${t("agent.dateOfLoss")}*`}
-              // value={
-              //   formik.values.dateOfLoss
-              //     ? new Date(formik.values.dateOfLoss)
-              //     : null
-              // }
-              // onChange={(e) => {
-              //   formik.handleChange("dateOfLoss")(
-              //     e.value.toISOString().split("T")[0]
-              //   );
-              // }}
-              value={new Date(formik?.values?.dateOfLoss)}
-              onChange={(e) =>
-                formik.setFieldValue(
-                  "dateOfLoss",
-                  e.value.toISOString().split("T")
-                )
-              }
-              dateFormat="yy-mm-dd"
-            />
-            {formik.touched.dateOfLoss && formik.errors.dateOfLoss && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.dateOfLoss}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={
-                isFireClaim
-                  ? `${t("agent.placeOfIncidentLoss")}*`
-                  : `${t("agent.placeOfAccident")}*`
-              }
-              value={formik.values.placeOfAccident}
-              onChange={formik.handleChange("placeOfAccident")}
-            />
-            {formik.touched.placeOfAccident &&
-              formik.errors.placeOfAccident && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.placeOfAccident}
+                <div className="col-12 md:col-6">
+                  <DropdownField
+                    label={t("claimJourney.province")}
+                    value={formik.values.province}
+                    onChange={(e) => {
+                      formik.setFieldValue("province", e.value || "");
+                      formik.setFieldValue("city", "");
+                    }}
+                    options={provinceOptions}
+                    optionLabel="label"
+                    optionValue="value"
+                    disabled={!editable || !formik.values.country}
+                  />
                 </div>
-              )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={
-                isFireClaim
-                  ? `${t("agent.nameOfInsuredClaimant")}*`
-                  : `${t("agent.driversName")}*`
-              }
-              value={formik.values.driversName}
-              onChange={formik.handleChange("driversName")}
-            />
-            {formik.touched.driversName && formik.errors.driversName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.driversName}
-              </div>
-            )}
-          </div>
-
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={`${t("agent.houseNoUnitStreet")}*`}
-              value={formik.values.houseNumber}
-              onChange={formik.handleChange("houseNumber")}
-            />
-            {formik.touched.houseNumber && formik.errors.houseNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.houseNumber}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={t("agent.barangaySubd")}
-              value={formik.values.barangay}
-              onChange={formik.handleChange("barangay")}
-            />
-            {formik.touched.barangay && formik.errors.barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.barangay}
-              </div>
-            )}
-          </div>
-
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2">
-            <DropdownField
-              label={t("agent.country")}
-              value={formik.values.country}
-              onChange={(e) => {
-                console.log("Country selected:", e);
-                console.log("Country selected value:", e.value);
-                formik.setFieldValue("country", e.value);
-              }}
-              options={Country}
-              optionLabel="label"
-              optionValue="label"
-            />
-            {formik.touched.country && formik.errors.country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.country}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2">
-            <DropdownField
-              label={t("agent.province")}
-              value={formik.values.province}
-              onChange={(e) => {
-                console.log("Province selected:", e);
-                console.log("Province selected value:", e.value);
-                formik.setFieldValue("province", e.value);
-              }}
-              options={State}
-              optionLabel="label"
-              optionValue="label"
-            />
-            {formik.touched.province && formik.errors.province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.province}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2">
-            <DropdownField
-              label={t("agent.city")}
-              value={formik.values.city}
-              onChange={(e) => {
-                console.log("City selected:", e);
-                console.log("City selected value:", e.value);
-                formik.setFieldValue("city", e.value);
-              }}
-              options={City}
-              optionLabel="label"
-              optionValue="label"
-            />
-            {formik.touched.city && formik.errors.city && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.city}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={t("agent.zipCode")}
-              value={formik.values.zipCode}
-              onChange={formik.handleChange("zipCode")}
-            />
-            {formik.touched.zipCode && formik.errors.zipCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.zipCode}
-              </div>
-            )}
-          </div>
-          {coInsuranceParticipantRows.length > 0 && (
-            <div className="col-12 mt-2 mb-3">
-              <table className="co-insurance-participants-table">
-                <thead>
-                  <tr>
-                    <th>{t("agent.insurer")}</th>
-                    <th>{t("agent.role")}</th>
-                    <th className="share">{t("agent.share")}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {coInsuranceParticipantRows.map((row) => (
-                    <tr key={row.id}>
-                      <td>{row.insurer}</td>
-                      <td>{row.role}</td>
-                      <td className="share">{row.share}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-          <div className="col-12 claim__request__upload__subtitle mt-2 mb-2">
-            {t("agent.thirdPartyDetails")}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={t("agent.name")}
-              value={formik.values.name}
-              onChange={formik.handleChange("name")}
-            />
-            {formik.touched.name && formik.errors.name && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.name}
-              </div>
-            )}
-          </div>
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={t("agent.contactNumber")}
-              value={formik.values.contactNumber}
-              onChange={formik.handleChange("contactNumber")}
-            />
-            {formik.touched.contactNumber && formik.errors.contactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.contactNumber}
-              </div>
-            )}
-          </div>
-          {isMotorClaim && (
-            <>
-              <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-                <InputTextField
-                  label={t("agent.plateNumber")}
-                  value={formik.values.plateNumber}
-                  onChange={formik.handleChange("plateNumber")}
-                />
-                {formik.touched.plateNumber && formik.errors.plateNumber && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                    {formik.errors.plateNumber}
-                  </div>
-                )}
-              </div>
-              <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-                <InputTextField
-                  label={t("agent.unit")}
-                  value={formik.values.unit}
-                  onChange={formik.handleChange("unit")}
-                />
-                {formik.touched.unit && formik.errors.unit && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                    {formik.errors.unit}
-                  </div>
-                )}
-              </div>
-              <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-                <InputTextField
-                  label={t("agent.shop")}
-                  value={formik.values.shop}
-                  onChange={formik.handleChange("shop")}
-                />
-                {formik.touched.shop && formik.errors.shop && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                    {formik.errors.shop}
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-          <div className="col-6 md:col-6 lg:col-6 xl:col-6 mt-2 ">
-            <InputTextField
-              label={t("agent.insuranceCompanyName")}
-              value={formik.values.insuranceCompanyName}
-              onChange={formik.handleChange("insuranceCompanyName")}
-            />
-            {formik.touched.insuranceCompanyName &&
-              formik.errors.insuranceCompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.insuranceCompanyName}
+                <div className="col-12 md:col-6">
+                  <DropdownField
+                    label={t("claimJourney.city")}
+                    value={formik.values.city}
+                    onChange={(e) => formik.setFieldValue("city", e.value || "")}
+                    options={cityOptions}
+                    optionLabel="label"
+                    optionValue="value"
+                    disabled={!editable || !formik.values.province}
+                  />
                 </div>
+                {input("zipCode", labels.zipCode, { maxLength: isPhilippines(formik.values.country) ? 4 : undefined })}
+              </div>
+            </ClaimSection>
+          )}
+
+          {coInsuranceRows.length > 0 && (
+            <ClaimSection title={t("claimJourney.coInsurance")}>
+              <DataTable value={coInsuranceRows} size="small" dataKey="id">
+                <Column field="insurer" header={t("claimJourney.insurer")} />
+                <Column field="role" header={t("claimJourney.role")} />
+                <Column field="share" header={t("claimJourney.share")} alignHeader="right" bodyStyle={{ textAlign: "right" }} />
+              </DataTable>
+            </ClaimSection>
+          )}
+
+          <ClaimSection
+            title={usesDriver ? t("claimJourney.thirdParty") : t("claimJourney.thirdPartyWitness")}
+            hint={t("claimJourney.ifApplicable")}
+          >
+            <div className="grid">
+              {input("name", t("claimJourney.name"))}
+              {input("contactNumber", t("claimJourney.contactNumber"))}
+              {usesVehicle && input("plateNumber", t("claimJourney.plateNumber"))}
+              {usesVehicle && input("unit", t("claimJourney.unit"))}
+              {usesVehicle && input("shop", t("claimJourney.shop"))}
+              {input("insuranceCompanyName", t("claimJourney.thirdPartyInsurer"))}
+            </div>
+          </ClaimSection>
+
+          <ClaimSection title={t("claimJourney.proofOfDocuments")} hint={t("claimJourney.optional")}>
+            <div className="claim-journey__upload">
+              {formik.values.file ? (
+                <span className="claim-journey__file">
+                  <i className="pi pi-file" aria-hidden="true" />
+                  {formik.values.file.name}
+                  <Button
+                    type="button"
+                    icon="pi pi-times"
+                    text
+                    rounded
+                    aria-label={t("claimJourney.removeFile")}
+                    onClick={() => {
+                      formik.setFieldValue("file", null);
+                      fileUploadRef.current?.clear();
+                    }} tooltip={t("claimJourney.removeFile")} tooltipOptions={{ position: "top" }}
+                  />
+                </span>
+              ) : (
+                <FileUpload
+                  ref={fileUploadRef}
+                  mode="basic"
+                  auto
+                  customUpload
+                  name="file"
+                  accept=".png,.jpg,.jpeg,.pdf"
+                  maxFileSize={2000000}
+                  chooseLabel={t("claimJourney.chooseFile")}
+                  disabled={!editable}
+                  invalidFileSizeMessageSummary={t("claimJourney.fileTooLarge")}
+                  invalidFileSizeMessageDetail=""
+                  uploadHandler={(e) => {
+                    formik.setFieldValue("file", e.files[0]);
+                    e.options.clear();
+                  }}
+                />
               )}
-          </div>
-          <div className="col-12 claim__request__upload__subtitle mt-2 mb-2">
-            {t("agent.proofOfDocuments")}
-          </div>
-          <div className="col-12">
-            <div className="file_icon_selector">
-              <FileUpload
-                ref={fileUploadRef}
-                url="./upload"
-                auto
-                customUpload
-                mode="basic"
-                name="demo"
-                accept=".png,.jpg,.jpeg,.pdf"
-                maxFileSize={2000000}
-                // uploadHandler={(e) => {
-                //   handleUppendImg(e.options.props.name, e.files[0]);
-                // }}
-                uploadHandler={(e) => {
-                  formik.setFieldValue("file", e.files[0]);
-                  handleUppendImg(e.options.props.name, e.files[0]);
-                }}
-              />
+              <small>{t("claimJourney.fileRule")}</small>
+            </div>
+            {(claim.documents || []).length > 0 && (
+              <p className="claim-journey__hint mt-2">
+                {t("claimJourney.documentsOnFile", { names: claim.documents.map((d) => d.documentName).join(", ") })}
+              </p>
+            )}
+          </ClaimSection>
 
-              <div className="icon_click_option">
-                <SvgImageUpload />
-              </div>
-              <div className="upload__caption text-center">{t("common.upload")}</div>
-              <div className="upload__caption text-center">
-                {t("agent.maxFileSizePdf")}
-              </div>
-            </div>
-          </div>
-          {formik.touched.file && formik.errors.file && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-              {formik.errors.file}
-            </div>
-          )}
-          {uploadImage && (
-            <div className="col-12 mt-2">
-              <span
-                onClick={handleCancelUplaoded}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    handleCancelUplaoded();
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                style={{ cursor: "pointer" }}
-              >
-                <SvgUploadClose />
-              </span>
-            </div>
-          )}
-
-          <div className="col-12 mt-2">
-            <div className="back__next__btn__container">
-              <div className="back__btn__container">
-                <Button onClick={handleBackNavigation} className="back__btn">
-                  {t("agent.back")}
-                </Button>
-              </div>
-              <div className="next__btn__container">
-                <Button
-                  className="next__btn"
-                  onClick={formik.handleSubmit}
-                  disabled={isSubmitting}
-                  loading={isSubmitting}
-                >
-                  {isSubmitting ? t("agent.submitting") : t("agent.next")}
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Card>
-    </div>
+          <FormErrorSummary errors={formik.errors} labels={labels} show={showErrors} serverError={serverError} />
+        </>
+      )}
+      <ClaimActions>
+        <Button type="button" label={t("claimJourney.back")} outlined onClick={backToReview} disabled={isSubmitting} />
+        <Button
+          type="button"
+          label={editable ? t("claimJourney.saveAndContinue") : t("claimJourney.next")}
+          onClick={formik.handleSubmit}
+          loading={isSubmitting}
+          disabled={isSubmitting || !claim}
+        />
+      </ClaimActions>
+    </ClaimJourneyLayout>
   );
 };
 

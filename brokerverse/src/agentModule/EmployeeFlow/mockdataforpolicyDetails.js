@@ -1,18 +1,5 @@
 // Thailand Employee Benefits Policy Details Mock Data
 
-export const InsuranceCompanyOptions = [
-  { label: "Malayan Insurance", value: "Malayan Insurance" },
-  { label: "PGA Sompo", value: "PGA Sompo" },
-  { label: "AXA Thailand", value: "AXA Thailand" },
-  { label: "Charter Ping An", value: "Charter Ping An" },
-  { label: "FPG Insurance", value: "FPG Insurance" },
-  { label: "Pioneer Insurance", value: "Pioneer Insurance" },
-  { label: "Standard Insurance", value: "Standard Insurance" },
-  { label: "Maxicare", value: "Maxicare" },
-  { label: "Medicard Thailand", value: "Medicard Thailand" },
-  { label: "Intellicare", value: "Intellicare" },
-];
-
 export const InsurancePolicyTypes = [
   { label: "Group Medical/HMO", value: "GroupMedical" },
   { label: "Group Life", value: "GroupLife" },

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -7,27 +7,28 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getInitiateDetailsMiddleware,
+  getInitiateListMiddleware,
   getInitiateListSearchMiddleware,
 } from "../store/pettyCashInitiateMiddleware";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 
 const InitiateTable = () => {
+  const { formatCurrency } = useFormatCurrency();
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Pettycashcode");
 
-  const { InitiateList, loading, InitiateListSearch } = useSelector(
+  const { InitiateList, InitiateListSearch } = useSelector(
     ({ pettyCashInitiateReducer }) => {
       return {
         loading: pettyCashInitiateReducer?.loading,
@@ -37,7 +38,6 @@ const InitiateTable = () => {
     }
   );
 
-  console.log("first11", InitiateList);
   const searchs = [
     { name: t("pettyCash.pettyCashCode"), code: "Pettycashcode" },
     { name: t("pettyCash.transactionNumber"), code: "TransactionNumber" },
@@ -45,7 +45,11 @@ const InitiateTable = () => {
     { name: t("pettyCash.departmentCode"), code: "Departmentcode" },
   ];
 
-  const isEmpty = InitiateList.length === 0;
+  useEffect(() => {
+    dispatch(getInitiateListMiddleware());
+  }, [dispatch]);
+
+  const isEmpty = !InitiateList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -60,10 +64,9 @@ const InitiateTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -93,8 +96,7 @@ const InitiateTable = () => {
         <Button
           icon={<SvgEyeIcon />}
           className="eye__btn"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -125,7 +127,6 @@ const InitiateTable = () => {
     display: "flex",
   };
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(
@@ -138,18 +139,6 @@ const InitiateTable = () => {
     }
   }, [search]);
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
   return (
     <div className="initiate__table">
       <Card className="mt-1">
@@ -166,7 +155,6 @@ const InitiateTable = () => {
             </span>
           </div>
           <div class="col-12 md:col-6 lg:col-2">
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" /> */}
             <Dropdown
               value={search}
               onChange={(e) => setGlobalFilter(e.value)}
@@ -178,10 +166,6 @@ const InitiateTable = () => {
               dropdownIcon={<SvgDropdownicon />}
             />
 
-            {/* <Button label="Search by" outlined icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
           </div>
           <div className="sub__title">Petty Cash Code history</div>
         </div>
@@ -194,9 +178,8 @@ const InitiateTable = () => {
             scrollable={true}
             scrollHeight="40vh"
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -210,10 +193,12 @@ const InitiateTable = () => {
             ></Column>
             <Column
               field="Pettycashsize"
-              header="Petty cash size"
+              header="Petty Cash Size"
               headerStyle={headerStyle}
-              className="fieldvalue_container"
-              body={(rowData) => rowData.Pettycashsize?.toUpperCase()}
+              className="fieldvalue_container bv-nowrap"
+              alignHeader="right"
+              bodyStyle={{ textAlign: "right" }}
+              body={(rowData) => formatCurrency(rowData.Pettycashsize)}
               sortable
             ></Column>
             <Column
@@ -228,7 +213,10 @@ const InitiateTable = () => {
               field="MaxLimit"
               header="Max Limit"
               headerStyle={headerStyle}
-              className="fieldvalue_container"
+              className="fieldvalue_container bv-nowrap"
+              alignHeader="right"
+              bodyStyle={{ textAlign: "right" }}
+              body={(rowData) => formatCurrency(rowData.MaxLimit)}
             ></Column>
             <Column
               field="Branchcode"
@@ -244,7 +232,7 @@ const InitiateTable = () => {
               className="fieldvalue_container"
               body={(rowData) => rowData.Departmentcode?.toUpperCase()}
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.TransactionDate)}
               field="TransactionDate"
               header="Date"
               headerStyle={headerStyle}

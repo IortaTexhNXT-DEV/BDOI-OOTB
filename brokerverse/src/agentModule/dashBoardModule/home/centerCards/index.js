@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Dropdown } from "primereact/dropdown";
 import BarchartMonthly from "./BarchartMonthly";
@@ -16,7 +16,7 @@ const CenterCard = ({ commission }) => {
     navigate("/agent/openitems");
   };
 
-  const { upcommingEventsList, loading } = useSelector(
+  const { upcommingEventsList } = useSelector(
     ({ openitemsReducers }) => {
       return {
         loading: openitemsReducers?.loading,
@@ -25,14 +25,12 @@ const CenterCard = ({ commission }) => {
     }
   );
 
-  const [selectedCity, setSelectedCity] = useState("2024");
-  const cities = [
-    { name: "2024" },
-    { name: "2023" },
-    { name: "2022" },
-    { name: "2021" },
-    { name: "2020" },
-  ];
+  const currentYear = String(new Date().getFullYear());
+  const years = [...new Set([currentYear, ...Object.keys(commission || {})])]
+    .sort()
+    .reverse()
+    .map((name) => ({ name }));
+  const [selectedCity, setSelectedCity] = useState(currentYear);
 
   return (
     <div className="center__card__container grid pt-2">
@@ -47,7 +45,7 @@ const CenterCard = ({ commission }) => {
               <Dropdown
                 value={selectedCity}
                 onChange={(e) => setSelectedCity(e.value)}
-                options={cities}
+                options={years}
                 optionLabel="name"
                 className="w-full md:w-8rem"
                 optionValue="name"

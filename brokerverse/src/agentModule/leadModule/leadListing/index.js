@@ -1,27 +1,22 @@
 import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import SvgAdd from "../../../assets/agentIcon/SvgAdd";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
-import LeadListingCard from "./leadListingCard";
+import ProspectTable from "./ProspectTable";
 import LeadStatsCards from "./LeadStatsCards";
 import { Dropdown } from "primereact/dropdown";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import SvgMotor from "../../../assets/agentIcon/SvgMotor";
 import { useNavigate } from "react-router-dom";
 import BulkUploadModal from "./BulkUploadModal";
-import SvgTravel from "../../../assets/agentIcon/SvgTravel";
-import SvgHome from "../../../assets/agentIcon/SvgHome";
-import SvgFire from "../../../assets/agentIcon/SvgFire";
-import EmployeeBenefitIcon from "../../EmployeeFlow/EmployeeBenefitIcon";
 import leadService from "../../../services/leadService";
+import CreateProspectDialog from "./CreateProspectDialog";
 
 const LeadListing = () => {
   const { t } = useTranslation();
-  const [selectedOption] = useState(null);
+  const [showCreate, setShowCreate] = useState(false);
   const [showBulkUpload, setShowBulkUpload] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const [selectedReportCategory, setSelectedReportCategory] = useState("All");
@@ -33,182 +28,39 @@ const LeadListing = () => {
   const items = [
     { label: t("leads.title"), command: () => navigate("/agent/leadlisting") },
   ];
-  const Initiate = { label: t("sidebar.Home") };
+  const Initiate = { label: t("sidebar.Operations") };
 
-  const dropdownOptions = [
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            handleClickMotor();
-          }}
-        >
-          <div>
-            <SvgMotor />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("dashboard.Motor")}
-          </div>
-        </div>
-      ),
-      value: "Motor",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            handleClickFireAndAlliedPerils();
-          }}
-        >
-          <div>
-            <SvgFire />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("dashboard.Fire and Allied Perils")}
-          </div>
-        </div>
-      ),
-      value: "FireAndAlliedPerils",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            handleClickIar();
-          }}
-        >
-          <div>
-            <SvgHome />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("dashboard.Industrial All Risks", "Industrial All Risks")}
-          </div>
-        </div>
-      ),
-      value: "IndustrialAllRisks",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            handleClickEmployeeBenefit();
-          }}
-        >
-          <div>
-            <EmployeeBenefitIcon />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("dashboard.Employee Benefit")}
-          </div>
-        </div>
-      ),
-      value: "EmployeeBenefit",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            // handleClickMotor();
-          }}
-        >
-          <div>
-            <SvgTravel />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("dashboard.Travel")}
-          </div>
-        </div>
-      ),
-      value: "Travel",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => {
-            // handleClickMotor();
-          }}
-        >
-          <div>
-            <SvgHome />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("dashboard.Property")}
-          </div>
-        </div>
-      ),
-      value: "Property",
-    },
+
+  // an existing customer picked in the Create prospect dialog travels to the prospect form
+  const withClient = (client) => (client ? { state: { existingClient: client } } : undefined);
+  const handleClickMotor = (client) => {
+    navigate("/agent/createlead", withClient(client));
+  };
+
+  const handleClickFireAndAlliedPerils = (client) => {
+    navigate("/agent/createlead/fire-allied-perils", withClient(client));
+  };
+
+  const handleClickIar = (client) => {
+    navigate("/agent/createlead/iar", withClient(client));
+  };
+
+  const handleClickEmployeeBenefit = (client) => {
+    navigate("/agent/createlead/employee-benefit", withClient(client));
+  };
+
+  // travel and householder are package products: Quick Quote lists them with the way to quote each
+  const handleClickPackageProduct = () => {
+    navigate("/sales/quick-quote");
+  };
+
+  const prospectProducts = [
+    { value: "Motor", label: t("dashboard.Motor"), open: handleClickMotor },
+    { value: "Fire", label: t("dashboard.Fire and Allied Perils", "Fire and Allied Perils"), open: handleClickFireAndAlliedPerils },
+    { value: "IAR", label: t("dashboard.Industrial All Risks", "Industrial All Risks"), open: handleClickIar },
+    { value: "EB", label: t("dashboard.Employee Benefit"), open: handleClickEmployeeBenefit },
+    { value: "Package", label: t("prospectChooser.packageProducts"), open: () => handleClickPackageProduct() },
   ];
-
-  const handleClickMotor = () => {
-    navigate("/agent/createlead");
-  };
-
-  const handleClickFireAndAlliedPerils = () => {
-    navigate("/agent/createlead/fire-allied-perils");
-  };
-
-  const handleClickIar = () => {
-    navigate("/agent/createlead/iar");
-  };
-
-  const handleClickEmployeeBenefit = () => {
-    navigate("/agent/createlead/employee-benefit");
-  };
 
   const handleBulkUploadSuccess = () => {
     // Refresh the leads table by updating key
@@ -257,7 +109,6 @@ const LeadListing = () => {
         throw new Error(result.error || t("leads.reportFailedDetail"));
       }
     } catch (error) {
-      console.error("Generate report error:", error);
       toast.current.show({
         severity: "error",
         summary: t("leads.reportFailed"),
@@ -289,13 +140,13 @@ const LeadListing = () => {
     <div className="leadlisting__overal__container">
       <Toast ref={toast} />
       <div className="grid mt-3">
-        <div className="col-12 md:col-6 lg:col-6">
+        <div className="col-12 md:col-4 lg:col-4">
           <label className="leadlisting__overal__container__title">{t("leads.title")}</label>
         </div>
-        <div className="col-12 md:col-6 lg:col-6">
+        <div className="col-12 md:col-8 lg:col-8">
           <div
             className="btn_lable_save_container"
-            style={{ display: "flex", gap: "10px" }}
+            style={{ display: "flex", gap: "10px", justifyContent: "flex-end", flexWrap: "wrap" }}
           >
             <Button
               label={t("leads.bulkUpload")}
@@ -315,13 +166,7 @@ const LeadListing = () => {
               disabled={isGeneratingReport}
               loading={isGeneratingReport}
             />
-            <Dropdown
-              value={selectedOption}
-              options={dropdownOptions}
-              // onChange={(e) => setSelectedOption(e.value)}
-              placeholder={t("leads.createLead")}
-              dropdownIcon={<SvgAdd />}
-            />
+            <Button label={t("leads.createLead")} icon="pi pi-plus" onClick={() => setShowCreate(true)} />
           </div>
         </div>
       </div>
@@ -334,7 +179,8 @@ const LeadListing = () => {
         />
       </div>
       <LeadStatsCards />
-      <LeadListingCard key={refreshKey} />
+      <ProspectTable key={refreshKey} />
+      <CreateProspectDialog visible={showCreate} onHide={() => setShowCreate(false)} products={prospectProducts} />
       <BulkUploadModal
         visible={showBulkUpload}
         onHide={() => setShowBulkUpload(false)}

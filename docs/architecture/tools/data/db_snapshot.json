@@ -1,0 +1,5327 @@
+{
+ "collectedAt": "2026-09-29T16:04:56+00:00",
+ "database": "brokerverse_arch",
+ "version": "16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)",
+ "timezone": "Asia/Manila",
+ "sizeBytes": 21683223,
+ "extensions": [
+  {
+   "name": "pgcrypto",
+   "version": "1.3"
+  },
+  {
+   "name": "plpgsql",
+   "version": "1.0"
+  }
+ ],
+ "functions": [
+  "accounting_period_lock_guard",
+  "backfill_risk_participants",
+  "document_numbering_mirror_prefix",
+  "format_document_number",
+  "gl_accounts_defaults",
+  "jv_check_posting",
+  "next_document_number",
+  "next_number",
+  "numbering_business_date",
+  "numbering_fiscal_year",
+  "numbering_optional_token",
+  "numbering_period_key",
+  "numbering_prefix",
+  "pe_balance_before",
+  "quotes_link_product",
+  "rp_insurer_id",
+  "rp_parts_from_doc",
+  "rp_share",
+  "rp_write_split",
+  "rpt_age_bucket",
+  "set_updated_at",
+  "user_effective_roles"
+ ],
+ "triggers": [
+  {
+   "name": "accounting_period_lock_guard_trg",
+   "table": "accounting_periods"
+  },
+  {
+   "name": "commission_rates_updated",
+   "table": "commission_rates"
+  },
+  {
+   "name": "document_numbering_mirror",
+   "table": "document_numbering"
+  },
+  {
+   "name": "document_numbering_updated",
+   "table": "document_numbering"
+  },
+  {
+   "name": "gl_accounts_defaults_trg",
+   "table": "gl_accounts"
+  },
+  {
+   "name": "jv_check_posting_trg",
+   "table": "journal_vouchers"
+  },
+  {
+   "name": "quotes_link_product",
+   "table": "quotes"
+  },
+  {
+   "name": "roles_updated",
+   "table": "roles"
+  },
+  {
+   "name": "users_updated",
+   "table": "users"
+  }
+ ],
+ "views": [
+  "bank_account_links",
+  "bank_book_lines"
+ ],
+ "sequences": [
+  "audit_log_id_seq",
+  "bank_rec_match_items_id_seq",
+  "bank_reconciliation_history_id_seq",
+  "banks_id_seq",
+  "branches_id_seq",
+  "cessions_id_seq",
+  "cities_id_seq",
+  "claim_field_changes_id_seq",
+  "claim_history_id_seq",
+  "claim_settlement_movements_id_seq",
+  "collection_actions_id_seq",
+  "commission_adjustments_id_seq",
+  "commission_debit_note_lines_id_seq",
+  "commission_rates_id_seq",
+  "countries_id_seq",
+  "coverages_id_seq",
+  "currencies_id_seq",
+  "districts_id_seq",
+  "document_numbering_id_seq",
+  "email_outbox_id_seq",
+  "incentive_programs_id_seq",
+  "incentive_results_id_seq",
+  "insurance_companies_id_seq",
+  "insurer_refund_credits_id_seq",
+  "job_queue_id_seq",
+  "job_runs_id_seq",
+  "journal_lines_id_seq",
+  "login_history_id_seq",
+  "master_records_id_seq",
+  "password_history_id_seq",
+  "password_resets_id_seq",
+  "period_close_entries_id_seq",
+  "period_close_run_checks_id_seq",
+  "period_status_history_id_seq",
+  "permissions_id_seq",
+  "petty_cash_request_lines_id_seq",
+  "policy_types_id_seq",
+  "postal_codes_id_seq",
+  "posting_rule_lines_id_seq",
+  "posting_rules_id_seq",
+  "product_components_id_seq",
+  "product_templates_id_seq",
+  "products_id_seq",
+  "receipt_applications_id_seq",
+  "receivable_credits_id_seq",
+  "recurring_journal_runs_id_seq",
+  "reinsurance_treaties_id_seq",
+  "remittance_allocations_id_seq",
+  "remittance_approvals_id_seq",
+  "remittance_delegations_id_seq",
+  "remittance_lines_id_seq",
+  "renewal_activities_id_seq",
+  "renewal_batch_policies_id_seq",
+  "renewal_notices_id_seq",
+  "risk_participants_id_seq",
+  "roles_id_seq",
+  "scheduled_jobs_id_seq",
+  "signatories_id_seq",
+  "states_id_seq",
+  "vehicle_brands_id_seq",
+  "vehicle_models_id_seq",
+  "vehicle_variants_id_seq",
+  "write_off_reasons_id_seq"
+ ],
+ "migrations": [
+  {
+   "name": "0001_core.sql",
+   "appliedAt": "2026-09-29 23:53:01.988446+08"
+  },
+  {
+   "name": "0002_masters.sql",
+   "appliedAt": "2026-09-29 23:53:02.033117+08"
+  },
+  {
+   "name": "0003_operations.sql",
+   "appliedAt": "2026-09-29 23:53:02.06946+08"
+  },
+  {
+   "name": "0004_finance.sql",
+   "appliedAt": "2026-09-29 23:53:02.119647+08"
+  },
+  {
+   "name": "0010_sales.sql",
+   "appliedAt": "2026-09-29 23:53:02.169715+08"
+  },
+  {
+   "name": "0020_claims.sql",
+   "appliedAt": "2026-09-29 23:53:02.191559+08"
+  },
+  {
+   "name": "0021_renewals.sql",
+   "appliedAt": "2026-09-29 23:53:02.199513+08"
+  },
+  {
+   "name": "0030_ledger.sql",
+   "appliedAt": "2026-09-29 23:53:02.226379+08"
+  },
+  {
+   "name": "0031_receipts_collections.sql",
+   "appliedAt": "2026-09-29 23:53:02.251449+08"
+  },
+  {
+   "name": "0032_disbursements.sql",
+   "appliedAt": "2026-09-29 23:53:02.274552+08"
+  },
+  {
+   "name": "0033_commission.sql",
+   "appliedAt": "2026-09-29 23:53:02.287839+08"
+  },
+  {
+   "name": "0034_petty_cash_open_items.sql",
+   "appliedAt": "2026-09-29 23:53:02.294828+08"
+  },
+  {
+   "name": "0040_config_masters.sql",
+   "appliedAt": "2026-09-29 23:53:02.334428+08"
+  },
+  {
+   "name": "0041_product_configurator.sql",
+   "appliedAt": "2026-09-29 23:53:02.363229+08"
+  },
+  {
+   "name": "0042_remittance.sql",
+   "appliedAt": "2026-09-29 23:53:02.378831+08"
+  },
+  {
+   "name": "0043_reinsurance.sql",
+   "appliedAt": "2026-09-29 23:53:02.395781+08"
+  },
+  {
+   "name": "0044_incentive.sql",
+   "appliedAt": "2026-09-29 23:53:02.419024+08"
+  },
+  {
+   "name": "0050_reports.sql",
+   "appliedAt": "2026-09-29 23:53:02.425783+08"
+  },
+  {
+   "name": "0060_security.sql",
+   "appliedAt": "2026-09-29 23:53:02.437508+08"
+  },
+  {
+   "name": "0070_policy_payments.sql",
+   "appliedAt": "2026-09-29 23:53:02.446861+08"
+  },
+  {
+   "name": "0080_chart_of_accounts.sql",
+   "appliedAt": "2026-09-29 23:53:02.453045+08"
+  },
+  {
+   "name": "0081_direct_bill.sql",
+   "appliedAt": "2026-09-29 23:53:02.456211+08"
+  },
+  {
+   "name": "0082_policy_product_backfill.sql",
+   "appliedAt": "2026-09-29 23:53:02.479747+08"
+  },
+  {
+   "name": "0083_insurer_remittance_label.sql",
+   "appliedAt": "2026-09-29 23:53:02.482587+08"
+  },
+  {
+   "name": "0084_finance_only_receipts.sql",
+   "appliedAt": "2026-09-29 23:53:02.484069+08"
+  },
+  {
+   "name": "0085_seeded_agency_bill_insurer.sql",
+   "appliedAt": "2026-09-29 23:53:02.485354+08"
+  },
+  {
+   "name": "0090_security_hardening.sql",
+   "appliedAt": "2026-09-29 23:53:02.486845+08"
+  },
+  {
+   "name": "0091_least_privilege_reads.sql",
+   "appliedAt": "2026-09-29 23:53:02.49049+08"
+  },
+  {
+   "name": "0095_finance_incentive.sql",
+   "appliedAt": "2026-09-29 23:53:02.492009+08"
+  },
+  {
+   "name": "0096_notification_audience.sql",
+   "appliedAt": "2026-09-29 23:53:02.492793+08"
+  },
+  {
+   "name": "0097_principal_insurer.sql",
+   "appliedAt": "2026-09-29 23:53:02.494687+08"
+  },
+  {
+   "name": "0110_brokerverse_ootb_branding.sql",
+   "appliedAt": "2026-09-29 23:53:02.495901+08"
+  },
+  {
+   "name": "0111_quote_product_link.sql",
+   "appliedAt": "2026-09-29 23:53:02.497051+08"
+  },
+  {
+   "name": "0112_company_letterhead.sql",
+   "appliedAt": "2026-09-29 23:53:02.499035+08"
+  },
+  {
+   "name": "0113_print_data_fixes.sql",
+   "appliedAt": "2026-09-29 23:53:02.502701+08"
+  },
+  {
+   "name": "0115_role_inheritance.sql",
+   "appliedAt": "2026-09-29 23:53:02.504614+08"
+  },
+  {
+   "name": "0116_bank_reconciliation.sql",
+   "appliedAt": "2026-09-29 23:53:02.506173+08"
+  },
+  {
+   "name": "0117_bank_lines_from_remittance.sql",
+   "appliedAt": "2026-09-29 23:53:02.57815+08"
+  },
+  {
+   "name": "0120_risk_participants.sql",
+   "appliedAt": "2026-09-29 23:53:02.58104+08"
+  },
+  {
+   "name": "0121_document_numbering.sql",
+   "appliedAt": "2026-09-29 23:53:02.589924+08"
+  },
+  {
+   "name": "0122_commission_rates.sql",
+   "appliedAt": "2026-09-29 23:53:02.602564+08"
+  },
+  {
+   "name": "0123_insurer_credit_terms.sql",
+   "appliedAt": "2026-09-29 23:53:02.606995+08"
+  },
+  {
+   "name": "0125_placement_journey.sql",
+   "appliedAt": "2026-09-29 23:53:02.61046+08"
+  },
+  {
+   "name": "0126_risk_participants_backfill.sql",
+   "appliedAt": "2026-09-29 23:53:02.638684+08"
+  },
+  {
+   "name": "0127_placement_reports.sql",
+   "appliedAt": "2026-09-29 23:53:02.642904+08"
+  },
+  {
+   "name": "0130_posting_rules.sql",
+   "appliedAt": "2026-09-29 23:53:02.644714+08"
+  },
+  {
+   "name": "0131_posting_rules_seed.sql",
+   "appliedAt": "2026-09-29 23:53:02.672732+08"
+  },
+  {
+   "name": "0132_coinsurance_reports.sql",
+   "appliedAt": "2026-09-29 23:53:02.684146+08"
+  },
+  {
+   "name": "0135_period_end.sql",
+   "appliedAt": "2026-09-29 23:53:02.685485+08"
+  },
+  {
+   "name": "0136_tax_codes.sql",
+   "appliedAt": "2026-09-29 23:53:02.741433+08"
+  },
+  {
+   "name": "0140_broker_roles.sql",
+   "appliedAt": "2026-09-29 23:53:02.756427+08"
+  },
+  {
+   "name": "0145_business_date_defaults.sql",
+   "appliedAt": "2026-09-29 23:53:02.761998+08"
+  },
+  {
+   "name": "0146_foreign_key_indexes.sql",
+   "appliedAt": "2026-09-29 23:53:02.776889+08"
+  },
+  {
+   "name": "0147_ootb_branding_cleanup.sql",
+   "appliedAt": "2026-09-29 23:53:02.876003+08"
+  },
+  {
+   "name": "0148_accounting_followups.sql",
+   "appliedAt": "2026-09-29 23:53:02.877296+08"
+  },
+  {
+   "name": "0150_ootb_defaults.sql",
+   "appliedAt": "2026-09-29 23:53:02.895328+08"
+  },
+  {
+   "name": "0151_go_live_imports.sql",
+   "appliedAt": "2026-09-29 23:53:02.89677+08"
+  },
+  {
+   "name": "0152_email_sender.sql",
+   "appliedAt": "2026-09-29 23:53:02.899692+08"
+  }
+ ],
+ "settingsByGroup": {
+  "accounting": 52,
+  "bank_reconciliation": 6,
+  "bir": 6,
+  "branding": 6,
+  "claims": 16,
+  "collections": 7,
+  "commission": 8,
+  "currency": 4,
+  "dashboard": 3,
+  "direct_bill": 10,
+  "documents": 4,
+  "email": 7,
+  "endorsements": 1,
+  "finance": 5,
+  "general": 11,
+  "housekeeping": 9,
+  "incentive": 5,
+  "leads": 5,
+  "limits": 7,
+  "notification": 5,
+  "numbering": 52,
+  "placement": 8,
+  "policies": 3,
+  "policy": 4,
+  "premium": 3,
+  "product": 4,
+  "quotations": 7,
+  "quote": 4,
+  "reinsurance": 6,
+  "remittance": 13,
+  "renewals": 23,
+  "reports": 19,
+  "security": 18,
+  "system": 1,
+  "tax": 5,
+  "uploads": 4
+ },
+ "numberSequences": [
+  {
+   "name": "adjustment",
+   "period": "2026",
+   "value": 4
+  },
+  {
+   "name": "bank_statement",
+   "period": "2026",
+   "value": 1
+  },
+  {
+   "name": "bank_txn",
+   "period": "2026",
+   "value": 5
+  },
+  {
+   "name": "bordereau",
+   "period": "2026",
+   "value": 2
+  },
+  {
+   "name": "cession",
+   "period": "2026",
+   "value": 13
+  },
+  {
+   "name": "disbursement_txn",
+   "period": "2026",
+   "value": 16
+  },
+  {
+   "name": "incentive_calc",
+   "period": "2026",
+   "value": 4
+  },
+  {
+   "name": "invoice_list",
+   "period": "2026",
+   "value": 5
+  },
+  {
+   "name": "journal",
+   "period": "2026",
+   "value": 86
+  },
+  {
+   "name": "petty_cash",
+   "period": "2026",
+   "value": 3
+  },
+  {
+   "name": "petty_cash_request",
+   "period": "2026",
+   "value": 2
+  },
+  {
+   "name": "receipt",
+   "period": "2026",
+   "value": 18
+  },
+  {
+   "name": "receipt_txn",
+   "period": "2026",
+   "value": 23
+  },
+  {
+   "name": "remittance",
+   "period": "2026",
+   "value": 17
+  },
+  {
+   "name": "remittance_batch",
+   "period": "2026",
+   "value": 2
+  },
+  {
+   "name": "remittance_bill",
+   "period": "2026",
+   "value": 3
+  },
+  {
+   "name": "remittance_exception",
+   "period": "2026",
+   "value": 4
+  },
+  {
+   "name": "remittance_notice",
+   "period": "2026",
+   "value": 3
+  },
+  {
+   "name": "renewal",
+   "period": "2026",
+   "value": 1
+  },
+  {
+   "name": "ri_reconciliation",
+   "period": "2026",
+   "value": 2
+  },
+  {
+   "name": "ri_recovery",
+   "period": "2026",
+   "value": 6
+  },
+  {
+   "name": "settlement",
+   "period": "2026",
+   "value": 1
+  },
+  {
+   "name": "transfer",
+   "period": "2026",
+   "value": 4
+  },
+  {
+   "name": "voucher",
+   "period": "2026",
+   "value": 16
+  }
+ ],
+ "scheduledJobs": [
+  {
+   "code": "bank-auto-match",
+   "cron": "45 5 * * *",
+   "handler": "bankAutoMatch",
+   "enabled": "f"
+  },
+  {
+   "code": "month-end-reminder",
+   "cron": "0 8 * * *",
+   "handler": "monthEndReminder",
+   "enabled": "f"
+  },
+  {
+   "code": "recurring-journals",
+   "cron": "15 1 * * *",
+   "handler": "recurringJournals",
+   "enabled": "f"
+  },
+  {
+   "code": "accrual-reversal",
+   "cron": "30 0 1 * *",
+   "handler": "accrualReversal",
+   "enabled": "f"
+  },
+  {
+   "code": "period-auto-soft-close",
+   "cron": "0 2 * * *",
+   "handler": "periodAutoSoftClose",
+   "enabled": "f"
+  },
+  {
+   "code": "renewal-notices",
+   "cron": "0 6 * * *",
+   "handler": "renewalNotices",
+   "enabled": "t"
+  },
+  {
+   "code": "policy-expiry",
+   "cron": "15 0 * * *",
+   "handler": "policyExpiry",
+   "enabled": "t"
+  },
+  {
+   "code": "quote-expiry",
+   "cron": "30 0 * * *",
+   "handler": "quoteExpiry",
+   "enabled": "t"
+  },
+  {
+   "code": "receivable-ageing",
+   "cron": "0 7 * * *",
+   "handler": "receivableAgeing",
+   "enabled": "t"
+  },
+  {
+   "code": "daily-reports",
+   "cron": "0 5 * * *",
+   "handler": "dailyReports",
+   "enabled": "t"
+  },
+  {
+   "code": "email-outbox",
+   "cron": "*/5 * * * *",
+   "handler": "emailOutbox",
+   "enabled": "t"
+  },
+  {
+   "code": "renewal-queue",
+   "cron": "* * * * *",
+   "handler": "processRenewalQueue",
+   "enabled": "t"
+  },
+  {
+   "code": "renewal-pipeline",
+   "cron": "30 5 * * *",
+   "handler": "renewalPipeline",
+   "enabled": "t"
+  },
+  {
+   "code": "collection-reminders",
+   "cron": "0 8 * * *",
+   "handler": "collectionReminders",
+   "enabled": "t"
+  },
+  {
+   "code": "housekeeping",
+   "cron": "45 2 * * *",
+   "handler": "housekeeping",
+   "enabled": "t"
+  }
+ ],
+ "indexCount": 448,
+ "uniqueIndexCount": 229,
+ "partialIndexes": [
+  "bank_rec_match_items_bank_uq",
+  "bank_rec_match_items_book_uq",
+  "bank_rec_matches_account_idx",
+  "bank_reconciliations_active_uq",
+  "bank_statement_lines_account_idx",
+  "bank_statement_lines_hash_uq",
+  "bank_statements_account_idx",
+  "bank_statements_file_uq",
+  "bir_2307_active_uq",
+  "cessions_number_uq",
+  "clients_lead_uidx",
+  "commissions_policy_referrer_uq",
+  "direct_bill_items_open_idx",
+  "document_numbering_active_prefix",
+  "entry_matches_credit_idx",
+  "entry_matches_debit_idx",
+  "incentive_programs_code_uq",
+  "master_records_code_uq",
+  "period_close_entries_due_idx",
+  "period_close_runs_active_uq",
+  "policies_billing_mode_idx",
+  "product_components_code_uq",
+  "product_templates_code_uq",
+  "receivables_opening_reference_uq",
+  "recurring_journal_runs_uq",
+  "recurring_journals_due_idx",
+  "refresh_tokens_user_idx",
+  "reinsurance_treaties_number_uq",
+  "remittance_approvals_open_uq",
+  "renewals_open_policy_uq",
+  "risk_participants_one_lead",
+  "tax_codes_atc_uq",
+  "year_end_runs_active_uq"
+ ],
+ "ginIndexes": [
+  "master_records_data_idx"
+ ],
+ "columnTypes": {
+  "text": 1320,
+  "timestamp with time zone": 310,
+  "numeric": 256,
+  "integer": 139,
+  "date": 99,
+  "jsonb": 92,
+  "bigint": 47,
+  "boolean": 44,
+  "ARRAY": 5
+ },
+ "tables": {
+  "accounting_periods": {
+   "columns": 16,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "period"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "fiscal_year",
+     "refTable": "fiscal_years",
+     "refColumn": "code",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "agent_events": {
+   "columns": 10,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('evt_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "app_settings": {
+   "columns": 8,
+   "totalBytes": 147456,
+   "heapBytes": 73728,
+   "indexes": 1,
+   "pk": [
+    "key"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "value"
+   ],
+   "rows": 351,
+   "avgRowBytes": 199,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "audit_log": {
+   "columns": 10,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "before_data",
+    "after_data"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('audit_log_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "bank_match_rules": {
+   "columns": 10,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "params"
+   ],
+   "rows": 6,
+   "avgRowBytes": 200,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "bank_rec_match_items": {
+   "columns": 7,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "bank_line_id",
+     "refTable": "bank_statement_lines",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_line_id",
+     "refTable": "journal_lines",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "match_id",
+     "refTable": "bank_rec_matches",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('bank_rec_match_items_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "bank_rec_matches": {
+   "columns": 18,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('brm_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "bank_reconciliation_history": {
+   "columns": 7,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "rec_id",
+     "refTable": "bank_reconciliations",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('bank_reconciliation_history_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "bank_reconciliations": {
+   "columns": 34,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "rec_number"
+   ],
+   "fks": [],
+   "jsonb": [
+    "snapshot"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('brc_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "bank_statement_formats": {
+   "columns": 17,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "columns"
+   ],
+   "rows": 4,
+   "avgRowBytes": 624,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "bank_statement_lines": {
+   "columns": 28,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "txn_number"
+   ],
+   "fks": [
+    {
+     "column": "statement_id",
+     "refTable": "bank_statements",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 9,
+   "avgRowBytes": 253,
+   "idDefault": "('bsl_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "bank_statements": {
+   "columns": 23,
+   "totalBytes": 73728,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "statement_number"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 1,
+   "avgRowBytes": 264,
+   "idDefault": "('bst_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": "deleted_at"
+  },
+  "bank_transaction_types": {
+   "columns": 17,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 7,
+   "avgRowBytes": 240,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "banks": {
+   "columns": 10,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 6,
+   "avgRowBytes": 325,
+   "idDefault": "nextval('banks_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "bir_2307_certificates": {
+   "columns": 23,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "cert_number"
+   ],
+   "fks": [],
+   "jsonb": [
+    "lines"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('cwt_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "branches": {
+   "columns": 10,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 3,
+   "avgRowBytes": 293,
+   "idDefault": "nextval('branches_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "broker_slips": {
+   "columns": 26,
+   "totalBytes": 147456,
+   "heapBytes": 8192,
+   "indexes": 8,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "slip_number"
+   ],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "lead_id",
+     "refTable": "leads",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "owner_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "quote_id",
+     "refTable": "quotes",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "risk_details",
+    "doc",
+    "requested_covers"
+   ],
+   "rows": 2,
+   "avgRowBytes": 748,
+   "idDefault": "('bs_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "cessions": {
+   "columns": 26,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "facultative_reinsurer_id",
+     "refTable": "reinsurers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "treaty_id",
+     "refTable": "reinsurance_treaties",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 13,
+   "avgRowBytes": 251,
+   "idDefault": "nextval('cessions_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "checkbooks": {
+   "columns": 19,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "disbursement_id",
+     "refTable": "disbursements",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "invoice_list_id",
+     "refTable": "invoice_lists",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 3,
+   "avgRowBytes": 259,
+   "idDefault": "('chk_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "cities": {
+   "columns": 9,
+   "totalBytes": 65536,
+   "heapBytes": 16384,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "state_id",
+     "refTable": "states",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 49,
+   "avgRowBytes": 135,
+   "idDefault": "nextval('cities_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "claim_field_changes": {
+   "columns": 9,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "claim_id",
+     "refTable": "claims",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 48,
+   "avgRowBytes": 122,
+   "idDefault": "nextval('claim_field_changes_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "claim_history": {
+   "columns": 6,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "claim_id",
+     "refTable": "claims",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 48,
+   "avgRowBytes": 88,
+   "idDefault": "nextval('claim_history_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "claim_settlement_movements": {
+   "columns": 14,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "claim_id",
+     "refTable": "claims",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('claim_settlement_movements_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "claims": {
+   "columns": 41,
+   "totalBytes": 131072,
+   "heapBytes": 8192,
+   "indexes": 7,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "claim_number"
+   ],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "handler_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "details",
+    "driver",
+    "third_party",
+    "policy_info",
+    "adjuster",
+    "settlement"
+   ],
+   "rows": 15,
+   "avgRowBytes": 462,
+   "idDefault": "('clm_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "clients": {
+   "columns": 33,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "client_code"
+   ],
+   "fks": [
+    {
+     "column": "lead_id",
+     "refTable": "leads",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "owner_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "extra"
+   ],
+   "rows": 20,
+   "avgRowBytes": 287,
+   "idDefault": "('cl_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "collection_actions": {
+   "columns": 9,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "collection_id",
+     "refTable": "collection_items",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 5,
+   "avgRowBytes": 137,
+   "idDefault": "nextval('collection_actions_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "collection_items": {
+   "columns": 14,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "receivable_id"
+   ],
+   "fks": [
+    {
+     "column": "assigned_to",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receivable_id",
+     "refTable": "receivables",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 28,
+   "avgRowBytes": 106,
+   "idDefault": "('col_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "commission_adjustments": {
+   "columns": 13,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "commission_id",
+     "refTable": "commissions",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('commission_adjustments_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "commission_debit_note_collections": {
+   "columns": 16,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "collection_number"
+   ],
+   "fks": [
+    {
+     "column": "debit_note_id",
+     "refTable": "commission_debit_notes",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('dnc_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "commission_debit_note_lines": {
+   "columns": 16,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "debit_note_id",
+     "refTable": "commission_debit_notes",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    },
+    {
+     "column": "item_id",
+     "refTable": "direct_bill_items",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('commission_debit_note_lines_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "commission_debit_notes": {
+   "columns": 34,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "dn_number"
+   ],
+   "fks": [
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('dn_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "commission_rates": {
+   "columns": 14,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('commission_rates_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "commission_referrers": {
+   "columns": 17,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "parent_referrer_id",
+     "refTable": "commission_referrers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [],
+   "rows": 8,
+   "avgRowBytes": 181,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "commissions": {
+   "columns": 44,
+   "totalBytes": 204800,
+   "heapBytes": 24576,
+   "indexes": 9,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "accrual_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "agent_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "disbursement_id",
+     "refTable": "disbursements",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "endorsement_id",
+     "refTable": "endorsements",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "payment_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "quote_id",
+     "refTable": "quotes",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "referrer_id",
+     "refTable": "commission_referrers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 22,
+   "avgRowBytes": 359,
+   "idDefault": "('cm_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "countries": {
+   "columns": 9,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 5,
+   "avgRowBytes": 141,
+   "idDefault": "nextval('countries_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "coverages": {
+   "columns": 12,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "policy_type_id",
+     "refTable": "policy_types",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 11,
+   "avgRowBytes": 107,
+   "idDefault": "nextval('coverages_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "currencies": {
+   "columns": 13,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 5,
+   "avgRowBytes": 221,
+   "idDefault": "nextval('currencies_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "direct_bill_items": {
+   "columns": 20,
+   "totalBytes": 65536,
+   "heapBytes": 0,
+   "indexes": 7,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "booking_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "debit_note_id",
+     "refTable": "commission_debit_notes",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "endorsement_id",
+     "refTable": "endorsements",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "reversal_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('dbi_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "disbursements": {
+   "columns": 39,
+   "totalBytes": 196608,
+   "heapBytes": 16384,
+   "indexes": 9,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "voucher_number"
+   ],
+   "fks": [
+    {
+     "column": "bank_id",
+     "refTable": "banks",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 16,
+   "avgRowBytes": 374,
+   "idDefault": "('pv_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "districts": {
+   "columns": 5,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "city_id,name"
+   ],
+   "fks": [
+    {
+     "column": "city_id",
+     "refTable": "cities",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 26,
+   "avgRowBytes": 54,
+   "idDefault": "nextval('districts_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "document_numbering": {
+   "columns": 15,
+   "totalBytes": 98304,
+   "heapBytes": 16384,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 52,
+   "avgRowBytes": 182,
+   "idDefault": "nextval('document_numbering_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "documents": {
+   "columns": 11,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "storage_key"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('doc_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "email_outbox": {
+   "columns": 13,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('email_outbox_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "endorsements": {
+   "columns": 25,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "endorsement_number"
+   ],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receivable_id",
+     "refTable": "receivables",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "changes",
+    "endorsement_type_ids",
+    "completion"
+   ],
+   "rows": 3,
+   "avgRowBytes": 298,
+   "idDefault": "('end_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "entry_matches": {
+   "columns": 14,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "credit_line_id",
+     "refTable": "journal_lines",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "debit_line_id",
+     "refTable": "journal_lines",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "write_off_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('mt_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "fiscal_years": {
+   "columns": 10,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "generated_reports": {
+   "columns": 17,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "params",
+    "totals"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('rpt_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "gl_accounts": {
+   "columns": 13,
+   "totalBytes": 90112,
+   "heapBytes": 24576,
+   "indexes": 2,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "parent_code",
+     "refTable": "gl_accounts",
+     "refColumn": "code",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [],
+   "rows": 129,
+   "avgRowBytes": 173,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "incentive_calculations": {
+   "columns": 23,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "batch_id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "approved_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "created_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "rejected_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "submitted_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "programs_included"
+   ],
+   "rows": 4,
+   "avgRowBytes": 244,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "incentive_programs": {
+   "columns": 22,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "applicable_to",
+    "structure",
+    "eligibility"
+   ],
+   "rows": 4,
+   "avgRowBytes": 606,
+   "idDefault": "nextval('incentive_programs_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "incentive_results": {
+   "columns": 16,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "program_id,agent_user_id,period"
+   ],
+   "fks": [
+    {
+     "column": "agent_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "calculation_id",
+     "refTable": "incentive_calculations",
+     "refColumn": "batch_id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    },
+    {
+     "column": "program_id",
+     "refTable": "incentive_programs",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 18,
+   "avgRowBytes": 159,
+   "idDefault": "nextval('incentive_results_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "insurance_companies": {
+   "columns": 19,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 13,
+   "avgRowBytes": 332,
+   "idDefault": "nextval('insurance_companies_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "insurer_offers": {
+   "columns": 26,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "offer_number",
+    "broker_slip_id,insurance_company_id"
+   ],
+   "fks": [
+    {
+     "column": "broker_slip_id",
+     "refTable": "broker_slips",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 5,
+   "avgRowBytes": 222,
+   "idDefault": "('ofr_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "insurer_refund_credits": {
+   "columns": 16,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "split",
+    "applications"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('insurer_refund_credits_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "invoice_lists": {
+   "columns": 28,
+   "totalBytes": 147456,
+   "heapBytes": 8192,
+   "indexes": 8,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "invoice_number"
+   ],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "disbursement_id",
+     "refTable": "disbursements",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receipt_id",
+     "refTable": "receipts",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 5,
+   "avgRowBytes": 262,
+   "idDefault": "('il_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "job_queue": {
+   "columns": 13,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "payload",
+    "progress",
+    "result"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('job_queue_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "job_runs": {
+   "columns": 8,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "job_id",
+     "refTable": "scheduled_jobs",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "output"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('job_runs_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "journal_lines": {
+   "columns": 24,
+   "totalBytes": 155648,
+   "heapBytes": 40960,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 210,
+   "avgRowBytes": 185,
+   "idDefault": "nextval('journal_lines_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "journal_vouchers": {
+   "columns": 37,
+   "totalBytes": 270336,
+   "heapBytes": 65536,
+   "indexes": 10,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "jv_number"
+   ],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "correction_of",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "posting_rule_id",
+     "refTable": "posting_rules",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "reversal_of",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "reversed_by_jv",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 86,
+   "avgRowBytes": 334,
+   "idDefault": "('jv_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "leads": {
+   "columns": 38,
+   "totalBytes": 131072,
+   "heapBytes": 8192,
+   "indexes": 7,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "lead_number"
+   ],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "owner_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "extra"
+   ],
+   "rows": 16,
+   "avgRowBytes": 334,
+   "idDefault": "('ld_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": "deleted_at"
+  },
+  "login_history": {
+   "columns": 9,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "SET NULL",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('login_history_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "master_records": {
+   "columns": 10,
+   "totalBytes": 450560,
+   "heapBytes": 139264,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "type_code",
+     "refTable": "master_types",
+     "refColumn": "code",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "data"
+   ],
+   "rows": 319,
+   "avgRowBytes": 394,
+   "idDefault": "nextval('master_records_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "master_types": {
+   "columns": 18,
+   "totalBytes": 106496,
+   "heapBytes": 57344,
+   "indexes": 1,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "fields",
+    "unique_keys"
+   ],
+   "rows": 53,
+   "avgRowBytes": 915,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "notifications": {
+   "columns": 13,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('ntf_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "opening_balances": {
+   "columns": 5,
+   "totalBytes": 16384,
+   "heapBytes": 0,
+   "indexes": 1,
+   "pk": [
+    "fiscal_year",
+    "account_code"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "account_code",
+     "refTable": "gl_accounts",
+     "refColumn": "code",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "fiscal_year",
+     "refTable": "fiscal_years",
+     "refColumn": "code",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "password_history": {
+   "columns": 4,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('password_history_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "password_resets": {
+   "columns": 8,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('password_resets_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "period_close_checklist": {
+   "columns": 12,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 11,
+   "avgRowBytes": 220,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "period_close_entries": {
+   "columns": 13,
+   "totalBytes": 49152,
+   "heapBytes": 0,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "reversal_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "run_id",
+     "refTable": "period_close_runs",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('period_close_entries_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "period_close_run_checks": {
+   "columns": 16,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "run_id,code"
+   ],
+   "fks": [
+    {
+     "column": "run_id",
+     "refTable": "period_close_runs",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "detail"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('period_close_run_checks_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "period_close_runs": {
+   "columns": 21,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "run_number"
+   ],
+   "fks": [
+    {
+     "column": "period",
+     "refTable": "accounting_periods",
+     "refColumn": "period",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "steps"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('pcr_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "period_status_history": {
+   "columns": 10,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('period_status_history_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "permissions": {
+   "columns": 4,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 56,
+   "avgRowBytes": 78,
+   "idDefault": "nextval('permissions_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "petty_cash_disbursements": {
+   "columns": 20,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "transaction_number"
+   ],
+   "fks": [
+    {
+     "column": "fund_id",
+     "refTable": "petty_cash_funds",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "request_id",
+     "refTable": "petty_cash_requests",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 1,
+   "avgRowBytes": 256,
+   "idDefault": "('pcd_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "petty_cash_funds": {
+   "columns": 22,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [
+    {
+     "column": "custodian_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [],
+   "rows": 2,
+   "avgRowBytes": 220,
+   "idDefault": "('pcf_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "petty_cash_receipts": {
+   "columns": 17,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "receipt_number"
+   ],
+   "fks": [
+    {
+     "column": "fund_id",
+     "refTable": "petty_cash_funds",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('pcrc_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "petty_cash_replenishments": {
+   "columns": 15,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "transaction_number"
+   ],
+   "fks": [
+    {
+     "column": "fund_id",
+     "refTable": "petty_cash_funds",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('pcp_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "petty_cash_request_lines": {
+   "columns": 5,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "request_id",
+     "refTable": "petty_cash_requests",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 3,
+   "avgRowBytes": 96,
+   "idDefault": "nextval('petty_cash_request_lines_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "petty_cash_requests": {
+   "columns": 19,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "request_number"
+   ],
+   "fks": [
+    {
+     "column": "fund_id",
+     "refTable": "petty_cash_funds",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "requester_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 2,
+   "avgRowBytes": 208,
+   "idDefault": "('pcr_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "placements": {
+   "columns": 41,
+   "totalBytes": 212992,
+   "heapBytes": 8192,
+   "indexes": 12,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "placement_number"
+   ],
+   "fks": [
+    {
+     "column": "broker_slip_id",
+     "refTable": "broker_slips",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "lead_id",
+     "refTable": "leads",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "owner_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_type_id",
+     "refTable": "policy_types",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "quote_id",
+     "refTable": "quotes",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "doc"
+   ],
+   "rows": 1,
+   "avgRowBytes": 512,
+   "idDefault": "('plc_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "policies": {
+   "columns": 35,
+   "totalBytes": 262144,
+   "heapBytes": 24576,
+   "indexes": 13,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "policy_number"
+   ],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "lead_id",
+     "refTable": "leads",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "owner_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "placement_id",
+     "refTable": "placements",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_type_id",
+     "refTable": "policy_types",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "quote_id",
+     "refTable": "quotes",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "renewed_from",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "details",
+    "doc"
+   ],
+   "rows": 28,
+   "avgRowBytes": 527,
+   "idDefault": "('pol_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "policy_payments": {
+   "columns": 20,
+   "totalBytes": 49152,
+   "heapBytes": 0,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "confirmed_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receipt_id",
+     "refTable": "receipts",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receivable_id",
+     "refTable": "receivables",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "rejected_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "submitted_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('pp_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "policy_types": {
+   "columns": 10,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 14,
+   "avgRowBytes": 138,
+   "idDefault": "nextval('policy_types_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "postal_codes": {
+   "columns": 6,
+   "totalBytes": 65536,
+   "heapBytes": 8192,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "country_code,code,district"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 26,
+   "avgRowBytes": 66,
+   "idDefault": "nextval('postal_codes_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "posting_rule_lines": {
+   "columns": 10,
+   "totalBytes": 81920,
+   "heapBytes": 16384,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "rule_id,line_no"
+   ],
+   "fks": [
+    {
+     "column": "rule_id",
+     "refTable": "posting_rules",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 100,
+   "avgRowBytes": 109,
+   "idDefault": "nextval('posting_rule_lines_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "posting_rules": {
+   "columns": 17,
+   "totalBytes": 98304,
+   "heapBytes": 16384,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "event_code,version"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 31,
+   "avgRowBytes": 330,
+   "idDefault": "nextval('posting_rules_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "product_components": {
+   "columns": 12,
+   "totalBytes": 106496,
+   "heapBytes": 24576,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "template_id",
+     "refTable": "product_templates",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "data"
+   ],
+   "rows": 48,
+   "avgRowBytes": 406,
+   "idDefault": "nextval('product_components_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "product_risk_mappings": {
+   "columns": 13,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "product_code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "configuration"
+   ],
+   "rows": 8,
+   "avgRowBytes": 177,
+   "idDefault": "('prm_'::text || encode(gen_random_bytes(6), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "product_risk_sections": {
+   "columns": 12,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "mapping_id,section_code"
+   ],
+   "fks": [
+    {
+     "column": "mapping_id",
+     "refTable": "product_risk_mappings",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 4,
+   "avgRowBytes": 126,
+   "idDefault": "('prs_'::text || encode(gen_random_bytes(6), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "product_templates": {
+   "columns": 27,
+   "totalBytes": 81920,
+   "heapBytes": 16384,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "parent_id",
+     "refTable": "product_templates",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "config",
+    "features",
+    "insurers",
+    "tags"
+   ],
+   "rows": 13,
+   "avgRowBytes": 668,
+   "idDefault": "nextval('product_templates_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "products": {
+   "columns": 11,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 9,
+   "avgRowBytes": 128,
+   "idDefault": "nextval('products_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "quotes": {
+   "columns": 45,
+   "totalBytes": 270336,
+   "heapBytes": 24576,
+   "indexes": 13,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "quote_number"
+   ],
+   "fks": [
+    {
+     "column": "agent_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "broker_slip_id",
+     "refTable": "broker_slips",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "lead_id",
+     "refTable": "leads",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_type_id",
+     "refTable": "policy_types",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "product_id",
+     "refTable": "products",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "signatory_id",
+     "refTable": "signatories",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "vehicle",
+    "coverage",
+    "doc"
+   ],
+   "rows": 14,
+   "avgRowBytes": 808,
+   "idDefault": "('qt_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": "deleted_at"
+  },
+  "receipt_applications": {
+   "columns": 13,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receipt_id",
+     "refTable": "receipts",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receipt_line_id",
+     "refTable": "receipt_lines",
+     "refColumn": "id",
+     "onDelete": "SET NULL",
+     "indexed": true
+    },
+    {
+     "column": "receivable_id",
+     "refTable": "receivables",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 23,
+   "avgRowBytes": 183,
+   "idDefault": "nextval('receipt_applications_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "receipt_lines": {
+   "columns": 20,
+   "totalBytes": 65536,
+   "heapBytes": 8192,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "receipt_id,line_no"
+   ],
+   "fks": [
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receipt_id",
+     "refTable": "receipts",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 23,
+   "avgRowBytes": 165,
+   "idDefault": "('rl_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "receipts": {
+   "columns": 32,
+   "totalBytes": 147456,
+   "heapBytes": 8192,
+   "indexes": 8,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "receipt_number"
+   ],
+   "fks": [
+    {
+     "column": "bank_id",
+     "refTable": "banks",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receivable_id",
+     "refTable": "receivables",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 23,
+   "avgRowBytes": 299,
+   "idDefault": "('or_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "receivable_credits": {
+   "columns": 10,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "journal_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receivable_id",
+     "refTable": "receivables",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('receivable_credits_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "receivable_participants": {
+   "columns": 8,
+   "totalBytes": 24576,
+   "heapBytes": 0,
+   "indexes": 2,
+   "pk": [
+    "receivable_id",
+    "insurance_company_id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receivable_id",
+     "refTable": "receivables",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "receivables": {
+   "columns": 26,
+   "totalBytes": 139264,
+   "heapBytes": 16384,
+   "indexes": 6,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "bill_number"
+   ],
+   "fks": [
+    {
+     "column": "booking_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 28,
+   "avgRowBytes": 191,
+   "idDefault": "('rcv_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "recurring_journal_runs": {
+   "columns": 10,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "recurring_id",
+     "refTable": "recurring_journals",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('recurring_journal_runs_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "recurring_journals": {
+   "columns": 20,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "lines"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('rj_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "refresh_tokens": {
+   "columns": 9,
+   "totalBytes": 32768,
+   "heapBytes": 0,
+   "indexes": 3,
+   "pk": [
+    "jti"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "reinsurance_bordereaux": {
+   "columns": 18,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "reference"
+   ],
+   "fks": [
+    {
+     "column": "reinsurer_id",
+     "refTable": "reinsurers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "treaty_id",
+     "refTable": "reinsurance_treaties",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "totals"
+   ],
+   "rows": 2,
+   "avgRowBytes": 308,
+   "idDefault": "('bdx_'::text || encode(gen_random_bytes(6), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "reinsurance_exceptions": {
+   "columns": 11,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "reconciliation_id",
+     "refTable": "reinsurance_reconciliations",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 2,
+   "avgRowBytes": 200,
+   "idDefault": "('rex_'::text || encode(gen_random_bytes(6), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "reinsurance_reconciliations": {
+   "columns": 14,
+   "totalBytes": 65536,
+   "heapBytes": 8192,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "reference"
+   ],
+   "fks": [
+    {
+     "column": "reinsurer_id",
+     "refTable": "reinsurers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 2,
+   "avgRowBytes": 180,
+   "idDefault": "('rrc_'::text || encode(gen_random_bytes(6), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "reinsurance_recoveries": {
+   "columns": 26,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "recovery_number"
+   ],
+   "fks": [
+    {
+     "column": "cession_id",
+     "refTable": "cessions",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "claim_id",
+     "refTable": "claims",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "treaty_id",
+     "refTable": "reinsurance_treaties",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "cash_call",
+    "documents"
+   ],
+   "rows": 6,
+   "avgRowBytes": 303,
+   "idDefault": "('rcl_'::text || encode(gen_random_bytes(6), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "reinsurance_treaties": {
+   "columns": 25,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "reinsurer_ids",
+    "terms"
+   ],
+   "rows": 6,
+   "avgRowBytes": 564,
+   "idDefault": "nextval('reinsurance_treaties_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "reinsurers": {
+   "columns": 14,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "contact"
+   ],
+   "rows": 6,
+   "avgRowBytes": 261,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "remittance_allocations": {
+   "columns": 9,
+   "totalBytes": 40960,
+   "heapBytes": 0,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "receipt_application_id,insurance_company_id"
+   ],
+   "fks": [
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "invoice_list_id",
+     "refTable": "invoice_lists",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "receipt_application_id",
+     "refTable": "receipt_applications",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "nextval('remittance_allocations_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "remittance_approvals": {
+   "columns": 19,
+   "totalBytes": 114688,
+   "heapBytes": 16384,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "action_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "delegated_to",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "initiator_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "history"
+   ],
+   "rows": 19,
+   "avgRowBytes": 493,
+   "idDefault": "nextval('remittance_approvals_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "remittance_delegations": {
+   "columns": 10,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "delegate_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "delegator_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "trans_types"
+   ],
+   "rows": 1,
+   "avgRowBytes": 136,
+   "idDefault": "nextval('remittance_delegations_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "remittance_items": {
+   "columns": 17,
+   "totalBytes": 131072,
+   "heapBytes": 16384,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "reference_no"
+   ],
+   "fks": [
+    {
+     "column": "created_by",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "remittance_id",
+     "refTable": "remittances",
+     "refColumn": "id",
+     "onDelete": "SET NULL",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "data"
+   ],
+   "rows": 18,
+   "avgRowBytes": 483,
+   "idDefault": "('rmi_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "remittance_lines": {
+   "columns": 14,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "remittance_id",
+     "refTable": "remittances",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 34,
+   "avgRowBytes": 147,
+   "idDefault": "nextval('remittance_lines_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "remittances": {
+   "columns": 37,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "remittance_number"
+   ],
+   "fks": [
+    {
+     "column": "agent_user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "delivery_method",
+    "data"
+   ],
+   "rows": 17,
+   "avgRowBytes": 329,
+   "idDefault": "('rm_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "renewal_activities": {
+   "columns": 11,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "renewal_id",
+     "refTable": "renewals",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "details"
+   ],
+   "rows": 9,
+   "avgRowBytes": 182,
+   "idDefault": "nextval('renewal_activities_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "renewal_batch_policies": {
+   "columns": 10,
+   "totalBytes": 81920,
+   "heapBytes": 8192,
+   "indexes": 4,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "batch_id,policy_id"
+   ],
+   "fks": [
+    {
+     "column": "batch_id",
+     "refTable": "renewal_batches",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "renewal_id",
+     "refTable": "renewals",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 7,
+   "avgRowBytes": 102,
+   "idDefault": "nextval('renewal_batch_policies_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "renewal_batches": {
+   "columns": 8,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "batch_number"
+   ],
+   "fks": [],
+   "jsonb": [
+    "criteria"
+   ],
+   "rows": 2,
+   "avgRowBytes": 140,
+   "idDefault": "('rb_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "renewal_notices": {
+   "columns": 12,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "renewal_id,stage"
+   ],
+   "fks": [
+    {
+     "column": "renewal_id",
+     "refTable": "renewals",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 19,
+   "avgRowBytes": 115,
+   "idDefault": "nextval('renewal_notices_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "renewal_quotes": {
+   "columns": 17,
+   "totalBytes": 65536,
+   "heapBytes": 8192,
+   "indexes": 3,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "quote_number"
+   ],
+   "fks": [
+    {
+     "column": "renewal_id",
+     "refTable": "renewals",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "taxes",
+    "rating"
+   ],
+   "rows": 2,
+   "avgRowBytes": 352,
+   "idDefault": "('rq_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "renewals": {
+   "columns": 34,
+   "totalBytes": 114688,
+   "heapBytes": 8192,
+   "indexes": 6,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "client_id",
+     "refTable": "clients",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "new_policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "policy_id",
+     "refTable": "policies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "coverage_details",
+    "accessories",
+    "order_summary",
+    "policy_limits",
+    "premium_breakdown"
+   ],
+   "rows": 14,
+   "avgRowBytes": 189,
+   "idDefault": "('rnw_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "report_definitions": {
+   "columns": 14,
+   "totalBytes": 147456,
+   "heapBytes": 98304,
+   "indexes": 1,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "parameters",
+    "default_columns"
+   ],
+   "rows": 39,
+   "avgRowBytes": 1790,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "report_schedules": {
+   "columns": 17,
+   "totalBytes": 16384,
+   "heapBytes": 0,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "job_id",
+     "refTable": "scheduled_jobs",
+     "refColumn": "id",
+     "onDelete": "SET NULL",
+     "indexed": false
+    },
+    {
+     "column": "report_code",
+     "refTable": "report_definitions",
+     "refColumn": "code",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "params"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('rsch_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "risk_participants": {
+   "columns": 20,
+   "totalBytes": 98304,
+   "heapBytes": 8192,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "entity_type,entity_id,insurance_company_id"
+   ],
+   "fks": [
+    {
+     "column": "insurance_company_id",
+     "refTable": "insurance_companies",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 44,
+   "avgRowBytes": 134,
+   "idDefault": "nextval('risk_participants_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "role_permissions": {
+   "columns": 2,
+   "totalBytes": 24576,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "role_id",
+    "permission_id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "permission_id",
+     "refTable": "permissions",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": false
+    },
+    {
+     "column": "role_id",
+     "refTable": "roles",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 163,
+   "avgRowBytes": 32,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "roles": {
+   "columns": 9,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 7,
+   "avgRowBytes": 219,
+   "idDefault": "nextval('roles_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "scheduled_jobs": {
+   "columns": 12,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "params"
+   ],
+   "rows": 15,
+   "avgRowBytes": 201,
+   "idDefault": "nextval('scheduled_jobs_id_seq'::regclass)",
+   "hasCreatedAt": false,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "schema_migrations": {
+   "columns": 2,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "name"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 58,
+   "avgRowBytes": 61,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "sequences": {
+   "columns": 3,
+   "totalBytes": 73728,
+   "heapBytes": 16384,
+   "indexes": 1,
+   "pk": [
+    "name",
+    "period"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 24,
+   "avgRowBytes": 52,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "signatories": {
+   "columns": 10,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 3,
+   "avgRowBytes": 176,
+   "idDefault": "nextval('signatories_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "states": {
+   "columns": 10,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "country_id",
+     "refTable": "countries",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 17,
+   "avgRowBytes": 132,
+   "idDefault": "nextval('states_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "tax_codes": {
+   "columns": 19,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "code"
+   ],
+   "unique": [],
+   "fks": [],
+   "jsonb": [],
+   "rows": 26,
+   "avgRowBytes": 196,
+   "idDefault": null,
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "user_roles": {
+   "columns": 2,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "user_id",
+    "role_id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "role_id",
+     "refTable": "roles",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": false
+    },
+    {
+     "column": "user_id",
+     "refTable": "users",
+     "refColumn": "id",
+     "onDelete": "CASCADE",
+     "indexed": true
+    }
+   ],
+   "jsonb": [],
+   "rows": 7,
+   "avgRowBytes": 52,
+   "idDefault": null,
+   "hasCreatedAt": false,
+   "hasUpdatedAt": false,
+   "hasCreatedBy": false,
+   "softDelete": null
+  },
+  "users": {
+   "columns": 28,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "username"
+   ],
+   "fks": [],
+   "jsonb": [],
+   "rows": 7,
+   "avgRowBytes": 266,
+   "idDefault": "('usr_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "vehicle_brands": {
+   "columns": 8,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "name"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 8,
+   "avgRowBytes": 65,
+   "idDefault": "nextval('vehicle_brands_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "vehicle_models": {
+   "columns": 9,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "brand_id",
+     "refTable": "vehicle_brands",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 19,
+   "avgRowBytes": 80,
+   "idDefault": "nextval('vehicle_models_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "vehicle_variants": {
+   "columns": 11,
+   "totalBytes": 32768,
+   "heapBytes": 8192,
+   "indexes": 1,
+   "pk": [
+    "id"
+   ],
+   "unique": [],
+   "fks": [
+    {
+     "column": "model_id",
+     "refTable": "vehicle_models",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": false
+    }
+   ],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 20,
+   "avgRowBytes": 92,
+   "idDefault": "nextval('vehicle_variants_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "winback_campaigns": {
+   "columns": 13,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "campaign_number"
+   ],
+   "fks": [],
+   "jsonb": [
+    "offers"
+   ],
+   "rows": 1,
+   "avgRowBytes": 256,
+   "idDefault": "('wb_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "write_off_reasons": {
+   "columns": 12,
+   "totalBytes": 49152,
+   "heapBytes": 8192,
+   "indexes": 2,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "code"
+   ],
+   "fks": [],
+   "jsonb": [
+    "attrs"
+   ],
+   "rows": 4,
+   "avgRowBytes": 176,
+   "idDefault": "nextval('write_off_reasons_id_seq'::regclass)",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  },
+  "year_end_runs": {
+   "columns": 22,
+   "totalBytes": 49152,
+   "heapBytes": 0,
+   "indexes": 5,
+   "pk": [
+    "id"
+   ],
+   "unique": [
+    "run_number"
+   ],
+   "fks": [
+    {
+     "column": "closing_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "fiscal_year",
+     "refTable": "fiscal_years",
+     "refColumn": "code",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    },
+    {
+     "column": "transfer_jv_id",
+     "refTable": "journal_vouchers",
+     "refColumn": "id",
+     "onDelete": "NO ACTION",
+     "indexed": true
+    }
+   ],
+   "jsonb": [
+    "checks"
+   ],
+   "rows": 0,
+   "avgRowBytes": null,
+   "idDefault": "('yec_'::text || encode(gen_random_bytes(8), 'hex'::text))",
+   "hasCreatedAt": true,
+   "hasUpdatedAt": true,
+   "hasCreatedBy": true,
+   "softDelete": null
+  }
+ }
+}

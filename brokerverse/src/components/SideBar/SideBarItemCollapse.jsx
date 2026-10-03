@@ -1,10 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SidebarItem from "./SideBarItem";
-import SvgAccountIcon from "../../assets/icons/SvgAccountIcon";
-import SvgArrow from "../../assets/icons/SvgArrow";
-import SvgBackArrow from "../../assets/icons/SvgBackArrow";
-import SvgAdd from "../../assets/icons/SvgAdd";
 import SvgDownarrows from "../../assets/agentIcon/SvgDownarrows";
 import SvgUparrows from "../../assets/agentIcon/SvgUparrows";
 
@@ -17,7 +13,6 @@ const SidebarItemCollapse = ({
   onToggle, // Callback to parent to handle expansion (for top-level menus)
 }) => {
   const { t } = useTranslation();
-  const [isActive, setIsActive] = useState(false);
   // For nested menus (when onToggle is not provided), manage own state
   const [localExpanded, setLocalExpanded] = useState(false);
 
@@ -64,14 +59,6 @@ const SidebarItemCollapse = ({
   }, [isTopLevel, item?.submenu, currentPathname]);
 
   const handleToggleCollapse = (e) => {
-    console.log("🔴 SidebarItemCollapse handleToggleCollapse:", {
-      menuName: item?.name,
-      isTopLevel,
-      currentExpanded: isExpandedState,
-      willToggleTo: !isExpandedState,
-      hasEvent: !!e,
-      timestamp: new Date().toISOString(),
-    });
     // Stop event propagation to prevent bubbling
     if (e) {
       e.stopPropagation();
@@ -130,21 +117,11 @@ const SidebarItemCollapse = ({
       const hasMatch = checkSubmenuMatch(item.submenu);
 
       if (hasMatch) {
-        console.log(
-          "🟡 SidebarItemCollapse - Auto-expanding nested menu:",
-          item?.name,
-          "because path matches",
-        );
         setLocalExpanded(true);
       } else {
         // Only collapse if it was auto-expanded (don't collapse if user manually expanded it)
         // We can't easily track manual vs auto expansion, so we'll keep it expanded if it was already expanded
         // This prevents flickering when navigating between pages
-        console.log(
-          "🟡 SidebarItemCollapse - Nested menu:",
-          item?.name,
-          "does not match current path",
-        );
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

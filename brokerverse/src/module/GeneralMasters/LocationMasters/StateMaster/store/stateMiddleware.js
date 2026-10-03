@@ -1,95 +1,26 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-// import { getRequest } from "../../../utility/commonServices";
-// import { APIROUTES } from "../../../routes/apiRoutes";
+import mastersService, { searchText } from "../../../../../services/mastersService";
+import masterThunk from "../../../common/masterThunk";
 import {
-  GET_STATE_DETAILS,
-  GET_STATE_BY_ID,
-  POST_ADD_STATE,
-  PATCH_STATE_EDIT,
   GET_SERACH_STATE,
- 
+  GET_STATE_BY_ID,
+  GET_STATE_DETAILS,
+  PATCH_STATE_EDIT,
+  POST_ADD_STATE,
 } from "../../../../../redux/actionTypes";
-import { data } from "../../../../Receipts/PolicyReceipts/mock";
 
-export const getStateMiddleware = createAsyncThunk(
-  GET_STATE_DETAILS,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const getStateListByIdMiddleware = createAsyncThunk(
-  GET_STATE_BY_ID,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const postAddStateMiddleware = createAsyncThunk(
-  POST_ADD_STATE,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload,"postAddStateMiddleware");
+const TYPE = "state";
 
-    console.log(data,"data");
-    try {
-      const data={
-        id: payload?.id,
-        StateCode: payload?.StateCode,
-        StateName: payload?.StateName,
-        Country: payload?.Country,
-        Modifiedby: payload?.Modifiedby,
-        ModifiedOn: payload?.ModifiedOn
-      }
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const patchStateEditMiddleware = createAsyncThunk(
-  PATCH_STATE_EDIT,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
+export const getStateMiddleware = masterThunk(GET_STATE_DETAILS, (params) =>
+  mastersService.list(TYPE, params));
 
-export const getSearchStateMiddleware = createAsyncThunk(
-  GET_SERACH_STATE,
-  async (payload, { rejectWithValue, getState }) => {
-    const { textSearch } = payload;
-    const { stateReducers } = getState();
+export const getStateListByIdMiddleware = masterThunk(GET_STATE_BY_ID, (row) =>
+  mastersService.get(TYPE, row?.id ?? row));
 
-    const { stateTableList } = stateReducers;
-    console.log(stateTableList, "1234")
+export const postAddStateMiddleware = masterThunk(POST_ADD_STATE, (values) =>
+  mastersService.create(TYPE, values));
 
-    try {
-      if (textSearch.trim() !== "") {
-        const searchResults = stateTableList.filter(item => {
-          return item.StateName.toLowerCase().includes(textSearch.toLowerCase())
-        });
-        console.log(searchResults, "searchResults")
-        return searchResults;
-      } else {
-        return stateTableList;
-      }
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  },
-);
+export const patchStateEditMiddleware = masterThunk(PATCH_STATE_EDIT, (values) =>
+  mastersService.update(TYPE, values.id, values));
 
-
+export const getSearchStateMiddleware = masterThunk(GET_SERACH_STATE, (query) =>
+  mastersService.list(TYPE, { search: searchText(query) }));

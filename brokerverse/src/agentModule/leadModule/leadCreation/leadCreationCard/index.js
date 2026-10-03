@@ -3,11 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { RadioButton } from "primereact/radiobutton";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { Button } from "primereact/button";
 import DatepickerField from "../../../component/datePicker";
 import CustomToast from "../../../../components/Toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patchLeadEditMiddleWare,
@@ -18,6 +18,8 @@ import { useFormik } from "formik";
 import addressService from "../../../../services/addressService";
 import { isThailand } from "../../../../utility/addressHelpers";
 import { patchClientEditMiddleWare } from "../../../quoteModule/clientListing/store/clientsMiddleware";
+import { isValidMobile, mobileHint, normalizeMobile } from "../../../../utility/phoneFormat";
+import { birthDateError, birthDateRange, useAgeLimits } from "../../../../utility/birthDate";
 
 const initialValue = {
   CompanyName: "",
@@ -45,6 +47,8 @@ const initialValue = {
 
 const LeadCreationCard = ({ flow, action }) => {
   const { t } = useTranslation();
+  // Configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
+  const ageLimits = useAgeLimits();
   const { leadId } = useParams();
   const { leadtabledata, currentLeadDetails } = useSelector(
     ({ leadReducers }) => {
@@ -54,11 +58,11 @@ const LeadCreationCard = ({ flow, action }) => {
       };
     }
   );
-  // const [ingredient, setIngredient] = useState("");
   const [show, setShow] = useState(false);
   const toastRef = useRef(null);
   const toastErrorRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   // Fetch lead data when in edit mode
@@ -133,8 +137,6 @@ const LeadCreationCard = ({ flow, action }) => {
       try {
         const result = await dispatch(postCreateleadMiddleware(valueWithId));
 
-        console.log(result, "result");
-
         if (result.type.endsWith("/fulfilled")) {
           // Success case - use the leadId from the API response
           const createdLeadId = result.payload?.leadId || result.payload?.id;
@@ -152,7 +154,7 @@ const LeadCreationCard = ({ flow, action }) => {
               );
             } else {
               showErrorToast(
-                "Lead created but ID not found. Please try creating quote from lead listing."
+                "Prospect created but its ID was not returned. Create the quote from the Prospects list."
               );
               setTimeout(() => {
                 navigate("/agent/leadlisting");
@@ -167,7 +169,6 @@ const LeadCreationCard = ({ flow, action }) => {
           showErrorToast(errorMsg);
         }
       } catch (error) {
-        console.error("Unexpected error:", error);
         const errorMsg =
           error?.response?.data?.error ||
           error?.message ||
@@ -199,7 +200,6 @@ const LeadCreationCard = ({ flow, action }) => {
             }, 2000);
           } else if (result.type.endsWith("/rejected")) {
             // Error case
-            console.error("Lead update failed:", result.payload);
             const errorMsg = extractErrorMessage(
               result,
               "Failed to update lead. Please try again."
@@ -207,7 +207,6 @@ const LeadCreationCard = ({ flow, action }) => {
             showErrorToast(errorMsg);
           }
         } catch (error) {
-          console.error("Unexpected error:", error);
           const errorMsg =
             error?.response?.data?.error ||
             error?.message ||
@@ -236,21 +235,15 @@ const LeadCreationCard = ({ flow, action }) => {
     if (!values.LastName) {
       errors.LastName = "This field is required";
     }
-    // if (!values.EmailID) {
-    //   errors.EmailID = "This field is required";
-    // }
     if (!values.EmailID) {
       errors.EmailID = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
       errors.EmailID = "Invalid email address";
     }
-    // if (!values.ContactNumber) {
-    //   errors.ContactNumber = "This field is required";
-    // }
     if (!values.ContactNumber) {
       errors.ContactNumber = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.ContactNumber)) {
-      errors.ContactNumber = "Invalid phone number (10 digits)";
+    } else if (!isValidMobile(values.ContactNumber)) {
+      errors.ContactNumber = `Invalid mobile number (e.g. ${mobileHint()})`;
     }
     if (!values.HouseNo) {
       errors.HouseNo = "This field is required";
@@ -273,6 +266,9 @@ const LeadCreationCard = ({ flow, action }) => {
     }
     if (!values.DateofBirth) {
       errors.DateofBirth = "This field is required";
+    } else {
+      const dobError = birthDateError(values.DateofBirth, ageLimits);
+      if (dobError) errors.DateofBirth = dobError;
     }
     if (!values.category) {
       errors.category = "This field is required";
@@ -341,6 +337,30 @@ const LeadCreationCard = ({ flow, action }) => {
 
       return values;
     }
+    // a prospect for an existing customer starts from the client's details and stays linked to the client
+    const client = location.state?.existingClient;
+    if (action !== "edit" && client) {
+      return {
+        ...initialValue,
+        clientId: client.clientId || client.id,
+        CompanyName: client.companyName || "",
+        TaxNumber: client.taxNumber || "",
+        FirstName: client.firstName || "",
+        LastName: client.lastName || "",
+        PreferredName: client.preferredName || "",
+        EmailID: client.emailId || client.email || "",
+        ContactNumber: client.contactNumber || client.phone || "",
+        HouseNo: client.houseNo || "",
+        Barangay: client.barangay || "",
+        Country: client.country || initialValue.Country || "",
+        Province: client.province || "",
+        City: client.city || "",
+        ZIPCode: client.zipCode || "",
+        DateofBirth: client.DOB ? new Date(client.DOB) : "",
+        category: client.leadCategory || initialValue.category || "Retail",
+        gender: client.gender || initialValue.gender || "Male",
+      };
+    }
     return initialValue;
   };
 
@@ -349,7 +369,7 @@ const LeadCreationCard = ({ flow, action }) => {
     enableReinitialize: true, // This allows formik to reinitialize when values change
     validate: customValidation,
     onSubmit: (values) => {
-      handleclick(values);
+      handleclick({ ...values, ContactNumber: normalizeMobile(values.ContactNumber) });
     },
   });
 
@@ -463,8 +483,8 @@ const LeadCreationCard = ({ flow, action }) => {
         ref={toastRef}
         message={
           action === "edit"
-            ? "Lead Updated Successfully"
-            : "Lead Created Successfully"
+            ? "Prospect updated"
+            : "Prospect created"
         }
       />
       <CustomToast
@@ -497,7 +517,7 @@ const LeadCreationCard = ({ flow, action }) => {
                   }}
                   checked={formik.values.category === "Retail"}
                 />
-                <label htmlFor="ingredient1" className="labeltxt_container">
+                <label htmlFor="individual" className="labeltxt_container">
                   {t("leadCreation.individual")}
                 </label>
               </div>
@@ -512,7 +532,7 @@ const LeadCreationCard = ({ flow, action }) => {
                   }}
                   checked={formik.values.category === "Corporate"}
                 />
-                <label htmlFor="ingredient2" className="labeltxt_container">
+                <label htmlFor="company" className="labeltxt_container">
                   {t("leadCreation.company")}
                 </label>
               </div>
@@ -540,7 +560,7 @@ const LeadCreationCard = ({ flow, action }) => {
                 onChange={formik.handleChange("CompanyName")}
               />
               {formik.touched.CompanyName && formik.errors.CompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.CompanyName}
                 </div>
               )}
@@ -552,7 +572,7 @@ const LeadCreationCard = ({ flow, action }) => {
                 onChange={formik.handleChange("TaxNumber")}
               />
               {formik.touched.TaxNumber && formik.errors.TaxNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.TaxNumber}
                 </div>
               )}
@@ -568,7 +588,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("FirstName")}
             />
             {formik.touched.FirstName && formik.errors.FirstName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.FirstName}
               </div>
             )}
@@ -580,7 +600,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("LastName")}
             />
             {formik.touched.LastName && formik.errors.LastName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.LastName}
               </div>
             )}
@@ -595,24 +615,23 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("PreferredName")}
             />
             {formik.touched.PreferredName && formik.errors.PreferredName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PreferredName}
               </div>
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6">
-            {/* <InputTextField label="Date of Birth" />  */}
             <DatepickerField
               label={t("leadCreation.dateOfBirth")}
               value={formik.values.DateofBirth}
+              {...birthDateRange(ageLimits)}
               onChange={(date) => {
-                console.log(date, "date");
                 return formik.setFieldValue("DateofBirth", date.target.value);
               }}
             />
 
             {formik.touched.DateofBirth && formik.errors.DateofBirth && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.DateofBirth}
               </div>
             )}
@@ -629,7 +648,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={() => formik.setFieldValue("gender", "Male")}
               checked={formik.values.gender === "Male"}
             />
-            <label htmlFor="ingredient1" className="labeltxt_container">
+            <label htmlFor="male" className="labeltxt_container">
               {t("leadCreation.male")}
             </label>
           </div>
@@ -641,7 +660,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={() => formik.setFieldValue("gender", "Female")}
               checked={formik.values.gender === "Female"}
             />
-            <label htmlFor="ingredient2" className="labeltxt_container">
+            <label htmlFor="female" className="labeltxt_container">
               {t("leadCreation.female")}
             </label>
           </div>
@@ -655,7 +674,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("EmailID")}
             />
             {formik.touched.EmailID && formik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.EmailID}
               </div>
             )}
@@ -665,9 +684,11 @@ const LeadCreationCard = ({ flow, action }) => {
               label={t("leadCreation.contactNumber")}
               value={formik.values.ContactNumber}
               onChange={formik.handleChange("ContactNumber")}
+              inputMode="tel"
+              hint={mobileHint()}
             />
             {formik.touched.ContactNumber && formik.errors.ContactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ContactNumber}
               </div>
             )}
@@ -689,7 +710,7 @@ const LeadCreationCard = ({ flow, action }) => {
               }}
             />
             {formik.touched.Country && formik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Country}
               </div>
             )}
@@ -705,7 +726,7 @@ const LeadCreationCard = ({ flow, action }) => {
               <div style={{ fontSize: 12, color: "#666" }} className="mt-1">{t("leadCreation.lookupInProgress")}</div>
             )}
             {formik.touched.ZIPCode && formik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ZIPCode}
               </div>
             )}
@@ -726,7 +747,7 @@ const LeadCreationCard = ({ flow, action }) => {
               disabled={!formik.values.Country}
             />
             {formik.touched.Province && formik.errors.Province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Province}
               </div>
             )}
@@ -743,7 +764,7 @@ const LeadCreationCard = ({ flow, action }) => {
               disabled={!formik.values.Province}
             />
             {formik.touched.City && formik.errors.City && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.City}
               </div>
             )}
@@ -768,7 +789,7 @@ const LeadCreationCard = ({ flow, action }) => {
               />
             )}
             {formik.touched.Barangay && formik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Barangay}
               </div>
             )}
@@ -780,7 +801,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("HouseNo")}
             />
             {formik.touched.HouseNo && formik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.HouseNo}
               </div>
             )}
@@ -814,12 +835,6 @@ const LeadCreationCard = ({ flow, action }) => {
         )}
 
         <div className="save_continue_conatiner">
-          {/* <Button
-            label={t("leadCreation.saveLead")}
-            onClick={handleSaveLead}
-            text
-            className="btn_lable_container"
-          /> */}
           <div className="btn_lable_save_container flex justify-content-end mt-2">
             <Button
               onClick={() => {

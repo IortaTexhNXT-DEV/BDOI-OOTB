@@ -1,33 +1,34 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import "./index.scss";
-import { Button } from "primereact/button";
-import SvgAdd from "../../../assets/agentIcon/SvgAdd";
 import { BreadCrumb } from "primereact/breadcrumb";
+import { Button } from "primereact/button";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
 import ClientViewCard from "./clientViewCard";
-import { Dropdown } from "primereact/dropdown";
-import SvgMotor from "../../../assets/agentIcon/SvgMotor";
-import SvgTravel from "../../../assets/agentIcon/SvgTravel";
-import SvgHome from "../../../assets/agentIcon/SvgHome";
 import { useNavigate, useParams } from "react-router-dom";
 
-const LeadListing = ({ action }) => {
-  const [selectedOption, setSelectedOption] = useState(null);
+const ClientView = ({ action }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { id: clientId } = useParams();
+  // the header shows the client code (CL-...), never the internal record id of the address
+  const [clientCode, setClientCode] = useState(null);
+  // back to the list: it reopens with the tab, search and page it was left with
+  const toList = () => navigate("/agent/clientlisting");
 
   const items = [
-    { label: "Clients", url: "/agent/clientlisting" },
-    { label: `Client ID : ${clientId || '12345678'}` }
+    { label: t("clients.title"), command: toList, className: "bv-crumb-link" },
+    { label: clientCode || t("clients.client", { defaultValue: "Client" }) },
   ];
-  const Initiate = { label: "Home" };
+  const Initiate = { label: t("sidebar.Operations") };
 
   return (
     <div className="client__listing__card__container">
-      <div class="grid mt-3">
-        <div class="col-12 md:col-6 lg:col-6">
+      <div className="grid mt-3">
+        <div className="col-12 flex align-items-center gap-2">
+          <Button icon="pi pi-arrow-left" text rounded aria-label={t("common.back", { defaultValue: "Back" })} tooltip={t("common.back", { defaultValue: "Back" })} onClick={toList} />
           <label className="leadlisting__overal__container__title">
-            Clients
+            {clientCode ? `${t("clients.client", { defaultValue: "Client" })} ${clientCode}` : t("clients.title")}
           </label>
         </div>
       </div>
@@ -39,9 +40,9 @@ const LeadListing = ({ action }) => {
           separatorIcon={<SvgDot color={"#000"} />}
         />
       </div>
-      <ClientViewCard action={action} clientId={clientId} />
+      <ClientViewCard action={action} clientId={clientId} onClient={(c) => setClientCode(c?.clientCode || c?.generatedClientId || null)} />
     </div>
   );
 };
 
-export default LeadListing;
+export default ClientView;

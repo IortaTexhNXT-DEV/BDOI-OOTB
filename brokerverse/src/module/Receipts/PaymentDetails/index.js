@@ -1,14 +1,10 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { Button } from "primereact/button";
-import NavBar from "../../../components/NavBar";
-import { DataTable } from "primereact/datatable";
 import { useNavigate } from "react-router-dom";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
 import SvgBack from "../../../assets/icons/SvgBack";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
@@ -20,24 +16,32 @@ import { getPaymentDetails } from "../store/receiptsMiddleware";
 import { useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import documentTemplateService from "../../../services/documentTemplateService";
+import mastersService from "../../../services/mastersService";
 import {
   showSuccessMessage,
   showErrorMessage,
 } from "../../../utility/toastUtils";
 
+/** Receipt payment modes accepted by the receipts API. */
+const PAYMENT_MODES = [
+  { label: "Cash", value: "cash" },
+  { label: "Check", value: "check" },
+  { label: "Bank Transfer", value: "bank-transfer" },
+  { label: "Card", value: "card" },
+  { label: "GCash", value: "gcash" },
+  { label: "Online", value: "online" },
+];
+
 function PolicyReceipts() {
   const { t } = useTranslation();
   const location = useLocation();
   const totalFC = location.state?.totalFC;
-  console.log("totalFC", totalFC)
   const toastRef = useRef(null);
-  const [selectedProducts, setSelectedProducts] = useState(false);
   const [products, setProducts] = useState("Approve");
   const navigate = useNavigate();
-  const [errors, setErrors] = useState("");
-  const [printLoading, setPrintLoading] = useState(false);
+  const [, setPrintLoading] = useState(false);
 
-  const { paymentDetails, loading, total, currentReceiptId } = useSelector(
+  const { currentReceiptId } = useSelector(
     ({ receiptsTableReducers }) => {
       return {
         loading: receiptsTableReducers?.loading,
@@ -52,7 +56,6 @@ function PolicyReceipts() {
     location.state?.receiptId ||
     location.state?.customerData?.receiptId ||
     currentReceiptId;
-  // console.log(paymentDetails[0].bankAccount, "paymentDetails")
   const initialValue = {
     totalPayment: totalFC,
     bankcode: "",
@@ -64,7 +67,6 @@ function PolicyReceipts() {
   };
 
   const validate = (values) => {
-    console.log(values, "sss");
     const errors = {};
 
     if (!values.bankcode) {
@@ -83,7 +85,6 @@ function PolicyReceipts() {
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const handleSubmit = async (values) => {
-    // navigate('')
     setProducts("Print");
     if (products == "Print") {
       toastRef.current?.showToast();
@@ -118,11 +119,8 @@ function PolicyReceipts() {
           t("common.success")
         );
 
-        setTimeout(() => {
-          navigate("/accounts/receipts");
-        }, 1000);
+        navigate("/accounts/receipts");
       } catch (error) {
-        console.error("Error printing receipt:", error);
         showErrorMessage(
           error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
           t("common.error")
@@ -135,14 +133,6 @@ function PolicyReceipts() {
       dispatch(getPaymentDetails(formik.values));
     }
   };
-  // const handleSubmit2 = () => {
-  //   const formErrors = validate(formik.values);
-  //   setErrors(formErrors);
-  //   console.log(formErrors, "iiiii");
-  //   toastRef.current.showToast();
-  //   // navigate('')
-  //   // setProducts("Print")
-  // };
 
   const formik = useFormik({
     initialValues: initialValue,
@@ -150,7 +140,6 @@ function PolicyReceipts() {
     // onSubmit: handleSubmit,handleSubmit2
     onSubmit: () => {
       handleSubmit();
-      //  handleSubmit2()
     },
   });
   const items = [
@@ -161,54 +150,39 @@ function PolicyReceipts() {
   const home = { label: t("sidebar.Accounts") };
 
   // const dataa= [
-  //   { label:paymentDetails[0].bankcode, value:paymentDetails[0].bankcode},
 
   // ];
-  // const data1 = [
-  //   { label: paymentDetails[0].bankAccount, value:paymentDetails[0].bankAccount},
-
-  // ];
-  // const data2 = [
-  //   { label:paymentDetails[0].paymentType, value: paymentDetails[0].paymentType },
-
-  // ];
-  const dataa = [
-    { label: "bank123", value: "bank123" },
-    { label: "bank7844", value: "bank7844" },
-  ];
-  const data1 = [
-    { label: "ICIC", value: "ICIC" },
-    { label: "SBI", value: "SBI" },
-  ];
-  const data2 = [
-    { label: "Credit Card", value: "Credit Card" },
-    { label: "Debit Card", value: "Debit Card" },
-  ];
+  const [banks, setBanks] = useState([]);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  useEffect(() => {
+    Promise.all([
+      mastersService.options("bank"),
+      mastersService.list("bank-account", { status: "Active" }),
+    ])
+      .then(([bankRows, accountRows]) => {
+        setBanks(bankRows);
+        setBankAccounts(accountRows);
+      })
+      .catch((error) => showErrorMessage(error.message, t("common.error")));
+  }, [t]);
+  const dataa = banks.map((bank) => ({ label: bank.label, value: bank.code }));
+  const data1 = bankAccounts
+    .filter((account) => account.bankCode === formik.values.bankcode)
+    .map((account) => ({ label: account.accountName, value: account.accountNumber }));
+  const data2 = PAYMENT_MODES;
+  const labelOf = (options, value) =>
+    options.find((option) => option.value === value)?.label || "";
 
   // const setFormikValues = (totalFC) => {
-
   //   const updatedValues = {
   //     totalPayment: totalFC,
 
   //   };
 
-
-  //   formik.setValues({ ...formik.values, ...updatedValues });
   // };
-  // console.log("first", formik.values.totalPayment)
   // useEffect(() => {
-  //   setFormikValues()
   // }, [])
 
-
-  const headerStyle = {
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: "none",
-    textalign: "center",
-  };
 
   return (
     <div className="overall__payment_details_container">
@@ -238,7 +212,6 @@ function PolicyReceipts() {
               <InputField
                 value={formik.values.totalPayment}
                 onChange={formik.handleChange("totalPayment")}
-                // error={formik.errors.totalPayment}
                 classNames="field__policy "
                 label="Total Payment"
               />
@@ -254,16 +227,16 @@ function PolicyReceipts() {
                 onChange={(e) =>
                   formik.setFieldValue("bankcode", e.target.value)
                 }
-                // error={formik.errors.bankcode}
                 className="dropdown__container"
                 label="Bank code"
                 options={dataa}
                 optionLabel="value"
+                optionValue="value"
                 placeholder={"Select"}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.bankcode && formik.errors.bankcode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.bankcode}
                 </div>
               )}
@@ -272,27 +245,12 @@ function PolicyReceipts() {
           <div class="col-4 md:col-4 lg-col-4">
             <div>
               <InputField
-                value={
-                  formik.values.bankcode
-                    ? `${formik.values.bankcode}`
-                    : ""
-                }
-                // onChange={formik.handleChange("bankName")}
+                value={labelOf(dataa, formik.values.bankcode)}
                 error={formik.errors.bankName}
                 classNames="field__policy "
                 label="Bank Name"
               />
 
-              {/* <InputField  
-                value={ formik.values.bankcode
-                  ? `bankcode ${formik.values.bankcode}`
-                  : ""}
-                onChange={formik.handleChange("bankName")}
-                error={formik.errors.bankName}
-                classNames="field__policy "
-                label="Bank Name"
-              // value={"Money bank"}
-              /> */}
             </div>
           </div>
         </div>
@@ -304,16 +262,16 @@ function PolicyReceipts() {
                 onChange={(e) =>
                   formik.setFieldValue("bankAccount", e.target.value)
                 }
-                // error={formik.errors.bankAccount}
                 className="dropdown__container"
                 label="Bank Account"
                 options={data1}
                 optionLabel="value"
+                optionValue="value"
                 placeholder={"Select"}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.bankAccount && formik.errors.bankAccount && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.bankAccount}
                 </div>
               )}
@@ -322,22 +280,11 @@ function PolicyReceipts() {
           <div class="col-4 md:col-4 lg-col-4">
             <div>
               <InputField
-                value={
-                  formik.values.bankAccount
-                    ? `bankAccount ${formik.values.bankAccount}`
-                    : ""
-                }
-                // value={
-                //   formik.values.bankAccount
-                //     ? `654${formik.values.bankAccount}`
-                //     : ""
-                // }
-                // value={paymentDetails[0].bankAccount && paymentDetails[0].bankAccountName}
+                value={labelOf(data1, formik.values.bankAccount)}
                 onChange={formik.handleChange("bankAccountName")}
                 error={formik.errors.bankAccountName}
                 classNames="field__policy"
                 label="Bank Account Name"
-              // value={"Business Account"}
               />
             </div>
           </div>
@@ -350,16 +297,16 @@ function PolicyReceipts() {
                 onChange={(e) =>
                   formik.setFieldValue("paymentType", e.target.value)
                 }
-                // error={formik.errors.paymentType}
                 className="dropdown__container"
                 label="Payment Type"
                 options={data2}
-                optionLabel="value"
+                optionLabel="label"
+                optionValue="value"
                 placeholder={"Select"}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.paymentType && formik.errors.paymentType && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.paymentType}
                 </div>
               )}
@@ -368,33 +315,20 @@ function PolicyReceipts() {
           <div class="col-4 md:col-4 lg-col-4">
             <div>
               <InputField
-                // value={paymentDetails[0].paymentType && paymentDetails[0].cardNumber}
                 value={formik.values.cardNumber}
                 onChange={formik.handleChange("cardNumber")}
                 error={formik.errors.cardNumber}
                 classNames="field__policy "
                 label="Card Number"
-              // value={"1234 5678 9874 5632"}
               />
             </div>
           </div>
         </div>
       </Card>
-      {/* <div className="exit_print_buttons">
-        <Button
-          label={selectedProducts?.status === "Approved" ? "Print" : "Approve"}
-          className="print"
-          onClick={() => {
-            formik.handleSubmit();
-          }}
-          disabled={!formik.isValid}
-        />
-      </div> */}
 
       <div className="exit_print_buttons">
         {products == "Print" ? (
           <Button
-            // label={selectedProducts?.status === "Approved" ? "Print" : "Approve"}
             label="Print"
             className="print"
             onClick={() => {
@@ -404,7 +338,6 @@ function PolicyReceipts() {
           />
         ) : (
           <Button
-            // label={selectedProducts?.status === "Approved" ? "Print" : "Approve"}
             label="Approve"
             className="print"
             onClick={() => {

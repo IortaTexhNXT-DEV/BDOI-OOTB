@@ -7,6 +7,7 @@ import {
 
 const initialState = {
   loading: false,
+  detailLoading: false,
   error: "",
   policyListData: [],
   policyListSearchData: [],
@@ -42,8 +43,7 @@ const policyReducers = createSlice({
     });
     builder.addCase(policyListDataMiddleWare.rejected, (state, action) => {
       state.loading = false;
-      state.policyListData = [];
-      state.rawApiData = [];
+      // keep the rows already on screen; the error is shown instead of an empty table
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -67,16 +67,17 @@ const policyReducers = createSlice({
     );
 
     // Policy Details reducers
+    // own flag, so opening a policy does not put the policy list into its loading state
     builder.addCase(policyDetailsDataMiddleWare.pending, (state) => {
-      state.loading = true;
+      state.detailLoading = true;
     });
     builder.addCase(policyDetailsDataMiddleWare.fulfilled, (state, action) => {
-      state.loading = false;
+      state.detailLoading = false;
       state.policyDetails = action.payload.policyDetails;
       state.rawPolicyData = action.payload.rawPolicyData;
     });
     builder.addCase(policyDetailsDataMiddleWare.rejected, (state, action) => {
-      state.loading = false;
+      state.detailLoading = false;
       state.policyDetails = null;
       state.rawPolicyData = null;
       state.error = typeof action.payload === "string" ? action.payload : "";

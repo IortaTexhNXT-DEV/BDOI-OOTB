@@ -1,25 +1,23 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../components/InputField";
-import SubmitButton from "../../../../components/SubmitButton";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import { useNavigate } from "react-router-dom";
-import NavBar from "../../../../components/NavBar";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../components/DatePicker";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import { useFormik } from "formik";
-import { Toast } from "primereact/toast";
 import CustomToast from "../../../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
 import { patchExchangeDetailEdit } from "../store/exchangeMasterMiddleware";
+import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
 
 const initialValues = {
   EffectiveFrom: "",
@@ -34,38 +32,8 @@ const initialValues = {
 function EditExchange() {
   const { t } = useTranslation();
   const toastRef = useRef(null);
-  const [date, setDate] = useState(null);
   const Navigate = useNavigate();
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] =
-    useState(null);
 
-  const PayeeType = [
-    { name: "Customer", code: "NY" },
-    { name: "owner", code: "RM" },
-  ];
-  const Criteria = [
-    { name: "Specific", code: "NY" },
-    { name: "payall", code: "RM" },
-  ];
-  const CustomerCode = [
-    { name: "Cus00123", code: "NY" },
-    { name: "Cus001234", code: "RM" },
-  ];
-  const Transactioncode = [
-    { name: "Trans00123", code: "NY" },
-    { name: "Trans001234", code: "RM" },
-  ];
-  const SelectInstrumentCurrency = [
-    { name: "PHP", code: "PHP" },
-    { name: "THB", code: "THB" },
-    { name: "USD", code: "USD" },
-  ];
 
   const home = { label: t("financeMasters.master") };
   const items = [
@@ -78,7 +46,7 @@ function EditExchange() {
 
   const dispatch = useDispatch();
 
-  const { getExchangeEdit, loading } = useSelector(
+  const { getExchangeEdit } = useSelector(
     ({ exchangeMasterReducer }) => {
       return {
         loading: exchangeMasterReducer?.loading,
@@ -86,33 +54,22 @@ function EditExchange() {
       };
     }
   );
-  console.log(getExchangeEdit, "exchangeDetailEdit");
-  const handleSubmit = (value) => {
-    console.log(value, "value");
-    dispatch(patchExchangeDetailEdit(value));
-    Navigate("/master/finance/exchangerate");
-
-    // toastRef.current.showToast();
-    // setTimeout(() => {
-    //   Navigate("/master/finance/exchangerate")
-    // }, 2000)
+  const handleSubmit = async (value) => {
+    try {
+      await dispatch(patchExchangeDetailEdit(value)).unwrap();
+      toastRef.current.showToast({ detail: t("financeMasters.saveSuccessfully") });
+      setTimeout(() => {
+        Navigate("/master/finance/exchangerate");
+      }, 2000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-  const currencyCode = [
-    {
-      label: getExchangeEdit?.CurrencyCode,
-      value: getExchangeEdit?.CurrencyCode,
-    },
-  ];
-  const ToCurrencyCode = [
-    {
-      label: getExchangeEdit?.ToCurrencyCode,
-      value: getExchangeEdit?.ToCurrencyCode,
-    },
-  ];
+  const currencyCode = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
+  const ToCurrencyCode = currencyCode;
   const setFormikValues = () => {
-    const IsoCode = getExchangeEdit?.ISOcode;
     const updatedValues = {
-      id: getExchangeEdit.id,
+      id: getExchangeEdit?.id,
       EffectiveFrom: new Date(getExchangeEdit?.EffectiveFrom),
       EffectiveTo: new Date(getExchangeEdit?.EffectiveTo),
       CurrencyCode: getExchangeEdit?.CurrencyCode,
@@ -132,7 +89,6 @@ function EditExchange() {
     },
   });
 
-  console.log(formik.values.id, "idleo");
   useEffect(() => {
     setFormikValues();
   }, [getExchangeEdit]);
@@ -145,10 +101,7 @@ function EditExchange() {
 
   return (
     <div className="overall__editexchange__container">
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
+      <CustomToast ref={toastRef} />
       <div>
         <span onClick={() => Navigate(-1)}>
           <SvgBackicon />
@@ -169,8 +122,6 @@ function EditExchange() {
               <DropDowns
                 className="dropdown__container"
                 label="Currency Code"
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.CurrencyCode}
                 onChange={(e) => formik.setFieldValue("CurrencyCode", e.value)}
                 options={currencyCode}
@@ -186,7 +137,6 @@ function EditExchange() {
                 classNames="field__container"
                 label="Currency  Description"
                 placeholder={"Enter"}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.CurrencyCode
                     ? `CurrencyCode ${formik.values.CurrencyDescription}`
@@ -204,8 +154,6 @@ function EditExchange() {
               <DropDowns
                 className="dropdown__container"
                 label="To Currency Code"
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.ToCurrencyCode}
                 onChange={(e) =>
                   formik.setFieldValue("ToCurrencyCode", e.value)
@@ -223,7 +171,6 @@ function EditExchange() {
                 classNames="field__container"
                 label="To Currency  Description"
                 placeholder={"Enter"}
-                //   value={formik.values.ToCurrencyDescription}
                 value={
                   formik.values.ToCurrencyCode
                     ? `ToCurrencyCode ${formik.values.ToCurrencyDescription}`
@@ -248,7 +195,7 @@ function EditExchange() {
               onChange={(e) => {
                 formik.setFieldValue("EffectiveFrom", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">
@@ -263,7 +210,7 @@ function EditExchange() {
               onChange={(e) => {
                 formik.setFieldValue("EffectiveTo", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
             />
           </div>
           <div class="col-3 md:col-3 lg-col-3">
@@ -282,8 +229,6 @@ function EditExchange() {
         <Button
           className="submit_button p-0"
           label="Update"
-          // disabled={!formik.isValid}
-          // onClick={()=>{formik.handleSubmit();}}
           onClick={formik.handleSubmit}
         />
       </div>

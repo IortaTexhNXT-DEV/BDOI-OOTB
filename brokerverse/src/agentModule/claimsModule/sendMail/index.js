@@ -1,4 +1,5 @@
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import { Toast } from "primereact/toast";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
@@ -15,10 +16,12 @@ import { useFormik } from "formik";
 import { postSendData } from "./store/sendMailMiddleWare";
 import SvgUploadClose from "../../../assets/agentIcon/SvgUploadClose";
 import { setPolicyHolderData } from "../claimDetails/store/claimDetailsReducers";
+import logger from "../../../utility/logger";
 
 const SendMail = () => {
   const { t } = useTranslation();
   const fileUploadRef = useRef(null);
+  const errorToast = useRef(null);
   const [uploadImage, setuploadImage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -27,7 +30,7 @@ const SendMail = () => {
     null;
 
   // Get loading, error states and claim response data from Redux
-  const { loading, error, claimResponseData } = useSelector(
+  const { loading, error } = useSelector(
     ({ sendMailReducers }) => ({
       loading: sendMailReducers?.loading || false,
       error: sendMailReducers?.error || "",
@@ -46,15 +49,7 @@ const SendMail = () => {
   // Get dispatch for Redux actions
   const dispatch = useDispatch();
   const handleUppendImg = (name, src) => {
-    console.log(name, src, "find handleUppendImg");
     setuploadImage(src?.objectURL);
-    // const file = src.files[0];
-    // console.log(file,"file");
-
-    // if (file.size <= 200000) {
-    // } else {
-    //   console.log("File size exceeds 2 MB. Please select a smaller file.");
-    // }
   };
   const handleCancelUplaoded = () => {
     setuploadImage(null);
@@ -65,18 +60,9 @@ const SendMail = () => {
   const policyNumber = claimDetailsViewData?.policyNumber || "N/A";
   const policyHolderName = claimDetailsViewData?.PolicyHolderName || "N/A";
 
-  // Console logs to verify data extraction
-  console.log("=== SEND MAIL POLICY DATA ===");
-  console.log("Claim Details View Data:", claimDetailsViewData);
-  console.log("Extracted Policy Number:", policyNumber);
-  console.log("Extracted Policy Holder Name:", policyHolderName);
-  console.log("=== END SEND MAIL POLICY DATA ===");
-
   // Store policy holder data in Redux for future pages
   useEffect(() => {
     if (policyHolderName && policyNumber) {
-      console.log("=== DISPATCHING POLICY HOLDER DATA TO REDUX ===");
-      console.log("Storing in Redux:", { policyHolderName, policyNumber });
       dispatch(
         setPolicyHolderData({
           policyHolderName,
@@ -84,7 +70,6 @@ const SendMail = () => {
           claimNumber: "", // Will be updated when claim is created
         })
       );
-      console.log("=== END DISPATCHING POLICY HOLDER DATA TO REDUX ===");
     }
   }, [dispatch, policyHolderName, policyNumber]);
 
@@ -96,48 +81,23 @@ const SendMail = () => {
     file: null,
   };
   // const customValidation = (values) => {
-  //   const errors = {};
-
-  //   if (!values.mailSubject) {
-  //     errors.mailSubject = "This field is required";
-  //   }
-  //   if (!values.write) {
-  //     errors.write = "This field is required";
-  //   }
-
   //   if (!values.file) {
-  //     errors.file = "Please select a file";
   //   }
-  //   return errors;
   // };
   const handleSubmit = async (values) => {
     try {
       const result = await dispatch(postSendData(formik.values));
 
-      console.log("=== REDUX ACTION RESULT DEBUG ===");
-      console.log("Result Type:", result.type);
-      console.log("Result Payload:", result.payload);
-      console.log("Result Meta:", result.meta);
-      console.log("=== END REDUX ACTION RESULT DEBUG ===");
-
       if (result.type === "sendmail/POST_SENT_MAIL_DATA/fulfilled") {
         // Success - navigate to next page with claim data
-        console.log("=== NAVIGATING TO NEXT PAGE ===");
-        console.log("API Response Result:", result.payload);
-        console.log("Response Data:", result.payload.data);
-        console.log("Claim Data:", result.payload.data?.claim);
 
         // Extract claim data from nested response structure
         const claimData =
           result.payload.data?.claim || result.payload.data || result.payload;
         const claimId =
-          claimData.id || claimData.claimId || claimData.claim_id || "12234";
+          claimData.id || claimData.claimId || claimData.claim_id || null;
         const claimNumber =
           claimData.claimNumber || claimData.claim_number || claimData.id;
-
-        console.log("Extracted Claim ID:", claimId);
-        console.log("Extracted Claim Number:", claimNumber);
-        console.log("=== END NAVIGATING TO NEXT PAGE ===");
 
         // Update Redux with claim number
         dispatch(
@@ -166,30 +126,25 @@ const SendMail = () => {
         };
 
         // Navigate to next page with claim ID in URL
-        if (claimId && claimId !== "12234") {
+        if (claimId) {
           navigate(`/agent/claimrequest/requestapproval/${claimId}`, {
             state: approvalState,
           });
         } else {
-          // Fallback navigation if no claim ID is available
-          console.log("No claim ID found, using fallback navigation");
-          navigate("/agent/claimrequest/requestapproval/12234", {
-            state: approvalState,
-          });
+          errorToast.current?.show({ severity: "error", summary: "Claim not registered", detail: "The server did not return a claim id", life: 8000 });
         }
       } else if (result.type === "sendmail/POST_SENT_MAIL_DATA/rejected") {
-        // Handle error - you might want to show a toast or error message
-        console.error(
-          "Failed to create claim - Action Rejected:",
-          result.payload
-        );
+        errorToast.current?.show({
+          severity: "error",
+          summary: t("common.error", "Claim not registered"),
+          detail: String(result.payload || "Failed to create claim"),
+          life: 8000,
+        });
       } else {
         // Handle other cases
-        console.log("Unexpected result type:", result.type);
-        console.log("Result payload:", result.payload);
       }
     } catch (error) {
-      console.error("Error submitting claim:", error);
+      logger.error("Error submitting claim:", error);
     }
   };
   const formik = useFormik({
@@ -197,14 +152,12 @@ const SendMail = () => {
     // validate: customValidation,
     onSubmit: handleSubmit,
   });
-  // const handleSubmit = () => {
-  //   navigate("/agent/claimrequest/requestapproval/122344");
-  // };
   const handleBackNavigation = () => {
     customHistory.back();
   };
   return (
     <div className="claimrequest__details__container">
+      <Toast ref={errorToast} />
       <div className="claim__details__container__titles">{t("agent.clients")}</div>
       <div 
         className="claim__details__container__back__btn mt-3 cursor-pointer"
@@ -231,16 +184,12 @@ const SendMail = () => {
             onChange={formik.handleChange("mailSubject")}
           />
           {formik.touched.mailSubject && formik.errors.mailSubject && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.mailSubject}
             </div>
           )}
         </div>
         <div className="mt-4">
-          {/* <InputTextField 
-          style={{height:"200px"}}
-            label="Write"
-          /> */}
           <InputTextarea
             label={t("agent.write")}
             rows={5}
@@ -251,7 +200,7 @@ const SendMail = () => {
             onChange={formik.handleChange("write")}
           />
           {formik.touched.write && formik.errors.write && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.write}
             </div>
           )}
@@ -271,12 +220,10 @@ const SendMail = () => {
                 mode="basic"
                 name="demo"
                 accept=".png,.jpg,.jpeg"
-                // maxFileSize={2000000}
                 uploadHandler={(e) => {
                   formik.setFieldValue("file", e.files[0]);
                   handleUppendImg(e.options.props.name, e.files[0], "the data");
                 }}
-                // disabled={pending === "Pending"}
               />
               <div className="icon_click_option">
                 <SvgImageUpload />
@@ -288,7 +235,7 @@ const SendMail = () => {
             </div>
           </div>
           {formik.touched.file && formik.errors.file && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.file}
             </div>
           )}
@@ -301,15 +248,11 @@ const SendMail = () => {
             </div>
           )}
           {/* ) : ( */}
-          {/* <div className="upload__image__area mt-2">
-                <img src={imageURL} alt="Image" className="image__view" />
-              </div>
-            ) */}
           {/* } */}
         </div>
 
         {error && (
-          <div className="mt-3" style={{ color: "red", fontSize: "14px" }}>
+          <div className="mt-3" style={{ color: "var(--color-danger)", fontSize: "14px" }}>
             {error}
           </div>
         )}
@@ -333,7 +276,6 @@ const SendMail = () => {
           </Button>
         </div>
       </Card>
-      {/* <ClaimDetailsCard /> */}
     </div>
   );
 };

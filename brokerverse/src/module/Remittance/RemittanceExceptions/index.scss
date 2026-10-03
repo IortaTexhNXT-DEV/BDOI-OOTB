@@ -26,7 +26,7 @@
         color: #6c757d;
       }
 
-      &.red i { color: #f44336; }
+      &.red i { color: var(--color-danger); }
       &.orange i { color: #ff9800; }
       &.green i { color: #4caf50; }
       &.highlight {

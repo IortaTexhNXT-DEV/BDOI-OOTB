@@ -1,0 +1,77 @@
+name: CI
+
+# Pull requests. A push to main is tested inside .github/workflows/deploy.yml before it deploys.
+
+on:
+  pull_request:
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  backend:
+    name: Backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: brokerverse
+          POSTGRES_PASSWORD: brokerverse
+          POSTGRES_DB: brokerverse_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U brokerverse -d brokerverse_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse_test
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: brokerverse
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: brokerverse/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Test
+        run: npx craco test --watchAll=false
+        env:
+          CI: true

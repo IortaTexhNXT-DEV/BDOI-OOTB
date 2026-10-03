@@ -1,3 +1,4 @@
+import logger from "./logger";
 /**
  * Accounting Validation Utility
  * Provides reusable functions for validating accounting equations across payment flows
@@ -47,7 +48,7 @@ export const validateAccountingEquation = (
   // Log warning if equation doesn't balance (unless grossPremium is 0)
   if (!isValid && gross > 0) {
     const contextStr = context ? ` (${context})` : "";
-    console.warn(`⚠️ Accounting equation warning${contextStr}:`, {
+    logger.warn(`Accounting equation warning${contextStr}:`, {
       grossPremium: gross,
       netPremium: net,
       valueAddedTax: vat,

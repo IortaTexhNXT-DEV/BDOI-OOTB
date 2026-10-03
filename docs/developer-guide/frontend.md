@@ -1,0 +1,208 @@
+# BrokerVerse front end: developer guide
+
+The front end is a React 18 single-page application in `brokerverse/`, built with Create React App
+through craco. It uses PrimeReact for components, Redux Toolkit for shared state, Formik for most
+forms and i18next for text. It talks only to the BrokerVerse API (`backend/`, see `backend.md`).
+
+## 1. Layout of `brokerverse/src`
+
+| Folder | What is in it |
+| --- | --- |
+| `index.js`, `App.js` | Entry point: store, router, theme, session renewal; `App.js` holds the sign-in and public routes |
+| `routes/MainRoute.js` | Every signed-in route, wrapped by `routes/ProtectedRoute` |
+| `components/SideBar/list.js` | The side menu: one tree of `{ name, path, includes, submenu }` |
+| `utils/menuPermissions.js`, `utils/canOpen.js` | Which role sees which menu entry, route guard, `hasPermission` |
+| `agentModule/` | Operations screens (leads, clients, quotations, policies, endorsements, claims, renewals, payments, open items); routes under `/agent/...` |
+| `module/` | Everything else: masters, accounts and finance, placement, remittance, reinsurance, commission, incentive, product configurator, reports, system settings |
+| `services/` | One file per API area; every HTTP call of a screen goes through a service |
+| `utility/`, `utils/` | Shared helpers (formatting, dialogs, session, validation); `utils/` holds the permission helpers |
+| `components/` | Shared UI pieces (error boundary, dialogs host, notification drawer, file upload, status badge, stats cards) |
+| `hooks/` | `useFormatCurrency`, `useNotifications` |
+| `redux/` | Store and the list of reducers |
+| `locales/` | `en.json` (complete) and `th.json` |
+| `theme/bdoi/` | PrimeReact theme and application styles (generated theme: `scripts/build-bdoi-theme.js`) |
+
+### Why two source trees
+
+`agentModule/` started as the agent (sales) application and `module/` as the finance and masters
+application. They were merged into one product, but the folders were kept to avoid moving several
+hundred files. The rule for new work: operations screens used by sales, processing and claims staff
+go in `agentModule/<area>`, back-office screens (accounts, masters, configuration, reports) go in
+`module/<Area>`. Both use the same services, helpers and store.
+
+## 2. Routes, menus and permissions
+
+Three layers decide what a user can do. They must agree.
+
+1. **Menu** (`components/SideBar/list.js`). Each entry has a `path` and an `includes` list of path
+   prefixes that belong to the same screen (detail and edit pages). The `permissions` field on an
+   entry records the API permission the screen needs; it is documentation and is not checked in the
+   browser.
+2. **Role grants** (`utils/menuPermissions.js`, `roleMenuPermissions`). Deny by default. The
+   administrator role (`system-admin`) gets `all: true`. Other roles list, per top-level menu, the
+   second-level entries they may open (`"Operational Reports > Remittance"` grants one child).
+   `ProtectedRoute` calls `isPathAllowed`: a path that belongs to a menu entry opens only when that
+   entry is in the user's filtered menu; paths outside the menu (profile, notifications) are open to
+   every signed-in user. `canOpen(path)` applies the same rule to buttons and links, and
+   `hasPermission("write:policies")` hides actions the API would refuse (permissions come from the
+   sign-in response).
+3. **API** (backend). Every endpoint checks the user's permissions. The front end only hides what a
+   role cannot use; the server is the authority. `utils/menuPermissions.test.js` walks each persona
+   through the menu and checks the grants against the API permissions.
+
+When a role must see a new screen: add the menu entry, add it to the role in `roleMenuPermissions`,
+and make sure the backend role has the permission the screen's API calls need.
+
+## 3. Business areas
+
+| Area | Route prefix | Folder | Main service | Backend module |
+| --- | --- | --- | --- | --- |
+| Dashboards | `/executive/dashboard`, `/claims/dashboard`, `/processing/dashboard`, `/agent/home` | `module/ExecutiveDashboard`, `module/ClaimsModule`, `agentModule/dashBoardModule` | `dashboardService` | `dashboard` |
+| Leads | `/agent/leadlisting`, `/agent/createlead` | `agentModule/leadModule` | `leadService` | `leads` |
+| Clients | `/agent/clientlisting`, `/agent/clientview` | `agentModule/quoteModule/clientListing`, `clientView` | `clientService` | `clients` |
+| Quotations | `/agent/Quotation`, `/agent/createquote`, `/agent/editquote`, `/agent/quotedetailview` | `agentModule/quoteModule`, `agentModule/quotationModule` | `quotationService`, `emailService` | `quotations` |
+| Placement | `/placement/broker-slips`, `/placement/placement-slips` | `module/Placement` | `placementService` | `placement` |
+| Policies | `/agent/policy`, `/agent/policydetail` | `agentModule/policyModule` | `policyService` | `policies` |
+| Endorsements | `/agent/endorsement...` | `agentModule/endorsementModule` | `endorsementService` | `endorsements` |
+| Claims | `/agent/claim` | `agentModule/claimModule`, `agentModule/claimsModule` | `claimsService`, `claimSettlementCashService` | `claims` |
+| Renewals | `/agent/expired-policies`, `/agent/renewal-batch`, `/renewal/...` | `agentModule/renewalModule`, `module/Renewal` | `policyRenewalService`, `batchRenewalService`, `renewalsWorkspaceService` | `renewals` |
+| Open items, payments | `/agent/openitemslistdata`, `/agent/payments` | `agentModule/openItems`, `agentModule/paymentsModule` | `paymentsService` | `payments` |
+| Receipts, collections | `/accounts/receipts`, `/agent/collections` | `module/Receipts`, `agentModule/collectionsModule` | `receiptsService`, `collectionService`, `billingService` | `receipts`, `collections` |
+| Disbursements | `/accounts/paymentvoucher` | `module/PaymentVoucher` | `disbursementsService` | `disbursements` |
+| Journals | `/accounts/journalvoucher`, correction and reversal JV | `module/JournalVoucher`, `module/CorrectionJV`, `module/Reversals` | `journalVoucherService`, `accountingService` | `journal-vouchers`, `accounting` |
+| Petty cash | `/accounts/pettycash` | `module/PettyCashManagement` | `pettyCashService` | `payments` (petty cash) |
+| Bank reconciliation | `/accounts/bank-reconciliation` | `module/BankReconciliation` | `bankReconciliationService` | `bank-reconciliation` |
+| Period end, tax | `/accounts/period-end`, `/accounts/tax` | `module/PeriodEnd` | `periodEndService` | `period-end` |
+| Remittance | `/finance/remittance`, `/master/finance/remittance` | `module/Remittance`, `module/FinanceMastersModule/RemittanceMaster` | `remittanceService` | `remittance` |
+| Commission | `/commission` | `module/Commission` | `commissionService` | `commission`, `commission-rates` |
+| Incentive | `/incentive`, `/master/incentive` | `module/Incentive` | `incentiveService` | `incentive` |
+| Reinsurance | `/reinsurance`, `/master/reinsurance` | `module/Reinsurance` | `reinsuranceService` | `reinsurance` |
+| Product configurator | `/product-configurator` | `module/ProductConfigurator` | `productConfiguratorService` | `product-configurator` |
+| Masters | `/master/generals`, `/master/finance` | `module/GeneralMasters`, `module/FinanceMastersModule` | `mastersService` | `masters` |
+| Users and roles | `/master/generals/usermanagement` | `module/GeneralMasters/UserManagementMasters` | `userService`, `adminService` | `users` |
+| Configuration | `/master/configuration` | `module/SystemSettings`, `module/Administration` | `systemSettingsService`, `numberingService` | `system-settings`, `settings`, `schedules`, `document-numbering` |
+| Reports | `/reports` | `module/Reports` | `reportsService` | `reports` |
+
+## 4. Services and the API client
+
+Each file in `services/` wraps the endpoints of one area and returns plain data or
+`{ success, data, error }`. Screens do not build URLs themselves.
+
+- The API base URL is `BASE_URL` from `utility/constant.js` (`REACT_APP_BASE_URL` at build time).
+- Two request styles exist. Older services use `fetch` with `authService.getAuthHeader()`; newer ones
+  use the axios client in `utility/interceptor.js` through `getRequest` / `postRequest` /
+  `putRequest` / `patchRequest` / `deleteRequest` (`utility/commonServices.js`). Prefer the axios
+  client for new code.
+- Both styles renew the session the same way: `utility/sessionRefresh.js` wraps `window.fetch`, and
+  the axios interceptor calls the same `refreshAccessToken`. A 401 is retried once with a new access
+  token; when the refresh token is also rejected the user returns to the sign-in page.
+- `npm run check:api` (`scripts/check-api-calls.js`) compares every call in `src` with the routes in
+  `backend/docs/api/openapi.json` and lists calls to routes that do not exist or use the wrong
+  method. Run it after changing a service or a backend route.
+
+## 5. Redux store
+
+`redux/store.js` combines the reducers listed in `redux/mainReducer.js` (back office) and
+`redux/AgentReducer.js` (operations). Each area keeps its slice next to its screens in a `store/`
+folder (`*Reducer.js` or `*Slice.js` with `createAsyncThunk` middlewares in `*Middleware.js`).
+Notable slices: `systemSettingsReducer` (display currency, date format, branding), the quote creation
+slice (`quotationReducers.currentQuoteCreation`, which carries a quote across the creation steps),
+and the lead and client lists. `resetStore()` clears everything at sign-out. In development
+`redux-logger` prints each action to the browser console.
+
+Many newer screens keep their data in component state and call a service directly; that is
+acceptable for data no other screen needs.
+
+## 6. Shared UI layer
+
+| Need | Use |
+| --- | --- |
+| Success / error / warning message | `notifySuccess`, `notifyError`, `notifyWarn`, `notifyInfo` from `utility/dialogs` |
+| Confirm or ask for text | `confirmAction`, `promptText` from `utility/dialogs` (never `window.confirm`) |
+| Amounts | `useFormatCurrency()` in components, `formatCurrency` / `formatNumber` from `utility/currencyConverter` elsewhere |
+| Dates | `formatDate(value, { withTime, empty })`, `toIsoDate`, `calendarDateFormat()` from `utility/dateFormat` |
+| Percentages, rounding | `utility/numberFormat` |
+| Right-aligned numeric table columns | automatic: `utility/tableNumericAlign` marks numeric cells |
+| Status tags | `components/StatusBadge`, `utils/statusHelpers` |
+| File upload | `components/S3FileUpload`, `services/s3Service` |
+| Bulk upload template | `agentModule/component/bulkUploadTemplate` |
+| Required-field checks without Formik | `utility/requiredFields` |
+| Diagnostics | `utility/logger` (silent in production, see section 8) |
+
+The display currency and the date format come from System Settings. `module/SystemSettings/store`
+loads them after sign-in and `utility/applySystemSettings` passes them to the formatting helpers,
+so formatted values follow the configuration without screens reading the settings. Do not format
+dates with `toLocaleDateString` or amounts with a fixed currency symbol.
+
+## 7. Translations
+
+Text is in `src/locales/en.json` and `th.json`, loaded by `src/i18n.js`, and read with
+`const { t } = useTranslation()`. Keys are grouped by screen (`"quoteDetailView.title"`). The
+language pickers offer the languages configured in System Settings that have a bundled translation
+(`utility/languages.js`).
+
+- Add every new key to `en.json`; add the Thai text to `th.json` when known (English is shown
+  otherwise).
+- `t("key", "Default")` shows the default when the key is missing, but the key still belongs in
+  `en.json` so that it can be translated.
+- `npm run check:i18n` (`scripts/check-translations.js`) lists keys used in code and missing from
+  `en.json`.
+
+## 8. Tracing a defect from a screen to the API
+
+1. Find the screen: the address bar path is in `routes/MainRoute.js`, which names the component.
+2. In the component, find the handler of the button or the `useEffect` that loads the data; it calls
+   a service method (or dispatches a thunk in the area's `store/` folder, which calls a service).
+3. The service method shows the HTTP method and path. Look the path up in
+   `backend/docs/api/BrokerVerse_API_Touchpoints.csv` or `openapi.json` to find the backend module
+   and the permissions it needs.
+4. In the browser developer tools, the Network tab shows the request, the response and the
+   `x-request-id` header; the same id is in the backend log line for the request.
+5. Errors the user should see are shown with the notify helpers. Other diagnostics go through
+   `utility/logger`, which prints nothing in production. To see them while reproducing a problem in
+   production, run `localStorage.setItem("bv.debug", "1")` in the browser console, reload, and remove
+   the item afterwards.
+6. A screen that fails to render shows the error boundary (`components/ErrorBoundary`) instead of a
+   blank page; the other screens keep working.
+
+## 9. Common changes
+
+**Add a screen.** Create the component in the right tree (section 1) with its service calls in
+`services/`. Add a `<Route>` to `routes/MainRoute.js`. If users reach it from the menu, add an entry
+to `components/SideBar/list.js` with `path` and `includes` (detail pages), then grant it to the roles
+in `utils/menuPermissions.js` and extend `menuPermissions.test.js` when a persona's access changes.
+Buttons that open another screen should check `canOpen(path)`.
+
+**Add a menu entry for an existing screen.** Add it to `list.js` and to the roles that need it. An
+entry without a role grant is visible only to the administrator.
+
+**Add a translation.** Add the key to `en.json` (and `th.json`), use `t("area.key")`, run
+`npm run check:i18n`.
+
+**Add a report.** Standard reports are defined in the backend report catalogue and appear under
+Reports > All Reports (`/reports/catalogue`, `/reports/run/:code`) without front-end work: the
+filter form is built from the report definition (`module/Reports/ReportScreen`). A report with its
+own layout gets a component under `module/Reports/...`, a route and a menu entry as above, and reads
+its data through `reportsService`.
+
+**Add an API call.** Add a method to the area's service, call it from the screen, then run
+`npm run check:api`.
+
+## 10. Build, configuration and tests
+
+| Command (in `brokerverse/`) | Purpose |
+| --- | --- |
+| `npm ci --legacy-peer-deps` | Install dependencies |
+| `REACT_APP_BASE_URL=http://localhost:8000/api npm start` | Development server on port 3000 |
+| `REACT_APP_BASE_URL=/api npm run build` | Production build in `build/` |
+| `CI=true npm test -- --watchAll=false` | Unit tests (Jest, Testing Library) |
+| `npm run check:api`, `npm run check:i18n` | Consistency checks described above |
+
+`REACT_APP_BASE_URL` is the only environment variable and is fixed at build time. The Docker image
+(`brokerverse/Dockerfile`) builds with `/api` and serves the files with nginx, which proxies `/api/`
+to the backend and sends unknown paths to `index.html` so that deep links work (`nginx.conf`). Build
+warnings come from ESLint (`react-app` rules plus `no-console`); keep the count from growing.
+
+Tests live next to the code they test (`*.test.js`): formatting helpers, menu permissions and route
+guard, placement helpers, the lead service and an application smoke test. End-to-end scenarios are
+in `docs/e2e`.

@@ -10,6 +10,8 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import documentTemplateService from "../../../services/documentTemplateService";
+import emailService from "../../../services/emailService";
+import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
 import {
   showSuccessMessage,
   showErrorMessage,
@@ -19,8 +21,9 @@ function PolicyReceipts() {
   const { t } = useTranslation();
   const [selectedRows, setSelectedRows] = useState([]);
   const [printLoading, setPrintLoading] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
 
-  const { receiptDetailList, loading, currentReceiptId, receiptNumber } =
+  const { receiptDetailList, loading, currentReceiptId, receiptNumber, clientEmail, receiptStatus } =
     useSelector(({ receiptsTableReducers }) => {
       return {
         loading: receiptsTableReducers?.loading,
@@ -28,6 +31,8 @@ function PolicyReceipts() {
         currentReceiptId: receiptsTableReducers?.currentReceiptId,
         receiptNumber:
           receiptsTableReducers?.currentReceiptDetails?.receiptNumber,
+        clientEmail: receiptsTableReducers?.currentReceiptDetails?.clientEmail,
+        receiptStatus: receiptsTableReducers?.currentReceiptDetails?.receiptStatus,
       };
     });
 
@@ -84,7 +89,6 @@ function PolicyReceipts() {
         t("common.success")
       );
     } catch (error) {
-      console.error("Error printing receipt:", error);
       showErrorMessage(
         error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
         t("common.error")
@@ -135,7 +139,6 @@ function PolicyReceipts() {
         t("common.success")
       );
     } catch (error) {
-      console.error("Error printing selected receipt items:", error);
       showErrorMessage(
         error?.message || t("accounts.addReceiptEdit.failedToPrintReceipt"),
         t("common.error")
@@ -272,6 +275,14 @@ function PolicyReceipts() {
         }}
       >
         <Button
+          label={t("emailDocument.emailReceipt")}
+          icon="pi pi-envelope"
+          outlined
+          onClick={() => setEmailOpen(true)}
+          disabled={!currentReceiptId || loading || receiptStatus === "Cancelled"}
+          style={{ minWidth: "150px", padding: "10px 20px" }}
+        />
+        <Button
           label={t("accounts.addReceiptEdit.printAll")}
           onClick={handlePrintAll}
           disabled={!currentReceiptId || printLoading || loading}
@@ -302,6 +313,14 @@ function PolicyReceipts() {
           }}
         />
       </div>
+      <EmailDocumentDialog
+        visible={emailOpen}
+        onHide={() => setEmailOpen(false)}
+        title={t("emailDocument.emailReceiptTitle", { number: receiptNumber || "" })}
+        defaultTo={clientEmail || ""}
+        fileName={`receipt-${receiptNumber || currentReceiptId}.pdf`}
+        send={(body) => emailService.emailReceipt(currentReceiptId, body)}
+      />
     </div>
   );
 }

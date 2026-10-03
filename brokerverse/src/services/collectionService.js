@@ -32,7 +32,6 @@ class CollectionService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get collections error:", error);
       throw error;
     }
   }
@@ -47,7 +46,6 @@ class CollectionService {
       const response = await getRequest(`collections/${collectionId}`);
       return response.data;
     } catch (error) {
-      console.error("Get collection by ID error:", error);
       throw error;
     }
   }
@@ -66,7 +64,6 @@ class CollectionService {
       );
       return response.data;
     } catch (error) {
-      console.error("Add follow-up action error:", error);
       throw error;
     }
   }
@@ -89,7 +86,6 @@ class CollectionService {
       );
       return response.data;
     } catch (error) {
-      console.error("Set commitment date error:", error);
       throw error;
     }
   }
@@ -110,7 +106,6 @@ class CollectionService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get aging report error:", error);
       throw error;
     }
   }
@@ -124,7 +119,6 @@ class CollectionService {
       const response = await getRequest("collections/dashboard-stats");
       return response.data;
     } catch (error) {
-      console.error("Get dashboard stats error:", error);
       throw error;
     }
   }
@@ -139,7 +133,6 @@ class CollectionService {
       const response = await postRequest("collections/sync", { receiptId });
       return response.data;
     } catch (error) {
-      console.error("Sync from receipt error:", error);
       throw error;
     }
   }
@@ -151,7 +144,6 @@ class CollectionService {
       );
       return response.data;
     } catch (error) {
-      console.error("Send email error:", error);
       throw error;
     }
   }
@@ -165,7 +157,6 @@ class CollectionService {
       const response = await postRequest("collections/send-due-date-reminders");
       return response.data;
     } catch (error) {
-      console.error("Send due date reminders error:", error);
       throw error;
     }
   }

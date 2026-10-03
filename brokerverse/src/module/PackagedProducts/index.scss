@@ -1,0 +1,130 @@
+// Packaged products screens: bundles, insurer rate tables, the insurer comparison, premium taxes and payment gateways.
+// Layout and cards come from the Placement styles (placement-page, placement-card); this file adds what is specific here.
+
+.pkg-page {
+  .pkg-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .pkg-spacer {
+    flex: 1;
+  }
+
+  .pkg-subtitle {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-color, #1f2937);
+  }
+
+  .pkg-actions,
+  .pkg-inline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pkg-wide {
+    grid-column: 1 / -1;
+  }
+
+  .muted {
+    color: var(--text-color-secondary, #6b7280);
+    font-size: 0.875rem;
+  }
+}
+
+// Plain tables for the comparison matrix and the premium breakdown
+.pkg-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+
+  th,
+  td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--surface-border, #e5e7eb);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  th {
+    background: var(--surface-50, #f8fafc);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .center {
+    text-align: center;
+  }
+
+  tr.total td,
+  td.total {
+    font-weight: 700;
+    border-top: 2px solid var(--surface-border, #d1d5db);
+  }
+}
+
+// Comparison matrix: one column per insurer
+.pkg-matrix {
+  th:first-child,
+  td:first-child {
+    position: sticky;
+    left: 0;
+    background: var(--surface-0, #ffffff);
+    z-index: 1;
+    min-width: 11rem;
+  }
+
+  .pkg-matrix-head {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
+
+.pkg-benefits {
+  margin: 0;
+  padding-left: 1.1rem;
+
+  li {
+    margin-bottom: 0.15rem;
+  }
+}
+
+.pkg-breakdown {
+  max-width: 28rem;
+}
+
+// Staff-only figures (commission) are set apart from what the client sees
+.pkg-staff {
+  color: var(--text-color-secondary, #6b7280);
+  font-style: italic;
+}
+
+.pkg-gateway {
+  .pkg-gateway-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .pkg-credentials {
+    margin-top: 0.5rem;
+    color: var(--text-color-secondary, #6b7280);
+    font-size: 0.8125rem;
+  }
+}

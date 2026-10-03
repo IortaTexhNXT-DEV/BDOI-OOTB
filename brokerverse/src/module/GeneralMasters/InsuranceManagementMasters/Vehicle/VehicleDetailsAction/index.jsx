@@ -1,7 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
@@ -10,39 +9,28 @@ import { Button } from "primereact/button";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   patchInsuranceVehicleMiddleWare,
   postInsuranceVehicleMiddleWare,
 } from "../store/insuranceVehicleMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const VehicleDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { InsuranceVehicleList, loading } = useSelector(
-    ({ insuranceVehicleReducers }) => {
-      return {
-        loading: insuranceVehicleReducers?.loading,
-        InsuranceVehicleList: insuranceVehicleReducers?.InsuranceVehicleList,
-      };
-    }
-  );
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceVehicleList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("vehicle", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -84,31 +72,21 @@ const VehicleDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceVehicleList?.length + 1,
-      };
-      console.log(valueWithId, "find valueWithId");
-      dispatch(postInsuranceVehicleMiddleWare(valueWithId));
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/vehicle");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsuranceVehicleMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/vehicle");
-    } else {
-      navigation("/master/generals/insurancemanagement/vehicle");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsuranceVehicleMiddleWare : patchInsuranceVehicleMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/vehicle");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
     const vehicleCode = data[0]?.vehicleCode;
@@ -120,12 +98,12 @@ const VehicleDetailsAction = ({ action }) => {
 
     const updatedValues = {
       id: id,
-      vehicleCode: `${vehicleCode}`,
-      vehicleName: `${vehicleName}`,
-      vehicleVariant: `${vehicleVariant}`,
-      vehicleModel: `${vehicleModel}`,
-      vehicleBrand: `${vehicleBrand}`,
-      seatingCapacity: `${seatingCapacity}`,
+      vehicleCode: vehicleCode ?? "",
+      vehicleName: vehicleName ?? "",
+      vehicleVariant: vehicleVariant ?? "",
+      vehicleModel: vehicleModel ?? "",
+      vehicleBrand: vehicleBrand ?? "",
+      seatingCapacity: seatingCapacity ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -146,7 +124,7 @@ const VehicleDetailsAction = ({ action }) => {
   return (
     <div className="action__vehicle_container">
       <div className="grid m-0 top-container">
-        <CustomToast ref={toastRef} message="Vehicle Code VC1234 is added" />
+        <CustomToast ref={toastRef} message={`Vehicle Code ${formik.values.vehicleCode || ""} is added`} />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
           <div className="svgback_container">
@@ -186,7 +164,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleCode && formik.errors.vehicleCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleCode}
               </div>
             )}
@@ -204,7 +182,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleName && formik.errors.vehicleName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleName}
               </div>
             )}
@@ -222,7 +200,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleVariant && formik.errors.vehicleVariant && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleVariant}
               </div>
             )}
@@ -240,7 +218,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleModel && formik.errors.vehicleModel && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleModel}
               </div>
             )}
@@ -258,7 +236,7 @@ const VehicleDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.vehicleBrand && formik.errors.vehicleBrand && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.vehicleBrand}
               </div>
             )}
@@ -277,7 +255,7 @@ const VehicleDetailsAction = ({ action }) => {
             />
             {formik.touched.seatingCapacity &&
               formik.errors.seatingCapacity && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.seatingCapacity}
                 </div>
               )}
@@ -288,7 +266,6 @@ const VehicleDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -297,7 +274,6 @@ const VehicleDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

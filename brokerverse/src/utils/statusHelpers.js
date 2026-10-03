@@ -1,4 +1,5 @@
-/**
+
+import { formatDate as formatAppDate } from "../utility/dateFormat";/**
  * Status Helpers - Utility functions for handling Lead, Quote, and Policy statuses
  */
 
@@ -242,11 +243,7 @@ export const formatStatusWithTime = (status, timestamp) => {
   if (!timestamp) return getStatusLabel(status);
   
   const date = new Date(timestamp);
-  const formattedDate = date.toLocaleDateString('en-US', { 
-    month: 'short', 
-    day: 'numeric', 
-    year: 'numeric' 
-  });
+  const formattedDate = formatAppDate(date);
   
   return `${getStatusLabel(status)} (${formattedDate})`;
 };

@@ -1,12 +1,8 @@
-import React, { useMemo, useRef, useState, useEffect } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import SvgHomes from "../../../assets/agentIcon/SvgHomes";
-import SvgQr from "../../../assets/agentIcon/SvgQr";
-import SvgCredit from "../../../assets/agentIcon/SvgCredit";
-import SvgEmoney from "../../../assets/agentIcon/SvgEmoney";
 import SvgDigital from "../../../assets/agentIcon/SvgDigital";
 import SvgStore from "../../../assets/agentIcon/SvgStore";
 import SvgDebit from "../../../assets/agentIcon/SvgDebit";
@@ -16,10 +12,8 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import DocumentUpload from "./Modal/DocumentUpload";
 import SvgPaymentLinkIcon from "../../../assets/agentIcon/SvgPaymentLinkIcon";
-import SvgInxTlinkicon from "../../../assets/agentIcon/SvgInxTlinkicon";
 import ShareOption from "./Modal/ShareOption";
 import InternetBankingList from "./Modal/InternetBankingList";
-import policyService from "../../../services/policyService";
 import { getpolicyDetailedMiddleware } from "../policyDetailedView/store/policyDetailedMiddleware";
 import clientService from "../../../services/clientService";
 
@@ -40,7 +34,7 @@ const PaymentOptions = () => {
   const fromEndorsement = state?.fromEndorsement;
   const endorsementId = state?.endorsementId;
 
-  const { policydetailedlist, loadingPolicyDetails } = useSelector(
+  const { policydetailedlist } = useSelector(
     ({ policyDetailedViewMainReducers }) => ({
       policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
       loadingPolicyDetails: policyDetailedViewMainReducers?.loading,
@@ -72,10 +66,6 @@ const PaymentOptions = () => {
     policydetailedlist?.grossPremium ||
     policydetailedlist?.quotation?.grossPremium ||
     "0.00";
-
-  // Log data completeness for debugging
-
-  console.log(clientData, "clientData");
 
   const displayTitle = useMemo(() => {
     const parts = [];
@@ -122,44 +112,18 @@ const PaymentOptions = () => {
       const payload = response.data?.data || response.data;
       setClientData(payload);
     } else {
-      console.log(response.error, "error");
       setClientData(null);
     }
   };
   useEffect(() => {
-    const fromWaitingPage = state?.fromWaitingPage;
-    const fromPolicyDetail = state?.fromPolicyDetail;
-    const fromUploadPolicy = state?.fromUploadPolicy;
-    const fromEndorsement = state?.fromEndorsement;
-
-    // Auto-proceed for quote-to-policy direct flow (no waiting page)
-    if (
-      quotationId &&
-      !policyId &&
-      !fromWaitingPage &&
-      clientData?.generatedClientId
-    ) {
-      const timer = setTimeout(() => {
-        console.log("Auto-proceeding: quote flow");
-        handleSubmit("Direct Debit");
-      }, 2000);
-      return () => clearTimeout(timer);
+    // Quote and policy flows: no simulated payment. The payment screen asks how the client pays (pay later, bank
+    // transfer, cheque, online, cash) and records it for finance to verify, so go straight there.
+    if (!fromEndorsement && (quotationId || policyId)) {
+      handleSubmit(null, { replace: true });
+      return undefined;
     }
 
-    // Auto-proceed for policy flow (from waiting page OR policy detail OR upload)
-    if (
-      policyId &&
-      (fromWaitingPage || fromPolicyDetail || fromUploadPolicy) &&
-      clientData?.generatedClientId
-    ) {
-      const timer = setTimeout(() => {
-        console.log("Auto-proceeding: policy flow");
-        handleSubmit("Direct Debit");
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-
-    // Auto-proceed for endorsement payment flow
+    // Endorsement payment flow (owned by the endorsement module): unchanged
     if (
       policyId &&
       fromEndorsement &&
@@ -167,7 +131,6 @@ const PaymentOptions = () => {
       clientData?.generatedClientId
     ) {
       const timer = setTimeout(() => {
-        console.log("Auto-proceeding: endorsement payment");
         handleSubmit("Direct Debit");
       }, 2000);
       return () => clearTimeout(timer);
@@ -184,7 +147,6 @@ const PaymentOptions = () => {
   ]);
 
   const handleUppendImg = (name, src) => {
-    console.log(name, src, "find handleUppendImg");
     setuploadImage(src?.objectURL);
   };
   const handleMOdalOpen = () => {
@@ -202,7 +164,7 @@ const PaymentOptions = () => {
     handleSubmit("Direct Debit");
   };
 
-  const handleSubmit = (paymentMethod) => {
+  const handleSubmit = (paymentMethod, navOptions = {}) => {
     // Handle endorsement payment flow differently
     if (fromEndorsement && endorsementId) {
       // For endorsement, go directly to client view after payment
@@ -219,26 +181,24 @@ const PaymentOptions = () => {
     }
 
     // Determine if this is a quote-to-policy flow or existing policy payment
-    const isQuoteFlow = !!quotationId;
+    const isQuoteFlow = !!quotationId && !policyId;
     const confirmationRoute = isQuoteFlow
       ? "/agent/quote/paymentconfirmation"
       : "/agent/policy/paymentconfirmation";
 
-    // FIX: Ensure we have complete policy data for policy payment flow
+    // The policy payment flow needs the complete policy record.
     const completePolicyData = isQuoteFlow
       ? policyData
       : policydetailedlist || policyData;
 
-    // FIX: Extract policy number correctly (never use ID as fallback)
+    // Policy number only; the id is not a policy number.
     const actualPolicyNumber =
       completePolicyData?.policyNumber ||
       state?.policyNumber ||
       state?.PolicyNumber;
 
-    // FIX: Extract gross premium correctly
     const actualGrossPremium = completePolicyData?.grossPremium || grossPremium;
 
-    // FIX: Extract client ID correctly
     const actualClientId = completePolicyData?.clientId || clientId;
 
     const actualClientName =
@@ -247,6 +207,7 @@ const PaymentOptions = () => {
       clientName;
 
     navigate(confirmationRoute, {
+      ...navOptions,
       state: {
         ...state,
         policyId: policyId || state?.policyId,
@@ -260,7 +221,7 @@ const PaymentOptions = () => {
         PolicyNumber: actualPolicyNumber, // Both cases for compatibility
         grossPremium: actualGrossPremium,
         GrossPremium: actualGrossPremium, // Both cases for compatibility
-        paymentMethod: paymentMethod || "Direct Debit",
+        paymentMethod: paymentMethod || null,
         isQuoteFlow: isQuoteFlow,
       },
     });
@@ -308,62 +269,6 @@ const PaymentOptions = () => {
         <Card className="mt-4">
           <div className="table__header">{t("agent.paymentOptions")}</div>
 
-          {/* Mock Payment Mode Banner - Show for quote flow, waiting page flow, and policy detail flow */}
-          {((quotationId && !policyId && !state?.fromWaitingPage) ||
-            (policyId &&
-              (state?.fromWaitingPage || state?.fromPolicyDetail))) && (
-            <>
-              <div
-                style={{
-                  padding: "12px 20px",
-                  backgroundColor: "#fff3cd",
-                  border: "1px solid #ffc107",
-                  borderRadius: "6px",
-                  marginTop: "15px",
-                  marginBottom: "10px",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <i
-                  className="pi pi-info-circle"
-                  style={{ color: "#856404" }}
-                ></i>
-                <span style={{ fontSize: "14px", color: "#856404" }}>
-                  <strong>{t("agent.mockPaymentMode")}</strong> {t("agent.autoSelectingDirectDebit")}
-                </span>
-              </div>
-              <div
-                style={{
-                  padding: "15px",
-                  backgroundColor: "#e3f2fd",
-                  borderRadius: "6px",
-                  marginBottom: "15px",
-                  textAlign: "center",
-                }}
-              >
-                <i
-                  className="pi pi-spin pi-spinner"
-                  style={{
-                    fontSize: "1.5em",
-                    color: "#1976d2",
-                    marginRight: "10px",
-                  }}
-                ></i>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "#1976d2",
-                    fontWeight: "500",
-                  }}
-                >
-                  {t("agent.autoProceedingPayment")}
-                </span>
-              </div>
-            </>
-          )}
-
           <div className="grid mt-2">
             <div className="col-6">
               <div className="atm__text cursor-pointer">
@@ -396,12 +301,6 @@ const PaymentOptions = () => {
               >
                 <SvgInternet />
                 <div className="input__text__style">{t("agent.internetBanking")}</div>
-              </div>
-            </div>
-            <div className="col-6">
-              <div className="atm__text cursor-pointer">
-                <SvgInxTlinkicon />
-                <div className="input__text__style">{t("agent.inxtPayment")}</div>
               </div>
             </div>
             <div className="col-6">

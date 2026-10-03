@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -8,9 +8,12 @@ import { Button } from "primereact/button";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import DropDowns from "../../../components/DropDowns";
 import { Card } from "primereact/card";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { InputNumber } from "primereact/inputnumber";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import { useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { SUPPORTED_CURRENCIES_NAME_CODE } from "../../../utility/currencyOptions";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { useSelector, useDispatch } from "react-redux";
@@ -20,362 +23,326 @@ import {
 } from "../store/receiptsMiddleware";
 import { showErrorMessage } from "../../../utility/toastUtils";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
-import clientService from "../../../services/clientService";
+import { receiptsService } from "../../../services/receiptsService";
+import mastersService from "../../../services/mastersService";
+import profileService from "../../../services/profileService";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { getDisplayCurrencyConfig, numberLocale } from "../../../utility/currencyConverter";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import useMasterOptions from "../../GeneralMasters/common/useMasterOptions";
+
+/** Receipt modes shown to the user, with the payment mode the receipts API records (cash / check / bank-transfer / online). */
+const RECEIPT_MODES = [
+  { key: "modeDollarPeso", code: "Dollar/Peso", paymentMode: "cash" },
+  { key: "modeDirectCredit", code: "Direct Credit/Transfer to Account", paymentMode: "bank-transfer" },
+  { key: "modeCheque", code: "Cheque", paymentMode: "check", cheque: true },
+  { key: "modeAuthorityToDebit", code: "Authority to Debit", paymentMode: "bank-transfer" },
+  { key: "modeTelegraphicTransfer", code: "Telegraphic Transfer", paymentMode: "bank-transfer" },
+  { key: "modeManagersCheck", code: "Managers Check/Demand Draft", paymentMode: "check", cheque: true },
+  { key: "modeCreditTicket", code: "Credit Ticket-Inter Office", paymentMode: "bank-transfer" },
+  { key: "modeOnlineBanking", code: "Online Banking", paymentMode: "online" },
+];
+
+/** Receipt transaction codes are the credit-basis entries of the Transaction Code master (e.g. OR – Official Receipt). */
+const FALLBACK_TRANSACTION_CODES = [{ name: "PAYMENT – Premium collection", code: "PAYMENT" }];
+
+const toNameCode = (option) => ({ name: option.label, code: option.code });
+const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
+const apiError = (error) =>
+  error?.response?.data?.error?.message || error?.response?.data?.message || error?.message;
+const pad = (n) => String(n).padStart(2, "0");
+const toDateText = (date) =>
+  date instanceof Date ? `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` : date || undefined;
+
+const errorText = (text) => (text ? <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{text}</div> : null);
 
 function BranchAdding() {
   const { t } = useTranslation();
-  const [errors, setErrors] = useState("");
-  const [clientsData, setClientsData] = useState([]);
-  const [clientsLoading, setClientsLoading] = useState(false);
-  const { loading, draftReceiptsList } = useSelector(
-    ({ receiptsTableReducers }) => {
-      return {
-        loading: receiptsTableReducers?.loading,
-        draftReceiptsList: receiptsTableReducers?.draftReceiptsList,
-      };
-    }
-  );
+  const { formatCurrency } = useFormatCurrency();
   const dispatch = useDispatch();
-
   const navigate = useNavigate();
+  const { loading, draftReceiptsList } = useSelector(({ receiptsTableReducers }) => ({
+    loading: receiptsTableReducers?.loading,
+    draftReceiptsList: receiptsTableReducers?.draftReceiptsList,
+  }));
+
+  const [openReceivables, setOpenReceivables] = useState([]);
+  const [receivablesLoading, setReceivablesLoading] = useState(false);
+  const [masters, setMasters] = useState({ branches: [], departments: [], transactionCodes: [] });
+  const [selectedBillId, setSelectedBillId] = useState(null);
+  const [amountReceived, setAmountReceived] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const drafts = useMemo(() => (Array.isArray(draftReceiptsList) ? draftReceiptsList : []), [draftReceiptsList]);
+
   const items = [
     { label: t("accounts.receipts.title"), command: () => navigate("/accounts/receipts") },
     { label: t("accounts.addReceiptsLabel"), to: "/accounts/receipts/addreceipts" },
   ];
   const home = { label: t("sidebar.Accounts") };
-  const item = [
+  const receiptTypeOptions = [
     { name: t("accounts.addReceipts.typePayment"), code: "Payment" },
     { name: t("accounts.addReceipts.typeRefund"), code: "Refund" },
   ];
-  const item1 = [
-    { name: "BR-001", code: "BR-001" },
-    { name: "BR-002", code: "BR-002" },
-    { name: "BR-003", code: "BR-003" },
-  ];
-  const item2 = [
-    { name: "DEPT-001", code: "DEPT-001" },
-    { name: "DEPT-002", code: "DEPT-002" },
-    { name: "DEPT-003", code: "DEPT-003" },
-  ];
-  // Fetch clients data from API
-  useEffect(() => {
-    const fetchClients = async () => {
-      setClientsLoading(true);
-      try {
-        const response = await clientService.getClients(1, 100); // Fetch more clients for dropdown
-        if (response.success && response.data?.data?.clients) {
-          setClientsData(response.data.data.clients);
-        } else {
-          console.error("Failed to fetch clients:", response.error);
-          showErrorMessage(t("accounts.addReceipts.failedToLoadClientData"), t("accounts.receipts.error"));
-        }
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-        showErrorMessage(t("accounts.addReceipts.failedToLoadClientData"), t("accounts.receipts.error"));
-      } finally {
-        setClientsLoading(false);
-      }
-    };
+  const receiptModeOptions = RECEIPT_MODES.map((m) => ({ name: t(`accounts.addReceipts.${m.key}`), code: m.code }));
+  const defaultCurrency = getDisplayCurrencyConfig().currency;
+  // Currency codes from the Currency master (Master > Finance > Currency)
+  const currencyOptions = useMasterOptions("currency", { valueKey: "code", labelKey: "code" });
 
-    fetchClients();
-  }, []);
+  const loadOpenReceivables = useCallback(async () => {
+    setReceivablesLoading(true);
+    try {
+      setOpenReceivables(await receiptsService.getOpenReceivables());
+    } catch (error) {
+      showErrorMessage(apiError(error) || t("accounts.addReceipts.failedToLoadReceivables"), t("accounts.receipts.error"));
+    } finally {
+      setReceivablesLoading(false);
+    }
+  }, [t]);
 
-  // Fetch draft receipts data
   useEffect(() => {
+    loadOpenReceivables();
     dispatch(getDraftReceiptsMiddleware());
-  }, [dispatch]);
+  }, [dispatch, loadOpenReceivables]);
 
-  // Log draft receipts when they change
-  useEffect(() => {
-    console.log("Draft Receipts List Updated:", draftReceiptsList);
-  }, [draftReceiptsList]);
-
-  // Generate transaction code on mount
-  useEffect(() => {
-    formik.setFieldValue("transactionCode", generateTransactionCode());
-  }, []);
-
-  // Transform clients data to dropdown options
-  const getCustomerCodeOptions = () => {
-    return clientsData.map((client) => ({
-      name: client.generatedClientId || client.clientId,
-      code: client.generatedClientId || client.clientId,
-      clientId: client.clientId,
-      firstName: client.firstName,
-      lastName: client.lastName,
-      companyName: client.companyName,
-    }));
-  };
-
-  // Transform draft receipts data to dropdown options for Customer Code
-  const getDraftReceiptCustomerCodeOptions = () => {
-    if (!Array.isArray(draftReceiptsList) || draftReceiptsList.length === 0) {
-      return [];
-    }
-
-    // Get unique customer codes from draft receipts
-    const uniqueCustomerCodes = [
-      ...new Set(draftReceiptsList.map((receipt) => receipt.customerCode)),
-    ];
-
-    return uniqueCustomerCodes.map((customerCode) => {
-      // Find the first receipt with this customer code to get the customer name
-      const receipt = draftReceiptsList.find(
-        (r) => r.customerCode === customerCode
-      );
-      return {
-        name: customerCode, // Show only customer code
-        code: customerCode,
-        customerName: receipt?.customerName || t("accounts.addReceipts.unknown"),
-      };
-    });
-  };
-  const item4 = SUPPORTED_CURRENCIES_NAME_CODE;
-
-  const receiptModeOptions = [
-    { name: t("accounts.addReceipts.modeDollarPeso"), code: "Dollar/Peso" },
-    {
-      name: t("accounts.addReceipts.modeDirectCredit"),
-      code: "Direct Credit/Transfer to Account",
-    },
-    { name: t("accounts.addReceipts.modeCheque"), code: "Cheque" },
-    { name: t("accounts.addReceipts.modeAuthorityToDebit"), code: "Authority to Debit" },
-    { name: t("accounts.addReceipts.modeTelegraphicTransfer"), code: "Telegraphic Transfer" },
-    {
-      name: t("accounts.addReceipts.modeManagersCheck"),
-      code: "Managers Check/Demand Draft",
-    },
-    { name: t("accounts.addReceipts.modeCreditTicket"), code: "Credit Ticket-Inter Office" },
-    { name: t("accounts.addReceipts.modeOnlineBanking"), code: "Online Banking" },
-  ];
-
-  // Function to get customer names based on selected customer code from API data
-  const getCustomerNamesFromAPI = (customerCode) => {
-    if (!customerCode || !clientsData.length) return [];
-
-    const code =
-      typeof customerCode === "object" ? customerCode.code : customerCode;
-    const selectedClient = clientsData.find(
-      (client) => (client.generatedClientId || client.clientId) === code
-    );
-
-    if (!selectedClient) return [];
-
-    // Return only the combined first name and last name
-    const fullName = `${selectedClient.firstName || ""} ${
-      selectedClient.lastName || ""
-    }`.trim();
-
-    // Only return the full name if it's not empty
-    if (fullName) {
-      return [{ name: fullName, code: fullName }];
-    }
-
-    return [];
-  };
-
-  // Function to get customer names from draft receipts data
-  const getCustomerNamesFromDraftReceipts = (customerCode) => {
-    if (!customerCode || !Array.isArray(draftReceiptsList)) return [];
-
-    const code =
-      typeof customerCode === "object" ? customerCode.code : customerCode;
-    const draftReceipt = draftReceiptsList.find(
-      (receipt) => receipt.customerCode === code
-    );
-
-    if (!draftReceipt) return [];
-
-    // Return the customer name from draft receipt
-    if (draftReceipt.customerName) {
-      return [
-        { name: draftReceipt.customerName, code: draftReceipt.customerName },
-      ];
-    }
-
-    return [];
-  };
-
-  // Function to get policy numbers based on customer code and name
-  const getPolicyNumbers = (customerCode, customerName) => {
-    if (!customerCode || !customerName || !Array.isArray(draftReceiptsList)) {
-      console.log("getPolicyNumbers: Missing data", {
-        customerCode,
-        customerName,
-        hasDraftList: Array.isArray(draftReceiptsList),
-      });
-      return [];
-    }
-
-    const code =
-      typeof customerCode === "object" ? customerCode.code : customerCode;
-    const name =
-      typeof customerName === "object" ? customerName.code : customerName;
-
-    console.log("getPolicyNumbers: Searching for", { code, name });
-
-    // Find receipts that match the customer code and name
-    const matchingReceipts = draftReceiptsList.filter(
-      (receipt) =>
-        receipt.customerCode === code && receipt.customerName === name
-    );
-
-    console.log(
-      "getPolicyNumbers: Found matching receipts",
-      matchingReceipts.length,
-      matchingReceipts
-    );
-
-    // Extract unique policy numbers from matching receipts
-    const uniquePolicyNumbers = [
-      ...new Set(
-        matchingReceipts
-          .map((receipt) => receipt.policyNumber)
-          .filter((policyNumber) => policyNumber && policyNumber.trim() !== "")
-      ),
-    ];
-
-    console.log("getPolicyNumbers: Unique policy numbers", uniquePolicyNumbers);
-
-    // Transform to dropdown format
-    const options = uniquePolicyNumbers.map((policyNumber) => ({
-      name: policyNumber,
-      code: policyNumber,
-    }));
-
-    console.log("getPolicyNumbers: Dropdown options", options);
-
-    return options;
-  };
-
-  const initialValue = {
-    receiptDate: new Date(),
-    receiptNumber: "",
-    receiptType: "",
-    branchCode: "",
-    departmentCode: "",
-    customerCode: "",
-    customerName: "",
-    policyNumber: "",
-    currencyCode: "",
-    transactionCode: "",
-    receiptMode: "",
-    chequeNumber: "",
-    chequeDate: new Date(),
-    remarks: "",
-    // Removed policyRefId and receipt line items fields as requested
-  };
   const validate = (values) => {
-    console.log(values, "sss");
     const errors = {};
-    console.log(values, errors, "values");
-    if (!values.receiptDate) {
-      errors.receiptDate = t("accounts.addReceipts.validationDateRequired");
-    }
-    // if (!values.receiptNumber) {
-    //   errors.receiptNumber = "Receipt number is required";
-    // }
-    if (!values.receiptType) {
-      errors.receiptType = t("accounts.addReceipts.validationReceiptTypeRequired");
-    }
-    if (!values.branchCode) {
-      errors.branchCode = t("accounts.addReceipts.validationBranchCodeRequired");
-    }
-    if (!values.departmentCode) {
-      errors.departmentCode = t("accounts.addReceipts.validationDepartmentCodeRequired");
-    }
-    if (!values.customerCode) {
-      errors.customerCode = t("accounts.addReceipts.validationCustomerCodeRequired");
-    }
-    if (!values.customerName) {
-      errors.customerName = t("accounts.addReceipts.validationCustomerNameRequired");
-    }
-    if (!values.currencyCode) {
-      errors.currencyCode = t("accounts.addReceipts.validationCurrencyCodeRequired");
-    }
-    if (!values.transactionCode) {
-      errors.transactionCode = t("accounts.addReceipts.validationTransactionCodeRequired");
-    }
+    if (!values.receiptDate) errors.receiptDate = t("accounts.addReceipts.validationDateRequired");
+    if (!values.receiptType) errors.receiptType = t("accounts.addReceipts.validationReceiptTypeRequired");
+    if (!values.branchCode) errors.branchCode = t("accounts.addReceipts.validationBranchCodeRequired");
+    if (!values.departmentCode) errors.departmentCode = t("accounts.addReceipts.validationDepartmentCodeRequired");
+    if (!values.customerCode) errors.customerCode = t("accounts.addReceipts.validationCustomerCodeRequired");
+    if (!values.customerName) errors.customerName = t("accounts.addReceipts.validationCustomerNameRequired");
+    if (!values.policyNumber) errors.policyNumber = t("accounts.addReceipts.validationPolicyNumberRequired");
+    if (!values.currencyCode) errors.currencyCode = t("accounts.addReceipts.validationCurrencyCodeRequired");
+    if (!values.transactionCode) errors.transactionCode = t("accounts.addReceipts.validationTransactionCodeRequired");
+    if (!values.receiptMode) errors.receiptMode = t("accounts.addReceipts.validationReceiptModeRequired");
     return errors;
   };
-  const minDate = new Date();
-  minDate.setDate(minDate.getDate() + 1);
-  const generateRandomName = () => {
-    const names = ["Ayesha", "Sindhu", "John", "Doe", "Alice", "Bob"];
-    const randomIndex = Math.floor(Math.random() * names.length);
-    return names[randomIndex];
-  };
 
-  const generateRandomTransaction = () => {
-    const randomCode = Math.floor(100000 + Math.random() * 900000); // Generates a 6-digit code
-    return { code: randomCode.toString() };
-  };
-  const generateRandomAmount = () => {
-    return (Math.random() * 1000).toFixed(2);
-  };
+  const formik = useFormik({
+    initialValues: {
+      receiptDate: new Date(),
+      receiptNumber: "",
+      receiptType: "Payment",
+      branchCode: "",
+      departmentCode: "",
+      customerCode: "",
+      customerName: "",
+      policyNumber: "",
+      currencyCode: defaultCurrency,
+      transactionCode: "",
+      receiptMode: "",
+      chequeNumber: "",
+      chequeDate: new Date(),
+      referenceNo: "",
+      remarks: "",
+    },
+    validate,
+    onSubmit: () => {},
+  });
+  const { values, setFieldValue } = formik;
 
-  const generateTransactionCode = () => {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const random5Digits = Math.floor(10000 + Math.random() * 90000);
-    return `TXN-${year}${month}${day}-${random5Digits}`;
-  };
-
-  // Function to get customer names based on selected customer code
-  const getCustomerNames = (customerCode) => {
-    return getCustomerNamesFromDraftReceipts(customerCode);
-  };
-
-  // Handle customer code change - reset customer name when customer code changes
-  const handleCustomerCodeChange = (e) => {
-    formik.setFieldValue("customerCode", e.value);
-    // Reset customer name when customer code changes
-    formik.setFieldValue("customerName", "");
-  };
-
-  const handleNext = async (values) => {
-    const formErrors = validate(formik.values);
-    setErrors(formErrors);
-
-    if (Object.keys(formErrors).length > 0) {
-      return; // Don't proceed if there are validation errors
-    }
-
-    // Helper function to extract string value from object or return the value itself
-    const extractValue = (value) => {
-      if (typeof value === "object" && value !== null) {
-        return value.code || value.name || value;
-      }
-      return value;
+  // Branch / department from the same masters as the Payment Voucher screen; transaction codes from the
+  // Transaction Code master (credit basis = receipts). Branch defaults to the signed-in user's branch.
+  useEffect(() => {
+    let alive = true;
+    const load = (type, params) =>
+      mastersService.options(type, params).then((rows) => rows.map(toNameCode)).catch(() => []);
+    Promise.all([
+      load("branch"),
+      load("department"),
+      mastersService
+        .options("transaction-code", { TransactionBasis: "Credit" })
+        .then((rows) => rows.map((o) => ({ name: `${o.code} – ${o.label}`, code: o.code })))
+        .catch(() => []),
+      profileService.getProfile().catch(() => null),
+    ]).then(([branches, departments, codes, profile]) => {
+      if (!alive) return;
+      const transactionCodes = codes.length ? codes : FALLBACK_TRANSACTION_CODES;
+      setMasters({ branches, departments, transactionCodes });
+      const ownBranch = profile?.branchCode && branches.find((b) => b.code === profile.branchCode);
+      if (ownBranch) setFieldValue("branchCode", ownBranch.code);
+      else if (branches.length === 1) setFieldValue("branchCode", branches[0].code);
+      if (departments.length === 1) setFieldValue("departmentCode", departments[0].code);
+      const receipt = transactionCodes.find((c) => c.code === "OR") || transactionCodes[0];
+      setFieldValue("transactionCode", receipt.code);
+    });
+    return () => {
+      alive = false;
     };
+  }, [setFieldValue]);
 
-    const customerCode = extractValue(values.customerCode);
-    const customerName = extractValue(values.customerName);
-    const policyNumber = extractValue(values.policyNumber);
+  // Customers: every client with an open (unpaid / partial) bill, plus those with a draft receipt.
+  const customers = useMemo(() => {
+    const byCode = new Map();
+    openReceivables.forEach((r) => {
+      if (!r.customerCode) return;
+      const c = byCode.get(r.customerCode) || { code: r.customerCode, customerName: r.customerName, balance: 0, drafts: 0 };
+      c.balance = round2(c.balance + Number(r.balance || 0));
+      byCode.set(r.customerCode, c);
+    });
+    drafts.forEach((d) => {
+      if (!d.customerCode) return;
+      const c = byCode.get(d.customerCode) || { code: d.customerCode, customerName: d.customerName, balance: 0, drafts: 0 };
+      c.customerName = c.customerName || d.customerName;
+      c.drafts += 1;
+      byCode.set(d.customerCode, c);
+    });
+    return [...byCode.values()].sort((a, b) => a.code.localeCompare(b.code));
+  }, [openReceivables, drafts]);
 
-    // Find matching draft receipt for this customer and policy
-    const matchingReceipt = draftReceiptsList.find(
-      (receipt) =>
-        receipt.customerCode === customerCode &&
-        receipt.customerName === customerName &&
-        receipt.policyNumber === policyNumber
-    );
+  const customerOptions = customers.map((c) => ({
+    code: c.code,
+    name: `${c.code} – ${c.customerName || t("accounts.addReceipts.unknown")}${
+      c.balance > 0 ? ` (${t("accounts.addReceipts.openBalance")} ${formatCurrency(c.balance)})` : ""
+    }${c.drafts > 0 ? ` · ${t("accounts.addReceipts.draftCount", { count: c.drafts })}` : ""}`,
+  }));
 
-    if (!matchingReceipt || !matchingReceipt.receiptId) {
+  const customerBills = useMemo(
+    () => openReceivables.filter((r) => r.customerCode === values.customerCode),
+    [openReceivables, values.customerCode]
+  );
+  const customerDrafts = useMemo(
+    () => drafts.filter((d) => d.customerCode === values.customerCode),
+    [drafts, values.customerCode]
+  );
+
+  // Policies of the customer that have an open bill (or a draft receipt).
+  const policyOptions = useMemo(() => {
+    const byNumber = new Map();
+    customerBills.forEach((r) => {
+      const p = byNumber.get(r.policyNumber) || { code: r.policyNumber, balance: 0, bills: 0, draft: false };
+      p.balance = round2(p.balance + Number(r.balance || 0));
+      p.bills += 1;
+      byNumber.set(r.policyNumber, p);
+    });
+    customerDrafts.forEach((d) => {
+      if (!d.policyNumber) return;
+      const p = byNumber.get(d.policyNumber) || { code: d.policyNumber, balance: 0, bills: 0, draft: false };
+      p.draft = true;
+      byNumber.set(d.policyNumber, p);
+    });
+    return [...byNumber.values()].map((p) => ({
+      code: p.code,
+      name: `${p.code}${p.bills ? ` – ${t("accounts.addReceipts.billsOpen", { count: p.bills })}, ${formatCurrency(p.balance)}` : ""}${
+        p.draft ? ` · ${t("accounts.addReceipts.draftReceipt")}` : ""
+      }`,
+    }));
+  }, [customerBills, customerDrafts, formatCurrency, t]);
+
+  const policyBills = useMemo(
+    () => customerBills.filter((r) => r.policyNumber === values.policyNumber),
+    [customerBills, values.policyNumber]
+  );
+  const policyDraft = useMemo(
+    () => customerDrafts.find((d) => d.policyNumber === values.policyNumber),
+    [customerDrafts, values.policyNumber]
+  );
+  const selectedBill = policyBills.find((b) => b.receivableId === selectedBillId) || null;
+
+  // One open bill: select it for the user.
+  useEffect(() => {
+    if (policyBills.length === 1) setSelectedBillId(policyBills[0].receivableId);
+    else if (!policyBills.some((b) => b.receivableId === selectedBillId)) setSelectedBillId(null);
+  }, [policyBills, selectedBillId]);
+
+  const handleCustomerCodeChange = (e) => {
+    const customer = customers.find((c) => c.code === e.value);
+    setFieldValue("customerCode", e.value || "");
+    setFieldValue("customerName", customer?.customerName || "");
+    setFieldValue("policyNumber", "");
+    setSelectedBillId(null);
+    setAmountReceived(null);
+  };
+  const handlePolicyChange = (e) => {
+    setFieldValue("policyNumber", e.value || "");
+    setSelectedBillId(null);
+    setAmountReceived(null);
+  };
+
+  const receiptMode = RECEIPT_MODES.find((m) => m.code === values.receiptMode);
+  const amountError = (() => {
+    if (!selectedBill || amountReceived === null || amountReceived === undefined) return "";
+    if (!(Number(amountReceived) > 0)) return t("accounts.addReceipts.validationAmountPositive");
+    if (round2(amountReceived) > round2(selectedBill.balance)) {
+      return t("accounts.addReceipts.validationAmountExceedsBalance", {
+        balance: formatCurrency(selectedBill.balance),
+        bill: selectedBill.billNumber,
+      });
+    }
+    return "";
+  })();
+  const headerComplete = Object.keys(validate(values)).length === 0;
+  const chequeMissing = receiptMode?.cheque && !values.chequeNumber.trim();
+  const canRecord =
+    !!selectedBill && headerComplete && !!receiptMode && !chequeMissing && Number(amountReceived) > 0 && !amountError && !submitting;
+
+  const recordPayment = async () => {
+    const bill = selectedBill;
+    const amount = round2(amountReceived);
+    setSubmitting(true);
+    try {
+      const reference = receiptMode?.cheque ? values.chequeNumber.trim() : values.referenceNo.trim();
+      const modeNote = receiptMode?.cheque
+        ? t("accounts.addReceipts.chequeRemark", { mode: values.receiptMode, number: reference, date: toDateText(values.chequeDate) || "" })
+        : values.receiptMode;
+      const response = await receiptsService.createReceipt({
+        receivableId: bill.receivableId,
+        amount,
+        customerCode: values.customerCode,
+        name: values.customerName,
+        policyRefId: bill.policyId,
+        receiptType: values.receiptType,
+        receiptDate: toDateText(values.receiptDate),
+        branchCode: values.branchCode,
+        departmentCode: values.departmentCode,
+        currencyCode: values.currencyCode,
+        transactionCode: values.transactionCode,
+        paymentMode: receiptMode.paymentMode,
+        referenceNo: reference || undefined,
+        remarks: [values.remarks.trim(), `${modeNote} – ${bill.billNumber}`].filter(Boolean).join(" | "),
+      });
+      const receipt = response?.data || response;
+      const remaining = round2(bill.balance - amount);
+      // back to the receipts list, where the new receipt is shown first and highlighted
+      navigate("/accounts/receipts", {
+        state: { recorded: { receiptId: receipt?.receiptId, receiptNumber: receipt?.receiptNumber, billNumber: bill.billNumber, amount, remaining, customerName: values.customerName, clientEmail: receipt?.clientEmail || "" } },
+      });
+    } catch (error) {
+      showErrorMessage(apiError(error) || t("accounts.addReceipts.paymentFailed"), t("accounts.receipts.error"));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const confirmRecordPayment = () => {
+    formik.setTouched(Object.fromEntries(Object.keys(formik.initialValues).map((k) => [k, true])));
+    if (!canRecord) return;
+    const remaining = round2(selectedBill.balance - round2(amountReceived));
+    confirmDialog({
+      header: t("accounts.addReceipts.confirmTitle"),
+      message: t("accounts.addReceipts.confirmMessage", {
+        amount: formatCurrency(amountReceived),
+        bill: selectedBill.billNumber,
+        balance: formatCurrency(remaining),
+      }),
+      icon: "pi pi-question-circle",
+      acceptLabel: t("accounts.addReceipts.recordPayment"),
+      rejectLabel: t("accounts.addReceipts.cancel"),
+      accept: recordPayment,
+    });
+  };
+
+  // Existing pay-later flow: open the draft receipt for this customer / policy on the receipt edit screen.
+  const openDraftReceipt = async () => {
+    if (!policyDraft?.receiptId) {
       showErrorMessage(t("accounts.addReceipts.receiptNotFound"));
       return;
     }
-
     try {
-      // Fetch full receipt details from API
-      const response = await dispatch(
-        getReceiptByIdMiddleware(matchingReceipt.receiptId)
-      ).unwrap();
-
-      // Transform receiptsList from API to receivableTableList format
-      const receivableTableList = response.receiptsList.map((item) => ({
+      const response = await dispatch(getReceiptByIdMiddleware(policyDraft.receiptId)).unwrap();
+      const receivableTableList = (response.receiptsList || []).map((item) => ({
         id: item.receiptListId,
         policies: item.policies,
         netPremium: item.netPremium,
@@ -390,285 +357,204 @@ function BranchAdding() {
         lcAmount: item.lcAmount,
         status: item.status || "Pending",
       }));
-
-      // Prepare the customer data for the next page
-      const customerData = {
-        customerCode,
-        customerName,
-        policyNumber,
-        receiptId: response.receiptId,
-        receiptNumber: response.receiptNumber,
-        receiptType: extractValue(values.receiptType),
-        branchCode: extractValue(values.branchCode),
-        departmentCode: extractValue(values.departmentCode),
-        currencyCode: extractValue(values.currencyCode),
-        transactionCode: extractValue(values.transactionCode),
-        remarks:
-          values.remarks ||
-          response.remarks ||
-          "Payment for motor insurance premium",
-        transactionNumber: response.transactionNumber,
-        policyRefId: response.policyRefId,
-        receiptStatus: response.receiptStatus,
-      };
-
-      console.log("Customer data for next page:", customerData);
-      console.log("Receivable table list (from API):", receivableTableList);
-
-      // Navigate to the next page with real API data
       navigate("/accounts/receipts/addreceiptedit", {
         state: {
-          customerData,
+          customerData: {
+            customerCode: values.customerCode,
+            customerName: values.customerName,
+            policyNumber: values.policyNumber,
+            receiptId: response.receiptId,
+            receiptNumber: response.receiptNumber,
+            receiptType: values.receiptType,
+            branchCode: values.branchCode,
+            departmentCode: values.departmentCode,
+            currencyCode: values.currencyCode,
+            transactionCode: values.transactionCode,
+            remarks: values.remarks || response.remarks || "",
+            transactionNumber: response.transactionNumber,
+            policyRefId: response.policyRefId,
+            receiptStatus: response.receiptStatus,
+          },
           receivableTableList,
         },
       });
     } catch (error) {
-      console.error("Error fetching receipt details:", error);
       showErrorMessage(t("accounts.addReceipts.failedToLoadReceiptDetails"));
     }
   };
 
-  const formik = useFormik({
-    initialValues: initialValue,
-    validate,
-    onSubmit: handleNext,
-  });
+  const touchedError = (field) => (formik.touched[field] ? formik.errors[field] : "");
+  const money = (field) => (row) => formatCurrency(row[field]);
 
   return (
     <div className="overall_add_policy_receipts_container">
-      {/* <div>
-        <span onClick={() => navigate(-1)}>
-          <SvgBack />
-        </span>
-        <label className="label_header">Add Receipts</label>
-      </div> */}
+      <ConfirmDialog />
       <div>
-        <span onClick={() => navigate(-1)}>
+        <Button
+          type="button"
+          text
+          className="back_button"
+          aria-label={t("accounts.addReceipts.back")}
+          onClick={() => navigate(-1)}
+        >
           <SvgBackicon />
-        </span>
+        </Button>
         <label className="label_header">{t("accounts.addReceipts.title")}</label>
       </div>
-      <BreadCrumb
-        model={items}
-        home={home}
-        className="breadcrumbs_container"
-        separatorIcon={<SvgDot color={"#000"} />}
-      />
+      <BreadCrumb model={items} home={home} className="breadcrumbs_container" separatorIcon={<SvgDot color={"#000"} />} />
       <Card>
         <div className="grid">
           <div className="sm-col-12  md:col-3 lg-col-4 col-offset-9">
-            <LabelWrapper className="calenderlable__container">
-              {t("accounts.addReceipts.receiptDate")}
-            </LabelWrapper>
+            <LabelWrapper className="calenderlable__container">{t("accounts.addReceipts.receiptDate")}</LabelWrapper>
             <Calendar
               classNames="calender__container"
               showIcon
-              value={formik.values.receiptDate}
-              minDate={minDate}
-              onChange={(e) => {
-                formik.setFieldValue("receiptDate", e.target.value);
-              }}
-              dateFormat="yy-mm-dd"
+              value={values.receiptDate}
+              onChange={(e) => setFieldValue("receiptDate", e.target.value)}
+              dateFormat={calendarDateFormat()}
               disabled={true}
             />
-            {formik.touched.receiptDate && formik.errors.receiptDate && (
-              <div style={{ fontSize: 12, color: "red" }}>
-                {formik.errors.receiptDate}
-              </div>
-            )}
+            {errorText(touchedError("receiptDate"))}
           </div>
         </div>
         <div className="grid">
           <div className="sm-col-12 col-12 md:col-3 lg-col-4">
-            <div>
-              <InputField
-                value={formik.values.receiptNumber}
-                onChange={formik.handleChange("receiptNumber")}
-                // error={formik.errors.receiptNumber}
-                classNames="field__container"
-                label={t("accounts.addReceipts.receiptNumber")}
-                // placeholder={"Enter"}
-                type="numeric"
-                disabled={true}
-              />
-              {formik.touched.receiptNumber && formik.errors.receiptNumber && (
-                <div style={{ fontSize: 12, color: "red" }}>
-                  {formik.errors.receiptNumber}
-                </div>
-              )}
-            </div>
+            <InputField
+              value={values.receiptNumber}
+              classNames="field__container"
+              label={t("accounts.addReceipts.receiptNumber")}
+              placeholder={t("accounts.addReceipts.autoGenerated")}
+              disabled={true}
+            />
           </div>
           <div className="sm-col-12  md:col-3 lg-col-4">
-            <div>
-              <DropDowns
-                value={formik.values.receiptType}
-                onChange={formik.handleChange("receiptType")}
-                // error={formik.errors.receiptType}
-                className="dropdown__container"
-                label={t("accounts.addReceipts.receiptType")}
-                options={item}
-                optionLabel="name"
-                placeholder={t("accounts.addReceipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-              {formik.touched.receiptType && formik.errors.receiptType && (
-                <div style={{ fontSize: 12, color: "red" }}>
-                  {formik.errors.receiptType}
-                </div>
-              )}
-            </div>
+            <DropDowns
+              value={values.receiptType}
+              onChange={(e) => setFieldValue("receiptType", e.value)}
+              className="dropdown__container"
+              label={t("accounts.addReceipts.receiptType")}
+              options={receiptTypeOptions}
+              optionLabel="name"
+              optionValue="code"
+              placeholder={t("accounts.addReceipts.select")}
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+            />
+            {errorText(touchedError("receiptType"))}
           </div>
           <div className="sm-col-12  md:col-3 lg-col-4">
-            <div>
-              <DropDowns
-                value={formik.values.branchCode}
-                onChange={formik.handleChange("branchCode")}
-                // error={formik.errors.branchCode}
-                className="dropdown__container"
-                label={t("accounts.addReceipts.branchCode")}
-                options={item1}
-                optionLabel="name"
-                placeholder={t("accounts.addReceipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-              {formik.touched.branchCode && formik.errors.branchCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
-                  {formik.errors.branchCode}
-                </div>
-              )}
-            </div>
+            <DropDowns
+              value={values.branchCode}
+              onChange={(e) => setFieldValue("branchCode", e.value)}
+              className="dropdown__container"
+              label={t("accounts.addReceipts.branchCode")}
+              options={masters.branches}
+              optionLabel="name"
+              optionValue="code"
+              placeholder={t("accounts.addReceipts.select")}
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+            />
+            {errorText(touchedError("branchCode"))}
           </div>
           <div className="sm-col-12  md:col-3 lg-col-4">
-            <div>
-              <DropDowns
-                value={formik.values.departmentCode}
-                onChange={formik.handleChange("departmentCode")}
-                // error={formik.errors.departmentCode}
-                className="dropdown__container"
-                label={t("accounts.addReceipts.departmentCode")}
-                options={item2}
-                optionLabel="name"
-                placeholder={t("accounts.addReceipts.select")}
-                dropdownIcon={<SvgDropdown color={"#000"} />}
-              />
-              {formik.touched.departmentCode &&
-                formik.errors.departmentCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
-                    {formik.errors.departmentCode}
-                  </div>
-                )}
-            </div>
+            <DropDowns
+              value={values.departmentCode}
+              onChange={(e) => setFieldValue("departmentCode", e.value)}
+              className="dropdown__container"
+              label={t("accounts.addReceipts.departmentCode")}
+              options={masters.departments}
+              optionLabel="name"
+              optionValue="code"
+              placeholder={t("accounts.addReceipts.select")}
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+            />
+            {errorText(touchedError("departmentCode"))}
           </div>
         </div>
 
         <div className="grid">
-          <div className="col-3 md:col-3 lg-col-3">
+          <div className="col-12 md:col-4">
             <DropDowns
-              value={formik.values.customerCode}
+              value={values.customerCode}
               onChange={handleCustomerCodeChange}
-              // error={formik.errors.customerCode}
               className="dropdown__container"
               label={t("accounts.addReceipts.customerCode")}
-              options={getDraftReceiptCustomerCodeOptions()}
+              options={customerOptions}
               optionLabel="name"
-              placeholder={loading ? t("common.loading") : t("accounts.addReceipts.selectCustomerCode")}
+              optionValue="code"
+              placeholder={
+                receivablesLoading || loading ? t("common.loading") : t("accounts.addReceipts.selectCustomerCode")
+              }
               dropdownIcon={<SvgDropdown color={"#000"} />}
-              disabled={loading}
+              disabled={receivablesLoading}
             />
-            {formik.touched.customerCode && formik.errors.customerCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
-                {formik.errors.customerCode}
-              </div>
+            {errorText(touchedError("customerCode"))}
+            {!receivablesLoading && customerOptions.length === 0 && (
+              <small className="field_hint">{t("accounts.addReceipts.noOpenReceivables")}</small>
             )}
           </div>
-          <div className="col-3 md:col-3 lg-col-3">
-            <DropDowns
-              value={formik.values.customerName}
-              onChange={formik.handleChange("customerName")}
-              // error={formik.errors.customerName}
-              className="dropdown__container"
+          <div className="col-12 md:col-4">
+            <InputField
+              value={values.customerName}
+              classNames="field__container"
               label={t("accounts.addReceipts.customerName")}
-              options={getCustomerNames(formik.values.customerCode)}
-              optionLabel="name"
-              placeholder={t("accounts.addReceipts.select")}
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-              disabled={!formik.values.customerCode}
+              placeholder={t("accounts.addReceipts.customerNameAuto")}
+              disabled={true}
             />
-            {formik.touched.customerName && formik.errors.customerName && (
-              <div style={{ fontSize: 12, color: "red" }}>
-                {formik.errors.customerName}
-              </div>
-            )}
+            {errorText(touchedError("customerName"))}
           </div>
-          <div className="col-3 md:col-3 lg-col-3">
+          <div className="col-12 md:col-4">
             <DropDowns
-              value={formik.values.policyNumber}
-              onChange={formik.handleChange("policyNumber")}
-              // error={formik.errors.policyNumber}
+              value={values.policyNumber}
+              onChange={handlePolicyChange}
               className="dropdown__container"
               label={t("accounts.addReceipts.policyNumber")}
-              options={getPolicyNumbers(
-                formik.values.customerCode,
-                formik.values.customerName
-              )}
+              options={policyOptions}
               optionLabel="name"
               optionValue="code"
               placeholder={t("accounts.addReceipts.selectPolicyNumber")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
-              disabled={
-                !formik.values.customerCode || !formik.values.customerName
-              }
+              disabled={!values.customerCode}
             />
-            {formik.touched.policyNumber && formik.errors.policyNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
-                {formik.errors.policyNumber}
-              </div>
-            )}
+            {errorText(touchedError("policyNumber"))}
           </div>
         </div>
         <div className="grid">
-          <div className="col-3 md:col-3 lg-col-3">
+          <div className="col-12 md:col-4">
             <DropDowns
-              value={formik.values.currencyCode}
-              onChange={formik.handleChange("currencyCode")}
-              // error={formik.errors.currencyCode}
+              value={values.currencyCode}
+              onChange={(e) => setFieldValue("currencyCode", e.value)}
               className="dropdown__container"
               label={t("accounts.addReceipts.currencyCode")}
-              options={item4}
-              optionLabel="name"
+              options={currencyOptions}
+              optionLabel="label"
+              optionValue="code"
               placeholder={t("accounts.addReceipts.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
-            {formik.touched.currencyCode && formik.errors.currencyCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
-                {formik.errors.currencyCode}
-              </div>
-            )}
+            {errorText(touchedError("currencyCode"))}
           </div>
-          <div className="col-3 md:col-3 lg-col-3">
-            <InputField
-              value={formik.values.transactionCode}
-              onChange={formik.handleChange("transactionCode")}
-              classNames="field__container"
-              label={t("accounts.addReceipts.transactionCode")}
-              placeholder={t("accounts.addReceipts.autoGenerated")}
-              disabled={true}
-            />
-            {formik.touched.transactionCode &&
-              formik.errors.transactionCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
-                  {formik.errors.transactionCode}
-                </div>
-              )}
-          </div>
-          <div className="col-3 md:col-3 lg-col-3">
+          <div className="col-12 md:col-4">
             <DropDowns
-              value={formik.values.receiptMode}
+              value={values.transactionCode}
+              onChange={(e) => setFieldValue("transactionCode", e.value)}
+              className="dropdown__container"
+              label={t("accounts.addReceipts.transactionCode")}
+              options={masters.transactionCodes}
+              optionLabel="name"
+              optionValue="code"
+              placeholder={t("accounts.addReceipts.select")}
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+            />
+            {errorText(touchedError("transactionCode"))}
+          </div>
+          <div className="col-12 md:col-4">
+            <DropDowns
+              value={values.receiptMode}
               onChange={(e) => {
-                formik.setFieldValue("receiptMode", e.value);
-                // Reset Cheque Number and Cheque Date when Receipt Mode changes
-                formik.setFieldValue("chequeNumber", "");
-                formik.setFieldValue("chequeDate", new Date());
+                setFieldValue("receiptMode", e.value);
+                setFieldValue("chequeNumber", "");
+                setFieldValue("chequeDate", new Date());
+                setFieldValue("referenceNo", "");
               }}
               className="dropdown__container"
               label={t("accounts.addReceipts.receiptMode")}
@@ -678,83 +564,150 @@ function BranchAdding() {
               placeholder={t("accounts.addReceipts.selectReceiptMode")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
-            {formik.touched.receiptMode && formik.errors.receiptMode && (
-              <div style={{ fontSize: 12, color: "red" }}>
-                {formik.errors.receiptMode}
-              </div>
-            )}
+            {errorText(touchedError("receiptMode"))}
           </div>
         </div>
-        {formik.values.receiptMode === "Cheque" && (
+        {receiptMode?.cheque && (
           <div className="grid">
-            <div className="col-3 md:col-3 lg-col-3">
-              <div>
-                <InputField
-                  value={formik.values.chequeNumber}
-                  onChange={formik.handleChange("chequeNumber")}
-                  classNames="field__container"
-                  label={t("accounts.addReceipts.chequeNumber")}
-                  placeholder={t("accounts.addReceipts.enterChequeNumber")}
-                />
-                {formik.touched.chequeNumber && formik.errors.chequeNumber && (
-                  <div style={{ fontSize: 12, color: "red" }}>
-                    {formik.errors.chequeNumber}
-                  </div>
-                )}
-              </div>
+            <div className="col-12 md:col-4">
+              <InputField
+                value={values.chequeNumber}
+                onChange={formik.handleChange("chequeNumber")}
+                classNames="field__container"
+                label={t("accounts.addReceipts.chequeNumber")}
+                placeholder={t("accounts.addReceipts.enterChequeNumber")}
+              />
+              {selectedBill && chequeMissing && errorText(t("accounts.addReceipts.validationChequeNumberRequired"))}
             </div>
-            <div className="col-3 md:col-3 lg-col-3">
-              <div>
-                <LabelWrapper className="calenderlable__container">
-                  {t("accounts.addReceipts.chequeDate")}
-                </LabelWrapper>
-                <Calendar
-                  classNames="calender__container"
-                  showIcon
-                  value={formik.values.chequeDate}
-                  onChange={(e) => {
-                    formik.setFieldValue("chequeDate", e.target.value);
-                  }}
-                  dateFormat="yy-mm-dd"
-                />
-                {formik.touched.chequeDate && formik.errors.chequeDate && (
-                  <div style={{ fontSize: 12, color: "red" }}>
-                    {formik.errors.chequeDate}
-                  </div>
-                )}
-              </div>
+            <div className="col-12 md:col-4">
+              <LabelWrapper className="calenderlable__container">{t("accounts.addReceipts.chequeDate")}</LabelWrapper>
+              <Calendar
+                classNames="calender__container"
+                showIcon
+                value={values.chequeDate}
+                onChange={(e) => setFieldValue("chequeDate", e.target.value)}
+                dateFormat={calendarDateFormat()}
+              />
+            </div>
+          </div>
+        )}
+        {receiptMode && !receiptMode.cheque && receiptMode.paymentMode !== "cash" && (
+          <div className="grid">
+            <div className="col-12 md:col-4">
+              <InputField
+                value={values.referenceNo}
+                onChange={formik.handleChange("referenceNo")}
+                classNames="field__container"
+                label={t("accounts.addReceipts.referenceNoOptional")}
+                placeholder={t("accounts.addReceipts.enter")}
+              />
             </div>
           </div>
         )}
         <div className="grid">
-          <div className="col-6 md:col-6 lg-col-6">
-            <div>
-              <InputField
-                value={formik.values.remarks}
-                onChange={formik.handleChange("remarks")}
-                // error={formik.errors.remarks}
-                classNames="field__container"
-                label={t("accounts.addReceipts.remarksOptional")}
-                placeholder={t("accounts.addReceipts.enter")}
-              />
-              {formik.touched.remarks && formik.errors.remarks && (
-                <div style={{ fontSize: 12, color: "red" }}>
-                  {formik.errors.remarks}
-                </div>
-              )}
-            </div>
+          <div className="col-12 md:col-8">
+            <InputField
+              value={values.remarks}
+              onChange={formik.handleChange("remarks")}
+              classNames="field__container"
+              label={t("accounts.addReceipts.remarksOptional")}
+              placeholder={t("accounts.addReceipts.enter")}
+            />
           </div>
         </div>
       </Card>
 
+      {values.policyNumber && (
+        <Card className="mt-3 open_bills_card">
+          <h3 className="section_title">{t("accounts.addReceipts.openBillsTitle", { policy: values.policyNumber })}</h3>
+          {policyBills.length === 0 ? (
+            <p className="field_hint">{t("accounts.addReceipts.noOpenBillsForPolicy")}</p>
+          ) : (
+            <DataTable
+              value={policyBills}
+              dataKey="receivableId"
+              selectionMode="radiobutton"
+              selection={selectedBill}
+              onSelectionChange={(e) => {
+                setSelectedBillId(e.value?.receivableId || null);
+                setAmountReceived(null);
+              }}
+              className="datatable_container"
+              responsiveLayout="scroll"
+            >
+              <Column selectionMode="single" headerStyle={{ width: "3rem" }} />
+              <Column field="billNumber" header={t("accounts.addReceipts.billNumber")} />
+              <Column
+                field="source"
+                header={t("accounts.addReceipts.billType")}
+                body={(row) => t(`accounts.addReceipts.billSource.${row.source}`, { defaultValue: row.source })}
+              />
+              <Column field="amount" header={t("accounts.addReceipts.billAmount")} body={money("amount")} />
+              <Column field="paidAmount" header={t("accounts.addReceipts.billPaid")} body={money("paidAmount")} />
+              <Column field="balance" header={t("accounts.addReceipts.billBalance")} body={money("balance")} />
+              <Column body={(row) => formatAppDate(row.dueDate)} field="dueDate" header={t("accounts.addReceipts.billDueDate")} />
+              <Column
+                field="status"
+                header={t("accounts.addReceipts.billStatus")}
+                body={(row) => t(`accounts.addReceipts.billStatusLabel.${row.status}`, { defaultValue: row.status })}
+              />
+            </DataTable>
+          )}
+
+          {selectedBill && (
+            <div className="grid mt-3 payment_capture">
+              <div className="col-12 md:col-4">
+                <div className="calenderlable__container">
+                  <label htmlFor="amountReceived">{t("accounts.addReceipts.amountReceived")}</label>
+                </div>
+                <InputNumber
+                  inputId="amountReceived"
+                  value={amountReceived}
+                  onValueChange={(e) => setAmountReceived(e.value)}
+                  mode="decimal"
+                  locale={numberLocale()}
+                  minFractionDigits={2}
+                  maxFractionDigits={2}
+                  min={0}
+                  placeholder={formatCurrency(selectedBill.balance)}
+                  className="amount_input"
+                />
+                {errorText(amountError)}
+                <small className="field_hint">
+                  {t("accounts.addReceipts.balanceHint", { balance: formatCurrency(selectedBill.balance) })}
+                </small>
+              </div>
+              <div className="col-12 md:col-4 payment_capture_actions">
+                <Button
+                  type="button"
+                  label={t("accounts.addReceipts.payFullBalance")}
+                  className="p-button-outlined"
+                  onClick={() => setAmountReceived(round2(selectedBill.balance))}
+                />
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
+
       <div className="next_container">
         <div className="exit_print_buttons">
+          {policyDraft && (
+            <Button
+              type="button"
+              label={t("accounts.addReceipts.openDraftReceipt")}
+              className="p-button-outlined"
+              onClick={openDraftReceipt}
+              loading={loading}
+            />
+          )}
           <Button
-            label={t("accounts.addReceipts.next")}
+            type="button"
+            label={t("accounts.addReceipts.recordPayment")}
             className="print"
-            onClick={formik.handleSubmit}
-            disabled={!formik.isValid}
-            loading={loading}
+            onClick={confirmRecordPayment}
+            disabled={!canRecord}
+            loading={submitting}
           />
         </div>
       </div>

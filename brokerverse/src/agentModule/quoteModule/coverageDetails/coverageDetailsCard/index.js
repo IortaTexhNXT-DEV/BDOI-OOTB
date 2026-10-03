@@ -1,9 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import StepErrors from "../../../../components/StepErrors";
+import { formatNumber } from "../../../../utility/currencyConverter";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import InputTextField from "../../../component/inputText";
 import CalculaitionTextInputs from "../../../component/calculaitionTextInputs";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
@@ -11,22 +13,22 @@ import customHistory from "../../../../routes/customHistory";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
-  AutopassengerpersonalAccidentOptions,
-  BodilyInjuryOptions,
-  PropertyDamageOptions,
-} from "./mock";
-import {
   postcoverageDetailsMiddleware,
-  submitRenewalCoverageMiddleware,
 } from "../store/coverageDetailsMiddleware";
 import { setQuoteCoverageDetails } from "../../Store/quotationReducer";
 import {
   computeAllPremiums,
   calculatePremiumBreakdown,
 } from "../../utils/premiumCalculations";
-import { APPATotalCoverageOptions } from "../../../endorsementModule/personalDetails/mock";
 import policyService from "../../../../services/policyService";
+import policyRenewalService from "../../../../services/policyRenewalService";
+import useTaxRates from "../../utils/useTaxRates";
+import useMotorTariff, { appaFigures, findVehicleClass } from "../../utils/useMotorTariff";
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
+import { notifyError } from "../../../../utility/dialogs";
+import { amountOptions, bodilyInjuryOptions, propertyDamageOptions } from "../../../../utility/quoteOptions";
+import logger from "../../../../utility/logger";
+import coverageInputErrors from "./coverageInputErrors";
 
 const CoverageDetailsCard = ({
   action,
@@ -36,6 +38,17 @@ const CoverageDetailsCard = ({
   installmentType,
 }) => {
   const { t } = useTranslation();
+  // why the renewal step could not be saved, shown on the step
+  const [stepError, setStepError] = useState(null);
+  // Motor tariff (Product Configurator): fixed CTPL premium per vehicle class, Auto Passenger PA limits and rate.
+  const motorTariff = useMotorTariff();
+  // Limits offered come from Master > Configuration (quote.bodily_injury_limits / quote.property_damage_limits)
+  const BodilyInjuryOptions = useMemo(() => bodilyInjuryOptions(), []);
+  const PropertyDamageOptions = useMemo(() => propertyDamageOptions(), []);
+  const AutopassengerpersonalAccidentOptions = useMemo(
+    () => amountOptions(motorTariff.appa.limits),
+    [motorTariff]
+  );
   const normalizeDropdownValue = (value, options) => {
     if (value === undefined || value === null || value === "") {
       return value;
@@ -63,7 +76,7 @@ const CoverageDetailsCard = ({
         return numericMatch.value;
       }
 
-      return numericValue.toLocaleString("en-IN");
+      return formatNumber(numericValue);
     }
 
     return valueStr;
@@ -115,30 +128,14 @@ const CoverageDetailsCard = ({
       AutopassengerpersonalAccidentOptions
     );
 
-    const normalizedAPPATotalCoverage = normalizeDropdownValue(
-      keepOrFallback(
-        rawValues?.APPATotalCoverage,
-        renewalCoverageData?.APPATotalCoverage,
-        APPATotalCoverageOptions?.[0]?.value
-      ),
-      APPATotalCoverageOptions
-    );
+    const normalizedAPPATotalCoverage = appaFigures(
+      motorTariff,
+      normalizedAutopassengerAccident,
+      appaSeats
+    ).total;
 
-    const sanitizedCTPLRate = includeCTPL
-      ? keepOrFallback(
-          rawValues?.CtplCoverageRate,
-          renewalCoverageData?.CtplCoverageRate,
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] || ""
-        )
-      : "";
-
-    const sanitizedCTPLPremium = includeCTPL
-      ? keepOrFallback(
-          rawValues?.CtplCoverageRate,
-          renewalCoverageData?.CtplCoverageRate,
-          ""
-        )
-      : "";
+    // CTPL is the tariff premium of the vehicle class; it cannot be edited on the quote.
+    const sanitizedCTPLRate = includeCTPL ? ctplTariffPremium : "";
 
     const sanitizedActOfNatureRate = includeAON
       ? keepOrFallback(
@@ -195,7 +192,7 @@ const CoverageDetailsCard = ({
       LossandDamagecoverage: keepOrFallback(
         rawValues?.LossandDamagecoverage,
         renewalCoverageData?.LossandDamagecoverage,
-        "1,00,000.00"
+        formatNumber(100000, { minimumFractionDigits: 2 })
       ),
       LossandDamagecoverageRate: keepOrFallback(
         rawValues?.LossandDamagecoverageRate,
@@ -242,89 +239,47 @@ const CoverageDetailsCard = ({
   );
 
   useEffect(() => {
+    if (!motorTariff.templateCode) return;
     dispatch(
       fetchProductTemplateByIdMiddleware({
-        templateCode: "MOT-003-2025",
+        templateCode: motorTariff.templateCode,
       })
     );
-  }, [flow]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flow, motorTariff.templateCode]);
 
+  // Vehicle class code (older quotes stored the label), its CTPL tariff premium and the seats for Auto Passenger PA.
+  const vehicleClassInfo = findVehicleClass(
+    motorTariff,
+    currentQuoteCreation?.policyDetails?.vehicleType
+  );
   const vehicleType =
-    currentQuoteCreation?.policyDetails?.vehicleType || "ac_and_tourist_cars";
+    vehicleClassInfo?.value || currentQuoteCreation?.policyDetails?.vehicleType || "";
+  // 1-year CTPL, or the 3-year upfront amount for a brand-new vehicle where the tariff has one (LTO 3-year registration)
+  const [ctplTermYears, setCtplTermYears] = useState(
+    () => Number(currentQuoteCreation?.coverageDetails?.ctplTermYears) === 3 ? 3 : 1
+  );
+  const ctplOffers3Year = vehicleClassInfo?.ctplPremium3Year != null;
+  const ctplAmount =
+    ctplTermYears === 3 && ctplOffers3Year ? vehicleClassInfo.ctplPremium3Year : vehicleClassInfo?.ctplPremium;
+  const ctplTariffPremium = ctplAmount != null ? ctplAmount.toFixed(2) : "";
+  // form initial values use the 1-year amount so that a term change does not re-initialise (and wipe) the form
+  const ctplOneYearPremium = vehicleClassInfo?.ctplPremium != null ? vehicleClassInfo.ctplPremium.toFixed(2) : "";
+  const appaSeats =
+    Number(currentQuoteCreation?.policyDetails?.seatingCapacity) ||
+    vehicleClassInfo?.defaultSeats ||
+    0;
 
   const isEditMode = currentQuoteCreation?.isEditMode || false;
   const existingCoverageDetails = currentQuoteCreation?.coverageDetails;
 
-  const initialFormikValues = useMemo(() => {
-    if (isEditMode && existingCoverageDetails) {
-      return {
-        LossandDamagecoverage:
-          existingCoverageDetails.lossAndDamageCoverage || "",
-        LossandDamagecoverageRate:
-          existingCoverageDetails.lossAndDamageCoverageRate ||
-          productConfigurator?.configuration?.premiumRates?.[vehicleType] ||
-          "",
-        LossandDamagecoveragepremium:
-          existingCoverageDetails.lossAndDamageCoveragePremium || "",
-        ActsofNatureRate:
-          existingCoverageDetails.actsOfNatureRate ||
-          productConfigurator?.configuration?.premiumRates?.acts_of_nature ||
-          "",
-        RoadsideAssistanceRate:
-          existingCoverageDetails.roadsideAssistanceRate ||
-          productConfigurator?.configuration?.premiumRates
-            ?.roadside_assistance ||
-          "",
-        RoadsideAssistancepremium:
-          existingCoverageDetails.roadsideAssistancePremium || "",
-        PersonalAccidentCoverRate:
-          existingCoverageDetails.personalAccidentCoverRate ||
-          productConfigurator?.configuration?.premiumRates
-            ?.personal_accident_cover ||
-          "",
-        PersonalAccidentCoverpremium:
-          existingCoverageDetails.personalAccidentCoverPremium || "",
-        CtplCoverageRate:
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
-        ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
-        BodilyInjury: existingCoverageDetails.bodilyInjury || "",
-        BodilyInjuryCoveragePremium:
-          existingCoverageDetails.bodilyInjuryCoveragePremium || "",
-        PropertyDamage: existingCoverageDetails.propertyDamage || "",
-        PropertyDamageCoveragePremium:
-          existingCoverageDetails.propertyDamageCoveragePremium || "",
-        AutopassengerpersonalAccident:
-          existingCoverageDetails.autoPassengerPersonalAccident || "",
-        APPATotalCoverage: existingCoverageDetails.APPAtotalCoverage || "",
-        APPACoveragePremium: existingCoverageDetails.APPAcoveragePremium || "",
-        TotalSumInsured: existingCoverageDetails.totalSumInsured || "",
-      };
-    }
 
-    return {
-      LossandDamagecoverage: "",
-      LossandDamagecoverageRate:
-        productConfigurator?.configuration?.premiumRates?.[vehicleType] || "",
-      LossandDamagecoveragepremium: "",
-      ActsofNatureRate: "",
-      ActsofNaturepremium: "",
-      RoadsideAssistanceRate: "",
-      RoadsideAssistancepremium: "",
-      PersonalAccidentCoverRate: "",
-      PersonalAccidentCoverpremium: "",
-      CtplCoverageRate:
-        productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
-      BodilyInjury: "",
-      BodilyInjuryCoveragePremium: "",
-      PropertyDamage: "",
-      PropertyDamageCoveragePremium: "",
-      AutopassengerpersonalAccident: "",
-      APPATotalCoverage: "",
-      APPACoveragePremium: "",
-      TotalSumInsured: "",
-    };
-  }, [isEditMode, existingCoverageDetails, productConfigurator, vehicleType]);
-
+  // Configured tax rates (app settings) so the gross shown here matches the order summary.
+  const settingsTaxRates = useTaxRates();
+  // Renewal prefill kept as the form's initial values so a later re-initialisation
+  // (enableReinitialize, e.g. when the product template loads) does not wipe it.
+  const [renewalValues, setRenewalValues] = useState(null);
+  const [renewalVehicleType, setRenewalVehicleType] = useState(null);
   const [show, setshow] = useState(true);
   const [isOverRide, setOverRide] = useState(false);
   const [includeActsOfNature, setIncludeActsOfNature] = useState(
@@ -337,10 +292,13 @@ const CoverageDetailsCard = ({
     () =>
       isEditMode && Boolean(existingCoverageDetails?.personalAccidentCoverRate)
   );
+  // CTPL is offered on every new motor quote; the agent unticks it when the client already has CTPL.
   const [includeCTPL, setIncludeCTPL] = useState(() =>
-    Boolean(initialFormikValues?.CtplCoverageRate)
+    isEditMode ? Boolean(existingCoverageDetails?.ctplCoverageRate) : true
   );
   useEffect(() => {
+    // The renewal flow sets these from the renewal prefill.
+    if (flow === "renewal") return;
     setIncludeActsOfNature(
       isEditMode && Boolean(existingCoverageDetails?.actsOfNatureRate)
     );
@@ -350,13 +308,16 @@ const CoverageDetailsCard = ({
     setIncludePersonalAccident(
       isEditMode && Boolean(existingCoverageDetails?.personalAccidentCoverRate)
     );
-    setIncludeCTPL(Boolean(initialFormikValues?.CtplCoverageRate));
+    setIncludeCTPL(
+      isEditMode ? Boolean(existingCoverageDetails?.ctplCoverageRate) : true
+    );
   }, [
     isEditMode,
     existingCoverageDetails?.actsOfNatureRate,
     existingCoverageDetails?.roadsideAssistanceRate,
     existingCoverageDetails?.personalAccidentCoverRate,
-    initialFormikValues?.CtplCoverageRate,
+    existingCoverageDetails?.ctplCoverageRate,
+    flow,
   ]);
   // Initialize renewalDataLoaded to true if it's a renewal flow to prevent auto-calculate
   const [renewalDataLoaded, setRenewalDataLoaded] = useState(
@@ -371,6 +332,7 @@ const CoverageDetailsCard = ({
   const dispatch = useDispatch();
 
   const handleclick = (values) => {
+    if (blockedByInputErrors()) return;
     // Prepare coverage details data in proper format
     const coverageDetailsData = {
       lossAndDamageCoverage: values.LossandDamagecoverage,
@@ -380,7 +342,11 @@ const CoverageDetailsCard = ({
       actsOfNaturePremium: includeActsOfNature
         ? values.ActsofNaturepremium
         : "",
-      ctplCoverageRate: includeCTPL ? values.CtplCoverageRate : "",
+      includeCTPL,
+      ctplTermYears: includeCTPL && ctplOffers3Year ? ctplTermYears : 1,
+      ctplCoverageRate: includeCTPL ? ctplTariffPremium : "",
+      ctplCoveragePremium: includeCTPL ? ctplTariffPremium : "",
+      appaSeats,
       roadsideAssistanceRate: includeRoadsideAssistance
         ? values.RoadsideAssistanceRate
         : "",
@@ -412,30 +378,15 @@ const CoverageDetailsCard = ({
       }),
     };
 
-    // Save to Redux state
-    dispatch(setQuoteCoverageDetails(coverageDetailsData));
-
-    // Also dispatch to old middleware for backward compatibility
-    dispatch(postcoverageDetailsMiddleware(values));
-
     if (flow === "renewal") {
-      console.log("=== PROCESSING RENEWAL ===");
-      console.log("formik.values:", formik.values);
-      const sanitizedValues = buildSanitizedCoverageValues(
-        formik.values,
-        includeActsOfNature,
-        includeRoadsideAssistance,
-        includePersonalAccident
-      );
-      console.log("sanitizedValues:", sanitizedValues);
-      return dispatch(
-        submitRenewalCoverageMiddleware({
-          policyId,
-          formValues: sanitizedValues,
-        })
-      )
-        .unwrap()
-        .then(() => {
+      // Save exactly what is on screen on the policy's open renewal (created when there is none).
+      return policyRenewalService
+        .saveRenewalWizard(policyId, { coverageDetails: coverageDetailsData })
+        .then((response) => {
+          if (!response.success) {
+            setStepError({ message: response.error, errors: response.errors });
+            return;
+          }
           navigate(
             `/agent/renewalquote/accessories/accessorirsdetails/${policyId}`,
             {
@@ -447,15 +398,14 @@ const CoverageDetailsCard = ({
               },
             }
           );
-        })
-        .catch(() => {
-          // Intentionally left blank; navigation blocked when API fails
-        })
-        .finally(() => {
-          // align with Formik expectation; ensures the promise resolves
-          return;
         });
     }
+
+    // Save to Redux state
+    dispatch(setQuoteCoverageDetails(coverageDetailsData));
+
+    // Also dispatch to old middleware for backward compatibility
+    dispatch(postcoverageDetailsMiddleware(values));
 
     // Determine navigation path
     const currentPath = window.location.pathname;
@@ -494,7 +444,19 @@ const CoverageDetailsCard = ({
     }
   };
 
+  // A negative or empty sum insured, or a rate outside 0 to 100, is not priced (it gave negative premiums)
+  const blockedByInputErrors = () => {
+    const inputErrors = coverageInputErrors(formik.values, { includeActsOfNature, includeRoadsideAssistance, includePersonalAccident });
+    const fields = Object.keys(inputErrors);
+    if (!fields.length) return false;
+    formik.setTouched({ ...formik.touched, ...Object.fromEntries(fields.map((k) => [k, true])) }, false);
+    formik.setErrors(inputErrors);
+    setshow(true);
+    return true;
+  };
+
   const hadlecalculation = () => {
+    if (blockedByInputErrors()) return;
     // Calculate all premiums based on coverage, rates, and sum insured
     // Map PascalCase form fields to camelCase for computeAllPremiums
     const computed = computeAllPremiums({
@@ -503,7 +465,7 @@ const CoverageDetailsCard = ({
       actsOfNatureRate: includeActsOfNature
         ? formik.values.ActsofNatureRate
         : "0",
-      ctplCoverageRate: includeCTPL ? formik.values.CtplCoverageRate : "0",
+      ctplCoverageRate: includeCTPL ? ctplTariffPremium : "0",
       roadsideAssistanceRate: includeRoadsideAssistance
         ? formik.values.RoadsideAssistanceRate
         : "0",
@@ -512,9 +474,10 @@ const CoverageDetailsCard = ({
         : "0",
       bodilyInjury: formik.values.BodilyInjury,
       propertyDamage: formik.values.PropertyDamage,
-      APPAtotalCoverage: formik.values.APPATotalCoverage,
       autoPassengerPersonalAccident:
         formik.values.AutopassengerpersonalAccident,
+      appaSeats,
+      appaRatePercent: motorTariff.appa.ratePercent,
     });
 
     // Calculate full premium breakdown including taxes and gross premium
@@ -523,7 +486,8 @@ const CoverageDetailsCard = ({
         ...computed,
         discount: formik.values.Discount || "0",
       },
-      productConfigurator
+      productConfigurator,
+      settingsTaxRates
     );
 
     // Validate gross premium vs sum insured
@@ -532,18 +496,12 @@ const CoverageDetailsCard = ({
     if (sumInsuredNum > 0 && grossPremiumNum > 0) {
       const premiumRatio = (grossPremiumNum / sumInsuredNum) * 100;
       if (premiumRatio > 10) {
-        console.warn(
-          `⚠️ [Coverage Details] Gross Premium (${
+        logger.warn(
+          `[Coverage Details] Gross Premium (${
             breakdown.grossPremium
           }) is ${premiumRatio.toFixed(2)}% of Sum Insured (${
             computed.totalSumInsured
           }). This seems unusually high (>10%). Expected range: 1-5%.`
-        );
-      } else {
-        console.log(
-          `[Coverage Details] Premium ratio: ${premiumRatio.toFixed(
-            2
-          )}% (within expected range)`
         );
       }
     }
@@ -568,6 +526,7 @@ const CoverageDetailsCard = ({
           : "",
         BodilyInjuryCoveragePremium: computed.bodilyInjuryCoveragePremium,
         PropertyDamageCoveragePremium: computed.propertyDamageCoveragePremium,
+        APPATotalCoverage: computed.APPAtotalCoverage,
         APPACoveragePremium: computed.APPAcoveragePremium,
         TotalSumInsured: computed.totalSumInsured,
         // Add tax and gross premium values to form
@@ -614,6 +573,11 @@ const CoverageDetailsCard = ({
 
       formik.setValues(sanitizedValues);
     }
+  };
+
+  const handleCTPLToggle = (checked) => {
+    setIncludeCTPL(checked);
+    formik.setFieldValue("CtplCoverageRate", checked ? ctplTariffPremium : "");
   };
 
   const handleRoadsideAssistanceToggle = (checked) => {
@@ -675,6 +639,9 @@ const CoverageDetailsCard = ({
   // }
   // Helper function to get form values from Redux state or empty
   const getFormValues = () => {
+    if (flow === "renewal" && renewalValues) {
+      return renewalValues;
+    }
     // Use existing coverage details from Redux if in edit mode
     if (isEditMode && existingCoverageDetails) {
       return {
@@ -691,7 +658,7 @@ const CoverageDetailsCard = ({
           productConfigurator?.configuration?.premiumRates?.acts_of_nature ||
           "",
         CtplCoverageRate:
-          productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
+          ctplOneYearPremium,
         ActsofNaturepremium: existingCoverageDetails.actsOfNaturePremium || "",
         BodilyInjury: existingCoverageDetails.bodilyInjury || "",
         BodilyInjuryCoveragePremium:
@@ -714,7 +681,7 @@ const CoverageDetailsCard = ({
       LossandDamagecoveragepremium: "",
       ActsofNatureRate: "",
       CtplCoverageRate:
-        productConfigurator?.configuration?.ctplSetting?.[vehicleType] || "",
+        ctplOneYearPremium,
       ActsofNaturepremium: "",
       RoadsideAssistanceRate: "",
       RoadsideAssistancepremium: "",
@@ -732,9 +699,12 @@ const CoverageDetailsCard = ({
   };
 
   const initialValue = getFormValues();
-  console.log("initialValue", initialValue);
 
   const handleBackNavigation = () => {
+    if (flow === "renewal") {
+      navigate("/agent/expired-policies");
+      return;
+    }
     customHistory.back();
   };
 
@@ -751,15 +721,11 @@ const CoverageDetailsCard = ({
   useEffect(() => {
     // CRITICAL: Skip auto-calculate completely for renewal flow
     if (flow === "renewal") {
-      console.log(
-        "Skipping auto-calculate - this is a renewal flow, waiting for policy data"
-      );
       return;
     }
 
     // Skip auto-calculate if renewal data was already loaded
     if (renewalDataLoaded) {
-      console.log("Skipping auto-calculate - renewal data already loaded");
       return;
     }
 
@@ -773,7 +739,6 @@ const CoverageDetailsCard = ({
       formik.values.BodilyInjuryCoveragePremium;
 
     if (hasCoverageData && !hasPremiumData && !loading) {
-      console.log("Auto-calculating premiums on form load");
       hadlecalculation();
     }
   }, [
@@ -789,76 +754,86 @@ const CoverageDetailsCard = ({
     const fetchPolicyDataForRenewal = async () => {
       // Only process if this is a renewal flow
       if (flow !== "renewal") {
-        console.log("Skipping renewal fetch - not a renewal flow");
         return;
       }
 
-      let policyData = null;
-
-      if (policyId) {
-        console.log("Fetching FULL policy data from API for renewal...");
-        try {
-          const response = await policyService.getPolicyDetails(policyId);
-
-          if (!response.success || !response.data) {
-            console.error("Failed to fetch policy data:", response.error);
-            return;
-          }
-
-          policyData = response.data;
-          console.log("policyData", policyData);
-        } catch (error) {
-          console.error("Error fetching policy data for renewal:", error);
-          return;
-        }
-      } else {
-        console.error("No policy ID available for renewal");
+      if (!policyId) {
+        logger.error("No policy ID available for renewal");
         return;
       }
 
-      if (!policyData) {
-        console.warn("No policy data available for renewal");
+      // Prefill from this renewal's saved wizard data or, failing that, the expiring
+      // policy itself (its quotation, else sum insured / insurer / product of the policy row).
+      const response = await policyRenewalService.getRenewalPrefill(policyId);
+      if (!response.success || !response.data) {
+        logger.error("Failed to load renewal prefill:", response.error);
         return;
       }
+      const coverage = response.data.coverageDetails || {};
+      const mapped = policyService.transformRenewalCoverage(coverage);
+      const formatAmount = (value) =>
+        value === "" || value === undefined || value === null
+          ? ""
+          : formatNumber(Number(String(value).replace(/,/g, "")), {
+              minimumFractionDigits: 2,
+            });
+      const coverageForRenewal = {
+        ...mapped,
+        LossandDamagecoverage: formatAmount(mapped.LossandDamagecoverage),
+        TotalSumInsured: formatAmount(mapped.TotalSumInsured),
+        LossandDamagecoverageRate:
+          mapped.LossandDamagecoverageRate ||
+          productConfigurator?.configuration?.premiumRates?.[vehicleType] ||
+          "",
+        // A renewal is a new term: CTPL (if the expiring policy had it) at today's tariff.
+        CtplCoverageRate: mapped.CtplCoverageRate ? ctplTariffPremium : "",
+        BodilyInjury: mapped.BodilyInjury
+          ? normalizeDropdownValue(mapped.BodilyInjury, BodilyInjuryOptions)
+          : "",
+        PropertyDamage: mapped.PropertyDamage
+          ? normalizeDropdownValue(mapped.PropertyDamage, PropertyDamageOptions)
+          : "",
+        AutopassengerpersonalAccident: mapped.AutopassengerpersonalAccident
+          ? normalizeDropdownValue(
+              mapped.AutopassengerpersonalAccident,
+              AutopassengerpersonalAccidentOptions
+            )
+          : "",
+      };
 
-      // Transform policy coverage data to form format
-      const coverageForRenewal =
-        policyService.transformPolicyCoverageForRenewal({
-          ...policyData,
-
-          ctplCoverageRate:
-            productConfigurator?.configuration?.ctplSetting?.[vehicleType] ||
-            "",
-        });
-      console.log("Transformed coverage for renewal:", coverageForRenewal);
-
-      // Pre-populate the form with policy coverage data
-      if (coverageForRenewal && Object.keys(coverageForRenewal).length > 0) {
-        formik.setValues(coverageForRenewal);
-
-        // Verify what was actually set after React updates
-        setTimeout(() => {
-          // Double-check if values didn't stick, set them again
-          if (
-            !formik.values.LossandDamagecoverage &&
-            coverageForRenewal.LossandDamagecoverage
-          ) {
-            console.warn("Values didn't stick, setting again...");
-            formik.setValues(coverageForRenewal);
-          }
-        }, 100);
-
-        setshow(false); // Hide calculate button since values are already populated
-        setRenewalDataLoaded(true); // Mark renewal data as loaded to prevent auto-calculate from overwriting
-        console.log("Form pre-populated with policy data - SUCCESS");
-      } else {
-        console.warn("No coverage data to pre-populate");
-      }
+      const renewalVehicle = response.data.vehicle || {};
+      setRenewalVehicleType(
+        renewalVehicle.vehicleType || renewalVehicle.insuranceVehicleDetails?.[0]?.vehicleType || null
+      );
+      setRenewalValues(coverageForRenewal);
+      formik.setValues(coverageForRenewal);
+      setIncludeActsOfNature(Boolean(coverage.actsOfNatureRate));
+      setIncludeRoadsideAssistance(Boolean(coverage.roadsideAssistanceRate));
+      setIncludePersonalAccident(Boolean(coverage.personalAccidentCoverRate));
+      setIncludeCTPL(Boolean(coverageForRenewal.CtplCoverageRate));
+      // Premiums priced on the expiring term can be carried on; otherwise Calculate first.
+      setshow(!coverage.lossAndDamageCoveragePremium);
+      setRenewalDataLoaded(true);
     };
 
     fetchPolicyDataForRenewal();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flow, policyId, state]); // Run when flow, policyId, or state changes
+
+  // Renewal without an own damage rate on the expiring term (e.g. a seeded or uploaded policy): prefill the rate of
+  // the vehicle class from the motor tariff (GET /quotations/motor-tariff); a policy with no vehicle class recorded
+  // takes the tariff's first class (private cars). The agent can still change it before Calculate.
+  useEffect(() => {
+    if (flow !== "renewal" || !renewalValues || renewalValues.LossandDamagecoverageRate) return;
+    const tariffClass =
+      findVehicleClass(motorTariff, renewalVehicleType) || motorTariff.vehicleTypes?.[0];
+    const rate = tariffClass?.ownDamageRate;
+    if (rate === null || rate === undefined) return;
+    const next = { ...renewalValues, LossandDamagecoverageRate: String(rate) };
+    setRenewalValues(next);
+    formik.setFieldValue("LossandDamagecoverageRate", next.LossandDamagecoverageRate);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flow, renewalValues, motorTariff, renewalVehicleType]);
 
   return (
     <div className="coverage__details__card__container mt-4">
@@ -878,7 +853,7 @@ const CoverageDetailsCard = ({
             />
             {formik.touched.LossandDamagecoverage &&
               formik.errors.LossandDamagecoverage && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoverage}
                 </div>
               )}
@@ -893,7 +868,7 @@ const CoverageDetailsCard = ({
             />
             {formik.touched.LossandDamagecoverageRate &&
               formik.errors.LossandDamagecoverageRate && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoverageRate}
                 </div>
               )}
@@ -915,7 +890,7 @@ const CoverageDetailsCard = ({
 
             {formik.touched.LossandDamagecoveragepremium &&
               formik.errors.LossandDamagecoveragepremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.LossandDamagecoveragepremium}
                 </div>
               )}
@@ -923,17 +898,44 @@ const CoverageDetailsCard = ({
         </div>
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("coverageDetailsCard.ctplCoverageRate")}
-              value={formik.values.CtplCoverageRate}
-              onChange={formik.handleChange("CtplCoverageRate")}
-            />
-            {formik.touched.CtplCoverageRate &&
-              formik.errors.CtplCoverageRate && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.CtplCoverageRate}
-                </div>
-              )}
+            <div className="flex align-items-center gap-2 mb-2">
+              <Checkbox
+                inputId="include-ctpl"
+                checked={includeCTPL}
+                onChange={(e) => handleCTPLToggle(e.checked)}
+              />
+              <label htmlFor="include-ctpl" className="m-0">
+                {t("coverageDetailsCard.includeCtpl")}
+              </label>
+            </div>
+            {includeCTPL && ctplOffers3Year && (
+              <div className="flex align-items-center gap-2 mb-2">
+                <Checkbox
+                  inputId="ctpl-3-year"
+                  checked={ctplTermYears === 3}
+                  onChange={(e) => {
+                    const years = e.checked ? 3 : 1;
+                    setCtplTermYears(years);
+                    const amount = years === 3 ? vehicleClassInfo.ctplPremium3Year : vehicleClassInfo.ctplPremium;
+                    formik.setFieldValue("CtplCoverageRate", amount.toFixed(2));
+                  }}
+                />
+                <label htmlFor="ctpl-3-year" className="m-0">
+                  {t("coverageDetailsCard.ctplThreeYear")}
+                </label>
+              </div>
+            )}
+            {includeCTPL && (
+              <CalculaitionTextInputs
+                label={t("coverageDetailsCard.ctplTariffPremium")}
+                value={ctplTariffPremium ? formatNumber(ctplTariffPremium) : "-"}
+              />
+            )}
+            {includeCTPL && !ctplTariffPremium && (
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
+                {t("coverageDetailsCard.ctplNeedsVehicleType")}
+              </div>
+            )}
           </div>
         </div>
         <div className="grid m-0 mt-2">
@@ -961,7 +963,7 @@ const CoverageDetailsCard = ({
               />
               {formik.touched.ActsofNatureRate &&
                 formik.errors.ActsofNatureRate && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.ActsofNatureRate}
                   </div>
                 )}
@@ -982,7 +984,7 @@ const CoverageDetailsCard = ({
               )}
               {formik.touched.ActsofNaturepremium &&
                 formik.errors.ActsofNaturepremium && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.ActsofNaturepremium}
                   </div>
                 )}
@@ -1014,7 +1016,7 @@ const CoverageDetailsCard = ({
               />
               {formik.touched.RoadsideAssistanceRate &&
                 formik.errors.RoadsideAssistanceRate && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.RoadsideAssistanceRate}
                   </div>
                 )}
@@ -1035,7 +1037,7 @@ const CoverageDetailsCard = ({
               )}
               {formik.touched.RoadsideAssistancepremium &&
                 formik.errors.RoadsideAssistancepremium && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.RoadsideAssistancepremium}
                   </div>
                 )}
@@ -1066,7 +1068,7 @@ const CoverageDetailsCard = ({
               />
               {formik.touched.PersonalAccidentCoverRate &&
                 formik.errors.PersonalAccidentCoverRate && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.PersonalAccidentCoverRate}
                   </div>
                 )}
@@ -1087,7 +1089,7 @@ const CoverageDetailsCard = ({
               )}
               {formik.touched.PersonalAccidentCoverpremium &&
                 formik.errors.PersonalAccidentCoverpremium && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.PersonalAccidentCoverpremium}
                   </div>
                 )}
@@ -1107,7 +1109,7 @@ const CoverageDetailsCard = ({
               optionValue="value"
             />
             {formik.touched.BodilyInjury && formik.errors.BodilyInjury && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.BodilyInjury}
               </div>
             )}
@@ -1128,7 +1130,7 @@ const CoverageDetailsCard = ({
             )}{" "}
             {formik.touched.BodilyInjuryCoveragePremium &&
               formik.errors.BodilyInjuryCoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.BodilyInjuryCoveragePremium}
                 </div>
               )}
@@ -1147,7 +1149,7 @@ const CoverageDetailsCard = ({
               optionValue="value"
             />
             {formik.touched.PropertyDamage && formik.errors.PropertyDamage && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PropertyDamage}
               </div>
             )}
@@ -1168,7 +1170,7 @@ const CoverageDetailsCard = ({
             )}
             {formik.touched.PropertyDamageCoveragePremium &&
               formik.errors.PropertyDamageCoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.PropertyDamageCoveragePremium}
                 </div>
               )}
@@ -1188,7 +1190,7 @@ const CoverageDetailsCard = ({
             />
             {formik.touched.AutopassengerpersonalAccident &&
               formik.errors.AutopassengerpersonalAccident && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.AutopassengerpersonalAccident}
                 </div>
               )}
@@ -1197,38 +1199,24 @@ const CoverageDetailsCard = ({
 
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("coverageDetailsCard.appaTotalCoverage")}
-              value={formik.values.APPATotalCoverage}
-              onChange={formik.handleChange("APPATotalCoverage")}
+            <CalculaitionTextInputs
+              label={t("coverageDetailsCard.appaSeats")}
+              value={appaSeats || "-"}
             />
-            {formik.touched.APPATotalCoverage &&
-              formik.errors.APPATotalCoverage && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.APPATotalCoverage}
-                </div>
-              )}
           </div>
           <div className="col-12 md:col-6 lg:col-6">
-            {isOverRide ? (
-              <InputTextField
-                label={t("coverageDetailsCard.appaCoveragePremium")}
-                value={formik.values.APPACoveragePremium}
-                onChange={formik.handleChange("APPACoveragePremium")}
-              />
-            ) : (
-              <CalculaitionTextInputs
-                label={t("coverageDetailsCard.appaCoveragePremium")}
-                value={formik.values.APPACoveragePremium}
-                onChange={formik.handleChange("APPACoveragePremium")}
-              />
-            )}
-            {formik.touched.APPACoveragePremium &&
-              formik.errors.APPACoveragePremium && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                  {formik.errors.APPACoveragePremium}
-                </div>
+            <CalculaitionTextInputs
+              label={t("coverageDetailsCard.appaTotalCoverage")}
+              value={formatNumber(
+                appaFigures(motorTariff, formik.values.AutopassengerpersonalAccident, appaSeats).total
               )}
+            />
+          </div>
+          <div className="col-12 md:col-6 lg:col-6">
+            <CalculaitionTextInputs
+              label={t("coverageDetailsCard.appaCoveragePremium")}
+              value={formik.values.APPACoveragePremium}
+            />
           </div>
         </div>
         <div className="grid m-0 mt-2">
@@ -1248,7 +1236,7 @@ const CoverageDetailsCard = ({
             )}
             {formik.touched.TotalSumInsured &&
               formik.errors.TotalSumInsured && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.TotalSumInsured}
                 </div>
               )}
@@ -1295,8 +1283,13 @@ const CoverageDetailsCard = ({
               />
             </div>
           </div>
+          {flow === "renewal" && stepError && (
+            <div className="col-12">
+              <StepErrors error={stepError} />
+            </div>
+          )}
           <div className="col-12 md:col-6 lg:col-6 back__next__btn__container ">
-            {flow === "normal" && (
+            {(flow === "normal" || flow === "renewal") && (
               <div className="back__btn__container">
                 <Button className="back__btn" onClick={handleBackNavigation}>
                   {t("coverageDetailsCard.back")}

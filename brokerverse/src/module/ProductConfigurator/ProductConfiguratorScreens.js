@@ -1,7 +1,7 @@
 // Consolidated Product Configurator Screens Implementation
 // Comprehensive product management for insurance brokers
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { useNavigate, useParams } from "react-router-dom";
@@ -10,36 +10,128 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { TabView, TabPanel } from "primereact/tabview";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
-import { MultiSelect } from "primereact/multiselect";
 import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
-import { Panel } from "primereact/panel";
 import { Accordion, AccordionTab } from "primereact/accordion";
-import { TreeTable } from "primereact/treetable";
 import { Chips } from "primereact/chips";
-import { Steps } from "primereact/steps";
-import { Timeline } from "primereact/timeline";
 import { ProgressBar } from "primereact/progressbar";
 import { Chart } from "primereact/chart";
-import productConfiguratorMockService from "../../services/mockData/productConfiguratorMockData";
+import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import FieldError from "../../components/FieldError";
 import productConfiguratorService from "../../services/productConfiguratorService";
-import ProductConfiguratorTab from "./PoductConfiguratorTab/ProductConfiguratorTab";
+import mastersService from "../../services/mastersService";
+import s3Service from "../../services/s3Service";
+import ProductConfiguratorTab from "./ProductConfiguratorTab/ProductConfiguratorTab";
 import { fetchProductTemplateByIdMiddleware } from "./store/productConfiguratorMiddleware";
 import { clearProductTemplate } from "./store/productConfiguratorSlice";
+import { cleanMotorTariff } from "./ProductConfiguratorTab/MotorTariffEditor";
+import { numberLocale } from "../../utility/currencyConverter";
+import { calendarDateFormat, toIsoDate } from "../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../utility/requiredFields";
+/** Product templates as dropdown options for attaching a component to a product. */
+const useProductOptions = () => {
+  const [options, setOptions] = useState([]);
+  useEffect(() => {
+    productConfiguratorService
+      .getProductTemplates()
+      .then((rows) =>
+        setOptions(
+          rows
+            .filter((row) => row.status !== "Retired")
+            .map((row) => ({ label: `${row.templateCode} - ${row.name}`, value: row.id }))
+        )
+      )
+      .catch(() => setOptions([]));
+  }, []);
+  return options;
+};
+
+/** Loads the configuration components of one kind (coverages, rating-factors, ...). */
+const useComponentList = (kind, toast, errorSummary, errorDetail) => {
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const messages = useRef({});
+  messages.current = { errorSummary, errorDetail };
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      setRows(await productConfiguratorService.listComponents(kind));
+    } catch (error) {
+      toast.current?.show({
+        severity: "error",
+        summary: messages.current.errorSummary,
+        detail: error?.message || messages.current.errorDetail,
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [kind, toast]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  return { rows, loading, load };
+};
+
+/** Runs a save/delete call and shows the outcome on the screen's toast; resolves to true on success. */
+const persist = async (action, toast, { success, successDetail, error, errorDetail }) => {
+  try {
+    await action();
+    toast.current?.show({ severity: "success", summary: success, detail: successDetail });
+    return true;
+  } catch (err) {
+    toast.current?.show({ severity: "error", summary: error, detail: err?.message || errorDetail });
+    return false;
+  }
+};
+
+const ProductField = ({ value, options, onChange }) => {
+  const { t } = useTranslation();
+  return (
+    <div className="field">
+      <label>{t("marketMapping.product")}</label>
+      <Dropdown
+        value={value}
+        options={options}
+        filter
+        placeholder={t("marketMapping.product")}
+        onChange={(e) => onChange(e.value)}
+      />
+    </div>
+  );
+};
+
+const confirmDelete = (t, name, onAccept) =>
+  confirmDialog({
+    message: t("productConfigurator.confirmDelete", "Delete {{name}}?", { name }),
+    header: t("common.confirm"),
+    icon: "pi pi-exclamation-triangle",
+    acceptClassName: "p-button-danger",
+    accept: onAccept,
+  });
 
 // PC-2: Product Template Management
+/** Template column of the component lists: global rows apply to every product. */
+const TemplateCell = ({ code }) => {
+  const { t } = useTranslation();
+  return code || t("productConfigurator.allProducts", "All products");
+};
+const templateCell = (row) => <TemplateCell code={row.templateCode} />;
+
 export const ProductTemplateManager = () => {
   const { t } = useTranslation();
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [templateErrors, setTemplateErrors] = useState({});
 
   const [showDialog, setShowDialog] = useState(false);
   const [templatesLoading, setTemplatesLoading] = useState(false);
@@ -53,15 +145,12 @@ export const ProductTemplateManager = () => {
     error: templateError,
   } = useSelector((state) => state.productConfiguratorReducer || {});
 
-  const categoryOptions = [
-    { label: t("productTemplateManager.motor"), value: "Motor" },
-    { label: t("productTemplateManager.fireAndAlliedPerils"), value: "Fire and Allied Perils" },
-    { label: t("productTemplateManager.health"), value: "Health" },
-    { label: t("productTemplateManager.property"), value: "Property" },
-    { label: t("productTemplateManager.travel"), value: "Travel" },
-    { label: t("productTemplateManager.marine"), value: "Marine" },
-    { label: t("productTemplateManager.employeeBenefits"), value: "Employee Benefits" },
-  ];
+  const [categoryOptions, setCategoryOptions] = useState([]);
+  // line of business and product come from the masters (Line of Business master, products), so the codes match
+  const [lobOptions, setLobOptions] = useState([]);
+  const [productRows, setProductRows] = useState([]);
+
+  const productOptions = productRows.map((p) => ({ label: `${p.productCode} - ${p.productName}`, value: p.id }));
 
   const statusOptions = [
     { label: t("productTemplateManager.active"), value: "Active" },
@@ -71,6 +160,18 @@ export const ProductTemplateManager = () => {
 
   useEffect(() => {
     loadTemplates();
+    mastersService
+      .options("product-category")
+      .then((options) => setCategoryOptions(options.map((o) => ({ label: o.label, value: o.value }))))
+      .catch(() => setCategoryOptions([]));
+    mastersService
+      .options("line-of-business")
+      .then((options) => setLobOptions(options.map((o) => ({ label: `${o.code} - ${o.label}`, value: o.code }))))
+      .catch(() => setLobOptions([]));
+    mastersService
+      .list("product", { status: "Active" })
+      .then((rows) => setProductRows(rows))
+      .catch(() => setProductRows([]));
 
     return () => {
       dispatch(clearProductTemplate());
@@ -123,6 +224,31 @@ export const ProductTemplateManager = () => {
     }
   };
 
+  const setLifecycle = (template, action) => {
+    const retire = action === "retire";
+    confirmDialog({
+      message: `${retire ? t("productTemplateManager.retire", "Retire") : t("productTemplateManager.reactivate", "Reactivate")} ${template.templateCode}?`,
+      header: t("common.confirm"),
+      icon: "pi pi-exclamation-triangle",
+      accept: async () => {
+        const done = await persist(
+          () =>
+            retire
+              ? productConfiguratorService.retireProductTemplate(template.id)
+              : productConfiguratorService.reactivateProductTemplate(template.id),
+          toast,
+          {
+            success: t("productTemplateManager.success"),
+            successDetail: t("productTemplateManager.templateUpdated"),
+            error: t("productTemplateManager.error"),
+            errorDetail: t("productTemplateManager.failedToSaveTemplate"),
+          }
+        );
+        if (done) loadTemplates();
+      },
+    });
+  };
+
   const saveTemplate = async () => {
     try {
       if (!selectedTemplate) {
@@ -157,6 +283,7 @@ export const ProductTemplateManager = () => {
         return value === undefined || value === null;
       });
 
+      setTemplateErrors(Object.fromEntries(missingFields.map((field) => [field, `${fieldLabels[field] || field} is required`])));
       if (missingFields.length) {
         const formattedFields = missingFields.map(
           (field) => fieldLabels[field] || field
@@ -176,21 +303,21 @@ export const ProductTemplateManager = () => {
         name,
         category,
         lineOfBusiness,
+        productId,
         effectiveDate,
         status,
         description,
       } = selectedTemplate;
 
-      const formattedEffectiveDate =
-        effectiveDate instanceof Date
-          ? effectiveDate.toISOString().split("T")[0]
-          : effectiveDate;
+      // local calendar date (toISOString would give the previous day east of UTC)
+      const formattedEffectiveDate = toIsoDate(effectiveDate);
 
       const payload = {
         templateCode,
         name,
         category,
         lineOfBusiness,
+        productId: productId ?? null,
         effectiveDate: formattedEffectiveDate,
         status,
         description: description || "",
@@ -199,6 +326,7 @@ export const ProductTemplateManager = () => {
       if (selectedTemplate?.id) {
         await productConfiguratorService.updateProductTemplate({
           ...selectedTemplate,
+          configuration: cleanMotorTariff(selectedTemplate.configuration),
           ...payload,
         });
       } else {
@@ -213,8 +341,16 @@ export const ProductTemplateManager = () => {
           : t("productTemplateManager.templateSaved"),
       });
       setShowDialog(false);
-      setSelectedTemplate(null);
-      dispatch(clearProductTemplate());
+      if (selectedTemplate?.id) {
+        // an update stays on the template (as saved), so the user can keep working on it
+        setSelectedTemplate({
+          ...selectedTemplate,
+          configuration: cleanMotorTariff(selectedTemplate.configuration),
+        });
+      } else {
+        setSelectedTemplate(null);
+        dispatch(clearProductTemplate());
+      }
       loadTemplates();
     } catch (error) {
       toast.current?.show({
@@ -228,6 +364,7 @@ export const ProductTemplateManager = () => {
   return (
     <div className="product-template-manager p-3">
       <Toast ref={toast} />
+      <ConfirmDialog />
       <Card title={t("productTemplateManager.cardTitle")}>
         {!id ? (
           <>
@@ -239,6 +376,7 @@ export const ProductTemplateManager = () => {
                   icon="pi pi-plus"
                   onClick={() => {
                     setSelectedTemplate({ status: "Active" });
+                    setTemplateErrors({});
                     setShowDialog(true);
                   }}
                 />
@@ -247,7 +385,7 @@ export const ProductTemplateManager = () => {
                 value={templates}
                 loading={templatesLoading}
                 paginator
-                rows={10}
+                rows={20}
               >
                 <Column field="templateCode" header={t("productTemplateManager.templateCode")} sortable />
                 <Column field="name" header={t("productTemplateManager.productName")} sortable />
@@ -267,82 +405,36 @@ export const ProductTemplateManager = () => {
                 />
                 <Column
                   body={(rowData) => (
-                    <Button
-                      icon="pi pi-pencil"
-                      className="p-button-text"
-                      onClick={() => {
-                        navigate(
-                          `/product-configurator/template/${rowData.id}`
-                        );
-                        setSelectedTemplate(rowData);
-                      }}
-                    />
+                    <div className="flex gap-2">
+                      <Button
+                        icon="pi pi-pencil"
+                        className="p-button-text"
+                        onClick={() => {
+                          navigate(
+                            `/product-configurator/template/${rowData.id}`
+                          );
+                          setSelectedTemplate(rowData);
+                        }} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
+                      {rowData.status === "Retired" ? (
+                        <Button
+                          icon="pi pi-replay"
+                          className="p-button-text"
+                          tooltip={t("productTemplateManager.reactivate", "Reactivate")}
+                          onClick={() => setLifecycle(rowData, "reactivate")} aria-label={t("productTemplateManager.reactivate", "Reactivate")}
+                        />
+                      ) : (
+                        <Button
+                          icon="pi pi-ban"
+                          className="p-button-text p-button-danger"
+                          tooltip={t("productTemplateManager.retire", "Retire")}
+                          onClick={() => setLifecycle(rowData, "retire")} aria-label={t("productTemplateManager.retire", "Retire")}
+                        />
+                      )}
+                    </div>
                   )}
                 />
               </DataTable>
             </div>
-            {/* <div className="field">
-              <label>Category</label>
-              <Dropdown
-                value={selectedTemplate?.category || null}
-                options={categoryOptions}
-                placeholder={t("productTemplateManager.selectCategory")}
-                onChange={(e) =>
-                  setSelectedTemplate((prev) => ({
-                    ...prev,
-                    category: e.value,
-                  }))
-                }
-                disabled={!!id}
-              />
-            </div>
-            <div className="field">
-              <label>Line of Business</label>
-              <InputText
-                value={selectedTemplate?.lineOfBusiness || ""}
-                onChange={(e) =>
-                  setSelectedTemplate({
-                    ...selectedTemplate,
-                    lineOfBusiness: e.target.value,
-                  })
-                }
-                placeholder="e.g. Motor Vehicle"
-              />
-            </div>
-            <div className="field">
-              <label>Effective Date</label>
-              <Calendar
-                value={
-                  selectedTemplate?.effectiveDate
-                    ? new Date(selectedTemplate.effectiveDate)
-                    : null
-                }
-                onChange={(e) =>
-                  setSelectedTemplate({
-                    ...selectedTemplate,
-                    effectiveDate: e.value,
-                  })
-                }
-                showIcon
-                dateFormat="yy-mm-dd"
-                placeholder={t("productTemplateManager.selectEffectiveDate")}
-              />
-            </div>
-            <div className="field">
-              <label>Status</label>
-              <Dropdown
-                value={selectedTemplate?.status || null}
-                options={statusOptions}
-                placeholder={t("productTemplateManager.selectStatus")}
-                onChange={(e) =>
-                  setSelectedTemplate((prev) => ({
-                    ...prev,
-                    status: e.value,
-                  }))
-                }
-                disabled={!!id && templateLoading}
-              />
-            </div> */}
           </>
         ) : (
           <div>
@@ -374,7 +466,7 @@ export const ProductTemplateManager = () => {
       >
         <div className="p-fluid">
           <div className="field">
-            <label>{t("productTemplateManager.templateCode")}</label>
+            <label>{t("productTemplateManager.templateCode")} *</label>
             <InputText
               value={selectedTemplate?.templateCode || ""}
               onChange={(e) =>
@@ -384,9 +476,10 @@ export const ProductTemplateManager = () => {
                 })
               }
             />
+            <FieldError error={templateErrors.templateCode} />
           </div>
           <div className="field">
-            <label>{t("productTemplateManager.productName")}</label>
+            <label>{t("productTemplateManager.productName")} *</label>
             <InputText
               value={selectedTemplate?.name || ""}
               onChange={(e) =>
@@ -396,6 +489,7 @@ export const ProductTemplateManager = () => {
                 })
               }
             />
+            <FieldError error={templateErrors.name} />
           </div>
           <div className="field">
             <label>{t("productTemplateManager.description")}</label>
@@ -412,7 +506,7 @@ export const ProductTemplateManager = () => {
           </div>
           <div className="formgrid grid">
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.category")}</label>
+              <label>{t("productTemplateManager.category")} *</label>
               <Dropdown
                 value={selectedTemplate?.category || null}
                 options={categoryOptions}
@@ -425,22 +519,45 @@ export const ProductTemplateManager = () => {
                 }
                 showClear
               />
+              <FieldError error={templateErrors.category} />
             </div>
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.lineOfBusiness")}</label>
-              <InputText
-                value={selectedTemplate?.lineOfBusiness || ""}
-                onChange={(e) =>
+              <label>{t("productTemplateManager.product")}</label>
+              <Dropdown
+                value={selectedTemplate?.productId ?? null}
+                options={productOptions}
+                filter
+                showClear
+                placeholder={t("productTemplateManager.selectProduct")}
+                onChange={(e) => {
+                  const product = productRows.find((p) => p.id === e.value);
+                  const lob = product && lobOptions.find((o) => o.value === String(product.lineofBusiness || "").toUpperCase());
                   setSelectedTemplate({
                     ...selectedTemplate,
-                    lineOfBusiness: e.target.value,
-                  })
-                }
-                placeholder={t("productTemplateManager.lineOfBusinessPlaceholder")}
+                    productId: e.value ?? null,
+                    ...(lob ? { lineOfBusiness: lob.value } : {}),
+                  });
+                }}
               />
             </div>
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.effectiveDate")}</label>
+              <label>{t("productTemplateManager.lineOfBusiness")} *</label>
+              <Dropdown
+                value={selectedTemplate?.lineOfBusiness || null}
+                options={lobOptions}
+                filter
+                placeholder={t("productTemplateManager.selectLineOfBusiness")}
+                onChange={(e) =>
+                  setSelectedTemplate({
+                    ...selectedTemplate,
+                    lineOfBusiness: e.value,
+                  })
+                }
+              />
+              <FieldError error={templateErrors.lineOfBusiness} />
+            </div>
+            <div className="field col-12 md:col-6">
+              <label>{t("productTemplateManager.effectiveDate")} *</label>
               <Calendar
                 value={
                   selectedTemplate?.effectiveDate
@@ -454,12 +571,13 @@ export const ProductTemplateManager = () => {
                   })
                 }
                 showIcon
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 placeholder={t("productTemplateManager.selectEffectiveDate")}
               />
+              <FieldError error={templateErrors.effectiveDate} />
             </div>
             <div className="field col-12 md:col-6">
-              <label>{t("productTemplateManager.status")}</label>
+              <label>{t("productTemplateManager.status")} *</label>
               <Dropdown
                 value={selectedTemplate?.status || "Active"}
                 options={statusOptions}
@@ -470,6 +588,7 @@ export const ProductTemplateManager = () => {
                   })
                 }
               />
+              <FieldError error={templateErrors.status} />
             </div>
           </div>
           <Button
@@ -488,56 +607,65 @@ export const ProductTemplateManager = () => {
 export const CoverageBuilder = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode } = useFormatCurrency();
-  const [coverages, setCoverages] = useState([]);
   const [selectedCoverage, setSelectedCoverage] = useState(null);
+  const [coverageErrors, setCoverageErrors] = useState({});
   const [showDialog, setShowDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: coverages, loading, load: loadCoverages } = useComponentList(
+    "coverages",
+    toast,
+    t("coverageBuilder.error"),
+    t("coverageBuilder.failedToLoad")
+  );
+  const messages = {
+    success: t("coverageBuilder.success"),
+    successDetail: t("coverageBuilder.saved"),
+    error: t("coverageBuilder.error"),
+    errorDetail: t("coverageBuilder.failedToSave"),
+  };
 
   const typeOptions = [
     { label: t("coverageBuilder.mandatory"), value: "Mandatory" },
     { label: t("coverageBuilder.optional"), value: "Optional" },
   ];
 
-  useEffect(() => {
-    loadCoverages();
-  }, []);
-
-  const loadCoverages = async () => {
-    setLoading(true);
-    try {
-      const data =
-        await productConfiguratorMockService.getCoverageConfigurations();
-      setCoverages(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("coverageBuilder.error"),
-        detail: t("coverageBuilder.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
+  const openCoverage = (coverage) => {
+    setSelectedCoverage(coverage);
+    setShowDialog(true);
   };
+
+  useEffect(() => {
+    if (showDialog) setCoverageErrors({});
+  }, [showDialog]);
 
   const saveCoverage = async () => {
-    try {
-      await productConfiguratorMockService.createCoverage(selectedCoverage);
-      toast.current?.show({
-        severity: "success",
-        summary: t("coverageBuilder.success"),
-        detail: t("coverageBuilder.saved"),
-      });
+    const errors = requiredErrors(selectedCoverage, [["coverageCode", t("coverageBuilder.coverageCode")], ["coverageName", t("coverageBuilder.coverageName")], ["type", t("coverageBuilder.type")]]);
+    setCoverageErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors) });
+      return;
+    }
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("coverages", selectedCoverage),
+      toast,
+      messages
+    );
+    if (saved) {
       setShowDialog(false);
       loadCoverages();
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("coverageBuilder.error"),
-        detail: t("coverageBuilder.failedToSave"),
-      });
     }
   };
+
+  const deleteCoverage = (coverage) =>
+    confirmDelete(t, coverage.coverageName, async () => {
+      const deleted = await persist(
+        () => productConfiguratorService.deleteComponent("coverages", coverage.id),
+        toast,
+        messages
+      );
+      if (deleted) loadCoverages();
+    });
 
   const typeBodyTemplate = (rowData) => {
     const severity = rowData.type === "Mandatory" ? "danger" : "info";
@@ -548,21 +676,20 @@ export const CoverageBuilder = () => {
   return (
     <div className="coverage-builder p-3">
       <Toast ref={toast} />
+      <ConfirmDialog />
       <Card title={t("coverageBuilder.cardTitle")}>
         <div className="mb-3 flex justify-content-between">
           <h3>{t("coverageBuilder.pageTitle")}</h3>
           <Button
             label={t("coverageBuilder.addCoverage")}
             icon="pi pi-plus"
-            onClick={() => {
-              setSelectedCoverage({ limits: [], exclusions: [] });
-              setShowDialog(true);
-            }}
+            onClick={() => openCoverage({ limits: [], exclusions: [] })}
           />
         </div>
 
-        <DataTable value={coverages} loading={loading} paginator rows={10}>
+        <DataTable value={coverages} loading={loading} paginator rows={20}>
           <Column field="coverageCode" header={t("coverageBuilder.code")} sortable />
+          <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
           <Column field="coverageName" header={t("coverageBuilder.coverageName")} sortable />
           <Column header={t("coverageBuilder.type")} body={typeBodyTemplate} sortable />
           <Column
@@ -576,12 +703,20 @@ export const CoverageBuilder = () => {
             header={t("coverageBuilder.actions")}
             body={(rowData) => (
               <div className="flex gap-2">
-                <Button icon="pi pi-pencil" className="p-button-text" />
-                <Button icon="pi pi-copy" className="p-button-text" />
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-text"
+                  onClick={() => openCoverage(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
+                <Button
+                  icon="pi pi-copy"
+                  className="p-button-text"
+                  onClick={() =>
+                    openCoverage({ ...rowData, id: undefined, coverageCode: `${rowData.coverageCode}-COPY` })
+                  } aria-label="Copy" tooltip="Copy" tooltipOptions={{ position: "top" }} />
                 <Button
                   icon="pi pi-trash"
                   className="p-button-text p-button-danger"
-                />
+                  onClick={() => deleteCoverage(rowData)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
               </div>
             )}
           />
@@ -595,10 +730,17 @@ export const CoverageBuilder = () => {
         onHide={() => setShowDialog(false)}
       >
         <div className="p-fluid">
+          {!selectedCoverage?.id && (
+            <ProductField
+              value={selectedCoverage?.productId}
+              options={productOptions}
+              onChange={(productId) => setSelectedCoverage({ ...selectedCoverage, productId })}
+            />
+          )}
           <div className="grid">
             <div className="col-6">
               <div className="field">
-                <label>{t("coverageBuilder.coverageCode")}</label>
+                <label>{t("coverageBuilder.coverageCode")} *</label>
                 <InputText
                   value={selectedCoverage?.coverageCode}
                   onChange={(e) =>
@@ -608,9 +750,10 @@ export const CoverageBuilder = () => {
                     })
                   }
                 />
+                <FieldError error={coverageErrors.coverageCode} />
               </div>
               <div className="field">
-                <label>{t("coverageBuilder.coverageName")}</label>
+                <label>{t("coverageBuilder.coverageName")} *</label>
                 <InputText
                   value={selectedCoverage?.coverageName}
                   onChange={(e) =>
@@ -620,9 +763,10 @@ export const CoverageBuilder = () => {
                     })
                   }
                 />
+                <FieldError error={coverageErrors.coverageName} />
               </div>
               <div className="field">
-                <label>{t("coverageBuilder.type")}</label>
+                <label>{t("coverageBuilder.type")} *</label>
                 <Dropdown
                   value={selectedCoverage?.type}
                   options={typeOptions}
@@ -632,6 +776,7 @@ export const CoverageBuilder = () => {
                     setSelectedCoverage({ ...selectedCoverage, type: e.value })
                   }
                 />
+                <FieldError error={coverageErrors.type} />
               </div>
             </div>
             <div className="col-6">
@@ -714,11 +859,18 @@ export const CoverageBuilder = () => {
 // PC-4: Rating Engine
 export const RatingEngine = () => {
   const { t } = useTranslation();
-  const [ratingFactors, setRatingFactors] = useState([]);
   const [selectedFactor, setSelectedFactor] = useState(null);
+  const [factorErrors, setFactorErrors] = useState({});
   const [showDialog, setShowDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [expandedRows, setExpandedRows] = useState(null);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: ratingFactors, loading, load: loadRatingFactors } = useComponentList(
+    "rating-factors",
+    toast,
+    t("ratingEngine.error"),
+    t("ratingEngine.failedToLoad")
+  );
 
   const typeOptions = [
     { label: t("ratingEngine.multiplicative"), value: "Multiplicative" },
@@ -726,42 +878,35 @@ export const RatingEngine = () => {
     { label: t("ratingEngine.discount"), value: "Discount" },
   ];
 
-  useEffect(() => {
-    loadRatingFactors();
-  }, []);
-
-  const loadRatingFactors = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getRatingFactors();
-      setRatingFactors(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("ratingEngine.error"),
-        detail: t("ratingEngine.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
+  const openFactor = (factor) => {
+    setSelectedFactor(factor);
+    setShowDialog(true);
   };
 
+  useEffect(() => {
+    if (showDialog) setFactorErrors({});
+  }, [showDialog]);
+
   const saveFactor = async () => {
-    try {
-      await productConfiguratorMockService.createRatingFactor(selectedFactor);
-      toast.current?.show({
-        severity: "success",
-        summary: t("ratingEngine.success"),
-        detail: t("ratingEngine.saved"),
-      });
+    const errors = requiredErrors(selectedFactor, [["factorCode", t("ratingEngine.factorCode")], ["factorName", t("ratingEngine.factorName")], ["type", t("ratingEngine.type")]]);
+    setFactorErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors) });
+      return;
+    }
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("rating-factors", selectedFactor),
+      toast,
+      {
+        success: t("ratingEngine.success"),
+        successDetail: t("ratingEngine.saved"),
+        error: t("ratingEngine.error"),
+        errorDetail: t("ratingEngine.failedToSave"),
+      }
+    );
+    if (saved) {
       setShowDialog(false);
       loadRatingFactors();
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("ratingEngine.error"),
-        detail: t("ratingEngine.failedToSave"),
-      });
     }
   };
 
@@ -793,10 +938,7 @@ export const RatingEngine = () => {
             <Button
               label={t("ratingEngine.addFactor")}
               icon="pi pi-plus"
-              onClick={() => {
-                setSelectedFactor({ rules: [] });
-                setShowDialog(true);
-              }}
+              onClick={() => openFactor({ rules: [] })}
             />
           </div>
         </div>
@@ -805,12 +947,15 @@ export const RatingEngine = () => {
           value={ratingFactors}
           loading={loading}
           paginator
-          rows={10}
-          expandedRows={[]}
+          rows={20}
+          dataKey="id"
+          expandedRows={expandedRows}
+          onRowToggle={(e) => setExpandedRows(e.data)}
           rowExpansionTemplate={expandedRowTemplate}
         >
           <Column expander style={{ width: "3em" }} />
           <Column field="factorCode" header={t("ratingEngine.factorCode")} sortable />
+          <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
           <Column field="factorName" header={t("ratingEngine.factorName")} sortable />
           <Column
             field="type"
@@ -837,8 +982,16 @@ export const RatingEngine = () => {
             header={t("ratingEngine.actions")}
             body={(rowData) => (
               <div className="flex gap-2">
-                <Button icon="pi pi-pencil" className="p-button-text" />
-                <Button icon="pi pi-copy" className="p-button-text" />
+                <Button
+                  icon="pi pi-pencil"
+                  className="p-button-text"
+                  onClick={() => openFactor(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
+                <Button
+                  icon="pi pi-copy"
+                  className="p-button-text"
+                  onClick={() =>
+                    openFactor({ ...rowData, id: undefined, factorCode: `${rowData.factorCode}-COPY` })
+                  } aria-label="Copy" tooltip="Copy" tooltipOptions={{ position: "top" }} />
               </div>
             )}
           />
@@ -852,8 +1005,15 @@ export const RatingEngine = () => {
         onHide={() => setShowDialog(false)}
       >
         <div className="p-fluid">
+          {!selectedFactor?.id && (
+            <ProductField
+              value={selectedFactor?.productId}
+              options={productOptions}
+              onChange={(productId) => setSelectedFactor({ ...selectedFactor, productId })}
+            />
+          )}
           <div className="field">
-            <label>{t("ratingEngine.factorCode")}</label>
+            <label>{t("ratingEngine.factorCode")} *</label>
             <InputText
               value={selectedFactor?.factorCode}
               onChange={(e) =>
@@ -863,9 +1023,10 @@ export const RatingEngine = () => {
                 })
               }
             />
+            <FieldError error={factorErrors.factorCode} />
           </div>
           <div className="field">
-            <label>{t("ratingEngine.factorName")}</label>
+            <label>{t("ratingEngine.factorName")} *</label>
             <InputText
               value={selectedFactor?.factorName}
               onChange={(e) =>
@@ -875,9 +1036,10 @@ export const RatingEngine = () => {
                 })
               }
             />
+            <FieldError error={factorErrors.factorName} />
           </div>
           <div className="field">
-            <label>{t("ratingEngine.type")}</label>
+            <label>{t("ratingEngine.type")} *</label>
             <Dropdown
               value={selectedFactor?.type}
               options={typeOptions}
@@ -887,6 +1049,7 @@ export const RatingEngine = () => {
                 setSelectedFactor({ ...selectedFactor, type: e.value })
               }
             />
+            <FieldError error={factorErrors.type} />
           </div>
           <Button label={t("ratingEngine.saveFactor")} icon="pi pi-check" onClick={saveFactor} />
         </div>
@@ -898,11 +1061,17 @@ export const RatingEngine = () => {
 // PC-5: Underwriting Rules
 export const UnderwritingRules = () => {
   const { t } = useTranslation();
-  const [rules, setRules] = useState([]);
   const [selectedRule, setSelectedRule] = useState(null);
+  const [ruleErrors, setRuleErrors] = useState({});
   const [showDialog, setShowDialog] = useState(false);
-  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: rules, loading, load: loadRules } = useComponentList(
+    "underwriting-rules",
+    toast,
+    t("underwritingRules.error"),
+    t("underwritingRules.failedToLoad")
+  );
 
   const typeOptions = [
     { label: t("underwritingRules.acceptance"), value: "Acceptance" },
@@ -917,41 +1086,29 @@ export const UnderwritingRules = () => {
   ];
 
   useEffect(() => {
-    loadRules();
-  }, []);
-
-  const loadRules = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getUnderwritingRules();
-      setRules(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("underwritingRules.error"),
-        detail: t("underwritingRules.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    if (showDialog) setRuleErrors({});
+  }, [showDialog]);
 
   const saveRule = async () => {
-    try {
-      await productConfiguratorMockService.createUnderwritingRule(selectedRule);
-      toast.current?.show({
-        severity: "success",
-        summary: t("underwritingRules.success"),
-        detail: t("underwritingRules.saved"),
-      });
+    const errors = requiredErrors(selectedRule, [["ruleCode", t("underwritingRules.ruleCode")], ["ruleName", t("underwritingRules.ruleName")], ["type", t("underwritingRules.type")], ["condition", t("ratingEngine.condition")], ["action", t("underwritingRules.action")]]);
+    setRuleErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors) });
+      return;
+    }
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("underwriting-rules", selectedRule),
+      toast,
+      {
+        success: t("underwritingRules.success"),
+        successDetail: t("underwritingRules.saved"),
+        error: t("underwritingRules.error"),
+        errorDetail: t("underwritingRules.failedToSave"),
+      }
+    );
+    if (saved) {
       setShowDialog(false);
       loadRules();
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("underwritingRules.error"),
-        detail: t("underwritingRules.failedToSave"),
-      });
     }
   };
 
@@ -991,8 +1148,13 @@ export const UnderwritingRules = () => {
             <DataTable
               value={rules.filter((r) => r.type === "Acceptance")}
               loading={loading}
+              onRowClick={(e) => {
+                setSelectedRule(e.data);
+                setShowDialog(true);
+              }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
+              <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
               <Column field="condition" header={t("ratingEngine.condition")} />
               <Column header={t("underwritingRules.action")} body={actionBodyTemplate} />
@@ -1019,8 +1181,13 @@ export const UnderwritingRules = () => {
             <DataTable
               value={rules.filter((r) => r.type === "Validation")}
               loading={loading}
+              onRowClick={(e) => {
+                setSelectedRule(e.data);
+                setShowDialog(true);
+              }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
+              <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
               <Column field="condition" header={t("ratingEngine.condition")} />
               <Column header={t("underwritingRules.action")} body={actionBodyTemplate} />
@@ -1035,8 +1202,13 @@ export const UnderwritingRules = () => {
             <DataTable
               value={rules.filter((r) => r.type === "Loading")}
               loading={loading}
+              onRowClick={(e) => {
+                setSelectedRule(e.data);
+                setShowDialog(true);
+              }}
             >
               <Column field="ruleCode" header={t("underwritingRules.ruleCode")} sortable />
+              <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
               <Column field="ruleName" header={t("underwritingRules.ruleName")} sortable />
               <Column field="condition" header={t("ratingEngine.condition")} />
               <Column field="message" header={t("underwritingRules.loadingDescription")} />
@@ -1053,26 +1225,35 @@ export const UnderwritingRules = () => {
         onHide={() => setShowDialog(false)}
       >
         <div className="p-fluid">
+          {!selectedRule?.id && (
+            <ProductField
+              value={selectedRule?.productId}
+              options={productOptions}
+              onChange={(productId) => setSelectedRule({ ...selectedRule, productId })}
+            />
+          )}
           <div className="field">
-            <label>{t("underwritingRules.ruleCode")}</label>
+            <label>{t("underwritingRules.ruleCode")} *</label>
             <InputText
               value={selectedRule?.ruleCode}
               onChange={(e) =>
                 setSelectedRule({ ...selectedRule, ruleCode: e.target.value })
               }
             />
+            <FieldError error={ruleErrors.ruleCode} />
           </div>
           <div className="field">
-            <label>{t("underwritingRules.ruleName")}</label>
+            <label>{t("underwritingRules.ruleName")} *</label>
             <InputText
               value={selectedRule?.ruleName}
               onChange={(e) =>
                 setSelectedRule({ ...selectedRule, ruleName: e.target.value })
               }
             />
+            <FieldError error={ruleErrors.ruleName} />
           </div>
           <div className="field">
-            <label>{t("underwritingRules.type")}</label>
+            <label>{t("underwritingRules.type")} *</label>
             <Dropdown
               value={selectedRule?.type}
               options={typeOptions}
@@ -1082,9 +1263,10 @@ export const UnderwritingRules = () => {
                 setSelectedRule({ ...selectedRule, type: e.value })
               }
             />
+            <FieldError error={ruleErrors.type} />
           </div>
           <div className="field">
-            <label>{t("ratingEngine.condition")}</label>
+            <label>{t("ratingEngine.condition")} *</label>
             <InputTextarea
               value={selectedRule?.condition}
               rows={3}
@@ -1092,9 +1274,10 @@ export const UnderwritingRules = () => {
                 setSelectedRule({ ...selectedRule, condition: e.target.value })
               }
             />
+            <FieldError error={ruleErrors.condition} />
           </div>
           <div className="field">
-            <label>{t("underwritingRules.action")}</label>
+            <label>{t("underwritingRules.action")} *</label>
             <Dropdown
               value={selectedRule?.action}
               options={actionOptions}
@@ -1104,6 +1287,7 @@ export const UnderwritingRules = () => {
                 setSelectedRule({ ...selectedRule, action: e.value })
               }
             />
+            <FieldError error={ruleErrors.action} />
           </div>
           <Button label={t("underwritingRules.saveRule")} icon="pi pi-check" onClick={saveRule} />
         </div>
@@ -1112,156 +1296,47 @@ export const UnderwritingRules = () => {
   );
 };
 
-// PC-6: Approval Workflows
-export const ApprovalWorkflows = () => {
-  const { t } = useTranslation();
-  const [workflows, setWorkflows] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const toast = useRef(null);
-
-  useEffect(() => {
-    loadWorkflows();
-  }, []);
-
-  const loadWorkflows = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getApprovalWorkflows();
-      setWorkflows(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("approvalWorkflows.error"),
-        detail: t("approvalWorkflows.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const workflowTemplate = (workflow) => {
-    const events = workflow.stages.map((stage) => ({
-      status: stage.role,
-      date: `SLA: ${stage.sla}`,
-      icon: "pi pi-user",
-      color: "#9C27B0",
-    }));
-
-    return (
-      <Timeline
-        value={events}
-        align="left"
-        className="customized-timeline"
-        marker={(item) => (
-          <span
-            className="flex align-items-center justify-content-center"
-            style={{
-              backgroundColor: item.color,
-              color: "white",
-              borderRadius: "50%",
-              width: "2rem",
-              height: "2rem",
-            }}
-          >
-            <i className={item.icon}></i>
-          </span>
-        )}
-        content={(item) => (
-          <Card>
-            <h5>{item.status}</h5>
-            <p>{item.date}</p>
-          </Card>
-        )}
-      />
-    );
-  };
-
-  return (
-    <div className="approval-workflows p-3">
-      <Toast ref={toast} />
-      <Card title={t("approvalWorkflows.cardTitle")}>
-        <div className="mb-3 flex justify-content-between">
-          <h3>{t("approvalWorkflows.pageTitle")}</h3>
-          <Button label={t("approvalWorkflows.createWorkflow")} icon="pi pi-plus" />
-        </div>
-
-        {workflows.map((workflow) => (
-          <Panel
-            key={workflow.id}
-            header={workflow.workflowName}
-            toggleable
-            className="mb-3"
-          >
-            <div className="grid">
-              <div className="col-8">{workflowTemplate(workflow)}</div>
-              <div className="col-4">
-                <Card title={t("approvalWorkflows.workflowDetails")}>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.code")}:</label>
-                    <p>{workflow.workflowCode}</p>
-                  </div>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.type")}:</label>
-                    <p>
-                      <Tag value={workflow.type} />
-                    </p>
-                  </div>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.status")}:</label>
-                    <p>
-                      <Tag value={workflow.status} severity="success" />
-                    </p>
-                  </div>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.triggers")}:</label>
-                    {workflow.triggers.map((trigger) => (
-                      <Tag
-                        key={trigger}
-                        value={trigger}
-                        className="mr-2 mb-2"
-                      />
-                    ))}
-                  </div>
-                </Card>
-              </div>
-            </div>
-          </Panel>
-        ))}
-      </Card>
-    </div>
-  );
-};
-
 // PC-7: Market Mapping
 export const MarketMapping = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const [mappings, setMappings] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [selectedMapping, setSelectedMapping] = useState(null);
+  const [insurerOptions, setInsurerOptions] = useState([]);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: mappings, loading, load: loadMappings } = useComponentList(
+    "market-mappings",
+    toast,
+    t("marketMapping.error"),
+    t("marketMapping.failedToLoad")
+  );
 
   useEffect(() => {
-    loadMappings();
+    mastersService
+      .options("insurance-company")
+      .then((options) => setInsurerOptions(options.map((o) => ({ label: o.label, value: o.label }))))
+      .catch(() => setInsurerOptions([]));
   }, []);
 
-  const loadMappings = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getMarketMapping();
-      setMappings(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("marketMapping.error"),
-        detail: t("marketMapping.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
+  const saveMapping = async () => {
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("market-mappings", selectedMapping),
+      toast,
+      {
+        success: t("common.success"),
+        successDetail: selectedMapping.insurerName,
+        error: t("marketMapping.error"),
+        errorDetail: t("marketMapping.failedToSave", "Failed to save mapping"),
+      }
+    );
+    if (saved) {
+      setSelectedMapping(null);
+      loadMappings();
     }
   };
 
   const progressBodyTemplate = (rowData) => {
-    const percentage = (rowData.ytdPremium / rowData.targetPremium) * 100;
+    const percentage = rowData.targetPremium ? (rowData.ytdPremium / rowData.targetPremium) * 100 : 0;
     return (
       <div>
         <ProgressBar
@@ -1274,36 +1349,57 @@ export const MarketMapping = () => {
     );
   };
 
+  const numberField = (field, label, props = {}) => (
+    <div className="field col-12 md:col-6">
+      <label>{label}</label>
+      <InputNumber
+        value={selectedMapping?.[field]}
+        onValueChange={(e) => setSelectedMapping({ ...selectedMapping, [field]: e.value })}
+        {...props}
+      />
+    </div>
+  );
+
   return (
     <div className="market-mapping p-3">
       <Toast ref={toast} />
       <Card title={t("marketMapping.cardTitle")}>
         <div className="mb-3 flex justify-content-between">
           <h3>{t("marketMapping.pageTitle")}</h3>
-          <Button label={t("marketMapping.mapProduct")} icon="pi pi-plus" />
+          <Button
+            label={t("marketMapping.mapProduct")}
+            icon="pi pi-plus"
+            onClick={() => setSelectedMapping({ status: "Active" })}
+          />
         </div>
 
-        <DataTable value={mappings} loading={loading} paginator rows={10}>
-          <Column field="productId" header={t("marketMapping.product")} />
+        <DataTable
+          value={mappings}
+          loading={loading}
+          paginator
+          rows={20}
+          onRowClick={(e) => setSelectedMapping(e.data)}
+        >
+          <Column field="templateCode" header={t("marketMapping.product")} />
           <Column field="insurerName" header={t("marketMapping.insurer")} sortable />
           <Column field="productCode" header={t("marketMapping.insurerCode")} />
           <Column
             field="commissionRate"
             header={t("marketMapping.commissionPercent")}
             sortable
-            body={(rowData) => `${rowData.commissionRate}%`}
+            body={(rowData) => `${rowData.commissionRate ?? 0}%`}
           />
           <Column
             field="overrideRate"
             header={t("marketMapping.overridePercent")}
             sortable
-            body={(rowData) => `${rowData.overrideRate}%`}
+            body={(rowData) => `${rowData.overrideRate ?? 0}%`}
           />
           <Column
             field="targetPremium"
             header={t("marketMapping.target")}
             sortable
-            body={(rowData) => formatCurrency(rowData.targetPremium)}
+            body={(rowData) => formatCurrency(rowData.targetPremium ?? 0)}
           />
           <Column header={t("marketMapping.ytdPerformance")} body={progressBodyTemplate} />
           <Column
@@ -1315,6 +1411,53 @@ export const MarketMapping = () => {
           />
         </DataTable>
       </Card>
+
+      <Dialog
+        header={t("marketMapping.mapProduct")}
+        visible={!!selectedMapping}
+        style={{ width: "50vw" }}
+        onHide={() => setSelectedMapping(null)}
+      >
+        {selectedMapping && (
+          <div className="p-fluid">
+            {!selectedMapping.id && (
+              <ProductField
+                value={selectedMapping.productId}
+                options={productOptions}
+                onChange={(productId) => setSelectedMapping({ ...selectedMapping, productId })}
+              />
+            )}
+            <div className="field">
+              <label>{t("marketMapping.insurer")}</label>
+              <Dropdown
+                value={selectedMapping.insurerName}
+                options={insurerOptions}
+                filter
+                onChange={(e) => setSelectedMapping({ ...selectedMapping, insurerName: e.value })}
+              />
+            </div>
+            <div className="field">
+              <label>{t("marketMapping.insurerCode")}</label>
+              <InputText
+                value={selectedMapping.productCode || ""}
+                onChange={(e) => setSelectedMapping({ ...selectedMapping, productCode: e.target.value })}
+              />
+            </div>
+            <div className="formgrid grid">
+              {numberField("commissionRate", t("marketMapping.commissionPercent"), { suffix: "%", maxFractionDigits: 2 })}
+              {numberField("overrideRate", t("marketMapping.overridePercent"), { suffix: "%", maxFractionDigits: 2 })}
+              {numberField("targetPremium", t("marketMapping.target"), { maxFractionDigits: 2 })}
+              {numberField("ytdPremium", t("marketMapping.ytdPerformance"), { maxFractionDigits: 2 })}
+            </div>
+            <Button
+              label={t("common.save")}
+              icon="pi pi-check"
+              onClick={saveMapping}
+              disabled={!selectedMapping.insurerName || !selectedMapping.productCode}
+            />
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };
@@ -1322,27 +1465,59 @@ export const MarketMapping = () => {
 // PC-8: Document Manager
 export const DocumentManager = () => {
   const { t } = useTranslation();
-  const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [uploading, setUploading] = useState(false);
   const toast = useRef(null);
+  const productOptions = useProductOptions();
+  const { rows: documents, loading, load: loadDocuments } = useComponentList(
+    "documents",
+    toast,
+    t("documentManager.error"),
+    t("documentManager.failedToLoad")
+  );
 
-  useEffect(() => {
-    loadDocuments();
-  }, []);
+  const formatOptions = ["PDF", "Excel", "Word"];
 
-  const loadDocuments = async () => {
-    setLoading(true);
+  const uploadTemplateFile = async (file) => {
+    if (!file) return;
+    setUploading(true);
     try {
-      const data = await productConfiguratorMockService.getDocumentTemplates();
-      setDocuments(data);
+      const result = await s3Service.uploadFile(file, "product-documents");
+      if (!result?.url) throw new Error(result?.error || t("documentManager.uploadFailed", "Upload failed"));
+      setSelectedDocument((prev) => ({ ...prev, template: result.url }));
     } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("documentManager.error"),
-        detail: t("documentManager.failedToLoad"),
-      });
+      toast.current?.show({ severity: "error", summary: t("documentManager.error"), detail: error.message });
     } finally {
-      setLoading(false);
+      setUploading(false);
+    }
+  };
+
+  const saveDocument = async () => {
+    const saved = await persist(
+      () => productConfiguratorService.saveComponent("documents", selectedDocument),
+      toast,
+      {
+        success: t("common.success"),
+        successDetail: selectedDocument.documentName,
+        error: t("documentManager.error"),
+        errorDetail: t("documentManager.failedToSave", "Failed to save document"),
+      }
+    );
+    if (saved) {
+      setSelectedDocument(null);
+      loadDocuments();
+    }
+  };
+
+  const openTemplate = (rowData) => {
+    if (/^https?:\/\//.test(rowData.template || "")) {
+      window.open(rowData.template, "_blank", "noopener");
+    } else {
+      toast.current?.show({
+        severity: "info",
+        summary: rowData.documentName,
+        detail: t("documentManager.noFile", "No template file uploaded"),
+      });
     }
   };
 
@@ -1362,12 +1537,17 @@ export const DocumentManager = () => {
       <Card title={t("documentManager.cardTitle")}>
         <div className="mb-3 flex justify-content-between">
           <h3>{t("documentManager.pageTitle")}</h3>
-          <Button label={t("documentManager.uploadTemplate")} icon="pi pi-upload" />
+          <Button
+            label={t("documentManager.uploadTemplate")}
+            icon="pi pi-upload"
+            onClick={() => setSelectedDocument({ format: "PDF", mandatory: false, variables: [] })}
+          />
         </div>
 
-        <DataTable value={documents} loading={loading} paginator rows={10}>
+        <DataTable value={documents} loading={loading} paginator rows={20}>
           <Column header={t("documentManager.format")} body={formatBodyTemplate} />
           <Column field="documentCode" header={t("documentManager.documentCode")} sortable />
+          <Column field="templateCode" header={t("productConfigurator.template", "Template")} sortable body={templateCell} />
           <Column field="documentName" header={t("documentManager.documentName")} sortable />
           <Column field="type" header={t("documentManager.type")} sortable />
           <Column field="stage" header={t("documentManager.stage")} sortable />
@@ -1390,22 +1570,102 @@ export const DocumentManager = () => {
                   icon="pi pi-download"
                   className="p-button-text"
                   tooltip={t("documentManager.download")}
+                  onClick={() => openTemplate(rowData)} aria-label={t("documentManager.download")}
                 />
                 <Button
                   icon="pi pi-pencil"
                   className="p-button-text"
                   tooltip={t("documentManager.edit")}
+                  onClick={() => setSelectedDocument(rowData)} aria-label={t("documentManager.edit")}
                 />
                 <Button
                   icon="pi pi-eye"
                   className="p-button-text"
                   tooltip={t("documentManager.preview")}
+                  onClick={() => openTemplate(rowData)} aria-label={t("documentManager.preview")}
                 />
               </div>
             )}
           />
         </DataTable>
       </Card>
+
+      <Dialog
+        header={t("documentManager.uploadTemplate")}
+        visible={!!selectedDocument}
+        style={{ width: "50vw" }}
+        onHide={() => setSelectedDocument(null)}
+      >
+        {selectedDocument && (
+          <div className="p-fluid">
+            {!selectedDocument.id && (
+              <ProductField
+                value={selectedDocument.productId}
+                options={productOptions}
+                onChange={(productId) => setSelectedDocument({ ...selectedDocument, productId })}
+              />
+            )}
+            <div className="formgrid grid">
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.documentCode")}</label>
+                <InputText
+                  value={selectedDocument.documentCode || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, documentCode: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.documentName")}</label>
+                <InputText
+                  value={selectedDocument.documentName || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, documentName: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.type")}</label>
+                <InputText
+                  value={selectedDocument.type || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, type: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.stage")}</label>
+                <InputText
+                  value={selectedDocument.stage || ""}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, stage: e.target.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6">
+                <label>{t("documentManager.format")}</label>
+                <Dropdown
+                  value={selectedDocument.format}
+                  options={formatOptions}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, format: e.value })}
+                />
+              </div>
+              <div className="field col-12 md:col-6 flex align-items-center gap-2">
+                <Checkbox
+                  inputId="documentMandatory"
+                  checked={!!selectedDocument.mandatory}
+                  onChange={(e) => setSelectedDocument({ ...selectedDocument, mandatory: e.checked })}
+                />
+                <label htmlFor="documentMandatory">{t("documentManager.required")}</label>
+              </div>
+            </div>
+            <div className="field">
+              <label>{t("documentManager.uploadTemplate")}</label>
+              <input type="file" onChange={(e) => uploadTemplateFile(e.target.files?.[0])} />
+              {selectedDocument.template && <small className="block mt-1">{selectedDocument.template}</small>}
+            </div>
+            <Button
+              label={t("common.save")}
+              icon="pi pi-check"
+              loading={uploading}
+              onClick={saveDocument}
+              disabled={!selectedDocument.documentCode || !selectedDocument.documentName || !selectedDocument.type}
+            />
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };
@@ -1415,28 +1675,20 @@ export const ProductAnalytics = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [analytics, setAnalytics] = useState(null);
-  const [loading, setLoading] = useState(false);
   const toast = useRef(null);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
-
-  const loadAnalytics = async () => {
-    setLoading(true);
-    try {
-      const data = await productConfiguratorMockService.getProductAnalytics();
-      setAnalytics(data);
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("productAnalytics.error"),
-        detail: t("productAnalytics.failedToLoad"),
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    productConfiguratorService
+      .getProductAnalytics()
+      .then(setAnalytics)
+      .catch((error) =>
+        toast.current?.show({
+          severity: "error",
+          summary: t("productAnalytics.error"),
+          detail: error?.message || t("productAnalytics.failedToLoad"),
+        })
+      );
+  }, [t]);
 
   const performanceChart = {
     labels: analytics?.performanceTrend?.map((tr) => tr.month) || [],
@@ -1494,7 +1746,7 @@ export const ProductAnalytics = () => {
               field="totalPolicies"
               header={t("productAnalytics.policies")}
               sortable
-              body={(rowData) => rowData.totalPolicies.toLocaleString()}
+              body={(rowData) => rowData.totalPolicies.toLocaleString(numberLocale())}
             />
             <Column
               field="totalPremium"
@@ -1524,7 +1776,10 @@ export const ProductAnalytics = () => {
               header={t("productAnalytics.profitMargin")}
               sortable
               body={(rowData) => (
-                <Tag value={`${rowData.profitMargin}%`} severity="success" />
+                <Tag
+                  value={`${rowData.profitMargin}%`}
+                  severity={rowData.profitMargin >= 0 ? "success" : "danger"}
+                />
               )}
             />
           </DataTable>

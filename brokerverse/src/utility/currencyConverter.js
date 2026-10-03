@@ -11,7 +11,7 @@ let activeLocale =
 export const setDisplayCurrency = (code) => {
   const next = (code || DEFAULT_SYSTEM_SETTINGS.displayCurrency).toUpperCase();
   activeCurrency = next;
-  activeLocale = CURRENCY_LOCALE_MAP[next] || "en-US";
+  activeLocale = CURRENCY_LOCALE_MAP[next] || "en-PH";
 };
 
 /**
@@ -73,3 +73,33 @@ export const formatCurrency = (amount, options = {}) => {
 
 /** @deprecated Use formatCurrency instead. Kept for backward compatibility. */
 export const currencyConverter = formatCurrency;
+
+/** Locale for plain numbers: the display currency's locale (en-PH for PHP), never the browser's. */
+export const numberLocale = () => activeLocale || "en-PH";
+
+/**
+ * Format a plain number with the configured grouping (PHP: 1,200,000.00).
+ * @param {number|string} value
+ * @param {Intl.NumberFormatOptions} [options]
+ */
+export const formatNumber = (value, options = {}) => {
+  const n = Number(`${value ?? ""}`.replace(/,/g, ""));
+  if (value === null || value === undefined || value === "" || Number.isNaN(n)) return "";
+  return n.toLocaleString(numberLocale(), options);
+};
+
+/**
+ * Symbol of the display currency (System Settings > display currency), e.g. "₱" for PHP in en-PH.
+ * Use it in labels such as "Min Premium (₱)" instead of a literal symbol.
+ */
+export const currencySymbol = () => {
+  const { currency, locale } = getDisplayCurrencyConfig();
+  try {
+    const part = new Intl.NumberFormat(locale, { style: "currency", currency, currencyDisplay: "narrowSymbol" })
+      .formatToParts(0)
+      .find((p) => p.type === "currency");
+    return part?.value || currency;
+  } catch {
+    return currency;
+  }
+};

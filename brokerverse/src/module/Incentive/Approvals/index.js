@@ -7,27 +7,27 @@ import { Column } from "primereact/column";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
-import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
-import { Badge } from "primereact/badge";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
-import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import InputField from "../../../components/InputField";
-import { incentiveMockData, incentiveCrudOperations } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { isoDate, loadSettings, showError, showSuccess } from "../../Remittance/shared";
 import "./index.scss";
+
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { promptText } from "../../../utility/dialogs";
+const PRIORITY_LABEL = { Urgent: "High", High: "High", Normal: "Medium", Low: "Low" };
 
 const Approvals = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
 
   // State management
@@ -36,6 +36,7 @@ const Approvals = () => {
   const [selectedStatus, setSelectedStatus] = useState("Pending Approval");
   const [selectedPeriod, setSelectedPeriod] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [priorityRules, setPriorityRules] = useState([]);
 
   // Detail view state
   const [selectedApproval, setSelectedApproval] = useState(null);
@@ -55,90 +56,56 @@ const Approvals = () => {
     { label: "Pending Approval", value: "Pending Approval" },
     { label: "Approved", value: "Approved" },
     { label: "Rejected", value: "Rejected" },
+    { label: "Paid", value: "Paid" },
     { label: "All", value: "All" }
   ];
 
-  const periodOptions = [
-    { label: "January 2025", value: "January 2025" },
-    { label: "December 2024", value: "December 2024" },
-    { label: "November 2024", value: "November 2024" },
-    { label: "October 2024", value: "October 2024" }
-  ];
+  const periodOptions = [...new Set(approvals.map((a) => a.period))].map((p) => ({ label: p, value: p }));
 
   // Breadcrumb items
   const items = [
-    { label: t("incentive.incentive"), url: "/incentive" },
+    { label: t("incentive.incentive") },
     { label: t("incentive.approvals"), url: "/incentive/approvals" }
   ];
 
-  const home = { label: t("incentive.dashboard") };
+  const home = { label: t("sidebar.Accounts") };
 
   // Initialize data
   useEffect(() => {
     loadApprovals();
+    loadSettings()
+      .then((s) => setPriorityRules([...(s["remittance.priority_thresholds"] || [])].sort((a, b) => b.min - a.min)))
+      .catch((error) => showError(toast, error));
   }, []);
+
+  const priorityOf = (amount) => PRIORITY_LABEL[priorityRules.find((r) => Math.abs(amount) >= r.min)?.priority] || "Low";
 
   const loadApprovals = async () => {
     setLoading(true);
     try {
-      // Filter calculation batches that need approval or have been processed
-      const approvalData = incentiveMockData.calculationBatches.map(batch => ({
-        ...batch,
-        priority: batch.totalAmount > 300000 ? "High" : batch.totalAmount > 150000 ? "Medium" : "Low",
-        daysWaiting: Math.floor((new Date() - new Date(batch.submittedDate)) / (1000 * 60 * 60 * 24))
-      }));
-
-      setApprovals(approvalData);
-
-      // Calculate dashboard metrics
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-
-      const pending = approvalData.filter(a => a.status === "Pending Approval");
-      const approvedToday = approvalData.filter(a => {
-        if (a.status !== "Approved" || !a.approvalDate) return false;
-        const approvalDate = new Date(a.approvalDate);
-        approvalDate.setHours(0, 0, 0, 0);
-        return approvalDate.getTime() === today.getTime();
-      });
-      const rejectedToday = approvalData.filter(a => {
-        if (a.status !== "Rejected" || !a.rejectionDate) return false;
-        const rejectionDate = new Date(a.rejectionDate);
-        rejectionDate.setHours(0, 0, 0, 0);
-        return rejectionDate.getTime() === today.getTime();
-      });
-
+      const board = await incentiveService.approvals();
+      setApprovals(board.approvals || []);
       setDashboardData({
-        pendingCount: pending.length,
-        pendingAmount: pending.reduce((sum, a) => sum + a.totalAmount, 0),
-        approvedToday: approvedToday.length,
-        rejectedToday: rejectedToday.length
-      });
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Data Loaded',
-        detail: 'Approval queue loaded successfully',
-        life: 3000
+        pendingCount: board.summary?.pending || 0,
+        pendingAmount: board.summary?.pendingAmount || 0,
+        approvedToday: board.summary?.approvedToday || 0,
+        rejectedToday: board.summary?.rejectedToday || 0
       });
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to load approval data',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to load approval data');
     } finally {
       setLoading(false);
     }
   };
 
+  const approvalRows = approvals.map((a) => ({ ...a, priority: priorityOf(Number(a.totalAmount || 0)), rejectionComment: a.rejectionReason }));
+
   // Filter data
-  const filteredApprovals = approvals.filter((approval) => {
+  const filteredApprovals = approvalRows.filter((approval) => {
     const matchesSearch =
       approval.batchId.toLowerCase().includes(search.toLowerCase()) ||
       approval.period.toLowerCase().includes(search.toLowerCase()) ||
-      approval.submittedBy.toLowerCase().includes(search.toLowerCase());
+      String(approval.submittedBy || "").toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus = selectedStatus === "All" || approval.status === selectedStatus;
     const matchesPeriod = !selectedPeriod || approval.period === selectedPeriod;
@@ -153,46 +120,26 @@ const Approvals = () => {
     setDetailsVisible(true);
   };
 
-  // Handle approve
-  const handleApprove = async (approval, comment = "") => {
+  const runAction = async (action, summary, detail) => {
     setLoading(true);
     try {
-      await incentiveCrudOperations.approveCalculation(approval.batchId);
-
-      setApprovals(approvals.map(a =>
-        a.batchId === approval.batchId
-          ? {
-              ...a,
-              status: "Approved",
-              approvedBy: "Current User",
-              approvalDate: new Date().toISOString(),
-              approvalComment: comment
-            }
-          : a
-      ));
-
+      await action();
       setDetailsVisible(false);
-
-      toast.current.show({
-        severity: "success",
-        summary: "Approved",
-        detail: `Calculation batch ${approval.batchId} has been approved`,
-        life: 3000
-      });
-
-      // Refresh dashboard data
-      loadApprovals();
+      showSuccess(toast, detail, summary);
+      await loadApprovals();
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to approve calculation",
-        life: 3000
-      });
+      showError(toast, error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Handle approve (the backend refuses approvals by the batch creator or submitter)
+  const handleApprove = (approval, comment = "") => runAction(
+    () => incentiveService.approveCalculation(approval.batchId, comment || undefined),
+    "Approved",
+    `Calculation batch ${approval.batchId} has been approved`
+  );
 
   // Handle reject
   const handleReject = async (approval, comment = "") => {
@@ -205,42 +152,17 @@ const Approvals = () => {
       });
       return;
     }
+    runAction(() => incentiveService.rejectCalculation(approval.batchId, comment), "Rejected", `Calculation batch ${approval.batchId} has been rejected`);
+  };
 
-    setLoading(true);
-    try {
-      setApprovals(approvals.map(a =>
-        a.batchId === approval.batchId
-          ? {
-              ...a,
-              status: "Rejected",
-              rejectedBy: "Current User",
-              rejectionDate: new Date().toISOString(),
-              rejectionComment: comment
-            }
-          : a
-      ));
-
-      setDetailsVisible(false);
-
-      toast.current.show({
-        severity: "warn",
-        summary: "Rejected",
-        detail: `Calculation batch ${approval.batchId} has been rejected`,
-        life: 3000
-      });
-
-      // Refresh dashboard data
-      loadApprovals();
-    } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to reject calculation",
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handlePay = async (approval) => {
+    const paymentReference = await promptText(`Payment reference for ${approval.batchId}`, "");
+    if (paymentReference === null) return;
+    runAction(
+      () => incentiveService.payCalculation(approval.batchId, { paymentDate: isoDate(new Date()), paymentReference }),
+      "Paid",
+      `Calculation batch ${approval.batchId} marked as paid`
+    );
   };
 
   // Bulk approval
@@ -251,43 +173,11 @@ const Approvals = () => {
       message: `Approve ${pendingApprovals.length} pending calculation batches?`,
       header: "Bulk Approval",
       icon: "pi pi-check",
-      accept: async () => {
-        setLoading(true);
-        try {
-          for (const approval of pendingApprovals) {
-            await incentiveCrudOperations.approveCalculation(approval.batchId);
-          }
-
-          setApprovals(approvals.map(a =>
-            pendingApprovals.some(pa => pa.batchId === a.batchId)
-              ? {
-                  ...a,
-                  status: "Approved",
-                  approvedBy: "Current User",
-                  approvalDate: new Date().toISOString()
-                }
-              : a
-          ));
-
-          toast.current.show({
-            severity: "success",
-            summary: "Bulk Approval Complete",
-            detail: `${pendingApprovals.length} calculation batches approved`,
-            life: 3000
-          });
-
-          loadApprovals();
-        } catch (error) {
-          toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to complete bulk approval",
-            life: 3000
-          });
-        } finally {
-          setLoading(false);
-        }
-      }
+      accept: () => runAction(
+        () => Promise.all(pendingApprovals.map((a) => incentiveService.approveCalculation(a.batchId))),
+        "Bulk Approval Complete",
+        `${pendingApprovals.length} calculation batches approved`
+      )
     });
   };
 
@@ -320,7 +210,7 @@ const Approvals = () => {
   };
 
   const dateBodyTemplate = (rowData) => {
-    return new Date(rowData.submittedDate).toLocaleDateString();
+    return formatAppDate(rowData.submittedDate);
   };
 
   const amountBodyTemplate = (rowData) => {
@@ -345,7 +235,7 @@ const Approvals = () => {
           icon={<SvgEyeIcon />}
           className="view-details-button"
           onClick={() => handleViewDetails(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         {rowData.status === "Pending Approval" && (
           <>
@@ -353,7 +243,7 @@ const Approvals = () => {
               icon="pi pi-check"
               className="approve-button"
               onClick={() => handleApprove(rowData)}
-              tooltip="Quick Approve"
+              tooltip="Quick Approve" aria-label="Quick Approve"
             />
             <Button
               icon="pi pi-times"
@@ -363,9 +253,17 @@ const Approvals = () => {
                 setApprovalComment("");
                 setDetailsVisible(true);
               }}
-              tooltip="Review & Reject"
+              tooltip="Review & Reject" aria-label="Review & Reject"
             />
           </>
+        )}
+        {rowData.status === "Approved" && (
+          <Button
+            icon="pi pi-wallet"
+            className="approve-button"
+            onClick={() => handlePay(rowData)}
+            tooltip="Mark as Paid" aria-label="Mark as Paid"
+          />
         )}
       </div>
     );
@@ -431,7 +329,7 @@ const Approvals = () => {
 
           <Card className="dashboard-card">
             <div className="card-content">
-              <i className="pi pi-dollar card-icon red"></i>
+              <i className="pi pi-wallet card-icon red"></i>
               <div className="card-info">
                 <span className="card-value">
                   {formatCurrency(dashboardData.pendingAmount)}
@@ -514,7 +412,7 @@ const Approvals = () => {
             className="approvals-table"
             stripedRows
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             emptyMessage="No approvals found"
           >
@@ -533,7 +431,7 @@ const Approvals = () => {
             />
             <Column
               field="agentCount"
-              header="Agents"
+              header="Sales person"
               style={{ width: "8%", textAlign: "center" }}
             />
             <Column
@@ -610,7 +508,7 @@ const Approvals = () => {
                     </span>
                   </div>
                   <div className="detail-item">
-                    <label>Agent Count:</label>
+                    <label>Sales persons:</label>
                     <span>{selectedApproval.agentCount}</span>
                   </div>
                   <div className="detail-item">
@@ -619,7 +517,7 @@ const Approvals = () => {
                   </div>
                   <div className="detail-item">
                     <label>Submitted Date:</label>
-                    <span>{new Date(selectedApproval.submittedDate).toLocaleString()}</span>
+                    <span>{formatAppDate(selectedApproval.submittedDate, { withTime: true })}</span>
                   </div>
                   <div className="detail-item">
                     <label>Days Waiting:</label>
@@ -640,7 +538,7 @@ const Approvals = () => {
                         <i className="pi pi-check"></i>
                         <div className="history-content">
                           <div className="history-action">Approved by {selectedApproval.approvedBy}</div>
-                          <div className="history-date">{new Date(selectedApproval.approvalDate).toLocaleString()}</div>
+                          <div className="history-date">{formatAppDate(selectedApproval.approvalDate, { withTime: true })}</div>
                           {selectedApproval.approvalComment && (
                             <div className="history-comment">{selectedApproval.approvalComment}</div>
                           )}
@@ -652,7 +550,7 @@ const Approvals = () => {
                         <i className="pi pi-times"></i>
                         <div className="history-content">
                           <div className="history-action">Rejected by {selectedApproval.rejectedBy}</div>
-                          <div className="history-date">{new Date(selectedApproval.rejectionDate).toLocaleString()}</div>
+                          <div className="history-date">{formatAppDate(selectedApproval.rejectionDate, { withTime: true })}</div>
                           {selectedApproval.rejectionComment && (
                             <div className="history-comment">{selectedApproval.rejectionComment}</div>
                           )}
@@ -667,7 +565,7 @@ const Approvals = () => {
             <TabPanel header={`Agent Details (${selectedApproval.details?.length || 0})`}>
               {selectedApproval.details && selectedApproval.details.length > 0 ? (
                 <DataTable value={selectedApproval.details} className="detail-table">
-                  <Column field="agentName" header="Agent Name" />
+                  <Column field="agentName" header="Sales person" />
                   <Column field="program" header="Program" />
                   <Column field="achievementPercent" header="Achievement %" body={(data) => `${data.achievementPercent}%`} />
                   <Column field="baseIncentive" header="Base Incentive" body={(data) => formatCurrency(data.baseIncentive)} />

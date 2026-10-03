@@ -1,0 +1,34 @@
+{
+"bea.admin":[
+ {"name":"docnum","path":"/master/configuration/document-numbering"},
+ {"name":"postingrules","path":"/master/finance/posting-rules"},
+ {"name":"schedules","path":"/master/configuration/schedules"}
+],
+"maria.sales":[
+ {"name":"salesdash","path":"/agent/home","wait":3500},
+ {"name":"leads","path":"/agent/leadlisting"},
+ {"name":"renewalq","path":"/renewal/queue"}
+],
+"jose.uw":[
+ {"name":"procdash","path":"/processing/dashboard","wait":3500},
+ {"name":"brokerslips","path":"/placement/broker-slips"},
+ {"name":"placementslips","path":"/placement/placement-slips"}
+],
+"ana.cs":[
+ {"name":"openitems","path":"/agent/openitemslistdata"},
+ {"name":"clients","path":"/agent/clientlisting"}
+],
+"carlo.claims":[
+ {"name":"claimsdash","path":"/claims/dashboard","wait":3500},
+ {"name":"claims","path":"/agent/claim"}
+],
+"liza.finance":[
+ {"name":"receipts","path":"/accounts/receipts"},
+ {"name":"bankrec","path":"/accounts/bank-reconciliation"},
+ {"name":"monthend","path":"/accounts/period-end/close"}
+],
+"acct.manager":[
+ {"name":"periods","path":"/accounts/period-end/periods"},
+ {"name":"reconciliations","path":"/accounts/bank-reconciliation/reconciliations"}
+]
+}

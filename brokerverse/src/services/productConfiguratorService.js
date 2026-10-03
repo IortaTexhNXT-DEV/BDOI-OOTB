@@ -60,7 +60,12 @@ export const getProductTemplateById = async ({ id, templateCode }) => {
       }
     );
   }
-  return handleResponse(response);
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(errorText || "Failed to fetch product template");
+  }
+  const data = await response.json().catch(() => null);
+  return data?.data ?? data;
 };
 
 export const createProductTemplate = async (templateData) => {
@@ -242,7 +247,55 @@ const deactivateRiskSection = async (id, sectionId) => {
   return data?.data ?? data;
 };
 
+/** JSON request for the /product-configurator endpoints; throws with the API's message. */
+const call = async (method, path, body) => {
+  const response = await fetch(`${BASE_URL}/product-configurator/${path}`, {
+    method,
+    headers: {
+      "Content-Type": "application/json",
+      ...authService.getAuthHeader(),
+    },
+    body: body === undefined ? undefined : JSON.stringify(body),
+  });
+  const json = await response.json().catch(() => ({}));
+  if (!response.ok || json.success === false) {
+    const detail = json.errors?.map((e) => e.message).join(", ");
+    throw new Error(detail || json.message || `Request failed (${response.status})`);
+  }
+  return json.data;
+};
+
+/**
+ * Configuration components by kind: coverages, rating-factors, underwriting-rules, documents, workflows,
+ * market-mappings, commissions, taxes, acceptance-limits, rating-parameters.
+ */
+const listComponents = (kind, params = {}) => {
+  const qs = new URLSearchParams({ perPage: 200, ...params }).toString();
+  return call("GET", `${kind}?${qs}`);
+};
+const createComponent = (kind, payload) => call("POST", kind, payload);
+const updateComponent = (kind, id, payload) => call("PUT", `${kind}/${id}`, payload);
+const deleteComponent = (kind, id) => call("DELETE", `${kind}/${id}`);
+const saveComponent = (kind, record) => {
+  const { id, createdAt, updatedAt, createdBy, templateCode, ...payload } = record;
+  return id ? updateComponent(kind, id, payload) : createComponent(kind, payload);
+};
+
+const retireProductTemplate = (id, reason) => call("POST", `products/${id}/retire`, { reason });
+const reactivateProductTemplate = (id) => call("POST", `products/${id}/reactivate`, {});
+const createProductVersion = (id, payload = {}) => call("POST", `products/${id}/versions`, payload);
+const getProductAnalytics = () => call("GET", "analytics");
+
 const productConfiguratorService = {
+  listComponents,
+  createComponent,
+  updateComponent,
+  deleteComponent,
+  saveComponent,
+  retireProductTemplate,
+  reactivateProductTemplate,
+  createProductVersion,
+  getProductAnalytics,
   getProductTemplates,
   createProductTemplate,
   updateProductTemplate,

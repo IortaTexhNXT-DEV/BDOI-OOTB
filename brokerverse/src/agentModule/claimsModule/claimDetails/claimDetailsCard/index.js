@@ -12,11 +12,16 @@ import { useDispatch, useSelector } from "react-redux";
 import { postClaimDetailsData } from "../store/claimDetailsMiddleWare";
 import { mapToApiLob } from "../store/claimDetailsMiddleWare";
 import { isFireLob } from "../../../endorsementModule/constants/endorsementCategories";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
 import InputNumberField from "../../../component/inputNumberField";
 import addressService from "../../../../services/addressService";
-import { isThailand } from "../../../../utility/addressHelpers";
+import {
+  isThailand,
+  findAddressItem,
+  canonicalAddressValue,
+  addressOptionsWithSaved,
+} from "../../../../utility/addressHelpers";
 
 const ClaimDetailsCard = ({
   leadRefId,
@@ -25,7 +30,6 @@ const ClaimDetailsCard = ({
   initialLob,
 }) => {
   const { t } = useTranslation();
-  const [checked, setChecked] = useState(false);
   const location = useLocation();
 
   // Fire incident/cause-of-loss options (translated)
@@ -35,6 +39,15 @@ const ClaimDetailsCard = ({
     { label: t("claimDetails.typhoon"), value: "Typhoon" },
     { label: t("claimDetails.earthquake"), value: "Earthquake" },
     { label: t("claimDetails.lightning"), value: "Lightning" },
+    { label: t("claimDetails.other"), value: "Other" },
+  ];
+  const MOTOR_INCIDENT_TYPES = [
+    { label: "Collision", value: "Collision" },
+    { label: "Theft / Carnapping", value: "Theft" },
+    { label: "Fire", value: "Fire" },
+    { label: "Flood / Typhoon (Acts of Nature)", value: "Acts of Nature" },
+    { label: "Third-party liability", value: "Third-party liability" },
+    { label: "Glass / windshield damage", value: "Glass damage" },
     { label: t("claimDetails.other"), value: "Other" },
   ];
   const [lastUpdatedData, setLastUpdatedData] = useState(null);
@@ -48,6 +61,10 @@ const ClaimDetailsCard = ({
         loading: claimDetailsMainReducers?.loading,
       };
     }
+  );
+  // "Same as Policy Holder": restored when coming back from the mail step
+  const [checked, setChecked] = useState(
+    claimThirdParty?.isPolicyHolderTheDriver === true
   );
 
   const isFire = isFireLob(
@@ -99,11 +116,21 @@ const ClaimDetailsCard = ({
       claimThirdParty?.insuranceCompanyClaimNumber || "",
   };
 
-  console.log("=== FORM INITIAL VALUES ===");
-  console.log("Form Initial Value:", formInitialValue);
-  console.log("=== END FORM INITIAL VALUES ===");
-
   const dispatch = useDispatch();
+
+  // Policy holder name and address (house/street, barangay, country, province, city, ZIP) copied to the driver
+  const holderToDriver = (values) => ({
+    driverName: values.PolicyHolderName || "",
+    driverHouseNo: values.HouseNo || "",
+    driverBarangay: values.Barangay || "",
+    driverCountry: values.CountryName || "",
+    driverProvince: values.Province || "",
+    driverCity: values.CityName || "",
+    driverZipCode: values.ZipCode || "",
+    driverRoadThanon: values.RoadThanon || "",
+    driverSoiAlley: values.SoiAlley || "",
+    driverMooVillage: values.MooVillage || "",
+  });
 
   const handleSubmit = async (values) => {
     const lob = mapToApiLob(
@@ -111,8 +138,11 @@ const ClaimDetailsCard = ({
         claimDetailsViewData?.productType ||
         initialLob
     );
+    const holderAsDriver = !isFire && checked;
     const payload = {
       ...values,
+      ...(holderAsDriver ? holderToDriver(values) : {}),
+      isPolicyHolderTheDriver: holderAsDriver,
       leadRefId,
       quoteRefId,
       policyRefId,
@@ -135,6 +165,18 @@ const ClaimDetailsCard = ({
       (!values.driverName || values.driverName.trim() === "")
     ) {
       errors.driverName = t("claimDetails.driversNameRequired");
+    }
+    // date of loss and cause are required for every line; the server checks the policy period
+    if (!values.dateOfIncident) {
+      errors.dateOfIncident = t("claimDetails.dateOfIncidentRequired", "Date of loss is required");
+    } else if (new Date(values.dateOfIncident) > new Date()) {
+      errors.dateOfIncident = t("claimDetails.dateOfIncidentFuture", "Date of loss cannot be in the future");
+    }
+    if (!values.typeOfIncident) {
+      errors.typeOfIncident = t("claimDetails.typeOfIncidentRequired", "Select the cause of loss");
+    }
+    if (values.estimatedClaimAmount != null && Number(values.estimatedClaimAmount) < 0) {
+      errors.estimatedClaimAmount = t("claimDetails.estimateNegative", "Estimate cannot be negative");
     }
     return errors;
   };
@@ -170,36 +212,30 @@ const ClaimDetailsCard = ({
     };
   }, []);
 
-  const selectedCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.CountryName ||
-      c.id === formik.values.CountryName
+  const selectedCountryId = findAddressItem(
+    countryList,
+    formik.values.CountryName
   )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) =>
-      (p.name || p.code) === formik.values.Province ||
-      p.id === formik.values.Province
+  const selectedProvinceId = findAddressItem(
+    provinceList,
+    formik.values.Province
   )?.id;
-  const selectedCityId = cityList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.CityName ||
-      c.id === formik.values.CityName
+  const selectedCityId = findAddressItem(
+    cityList,
+    formik.values.CityName
   )?.id;
 
-  const selectedDriverCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.driverCountry ||
-      c.id === formik.values.driverCountry
+  const selectedDriverCountryId = findAddressItem(
+    countryList,
+    formik.values.driverCountry
   )?.id;
-  const selectedDriverProvinceId = driverProvinceList.find(
-    (p) =>
-      (p.name || p.code) === formik.values.driverProvince ||
-      p.id === formik.values.driverProvince
+  const selectedDriverProvinceId = findAddressItem(
+    driverProvinceList,
+    formik.values.driverProvince
   )?.id;
-  const selectedDriverCityId = driverCityList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.driverCity ||
-      c.id === formik.values.driverCity
+  const selectedDriverCityId = findAddressItem(
+    driverCityList,
+    formik.values.driverCity
   )?.id;
 
   useEffect(() => {
@@ -366,29 +402,21 @@ const ClaimDetailsCard = ({
     }
   }, [formik, countryList]);
 
-  const countryOptions = useMemo(
-    () =>
-      countryList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [countryList]
+  const holderCountryOptions = useMemo(
+    () => addressOptionsWithSaved(countryList, formik.values.CountryName),
+    [countryList, formik.values.CountryName]
+  );
+  const driverCountryOptions = useMemo(
+    () => addressOptionsWithSaved(countryList, formik.values.driverCountry),
+    [countryList, formik.values.driverCountry]
   );
   const availableProvinces = useMemo(
-    () =>
-      provinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [provinceList]
+    () => addressOptionsWithSaved(provinceList, formik.values.Province),
+    [provinceList, formik.values.Province]
   );
   const availableCities = useMemo(
-    () =>
-      cityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [cityList]
+    () => addressOptionsWithSaved(cityList, formik.values.CityName),
+    [cityList, formik.values.CityName]
   );
   const availableDistricts = useMemo(
     () =>
@@ -399,20 +427,12 @@ const ClaimDetailsCard = ({
     [districtList]
   );
   const availableDriverProvinces = useMemo(
-    () =>
-      driverProvinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [driverProvinceList]
+    () => addressOptionsWithSaved(driverProvinceList, formik.values.driverProvince),
+    [driverProvinceList, formik.values.driverProvince]
   );
   const availableDriverCities = useMemo(
-    () =>
-      driverCityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [driverCityList]
+    () => addressOptionsWithSaved(driverCityList, formik.values.driverCity),
+    [driverCityList, formik.values.driverCity]
   );
   const availableDriverDistricts = useMemo(
     () =>
@@ -423,21 +443,38 @@ const ClaimDetailsCard = ({
     [driverDistrictList]
   );
 
+  // Saved names spelled differently from the master ("PHILIPPINES", "MAKATI CITY", a code) take the master name
+  useEffect(() => {
+    [
+      ["CountryName", countryList],
+      ["Province", provinceList],
+      ["CityName", cityList],
+      ["driverCountry", countryList],
+      ["driverProvince", driverProvinceList],
+      ["driverCity", driverCityList],
+    ].forEach(([field, list]) => {
+      const current = formik.values[field];
+      if (!current || !list.length) return;
+      const canonical = canonicalAddressValue(list, current);
+      if (canonical !== current) formik.setFieldValue(field, canonical, false);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    countryList,
+    provinceList,
+    cityList,
+    driverProvinceList,
+    driverCityList,
+    formik.values.CountryName,
+    formik.values.Province,
+    formik.values.CityName,
+    formik.values.driverCountry,
+    formik.values.driverProvince,
+    formik.values.driverCity,
+  ]);
+
   // Update form when Redux data changes
   useEffect(() => {
-    console.log("=== FORM UPDATE USEEFFECT TRIGGERED ===");
-    console.log("Claim Details View Data:", claimDetailsViewData);
-    console.log("Claim Third Party Data:", claimThirdParty);
-    console.log("Data keys:", Object.keys(claimDetailsViewData || {}));
-    console.log("Third Party Data keys:", Object.keys(claimThirdParty || {}));
-    console.log("Data length:", Object.keys(claimDetailsViewData || {}).length);
-    console.log(
-      "Third Party Data length:",
-      Object.keys(claimThirdParty || {}).length
-    );
-    console.log("Last Updated Data:", lastUpdatedData);
-    console.log("Current Formik Values:", formik.values);
-
     // Check if we have either claim details or third party data
     const hasClaimDetails =
       claimDetailsViewData && Object.keys(claimDetailsViewData).length > 0;
@@ -451,15 +488,8 @@ const ClaimDetailsCard = ({
         claimThirdParty,
       });
       if (lastUpdatedData === dataString) {
-        console.log("Data hasn't changed, skipping form update");
         return;
       }
-
-      console.log("=== UPDATING FORM WITH REDUX DATA ===");
-      console.log("Claim Details View Data:", claimDetailsViewData);
-      console.log("Claim Third Party Data:", claimThirdParty);
-      console.log("Last Updated Data:", lastUpdatedData);
-      console.log("Current Formik Values (before update):", formik.values);
 
       // Check if user has already entered data (scenario 3: coming back from mail screen)
       const hasUserData =
@@ -494,7 +524,6 @@ const ClaimDetailsCard = ({
 
       // If user has already entered data, don't override it — unless address snapshot still needs hydration
       if (hasUserData && !needsAddressHydration) {
-        console.log("User has entered data, preserving existing form values");
         setLastUpdatedData(dataString);
         return;
       }
@@ -577,7 +606,6 @@ const ClaimDetailsCard = ({
       }
 
       // Only update form with API data if user hasn't entered anything (scenarios 1 & 2: new claim or edit)
-      console.log("No user data found, updating form with API data");
 
       const updatedValues = {
         InsuranceCompanyName: claimDetailsViewData?.InsuranceCompanyName || "",
@@ -660,42 +688,19 @@ const ClaimDetailsCard = ({
           claimThirdParty?.insuranceCompanyClaimNumber || "",
       };
 
-      console.log("Updated Form Values:", updatedValues);
       formik.setValues(updatedValues);
       setLastUpdatedData(dataString);
-
-      console.log("=== FORM VALUES AFTER UPDATE ===");
-      console.log("Formik values after setValues:", formik.values);
-      console.log("=== END FORM VALUES AFTER UPDATE ===");
-
-      console.log("=== END UPDATING FORM WITH REDUX DATA ===");
-    } else {
-      console.log("No data to update form with");
     }
-  }, [claimDetailsViewData, claimThirdParty, lastUpdatedData, checked]); // Added claimThirdParty to dependencies
+  }, [claimDetailsViewData, claimThirdParty, lastUpdatedData, checked]);
 
-  console.log("=== FORMIK STATE ===");
-  console.log("Formik Values:", formik.values);
-  console.log("Formik Touched:", formik.touched);
-  console.log("Formik Errors:", formik.errors);
-  console.log("=== END FORMIK STATE ===");
   const handleCheckboxChange = (e) => {
     setChecked(e.checked);
 
     if (e.checked) {
-      // Copy current policyholder form values to driver
+      // Copy current policyholder name and address to the driver
       formik.setValues({
         ...formik.values,
-        driverName: formik.values.PolicyHolderName || "",
-        driverHouseNo: formik.values.HouseNo || "",
-        driverBarangay: formik.values.Barangay || "",
-        driverCountry: formik.values.CountryName || "",
-        driverProvince: formik.values.Province || "",
-        driverCity: formik.values.CityName || "",
-        driverZipCode: formik.values.ZipCode || "",
-        driverRoadThanon: formik.values.RoadThanon || "",
-        driverSoiAlley: formik.values.SoiAlley || "",
-        driverMooVillage: formik.values.MooVillage || "",
+        ...holderToDriver(formik.values),
       });
     } else {
       formik.setValues({
@@ -759,7 +764,6 @@ const ClaimDetailsCard = ({
               label={t("claimDetails.policyHolderName")}
               value={formik.values.PolicyHolderName}
               onChange={(e) => {
-                console.log("Policy Holder Name changed:", e.target.value);
                 formik.handleChange("PolicyHolderName")(e);
               }}
             />
@@ -771,7 +775,7 @@ const ClaimDetailsCard = ({
             <DropdownField
               label={t("claimDetails.country")}
               value={formik.values.CountryName}
-              options={countryOptions}
+              options={holderCountryOptions}
               onChange={(e) => {
                 formik.setFieldValue("CountryName", e.value);
                 formik.setFieldValue("Province", "");
@@ -934,7 +938,7 @@ const ClaimDetailsCard = ({
           </div>
         )}
 
-        {isFire && (
+        {(
           <>
             <div className="claim__details__card__sub__title mt-4 ml-2">
               {t("claimDetails.incidentDetails")}
@@ -947,8 +951,12 @@ const ClaimDetailsCard = ({
                   onChange={(e) =>
                     formik.setFieldValue("dateOfIncident", e.value)
                   }
-                  dateFormat="yy-mm-dd"
+                  dateFormat="dd/mm/yy"
+                  maxDate={new Date()}
                 />
+                {formik.touched.dateOfIncident && formik.errors.dateOfIncident && (
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.dateOfIncident}</div>
+                )}
               </div>
               <div className="col-12 md:col-6 lg:col-6">
                 <InputTextField
@@ -998,11 +1006,14 @@ const ClaimDetailsCard = ({
                   onChange={(e) =>
                     formik.setFieldValue("typeOfIncident", e.value)
                   }
-                  options={FIRE_INCIDENT_TYPES}
+                  options={isFire ? FIRE_INCIDENT_TYPES : MOTOR_INCIDENT_TYPES}
                   optionLabel="label"
                   optionValue="value"
                   placeholder={t("claimDetails.select")}
                 />
+                {formik.touched.typeOfIncident && formik.errors.typeOfIncident && (
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.typeOfIncident}</div>
+                )}
               </div>
             </div>
             <div className="grid mt-2">
@@ -1049,12 +1060,11 @@ const ClaimDetailsCard = ({
                   label={t("claimDetails.driversNameLabel")}
               value={formik.values.driverName}
               onChange={(e) => {
-                console.log("Driver's name changed:", e.target.value);
                 formik.handleChange("driverName")(e);
               }}
             />
             {formik.touched.driverName && formik.errors.driverName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.driverName}
               </div>
             )}
@@ -1066,7 +1076,7 @@ const ClaimDetailsCard = ({
             <DropdownField
               label={t("claimDetails.country")}
               value={formik.values.driverCountry}
-              options={countryOptions}
+              options={driverCountryOptions}
               onChange={(e) => {
                 formik.setFieldValue("driverCountry", e.value);
                 formik.setFieldValue("driverProvince", "");
@@ -1207,7 +1217,7 @@ const ClaimDetailsCard = ({
                 onChange={formik.handleChange("name")}
               />
               {formik.touched.name && formik.errors.name && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.name}
                 </div>
               )}
@@ -1219,7 +1229,7 @@ const ClaimDetailsCard = ({
                 onChange={formik.handleChange("contactNumber")}
               />
               {formik.touched.contactNumber && formik.errors.contactNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.contactNumber}
                 </div>
               )}
@@ -1235,7 +1245,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("plateNumber")}
                 />
                 {formik.touched.plateNumber && formik.errors.plateNumber && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.plateNumber}
                   </div>
                 )}
@@ -1247,7 +1257,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("unit")}
                 />
                 {formik.touched.unit && formik.errors.unit && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.unit}
                   </div>
                 )}
@@ -1264,7 +1274,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("shop")}
                 />
                 {formik.touched.shop && formik.errors.shop && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.shop}
                   </div>
                 )}
@@ -1278,7 +1288,7 @@ const ClaimDetailsCard = ({
               />
               {formik.touched.InsuranceCompanyN &&
                 formik.errors.InsuranceCompanyN && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.InsuranceCompanyN}
                   </div>
                 )}

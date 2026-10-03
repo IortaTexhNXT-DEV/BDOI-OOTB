@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
 import { DataTable } from "primereact/datatable";
@@ -9,7 +9,8 @@ import { Steps } from "primereact/steps";
 import { Toast } from "primereact/toast";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Tag } from "primereact/tag";
-import { bulkProcessingData, mockCrudOperations } from "../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../services/remittanceService";
+import { downloadCsv, formatDateTime, showError, statusSeverity } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
@@ -18,14 +19,16 @@ const BulkProcessing = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [uploadedFile, setUploadedFile] = useState(null);
-  const [processingStatus, setProcessingStatus] = useState("idle");
+  const [upload, setUpload] = useState(null);
   const [processedRecords, setProcessedRecords] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedConfig, setSelectedConfig] = useState(bulkProcessingData.configurations[0]);
+  const [selectedConfig, setSelectedConfig] = useState(null);
 
-  const [configurations, setConfigurations] = useState(bulkProcessingData.configurations);
-  const [processingHistory, setProcessingHistory] = useState(bulkProcessingData.processingHistory);
+  useEffect(() => {
+    masterService.list("remittance-bulk-processing", { status: "Active" })
+      .then((rows) => setSelectedConfig((rows || []).find((r) => /csv/i.test(r.fileFormat)) || (rows || [])[0] || null))
+      .catch((e) => showError(toast, e));
+  }, []);
 
   const steps = [
     { label: t("remittance.uploadFile") },
@@ -34,13 +37,7 @@ const BulkProcessing = () => {
     { label: t("remittance.complete") }
   ];
 
-  const validationResults = selectedConfig ? selectedConfig.validationRules.map((rule, index) => ({
-    field: rule.field,
-    rule: rule.rule,
-    valid: Math.floor(Math.random() * 20) + 80,
-    invalid: Math.floor(Math.random() * 10) + 1,
-    total: 100
-  })) : [];
+  const validationResults = upload?.validationResults || [];
 
   const items = [
     { label: t("sidebar.Finance"), url: "#" },
@@ -54,119 +51,52 @@ const BulkProcessing = () => {
     setLoading(true);
     try {
       const file = e.files[0];
-      setUploadedFile(file);
-
-      // Validate file against configuration
-      if (file.size > selectedConfig.maxFileSize * 1024 * 1024) {
-        throw new Error(`File size exceeds maximum limit of ${selectedConfig.maxFileSize}MB`);
-      }
-
-      // Create upload record
-      const uploadRecord = {
-        fileName: file.name,
-        fileSize: `${(file.size / 1024 / 1024).toFixed(2)} MB`,
-        configCode: selectedConfig.code,
-        uploadedAt: new Date().toISOString(),
-        uploadedBy: 'Current User',
-        status: 'Uploaded'
-      };
-
-      await mockCrudOperations.create('bulk_upload', uploadRecord);
+      const result = await remittanceService.uploadBulk(file, selectedConfig?.code);
+      setUpload(result);
+      e.options?.clear?.();
 
       toast.current.show({
-        severity: 'success',
+        severity: result.errorCount ? 'warn' : 'success',
         summary: 'File Uploaded',
-        detail: `${file.name} uploaded successfully`,
-        life: 3000
+        detail: `${file.name}: ${result.successCount}/${result.totalRecords} records valid`,
+        life: 4000
       });
 
       setActiveIndex(1);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Upload Failed',
-        detail: error.message || 'Failed to upload file',
-        life: 3000
-      });
+      showError(toast, error, 'Upload Failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleProcess = async () => {
-    setProcessingStatus("processing");
     setLoading(true);
-
     try {
-      const totalRecords = Math.floor(Math.random() * 1000) + 500;
-      const successCount = Math.floor(totalRecords * 0.85) + Math.floor(Math.random() * 100);
-      const errorCount = totalRecords - successCount;
-
-      // Create processing record
-      const processRecord = {
-        fileName: uploadedFile.name,
-        configCode: selectedConfig.code,
-        totalRecords,
-        successCount,
-        errorCount,
-        status: errorCount > 0 ? 'Completed with Errors' : 'Success',
-        processedBy: 'Current User',
-        processedAt: new Date().toISOString()
-      };
-
-      const result = await mockCrudOperations.create('bulk_process', processRecord);
-      setProcessedRecords([result]);
-
-      // Add to history
-      setProcessingHistory(prev => [processRecord, ...prev]);
-
-      setTimeout(() => {
-        setProcessingStatus("complete");
-        setActiveIndex(3);
-        setLoading(false);
-
-        toast.current.show({
-          severity: errorCount > 0 ? 'warn' : 'success',
-          summary: 'Processing Complete',
-          detail: `Processed ${successCount}/${totalRecords} records successfully`,
-          life: 4000
-        });
-      }, 3000);
-    } catch (error) {
+      const result = await remittanceService.processBulk(upload.id);
+      const processed = { ...result.upload, processedAt: result.upload.processedAt || new Date().toISOString() };
+      setProcessedRecords([processed]);
+      setActiveIndex(3);
       toast.current.show({
-        severity: 'error',
-        summary: 'Processing Failed',
-        detail: error.message || 'Failed to process file',
-        life: 3000
+        severity: processed.errorCount > 0 ? 'warn' : 'success',
+        summary: 'Processing Complete',
+        detail: `Processed ${processed.successCount}/${processed.totalRecords} records; ${result.remittances.length} draft remittance(s) created`,
+        life: 4000
       });
+    } catch (error) {
+      showError(toast, error, 'Processing Failed');
+    } finally {
       setLoading(false);
     }
   };
 
-  const handleDownloadReport = async () => {
-    try {
-      const reportData = {
-        fileName: uploadedFile.name,
-        processedRecords: processedRecords[0],
-        generatedAt: new Date().toISOString()
-      };
-
-      await mockCrudOperations.create('processing_report', reportData);
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Report Downloaded',
-        detail: 'Processing report has been downloaded',
-        life: 3000
-      });
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Download Failed',
-        detail: 'Failed to download report',
-        life: 3000
-      });
-    }
+  const handleDownloadReport = () => {
+    const record = processedRecords[0] || upload;
+    downloadCsv(`${(record?.fileName || 'bulk').replace(/\.[^.]+$/, '')}_report.csv`, record?.errors || [], [
+      { field: 'row', header: 'Row' },
+      { field: 'field', header: 'Field' },
+      { field: 'message', header: 'Error' }
+    ]);
   };
 
   return (
@@ -186,6 +116,7 @@ const BulkProcessing = () => {
               name="bulkFile"
               customUpload
               uploadHandler={handleUpload}
+              disabled={loading}
               accept=".csv,.xlsx"
               maxFileSize={50000000}
               emptyTemplate={<p>Drag and drop files here to upload.</p>}
@@ -212,9 +143,9 @@ const BulkProcessing = () => {
         {activeIndex === 2 && (
           <div className="processing-section">
             <h3>{t("remittance.processingRecords")}</h3>
-            <ProgressBar mode="indeterminate" style={{ height: "6px" }} />
-            <p className="mt-3">Processing 100 records...</p>
-            <Button label={t("remittance.startProcessing")} onClick={handleProcess} className="p-button-success mt-3" />
+            {loading && <ProgressBar mode="indeterminate" style={{ height: "6px" }} />}
+            <p className="mt-3">Processing {upload?.validRowCount ?? 0} records...</p>
+            <Button label={t("remittance.startProcessing")} onClick={handleProcess} className="p-button-success mt-3" loading={loading} disabled={!upload?.validRowCount} />
           </div>
         )}
 
@@ -254,8 +185,8 @@ const BulkProcessing = () => {
                 </div>
                 <div className="status-info mt-3">
                   <Tag value={processedRecords[0].status}
-                       severity={processedRecords[0].status === 'Success' ? 'success' : 'warning'} />
-                  <span className="ml-2">Processed on {new Date(processedRecords[0].processedAt).toLocaleString()}</span>
+                       severity={statusSeverity(processedRecords[0].status)} />
+                  <span className="ml-2">Processed on {formatDateTime(processedRecords[0].processedAt)}</span>
                 </div>
               </div>
             )}
@@ -272,9 +203,8 @@ const BulkProcessing = () => {
                 className="p-button-secondary"
                 onClick={() => {
                   setActiveIndex(0);
-                  setUploadedFile(null);
+                  setUpload(null);
                   setProcessedRecords([]);
-                  setProcessingStatus('idle');
                 }}
               />
             </div>

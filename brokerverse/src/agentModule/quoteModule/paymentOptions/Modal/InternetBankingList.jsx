@@ -1,4 +1,3 @@
-import React from "react";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
 
@@ -16,15 +15,6 @@ const InternetBankingList = ({ modalVisible, setModalVisible }) => {
     "Security Bank",
   ];
 
-  const handleCopyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        "https://www.figma.com/file/STJkBwHGeOlCFmrkBBL"
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
   return (
     <Dialog
       visible={modalVisible}

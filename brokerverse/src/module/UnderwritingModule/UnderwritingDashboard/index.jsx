@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
@@ -11,15 +11,44 @@ import { ProgressBar } from "primereact/progressbar";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Dropdown } from "primereact/dropdown";
 import { Badge } from "primereact/badge";
+import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
+import dashboardService from "../../../services/dashboardService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+
+const STATUS_COLORS = ["#4CAF50", "#2196F3", "#FFC107", "#9C27B0", "#FF5252", "#00BCD4"];
+const LOB_COLORS = ["#2196F3", "#4CAF50", "#00BCD4", "#FF9800", "#9C27B0", "#607D8B"];
+const OPEN_TASK_LIMIT = 5;
+
+const countBy = (rows, keyOf) =>
+  rows.reduce((acc, row) => {
+    const key = keyOf(row);
+    acc[key] = (acc[key] || 0) + 1;
+    return acc;
+  }, {});
+
+const isOverdue = (row) => row.requirementDue && new Date(row.requirementDue) < new Date();
+
+const monthKey = (date) => (date ? String(date).slice(0, 7) : "-");
 
 const UnderwritingDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
+  const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedPeriod, setSelectedPeriod] = useState("week");
+  const [dashboard, setDashboard] = useState(null);
+
+  useEffect(() => {
+    dashboardService
+      .getProcessing()
+      .then(setDashboard)
+      .catch((error) =>
+        toast.current?.show({ severity: "error", summary: "Error", detail: error.message })
+      );
+  }, []);
 
   const periodOptions = useMemo(
     () => [
@@ -32,191 +61,99 @@ const UnderwritingDashboard = () => {
   );
 
   // Workbench Metrics
-  const workbenchMetrics = {
-    newSubmissions: 51,
-    olderSubmissions: 182,
-    avgCycleTime: "8 Hours",
-    openAlerts: {
-      duplicateSubmission: 3,
-      missingDates: 2,
-      missingLOB: 1,
-      totalAlerts: 6,
-    },
+  const workbenchMetrics = dashboard?.workbenchMetrics || {
+    newSubmissions: 0,
+    olderSubmissions: 0,
+    avgCycleTime: "-",
+    openAlerts: { duplicateSubmission: 0, missingDates: 0, missingLOB: 0, totalAlerts: 0 },
   };
 
-  // My Cases Data
-  const myCases = [
-    {
-      caseId: "SUB938416DM",
-      initialReview: "Pending",
-      finalDecision: "Pending",
-      watchedCases: true,
-      proposedInsured: "Danka Mockert",
-      agent: "Regan Baldrige",
-      faceAmount: "₱815,014",
-      productType: "Term Life",
-      requirementDue: "10/14/2025",
-      status: "IN REVIEW",
-      priority: "high",
-      riskScore: 82,
-    },
-    {
-      caseId: "SUB938627HK",
-      initialReview: "Completed",
-      finalDecision: "Pending",
-      watchedCases: false,
-      proposedInsured: "Hayley Klimshuk",
-      agent: "Amabelle Maulchin",
-      faceAmount: "₱600,704",
-      productType: "Whole Life",
-      requirementDue: "10/28/2025",
-      status: "PENDING REVIEW",
-      priority: "medium",
-      riskScore: 65,
-    },
-    {
-      caseId: "SUB938563AT",
-      initialReview: "Pending",
-      finalDecision: "Pending",
-      watchedCases: true,
-      proposedInsured: "Amalée Traviss",
-      agent: "Nappy O'Sheils",
-      faceAmount: "₱586,405",
-      productType: "Term Life",
-      requirementDue: "11/19/2025",
-      status: "IN REVIEW",
-      priority: "low",
-      riskScore: 45,
-    },
-    {
-      caseId: "SUB938665CB",
-      initialReview: "Completed",
-      finalDecision: "Approved",
-      watchedCases: false,
-      proposedInsured: "Cyrus Bisseck",
-      agent: "Tobye Tunnoch",
-      faceAmount: "₱384,064",
-      productType: "Term Life",
-      requirementDue: "11/30/2025",
-      status: "APPROVED",
-      priority: "low",
-      riskScore: 38,
-    },
-    {
-      caseId: "SUB938566ET",
-      initialReview: "Pending",
-      finalDecision: "Pending",
-      watchedCases: false,
-      proposedInsured: "Emmye Tynan",
-      agent: "Cordula Peacher",
-      faceAmount: "₱758,319",
-      productType: "Universal Life",
-      requirementDue: "11/06/2025",
-      status: "IN REVIEW",
-      priority: "high",
-      riskScore: 75,
-    },
-  ];
+  // My Cases Data (quotations awaiting a decision)
+  const myCases = useMemo(() => dashboard?.myCases || [], [dashboard]);
 
-  // Group Workload by Assignment
-  const workloadData = {
-    labels: [
-      "Andy James",
-      "Alex Robinson",
-      "Joseph Gomez",
-      "Steve Little",
-      "Andrea Hock",
-    ],
-    datasets: [
-      {
-        label: t("underwritingDashboard.missingCriticalInfo"),
-        data: [4, 3, 2, 3, 2],
-        backgroundColor: "#4CAF50",
-      },
-      {
-        label: t("underwritingDashboard.inReview"),
-        data: [3, 2, 2, 1, 2],
-        backgroundColor: "#2196F3",
-      },
-      {
-        label: t("underwritingDashboard.hold"),
-        data: [1, 1, 2, 1, 1],
-        backgroundColor: "#FFC107",
-      },
-      {
-        label: t("underwritingDashboard.ready"),
-        data: [2, 2, 1, 2, 1],
-        backgroundColor: "#9C27B0",
-      },
-    ],
-  };
+  // Group Workload by Assignment: cases per agent, stacked by status
+  const workloadData = useMemo(() => {
+    const agents = Object.keys(countBy(myCases, (row) => row.agent || "-"));
+    const statuses = Object.keys(countBy(myCases, (row) => row.status));
+    return {
+      labels: agents,
+      datasets: statuses.map((status, index) => ({
+        label: status,
+        data: agents.map(
+          (agent) => myCases.filter((row) => (row.agent || "-") === agent && row.status === status).length
+        ),
+        backgroundColor: STATUS_COLORS[index % STATUS_COLORS.length],
+      })),
+    };
+  }, [myCases]);
 
-  // In Progress vs Overdue Tasks
-  const tasksData = {
-    labels: [
-      "Jan-23",
-      "Feb-23",
-      "Mar-23",
-      "Apr-23",
-      "May-23",
-      "Jun-23",
-      "Jul-23",
-      "Aug-23",
-      "Sep-23",
-      "Oct-23",
-      "Nov-23",
-      "Dec-23",
-    ],
-    datasets: [
-      {
-        label: t("underwritingDashboard.inProgressTasks"),
-        data: [12, 15, 18, 22, 19, 25, 28, 24, 30, 27, 32, 35],
-        backgroundColor: "#2196F3",
-        borderColor: "#2196F3",
-        borderWidth: 1,
-      },
-      {
-        label: t("underwritingDashboard.overdueTasks"),
-        data: [2, 3, 2, 4, 3, 5, 4, 6, 5, 7, 6, 8],
-        backgroundColor: "#FF5252",
-        borderColor: "#FF5252",
-        borderWidth: 1,
-      },
-    ],
-  };
+  // In Progress vs Overdue Tasks by requirement due month
+  const tasksData = useMemo(() => {
+    const months = Object.keys(countBy(myCases, (row) => monthKey(row.requirementDue))).sort();
+    const countFor = (month, overdue) =>
+      myCases.filter((row) => monthKey(row.requirementDue) === month && isOverdue(row) === overdue).length;
+    return {
+      labels: months,
+      datasets: [
+        {
+          label: t("underwritingDashboard.inProgressTasks"),
+          data: months.map((month) => countFor(month, false)),
+          backgroundColor: "#2196F3",
+          borderColor: "#2196F3",
+          borderWidth: 1,
+        },
+        {
+          label: t("underwritingDashboard.overdueTasks"),
+          data: months.map((month) => countFor(month, true)),
+          backgroundColor: "#FF5252",
+          borderColor: "#FF5252",
+          borderWidth: 1,
+        },
+      ],
+    };
+  }, [myCases, t]);
 
   // Volume by LOB Chart
   const volumeByLOBData = {
-    labels: ["Commercial Auto", "Commercial Package", "Commercial Property"],
+    labels: dashboard?.volumeByLOB?.labels || [],
     datasets: [
       {
-        data: [135, 98, 67],
-        backgroundColor: ["#2196F3", "#4CAF50", "#00BCD4"],
+        data: dashboard?.volumeByLOB?.data || [],
+        backgroundColor: LOB_COLORS,
       },
     ],
   };
 
   // Submission Assignment Chart
+  const assignedCount = myCases.filter((row) => row.agent).length;
   const submissionAssignmentData = {
     labels: [t("underwritingDashboard.assignedToUw"), t("underwritingDashboard.unassigned")],
     datasets: [
       {
-        data: [78, 22],
+        data: [assignedCount, myCases.length - assignedCount],
         backgroundColor: ["#4CAF50", "#FF9800"],
       },
     ],
   };
 
+  const openTasks = [...myCases]
+    .filter((row) => row.requirementDue)
+    .sort((a, b) => String(a.requirementDue).localeCompare(String(b.requirementDue)))
+    .slice(0, OPEN_TASK_LIMIT);
+
+  const openCase = (rowData) => navigate(`/agent/quotedetailview/${rowData.quotationId}`);
+
   const statusBodyTemplate = (rowData) => {
     const getSeverity = (status) => {
       switch (status) {
-        case "APPROVED":
+        case "Approved":
+        case "CustomerAccepted":
           return "success";
-        case "IN REVIEW":
+        case "SubmittedToInsurer":
           return "warning";
-        case "PENDING REVIEW":
+        case "PendingCustomer":
           return "info";
-        case "REJECTED":
+        case "Rejected":
           return "danger";
         default:
           return null;
@@ -242,13 +179,14 @@ const UnderwritingDashboard = () => {
     };
     return (
       <Badge
-        value={rowData.priority.toUpperCase()}
+        value={String(rowData.priority || "-").toUpperCase()}
         style={{ backgroundColor: getPriorityColor(rowData.priority) }}
       />
     );
   };
 
   const riskScoreBodyTemplate = (rowData) => {
+    if (rowData.riskScore === undefined || rowData.riskScore === null) return "-";
     const getScoreColor = (score) => {
       if (score >= 80) return "#F44336";
       if (score >= 60) return "#FF9800";
@@ -275,38 +213,18 @@ const UnderwritingDashboard = () => {
     );
   };
 
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="flex gap-2">
-        <Button
-          icon="pi pi-eye"
-          rounded
-          text
-          severity="info"
-          onClick={() => navigate(`/underwriting/case/${rowData.caseId}`)}
-        />
-        <Button
-          icon="pi pi-pencil"
-          rounded
-          text
-          onClick={() => navigate(`/underwriting/edit/${rowData.caseId}`)}
-        />
-        <Button
-          icon={rowData.watchedCases ? "pi pi-star-fill" : "pi pi-star"}
-          rounded
-          text
-          severity="warning"
-        />
-      </div>
-    );
-  };
+  const actionBodyTemplate = (rowData) => (
+    <div className="flex gap-2">
+      <Button icon="pi pi-eye" rounded text severity="info" onClick={() => openCase(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
+    </div>
+  );
 
   return (
     <div className="underwriting-dashboard">
+      <Toast ref={toast} />
       <div className="dashboard-header">
         <div className="header-left">
           <h2>{t("underwritingDashboard.myWorkbench")}</h2>
-          <p>{t("underwritingDashboard.connectedUnderwriting")}</p>
         </div>
         <div className="header-right">
           <Dropdown
@@ -318,7 +236,7 @@ const UnderwritingDashboard = () => {
             label={t("underwritingDashboard.newSubmission")}
             icon="pi pi-plus"
             severity="success"
-            onClick={() => navigate("/underwriting/new")}
+            onClick={() => navigate("/agent/createlead")}
           />
         </div>
         <div className="mobile-header-actions">
@@ -331,7 +249,7 @@ const UnderwritingDashboard = () => {
             label={t("underwritingDashboard.newSubmission")}
             icon="pi pi-plus"
             severity="success"
-            onClick={() => navigate("/underwriting/new")}
+            onClick={() => navigate("/agent/createlead")}
           />
         </div>
       </div>
@@ -463,17 +381,17 @@ const UnderwritingDashboard = () => {
           <DataTable
             value={myCases}
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25]}
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             className="submissions-table"
           >
             <Column field="caseId" header={t("underwritingDashboard.caseId")} />
             <Column field="proposedInsured" header={t("underwritingDashboard.proposedInsured")} />
             <Column field="agent" header={t("underwritingDashboard.agent")} />
-            <Column field="faceAmount" header={t("underwritingDashboard.faceAmount")} body={(row) => formatCurrency(parseFloat(String(row.faceAmount || "0").replace(/[^0-9.]/g, "")) || 0)} />
+            <Column field="faceAmount" header={t("underwritingDashboard.faceAmount")} body={(row) => formatCurrency(row.faceAmount)} />
             <Column field="productType" header={t("underwritingDashboard.productType")} />
             <Column body={riskScoreBodyTemplate} header={t("underwritingDashboard.riskScore")} />
-            <Column field="requirementDue" header={t("underwritingDashboard.nextRequirementDue")} />
+            <Column field="requirementDue" header={t("underwritingDashboard.nextRequirementDue")} body={(row) => formatAppDate(row.requirementDue)} />
             <Column body={priorityBodyTemplate} header={t("underwritingDashboard.priority")} />
             <Column body={statusBodyTemplate} header={t("underwritingDashboard.status")} />
             <Column
@@ -544,64 +462,21 @@ const UnderwritingDashboard = () => {
         {/* Open Tasks Section */}
         <Card title={t("underwritingDashboard.openTasks")} className="tasks-section">
           <div className="tasks-list">
-            <div className="task-item">
-              <div className="task-info">
-                <i className="pi pi-clock task-icon"></i>
-                <div>
-                  <span className="task-title">{t("underwritingDashboard.followUpLossRun")}</span>
-                  <span className="task-meta">SUB1256789 • 3 {t("underwritingDashboard.daysAgo")}</span>
+            {openTasks.map((task) => (
+              <div className="task-item" key={task.caseId}>
+                <div className="task-info">
+                  <i
+                    className={isOverdue(task) ? "pi pi-exclamation-triangle task-icon" : "pi pi-clock task-icon"}
+                    style={isOverdue(task) ? { color: "#FF9800" } : undefined}
+                  ></i>
+                  <div>
+                    <span className="task-title">{`${task.proposedInsured || "-"} (${task.productType || "-"})`}</span>
+                    <span className="task-meta">{`${task.caseId} • ${formatAppDate(task.requirementDue)}`}</span>
+                  </div>
                 </div>
+                <Button icon="pi pi-eye" rounded text severity="info" size="small" onClick={() => openCase(task)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
               </div>
-              <Button label={t("underwritingDashboard.markAsClosed")} size="small" />
-            </div>
-            <div className="task-item">
-              <div className="task-info">
-                <i
-                  className="pi pi-exclamation-triangle task-icon"
-                  style={{ color: "#FF9800" }}
-                ></i>
-                <div>
-                  <span className="task-title">{t("underwritingDashboard.updateSov")}</span>
-                  <span className="task-meta">SUB1256790 • {t("underwritingDashboard.yesterday")}</span>
-                </div>
-              </div>
-              <Button label={t("underwritingDashboard.markAsClosed")} size="small" />
-            </div>
-            <div className="task-item">
-              <div className="task-info">
-                <i
-                  className="pi pi-check-circle task-icon"
-                  style={{ color: "#4CAF50" }}
-                ></i>
-                <div>
-                  <span className="task-title">{t("underwritingDashboard.reviewLossHistory")}</span>
-                  <span className="task-meta">SUB1378890 • {t("underwritingDashboard.today")}</span>
-                </div>
-              </div>
-              <Button label={t("underwritingDashboard.markAsClosed")} size="small" />
-            </div>
-            <div className="task-item">
-              <div className="task-info">
-                <i className="pi pi-user task-icon"></i>
-                <div>
-                  <span className="task-title">
-                    {t("underwritingDashboard.runSanctionCheck")}
-                  </span>
-                  <span className="task-meta">SUB0321985 • 2 {t("underwritingDashboard.hoursAgo")}</span>
-                </div>
-              </div>
-              <Button label={t("underwritingDashboard.markAsClosed")} size="small" />
-            </div>
-            <div className="task-item">
-              <div className="task-info">
-                <i className="pi pi-file task-icon"></i>
-                <div>
-                  <span className="task-title">{t("underwritingDashboard.runOfac")}</span>
-                  <span className="task-meta">SUB0345678 • {t("underwritingDashboard.justNow")}</span>
-                </div>
-              </div>
-              <Button label={t("underwritingDashboard.markAsClosed")} size="small" />
-            </div>
+            ))}
           </div>
         </Card>
       </div>

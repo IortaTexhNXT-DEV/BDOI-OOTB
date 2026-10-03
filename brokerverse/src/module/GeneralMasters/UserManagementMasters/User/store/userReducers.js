@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import {
   getAdditionalRoleTabelMiddleWare,
   getAdditionalRoleViewMiddleWare,
@@ -20,26 +21,31 @@ const mapUserData = (user) => {
   const formatDate = (dateString) => {
     if (!dateString) return "";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-GB");
+    return formatConfiguredDate(date, { empty: "" });
   };
 
   return {
     ...user,
-    id: user.id,
+    id: user.userId ?? user.id,
     userName: user.username || "",
-    employeeCode: user.agentProfile?.employeeCode || "N/A",
+    employeeCode: user.employeeCode || user.agentProfile?.employeeCode || "N/A",
+    // Role names (as set up in Role master); the code only when a name is missing
     assignedRole:
-      Array.isArray(user.roles) && user.roles.length > 0
+      Array.isArray(user.roleNames) && user.roleNames.length > 0
+        ? user.roleNames.join(", ")
+        : Array.isArray(user.roles) && user.roles.length > 0
         ? user.roles.join(", ")
         : "No Role",
     email: user.email || "",
     phoneNumber: user.agentProfile?.mobile || "",
-    modifiedBy: user.updatedBy || "System",
+    modifiedBy: user.updatedByName || user.updatedBy || "-",
     modifiedOn: formatDate(user.updatedAt || user.createdAt),
-    status: "",
+    status: user.status || "",
     action: "",
     // Store full user data for view/edit
-    fullUserData: user,
+    fullUserData: { ...user, temporaryPassword: undefined },
+    // shown once in its dialog, never kept in the store
+    temporaryPassword: undefined,
   };
 };
 
@@ -135,7 +141,6 @@ const usersReducer = createSlice({
       state.lastAddUserError = null;
     });
     builder.addCase(postAddUserMiddleware.fulfilled, (state, action) => {
-      console.log(action.payload, "find action.payload");
       state.loading = false;
       state.lastAddUserError = null;
       // Map and add new user to list
@@ -160,7 +165,6 @@ const usersReducer = createSlice({
 
     builder.addCase(patchUserEditMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      console.log(state.userList, "state.countryTableList");
       // Map the updated user data
       const mappedUser = mapUserData(action.payload);
       const updatedIndex = state.userList.findIndex(
@@ -252,7 +256,6 @@ const usersReducer = createSlice({
         ...state.mainBranchAccessTableList,
         newItem2,
       ];
-      console.log(state.mainBranchAccessTableList, "mainBranchAccessTableList");
     });
     builder.addCase(postViewMainBranchUser.rejected, (state, action) => {
       state.loading = false;
@@ -313,7 +316,6 @@ const usersReducer = createSlice({
           ...state.mainAdditionalTableList,
           newItem2,
         ];
-        console.log(state.mainAdditionalTableList, "mainAdditionalTableList");
       }
     );
     builder.addCase(

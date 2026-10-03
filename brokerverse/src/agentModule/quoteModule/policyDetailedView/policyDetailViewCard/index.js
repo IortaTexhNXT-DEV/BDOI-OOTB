@@ -1,33 +1,26 @@
 import { Card } from "primereact/card";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
-import SvgBlueArrow from "../../../../assets/agentIcon/SvgBlueArrow";
-import { Button } from "primereact/button";
-import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { useFormik } from "formik";
 import { getpolicyDetailedMiddleware } from "../store/policyDetailedMiddleware";
+import { formatDate } from "../../../../utility/dateFormat";
 
-const handleSubmit = () => {
-  // TODO: integrate policy updates when API is ready
-};
-
-const PolicyDetailedViewCard = ({ action, state, policyId }) => {
+const PolicyDetailedViewCard = ({ policyId }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const { policydetailedlist, loading } = useSelector(
-    ({ policyDetailedViewMainReducers }) => {
-      return {
-        loading: policyDetailedViewMainReducers?.loading,
-        policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
-      };
-    }
+  const { policydetailedlist: loaded, loading } = useSelector(
+    ({ policyDetailedViewMainReducers }) => ({
+      loading: policyDetailedViewMainReducers?.loading,
+      policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
+    })
   );
+  // The page loads its own policy (GET /policies/:id); a policy left in the store by another page is not shown.
+  const matches = (p) => p && (!policyId || [p.policyId, p.id, p.policyNumber].includes(policyId));
+  const policydetailedlist = matches(loaded) ? loaded : null;
 
   // Fetch policy details when component mounts
   useEffect(() => {
@@ -36,19 +29,18 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
     }
   }, [dispatch, policyId]);
 
-  const formik = useFormik({
-    initialValues: {
-      PolicyNumber: policydetailedlist?.policyNumber || "",
-      Production: policydetailedlist?.production || "",
-      Inception: policydetailedlist?.inception || "",
-      IssueDate: policydetailedlist?.issuedDate || "",
-      Expiry: policydetailedlist?.expiry || "",
-    },
-    enableReinitialize: true, // Allow formik to reinitialize when policydetailedlist changes
-    onSubmit: () => {
-      handleSubmit();
-    },
-  });
+  const participants = policydetailedlist?.participants || [];
+  const insurerName =
+    participants.find((p) => p.isLead)?.insuranceCompanyName ||
+    policydetailedlist?.insuranceCompanyName ||
+    policydetailedlist?.quotation?.participantDetails?.[0]?.insuranceCompanyName ||
+    "";
+  const productName =
+    policydetailedlist?.productType || policydetailedlist?.product || policydetailedlist?.quotation?.productType || "";
+  // Totals of the policy record (sum insured and gross premium as issued)
+  const totalCoverage = Number(policydetailedlist?.totalSumInsured ?? policydetailedlist?.sumInsured ?? 0);
+  const grossPremium = Number(policydetailedlist?.grossPremium ?? policydetailedlist?.premiumTotal ?? 0);
+  const dateOf = (value) => (value ? formatDate(value, { empty: "" }) : "");
 
   if (loading) {
     return (
@@ -67,29 +59,24 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
       <Card>
         <div className="policy__details__card__view__container__title">
           {t("coverageDetailsReview.policyDetails")}
-          {/* <SvgDot /> */}
         </div>
         <div className="grid mt-2">
           <div className="col-12">
             <InputTextField
               label={t("coverageDetailsReview.insuranceCompany")}
-              value={
-                policydetailedlist?.quotation?.participantDetails?.[0]
-                  ?.insuranceCompanyName || "SecureGuard Insurance"
-              }
+              value={insurerName}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.product")}
-              value={policydetailedlist?.quotation?.productType || "Motor"}
+              value={productName}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.policyNumber")}
               value={policydetailedlist?.policyNumber || ""}
-              onChange={formik.handleChange("PolicyNumber")}
             />
           </div>
         </div>
@@ -98,13 +85,13 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.production")}
-              value={policydetailedlist?.production || ""}
+              value={dateOf(policydetailedlist?.production)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.inception")}
-              value={policydetailedlist?.inception || ""}
+              value={dateOf(policydetailedlist?.inception)}
             />
           </div>
         </div>
@@ -113,130 +100,29 @@ const PolicyDetailedViewCard = ({ action, state, policyId }) => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.issueDate")}
-              value={policydetailedlist?.issuedDate || ""}
+              value={dateOf(policydetailedlist?.issuedDate)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.expiry")}
-              value={policydetailedlist?.expiry || ""}
+              value={dateOf(policydetailedlist?.expiry)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.totalCoverage")}
-              value={formatCurrency(
-                policydetailedlist?.quotation?.participantDetails?.reduce(
-                  (sum, participant) => {
-                    const coverage = parseFloat(
-                      participant.sumInsuredCurrency?.replace(/[^0-9.-]/g, "") || 0
-                    );
-                    return sum + coverage;
-                  },
-                  0
-                ) || 0
-              )}
+              value={formatCurrency(totalCoverage)}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               label={t("coverageDetailsReview.grossPremium")}
-              value={formatCurrency(
-                policydetailedlist?.quotation?.participantDetails?.reduce(
-                  (sum, participant) => {
-                    const premium = parseFloat(
-                      participant.premiumCurrency?.replace(/[^0-9.-]/g, "") || 0
-                    );
-                    return sum + premium;
-                  },
-                  0
-                ) || 0
-              )}
+              value={formatCurrency(grossPremium)}
             />
           </div>
         </div>
 
-        {/* <div className="policy__detail__view__title mt-2">Documents</div>
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() => handlePolicySubmit()}
-              className="policy__detail__view__box"
-            >
-              <div className="grid mt-2">
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__title">Policy</div>
-                </div>
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__container">
-                    <div className="policy__detail__view__box__sub__title">
-                      View
-                    </div>
-                    <SvgBlueArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() => handleInvoiceSubmit()}
-              className="policy__detail__view__box"
-            >
-              <div className="grid mt-2">
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__title">
-                    Invoice
-                  </div>
-                </div>
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__container">
-                    <div className="policy__detail__view__box__sub__title">
-                      View
-                    </div>
-                    <SvgBlueArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <div
-              onClick={() => handleAccountingSubmit()}
-              className="policy__detail__view__box"
-            >
-              <div className="grid mt-2">
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__title">
-                    Premium Accounting Entries
-                  </div>
-                </div>
-                <div className="col-12 md:col-6 lg:col-6">
-                  <div className="policy__detail__view__box__container">
-                    <div className="policy__detail__view__box__sub__title">
-                      View
-                    </div>
-                    <SvgBlueArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        {action === "edit" && (
-          <div className="policy__detail__view__btn__container mt-4">
-            <div className="paylater__btn__container">
-              <Button className="back__btn" onClick={handlePayLater}>
-                Pay Later
-              </Button>
-            </div>
-            <div className="proceed__btn__container">
-              <Button className="next__btn" onClick={handleProceedToPayment}>
-                Proceed to payment
-              </Button>
-            </div>
-          </div>
-        )} */}
       </Card>
     </div>
   );

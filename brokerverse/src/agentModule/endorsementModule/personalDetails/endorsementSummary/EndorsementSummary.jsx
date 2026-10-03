@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import "./index.scss";
@@ -13,6 +13,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { BASE_URL } from "../../../../utility/constant";
 import authService from "../../../../services/authService";
 import policyService from "../../../../services/policyService";
+import endorsementService from "../../../../services/endorsementService";
 import { fetchProductTemplateByIdMiddleware } from "../../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import ShareOption from "../../../quoteModule/quoteDetailView/Modal/ShareOption";
 import { formatDate } from "@fullcalendar/core/index.js";
@@ -20,19 +21,43 @@ import axios from "axios";
 import { validateAccountingEquation } from "../../../../utility/accountingValidation";
 import { isFireLob } from "../../constants/endorsementCategories";
 
+import { numberLocale } from "../../../../utility/currencyConverter";
+import useTaxRates from "../../../quoteModule/utils/useTaxRates";
+import { getTaxRates } from "../../../quoteModule/utils/premiumCalculations";
+import { confirmAction, notifyError } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 const EndorsementSummary = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { state } = useLocation();
+  const { state: navState } = useLocation();
   const { id: endorsementIdFromUrl } = useParams();
+  // Opened from a link, a notification or a refresh: load the endorsement instead of relying on navigation state
+  const [loadedState, setLoadedState] = useState(null);
+  useEffect(() => {
+    if (navState?.endorsementData || !endorsementIdFromUrl) return;
+    let cancelled = false;
+    endorsementService.getEndorsementById(endorsementIdFromUrl).then((res) => {
+      const data = res?.data?.data || res?.data || res;
+      if (cancelled || !data?.id) return;
+      setLoadedState({
+        endorsementId: data.id,
+        policyId: data.policyId,
+        clientId: data.clientId,
+        clientName: data.clientName,
+        endorsementData: data,
+      });
+    }).catch(() => {});
+    return () => { cancelled = true; };
+  }, [navState?.endorsementData, endorsementIdFromUrl]);
+  const state = navState?.endorsementData ? navState : loadedState || navState;
   const [modalVisible, setModalVisible] = useState(false);
 
   const [policyData, setPolicyData] = useState(null);
-  const [relatedPolicy, setRelatedPolicy] = useState(null);
-  const [checkingPolicy, setCheckingPolicy] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setRelatedPolicy] = useState(null);
+  const [, setCheckingPolicy] = useState(false);
+  const [isLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
   const { productConfigurator } = useSelector(
@@ -100,7 +125,7 @@ const EndorsementSummary = ({ action }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch related policy:", error);
+      logger.error("Failed to fetch related policy:", error);
     } finally {
       setCheckingPolicy(false);
     }
@@ -139,21 +164,41 @@ const EndorsementSummary = ({ action }) => {
       );
 
       if (!validation.isValid) {
-        console.warn("⚠️ [EndorsementSummary] Accounting equation mismatch:", {
+        logger.warn("[EndorsementSummary] Accounting equation mismatch:", {
           ...validation.breakdown,
           calculatedTotal: validation.calculatedTotal,
           difference: validation.difference,
           endorsementId: state?.endorsementId,
         });
-      } else {
-        console.log("✅ [EndorsementSummary] Accounting equation validates correctly:", {
-          ...validation.breakdown,
-          calculatedTotal: validation.calculatedTotal,
-          endorsementId: state?.endorsementId,
-        });
       }
     }
   }, [coverageChanges, state?.endorsementId]);
+
+  // tax rates the premium was priced with: the server's (premiumChange.taxRates), else the quotation's source
+  // (the premium tax and charge engine, Premium Taxes & LGU Rates)
+  const settingsTaxRates = useTaxRates();
+  const taxRates = useMemo(() => {
+    const priced =
+      state?.endorsementData?.premiumChange?.taxRates ||
+      state?.endorsementData?.summary?.premiumChange?.taxRates;
+    if (priced) {
+      return {
+        valueAddedTax: Number(priced.valueAddedTax) || 0,
+        documentaryStampTax: Number(priced.documentaryStampTax) || 0,
+        localGovernmentTax: Number(priced.localGovernmentTax) || 0,
+      };
+    }
+    return getTaxRates(productConfigurator, settingsTaxRates);
+  }, [state?.endorsementData, productConfigurator, settingsTaxRates]);
+  const percentOf = (rate) => Number((Number(rate || 0) * 100).toFixed(4));
+  // premium change of the endorsement: positive = additional premium, negative = return premium
+  const premiumDelta = useMemo(() => {
+    const raw =
+      state?.endorsementData?.premiumDelta ??
+      state?.endorsementData?.summary?.premiumDelta;
+    const n = Number(raw);
+    return raw === undefined || raw === null || raw === "" || Number.isNaN(n) ? null : n;
+  }, [state?.endorsementData]);
 
   const quotationData = policyData?.quotation;
 
@@ -216,12 +261,13 @@ const EndorsementSummary = ({ action }) => {
   const handleSendForApproval = async () => {
     setIsSending(true);
     if (!state?.endorsementId) {
-      alert(t("endorsementSummary.endorsementIdNotFound"));
+      notifyError(t("endorsementSummary.endorsementIdNotFound"));
       setIsSending(false);
       return;
     }
 
-    if (!window.confirm(t("endorsementSummary.confirmSendToInsurance"))) {
+    if (!(await confirmAction(t("endorsementSummary.confirmSendToInsurance")))) {
+      setIsSending(false);
       return;
     }
 
@@ -279,46 +325,34 @@ const EndorsementSummary = ({ action }) => {
         setIsSending(false);
       } else {
         setIsSending(false);
-        alert(t("endorsementSummary.failedToSend"));
+        notifyError(t("endorsementSummary.failedToSend"));
       }
     } catch (error) {
       setIsSending(false);
-      alert(t("endorsementSummary.errorSending"));
-      console.error(error);
+      notifyError(t("endorsementSummary.errorSending"));
     } finally {
       setIsSending(false);
     }
 
     // try {
     //   const response = await fetch(
-    //     `${BASE_URL}/quotations/${quotationData.quotationId}/send-for-approval`,
     //     {
     //       method: "POST",
     //       headers: {
     //         "Content-Type": "application/json",
-    //         ...authService.getAuthHeader(),
     //       },
-    //       body: JSON.stringify({ sentBy: "agent" }),
     //     }
     //   );
 
-    //   const result = await response.json();
-
     //   if (result.success) {
-    //     alert(`Quote sent to ${result.sentTo} successfully!`);
     //     // Refresh quotation data
     //     const refreshed = await dispatch(
-    //       getQuotationByIdMiddleware(quotationData.quotationId)
     //     );
     //     if (refreshed.type.endsWith("/fulfilled")) {
-    //       setQuotationData(refreshed.payload);
     //     }
     //   } else {
-    //     alert(`Failed: ${result.message}`);
     //   }
     // } catch (error) {
-    //   alert("Error sending quote for approval");
-    //   console.error(error);
     // }
   };
 
@@ -366,7 +400,7 @@ const EndorsementSummary = ({ action }) => {
       >
         <SvgLeftArrow />
         <div className="left_arrow_text">
-          {t("endorsementSummary.policyNumberColon")} {state.endorsementData?.policyNumber || t("policyDetail.nA")}
+          {t("endorsementSummary.policyNumberColon")} {state?.endorsementData?.policyNumber || t("policyDetail.nA")}
         </div>
       </div>
       <Card className="mt-4">
@@ -378,7 +412,7 @@ const EndorsementSummary = ({ action }) => {
         <div className="quote_details">
           <label>{t("endorsementSummary.checkEndorsementDetails")}</label>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <label>{t("endorsementSummary.endorsementIdColon")} {state?.endorsementId || t("policyDetail.nA")}</label>
+            <label>{t("endorsementSummary.endorsementIdColon")} {state?.endorsementData?.endorsementNumber || state?.endorsementId || t("policyDetail.nA")}</label>
           </div>
         </div>
         <div className="sub_title">
@@ -607,37 +641,37 @@ const EndorsementSummary = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.building")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.Building ?? 0).toLocaleString()}
+                  {(fireSumInsured?.Building ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.plantAndMachinery")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.PlantAndMachinery ?? 0).toLocaleString()}
+                  {(fireSumInsured?.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.otherContents")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.OtherContents ?? 0).toLocaleString()}
+                  {(fireSumInsured?.OtherContents ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.grossProfit")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.GrossProfit ?? 0).toLocaleString()}
+                  {(fireSumInsured?.GrossProfit ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.wages")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.Wages ?? 0).toLocaleString()}
+                  {(fireSumInsured?.Wages ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("endorsementSummary.lossOfRent")}</label>
                 <label className="alpha_text">
-                  {(fireSumInsured?.LossOfRent ?? 0).toLocaleString()}
+                  {(fireSumInsured?.LossOfRent ?? 0).toLocaleString(numberLocale())}
                 </label>
               </div>
             </div>
@@ -650,7 +684,7 @@ const EndorsementSummary = ({ action }) => {
                       {cover?.coverDesc || `Cover ${i + 1}`}
                     </label>
                     <label className="alpha_text">
-                      SI: {(cover?.si ?? 0).toLocaleString()} | Rate:{" "}
+                      SI: {(cover?.si ?? 0).toLocaleString(numberLocale())} | Rate:{" "}
                       {cover?.rate ?? 0}% | Premium: {formatCurrency(cover?.premium ?? 0)}
                     </label>
                   </div>
@@ -718,10 +752,7 @@ const EndorsementSummary = ({ action }) => {
           </div>
           <div className="quote_details">
             <label className="insurance_text">
-              {t("endorsementSummary.dst")} (
-              {productConfigurator?.configuration?.taxes?.documentary_stamp_tax ??
-                "12.5"}
-              %)
+              {t("endorsementSummary.dst")} ({percentOf(taxRates.documentaryStampTax)}%)
             </label>
             <label className="alpha_text">
               {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
@@ -730,10 +761,7 @@ const EndorsementSummary = ({ action }) => {
           </div>
           <div className="quote_details">
             <label className="insurance_text">
-              {t("endorsementSummary.vat")} (
-              {productConfigurator?.configuration?.taxes?.value_added_tax ??
-                "12"}
-              %)
+              {t("endorsementSummary.vat")} ({percentOf(taxRates.valueAddedTax)}%)
             </label>
             <label className="alpha_text">
               {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
@@ -742,10 +770,7 @@ const EndorsementSummary = ({ action }) => {
           </div>
           <div className="quote_details">
             <label className="insurance_text">
-              LGT (
-              {productConfigurator?.configuration?.taxes
-                ?.local_government_tax ?? "2"}
-              %)
+              {t("endorsementSummary.lgt", "LGT")} ({percentOf(taxRates.localGovernmentTax)}%)
             </label>
             <label className="alpha_text">
               {state?.endorsementData?.status === "InitiateCancel" ? "-" : ""}
@@ -773,6 +798,21 @@ const EndorsementSummary = ({ action }) => {
               {formatCurrency(coverageChanges?.Grosspremium ?? coverageChanges?.totalPremium ?? firePremiumDetails?.totalPremium ?? 0)}
             </label>
           </div>
+          {premiumDelta !== null && (
+            <div className="quote_details">
+              <label className="gross_text">
+                {premiumDelta > 0
+                  ? t("endorsementSummary.additionalPremium", "Additional premium")
+                  : premiumDelta < 0
+                  ? t("endorsementSummary.returnPremium", "Return premium")
+                  : t("endorsementSummary.premiumChange", "Premium change")}
+              </label>
+              <label className="gross_count">
+                {premiumDelta < 0 ? "-" : ""}
+                {formatCurrency(Math.abs(premiumDelta))}
+              </label>
+            </div>
+          )}
         </div>
       </Card>
       <div className="button_component">

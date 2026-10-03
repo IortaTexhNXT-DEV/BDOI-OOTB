@@ -105,7 +105,7 @@
   }
   .addbutton_container {
     background-color: #0072d8;
-    border-radius: 60px;
+    border-radius: 6px;
     // width: 100px !important;
     height: 38px;
     gap: 10px;
@@ -131,7 +131,7 @@
   }
   .bulk_button_container {
     background-color: #0072d8;
-    border-radius: 60px;
+    border-radius: 6px;
     // width: 100px !important;
     height: 38px;
     gap: 10px;
@@ -331,11 +331,11 @@
   }
 
   .p-datatable .p-datatable-tbody > tr > td:nth-child(5) {
-    // Customer Code column
+    // Name column: wrap between words, only split a single over-long word
     text-align: left;
     white-space: normal;
-    word-wrap: break-word;
-    word-break: break-all;
+    overflow-wrap: break-word;
+    word-break: normal;
     max-width: 200px;
     padding: 1rem !important;
     vertical-align: middle;
@@ -452,7 +452,7 @@
 
     .update_btnlabel {
       padding: 8px 24px;
-      border-radius: 30px;
+      border-radius: 6px;
       background-color: #0072d8;
       color: #fff;
       font-family: "Nunito", Arial, sans-serif;
@@ -479,4 +479,44 @@
       }
     }
   }
+}
+
+// Header actions are PrimeReact buttons: keep the pill look, drop the default button border / shadow.
+.overall__policyreceipts__container {
+  .bulk_button_container.p-button,
+  .addbutton_container.p-button {
+    border: none;
+    box-shadow: none;
+  }
+  .bulk_button_container.p-button:focus-visible,
+  .addbutton_container.p-button:focus-visible {
+    outline: 2px solid #1a1a1a;
+    outline-offset: 2px;
+  }
+  .p-datatable .p-datatable-tbody > tr > td.receipts_name_cell {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+}
+
+// banner after a receipt is recorded, and its row in the list
+.receipt-recorded {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  width: 100%;
+}
+
+.receipt-recorded__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.p-datatable .p-datatable-tbody > tr.receipt-row--recorded > td {
+  background: #eff7f2 !important;
 }

@@ -15,18 +15,26 @@ import ShareOption from "./Modal/ShareOption";
 import StatusBadge from "../../../components/StatusBadge";
 import { canConvertToPolicy } from "../../../utils/statusHelpers";
 import { calculatePremiumBreakdown } from "../utils/premiumCalculations";
+import useTaxRates from "../utils/useTaxRates";
 import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import { getLeadByIdMiddleware } from "../../leadModule/Store/leadMiddleware";
 import { BASE_URL } from "../../../utility/constant";
 import authService from "../../../services/authService";
-import quotationService from "../../../services/quotationService";
 import policyService from "../../../services/policyService";
+import clientService from "../../../services/clientService";
 import { QuotationStatus } from "../../../utils/statusHelpers";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
 import { isFireLob, isIarLob } from "../../endorsementModule/constants/endorsementCategories";
 import { Toast } from "primereact/toast";
 import QuotationAuditTrail from "../quotationAuditTrail";
 
+import { numberLocale } from "../../../utility/currencyConverter";
+import { vehicleColourLabel } from "../../../utility/quoteOptions";
+import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
+import { notifyError } from "../../../utility/dialogs";
+import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
+import CustomerResponseActions from "../customerResponse/CustomerResponseActions";
+import logger from "../../../utility/logger";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
   "Fire And Allied Peril": "fireLead.opt.cover.fireAndAlliedPeril",
@@ -43,6 +51,7 @@ const COVER_DESC_TO_I18N_KEY = {
 const QuoteDetailView = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const motorTariff = useMotorTariff();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { state } = useLocation();
@@ -65,15 +74,11 @@ const QuoteDetailView = ({ action }) => {
     const fetchQuotation = async () => {
       // If we already have data from navigation, don't fetch
       if (quotationData) {
-        console.log("=== USING QUOTATION DATA FROM NAVIGATION ===");
-        console.log("Quotation data:", quotationData);
         return;
       }
 
       // If we have a quotation ID, fetch the data
       if (quotationIdFromParams) {
-        console.log("=== FETCHING QUOTATION FROM API ===");
-        console.log("Quotation ID:", quotationIdFromParams);
         setIsLoading(true);
 
         try {
@@ -82,15 +87,12 @@ const QuoteDetailView = ({ action }) => {
           );
 
           if (result.type.endsWith("/fulfilled")) {
-            console.log("✅ Quotation fetched successfully:", result.payload);
             setQuotationData(result.payload);
           } else {
-            console.error("❌ Failed to fetch quotation:", result.payload);
-            alert(t("quoteDetailView.failedToLoad"));
+            notifyError(t("quoteDetailView.failedToLoad"));
           }
         } catch (error) {
-          console.error("❌ Error fetching quotation:", error);
-          alert(t("quoteDetailView.errorLoading"));
+          notifyError(t("quoteDetailView.errorLoading"));
         } finally {
           setIsLoading(false);
         }
@@ -107,20 +109,8 @@ const QuoteDetailView = ({ action }) => {
       };
     }
   );
-  console.log("FETCHING", productConfigurator);
-  useEffect(() => {
-    const productType = quotationData?.productType || "";
-    const isFire = productType.toLowerCase().includes("fire");
-    const isIar = isIarLob(productType);
-    if (quotationData && !isFire && !isIar) {
-      dispatch(
-        fetchProductTemplateByIdMiddleware({
-          templateCode: "MOT-003-2025",
-        })
-      );
-    }
-  }, [quotationData, dispatch]);
-
+  const settingsTaxRates = useTaxRates();
+  // Fire / IAR layouts (built on the fire and IAR premium details of the quote wizard)
   const isIarLOB = useMemo(
     () => isIarLob(quotationData?.productType),
     [quotationData?.productType]
@@ -130,6 +120,20 @@ const QuoteDetailView = ({ action }) => {
     () => !isIarLOB && isFireLob(quotationData?.productType),
     [quotationData?.productType, isIarLOB]
   );
+  // Vehicle details and motor covers only for a motor quotation: the line of business of the quotation (product
+  // master line), since a fire or casualty product need not say so in its name (e.g. Householder Insurance)
+  const quoteLob = String(quotationData?.lob || "").toUpperCase();
+  const isMotorLOB = quoteLob ? quoteLob === "MOTOR" : !isFireLOB && !isIarLOB;
+
+  useEffect(() => {
+    if (quotationData && isMotorLOB) {
+      dispatch(
+        fetchProductTemplateByIdMiddleware({
+          templateCode: "MOT-003-2025",
+        })
+      );
+    }
+  }, [quotationData, isMotorLOB, dispatch]);
 
   const fireRiskDetails = quotationData?.fireRiskDetails || quotationData?.fireRisk || {};
   const firePremiumDetails = quotationData?.firePremiumDetails || quotationData?.firePremium || {};
@@ -190,19 +194,31 @@ const QuoteDetailView = ({ action }) => {
     }
 
     // Motor: FALLBACK: Calculate from coverage details
-    return calculatePremiumBreakdown(quotationData, productConfigurator);
+    return calculatePremiumBreakdown(quotationData, productConfigurator, settingsTaxRates);
   }, [
     quotationData,
     productConfigurator,
+    settingsTaxRates,
     isFireLOB,
     isIarLOB,
     firePremiumDetails,
     iarPremiumDetails,
   ]);
 
-  console.log(calculatedPremiums, "calculatedPremiums --- QUOTE DETAIL VIEW");
+  // Tax rate (in %) the quotation was priced with: the server breakdown's rates, else derived
+  // from the stored amounts, else the product template / configured settings.
+  const taxRatePercent = (key, templateKey) => {
+    const toPct = (rate) => Number((Number(rate) * 100).toFixed(4));
+    const priced = quotationData?.taxRates?.[key];
+    if (priced !== undefined && priced !== null) return toPct(priced);
+    const net = Number(String(calculatedPremiums?.netPremium ?? "").replace(/,/g, ""));
+    const amount = Number(String(calculatedPremiums?.[key] ?? "").replace(/,/g, ""));
+    if (net > 0 && amount > 0) return Number(((amount / net) * 100).toFixed(2));
+    // template tax values are not used by pricing (the configured tax.* rates are); they are not a fallback
+    return toPct(settingsTaxRates?.[key] || 0);
+  };
 
-  const { PolicyDetails, loading, currentLeadDetails } = useSelector(
+  const { currentLeadDetails } = useSelector(
     ({ policyDetailsReducer, leadReducer }) => {
       return {
         loading: policyDetailsReducer?.loading,
@@ -244,7 +260,7 @@ const QuoteDetailView = ({ action }) => {
         }
       }
     } catch (error) {
-      console.error("Failed to fetch related policy:", error);
+      logger.error("Failed to fetch related policy:", error);
     } finally {
       setCheckingPolicy(false);
     }
@@ -268,6 +284,24 @@ const QuoteDetailView = ({ action }) => {
       dispatch(getLeadByIdMiddleware(quotationData.leadRefId));
     }
   }, [dispatch, quotationData?.leadRefId]);
+
+  // A quotation without a lead (e.g. a renewal of a seeded or uploaded policy) takes the assured from its client.
+  const [quoteClient, setQuoteClient] = useState(null);
+  useEffect(() => {
+    const clientId = quotationData?.clientId;
+    if (quotationData?.leadRefId || !clientId) {
+      setQuoteClient(null);
+      return undefined;
+    }
+    let active = true;
+    clientService.getClientById(clientId).then((response) => {
+      const payload = response?.success ? response.data?.data || response.data : null;
+      if (active) setQuoteClient(payload || null);
+    });
+    return () => {
+      active = false;
+    };
+  }, [quotationData?.leadRefId, quotationData?.clientId]);
 
   const handleclick = async () => {
     const quotationId = quotationData?.quotationId;
@@ -297,8 +331,6 @@ const QuoteDetailView = ({ action }) => {
       return;
     }
 
-    console.log("Starting policy conversion flow for quotation:", quotationId);
-
     const convertIsIar = isIarLob(quotationData?.productType);
     const convertIsFire =
       !convertIsIar &&
@@ -315,6 +347,26 @@ const QuoteDetailView = ({ action }) => {
   };
   const handleLeadNavigation = () => {
     navigate("/agent/leadlisting");
+  };
+
+  /** Re-read the quotation (after a placement journey action). */
+  const loadQuotation = async () => {
+    if (!quotationData?.quotationId) return;
+    const refreshed = await dispatch(getQuotationByIdMiddleware(quotationData.quotationId));
+    if (refreshed.type.endsWith("/fulfilled")) setQuotationData(refreshed.payload);
+  };
+
+  // Assured: the quotation's lead, else (no lead) its client. The lead in the store is used only for a quote that has a lead.
+  const quoteLead = quotationData?.lead?.firstName || quotationData?.lead?.emailId
+    ? quotationData.lead
+    : quotationData?.leadRefId
+    ? currentLeadDetails
+    : null;
+  const joinName = (p) => [p?.firstName, p?.lastName].filter(Boolean).join(" ");
+  const assured = {
+    name: joinName(quoteLead) || quoteClient?.displayName || joinName(quoteClient) || quoteClient?.companyName || "",
+    email: quoteLead?.emailId || quoteClient?.emailId || quoteClient?.email || "",
+    phone: quoteLead?.contactNumber || quoteClient?.contactNumber || quoteClient?.phone || "",
   };
 
   // Send quote for customer approval
@@ -340,12 +392,12 @@ const QuoteDetailView = ({ action }) => {
       const result = await response.json();
 
       if (result.success) {
-        toast.current?.show({
-          severity: "success",
-          summary: t("quoteDetailView.success"),
-          detail: t("quoteDetailView.quoteSentToSuccess", { sentTo: result.sentTo }),
-          life: 3000,
-        });
+        // e-mail sending off: the quotation still waits for the customer, but nobody was e-mailed
+        toast.current?.show(
+          result.emailSending === false
+            ? { severity: "warn", summary: t("customerResponse.emailNotConfiguredTitle"), detail: t("customerResponse.emailNotConfigured"), life: 10000 }
+            : { severity: "success", summary: t("quoteDetailView.success"), detail: t("quoteDetailView.quoteSentToSuccess", { sentTo: result.sentTo }), life: 3000 }
+        );
         // Refresh quotation data
         const refreshed = await dispatch(
           getQuotationByIdMiddleware(quotationData.quotationId)
@@ -368,93 +420,17 @@ const QuoteDetailView = ({ action }) => {
         detail: t("quoteDetailView.errorSendingQuoteForApproval"),
         life: 3000,
       });
-      console.error(error);
+      logger.error(error);
     }
   };
 
-  // Submit quote to insurer
-  const handleSubmitToInsurer = async () => {
-    if (!window.confirm(t("quoteDetailView.submitToInsurerConfirm"))) {
-      return;
-    }
 
-    try {
-      const response = await fetch(
-        `${BASE_URL}/quotations/${quotationData.quotationId}/submit-to-insurer`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
-          body: JSON.stringify({ submittedBy: "agent" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (result.success) {
-        alert(t("quoteDetailView.quoteSubmittedToInsurer"));
-        // Refresh data
-        const refreshed = await dispatch(
-          getQuotationByIdMiddleware(quotationData.quotationId)
-        );
-        if (refreshed.type.endsWith("/fulfilled")) {
-          setQuotationData(refreshed.payload);
-        }
-      } else {
-        alert(t("quoteDetailView.failedMessage", { message: result.message }));
-      }
-    } catch (error) {
-      alert(t("quoteDetailView.errorSubmittingToInsurer"));
-      console.error(error);
-    }
-  };
-
-  // Manual status change (for SubmittedToInsurer -> Approved)
-  const handleStatusChange = async (newStatus) => {
-    if (!window.confirm(t("quoteDetailView.changeStatusConfirm", { newStatus }))) {
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        `${BASE_URL}/quotations/${quotationData.quotationId}/status`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...authService.getAuthHeader(),
-          },
-          body: JSON.stringify({ status: newStatus, updatedBy: "agent" }),
-        }
-      );
-
-      const result = await response.json();
-
-      if (response.ok) {
-        alert(t("quoteDetailView.statusUpdatedSuccess", { newStatus }));
-        // Refresh data
-        const refreshed = await dispatch(
-          getQuotationByIdMiddleware(quotationData.quotationId)
-        );
-        if (refreshed.type.endsWith("/fulfilled")) {
-          setQuotationData(refreshed.payload);
-        }
-      } else {
-        alert(t("quoteDetailView.failedMessage", { message: result.message || t("quoteDetailView.statusUpdateFailed") }));
-      }
-    } catch (error) {
-      alert(t("quoteDetailView.errorUpdatingStatus"));
-      console.error(error);
-    }
-  };
 
   // Show loading state
   if (isLoading) {
     return (
       <div className="overall__quotedetails__view__container">
-        <div className="header_title">{t("quoteDetailView.leads")}</div>
+        <div className="header_title">{t("quoteDetailView.pageTitle")}</div>
         <Card className="mt-4">
           <div style={{ textAlign: "center", padding: "40px" }}>
             <i
@@ -472,7 +448,7 @@ const QuoteDetailView = ({ action }) => {
   if (!quotationData) {
     return (
       <div className="overall__quotedetails__view__container">
-        <div className="header_title">{t("quoteDetailView.leads")}</div>
+        <div className="header_title">{t("quoteDetailView.pageTitle")}</div>
         <Card className="mt-4">
           <div style={{ textAlign: "center", padding: "40px" }}>
             <p>{t("quoteDetailView.noQuotationDataAvailable")}</p>
@@ -489,17 +465,20 @@ const QuoteDetailView = ({ action }) => {
 
   return (
     <div className="overall__quotedetails__view__container">
-      <div className="header_title">{t("quoteDetailView.leads")}</div>
+      <div className="header_title">{t("quoteDetailView.pageTitle")}</div>
       <div
         onClick={handleLeadNavigation}
         className="left_arrow mt-3 cursor-pointer"
       >
         <SvgLeftArrow />
         <div className="left_arrow_text">
-          {t("quoteDetailView.leadIdColon")}{" "}
-          {currentLeadDetails?.generatedLeadId ||
-            quotationData?.leadRefId ||
-            "N/A"}
+          {!quotationData?.leadRefId && quoteClient
+            ? [assured.name, `${t("agent.clientIdLabel")} ${quoteClient.clientCode || quoteClient.generatedClientId || ""}`]
+                .filter(Boolean)
+                .join(" / ")
+            : `${t("quoteDetailView.leadIdColon")} ${
+                quoteLead?.generatedLeadId || quotationData?.leadRefId || "N/A"
+              }`}
         </div>
       </div>
       <Card className="mt-4">
@@ -529,6 +508,7 @@ const QuoteDetailView = ({ action }) => {
                 )}
               </div>
             </div>
+            <QuoteJourneyPanel quotation={quotationData} relatedPolicy={relatedPolicy} onChanged={loadQuotation} />
             {!isFireLOB && !isIarLOB && (
               <>
                 <div className="sub_title">
@@ -539,6 +519,7 @@ const QuoteDetailView = ({ action }) => {
                       {quotationData?.participantDetails?.[0]
                         ?.insuranceCompanyName ||
                         quotationData?.participantDetails?.[0]?.participantName ||
+                        quotationData?.insuranceCompanyName ||
                         "N/A"}
                     </label>
                   </div>
@@ -563,15 +544,27 @@ const QuoteDetailView = ({ action }) => {
                 </div>
 
                 {/* Co-Insurance Participants Table */}
-                {quotationData?.isCoInsurance &&
-                  quotationData?.participantDetails?.length > 0 && (
+                {(quotationData?.participants?.length > 1 || (quotationData?.isCoInsurance &&
+                  quotationData?.participantDetails?.length > 0)) && (
                     <div className="sub_title">
                       <label className="policy_text">
                         {t("quoteDetailView.coInsuranceParticipants")}
                       </label>
                       <div style={{ marginTop: "16px" }}>
                         <DataTable
-                          value={quotationData.participantDetails}
+                          value={
+                            // risk_participants from the API (lead first, split amounts); the stored document as a fallback
+                            quotationData.participants?.length
+                              ? quotationData.participants.map((p) => ({
+                                  insuranceCompanyName: p.insuranceCompanyName,
+                                  participantName: p.insuranceCompanyName,
+                                  sharePercentage: p.sharePercent,
+                                  premiumAmount: p.premiumTotal,
+                                  sumInsuredCurrency: quotationData.currency,
+                                  premiumCurrency: quotationData.currency,
+                                }))
+                              : quotationData.participantDetails
+                          }
                           tableStyle={{ minWidth: "50rem" }}
                           size="small"
                         >
@@ -868,37 +861,37 @@ const QuoteDetailView = ({ action }) => {
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.building")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.Building ?? 0).toLocaleString()}
+                      {(fireSumInsured.Building ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.plantAndMachinery")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString()}
+                      {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.otherContents")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.OtherContents ?? 0).toLocaleString()}
+                      {(fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.grossProfit")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.GrossProfit ?? 0).toLocaleString()}
+                      {(fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.wages")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.Wages ?? 0).toLocaleString()}
+                      {(fireSumInsured.Wages ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.lossOfRent")}</label>
                     <label className="alpha_text">
-                      {(fireSumInsured.LossOfRent ?? 0).toLocaleString()}
+                      {(fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale())}
                     </label>
                   </div>
                 </div>
@@ -942,28 +935,25 @@ const QuoteDetailView = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.name")}</label>
                 <label className="alpha_text">
-                  {quotationData?.lead?.firstName && quotationData?.lead?.lastName
-                    ? `${quotationData.lead.firstName} ${quotationData.lead.lastName}`
-                    : currentLeadDetails?.firstName && currentLeadDetails?.lastName
-                    ? `${currentLeadDetails.firstName} ${currentLeadDetails.lastName}`
-                    : "N/A"}
+                  {assured.name || "N/A"}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.emailId")}</label>
                 <label className="alpha_text">
-                  {quotationData?.lead?.emailId || currentLeadDetails?.emailId || "N/A"}
+                  {assured.email || "N/A"}
                 </label>
               </div>
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.contactNumber")}</label>
                 <label className="alpha_text">
-                  {quotationData?.lead?.contactNumber || currentLeadDetails?.contactNumber || "N/A"}
+                  {assured.phone || "N/A"}
                 </label>
               </div>
             </div>
             {!isFireLOB && !isIarLOB && (
               <>
+                {isMotorLOB && (
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.insuranceVehicleDetails")}</label>
                   <div className="quote_details">
@@ -997,7 +987,7 @@ const QuoteDetailView = ({ action }) => {
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.vehicleColor")}</label>
                     <label className="alpha_text">
-                      {quotationData?.insuranceVehicleDetails?.[0]?.vehicleColor ||
+                      {vehicleColourLabel(quotationData?.insuranceVehicleDetails?.[0]?.vehicleColor) ||
                         "N/A"}
                     </label>
                   </div>
@@ -1008,7 +998,16 @@ const QuoteDetailView = ({ action }) => {
                         ?.seatingCapacity || "N/A"}
                     </label>
                   </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">{t("agent.vehicleType")}</label>
+                    <label className="alpha_text">
+                      {findVehicleClass(motorTariff, quotationData?.insuranceVehicleDetails?.[0]?.vehicleType)?.label ||
+                        quotationData?.insuranceVehicleDetails?.[0]?.vehicleType ||
+                        "N/A"}
+                    </label>
+                  </div>
                 </div>
+                )}
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.coverageDetails")}</label>
                   <div className="quote_details">
@@ -1017,10 +1016,54 @@ const QuoteDetailView = ({ action }) => {
                       {quotationData?.totalSumInsured
                         ? `${parseFloat(
                             quotationData.totalSumInsured
-                          ).toLocaleString()}.00`
+                          ).toLocaleString(numberLocale())}.00`
                         : "N/A"}
                     </label>
                   </div>
+                  {/* Priced covers of the quote: the detail showed the sum insured, CTPL and APPA only */}
+                  {isMotorLOB && [
+                    [t("coverageDetailsCard.ownDamageCoverage"), quotationData?.lossAndDamageCoverage, quotationData?.lossAndDamageCoverageRate, quotationData?.lossAndDamageCoveragePremium],
+                    [t("coverageDetailsCard.actsOfNature", "Acts of Nature"), null, quotationData?.actsOfNatureRate, quotationData?.actsOfNaturePremium],
+                    [t("coverageDetailsCard.bodilyInjury", "Bodily Injury"), quotationData?.bodilyInjury, null, quotationData?.bodilyInjuryCoveragePremium],
+                    [t("coverageDetailsCard.propertyDamage", "Property Damage"), quotationData?.propertyDamage, null, quotationData?.propertyDamageCoveragePremium],
+                    [t("coverageDetailsCard.roadsideAssistance", "Roadside Assistance"), null, quotationData?.roadsideAssistanceRate, quotationData?.roadsideAssistancePremium],
+                    [t("coverageDetailsCard.personalAccidentCover", "Personal Accident Cover"), null, quotationData?.personalAccidentCoverRate, quotationData?.personalAccidentCoverPremium],
+                  ]
+                    .filter(([, , , premium]) => Number(String(premium ?? "").replace(/,/g, "")) > 0)
+                    .map(([label, limit, rate, premium]) => (
+                      <div className="quote_details" key={label}>
+                        <label className="insurance_text">{label}</label>
+                        <label className="alpha_text">
+                          {[
+                            limit ? formatCurrency(Number(String(limit).replace(/,/g, ""))) : null,
+                            rate ? `${rate}%` : null,
+                            formatCurrency(Number(String(premium).replace(/,/g, ""))),
+                          ]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </label>
+                      </div>
+                    ))}
+                  {isMotorLOB && (
+                  <>
+                  <div className="quote_details">
+                    <label className="insurance_text">{t("coverageDetailsCard.ctplTariffPremium")}</label>
+                    <label className="alpha_text">
+                      {Number(quotationData?.ctplCoveragePremium)
+                        ? `${formatCurrency(quotationData.ctplCoveragePremium)}${Number(quotationData.ctplTermYears) === 3 ? " (3 years)" : ""}`
+                        : t("quoteDetailView.notIncluded", "Not included")}
+                    </label>
+                  </div>
+                  <div className="quote_details">
+                    <label className="insurance_text">{t("coverageDetailsCard.autoPassengerPersonalAccident")}</label>
+                    <label className="alpha_text">
+                      {Number(quotationData?.APPAcoveragePremium)
+                        ? `${formatCurrency(Number(String(quotationData.autoPassengerPersonalAccident).replace(/,/g, "")))} x ${quotationData.appaSeats || "-"} = ${formatCurrency(quotationData.APPAtotalCoverage)} · ${formatCurrency(quotationData.APPAcoveragePremium)}`
+                        : t("quoteDetailView.notIncluded", "Not included")}
+                    </label>
+                  </div>
+                  </>
+                  )}
                 </div>
               </>
             )}
@@ -1125,12 +1168,8 @@ const QuoteDetailView = ({ action }) => {
               </div>
               <div className="quote_details">
                 <label className="insurance_text">
-                  {t("quoteDetailView.dst")} ({" "}
-                  {
-                    productConfigurator?.configuration?.taxes
-                      ?.documentary_stamp_tax
-                  }
-                  %)
+                  {t("quoteDetailView.dst")} (
+                  {taxRatePercent("documentaryStampTax", "documentary_stamp_tax")}%)
                 </label>
                 <label className="alpha_text">
                   {formatCurrency(calculatedPremiums?.documentaryStampTax)}
@@ -1139,8 +1178,7 @@ const QuoteDetailView = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">
                   {t("quoteDetailView.vat")} (
-                  {productConfigurator?.configuration?.taxes?.value_added_tax}%
-                  )
+                  {taxRatePercent("valueAddedTax", "value_added_tax")}%)
                 </label>
                 <label className="alpha_text">
                   {formatCurrency(calculatedPremiums?.valueAddedTax)}
@@ -1149,11 +1187,7 @@ const QuoteDetailView = ({ action }) => {
               <div className="quote_details">
                 <label className="insurance_text">
                   {t("quoteDetailView.lgt")} (
-                  {
-                    productConfigurator?.configuration?.taxes
-                      ?.local_government_tax
-                  }
-                  % )
+                  {taxRatePercent("localGovernmentTax", "local_government_tax")}%)
                 </label>
                 <label className="alpha_text">
                   {formatCurrency(calculatedPremiums?.localGovernmentTax)}
@@ -1215,7 +1249,6 @@ const QuoteDetailView = ({ action }) => {
                 label={
                   checkingPolicy ? t("quoteDetailView.checkingPolicy") : t("quoteDetailView.waitingForPolicy")
                 }
-                // className="policy_button p-button-outlined"
                 disabled={checkingPolicy || !relatedPolicy?.policyId}
                 onClick={() => {
                   if (!relatedPolicy?.policyId) {
@@ -1266,22 +1299,11 @@ const QuoteDetailView = ({ action }) => {
 
                 {/* PendingCustomer: Waiting for customer */}
                 {quotationData?.quotationStatus === "PendingCustomer" && (
-                  <div
-                    className="waiting-notice"
-                    style={{
-                      padding: "10px",
-                      backgroundColor: "#fef3c7",
-                      borderRadius: "6px",
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
-                    <i
-                      className="pi pi-clock"
-                      style={{ marginRight: "8px" }}
-                    ></i>
-                    {t("quoteDetailView.waitingForCustomerApproval")}
-                  </div>
+                  <CustomerResponseActions
+                    quotationId={quotationData.quotationId}
+                    notice={t("quoteDetailView.waitingForCustomerApproval")}
+                    onRecorded={loadQuotation}
+                  />
                 )}
               </div>
             )}

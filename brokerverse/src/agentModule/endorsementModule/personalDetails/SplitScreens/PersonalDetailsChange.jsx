@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { useFormik } from "formik";
 import addressService from "../../../../services/addressService";
 import {
@@ -51,6 +51,7 @@ const PersonalDetailsChange = ({
   disabled,
   shouldSubmit,
   onSectionSubmitted,
+  onSectionInvalid,
   personalDetails,
 }) => {
   const { t } = useTranslation();
@@ -67,6 +68,16 @@ const PersonalDetailsChange = ({
   const formik = useFormik({
     initialValues: formikInitialValues,
     enableReinitialize: true,
+    validate: (v) => {
+      const e = {};
+      const need = (k) => { if (!String(v[k] ?? "").trim()) e[k] = t("common.required", "Required"); };
+      ["LastName", "ContactNumber", "HouseNo", "Country", "Province", "City"].forEach(need);
+      if (!v.CompanyName) need("FirstName");
+      const digits = String(v.ContactNumber || "").replace(/\D/g, "");
+      if (v.ContactNumber && !(digits.length >= 10 && digits.length <= 12)) e.ContactNumber = t("endorsement.invalidContact", "Enter a valid mobile number");
+      if (v.ZIPCode && !/^\d{4}$/.test(String(v.ZIPCode).trim())) e.ZIPCode = t("endorsement.invalidZip", "ZIP code is 4 digits");
+      return e;
+    },
     onSubmit: (values) => {
       onSectionSubmitted?.(index, values);
     },
@@ -170,13 +181,21 @@ const PersonalDetailsChange = ({
     [districtList]
   );
 
+  // Submit once per request; an invalid section shows its errors and hands control back to the page
   useEffect(() => {
     if (!shouldSubmit) {
       return;
     }
-
-    formik.submitForm();
-  }, [formik, shouldSubmit]);
+    formik.validateForm().then((errors) => {
+      if (Object.keys(errors).length) {
+        formik.setTouched(Object.fromEntries(Object.keys(errors).map((k) => [k, true])), false);
+        onSectionInvalid?.(index);
+        return;
+      }
+      formik.submitForm();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldSubmit]);
 
   return (
     <div>

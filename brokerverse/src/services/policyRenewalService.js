@@ -1,13 +1,9 @@
 import { BASE_URL } from "../utility/constant";
+import authService from "./authService";
 
 class PolicyRenewalService {
   constructor() {
     this.baseURL = BASE_URL;
-  }
-
-  getAuthHeader() {
-    const token = localStorage.getItem("accessToken");
-    return token ? { Authorization: `Bearer ${token}` } : {};
   }
 
   async getRenewals({ clientId, policyId, status, page = 1, limit = 50 } = {}) {
@@ -29,7 +25,7 @@ class PolicyRenewalService {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
-            ...this.getAuthHeader(),
+            ...authService.getAuthHeader(),
           },
           signal: controller.signal,
         }
@@ -75,7 +71,6 @@ class PolicyRenewalService {
           },
       };
     } catch (error) {
-      console.error("Policy renewal fetch error:", error);
       return {
         success: false,
         error:
@@ -85,6 +80,64 @@ class PolicyRenewalService {
       };
     }
   }
+
+  async request(method, path, body) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 20000);
+    try {
+      const response = await fetch(`${this.baseURL}${path}`, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          ...authService.getAuthHeader(),
+        },
+        ...(body !== undefined && { body: JSON.stringify(body) }),
+        signal: controller.signal,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || data?.success === false) {
+        return {
+          success: false,
+          error: data?.message || data?.error || `Request failed (status ${response.status})`,
+          // field problems of a step (422): [{ path, message }]
+          errors: Array.isArray(data?.errors) ? data.errors : [],
+        };
+      }
+      return { success: true, data: data?.data ?? data, message: data?.message || "" };
+    } catch (error) {
+      return {
+        success: false,
+        error:
+          error.name === "AbortError"
+            ? "Request timeout. Please try again."
+            : error.message || "Request failed",
+      };
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+
+  /**
+   * Renewal wizard prefill for a policy: the open renewal's saved wizard data, else the
+   * expiring policy's quotation / policy data (coverageDetails, accessories, vehicle, client, insurer).
+   */
+  getRenewalPrefill(policyId) {
+    return this.request("GET", `/policy-renewals/policies/${encodeURIComponent(policyId)}/prefill`);
+  }
+
+  /** Save wizard data on the policy's open renewal (created when there is none). */
+  saveRenewalWizard(policyId, payload) {
+    return this.request("POST", `/policy-renewals/policies/${encodeURIComponent(policyId)}/renewals`, payload);
+  }
+
+  /**
+   * "Completed Quote": save the wizard data and create (or update) the renewal quotation linked to
+   * the expiring policy. Returns { quotationId, quotationNumber, quotation, renewal }.
+   */
+  createRenewalQuotation(policyId, payload) {
+    return this.request("POST", `/policy-renewals/policies/${encodeURIComponent(policyId)}/quotation`, payload);
+  }
 }
 
-export default new PolicyRenewalService();
+const policyRenewalService = new PolicyRenewalService();
+export default policyRenewalService;

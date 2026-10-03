@@ -6,6 +6,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import "./index.scss";
 import { Button } from "primereact/button";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const PaymentApproval = () => {
   const { t } = useTranslation();
@@ -84,10 +85,7 @@ const PaymentApproval = () => {
         <div className="grid m-0 overall__container">
           <div>
             <div className="flex justify-content-center">
-              <img
-                src="https://i.ibb.co/Qpnyt7y/search.png"
-                alt="Payment status"
-              />
+              <StatusIllustration variant="search" />
             </div>
             <div className="col-12 p-0 paymentapproval__status__main__content__text">
               {t("agent.paymentProcessedForPolicy", { policyNumber: policyNumber || "-" })}

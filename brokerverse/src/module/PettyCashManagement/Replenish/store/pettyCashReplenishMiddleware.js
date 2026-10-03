@@ -6,89 +6,101 @@ import {
   GET_ADD_REPLENISH_TABLE_VOUCHER,
   GET_VIEW_REPLENISH_VOUCHER,
 } from "../../../../redux/actionTypes";
-import { getRequest } from "../../../../utility/commonServices";
-import { APIROUTES } from "../../../../routes/apiRoutes";
+import pettyCashService from "../../../../services/pettyCashService";
+import { formatDisplayDate, optionCode } from "../../pettyCashFormat";
+
+const errorMessage = (error) => error?.message || "Something went wrong";
+
+/** A replenishment as a row of the Replenish screens. */
+export const toReplenishRow = (r) => ({
+  id: r.id,
+  Pettycashcode: r.pettyCashCode,
+  Branchcode: r.branchCode || "",
+  Transactioncode: r.transactionCode || "",
+  BankCode: r.bankCode || "",
+  SubAccount: r.subAccount || "",
+  TransactionNumber: r.transactionNumber,
+  Date: formatDisplayDate(r.date),
+  dateValue: r.date,
+  Amount: r.amount,
+  Remarks: r.remarks || "",
+});
+
+/** A disbursement paid from the fund (the expenses a replenishment reimburses). */
+const toExpenseRow = (d) => ({
+  id: d.id,
+  Transactioncode: d.transactionCode || d.transactionNumber,
+  DocNumber: d.transactionNumber,
+  Narration: d.remarks || d.expenseAccount,
+  Date: formatDisplayDate(d.date),
+  Remarks: d.requestNumber || "",
+  Amount: d.netAmount,
+});
 
 export const getReplenishListMiddleware = createAsyncThunk(
   GET_REPLENISH_VOUCHER_LIST,
-  async (payload, { rejectWithValue }) => {
+  async (params, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
+      const { data } = await pettyCashService.list("replenishments", params || {});
+      return (data || []).map(toReplenishRow);
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
 
 export const getReplenishSearchMiddleware = createAsyncThunk(
   GET_REPLENISH_VOUCHER_SEARCH,
-  async ({ field, value }, { rejectWithValue, getState }) => {
-    const { pettyCashReplenishReducer } = getState();
-    const { ReplenishList } = pettyCashReplenishReducer;
-    function filterReceiptsByField(receipts, field, value) {
-      const lowercasedValue = value.toLowerCase();
-      return receipts.filter(receipt => receipt[field].toLowerCase().startsWith(lowercasedValue));
-    }
+  async ({ value }, { rejectWithValue }) => {
     try {
-
-      const filteredReceipts = filterReceiptsByField(ReplenishList, field, value);
-console.log(filteredReceipts,"filteredReceipts");
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return filteredReceipts;
+      const { data } = await pettyCashService.list("replenishments", { search: value });
+      return (data || []).map(toReplenishRow);
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
 
-export const postAddReplenishMiddleware = createAsyncThunk(
-  POST_ADD_REPLENISH_VOUCHER,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload, "postAddReplenishMiddleware");
-    const currentDate = new Date(); // Get current date
-    const formattedDate = `${currentDate.getDate()}/${
-      currentDate.getMonth() + 1
-    }/${currentDate.getFullYear()}`;
-    const TableData = {
-      id: payload?.id,
-      Pettycashcode:payload?.PettycashCode?.PettyCashCodes,
-      Branchcode: payload?.BranchCode?.Branchcode,
-      Transactioncode: "p-1233",
-      BankCode: payload.BankCode?.BankAccountCode,
-      SubAccount: payload?.SubAccountCode?.SubAccount,
-      TransactionNumber: "Trans002",
-      Date: formattedDate,
-    };
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return TableData;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-
+/** Header of the replenishment (fund, bank, sub account); loads the fund's disbursements. */
 export const getAddReplenishTableMiddleware = createAsyncThunk(
   GET_ADD_REPLENISH_TABLE_VOUCHER,
-  async (payload, { rejectWithValue }) => {
+  async (header, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
+      const pettyCashCode = optionCode(header?.PettycashCode);
+      const [{ data }, fund] = await Promise.all([
+        pettyCashService.list("disbursements", { pettyCashCode }),
+        pettyCashService.get("funds", pettyCashCode),
+      ]);
+      return { header, fund, rows: (data || []).map(toExpenseRow) };
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
+    }
+  }
+);
+
+/** Replenishes the fund by the amount of the selected expenses (Dr Petty Cash / Cr Cash in Bank). */
+export const postAddReplenishMiddleware = createAsyncThunk(
+  POST_ADD_REPLENISH_VOUCHER,
+  async (amount, { getState, rejectWithValue }) => {
+    const { AddReplenish: header = {} } = getState().pettyCashReplenishReducer || {};
+    try {
+      const saved = await pettyCashService.create("replenishments", {
+        pettyCashCode: optionCode(header.PettycashCode),
+        amount: amount > 0 ? amount : undefined,
+        bankCode: optionCode(header.BankCode),
+        subAccountCode: optionCode(header.SubAccountCode),
+        transactionCode: optionCode(header.TransactionCode),
+        branchCode: optionCode(header.BranchCode),
+        remarks: header.Remarks || undefined,
+      });
+      return toReplenishRow(saved);
+    } catch (error) {
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
 
 export const getViewReplenishMiddleware = createAsyncThunk(
   GET_VIEW_REPLENISH_VOUCHER,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (row) => row
 );

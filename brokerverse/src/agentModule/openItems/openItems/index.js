@@ -1,15 +1,12 @@
-import React, { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import SvgpolicyExpire from "../../../assets/agentIcon/SvgpolicyExpire";
 import SvgAdd from "../../../assets/agentIcon/SvgAdd";
 import { Card } from "primereact/card";
 import { Dialog } from "primereact/dialog";
-import SvgpendingPayment from "../../../assets/agentIcon/SvgpendingPayment";
 import { Button } from "primereact/button";
-import SvgCalendertracker from "../../../assets/agentIcon/SvgCalendertracker";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import DatepickerField from "../../component/datePicker";
 import InputTextField from "../../component/inputText";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -21,9 +18,10 @@ import dayGridPlugin from "@fullcalendar/daygrid"; // a plugin!
 import { useDispatch, useSelector } from "react-redux";
 import UpcommingEventCard from "./UpcommingEventCard";
 import { useFormik } from "formik";
-import moment from "moment";
-import { postOpenItemsListMiddleware } from "../store/openItemsMiddleware";
-import SvgBackArrow from "../../../assets/icons/SvgBackArrow";
+import {
+  getOpenItemsListMiddleware,
+  postOpenItemsListMiddleware,
+} from "../store/openItemsMiddleware";
 import Notification from "../upcomingEvents";
 
 const initialValues = {
@@ -43,20 +41,21 @@ const customValidation = (values) => {
 const OpenItems = () => {
   const { t } = useTranslation();
   const [visible, setVisible] = useState(false);
-  const [value, setValue] = useState("");
   const toastRef = useRef(null);
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const handleSubmit = (value) => {
-    if (value) {
-      dispatch(postOpenItemsListMiddleware(value));
-      handleclickClose();
-      console.log(value, "out Value");
+  useEffect(() => {
+    dispatch(getOpenItemsListMiddleware());
+  }, [dispatch]);
+
+  const handleSubmit = async (value) => {
+    const result = await dispatch(postOpenItemsListMiddleware(value));
+    if (postOpenItemsListMiddleware.rejected.match(result)) {
+      toastRef.current?.showToast({ severity: "error", detail: result.payload });
+      return;
     }
-    // toastRef.current.showToast();
-    // setTimeout(() => {
-    //   setVisible(false);
-    // }, 2000);
+    toastRef.current?.showToast();
+    handleclickClose();
   };
   const formik = useFormik({
     initialValues: initialValues,
@@ -99,29 +98,14 @@ const OpenItems = () => {
 
   const { upcommingList } = useSelector(({ openitemsReducers }) => {
     return {
-      upcommingList: openitemsReducers?.upcommingEventsList,
+      upcommingList: openitemsReducers?.upcommingEventsList || [],
     };
   });
-  // const handlesubmit = () => {
-  //   toastRef.current.showToast();
-  //   setTimeout(() => {
-  //     setVisible(false);
-  //   }, 2000);
-  // };
 
   const handleSeeMore = () => {
     navigate("/agent/openitems/upcomingevents");
   };
-  const handlePolicyExpiry = () => {
-    navigate("/agent/openitems/expiringpolicy");
-  };
 
-  const handlePendingPayments = () => {
-    navigate("/agent/payments");
-  };
-  const handleDateSelect = (info) => {
-    console.log("Selected dates:", info.start, info.end);
-  };
   const handleHomeNavigation = () => {
     navigate("/");
   };
@@ -131,50 +115,6 @@ const OpenItems = () => {
       <CustomToast ref={toastRef} message={t("openItems.eventAddedSuccess")} />
       <div className="open__item__title">{t("openItems.activityTracker")}</div>
 
-      {/* <div className="grid mt-3">
-        <div className="col-12 md:col-6 lg:col-6">
-          <Card>
-            <div className="grid" onClick={handlePolicyExpiry}>
-              <div
-                className="col-1 md:col-1 lg:col-1"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <SvgpolicyExpire />
-              </div>
-              <div
-                className="col-5 md:col-5 lg:col-5"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <div className="sub__title">Policies Expiring soon</div>
-              </div>
-              <div className="col-6 md:col-6 lg:col-6">
-                <div className="sub__number">15</div>
-              </div>
-            </div>
-          </Card>
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <Card>
-            <div className="grid" onClick={handlePendingPayments}>
-              <div
-                className="col-1 md:col-1 lg:col-1"
-                style={{ display: "flex", alignItems: "flex-end" }}
-              >
-                <SvgpendingPayment />
-              </div>
-              <div
-                className="col-5 md:col-5 lg:col-5"
-                style={{ display: "flex", alignItems: "center" }}
-              >
-                <div className="sub__title">Pending Payments</div>
-              </div>
-              <div className="col-6 md:col-6 lg:col-6">
-                <div className="sub__number">09</div>
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div> */}
       <div className="grid mt-3">
         <div className="col-12 md:col-6 lg:col-6">
           <div
@@ -182,7 +122,7 @@ const OpenItems = () => {
             onClick={handleHomeNavigation}
           >
             <SvgLeftArrow />
-            <div className="activity__tracker">HOME</div>
+            <div className="activity__tracker">{t("openItems.home")}</div>
           </div>
         </div>
         <div className="btn__container__new__event col-12 md:col-6 lg:col-6">
@@ -203,7 +143,6 @@ const OpenItems = () => {
                 initialView="dayGridMonth"
                 editable={true}
                 selectable={true}
-                // select={handleDateSelect}
               />
             </div>
           </Card>

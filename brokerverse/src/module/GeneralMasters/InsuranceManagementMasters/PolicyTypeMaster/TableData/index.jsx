@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -9,16 +9,24 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
-import ToggleButton from "../../../../../components/ToggleButton";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
-import { getSearchInsurancePolicyTypeMiddleware } from "../store/insurancePolicyTypeMiddleware";
+import { getSearchInsurancePolicyTypeMiddleware, getInsurancePolicyTypeMiddleWare } from "../store/insurancePolicyTypeMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { InsurancePolicyType, loading, SearchTableList } = useSelector(
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getInsurancePolicyTypeMiddleWare());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getInsurancePolicyTypeMiddleWare());
+  }, [dispatch]);
+  const { InsurancePolicyType, SearchTableList } = useSelector(
     ({ insurancePolicyTypeReducers }) => {
       return {
         loading: insurancePolicyTypeReducers?.loading,
@@ -40,10 +48,9 @@ const TableData = ({ navigate }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -69,13 +76,11 @@ const TableData = ({ navigate }) => {
         <Button
           icon={<SvgIconeye />}
           onClick={() => handleView(rowData.id)}
-          className="action__button p-0"
-        />
+          className="action__button p-0" aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
         <Button
           icon={<SvgEdit />}
           onClick={() => handleEdit(rowData.id)}
-          className="action__button p-0 w-auto"
-        />
+          className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -106,6 +111,7 @@ const TableData = ({ navigate }) => {
   }, [formik.values.search]);
   return (
     <div className="policy__type__table__container">
+      <Toast ref={statusToast} />
       <div className="grid m-0 header_search_container">
         <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
           <span className="p-input-icon-left w-full">
@@ -127,8 +133,8 @@ const TableData = ({ navigate }) => {
           formik.values.search !== "" ? SearchTableList : InsurancePolicyType
         }
         paginator
-        rows={5}
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rows={20}
+        rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         className="reversal__table__main"
@@ -137,7 +143,7 @@ const TableData = ({ navigate }) => {
         scrollHeight="40vh"
       >
         <Column
-          field="policytypeCode"
+          field="policyTypeCode"
           header="Policy type Code"
           className="fieldvalue_container"
           sortable
@@ -148,17 +154,17 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
         ></Column>
         <Column
-          field="product"
+          field="Product"
           header="Product"
           className="fieldvalue_container"
         ></Column>
 
         <Column
-          field="modifiedby"
+          field="modifiedBy"
           header="Modified by"
           className="fieldvalue_container"
         ></Column>
-        <Column
+        <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"
           header="Modified On"
           className="fieldvalue_container"
@@ -167,7 +173,7 @@ const TableData = ({ navigate }) => {
           field="status"
           header="status"
           className="fieldvalue_container"
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="policy-type" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
           style={{

@@ -51,10 +51,12 @@
 
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 1.5rem;
 
       .kpi-card {
+        min-height: 17.75rem;
+
         .p-card-body {
           padding: 1.5rem;
 
@@ -88,7 +90,7 @@
                 }
 
                 &.negative {
-                  color: #dc3545;
+                  color: var(--color-danger);
                 }
 
                 i {
@@ -131,7 +133,7 @@
 
   .charts-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
 
     .chart-card {
@@ -186,12 +188,18 @@
   }
 
   .performers-section {
+    // minmax(0, 1fr): a wide table scrolls inside its card; one column below 1500px so no column is cut
     .performers-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      @media (max-width: 1500px) {
+        grid-template-columns: minmax(0, 1fr);
+      }
       gap: 1.5rem;
 
       .performers-card {
+        min-width: 0;
         .p-card-body {
           padding: 1.5rem;
 
@@ -245,7 +253,7 @@
       }
 
       &.negative {
-        color: #dc3545;
+        color: var(--color-danger);
       }
 
       i {
@@ -257,7 +265,7 @@
   .alerts-section {
     .alerts-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
       gap: 1.5rem;
 
       .alerts-card {

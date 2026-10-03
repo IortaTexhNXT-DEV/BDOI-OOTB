@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
-import NavBar from "../../../../../components/NavBar";
 import SvgSearchIcon from "../../../../../assets/icons/SvgSearchIcon";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -14,35 +13,39 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../../components/ToggleButton";
-import Productdata from "./mock";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getHierarchyPatchMiddleWare,
   getHierarchyViewMiddleWare,
   getSearchHirarchyMiddleware,
+  getHirarchyListMiddleware,
 } from "../store/hierarchyMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const HierarchyMaster = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
   const navigate = useNavigate();
   const handleNavigate = () => {
     navigate("/master/generals/employeemanagement/hierarchy/add");
   };
-  const [rowList, setRowList] = useState(5);
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getHirarchyListMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
   useEffect(() => {
-    setProducts();
-  }, []);
+    dispatch(getHirarchyListMiddleware());
+  }, [dispatch]);
   useEffect(() => {
     if (search.length > 0) {
       dispatch(getSearchHirarchyMiddleware(search));
     }
   }, [search]);
 
-  const { hierarchTableList, loading, total, hierarchSeachList } = useSelector(
+  const { hierarchTableList, hierarchSeachList } = useSelector(
     ({ hierarchyTableReducers }) => {
       return {
         loading: hierarchyTableReducers?.loading,
@@ -52,12 +55,7 @@ const HierarchyMaster = () => {
       };
     }
   );
-  console.log(hierarchTableList, "list of master");
-  const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
-  };
   const handleView = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getHierarchyViewMiddleWare(rowData));
     navigate(
       `/master/generals/employeemanagement/hierarchy/view/${rowData.id}`
@@ -98,36 +96,19 @@ const HierarchyMaster = () => {
     justifyContent: "center",
   };
 
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRowsPerPage(event.rows);
-  };
 
   const renderViewButton = (rowData) => {
-    console.log(rowData, "row data");
     return (
       <div className="center-content">
         <Button
           icon={<SvgEyeIcon />}
           className="eye__btn"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
         <Button
           icon={<SvgEditIcon />}
           className="eye__btn"
-          onClick={() => handlEdit(rowData)}
-        />
-      </div>
-    );
-  };
-
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
+          onClick={() => handlEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -137,10 +118,9 @@ const HierarchyMaster = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -163,6 +143,7 @@ const HierarchyMaster = () => {
   };
   return (
     <div className="grid overall__hierarchy__master__container">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__hierarchy">Hierarchy Master</div>
         <div style={{ margin: "20px 0px" }}>
@@ -175,12 +156,12 @@ const HierarchyMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <div className="add__icon__view__hierarchy" onClick={handleNavigate}>
+        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
           <div className="add__icon__hierarchy">
             <SvgAdd />
           </div>
           <div className="add__text__hierarchy">{t("generalMasters.add")}</div>
-        </div>
+        </button>
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">
@@ -218,8 +199,8 @@ const HierarchyMaster = () => {
                 className="table__view__hierarchy"
                 paginator
                 paginatorLeft
-                rows={5}
-                rowsPerPageOptions={[5, 10, 25, 50]}
+                rows={20}
+                rowsPerPageOptions={[20, 50, 100]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
                 paginatorTemplate={template2}
                 scrollable={true}
@@ -237,23 +218,23 @@ const HierarchyMaster = () => {
                   header="Rank Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.rankName?.toUpperCase()}
+                  body={(rowData) => rowData.rankName}
                 ></Column>
                 <Column
                   field="levelNumber"
                   header="Level Number"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.levelNumber?.toUpperCase()}
+                  body={(rowData) => String(rowData.levelNumber ?? "")}
                 ></Column>
                 <Column
                   field="modifiedBy"
                   header="Modified By"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.modifiedBy?.toUpperCase()}
+                  body={(rowData) => rowData.modifiedBy}
                 ></Column>
-                <Column
+                <Column body={(row) => formatAppDate(row.modifiedOn)}
                   field="modifiedOn"
                   header="Modified On"
                   headerStyle={headerStyle}
@@ -261,7 +242,7 @@ const HierarchyMaster = () => {
                 ></Column>
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="hierarchy" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header="Status"
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

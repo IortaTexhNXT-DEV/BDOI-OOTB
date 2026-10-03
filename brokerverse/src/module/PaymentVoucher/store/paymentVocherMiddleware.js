@@ -12,21 +12,17 @@ import {
 } from "../../../redux/actionTypes";
 import disbursementService from "../../../services/disbursementService";
 import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 export const paymentVocherMiddleware = createAsyncThunk(
   GET_PAYMENT_VOUCHER,
   async (payload, { rejectWithValue }) => {
     try {
-      console.log("=== DISBURSEMENT MIDDLEWARE CALLED ===");
-      console.log("Fetching disbursements data with payload:", payload);
-
       // Call the disbursement service to get the list
       const result = await disbursementService.getDisbursements(
         payload?.page || 1,
         payload?.pageSize || 10
       );
-
-      console.log("Disbursement service result:", result);
 
       if (result.success) {
         // Map the API response to the table format
@@ -37,16 +33,13 @@ export const paymentVocherMiddleware = createAsyncThunk(
           CustomerCode: disbursement.customerCode,
           Insurer: disbursement.insurerName,
           PolicyNumber: disbursement.policyNumber,
-          VoucheDate: new Date(disbursement.voucherDate).toLocaleDateString(
-            "en-US",
-            {
-              month: "2-digit",
-              day: "2-digit",
-              year: "numeric",
-            }
-          ),
+          VoucheDate: formatAppDate(disbursement.voucherDate, { empty: "" }),
           Amount: formatCurrency(disbursement.amount),
           action: disbursement.disbursementId,
+          payeeType: disbursement.payeeType,
+          payeeName: disbursement.payeeName,
+          referrerId: disbursement.referrerId,
+          status: disbursement.status,
         }));
 
         return {
@@ -57,7 +50,6 @@ export const paymentVocherMiddleware = createAsyncThunk(
         return rejectWithValue(result.error || "Failed to fetch disbursements");
       }
     } catch (error) {
-      console.error("Error in payment voucher middleware:", error);
       return rejectWithValue(error.message || "An unexpected error occurred");
     }
   }
@@ -168,13 +160,8 @@ export const postpaymentVocherCreateDataMiddleware = createAsyncThunk(
           payload.SelectInstrumentCurrency?.code ||
           payload.SelectInstrumentCurrency,
         remarks: payload.Remarks,
-        amount:
-          (payload.PayeeType?.code || payload.PayeeType) === "Agent/Referrer"
-            ? "0.00"
-            : "350000.00",
+        amount: payload.Amount ? String(payload.Amount) : "0.00",
       };
-
-      console.log("Creating disbursement with data:", disbursementData);
 
       // Call the disbursement service
       const result = await disbursementService.createDisbursement(
@@ -192,7 +179,6 @@ export const postpaymentVocherCreateDataMiddleware = createAsyncThunk(
         return rejectWithValue(result.error || "Failed to create disbursement");
       }
     } catch (error) {
-      console.error("Error in payment voucher middleware:", error);
       return rejectWithValue(error.message || "An unexpected error occurred");
     }
   }
@@ -211,7 +197,6 @@ export const patchpaymentVocherInvoiceListMiddleware = createAsyncThunk(
   PATCH_INVOICE_LIST_DETAILS,
   async (payload, { rejectWithValue, getState }) => {
     try {
-      console.log(payload, "find payload in patch");
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -223,7 +208,6 @@ export const getPaymentVocherListBySearchMiddleware = createAsyncThunk(
   async ({ field, value }, { rejectWithValue, getState }) => {
     const { paymentVoucherReducers } = getState();
     const { paymentVocherList } = paymentVoucherReducers;
-    console.log(paymentVocherList, field, value, "dta");
     function filterReceiptsByField(receipts, field, value) {
       const lowercasedValue = value.toLowerCase();
       return receipts.filter((receipt) =>
@@ -251,10 +235,6 @@ export const bulkPrintDisbursementsMiddleware = createAsyncThunk(
   "disbursements/bulkPrint",
   async (filters, { rejectWithValue }) => {
     try {
-      console.log(
-        "Bulk print disbursements middleware called with filters:",
-        filters
-      );
       const response = await disbursementService.bulkPrintDisbursements(
         filters
       );
@@ -269,7 +249,6 @@ export const bulkPrintDisbursementsMiddleware = createAsyncThunk(
         );
       }
     } catch (error) {
-      console.error("Bulk print disbursements middleware error:", error);
       return rejectWithValue(
         error?.response?.data || {
           message: error.message || "Failed to bulk print disbursements",
@@ -286,16 +265,6 @@ export const filterPaymentVoucherMiddleware = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("=== DISBURSEMENT FILTER MIDDLEWARE CALLED ===");
-      console.log("Filtering disbursements with:", {
-        field,
-        value,
-        fromDate,
-        toDate,
-        page,
-        pageSize,
-      });
-
       const filterParams = {
         page,
         pageSize,
@@ -327,14 +296,10 @@ export const filterPaymentVoucherMiddleware = createAsyncThunk(
         filterParams.toDate = toDate;
       }
 
-      console.log("Filter parameters:", filterParams);
-
       // Call the disbursement service to filter the list
       const result = await disbursementService.filterDisbursements(
         filterParams
       );
-
-      console.log("Disbursement filter service result:", result);
 
       if (result.success) {
         // Map the API response to the table format
@@ -352,8 +317,6 @@ export const filterPaymentVoucherMiddleware = createAsyncThunk(
           ...disbursement,
         }));
 
-        console.log("Transformed disbursement filter data:", transformedData);
-
         return {
           data: transformedData,
           pagination: result.data.pagination || {
@@ -364,13 +327,11 @@ export const filterPaymentVoucherMiddleware = createAsyncThunk(
           },
         };
       } else {
-        console.error("Disbursement filter service failed:", result.error);
         return rejectWithValue(
           result.error || "Failed to filter disbursements"
         );
       }
     } catch (error) {
-      console.error("Disbursement filter middleware error:", error);
       return rejectWithValue(
         error?.response?.data?.error?.message || error.message
       );

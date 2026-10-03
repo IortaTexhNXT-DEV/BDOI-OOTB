@@ -56,6 +56,18 @@
       color: #fff;
       // padding-top: 16px;
       height: 2.75rem;
+      // "Create Lead" label centred vertically on the same line as its icon
+      display: flex;
+      align-items: center;
+      padding-top: 0;
+      padding-bottom: 0;
+      line-height: 1;
+    }
+
+    .p-dropdown .p-dropdown-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .p-dropdown .p-dropdown-trigger {
@@ -344,5 +356,45 @@
       padding: 0.5rem 1rem;
       border-radius: 6px;
     }
+  }
+}
+
+// Prospect list: tabs per product line, one toolbar, the table.
+.leadlisting__overal__container .prospect-list-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 4px 16px 8px;
+
+  .p-tabview-panels {
+    padding: 0;
+  }
+
+  .prospect-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 0;
+
+    .prospect-search {
+      flex: 1 1 18rem;
+      max-width: 28rem;
+
+      input {
+        width: 100%;
+      }
+    }
+
+    .prospect-filter {
+      width: 13.5rem;
+    }
+  }
+
+  .prospect-filters {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 16rem));
+    gap: 8px;
+    padding-bottom: 12px;
   }
 }

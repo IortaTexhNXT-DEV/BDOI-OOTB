@@ -1,4 +1,3 @@
-import React, { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -11,12 +10,11 @@ import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import TransactionCodeMasterDetailViewTable from "./TransactionCodeMasterDetailViewTable";
-import NavBar from "../../../../components/NavBar";
 import { useSelector } from "react-redux";
 
 const TransactionCodeDetails = () => {
   const { t } = useTranslation();
-  const { TrascationcodeDetailsView, TransactioncodeList, loading } =
+  const { TrascationcodeDetailsView } =
     useSelector(({ transactionCodeMasterReducer }) => {
       return {
         loading: transactionCodeMasterReducer?.loading,
@@ -25,17 +23,14 @@ const TransactionCodeDetails = () => {
         // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
       };
     });
-  console.log(TrascationcodeDetailsView, "hddgdg");
-  const toastRef = useRef(null);
   const navigate = useNavigate();
   const items = [
     {
-      label: t("sidebar.Transaction code") || "Transaction code",
+      label: t("sidebar.Transaction Code"),
       url: "/master/finance/transactioncode",
     },
     {
       label: t("breadcrumb.transactionCodeDetails"),
-      // url: "/master/finance/transactioncode/transactioncodedetails/${}",
     },
   ];
   const Initiate = { label: t("breadcrumb.master") };
@@ -74,11 +69,6 @@ const TransactionCodeDetails = () => {
     },
   ];
 
-  console.log(
-    TrascationcodeDetailsView?.TransactionBasis,
-    "TrascationcodeDetailsView?.TransactionCode"
-  );
-
   const validate = () => { };
 
   const handleSubmit = () => {
@@ -108,7 +98,6 @@ const TransactionCodeDetails = () => {
 
   return (
     <div className="transactioncode__master__detail__view">
-      {/* <CustomToast ref={toastRef} message="Petty Cash Initiated Successfully"/> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-12 lg:col-12">
           <div
@@ -195,11 +184,6 @@ const TransactionCodeDetails = () => {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={TrascationcodeDetailsView.TransactionBasis}
                 options={pettycashcodeOptions}
-                // onChange={(e) => {
-                //   console.log(e.value);
-                //   formik.setFieldValue("TransactionBasis", e.value);
-                //   //   handleAccountcode(e.value.TransactionBasis);
-                // }}
                 optionLabel="label"
                 error={
                   formik.touched.TransactionBasis &&
@@ -222,11 +206,8 @@ const TransactionCodeDetails = () => {
                 value={TrascationcodeDetailsView.MainAccountCode}
                 options={MainAccountCodeOptions}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("MainAccountCode", e.value);
-                  //   handleAccountcode(e.value.MainAccountCode);
                 }}
-                // optionLabel="MainAccountCode"
                 optionLabel="label"
                 error={
                   formik.touched.MainAccountCode &&
@@ -238,7 +219,6 @@ const TransactionCodeDetails = () => {
               <InputField
                 classNames="input__filed"
                 label="Main Account Description"
-                // placeholder="Enter"
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
@@ -266,15 +246,9 @@ const TransactionCodeDetails = () => {
                 value={TrascationcodeDetailsView.SubAccountCode}
                 options={SubAccountCodeOptions}
                 // onChange={(e) => {
-                //   console.log(e.value);
-                //   formik.setFieldValue("Description", e.value);
                 //   handleAccountcode(e.value.);
                 // }}
                 optionLabel="label"
-              // error={
-              //   formik.touched.BankAccountNumber &&
-              //   formik.errors.BankAccountNumber
-              // }
               />
             </div>
             <div className="col-12 md:col-6 lg-col-6 input__view">
@@ -288,11 +262,6 @@ const TransactionCodeDetails = () => {
                 disabled={true}
                 value={TrascationcodeDetailsView.SubAccountDescription}
 
-              // onChange={formik.handleChange("TransactionName")}
-              // error={
-              //   formik.touched.TransactionName &&
-              //   formik.errors.TransactionName
-              // }
               />
             </div>
           </div>
@@ -311,8 +280,6 @@ const TransactionCodeDetails = () => {
                 options={BranchCodeOptions}
                 optionLabel="label"
               // onChange={(e) => {
-              //   console.log(e.value);
-              //   formik.setFieldValue("Description", e.value);
               //   handleAccountcode(e.value.);
               // }}
               // optionLabel="Description"
@@ -332,11 +299,6 @@ const TransactionCodeDetails = () => {
                 textWeight={500}
                 disabled={true}
                 value={TrascationcodeDetailsView.BranchDescription}
-              // onChange={formik.handleChange("TransactionName")}
-              // error={
-              //   formik.touched.TransactionName &&
-              //   formik.errors.TransactionName
-              // }
               />
             </div>
           </div>
@@ -366,11 +328,6 @@ const TransactionCodeDetails = () => {
                 textWeight={500}
                 disabled={true}
                 value={TrascationcodeDetailsView.DepartmentDescription}
-              // onChange={formik.handleChange("TransactionName")}
-              // error={
-              //   formik.touched.TransactionName &&
-              //   formik.errors.TransactionName
-              // }
               />
             </div>
           </div>

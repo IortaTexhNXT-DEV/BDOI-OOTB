@@ -21,9 +21,6 @@ const claimReducers = createSlice({
     });
     builder.addCase(claimListDatMiddleWare.fulfilled, (state, action) => {
       state.loading = false;
-      console.log("=== REDUCER PAYLOAD ===");
-      console.log("Action payload:", action.payload);
-      console.log("=== END REDUCER PAYLOAD ===");
 
       // Handle API response structure - check if payload has data.claims array
       if (
@@ -31,17 +28,13 @@ const claimReducers = createSlice({
         Array.isArray(action.payload.data.claims)
       ) {
         state.claimsTabelList = action.payload.data.claims;
-        console.log("Claims data extracted:", action.payload.data.claims);
       } else if (action.payload && Array.isArray(action.payload)) {
         state.claimsTabelList = action.payload;
-        console.log("Direct array payload:", action.payload);
       } else if (action.payload?.data && Array.isArray(action.payload.data)) {
         state.claimsTabelList = action.payload.data;
-        console.log("Data array payload:", action.payload.data);
       } else {
         // Fallback to empty array if structure is unexpected
         state.claimsTabelList = [];
-        console.log("Fallback to empty array");
       }
     });
     builder.addCase(claimListDatMiddleWare.rejected, (state, action) => {

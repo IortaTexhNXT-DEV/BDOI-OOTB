@@ -33,7 +33,7 @@
   }
 
   .policy__header {
-    color: red;
+    color: var(--color-danger);
 
     font-family: "Nunito", Arial, sans-serif;
     font-size: 16px;
@@ -491,4 +491,27 @@
 
 .filter-container-bg {
   background-color: $main-background;
+}
+
+// Renewal Policy: filter bar above the list
+.renewal-policy__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+
+  > span {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+  }
+
+  .renewal-policy__search {
+    flex: 1 1 16rem;
+
+    input {
+      width: 100%;
+    }
+  }
 }

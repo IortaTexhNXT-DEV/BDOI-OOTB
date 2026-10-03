@@ -14,8 +14,13 @@ import { Toast } from 'primereact/toast';
 import { Knob } from 'primereact/knob';
 import { Panel } from 'primereact/panel';
 import { Timeline } from 'primereact/timeline';
-import reinsuranceMockService from '../../../services/mockData/reinsuranceMockData';
+import reinsuranceService from '../../../services/reinsuranceService';
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { canOpen } from "../../../utils/canOpen";
 import './style.scss';
+import { progressValue } from "../../../utility/numberFormat";
+
+const RENEWAL_WINDOW_DAYS = 90;
 
 const TreatyDashboard = () => {
   const { t } = useTranslation();
@@ -35,8 +40,8 @@ const TreatyDashboard = () => {
     setLoading(true);
     try {
       const [treatyData, analyticsData] = await Promise.all([
-        reinsuranceMockService.getTreaties(),
-        reinsuranceMockService.getAnalytics()
+        reinsuranceService.getTreaties(),
+        reinsuranceService.getAnalytics()
       ]);
       setTreaties(treatyData);
       setAnalytics(analyticsData);
@@ -44,7 +49,7 @@ const TreatyDashboard = () => {
       toast.current?.show({
         severity: 'error',
         summary: t('reinsurance.error'),
-        detail: t('reinsurance.failedToLoadTreatyData')
+        detail: error?.message || t('reinsurance.failedToLoadTreatyData')
       });
     } finally {
       setLoading(false);
@@ -110,7 +115,7 @@ const TreatyDashboard = () => {
     return (
       <div className="utilization-cell">
         <ProgressBar
-          value={rowData.utilization}
+          value={progressValue(rowData.utilization, 1)}
           color={color}
           showValue={true}
           style={{ height: '20px' }}
@@ -126,43 +131,48 @@ const TreatyDashboard = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text p-button-primary"
           tooltip={t('reinsurance.viewDetails')}
-          onClick={() => navigate(`/reinsurance/treaty/${rowData.id}`)}
+          onClick={() => navigate(`/reinsurance/treaty/${rowData.id}`)} aria-label={t('reinsurance.viewDetails')}
         />
         <Button
           icon="pi pi-file"
           className="p-button-rounded p-button-text"
           tooltip="Generate Report"
+          onClick={() => navigate('/reinsurance/reports')} aria-label="Generate Report"
         />
       </div>
     );
   };
 
-  const renewalTimeline = [
-    {
-      status: 'Completed',
-      date: '2025-09-01',
-      icon: 'pi pi-check',
-      color: '#4caf50',
-      treaty: 'QS-MOTOR-2025',
-      action: 'Renewal Quote Sent'
-    },
-    {
-      status: 'In Progress',
-      date: '2025-10-15',
-      icon: 'pi pi-cog',
-      color: '#ff9800',
-      treaty: 'SURPLUS-PROP-2025',
-      action: 'Negotiation Phase'
-    },
-    {
-      status: 'Upcoming',
-      date: '2025-11-01',
-      icon: 'pi pi-clock',
-      color: '#9e9e9e',
-      treaty: 'CAT-XOL-2025',
-      action: 'Renewal Due'
+  const activeTreaties = treaties.filter(tr => tr.status === 'Active');
+  const today = new Date();
+  const daysUntil = (date) => Math.ceil((new Date(date) - today) / (24 * 60 * 60 * 1000));
+  const sumOf = (field) => activeTreaties.reduce((total, tr) => total + (Number(tr[field]) || 0), 0);
+  const averageUtilization = activeTreaties.length
+    ? Math.round(activeTreaties.reduce((total, tr) => total + (Number(tr.utilization) || 0), 0) / activeTreaties.length)
+    : 0;
+  const newThisMonth = treaties.filter(tr => {
+    const created = new Date(tr.createdAt);
+    return created.getFullYear() === today.getFullYear() && created.getMonth() === today.getMonth();
+  }).length;
+  const dueForRenewal = activeTreaties
+    .filter(tr => daysUntil(tr.expiryDate) <= RENEWAL_WINDOW_DAYS)
+    .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+
+  const timelineEntry = (tr) => {
+    if (tr.status === 'Pending Approval') {
+      return { status: 'In Progress', icon: 'pi pi-cog', color: '#ff9800', action: tr.status, date: tr.effectiveDate };
     }
-  ];
+    if (daysUntil(tr.expiryDate) < 0) {
+      return { status: 'Completed', icon: 'pi pi-check', color: '#4caf50', action: tr.status, date: tr.expiryDate };
+    }
+    return { status: 'Upcoming', icon: 'pi pi-clock', color: '#9e9e9e', action: 'Renewal Due', date: tr.expiryDate };
+  };
+
+  const renewalTimeline = treaties
+    .filter(tr => ['Active', 'Pending Approval'].includes(tr.status))
+    .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
+    .slice(0, 6)
+    .map(tr => ({ treaty: tr.treatyNumber, ...timelineEntry(tr) }));
 
   const customizedMarker = (item) => {
     return (
@@ -189,10 +199,13 @@ const TreatyDashboard = () => {
       <Card className="timeline-card">
         <h5>{item.treaty}</h5>
         <p>{item.action}</p>
-        <small>{item.date}</small>
+        <small>{formatAppDate(item.date)}</small>
       </Card>
     );
   };
+
+  // treaties are set up in Master > Finance > Reinsurance Treaty; only roles that may open it get the button
+  const canAddTreaty = canOpen('/master/reinsurance/treaty');
 
   return (
     <div className="treaty-dashboard">
@@ -201,12 +214,14 @@ const TreatyDashboard = () => {
       <div className="dashboard-header">
         <h2>{t('reinsurance.reinsurance')} {t('reinsurance.treatyDashboard')}</h2>
         <div className="header-actions">
-          <Button
-            label="Add Treaty"
-            icon="pi pi-plus"
-            className="p-button-primary"
-            onClick={() => navigate('/master/reinsurance/treaty')}
-          />
+          {canAddTreaty && (
+            <Button
+              label="Add Treaty"
+              icon="pi pi-plus"
+              className="p-button-primary"
+              onClick={() => navigate('/master/reinsurance/treaty?new=1')}
+            />
+          )}
           <Button
             label="View Reports"
             icon="pi pi-chart-bar"
@@ -220,9 +235,9 @@ const TreatyDashboard = () => {
         <Card className="metric-card">
           <div className="metric-content">
             <span className="metric-label">Active Treaties</span>
-            <span className="metric-value">{treaties.length}</span>
+            <span className="metric-value">{activeTreaties.length}</span>
             <span className="metric-change positive">
-              <i className="pi pi-arrow-up"></i> 2 new this month
+              <i className="pi pi-arrow-up"></i> {newThisMonth} new this month
             </span>
           </div>
         </Card>
@@ -230,8 +245,8 @@ const TreatyDashboard = () => {
         <Card className="metric-card">
           <div className="metric-content">
             <span className="metric-label">Total Capacity</span>
-            <span className="metric-value">{formatCurrency(5200000000)}</span>
-            <span className="metric-change">Available: {formatCurrency(2100000000)}</span>
+            <span className="metric-value">{formatCurrency(sumOf('capacity'))}</span>
+            <span className="metric-change">Available: {formatCurrency(sumOf('availableCapacity'))}</span>
           </div>
         </Card>
 
@@ -240,7 +255,7 @@ const TreatyDashboard = () => {
             <span className="metric-label">Average Utilization</span>
             <div className="knob-container">
               <Knob
-                value={65}
+                value={progressValue(averageUtilization)}
                 size={80}
                 strokeWidth={8}
                 valueColor="#4caf50"
@@ -254,9 +269,9 @@ const TreatyDashboard = () => {
         <Card className="metric-card">
           <div className="metric-content">
             <span className="metric-label">Pending Renewals</span>
-            <span className="metric-value">3</span>
+            <span className="metric-value">{dueForRenewal.length}</span>
             <span className="metric-change warning">
-              <i className="pi pi-clock"></i> Next: Nov 1
+              <i className="pi pi-clock"></i> Next: {dueForRenewal[0]?.expiryDate || '-'}
             </span>
           </div>
         </Card>
@@ -268,7 +283,7 @@ const TreatyDashboard = () => {
             value={treaties}
             loading={loading}
             paginator
-            rows={10}
+            rows={20}
             className="treaty-table"
             emptyMessage={t('common.noData')}
             responsiveLayout="scroll"
@@ -278,8 +293,8 @@ const TreatyDashboard = () => {
             <Column field="type" header="Type" sortable />
             <Column field="lineOfBusiness" header="Line of Business" sortable />
             <Column header="Utilization" body={utilizationBodyTemplate} sortable />
-            <Column field="premiumCeded" header="Premium Ceded" sortable />
-            <Column field="claimsRecovered" header="Claims Recovered" sortable />
+            <Column field="premiumCeded" header="Premium Ceded" sortable body={(rowData) => formatCurrency(rowData.premiumCeded)} />
+            <Column field="claimsRecovered" header="Claims Recovered" sortable body={(rowData) => formatCurrency(rowData.claimsRecovered)} />
             <Column header="Status" body={statusBodyTemplate} sortable />
             <Column header="Actions" body={actionBodyTemplate} />
           </DataTable>
@@ -321,11 +336,11 @@ const TreatyDashboard = () => {
                   </div>
                   <div className="capacity-row">
                     <span>Utilization:</span>
-                    <ProgressBar value={treaty.utilization} showValue />
+                    <ProgressBar value={progressValue(treaty.utilization, 1)} showValue />
                   </div>
                   <div className="capacity-row">
                     <span>Premium Ceded:</span>
-                    <strong>{treaty.premiumCeded}</strong>
+                    <strong>{formatCurrency(treaty.premiumCeded)}</strong>
                   </div>
                   <div className="capacity-actions">
                     <Button

@@ -1,4 +1,4 @@
-import { configureStore, combineReducers, getDefaultMiddleware } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import mainReducers from "./mainReducer";
 import agentReducers from "./AgentReducer";
 import logger from 'redux-logger';
@@ -19,7 +19,7 @@ const resettableRootReducer = (state, action) => {
 
 const store = configureStore({
     reducer: resettableRootReducer,
-    middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(logger),
+    middleware: (getDefaultMiddleware) => process.env.NODE_ENV === 'development' ? getDefaultMiddleware().concat(logger) : getDefaultMiddleware(),
 });
 
 export const resetStore = () => {

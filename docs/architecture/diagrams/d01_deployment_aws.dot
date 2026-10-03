@@ -1,0 +1,36 @@
+// Production deployment on the existing BrokerVerse URL, AWS ap-southeast-1 (documents 01, 07).
+// Source: deploy/README.md and deploy/REFERENCE.md. Dashed boxes are recommendations to be confirmed by DevOps.
+digraph G {
+  graph [rankdir=TB, fontname="Nunito", fontsize=11, nodesep=0.35, ranksep=0.5, pad=0.2, compound=true];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10.5];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=9, arrowsize=0.7];
+
+  users [label="Broker staff and clients\n(browser, HTTPS)", fillcolor="#FFFFFF"];
+  gh [label="GitHub\nci.yml: backend tests on PostgreSQL 16,\nfront-end tests and build, image build\ndeploy.yml (front end, push to dev):\ntests, build, S3 sync, CloudFront invalidation", shape=component, fillcolor="#FFFFFF"];
+  dns [label="DNS\nexisting BrokerVerse URL", fillcolor="#FFFFFF"];
+  subgraph cluster_edge { label="Edge"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    cf [label="CloudFront distribution\ndefault behaviour -> S3 (SPA)\n/api/* behaviour -> load balancer (no cache)\n403/404 -> /index.html"];
+    waf [label="AWS WAF (recommended)", style="rounded,dashed,filled", fillcolor="#FFFFFF"];
+  }
+  s3 [label="S3 bucket\nSPA build", shape=folder];
+  subgraph cluster_vpc { label="AWS ap-southeast-1"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    alb [label="Load balancer, HTTPS\nhealth check GET /api/health"];
+    subgraph cluster_az { label="Backend containers from backend/Dockerfile (ECS Fargate, App Runner or EC2)"; style="rounded,dashed"; color="#9FB3C8"; fontcolor="#5B6776";
+      api1 [label="API container 1\nnode:22-alpine, port 8000\nSCHEDULER_ENABLED=true"];
+      api2 [label="API container 2..n\n(when scaled out)\nscheduler optional"];
+    }
+    rds [label="PostgreSQL 16 (e.g. Amazon RDS)\ntime zone Asia/Manila\ndaily snapshots, 30+ days", shape=cylinder];
+    efs [label="Persistent volume (e.g. EFS)\n/app/uploads (UPLOAD_DIR)", shape=folder];
+  }
+  sm [label="Secret store (Secrets Manager / SSM)\nJWT_SECRET, DATA_ENCRYPTION_KEY,\nDATABASE_URL, SMTP_URL, ADMIN_PASSWORD", shape=note, fillcolor="#FFF8E1", color="#E0B23A"];
+  cw [label="Logs, metrics, alarms\n(recommended: CloudWatch + SNS)", shape=note, style="rounded,dashed,filled", fillcolor="#FFFFFF"];
+  smtp [label="Office 365 SMTP\nsmtp.office365.com:587, STARTTLS", shape=component, fillcolor="#FFFFFF"];
+
+  users -> dns -> cf; waf -> cf [style=dashed, arrowhead=none];
+  cf -> s3 [label="static"]; cf -> alb [label="/api/*"];
+  gh -> s3 [label="aws s3 sync", style=dashed];
+  alb -> api1; alb -> api2;
+  api1 -> rds; api2 -> rds; api1 -> efs; api2 -> efs;
+  sm -> api1 [style=dashed]; sm -> api2 [style=dashed];
+  api1 -> cw [style=dashed]; api2 -> smtp [style=dashed, label="e-mail outbox"];
+}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -6,26 +6,25 @@ import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getReceiptSearchMiddleware,
   getViewReceiptMiddleware,
+  getReceiptListMiddleware,
 } from "../store/pettyCashReceiptsMiddleware";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const PettyCashReceiptsTable = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [filterData, setFilterData] = useState(null);
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("ReceiptNo");
 
-  const { ReceiptList, loading, ReceiptSearch } = useSelector(
+  const { ReceiptList, ReceiptSearch } = useSelector(
     ({ pettyCashReceiptsReducer }) => {
       return {
         loading: pettyCashReceiptsReducer?.loading,
@@ -46,7 +45,11 @@ const PettyCashReceiptsTable = () => {
     { name: "Date", code: "Date" },
   ];
 
-  const isEmpty = ReceiptList?.length === 0;
+  useEffect(() => {
+    dispatch(getReceiptListMiddleware());
+  }, [dispatch]);
+
+  const isEmpty = !ReceiptList?.length;
 
   const emptyTableIcon = (
     <div className="empty-table-icon">
@@ -58,10 +61,9 @@ const PettyCashReceiptsTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -91,8 +93,7 @@ const PettyCashReceiptsTable = () => {
         <Button
           icon={<SvgEyeIcon />}
           className="eye__btn p-0"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -111,26 +112,8 @@ const PettyCashReceiptsTable = () => {
     border: "none",
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
-  const cities = [
-    { name: "Name", code: "name" },
-    { name: "Date", code: "date" },
-    { name: "Receipt No", code: "code" },
-  ];
 
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(
@@ -170,14 +153,6 @@ const PettyCashReceiptsTable = () => {
               dropdownIcon={<SvgDropdownicon />}
             />
 
-            {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" />
-            <Button
-              label="Search by"
-              outlined
-              icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
           </div>
           <div className="sub__title">Receipts history</div>
         </div>
@@ -191,9 +166,8 @@ const PettyCashReceiptsTable = () => {
             scrollable={true}
             scrollHeight="40vh"
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -213,7 +187,7 @@ const PettyCashReceiptsTable = () => {
               headerStyle={headerStyle}
               className="fieldvalue_container"
               sortable
-              body={(rowData) => rowData.RequesterName?.toUpperCase()}
+              body={(rowData) => rowData.RequesterName}
             ></Column>
             <Column
               field="Branchcode"
@@ -248,10 +222,9 @@ const PettyCashReceiptsTable = () => {
               header="Transaction Number"
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              // body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
               sortable
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}

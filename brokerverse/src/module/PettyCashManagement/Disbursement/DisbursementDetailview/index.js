@@ -1,4 +1,3 @@
-import React, { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -7,24 +6,15 @@ import { useNavigate } from "react-router";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-// import CustomToast from "../../../../components/Toast";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
 import DisbursementDetailviewTable from "./DisbursementDetailviewTable";
 import { useSelector } from "react-redux";
-import { useFormik } from "formik";
-
-// const initialValue = {
-//   PettyCashCode: "",
-//   TransactionCode: "",
-//   BranchCode: "",
-//   DepartmentCode: "",
-// };
 
 const DisbursementDetailview = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { ViewDisbursment, loading, getViewDisbursment } = useSelector(
+  const { getViewDisbursment } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -33,8 +23,6 @@ const DisbursementDetailview = () => {
       };
     }
   );
-
-  console.log(getViewDisbursment, "getViewDisbursment");
 
   const items = [
     {
@@ -52,41 +40,12 @@ const DisbursementDetailview = () => {
     navigate("/accounts/pettycash/disbursement");
   };
 
-  // const formik = useFormik({
-  //   initialValues: initialValue,
-  // });
 
-  const PettycashCodetOptions = [
-    {
-      label: ViewDisbursment?.PettycashCode,
-      value: ViewDisbursment?.PettycashCode,
-    },
-  ];
 
-  const TransactioncodeOptions = [
-    {
-      label: ViewDisbursment?.Transactioncode,
-      value: ViewDisbursment?.Transactioncode,
-    },
-  ];
 
-  const BranchcodeOptions = [
-    {
-      label: ViewDisbursment?.Branchcode,
-      value: ViewDisbursment?.Branchcode,
-    },
-  ];
-
-  const DepartmentcodeOptions = [
-    {
-      label: ViewDisbursment?.Departmentcode,
-      value: ViewDisbursment?.Departmentcode,
-    },
-  ];
 
   return (
     <div className="add__disbursement__view__container">
-      {/* <CustomToast ref={toastRef} /> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
           <div
@@ -143,7 +102,6 @@ const DisbursementDetailview = () => {
               value={getViewDisbursment?.PettyCashCode}
               options={[{label:getViewDisbursment?.PettyCashCode,value:getViewDisbursment?.PettyCashCode}]}
                 optionLabel="label"
-            // optionLabel="pettycashcode"
             />
           </div>
           <div className="col-12 md:col-3 lg:col-3 input__view">
@@ -158,7 +116,6 @@ const DisbursementDetailview = () => {
               value={getViewDisbursment?.Criteria}
               options={[{label:getViewDisbursment?.Criteria,value:getViewDisbursment?.Criteria}]}
                 optionLabel="label"
-            // optionLabel="pettycashcode"
             />
           </div>
           <div className="col-12 md:col-3 lg:col-3 input__view">
@@ -173,7 +130,6 @@ const DisbursementDetailview = () => {
               value={getViewDisbursment?.VATMainAccount}
               options={[{label:getViewDisbursment?.VATMainAccount,value:getViewDisbursment?.VATMainAccount}]}
                 optionLabel="label"
-            // optionLabel="pettycashcode"
             />
           </div>
           <div className="col-12 md:col-3 lg:col-3 input__view">
@@ -188,7 +144,6 @@ const DisbursementDetailview = () => {
               value={getViewDisbursment?.VATSubAccount}
               options={[{label:getViewDisbursment?.VATSubAccount,value:getViewDisbursment?.VATSubAccount}]}
                 optionLabel="label"
-            // optionLabel="pettycashcode"
             />
           </div>
           <div className="col-12 md:col-3 lg:col-3 input__view">
@@ -203,7 +158,6 @@ const DisbursementDetailview = () => {
               value={getViewDisbursment?.WHTMainAccount}
               options={[{label:getViewDisbursment?.WHTMainAccount,value:getViewDisbursment?.WHTMainAccount}]}
                 optionLabel="label"
-            // optionLabel="pettycashcode"
             />
           </div>
           <div className="col-12 md:col-3 lg:col-3 input__view">
@@ -218,7 +172,6 @@ const DisbursementDetailview = () => {
               value={getViewDisbursment?.WHTSubAccount}
               options={[{label:getViewDisbursment?.WHTSubAccount,value:getViewDisbursment?.WHTSubAccount}]}
                 optionLabel="label"
-            // optionLabel="pettycashcode"
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6 input__view">

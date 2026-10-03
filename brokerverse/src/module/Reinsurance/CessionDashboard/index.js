@@ -1,1 +1,3 @@
-export { CessionDashboard as default } from '../ReinsuranceScreens';
+import { CessionDashboard } from "../ReinsuranceScreens";
+
+export default CessionDashboard;

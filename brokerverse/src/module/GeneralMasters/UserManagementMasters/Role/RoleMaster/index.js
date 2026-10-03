@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../../../assets/icons/SvgAdd";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
-import NavBar from "../../../../../components/NavBar";
 import SvgSearchIcon from "../../../../../assets/icons/SvgSearchIcon";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -14,18 +13,21 @@ import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
 import SvgEyeIcon from "../../../../../assets/icons/SvgEyeIcon";
 import SvgEditIcon from "../../../../../assets/icons/SvgEditIcon";
-import ToggleButton from "../../../../../components/ToggleButton";
-import Productdata from "./mock";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getPatchRoleEditMiddleware,
   getSearchRoleMiddleware,
   getViewRoleEditMiddleware,
+  getRoleListMiddleware,
 } from "../store/roleMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
+import userService from "../../../../../services/userService";
+import { formatDate } from "../../../../../utility/dateFormat";
 
 const RoleMaster = () => {
   const { t } = useTranslation();
-  const { loading, roleTableList, roleSearchList } = useSelector(
+  const { roleTableList, roleSearchList } = useSelector(
     ({ roleMainReducers }) => {
       return {
         loading: roleMainReducers?.loading,
@@ -34,15 +36,20 @@ const RoleMaster = () => {
       };
     }
   );
-  console.log(roleTableList, "find1243");
   const [search, setSearch] = useState("");
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getRoleListMiddleware());
+  const toggleRoleStatus = (role, active) =>
+    userService.updateRole(role.id, { status: active ? "active" : "inactive" });
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getRoleListMiddleware());
+  }, [dispatch]);
   const handleNavigate = () => {
     navigate("/master/generals/usermanagement/role/add/1");
-  };
-  const handleNavigateedit = () => {
-    // navigate('/master/finance/hierarchy/hierarchydetails')
   };
   const handleView = (rowData) => {
     dispatch(getViewRoleEditMiddleware(rowData));
@@ -87,8 +94,8 @@ const RoleMaster = () => {
     justifyContent: "center",
   };
 
-  const [first, setFirst] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [, setFirst] = useState(0);
+  const [, setRowsPerPage] = useState(10);
 
   const onPageChange = (event) => {
     setFirst(event.first);
@@ -97,25 +104,23 @@ const RoleMaster = () => {
 
   const renderViewButton = (rowData) => {
     return (
-      <div className="center-content">
+      <div className="role__actions">
         <Button
           icon={<SvgEyeIcon />}
-          className="eye__btn"
+          className="role__action__btn"
+          aria-label={t("common.view")}
+          tooltip={t("common.view")}
+          tooltipOptions={{ position: "top" }}
           onClick={() => handleView(rowData)}
         />
         <Button
           icon={<SvgEditIcon />}
-          className="eye__btn"
+          className="role__action__btn"
+          aria-label={t("common.edit")}
+          tooltip={t("common.edit")}
+          tooltipOptions={{ position: "top" }}
           onClick={() => handlEdit(rowData)}
         />
-      </div>
-    );
-  };
-
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
       </div>
     );
   };
@@ -125,10 +130,9 @@ const RoleMaster = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -151,6 +155,7 @@ const RoleMaster = () => {
   };
   return (
     <div className="grid overall__role__master__container">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__hierarchy">Role Master</div>
         <div className="mt-3">
@@ -163,12 +168,12 @@ const RoleMaster = () => {
         </div>
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__hierarchy mb-1">
-        <div className="add__icon__view__hierarchy" onClick={handleNavigate}>
-          <div className="add__icon__hierarchy">
+        <button type="button" className="add__icon__view__hierarchy bv-add-button" onClick={handleNavigate}>
+          <span className="add__icon__hierarchy">
             <SvgAdd />
-          </div>
-          <div className="add__text__hierarchy">{t("generalMasters.add")}</div>
-        </div>
+          </span>
+          <span className="add__text__hierarchy">{t("generalMasters.add")}</span>
+        </button>
       </div>
       <div className="col-12 m-0 ">
         <div className="sub__account__sub__container__hierarchy">
@@ -204,8 +209,8 @@ const RoleMaster = () => {
                 className="table__view__hierarchy"
                 paginator
                 paginatorLeft
-                rows={5}
-                rowsPerPageOptions={[5, 10, 25, 50]}
+                rows={20}
+                rowsPerPageOptions={[20, 50, 100]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
                 paginatorTemplate={template2}
                 onPage={onPageChange}
@@ -225,7 +230,7 @@ const RoleMaster = () => {
                   header="Role Name"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.roleName?.toUpperCase()}
+                  body={(rowData) => rowData.roleName}
                 ></Column>
 
                 <Column
@@ -233,17 +238,18 @@ const RoleMaster = () => {
                   header="Modified By"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.modifiedBy?.toUpperCase()}
+                  body={(rowData) => rowData.modifiedBy}
                 ></Column>
                 <Column
                   field="modifiedOn"
                   header="Modified On"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
+                  body={(rowData) => formatDate(rowData.modifiedOn)}
                 ></Column>
                 <Column
                   field="status"
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  body={(columnData) => <MasterStatusToggle type="role" record={columnData} onToggle={toggleRoleStatus} onChanged={reloadList} onError={showStatusError} />}
                   header="Status"
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"
@@ -253,7 +259,8 @@ const RoleMaster = () => {
                   body={renderViewButton}
                   header="Action"
                   headerStyle={ViewheaderStyle}
-                  className="fieldvalue_container_centered"
+                  className="fieldvalue_container"
+                  style={{ minWidth: "9rem" }}
                 ></Column>
               </DataTable>
             </div>

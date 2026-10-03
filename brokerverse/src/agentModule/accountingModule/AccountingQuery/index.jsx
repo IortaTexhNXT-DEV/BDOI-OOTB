@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { useNavigate } from "react-router-dom";
@@ -6,16 +6,16 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
-import { Dialog } from "primereact/dialog";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import accountingService from "../../../services/accountingService";
+import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const EntryTypeBadge = ({ entryType }) => {
   const { t } = useTranslation();
@@ -117,18 +117,8 @@ const AmountCell = ({ amount, debitCredit }) => {
   );
 };
 
-const DateCell = ({ dateString }) => {
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  return formatDate(dateString);
-};
+// Dates in the configured display format (System Settings, general.date_format), not ISO
+const DateCell = ({ dateString }) => formatDate(dateString, { empty: "" });
 
 const AccountingQuery = () => {
   const { t } = useTranslation();
@@ -140,11 +130,10 @@ const AccountingQuery = () => {
   const [entries, setEntries] = useState([]);
   const [pagination, setPagination] = useState({
     page: 1,
-    pageSize: 50,
+    pageSize: 20,
     total: 0,
     totalPages: 0,
   });
-  const [processingTransactionId, setProcessingTransactionId] = useState(null);
 
   // Filter states
   const [policyId, setPolicyId] = useState("");
@@ -231,7 +220,7 @@ const AccountingQuery = () => {
         );
       }
     } catch (error) {
-      console.error("Error searching accounting entries:", error);
+      logger.error("Error searching accounting entries:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -256,7 +245,7 @@ const AccountingQuery = () => {
     setEntries([]);
     setPagination({
       page: 1,
-      pageSize: 50,
+      pageSize: 20,
       total: 0,
       totalPages: 0,
     });
@@ -304,7 +293,7 @@ const AccountingQuery = () => {
         );
       }
     } catch (error) {
-      console.error("Error exporting accounting entries:", error);
+      logger.error("Error exporting accounting entries:", error);
       toast.current?.show({
         severity: "error",
         summary: "Export Failed",
@@ -322,192 +311,10 @@ const AccountingQuery = () => {
     }
   };
 
-  const handleMotherPolicyClick = (motherPolicyId) => {
-    if (motherPolicyId) {
-      navigate(`/agent/premium-accounting-entries/${motherPolicyId}`);
-    }
-  };
 
-  const handlePostTransaction = async (transactionId, transactionCode) => {
-    setProcessingTransactionId(transactionId);
-    try {
-      const response = await accountingService.postTransaction(transactionId);
-      if (response.success) {
-        // Immediately update local state
-        setEntries((prevEntries) =>
-          prevEntries.map((entry) =>
-            entry.id === transactionId
-              ? { ...entry, status: "Posted", ...response.data }
-              : entry
-          )
-        );
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: `Transaction ${transactionCode} posted successfully`,
-          life: 3000,
-        });
-        // Also refresh the data to ensure consistency
-        await handleSearch(pagination.page);
-      } else {
-        throw new Error(response.error || "Failed to post transaction");
-      }
-    } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: error.message || "Failed to post transaction",
-        life: 3000,
-      });
-    } finally {
-      setProcessingTransactionId(null);
-    }
-  };
 
-  const handleReverseTransaction = async (transactionId, transactionCode) => {
-    confirmDialog({
-      message: `Are you sure you want to reverse transaction ${transactionCode}? This action cannot be undone.`,
-      header: "Confirm Reverse",
-      icon: "pi pi-exclamation-triangle",
-      accept: async () => {
-        setProcessingTransactionId(transactionId);
-        try {
-          const response = await accountingService.reverseTransaction(
-            transactionId
-          );
-          if (response.success) {
-            // Immediately update local state
-            setEntries((prevEntries) =>
-              prevEntries.map((entry) =>
-                entry.id === transactionId
-                  ? { ...entry, status: "Reversed", ...response.data }
-                  : entry
-              )
-            );
-            toast.current?.show({
-              severity: "success",
-              summary: "Success",
-              detail: `Transaction ${transactionCode} reversed successfully`,
-              life: 3000,
-            });
-            // Also refresh the data to ensure consistency
-            await handleSearch(pagination.page);
-          } else {
-            throw new Error(response.error || "Failed to reverse transaction");
-          }
-        } catch (error) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.message || "Failed to reverse transaction",
-            life: 3000,
-          });
-        } finally {
-          setProcessingTransactionId(null);
-        }
-      },
-    });
-  };
 
-  const handleCancelTransaction = async (transactionId, transactionCode) => {
-    confirmDialog({
-      message: `Are you sure you want to cancel transaction ${transactionCode}? This action cannot be undone.`,
-      header: "Confirm Cancel",
-      icon: "pi pi-exclamation-triangle",
-      accept: async () => {
-        setProcessingTransactionId(transactionId);
-        try {
-          const response = await accountingService.cancelTransaction(
-            transactionId
-          );
-          if (response.success) {
-            // Immediately update local state
-            setEntries((prevEntries) =>
-              prevEntries.map((entry) =>
-                entry.id === transactionId
-                  ? { ...entry, status: "Cancelled", ...response.data }
-                  : entry
-              )
-            );
-            toast.current?.show({
-              severity: "success",
-              summary: "Success",
-              detail: `Transaction ${transactionCode} cancelled successfully`,
-              life: 3000,
-            });
-            // Also refresh the data to ensure consistency
-            await handleSearch(pagination.page);
-          } else {
-            throw new Error(response.error || "Failed to cancel transaction");
-          }
-        } catch (error) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.message || "Failed to cancel transaction",
-            life: 3000,
-          });
-        } finally {
-          setProcessingTransactionId(null);
-        }
-      },
-    });
-  };
 
-  const ActionButtons = ({ rowData }) => {
-    const isProcessing = processingTransactionId === rowData.id;
-    const canPost = rowData.status === "Pending";
-    const canReverse = rowData.status === "Posted";
-    const canCancel =
-      rowData.status !== "Cancelled" && rowData.status !== "Reversed";
-
-    return (
-      <div className="action-buttons">
-        {canPost && (
-          <Button
-            icon="pi pi-check"
-            className="p-button-rounded p-button-text p-button-success"
-            onClick={() =>
-              handlePostTransaction(rowData.id, rowData.transactionCode)
-            }
-            disabled={isProcessing}
-            loading={isProcessing}
-            tooltip="Post this transaction"
-            tooltipOptions={{ position: "top" }}
-          />
-        )}
-        {canReverse && (
-          <Button
-            icon="pi pi-undo"
-            className="p-button-rounded p-button-text p-button-warning"
-            onClick={() =>
-              handleReverseTransaction(rowData.id, rowData.transactionCode)
-            }
-            disabled={isProcessing}
-            loading={isProcessing}
-            tooltip="Reverse this transaction"
-            tooltipOptions={{ position: "top" }}
-          />
-        )}
-        {canCancel && (
-          <Button
-            icon="pi pi-times"
-            className="p-button-rounded p-button-text p-button-danger"
-            onClick={() =>
-              handleCancelTransaction(rowData.id, rowData.transactionCode)
-            }
-            disabled={isProcessing}
-            loading={isProcessing}
-            tooltip="Cancel this transaction"
-            tooltipOptions={{ position: "top" }}
-          />
-        )}
-        {!canPost && !canReverse && !canCancel && (
-          <span className="no-actions">-</span>
-        )}
-      </div>
-    );
-  };
 
   return (
     <div className="accounting-query">
@@ -517,9 +324,6 @@ const AccountingQuery = () => {
       {/* Header */}
       <div className="page-header">
         <h1>{t("accounting.entriesQuery")}</h1>
-        <p className="subtitle">
-          {t("accounting.entriesQuerySubtitle")}
-        </p>
       </div>
 
       {/* Search Form */}
@@ -588,7 +392,7 @@ const AccountingQuery = () => {
               <Calendar
                 value={startDate}
                 onChange={(e) => setStartDate(e.value)}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
               />
             </div>
@@ -597,7 +401,7 @@ const AccountingQuery = () => {
               <Calendar
                 value={endDate}
                 onChange={(e) => setEndDate(e.value)}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
                 showIcon
               />
             </div>
@@ -656,7 +460,7 @@ const AccountingQuery = () => {
             first={(pagination.page - 1) * pagination.pageSize}
             totalRecords={pagination.total}
             onPage={(e) => handleSearch(e.page + 1, e.rows)}
-            rowsPerPageOptions={[10, 25, 50, 100]}
+            rowsPerPageOptions={[20, 50, 100]}
             paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
             currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             emptyMessage={t("accounting.noEntriesFound")}
@@ -796,13 +600,6 @@ const AccountingQuery = () => {
               )}
               style={{ minWidth: "100px" }}
             />
-            {/* <Column
-              header={t("tables.actions")}
-              body={(rowData) => <ActionButtons rowData={rowData} />}
-              style={{ minWidth: "120px" }}
-              alignHeader="center"
-              align="center"
-            /> */}
           </DataTable>
         </Card>
       )}

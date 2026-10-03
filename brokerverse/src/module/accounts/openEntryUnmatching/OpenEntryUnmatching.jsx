@@ -12,7 +12,9 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import "../openEntryMatching/OpenEntryMatching.scss";
 import accountingService from "../../../services/accountingService";
 import { Dropdown } from "primereact/dropdown";
-import { subAccountOptions } from "../openEntryMatching/OpenEntryMatching";
+import useOpenItemAccounts from "../openEntryMatching/useOpenItemAccounts";
+import { notifyError, notifySuccess, notifyWarn } from "../../../utility/dialogs";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const OpenEntryUnmatching = () => {
   const { t } = useTranslation();
@@ -43,6 +45,7 @@ const OpenEntryUnmatching = () => {
     net: "",
   });
   const [loading, setLoading] = useState(false);
+  const subAccountOptions = useOpenItemAccounts();
 
   const items = [
     {
@@ -63,7 +66,9 @@ const OpenEntryUnmatching = () => {
         pageSize: 100,
       });
 
-      if (response.success) {
+      if (!response.success) {
+        notifyError(response.error || "Failed to fetch matched entries");
+      } else {
         const matches = response.data || [];
         // Transform matched entries into separate debit and credit entries
         const debitEntriesList = matches.map((match) => ({
@@ -82,8 +87,7 @@ const OpenEntryUnmatching = () => {
         setCreditEntries(creditEntriesList);
       }
     } catch (error) {
-      console.error("Error fetching matched entries:", error);
-      alert("Failed to fetch matched entries");
+      notifyError("Failed to fetch matched entries");
     } finally {
       setLoading(false);
     }
@@ -91,7 +95,7 @@ const OpenEntryUnmatching = () => {
 
   const handleUnmatch = async () => {
     if (selectedDebits.length === 0 || selectedCredits.length === 0) {
-      alert(t("openEntryUnmatching.pleaseSelectDebitAndCredit"));
+      notifyWarn(t("openEntryUnmatching.pleaseSelectDebitAndCredit"));
       return;
     }
 
@@ -106,21 +110,22 @@ const OpenEntryUnmatching = () => {
       ].filter((id) => id);
 
       if (matchingIds.length === 0) {
-        alert(t("openEntryUnmatching.noValidMatchingSelected"));
+        notifyWarn(t("openEntryUnmatching.noValidMatchingSelected"));
         return;
       }
 
       const response = await accountingService.unmatchEntries(matchingIds);
 
-      if (response.success) {
-        alert(`Successfully unmatched ${response.data.length} entry pair(s)`);
+      if (!response.success) {
+        notifyError(response.error || t("openEntryUnmatching.failedToUnmatchEntries"));
+      } else {
+        notifySuccess(`Successfully unmatched ${response.data.length} entry pair(s)`);
         setSelectedDebits([]);
         setSelectedCredits([]);
         handlePull();
       }
     } catch (error) {
-      console.error("Error unmatching entries:", error);
-      alert(error.response?.data?.error || t("openEntryUnmatching.failedToUnmatchEntries"));
+      notifyError(error.message || t("openEntryUnmatching.failedToUnmatchEntries"));
     } finally {
       setLoading(false);
     }
@@ -146,12 +151,7 @@ const OpenEntryUnmatching = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
+    return formatAppDate(dateString, { empty: "" });
   };
 
   const calculateTotal = (entries, field) => {
@@ -344,7 +344,7 @@ const OpenEntryUnmatching = () => {
       <div className="col-12"></div>
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title__open__entry__matching">
-          Open Entry Un-Matching
+          Open Entry Unmatching
         </div>
         <div className="mt-4">
           <BreadCrumb

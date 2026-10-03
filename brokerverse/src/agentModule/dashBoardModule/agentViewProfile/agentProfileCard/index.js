@@ -1,18 +1,17 @@
 import { Card } from "primereact/card";
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import InputTextField from "../../../component/inputText/index";
 import { Button } from "primereact/button";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
-import { patchProfileEditMiddleware } from "../agentProfileCard/store/profileMiddleware";
+import { getProfileMiddleware, patchProfileEditMiddleware } from "../agentProfileCard/store/profileMiddleware";
 import { RadioButton } from "primereact/radiobutton";
 import DatepickerField from "../../../component/datePicker";
 const AgentProfileCard = () => {
   const dispatch = useDispatch();
   const [formAction, setFormAction] = useState("view");
-  const { profileData, profileEditData, loading, total } = useSelector(
+  const { profileData } = useSelector(
     ({ profileReducers }) => {
-      console.log(profileReducers, "find profileReducers");
       return {
         loading: profileReducers?.loading,
         profileData: profileReducers?.profileData,
@@ -23,7 +22,6 @@ const AgentProfileCard = () => {
       };
     }
   );
-  console.log(profileData, "find profileEditData");
 
   const initialValue = {
     firstName: "",
@@ -41,55 +39,11 @@ const AgentProfileCard = () => {
     zipCode: "",
   };
   // const validate = (values) => {
-  //   const errors = {};
-  //   console.log(values, errors, "values");
   //   if (!values.employeeCode) {
-  //     errors.employeeCode = "Employee Code is required";
   //   }
   //   if (!values.firstName) {
-  //     errors.firstName = "First name Code is required";
   //   }
 
-  //   if (!values.middleName) {
-  //     errors.middleName = "Middle name Name is required";
-  //   }
-
-  //   if (!values.employeeType) {
-  //     errors.employeeType = "Employee type is required";
-  //   }
-  //   if (!values.designation) {
-  //     errors.designation = "Designation is required";
-  //   }
-  //   if (!values.reportingto) {
-  //     errors.reportingto = "Reporting is required";
-  //   }
-  //   if (!values.branchCode) {
-  //     errors.branchCode = "Branch code is required";
-  //   }
-  //   if (!values.departmentCode) {
-  //     errors.departmentCode = "Department code is required";
-  //   }
-  //   if (!values.idProofType) {
-  //     errors.idProofType = "Id proof type is required";
-  //   }
-  //   if (!values.idNumber) {
-  //     errors.idNumber = "Id number is required";
-  //   }
-
-  //   if (!values.city) {
-  //     errors.city = "City is required";
-  //   }
-  //   if (!values.country) {
-  //     errors.country = "Country is required";
-  //   }
-  //   if (!values.state) {
-  //     errors.state = "State is required";
-  //   }
-  //   if (!values.lastName) {
-  //     errors.lastName = "Last name is required";
-  //   }
-
-  //   return errors;
   // };
 
   const setFormikValues = () => {
@@ -98,7 +52,6 @@ const AgentProfileCard = () => {
       firstName: profileData[0]?.firstName,
       lastName: profileData[0]?.lastName,
       prefferedName: profileData[0]?.prefferedName,
-      lastName: profileData[0]?.lastName,
       dateOfBirth: profileData[0]?.dateOfBirth,
       gender: profileData[0]?.gender,
       houseNoUnitNoStreet: profileData[0]?.houseNoUnitNoStreet,
@@ -115,12 +68,14 @@ const AgentProfileCard = () => {
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
-  const toastRef = useRef(null);
   const handleSubmit = (value) => {
-    console.log(value, "find value");
     dispatch(patchProfileEditMiddleware(value));
     setFormAction("view");
   };
+  useEffect(() => {
+    dispatch(getProfileMiddleware());
+  }, [dispatch]);
+
   useEffect(() => {
     setFormikValues();
   }, [profileData]);

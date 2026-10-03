@@ -3,7 +3,6 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import "./index.scss";
-import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgFilters from "../../../assets/icons/SvgFilters";
@@ -13,14 +12,17 @@ import { Paginator } from "primereact/paginator";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router-dom";
-import { InputText } from "primereact/inputtext";
+import { Link, useNavigate } from "react-router-dom";
 import SvgTable from "../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import ToggleButton from "../../../components/ToggleButton";
 import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { TieredMenu } from "primereact/tieredmenu";
 import { Card } from "primereact/card";
+import { Toast } from "primereact/toast";
+import remittanceService, { masterService } from "../../../services/remittanceService";
+import { showError, showSuccess } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const RemittanceMaster = () => {
   const { t } = useTranslation();
@@ -30,179 +32,20 @@ const RemittanceMaster = () => {
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(10);
 
-  // Mock data for remittance masters
-  const [remittanceData] = useState([
-    {
-      id: 1,
-      code: "ARM-0001",
-      name: "Monthly Auto Remittance",
-      type: "Automated",
-      frequency: "Monthly",
-      insurers: 5,
-      status: true,
-      lastRun: "2025-09-15",
-    },
-    {
-      id: 2,
-      code: "STM-001",
-      name: "Standard Statement Template",
-      type: "Statement",
-      format: "Monthly",
-      columns: 12,
-      status: true,
-      lastUsed: "2025-09-20",
-    },
-    {
-      id: 3,
-      code: "STP-001",
-      name: "Regular Settlement",
-      type: "Settlement",
-      approvalLevels: 3,
-      limit: "500,000",
-      status: true,
-      lastUpdated: "2025-09-10",
-    },
-    {
-      id: 4,
-      code: "ARM-0002",
-      name: "Quarterly Auto Remittance",
-      type: "Automated",
-      frequency: "Quarterly",
-      insurers: 3,
-      status: false,
-      lastRun: "2025-07-01",
-    },
-    {
-      id: 5,
-      code: "REC-0001",
-      name: "Standard Reconciliation Rule",
-      type: "Reconciliation",
-      matchingRules: "4 Rules",
-      tolerance: "2.5%",
-      status: true,
-      lastUpdated: "2025-09-22",
-    },
-    {
-      id: 6,
-      code: "BFM-001",
-      name: "Standard CSV Import",
-      type: "BulkProcessing",
-      fileFormat: "CSV",
-      maxRecords: 50000,
-      status: true,
-      lastUpdated: "2025-09-21",
-    },
-    {
-      id: 7,
-      code: "SCH-0001",
-      name: "Monthly Remittance Schedule",
-      type: "Schedule",
-      frequency: "Monthly",
-      nextRun: "2025-10-01",
-      status: true,
-      lastUpdated: "2025-09-23",
-    },
-    {
-      id: 8,
-      code: "ETM-001",
-      name: "Standard Wire Transfer",
-      type: "Electronic",
-      transferType: "Domestic",
-      methods: "4 Methods",
-      status: true,
-      lastUpdated: "2025-09-24",
-    },
-    {
-      id: 9,
-      code: "AWF-001",
-      name: "Standard Approval Workflow",
-      type: "ApprovalWorkflow",
-      levels: "3 Levels",
-      pattern: "Sequential",
-      status: true,
-      lastUpdated: "2025-09-25",
-    },
-    {
-      id: 10,
-      code: "EXC-001",
-      name: "Exception Handling Master",
-      type: "Exception",
-      exceptionTypes: "7 Types",
-      autoResolve: "Enabled",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 11,
-      code: "RPT-001",
-      name: "Daily Remittance Report",
-      type: "ReportTemplate",
-      category: "Operational",
-      frequency: "Daily",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 12,
-      code: "ABL-001",
-      name: "Agency Bill Configuration",
-      type: "AgencyBill",
-      frequency: "Monthly",
-      agencies: "25 Active",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 13,
-      code: "DBL-001",
-      name: "Standard Direct Bill",
-      type: "DirectBill",
-      billMethod: "Policy-wise",
-      paymentTerms: "30 Days",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 14,
-      code: "ADJ-001",
-      name: "Standard Adjustment Config",
-      type: "Adjustment",
-      adjustmentTypes: "6 Types",
-      approvalMatrix: "Configured",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 15,
-      code: "NTF-001",
-      name: "Email Notification Template",
-      type: "Notification",
-      channels: "Email, SMS",
-      templates: "8 Active",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 16,
-      code: "HST-001",
-      name: "History Configuration",
-      type: "History",
-      retention: "24 Months",
-      archival: "Enabled",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-    {
-      id: 17,
-      code: "ANL-001",
-      name: "Executive Dashboard",
-      type: "Analytics",
-      widgets: "15 Widgets",
-      refreshRate: "5 Min",
-      status: true,
-      lastUpdated: "2025-09-26",
-    },
-  ]);
+  const [remittanceData, setRemittanceData] = useState([]);
+  const toast = useRef(null);
+
+  const loadMasters = async () => {
+    try {
+      setRemittanceData(await remittanceService.masterOverview());
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
+
+  useEffect(() => {
+    loadMasters();
+  }, []);
 
   const items = [
     { label: t("financeMasters.remittanceMaster"), url: "/master/finance/remittance" },
@@ -215,19 +58,11 @@ const RemittanceMaster = () => {
     { label: t("financeMasters.automatedRemittance"), value: "automated" },
     { label: t("financeMasters.statementTemplates"), value: "statement" },
     { label: t("financeMasters.settlementParameters"), value: "settlement" },
-    { label: t("financeMasters.reconciliation"), value: "reconciliation" },
     { label: t("financeMasters.bulkProcessing"), value: "bulkprocessing" },
-    { label: t("financeMasters.schedule"), value: "schedule" },
-    { label: t("financeMasters.electronicTransfer"), value: "electronic" },
-    { label: t("financeMasters.approvalWorkflow"), value: "approvalworkflow" },
     { label: t("financeMasters.exception"), value: "exception" },
-    { label: t("financeMasters.reportTemplate"), value: "reporttemplate" },
     { label: t("financeMasters.agencyBill"), value: "agencybill" },
-    { label: t("financeMasters.directBill"), value: "directbill" },
     { label: t("financeMasters.adjustment"), value: "adjustment" },
     { label: t("financeMasters.notification"), value: "notification" },
-    { label: t("financeMasters.history"), value: "history" },
-    { label: t("financeMasters.analytics"), value: "analytics" },
   ];
 
   const filteredData = remittanceData.filter((item) => {
@@ -240,19 +75,11 @@ const RemittanceMaster = () => {
       (selectedCategory === "automated" && item.type === "Automated") ||
       (selectedCategory === "statement" && item.type === "Statement") ||
       (selectedCategory === "settlement" && item.type === "Settlement") ||
-      (selectedCategory === "reconciliation" && item.type === "Reconciliation") ||
       (selectedCategory === "bulkprocessing" && item.type === "BulkProcessing") ||
-      (selectedCategory === "schedule" && item.type === "Schedule") ||
-      (selectedCategory === "electronic" && item.type === "Electronic") ||
-      (selectedCategory === "approvalworkflow" && item.type === "ApprovalWorkflow") ||
       (selectedCategory === "exception" && item.type === "Exception") ||
-      (selectedCategory === "reporttemplate" && item.type === "ReportTemplate") ||
       (selectedCategory === "agencybill" && item.type === "AgencyBill") ||
-      (selectedCategory === "directbill" && item.type === "DirectBill") ||
       (selectedCategory === "adjustment" && item.type === "Adjustment") ||
-      (selectedCategory === "notification" && item.type === "Notification") ||
-      (selectedCategory === "history" && item.type === "History") ||
-      (selectedCategory === "analytics" && item.type === "Analytics");
+      (selectedCategory === "notification" && item.type === "Notification");
 
     return matchesSearch && matchesCategory;
   });
@@ -270,10 +97,9 @@ const RemittanceMaster = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
         { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -301,8 +127,7 @@ const RemittanceMaster = () => {
         <Button
           icon={<SvgEyeIcon />}
           className="view-eye-button"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -313,8 +138,7 @@ const RemittanceMaster = () => {
         <Button
           icon={<SvgEditicons />}
           className="edit-button"
-          onClick={() => handleEdit(rowData)}
-        />
+          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -345,19 +169,11 @@ const RemittanceMaster = () => {
       automated: "automatedremittance",
       statement: "statementtemplate",
       settlement: "settlementparameter",
-      reconciliation: "reconciliationmaster",
       bulkprocessing: "bulkprocessingmaster",
-      schedule: "schedulemaster",
-      electronic: "electronictransfermaster",
-      approvalworkflow: "approvalworkflowmaster",
       exception: "exceptionmaster",
-      reporttemplate: "reporttemplatemaster",
       agencybill: "agencybillmaster",
-      directbill: "directbillmaster",
       adjustment: "adjustmentmaster",
       notification: "notificationmaster",
-      history: "historyconfiguration",
-      analytics: "analyticsconfiguration",
     };
 
     const route = selectedCategory === "all"
@@ -373,26 +189,23 @@ const RemittanceMaster = () => {
       "Automated": `${baseRoute}/automatedremittance/${mode}`,
       "Statement": `${baseRoute}/statementtemplate/${mode}`,
       "Settlement": `${baseRoute}/settlementparameter/${mode}`,
-      "Reconciliation": `${baseRoute}/reconciliationmaster/${mode}`,
       "BulkProcessing": `${baseRoute}/bulkprocessingmaster/${mode}`,
-      "Schedule": `${baseRoute}/schedulemaster/${mode}`,
-      "Electronic": `${baseRoute}/electronictransfermaster/${mode}`,
-      "ApprovalWorkflow": `${baseRoute}/approvalworkflowmaster/${mode}`,
       "Exception": `${baseRoute}/exceptionmaster/${mode}`,
-      "ReportTemplate": `${baseRoute}/reporttemplatemaster/${mode}`,
       "AgencyBill": `${baseRoute}/agencybillmaster/${mode}`,
-      "DirectBill": `${baseRoute}/directbillmaster/${mode}`,
       "Adjustment": `${baseRoute}/adjustmentmaster/${mode}`,
       "Notification": `${baseRoute}/notificationmaster/${mode}`,
-      "History": `${baseRoute}/historyconfiguration/${mode}`,
-      "Analytics": `${baseRoute}/analyticsconfiguration/${mode}`,
     };
     return typeRoutes[type] || baseRoute;
   };
 
-  const handleStatusChange = (rowData) => {
-    // Handle status change
-    console.log("Status changed for:", rowData);
+  const handleStatusChange = async (rowData) => {
+    try {
+      await masterService.setStatus(rowData.typeCode, rowData.id, rowData.status ? "Inactive" : "Active");
+      showSuccess(toast, `${rowData.code} ${rowData.status ? "deactivated" : "activated"}`);
+      loadMasters();
+    } catch (error) {
+      showError(toast, error);
+    }
   };
 
   const onPageChange = (event) => {
@@ -410,10 +223,20 @@ const RemittanceMaster = () => {
 
   return (
     <div className="container__remittance__master">
+      <Toast ref={toast} />
       <div className="grid m-0 top__container">
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
           <div className="remittance__master__title">Remittance Master</div>
+          {/* each value has one place: approval limits, schedules and the remittance settings live on their own screens */}
+          <div className="remittance__master__note">
+            {t("financeMasters.remittanceMasterNote")}{" "}
+            <Link to="/master/generals/usermanagement/authority-matrix">{t("remittance.authorityMatrix")}</Link>
+            {" · "}
+            <Link to="/finance/remittance/scheduling">{t("remittance.scheduling")}</Link>
+            {" · "}
+            <Link to="/master/configuration/settings">{t("financeMasters.configurationSettings")}</Link>
+          </div>
         </div>
         <div className="col-12 p-0 flex justify-content-end">
           <Button
@@ -423,8 +246,7 @@ const RemittanceMaster = () => {
               </div>
             }
             className="main__btn__action"
-            onClick={handleAdd}
-          >
+            onClick={handleAdd} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             {t("financeMasters.add")}
           </Button>
         </div>
@@ -464,8 +286,7 @@ const RemittanceMaster = () => {
               <Button
                 icon={<SvgFilters />}
                 onClick={(event) => menu.current.toggle(event)}
-                className="filter-button"
-              />
+                className="filter-button" aria-label="Filter" tooltip="Filter" tooltipOptions={{ position: "top" }} />
               <TieredMenu model={menuitems} popup ref={menu} />
             </div>
           </div>
@@ -489,11 +310,8 @@ const RemittanceMaster = () => {
                   body={(rowData) => {
                     if (rowData.type === "Automated") return rowData.frequency;
                     if (rowData.type === "Statement") return rowData.format;
-                    if (rowData.type === "Settlement") return `${rowData.approvalLevels} Levels`;
-                    if (rowData.type === "Reconciliation") return rowData.matchingRules;
+                    if (rowData.type === "Settlement") return rowData.settlementFrequency || "-";
                     if (rowData.type === "BulkProcessing") return rowData.fileFormat;
-                    if (rowData.type === "Schedule") return rowData.frequency;
-                    if (rowData.type === "Electronic") return rowData.transferType;
                     return "-";
                   }}
                   header={t("financeMasters.configuration")}
@@ -501,10 +319,9 @@ const RemittanceMaster = () => {
                 />
                 <Column
                   body={(rowData) => {
-                    if (rowData.type === "Automated") return rowData.lastRun;
-                    if (rowData.type === "Statement") return rowData.lastUsed;
-                    if (rowData.type === "Schedule") return rowData.nextRun;
-                    return rowData.lastUpdated || "-";
+                    if (rowData.type === "Automated") return formatAppDate(rowData.lastRun);
+                    if (rowData.type === "Statement") return formatAppDate(rowData.lastUsed);
+                    return formatAppDate(rowData.lastUpdated);
                   }}
                   header={t("financeMasters.lastActivity")}
                   style={{ width: "12%" }}

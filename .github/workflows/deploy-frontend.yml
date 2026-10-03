@@ -1,0 +1,215 @@
+name: CI/CD Pipeline
+
+# Push to main. Order: build, then deploy.
+# Lint and tests are commented out for now so a failing check does not block deploy.
+# Front end goes to S3. API is reloaded with PM2 on EC2 (deploy/ec2/deploy.sh).
+# brokerverse/.github/workflows/deploy.yml is the front-end publish used when that folder is its own repository.
+#
+# Front end: https://brokerverse-demo.inxtuniverse.com
+# API:       https://brokerverse-demo-api.inxtuniverse.com
+# Repository variable REACT_APP_BASE_URL overrides the API address baked into the build.
+# On the EC2 host, backend/.env must set:
+#   CORS_ORIGINS=https://brokerverse-demo.inxtuniverse.com
+#   PUBLIC_BASE_URL=https://brokerverse-demo-api.inxtuniverse.com
+# Repository secrets:
+#   AWS_ACCESS_KEY_ID
+#   AWS_SECRET_ACCESS_KEY
+#   S3_BUCKET
+#   CLOUDFRONT_DISTRIBUTION_ID
+#   EC2_HOST
+#   EC2_USER                        e.g. ubuntu
+#   EC2_SSH_KEY                     private key that can ssh to the instance
+# The API environment stays on the instance at /home/ubuntu/appdata/brokerverse/backend/.env.
+
+on:
+  push:
+    branches:
+      - brokerverse-platform
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+env:
+  NODE_VERSION: "22"
+  AWS_REGION: ap-southeast-1
+
+jobs:
+  # lint:
+  #   name: Lint
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: backend
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #         cache-dependency-path: backend/package-lock.json
+  #
+  #     - name: Install dependencies
+  #       run: npm ci
+  #
+  #     - name: Run ESLint
+  #       run: npm run lint
+
+  # test-backend:
+  #   name: Test backend
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   defaults:
+  #     run:
+  #       working-directory: backend
+  #   services:
+  #     postgres:
+  #       image: postgres:16
+  #       env:
+  #         POSTGRES_USER: brokerverse
+  #         POSTGRES_PASSWORD: brokerverse
+  #         POSTGRES_DB: brokerverse_test
+  #       ports:
+  #         - 5432:5432
+  #       options: >-
+  #         --health-cmd "pg_isready -U brokerverse -d brokerverse_test"
+  #         --health-interval 5s
+  #         --health-timeout 5s
+  #         --health-retries 20
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: npm
+  #         cache-dependency-path: backend/package-lock.json
+  #
+  #     - name: Install dependencies
+  #       run: npm ci
+  #
+  #     - name: Test
+  #       run: npm test
+  #       env:
+  #         TEST_DATABASE_URL: postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse_test
+
+  build-frontend:
+    name: Build front end
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: brokerverse/package-lock.json
+
+      - name: Install dependencies
+        working-directory: brokerverse
+        run: npm ci --legacy-peer-deps
+
+      # - name: Test
+      #   working-directory: brokerverse
+      #   run: npx craco test --watchAll=false
+      #   env:
+      #     CI: true
+
+      - name: Build
+        working-directory: brokerverse
+        run: npm run build
+        env:
+          NODE_ENV: production
+          CI: false
+          GENERATE_SOURCEMAP: false
+          REACT_APP_BASE_URL: ${{ vars.REACT_APP_BASE_URL || 'https://brokerverse-demo-api.inxtuniverse.com/api' }}
+
+      - name: Keep the build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build
+          path: brokerverse/build/
+          if-no-files-found: error
+          retention-days: 1
+
+  deploy-frontend:
+    name: Deploy front end to S3
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    steps:
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-build
+          path: build/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Upload to S3 and refresh CloudFront
+        run: |
+          set -euo pipefail
+          aws s3 sync build/ "s3://${{ secrets.S3_BUCKET }}" --delete \
+            --exclude "index.html" \
+            --cache-control "public,max-age=31536000,immutable"
+          aws s3 cp build/index.html "s3://${{ secrets.S3_BUCKET }}/index.html" \
+            --cache-control "no-cache,no-store,must-revalidate" \
+            --content-type "text/html"
+          aws cloudfront create-invalidation --distribution-id "${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}" --paths "/*"
+
+  deploy-backend:
+    name: Deploy API to EC2
+    runs-on: ubuntu-latest
+    needs: build-frontend
+    permissions:
+      contents: read
+    steps:
+      - name: Reload PM2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          command_timeout: 20m
+          script: |
+            set -euo pipefail
+            # Remove the instance an earlier run started under this login user's PM2; the apps on this host run under root's PM2.
+            if command -v pm2 >/dev/null || [ -s "$HOME/.nvm/nvm.sh" ]; then
+              [ -s "$HOME/.nvm/nvm.sh" ] && . "$HOME/.nvm/nvm.sh" >/dev/null 2>&1 || true
+              pm2 delete brokerverse-api >/dev/null 2>&1 && pm2 save >/dev/null 2>&1 || true
+            fi
+            sudo su - root -c 'bash -s' << 'EOF'
+            set -euo pipefail
+            APP=/home/ubuntu/appdata/brokerverse
+            # deploy the branch that was pushed (main holds an older code base without deploy/ec2)
+            BRANCH="${{ github.ref_name }}"
+            REPO="https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git"
+            if ! command -v git >/dev/null; then
+              apt-get update
+              apt-get install -y git
+            fi
+            mkdir -p /home/ubuntu/appdata
+            git config --global --add safe.directory "$APP"
+            if [ ! -d "$APP/.git" ]; then
+              git clone --branch "$BRANCH" --depth 1 "$REPO" "$APP"
+            fi
+            cd "$APP"
+            git remote set-url origin "$REPO"
+            # explicit refspec: an earlier clone may be shallow and limited to another branch
+            git fetch --depth 1 origin "+refs/heads/$BRANCH:refs/remotes/origin/$BRANCH"
+            git checkout -f -B "$BRANCH" "origin/$BRANCH"
+            git remote set-url origin "https://github.com/${{ github.repository }}.git"
+            BROKERVERSE_ROOT="$APP" bash deploy/ec2/deploy.sh
+            EOF

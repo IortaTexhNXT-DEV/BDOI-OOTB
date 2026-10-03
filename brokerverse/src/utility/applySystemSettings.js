@@ -2,6 +2,9 @@ import i18n from "../i18n";
 import { setDisplayCurrency } from "./currencyConverter";
 import { DEFAULT_SYSTEM_SETTINGS } from "./systemCurrencies";
 import { setActiveDefaultCurrency } from "./currencyOptions";
+import { setDateFormat } from "./dateFormat";
+import { setPhoneConfig } from "./phoneFormat";
+import { setQuoteOptions } from "./quoteOptions";
 
 /**
  * Apply CSS theme variables from system settings.
@@ -30,11 +33,11 @@ export function applyFavicon(faviconUrl) {
 }
 
 /**
- * Set document title from app title (login / generic pages).
+ * Set document title from the application name (login / generic pages).
  * Authenticated pages may append more in App.js.
  */
 export function applyAppTitle(appTitle, { authenticated, userName } = {}) {
-  const base = appTitle || DEFAULT_SYSTEM_SETTINGS.appTitle;
+  const base = appTitle || DEFAULT_SYSTEM_SETTINGS.systemName;
   if (authenticated) {
     document.title = `${base} - Dashboard | ${userName || "User"}`;
   } else {
@@ -61,9 +64,12 @@ export function applySystemSettings(settings = {}, options = {}) {
   const merged = { ...DEFAULT_SYSTEM_SETTINGS, ...settings };
   setDisplayCurrency(merged.displayCurrency);
   setActiveDefaultCurrency(merged.displayCurrency);
+  setDateFormat(merged.dateFormat);
+  setPhoneConfig(merged);
+  setQuoteOptions(merged);
   applyThemeColors(merged.primaryColor, merged.secondaryColor);
   applyFavicon(merged.faviconUrl);
-  applyAppTitle(merged.appTitle, options);
+  applyAppTitle(merged.systemName, options);
   applyDefaultLanguage(merged.defaultLanguage);
   return merged;
 }

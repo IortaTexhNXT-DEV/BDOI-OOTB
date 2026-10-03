@@ -11,19 +11,20 @@ import { Chart } from 'primereact/chart';
 import { ProgressBar } from 'primereact/progressbar';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
-import { Knob } from 'primereact/knob';
-import { Panel } from 'primereact/panel';
-import { Timeline } from 'primereact/timeline';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
-import productConfiguratorMockService from '../../../services/mockData/productConfiguratorMockData';
+import productConfiguratorService from '../../../services/productConfiguratorService';
+import mastersService from '../../../services/mastersService';
 import './style.scss';
 
+import { numberLocale } from "../../../utility/currencyConverter";
+import { formatPercent } from "../../../utility/numberFormat";
 const ProductDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const [productTemplates, setProductTemplates] = useState([]);
   const [analytics, setAnalytics] = useState(null);
+  const [categoryValues, setCategoryValues] = useState([]);
   const [loading, setLoading] = useState(false);
   const [globalFilter, setGlobalFilter] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
@@ -37,17 +38,19 @@ const ProductDashboard = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [templates, analyticsData] = await Promise.all([
-        productConfiguratorMockService.getProductTemplates(),
-        productConfiguratorMockService.getProductAnalytics()
+      const [templates, analyticsData, categoryOptions] = await Promise.all([
+        productConfiguratorService.getProductTemplates(),
+        productConfiguratorService.getProductAnalytics(),
+        mastersService.options('product-category')
       ]);
       setProductTemplates(templates);
       setAnalytics(analyticsData);
+      setCategoryValues([...new Set([...categoryOptions.map((o) => o.value), ...templates.map((p) => p.category)])].filter(Boolean));
     } catch (error) {
       toast.current?.show({
         severity: 'error',
         summary: t('productConfiguratorDashboard.error'),
-        detail: t('productConfiguratorDashboard.errorLoadFailed')
+        detail: error?.message || t('productConfiguratorDashboard.errorLoadFailed')
       });
     } finally {
       setLoading(false);
@@ -59,6 +62,20 @@ const ProductDashboard = () => {
     return <Tag value={rowData.status} severity={severity} />;
   };
 
+  const cloneProduct = async (rowData) => {
+    try {
+      const version = await productConfiguratorService.createProductVersion(rowData.id);
+      toast.current?.show({
+        severity: 'success',
+        summary: t('productTemplateManager.success'),
+        detail: `${version.templateCode} ${version.version}`
+      });
+      navigate(`/product-configurator/template/${version.id}`);
+    } catch (error) {
+      toast.current?.show({ severity: 'error', summary: t('productConfiguratorDashboard.error'), detail: error.message });
+    }
+  };
+
   const actionBodyTemplate = (rowData) => {
     return (
       <div className="action-buttons">
@@ -66,17 +83,19 @@ const ProductDashboard = () => {
           icon="pi pi-pencil"
           className="p-button-rounded p-button-text p-button-primary"
           tooltip={t('productConfiguratorDashboard.configureProduct')}
-          onClick={() => navigate(`/product-configurator/template/${rowData.id}`)}
+          onClick={() => navigate(`/product-configurator/template/${rowData.id}`)} aria-label={t('productConfiguratorDashboard.configureProduct')}
         />
         <Button
           icon="pi pi-copy"
           className="p-button-rounded p-button-text"
           tooltip={t('productConfiguratorDashboard.cloneProduct')}
+          onClick={() => cloneProduct(rowData)} aria-label={t('productConfiguratorDashboard.cloneProduct')}
         />
         <Button
           icon="pi pi-chart-line"
           className="p-button-rounded p-button-text"
           tooltip={t('productConfiguratorDashboard.viewAnalytics')}
+          onClick={() => navigate('/product-configurator/analytics')} aria-label={t('productConfiguratorDashboard.viewAnalytics')}
         />
       </div>
     );
@@ -151,11 +170,20 @@ const ProductDashboard = () => {
     ? productTemplates
     : productTemplates.filter((p) => p.category === selectedCategory);
 
-  const categoryKeys = ['all', 'motor', 'health', 'property', 'travel', 'marine'];
-  const categories = categoryKeys.map((key) => ({
-    label: t(`productConfiguratorDashboard.${key}`),
-    value: key === 'all' ? 'All' : key.charAt(0).toUpperCase() + key.slice(1)
-  }));
+  const categories = [
+    { label: t('productConfiguratorDashboard.all'), value: 'All' },
+    ...categoryValues.map((value) => ({ label: value, value }))
+  ];
+
+  const topProducts = analytics?.topProducts || [];
+  const totalTopPremium = topProducts.reduce((total, p) => total + (p.totalPremium || 0), 0);
+  const avgLossRatio = totalTopPremium
+    ? topProducts.reduce((total, p) => total + (p.lossRatio || 0) * (p.totalPremium || 0), 0) / totalTopPremium
+    : 0;
+  const commissionRates = productTemplates.map((p) => p.commissionRate).filter((rate) => rate !== null && rate !== undefined);
+  const avgCommission = commissionRates.length
+    ? commissionRates.reduce((total, rate) => total + Number(rate), 0) / commissionRates.length
+    : 0;
 
   return (
     <div className="product-dashboard">
@@ -181,7 +209,6 @@ const ProductDashboard = () => {
               <span className="stat-value">
                 {productTemplates.filter((p) => p.status === 'Active').length}
               </span>
-              <span className="stat-change positive">{t('productConfiguratorDashboard.fromLastMonth')}</span>
             </div>
           </Card>
         </div>
@@ -189,8 +216,7 @@ const ProductDashboard = () => {
           <Card>
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.totalPremium')}</span>
-              <span className="stat-value">{formatCurrency(1020000000)}</span>
-              <span className="stat-change positive">{t('productConfiguratorDashboard.ytd')}</span>
+              <span className="stat-value">{formatCurrency(analytics?.totals?.premium ?? 0)}</span>
             </div>
           </Card>
         </div>
@@ -198,8 +224,7 @@ const ProductDashboard = () => {
           <Card>
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.avgLossRatio')}</span>
-              <span className="stat-value">61.5%</span>
-              <span className="stat-change positive">{t('productConfiguratorDashboard.improved')}</span>
+              <span className="stat-value">{avgLossRatio.toFixed(1)}%</span>
             </div>
           </Card>
         </div>
@@ -207,8 +232,7 @@ const ProductDashboard = () => {
           <Card>
             <div className="stat-content">
               <span className="stat-label">{t('productConfiguratorDashboard.avgCommission')}</span>
-              <span className="stat-value">16.8%</span>
-              <span className="stat-change neutral">{t('productConfiguratorDashboard.noChange')}</span>
+              <span className="stat-value">{avgCommission.toFixed(1)}%</span>
             </div>
           </Card>
         </div>
@@ -243,7 +267,7 @@ const ProductDashboard = () => {
           <DataTable
             value={filteredTemplates}
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             globalFilter={globalFilter}
             className="product-table"
@@ -278,7 +302,7 @@ const ProductDashboard = () => {
             <DataTable value={analytics?.topProducts || []}>
               <Column field="productName" header={t('productConfiguratorDashboard.product')} />
               <Column field="totalPolicies" header={t('productConfiguratorDashboard.policies')} sortable
-                body={(rowData) => rowData.totalPolicies.toLocaleString()} />
+                body={(rowData) => rowData.totalPolicies.toLocaleString(numberLocale())} />
               <Column field="totalPremium" header={t('productConfiguratorDashboard.premium')} sortable
                 body={(rowData) => formatCurrency(rowData.totalPremium)} />
               <Column field="lossRatio" header={t('productConfiguratorDashboard.lossRatio')} sortable
@@ -291,13 +315,13 @@ const ProductDashboard = () => {
                       color={rowData.lossRatio > 70 ? '#f44336' :
                              rowData.lossRatio > 60 ? '#ff9800' : '#4caf50'}
                     />
-                    <span>{rowData.lossRatio}%</span>
+                    <span>{formatPercent(rowData.lossRatio)}</span>
                   </div>
                 )} />
               <Column field="growth" header={t('productConfiguratorDashboard.growth')} sortable
                 body={(rowData) => (
                   <Tag
-                    value={`${rowData.growth > 0 ? '+' : ''}${rowData.growth}%`}
+                    value={`${rowData.growth > 0 ? '+' : ''}${formatPercent(rowData.growth)}`}
                     severity={rowData.growth > 0 ? 'success' : 'danger'}
                   />
                 )} />
@@ -343,12 +367,6 @@ const ProductDashboard = () => {
                   icon="pi pi-file"
                   className="p-button-text action-button"
                   onClick={() => navigate('/product-configurator/documents')}
-                />
-                <Button
-                  label={t('productConfiguratorDashboard.approvalWorkflows')}
-                  icon="pi pi-sitemap"
-                  className="p-button-text action-button"
-                  onClick={() => navigate('/product-configurator/workflows')}
                 />
               </div>
             </Card>

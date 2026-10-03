@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Chart } from "primereact/chart";
 import CommissionService from "../../../services/commissionService";
-import { formatBaht } from "../utils/formatBaht";
+import { formatAmount } from "../utils/formatAmount";
 import {
   getCommissionViewMode,
   setCommissionViewMode,
 } from "../utils/commissionViewMode";
 import "./style.scss";
+import { currencySymbol } from "../../../utility/currencyConverter";
+import { formatPercent } from "../../../utility/numberFormat";
+import logger from "../../../utility/logger";
 
 const CHART_COLORS = ["#7c3aed", "#3b82f6", "#22c55e", "#f59e0b"];
 
@@ -30,7 +33,7 @@ const CommissionDashboard = () => {
       const res = await CommissionService.getDashboard();
       setData(res?.data || res);
     } catch (err) {
-      console.error("Failed to load commission dashboard", err);
+      logger.error("Failed to load commission dashboard", err);
       setData(null);
     } finally {
       setLoading(false);
@@ -63,8 +66,8 @@ const CommissionDashboard = () => {
         {
           label: "Comsub gross",
           data: data.monthlyTrend.map((m) => m.comsubGross),
-          borderColor: "#ef4444",
-          backgroundColor: "#ef4444",
+          borderColor: "#b42318",
+          backgroundColor: "#b42318",
           tension: 0.25,
           fill: false,
         },
@@ -99,7 +102,7 @@ const CommissionDashboard = () => {
     scales: {
       y: {
         ticks: {
-          callback: (v) => "₱" + Math.round(v / 1000) + "k",
+          callback: (v) => currencySymbol() + Math.round(v / 1000) + "k",
         },
         grid: { color: "#edf2f7" },
       },
@@ -148,18 +151,7 @@ const CommissionDashboard = () => {
         <div className="page-header-row">
           <div className="page-header-text">
             <h1>Commission Dashboard</h1>
-            {viewMode === "management" ? (
-              <p>
-                Live figures from the commission ledger ·{" "}
-                <span className="readonly-note">read-only (management)</span>.
-                Approve lines or run a payout and these update.
-              </p>
-            ) : (
-              <p>
-                Live figures from the commission ledger. Approve lines or run a
-                payout and these update.
-              </p>
-            )}
+            {viewMode === "management" && <p><span className="readonly-note">read-only (management)</span></p>}
           </div>
           <div className="view-mode-toggle" role="group" aria-label="View mode">
             <button
@@ -183,30 +175,30 @@ const CommissionDashboard = () => {
       <div className="kpi-row">
         <div className="kpi-card accent-green">
           <span className="label">Brokerage income</span>
-          <span className="value green">{formatBaht(kpis.brokerageIncome)}</span>
+          <span className="value green">{formatAmount(kpis.brokerageIncome)}</span>
         </div>
         <div className="kpi-card accent-red">
           <span className="label">Comsub (gross)</span>
-          <span className="value red">{formatBaht(kpis.comsubGross)}</span>
+          <span className="value red">{formatAmount(kpis.comsubGross)}</span>
         </div>
         <div className="kpi-card accent-blue">
           <span className="label">Net margin</span>
-          <span className="value blue">{formatBaht(kpis.netMargin)}</span>
+          <span className="value blue">{formatAmount(kpis.netMargin)}</span>
         </div>
         <div className="kpi-card accent-navy">
           <span className="label">Margin %</span>
-          <span className="value navy">{kpis.marginPct}%</span>
+          <span className="value navy">{formatPercent(kpis.marginPct)}</span>
         </div>
         <div className="kpi-card accent-purple">
           <span className="label">Outstanding payable</span>
           <span className="value navy">
-            {formatBaht(kpis.outstandingPayable)}
+            {formatAmount(kpis.outstandingPayable)}
           </span>
         </div>
         <div className="kpi-card accent-purple">
           <span className="label">WHT withheld (paid)</span>
           <span className="value navy">
-            {formatBaht(kpis.whtWithheldPaid)}
+            {formatAmount(kpis.whtWithheldPaid)}
           </span>
         </div>
       </div>
@@ -226,7 +218,7 @@ const CommissionDashboard = () => {
                     style={{ width: `${(r.amount / maxReferrer) * 100}%` }}
                   />
                 </div>
-                <span className="hbar-value">{formatBaht(r.amount)}</span>
+                <span className="hbar-value">{formatAmount(r.amount)}</span>
               </div>
             ))}
           </div>
@@ -260,7 +252,7 @@ const CommissionDashboard = () => {
             <strong className="claw-lines">
               {data.clawback.lines} line(s)
             </strong>{" "}
-            · {formatBaht(data.clawback.amount)} comsub clawed back (excluded
+            · {formatAmount(data.clawback.amount)} comsub clawed back (excluded
             from the figures above).
           </p>
         </div>
@@ -304,7 +296,7 @@ const CommissionDashboard = () => {
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
-                    {formatBaht(item.amount)} ({item.pct}%)
+                    {formatAmount(item.amount)} ({formatPercent(item.pct)})
                   </span>
                 </li>
               ))}
@@ -353,7 +345,7 @@ const CommissionDashboard = () => {
                   />
                   <span className="name">{item.label}</span>
                   <span className="amt">
-                    {formatBaht(item.amount)} ({item.pct}%)
+                    {formatAmount(item.amount)} ({formatPercent(item.pct)})
                   </span>
                 </li>
               ))}
@@ -363,7 +355,7 @@ const CommissionDashboard = () => {
       </div>
 
       <div className="panel funnel-panel">
-        <h3>PAYABLE FUNNEL — NET PAYABLE (₱) BY LIFECYCLE STAGE</h3>
+        <h3>PAYABLE FUNNEL — NET PAYABLE ({currencySymbol()}) BY LIFECYCLE STAGE</h3>
         <div className="hbar-list funnel">
           {data.payableFunnel.map((f) => (
             <div className="hbar-row" key={f.status}>
@@ -384,7 +376,7 @@ const CommissionDashboard = () => {
                   style={{ width: `${(f.amount / maxFunnel) * 100}%` }}
                 />
               </div>
-              <span className="hbar-value">{formatBaht(f.amount)}</span>
+              <span className="hbar-value">{formatAmount(f.amount)}</span>
             </div>
           ))}
         </div>

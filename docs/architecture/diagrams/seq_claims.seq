@@ -1,0 +1,17 @@
+title: Claim registration to settlement and cash
+participant A "Claims officer (maker)"
+participant C "Claims module"
+participant K "Second claims officer"
+participant F "Accounting"
+participant D "PostgreSQL"
+A -> C: register claim (first notice of loss) with documents
+C -> D: acceptance check: policy active, loss date inside the policy period; next_document_number('claim') -> CLM-
+C -> D: claim registered; claim_history; claim_field_changes; handler assigned; notifications
+C --> A: acknowledgement letter, claims data sheet, discharge voucher printed as PDF on request
+A -> C: review (in-review), update estimate and details (field-level audit)
+A -> C: settle: amount, type, documents
+C -> D: pending-approval when approval is required (settlement awaiting a different user)
+K -> C: approve / return / reject (maker cannot approve)
+C -> D: settled through the broker: posting rule claim.settlement.paid_through_broker, Dr recoverable from each insurer by share / Cr payable to claimant
+F -> C: record funds received from each insurer (claim.funds_received) and the payment to the claimant (claim.paid_to_claimant)
+C -> D: claim_settlement_movements; neither side may exceed what is due; reinsurance recovery raised against the cession

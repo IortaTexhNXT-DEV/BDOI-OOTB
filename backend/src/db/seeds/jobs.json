@@ -1,0 +1,87 @@
+[
+  {
+    "code": "renewal-notices",
+    "name": "Renewal notices",
+    "description": "Create renewal reminders and notifications for policies expiring within the configured notice windows",
+    "cron": "0 6 * * *",
+    "handler": "renewalNotices"
+  },
+  {
+    "code": "policy-expiry",
+    "name": "Policy expiry",
+    "description": "Mark policies past their expiry date as expired",
+    "cron": "15 0 * * *",
+    "handler": "policyExpiry"
+  },
+  {
+    "code": "quote-expiry",
+    "name": "Quotation expiry",
+    "description": "Expire quotations older than the configured validity",
+    "cron": "30 0 * * *",
+    "handler": "quoteExpiry"
+  },
+  {
+    "code": "receivable-ageing",
+    "name": "Receivable ageing",
+    "description": "Recompute ageing buckets for open receivables and notify collections",
+    "cron": "0 7 * * *",
+    "handler": "receivableAgeing"
+  },
+  {
+    "code": "daily-reports",
+    "name": "Daily reports",
+    "description": "Generate the scheduled daily reports (production register, collections, claims position)",
+    "cron": "0 5 * * *",
+    "handler": "dailyReports"
+  },
+  {
+    "code": "email-outbox",
+    "name": "E-mail outbox",
+    "description": "Deliver queued e-mails",
+    "cron": "*/5 * * * *",
+    "handler": "emailOutbox"
+  },
+  {
+    "code": "renewal-queue",
+    "name": "Renewal notice queue",
+    "description": "Send queued renewal notices and retry stale jobs",
+    "cron": "* * * * *",
+    "handler": "processRenewalQueue"
+  },
+  {
+    "code": "renewal-pipeline",
+    "name": "Renewal pipeline",
+    "description": "Enrol policies expiring within the pipeline window and lapse renewals past the grace period",
+    "cron": "30 5 * * *",
+    "handler": "renewalPipeline"
+  },
+  {
+    "code": "collection-reminders",
+    "name": "Collection reminders",
+    "description": "E-mail and notify clients about premiums falling due",
+    "cron": "0 8 * * *",
+    "handler": "collectionReminders"
+  },
+  {
+    "code": "housekeeping",
+    "name": "Housekeeping",
+    "description": "Purge old job runs, sent e-mails, sign-in history, expired sessions and reset codes, read notifications and completed queue jobs after the retention periods in System Settings (Housekeeping tab); the audit trail is kept",
+    "cron": "45 2 * * *",
+    "handler": "housekeeping"
+  },
+  {
+    "code": "dormant-users",
+    "name": "Dormant accounts",
+    "description": "Deactivate active accounts with no sign-in for access.dormant_days days (the built-in administrator excepted)",
+    "cron": "45 1 * * *",
+    "handler": "dormantUsers"
+  },
+  {
+    "code": "remittance-schedules",
+    "name": "Remittance schedules",
+    "description": "Run the remittance schedules of Accounts > Remittance > Scheduling whose next run date has come: draft remittances per insurer for the policies up to the cut-off date, then move the next run date on by the frequency. Disabled until switched on here",
+    "cron": "15 6 * * *",
+    "handler": "remittanceSchedules",
+    "enabled": false
+  }
+]

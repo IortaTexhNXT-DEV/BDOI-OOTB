@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Skeleton } from "primereact/skeleton";
 import { Message } from "primereact/message";
 import { getQuotationAuditTrail } from "./store/auditTrailMiddleware";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const QuotationAuditTrail = ({ quotationId: propQuotationId }) => {
@@ -31,23 +32,9 @@ const QuotationAuditTrail = ({ quotationId: propQuotationId }) => {
 
   useEffect(() => {
     if (quotationId) {
-      console.log(
-        "Fetching audit trail for quotationId:",
-        quotationId,
-        "sortOrder:",
-        sortOrder
-      );
       dispatch(getQuotationAuditTrail(quotationId, sortOrder));
     }
   }, [dispatch, quotationId, sortOrder]);
-
-  // Debug: Log the audit trail data when it changes
-  useEffect(() => {
-    if (auditTrailData && auditTrailData.length > 0) {
-      console.log("Audit trail data received:", auditTrailData);
-      console.log("First record:", auditTrailData[0]);
-    }
-  }, [auditTrailData]);
 
   const handleSortChange = (e) => {
     setSortOrder(e.value);
@@ -71,14 +58,7 @@ const QuotationAuditTrail = ({ quotationId: propQuotationId }) => {
         return "Invalid Date";
       }
 
-      const formatted = date.toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-      });
+      const formatted = formatAppDate(date, { withTime: true });
 
       return formatted;
     } catch (error) {
@@ -202,7 +182,7 @@ const QuotationAuditTrail = ({ quotationId: propQuotationId }) => {
     // Fallback to old structure for backward compatibility
     return (
       <div className="audit-user">
-        {rowData.user || rowData.createdBy || rowData.updatedBy || "System"}
+        {rowData.user || rowData.createdBy || rowData.updatedBy || "-"}
       </div>
     );
   };

@@ -6,13 +6,15 @@ import ClientListingViewPolicyTable from "./ClientListingViewPolicyTable";
 import ClientListingViewClaimTable from "./ClientListingViewClaimTable";
 import ClientListingViewRenewalTable from "./ClientListingViewRenewaleTable";
 import ClientListingViewEndorsementTable from "./ClientListingViewEndorsementTable";
+import PartyPrivacyPanel from "../../../../module/DataPrivacy/PartyPrivacyPanel";
 
 import "../../clientView/index.scss";
 import SvgLeftArrow from "../../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate } from "react-router-dom";
 import clientService from "../../../../services/clientService";
+import logger from "../../../../utility/logger";
 
-const ClientListingCard = ({ action, clientId }) => {
+const ClientListingCard = ({ action, clientId, onClient }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [clientName, setClientName] = useState(t("clientView.clientDetails"));
@@ -23,14 +25,12 @@ const ClientListingCard = ({ action, clientId }) => {
 
     const fetchClientDetails = async () => {
       if (!clientId) {
-        console.log("No clientId provided, setting default name");
         setClientName(t("clientView.clientDetails"));
         return;
       }
 
       // Check if clientId is a valid format (not empty string, not just whitespace)
       if (typeof clientId === "string" && clientId.trim() === "") {
-        console.log("Empty clientId string provided, setting default name");
         setClientName(t("clientView.clientDetails"));
         return;
       }
@@ -38,18 +38,15 @@ const ClientListingCard = ({ action, clientId }) => {
       setIsLoadingClient(true);
 
       try {
-        console.log("Calling clientService.getClientById with:", clientId);
         const response = await clientService.getClientById(clientId);
 
         if (!isMounted) {
           return;
         }
 
-        console.log("Client API Response:", response);
-
         if (response.success && response.data) {
           const payload = response.data?.data || response.data;
-          console.log("Client payload:", payload);
+          onClient?.(payload?.client || payload);
 
           const firstName =
             payload?.firstName || payload?.client?.firstName || null;
@@ -69,19 +66,14 @@ const ClientListingCard = ({ action, clientId }) => {
             payload?.companyName ||
             null;
 
-          console.log(
-            "Setting client name:",
-            fullName || fallbackName || "Client Details"
-          );
           setClientName(fullName || fallbackName || t("clientView.clientDetails"));
         } else {
-          console.log("Client API failed:", response.error);
           setClientName(t("clientView.clientDetails"));
         }
       } catch (error) {
         if (isMounted) {
-          console.error("Failed to load client details:", error);
-          console.error("Error details:", {
+          logger.error("Failed to load client details:", error);
+          logger.error("Error details:", {
             message: error.message,
             name: error.name,
             stack: error.stack,
@@ -129,6 +121,9 @@ const ClientListingCard = ({ action, clientId }) => {
           </TabPanel>
           <TabPanel header={t("clientView.tabEndorsement")} className="policy__header">
             <ClientListingViewEndorsementTable clientId={clientId} />
+          </TabPanel>
+          <TabPanel header={t("clientView.tabPrivacy")} className="policy__header">
+            {clientId ? <PartyPrivacyPanel partyType="client" partyId={clientId} /> : null}
           </TabPanel>
         </TabView>
       </Card>

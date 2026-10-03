@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
 import { useFormik } from "formik";
@@ -7,330 +7,20 @@ import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { postAddJournalVoucher } from "../../store/journalVoucherMiddleware";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import useJvMasterData from "../../useJvMasterData";
 
-// Account data
-const mainAccountsData = [
-  {
-    code: "1202001",
-    name: "Asset",
-    description: "Premiums Receivable - Direct Clients",
-  },
-  {
-    code: "1202002",
-    name: "Asset",
-    description: "Premiums Receivable - Corporate Customers",
-  },
-  {
-    code: "1202003",
-    name: "Asset",
-    description: "Premiums Receivable - Agents",
-  },
-  {
-    code: "1202004",
-    name: "Asset",
-    description: "Premiums Receivable - Broker - Local",
-  },
-  {
-    code: "1202005",
-    name: "Asset",
-    description: "Premiums Receivable - Broker - International",
-  },
-  {
-    code: "1202006",
-    name: "Asset",
-    description: "Premiums Receivable - Banks",
-  },
-  {
-    code: "1202007",
-    name: "Asset",
-    description: "Premiums Receivable - Insurance Co - Local",
-  },
-  {
-    code: "1202008",
-    name: "Asset",
-    description: "Premiums Receivable - Insurance Co - International",
-  },
-  { code: "1202020", name: "Asset", description: "Provision for Bad Debt" },
-  {
-    code: "2203001",
-    name: "Liability",
-    description: "Commission Accrued - Agents",
-  },
-  {
-    code: "2203002",
-    name: "Liability",
-    description: "Commission Accrued - Banks",
-  },
-  {
-    code: "2203003",
-    name: "Liability",
-    description: "Commission Accrued - Broker - Local",
-  },
-  {
-    code: "2203004",
-    name: "Liability",
-    description: "Commission Accrued - Broker - International",
-  },
-  {
-    code: "2203005",
-    name: "Liability",
-    description: "Commission Accrued - Insurance Co - Local",
-  },
-  {
-    code: "2203006",
-    name: "Liability",
-    description: "Commission Accrued - Insurance Co - International",
-  },
-  { code: "3101001", name: "Income", description: "Gross Written Premium" },
-  { code: "4101001", name: "Expense", description: "Gross Claims Paid" },
-  { code: "4401001", name: "Expense", description: "Administrative Cost" },
-  { code: "4401002", name: "Expense", description: "Advertising" },
-  { code: "4401003", name: "Expense", description: "Audit Fees" },
-  { code: "4401004", name: "Expense", description: "Bank Charges" },
-  { code: "4401005", name: "Expense", description: "Building Cost Expense" },
-  { code: "4401006", name: "Expense", description: "Consultancy Fees" },
-];
+const AddData = ({ visible, setVisible, handleUpdate, voucherDate }) => {
+  const {
+    mainAccountsData,
+    subAccountsData,
+    branchCodesData,
+    departmentCodesData,
+    currencyCodesData,
+    rateOn,
+  } = useJvMasterData();
 
-const subAccountsData = [
-  {
-    code: "3101001001",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Motor",
-  },
-  {
-    code: "3101001002",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Fire",
-  },
-  {
-    code: "3101001003",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Marine",
-  },
-  {
-    code: "3101001004",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - Engineering",
-  },
-  {
-    code: "3101001005",
-    mainAccount: "3101001",
-    name: "Gross Written Premium",
-    description: "Gross Written Premium - General Accident",
-  },
-  {
-    code: "4101001001",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Motor",
-  },
-  {
-    code: "4101001002",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Fire",
-  },
-  {
-    code: "4101001003",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Marine",
-  },
-  {
-    code: "4101001004",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Engineering",
-  },
-  {
-    code: "4101001005",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - General Accident",
-  },
-  {
-    code: "4101001006",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Liaibility",
-  },
-  {
-    code: "4101001007",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Bonds",
-  },
-  {
-    code: "4101001008",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Aviation",
-  },
-  {
-    code: "4101001009",
-    mainAccount: "4101001",
-    name: "Gross Claims Paid",
-    description: "Gross Claims Paid - Oil and Gas",
-  },
-  {
-    code: "4401003001",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Audit Fees Statutory",
-  },
-  {
-    code: "4401003002",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Audit Fees Other",
-  },
-  {
-    code: "4401003003",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Internal Audit",
-  },
-  {
-    code: "4401003004",
-    mainAccount: "4401003",
-    name: "Audit Fees",
-    description: "Tax Advisory Fees",
-  },
-  {
-    code: "4401005001",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Rent",
-  },
-  {
-    code: "4401005002",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Cleaning",
-  },
-  {
-    code: "4401005003",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Water & Electricity",
-  },
-  {
-    code: "4401005004",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Security",
-  },
-  {
-    code: "4401005005",
-    mainAccount: "4401005",
-    name: "Building Cost Expense",
-    description: "Office Repairs and Maintenance",
-  },
-  {
-    code: "4401006001",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Consultancy Fees",
-  },
-  {
-    code: "4401006002",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Legal Fees",
-  },
-  {
-    code: "4401006003",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Company Secretarial Fees",
-  },
-  {
-    code: "4401006004",
-    mainAccount: "4401006",
-    name: "Consultancy Fees",
-    description: "Technical & Administrative Fees",
-  },
-];
-
-const branchCodesData = [
-  {
-    code: "MKT",
-    name: "Makati Branch",
-    description: "Head office – Makati CBD",
-  },
-  {
-    code: "QC",
-    name: "Quezon City Branch",
-    description: "North Metro Manila operations",
-  },
-  { code: "CEB", name: "Cebu Branch", description: "Visayas regional office" },
-  {
-    code: "DVO",
-    name: "Davao Branch",
-    description: "Mindanao regional office",
-  },
-];
-
-const departmentCodesData = [
-  {
-    code: "ACCT",
-    name: "Accounting Department",
-    description: "Handles financial reporting and JVs",
-  },
-  {
-    code: "OPS",
-    name: "Operations Department",
-    description: "Policy processing & servicing",
-  },
-  {
-    code: "SALES",
-    name: "Sales Department",
-    description: "Manages agents and new business",
-  },
-  {
-    code: "CLAIMS",
-    name: "Claims Department",
-    description: "Handles customer claims and insurer coordination",
-  },
-  {
-    code: "IT",
-    name: "IT Department",
-    description: "System administration and support",
-  },
-];
-
-const currencyCodesData = [
-  { code: "PHP", description: "Philippine Peso" },
-  { code: "THB", description: "Thai Baht" },
-  { code: "USD", description: "US Dollar" },
-  { code: "INR", description: "Indian Rupee" },
-  { code: "EUR", description: "Euro" },
-];
-
-const EXCHANGE_RATES = {
-  PHP: 1.0,
-  USD: 58.86,
-  EUR: 67.99,
-  EURO: 67.99, // Alias for EUR
-  INR: 0.665,
-  THB: 1.0,
-};
-
-const AddData = ({ visible, setVisible, handleUpdate }) => {
-  // Get unique main account codes that have sub accounts
-  const mainAccountsWithSubAccounts = useMemo(() => {
-    const mainAccountCodes = new Set(
-      subAccountsData.map((sub) => sub.mainAccount)
-    );
-    return mainAccountsData.filter((account) =>
-      mainAccountCodes.has(account.code)
-    );
-  }, []);
+  const mainAccountsWithSubAccounts = mainAccountsData;
 
   // Format options for dropdowns - only include main accounts with sub accounts
   const codeOptionsMain = mainAccountsWithSubAccounts.map((account) => ({
@@ -372,7 +62,10 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
     if (!values.entryType) {
       errors.entryType = "This field is required";
     }
-    if (!values.subAccount) {
+    const hasSubAccounts = subAccountsData.some(
+      (sub) => sub.mainAccount === values.mainAccount
+    );
+    if (hasSubAccounts && !values.subAccount) {
       errors.subAccount = "This field is required";
     }
 
@@ -405,12 +98,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
 
   const dispatch = useDispatch();
 
-  const journalVoucherPostTabelData = useSelector(
-    ({ journalVoucherMainReducers }) =>
-      journalVoucherMainReducers?.journalVoucherPostTabelData || []
-  );
-
-  console.log(journalVoucherPostTabelData, "journalVoucherPostTabelData");
 
   // Helper functions to get descriptions
   const getMainAccountDescription = (code) => {
@@ -448,13 +135,16 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       return "";
     }
 
-    const exchangeRate = EXCHANGE_RATES[currencyCode] || EXCHANGE_RATES.THB;
+    // the Exchange Rate master rate in force on the voucher date, as the server converts it; blank when none
+    const exchangeRate = rateOn(currencyCode, voucherDate);
+    if (exchangeRate === null) {
+      return "";
+    }
     const localAmount = foreignAmountNum * exchangeRate;
     return localAmount.toFixed(2);
   };
 
   const handleSubmit = (values) => {
-    console.log("first11", formik.values);
     dispatch(postAddJournalVoucher(formik.values));
   };
 
@@ -477,7 +167,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
     validate: customValidation,
     onSubmit: (values) => {
       // Handle form submission
-      console.log(values, "qwerty");
       handleSubmit(values);
       formik.resetForm();
       handleUpdate(values);
@@ -497,7 +186,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         value: sub.code,
         description: sub.description,
       }));
-  }, [formik.values.mainAccount]);
+  }, [formik.values.mainAccount, subAccountsData]);
 
   // Handle main account change - reset sub account and update description
   const handleMainAccountChange = (e) => {
@@ -593,7 +282,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           />
           {formik.touched.mainAccount && formik.errors.mainAccount && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.mainAccount}
@@ -622,7 +311,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           />
           {formik.touched.entryType && formik.errors.entryType && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.entryType}
@@ -634,9 +323,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3">
           <DropDowns
-            // className="input__field__jv"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             className="dropdown__container"
             optionLabel="label"
             label="Sub Account"
@@ -648,7 +335,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           />
           {formik.touched.subAccount && formik.errors.subAccount && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.subAccount}
@@ -659,8 +346,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
           <InputField
             classNames="field__container"
-            // classNames="input__field__jv"
-            // className="input__label__jv"
             label="Sub Account Description"
             value={formik.values.subAccountDescription || ""}
             disabled={true}
@@ -671,9 +356,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid m-0 ">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
           <DropDowns
-            // className="input__field__jv"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             className="dropdown__container"
             optionLabel="label"
             label="Branch Code"
@@ -684,7 +367,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           />
           {formik.touched.branchCode && formik.errors.branchCode && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.branchCode}
@@ -693,8 +376,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         </div>
         <div className="col-12 md:col-6 lg:col-6 xl:col-6">
           <InputField
-            // classNames="input__field__jv"
-            // className="input__label__jv"
             classNames="field__container"
             label="Branch Code Description"
             value={formik.values.branchCodeDescription || ""}
@@ -703,7 +384,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           {formik.touched.branchCodeDescription &&
             formik.errors.branchCodeDescription && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.branchCodeDescription}
@@ -714,10 +395,8 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid m-0 ">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3">
           <DropDowns
-            // className="input__field__jv"
             className="dropdown__container"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             optionLabel="label"
             label="Department Code"
             value={formik.values.departmentCode}
@@ -727,7 +406,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           />
           {formik.touched.departmentCode && formik.errors.departmentCode && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.departmentCode}
@@ -736,8 +415,6 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
         </div>
         <div className="col-12 md:col-6 lg:col-6 xl:col-6">
           <InputField
-            // classNames="input__field__jv"
-            // className="input__label__jv"
             classNames="field__container"
             label="Department Description"
             value={formik.values.departmentDescription || ""}
@@ -746,7 +423,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           {formik.touched.departmentDescription &&
             formik.errors.departmentDescription && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.departmentDescription}
@@ -757,9 +434,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       <div className="grid m-0">
         <div className="col-12 md:col-3 lg:col-3 xl:col-3">
           <DropDowns
-            // className="input__field__jv"
             dropdownIcon={<SvgDropdown color={"#000"} />}
-            // classNames="select__label__jv"
             className="dropdown__container"
             optionLabel="label"
             label="Currency Code"
@@ -770,7 +445,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           />
           {formik.touched.currencyCode && formik.errors.currencyCode && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.currencyCode}
@@ -787,7 +462,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           {formik.touched.currencyDescription &&
             formik.errors.currencyDescription && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.currencyDescription}
@@ -804,7 +479,7 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           />
           {formik.touched.foreignAmount && formik.errors.foreignAmount && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.foreignAmount}
@@ -817,15 +492,13 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
           </div>
           <InputField
             classNames="field__container"
-            // className="select__label__jv"
-            // label="Remarks (Options)"
             value={formik.values.remarks}
             onChange={(e) => formik.setFieldValue("remarks", e.target.value)}
             placeholder="Enter"
           />
           {formik.touched.remarks && formik.errors.remarks && (
             <div
-              style={{ fontSize: 12, color: "red" }}
+              style={{ fontSize: 12, color: "var(--color-danger)" }}
               className="formik__errror__JV"
             >
               {formik.errors.remarks}

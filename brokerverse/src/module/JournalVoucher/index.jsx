@@ -1,33 +1,22 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useState, useRef, useEffect } from "react";
-import NavBar from "../../components/NavBar";
+import { useState, useRef, useEffect } from "react";
 import SvgDot from "../../assets/icons/SvgDot";
 import "../JournalVoucher/index.scss";
 import SvgAdd from "../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router-dom";
-import SvgFilters from "../../assets/icons/SvgFilters";
 import { InputText } from "primereact/inputtext";
-import SvgSearchIcon from "../../assets/icons/SvgSearchIcon";
 import { Dropdown } from "primereact/dropdown";
-import { dataa } from "./data";
-import { TieredMenu } from "primereact/tieredmenu";
-import SvgTable from "../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import DataTabelJV from "./DataTabelJV";
 import {
-  getJournalVoucherSearchList,
-  journalVoucherMiddleware,
   getJournalVoucherHistory,
 } from "./store/journalVoucherMiddleware";
-import { useFormik } from "formik";
-import { data } from "./DetailsJournalVocture/data";
-import SvgDropdown from "../../assets/icons/SvgDropdown";
 import SvgDropdownicon from "../../assets/icons/SvgDropdownicon";
 import { useTranslation } from "react-i18next";
 
 const JournalVoucher = () => {
   const { t } = useTranslation();
-  const { journalVoucherList, journalVoucherSearchList, loading, pagination } =
+  const { journalVoucherList, loading, pagination } =
     useSelector(({ journalVoucherMainReducers }) => {
       return {
         loading: journalVoucherMainReducers?.loading,
@@ -43,15 +32,13 @@ const JournalVoucher = () => {
       };
     });
 
-  const [selectedCity, setSelectedCity] = useState(null);
   const cities = [
     { name: t("accounts.transactionCode"), code: "transactionCode" },
     { name: t("accounts.transactionNumber"), code: "transactionNumber" },
   ];
 
-  const [products, setProducts] = useState([]);
   const [visible, setVisible] = useState(false);
-  const [newDataTable, setnewDataTable] = useState([]);
+  const [newDataTable] = useState([]);
   const navigate = useNavigate();
   const [globalFilter, setGlobalFilter] = useState("");
   const [search, setSearch] = useState("");
@@ -65,111 +52,32 @@ const JournalVoucher = () => {
 
   const [first, setFirst] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(20);
-  const [currentPage, setCurrentPage] = useState(1);
-  const isInitialMount = useRef(true);
+  const loadedOnce = useRef(false);
 
   const handleEdit = () => {
-    console.log("handleEdit success");
     setVisible(true);
   };
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    console.log(values.search, "getSearchPolicyList");
-    dispatch(getJournalVoucherSearchList({ textSearch: values.search }));
+
+  // One request per change of page, page size or search (the search is debounced while typing).
+  useEffect(() => {
+    const params = { page: Math.floor(first / rowsPerPage) + 1, pageSize: rowsPerPage };
+    if (globalFilter && search) params[globalFilter] = search;
+    const h = setTimeout(() => dispatch(getJournalVoucherHistory(params)), loadedOnce.current ? 250 : 0);
+    loadedOnce.current = true;
+    return () => clearTimeout(h);
+  }, [dispatch, first, rowsPerPage, search, globalFilter]);
+
+  // a new search starts on the first page
+  const onSearch = (value) => {
+    setSearch(value);
+    setFirst(0);
   };
-
-  // Load data on component mount
-  useEffect(() => {
-    if (isInitialMount.current) {
-      dispatch(
-        getJournalVoucherHistory({
-          page: 1,
-          pageSize: rowsPerPage,
-        })
-      );
-      isInitialMount.current = false;
-    }
-  }, [dispatch, rowsPerPage]);
-
-  // Handle pagination changes
-  useEffect(() => {
-    if (!isInitialMount.current) {
-      const params = {
-        page: currentPage,
-        pageSize: rowsPerPage,
-      };
-
-      // Add filters if search is active
-      if (globalFilter && search) {
-        params[globalFilter] = search;
-      }
-
-      dispatch(getJournalVoucherHistory(params));
-    }
-  }, [dispatch, currentPage, rowsPerPage]);
-
-  // Handle search/filter changes - reset to page 1
-  useEffect(() => {
-    if (!isInitialMount.current) {
-      setCurrentPage(1);
-      setFirst(0);
-      const params = {
-        page: 1,
-        pageSize: rowsPerPage,
-      };
-
-      if (globalFilter && search) {
-        params[globalFilter] = search;
-      }
-
-      dispatch(getJournalVoucherHistory(params));
-    }
-  }, [search, globalFilter, dispatch, rowsPerPage]);
-
-  const formik = useFormik({
-    initialValues: { search: "" },
-    onSubmit: handleSubmit,
-  });
-  // useEffect(() => {
-  //   if (formik.values.search !== "") {
-  //     dispatch(
-  //       getJournalVoucherSearchList({ textSearch: formik.values.search })
-  //     );
-  //   }
-  // }, [formik.values.search]);
 
   const onPageChange = (event) => {
-    const newPage = event.page + 1; // PrimeReact uses 0-based indexing
-    const newPageSize = event.rows;
     setFirst(event.first);
-    setRowsPerPage(newPageSize);
-    setCurrentPage(newPage);
-
-    // Build params for API call
-    const params = {
-      page: newPage,
-      pageSize: newPageSize,
-    };
-
-    // Include filters if search is active
-    if (globalFilter && search) {
-      params[globalFilter] = search;
-    }
-
-    dispatch(getJournalVoucherHistory(params));
+    setRowsPerPage(event.rows);
   };
-
-  const menu = useRef(null);
-  const menuitems = [
-    { label: t("common.name") },
-    { label: t("common.date") },
-    { label: t("accounts.voucherNumber") },
-  ];
-
-  // const dispatch=useDispatch();
-  //   useEffect(()=>{
-  // dispatch(journalVoucherMiddleware(data))
-  //   },[])
 
   return (
     <div className="grid  container__Journal__Voture">
@@ -190,12 +98,15 @@ const JournalVoucher = () => {
         </div>
       </div>
       <div className="menu-container">
-        {/* <TieredMenu className='mt-2' model={menuitems} popup ref={menu} breakpoint="767px" /> */}
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn__Journal__Voture mb-3">
         <div
           className="add__icon__view__Journal__Voture"
+          role="button"
+          tabIndex={0}
+          aria-label={t("accounts.voucher")}
           onClick={handleNavigate}
+          onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && handleNavigate()}
         >
           <div className="add__icon__Journal__Voture">
             <SvgAdd color={"#fff"} />
@@ -215,13 +126,6 @@ const JournalVoucher = () => {
                   <i className="pi pi-search" />
                   {/* <span className='p-1'> <SvgSearchIcon /></span> */}
             {/* <InputText
-                    style={{ width: "100%" }}
-                    classNames="input__sub__account__Journal__Voture"
-                    placeholder="Search by Transaction Code"
-                    value={formik.values.search}
-                    onChange={formik.handleChange("search")}
-                  /> */}
-            {/* <InputText
                 placeholder="Search customers"
                 className="searchinput_left"
               />
@@ -237,24 +141,18 @@ const JournalVoucher = () => {
               <span className="p-input-icon-left" style={{ width: "100%" }}>
                 <i className="pi pi-search" />
                 <InputText
-                  placeholder="Search Transactions"
+                  placeholder={t("accounts.searchTransactions", { defaultValue: "Search transactions" })}
                   className="searchinput_left"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) => onSearch(e.target.value)}
                 />
               </span>
             </div>
 
             <div className="col-12 md:col-2 lg:col-2">
-              {/* <div className='sort__filter__view__Journal__Voture' onClick={(e) => menu.current.toggle(e)}>
-                <div className='sort__by__text__Journal__Voture'>Search By</div>
-                <div>
-                  <SvgFilters />
-                </div>
-              </div> */}
               <Dropdown
                 value={globalFilter}
-                onChange={(e) => setGlobalFilter(e.value)}
+                onChange={(e) => { setGlobalFilter(e.value); setFirst(0); }}
                 options={cities}
                 optionValue="code"
                 optionLabel="name"
@@ -269,7 +167,7 @@ const JournalVoucher = () => {
               className="main__tabel__title__Journal__Voture "
               style={{ paddingLeft: 10, paddingRight: 10 }}
             >
-              Journal Voucher history
+              {t("accounts.journalVoucherHistory", { defaultValue: "Journal voucher history" })}
             </div>
           </div>
           <div

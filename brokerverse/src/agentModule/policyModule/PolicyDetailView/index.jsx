@@ -17,13 +17,17 @@ import { policyDetailsDataMiddleWare } from "../store/policyMiddleWare";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
 import { isFireLob } from "../../endorsementModule/constants/endorsementCategories";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import s3Service from "../../../services/s3Service";
+import s3Service, { browserFileUrl } from "../../../services/s3Service";
 import billingService from "../../../services/billingService";
 import documentTemplateService from "../../../services/documentTemplateService";
 import authService from "../../../services/authService";
 import { BASE_URL } from "../../../utility/constant";
+import useTaxRates from "../../quoteModule/utils/useTaxRates";
 import "./index.scss";
 
+import { numberLocale } from "../../../utility/currencyConverter";
+import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 const ENDORSEMENT_TYPE_KEYS = {
   1: "policyDetail.endorsementTypePersonalDetails",
   2: "policyDetail.endorsementTypeMotorDetails",
@@ -280,9 +284,27 @@ HighlightCard.defaultProps = {
   tone: undefined,
 };
 
+
+/** Vehicle photo; a photo that cannot be loaded (missing file, expired link) shows a placeholder, not the alt text. */
+const VehiclePhoto = ({ src, alt, className }) => {
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [src]);
+  if (failed) {
+    return (
+      <div className={`${className} vehicle-photo-placeholder`} role="img" aria-label={alt}>
+        <i className="pi pi-image" aria-hidden="true" />
+        <span>{alt}</span>
+      </div>
+    );
+  }
+  return <img className={className} src={src} alt={alt} onError={() => setFailed(true)} />;
+};
+VehiclePhoto.propTypes = { src: PropTypes.string.isRequired, alt: PropTypes.string, className: PropTypes.string };
+
 const PolicyDetailView = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const taxRates = useTaxRates();
   const { policyId } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -304,7 +326,7 @@ const PolicyDetailView = () => {
     ({ policyMainReducers }) => ({
       policyDetails: policyMainReducers?.policyDetails,
       rawPolicyData: policyMainReducers?.rawPolicyData,
-      loading: policyMainReducers?.loading,
+      loading: policyMainReducers?.detailLoading,
       error: policyMainReducers?.error,
     })
   );
@@ -349,13 +371,15 @@ const PolicyDetailView = () => {
 
     if (rawPolicyData?.grossPremium) {
       const gross = rawPolicyData.grossPremium;
-      const net = gross / 1.265;
+      const totalRate =
+        taxRates.documentaryStampTax + taxRates.valueAddedTax + taxRates.localGovernmentTax;
+      const net = gross / (1 + totalRate);
 
       return {
         netPremium: net,
-        documentaryStampTax: net * 0.125,
-        valueAddedTax: net * 0.12,
-        localGovernmentTax: net * 0.02,
+        documentaryStampTax: net * taxRates.documentaryStampTax,
+        valueAddedTax: net * taxRates.valueAddedTax,
+        localGovernmentTax: net * taxRates.localGovernmentTax,
         accountPremiumOthers: 0,
         grossPremium: gross,
         _calculated: true,
@@ -363,7 +387,7 @@ const PolicyDetailView = () => {
     }
 
     return null;
-  }, [rawPolicyData]);
+  }, [rawPolicyData, taxRates]);
 
   useEffect(() => {
     if (policyId) {
@@ -408,7 +432,7 @@ const PolicyDetailView = () => {
           setVehiclePhotoUrls(fallbackMap);
         }
       } catch (fetchError) {
-        console.error(
+        logger.error(
           "Error fetching vehicle photo presigned URLs:",
           fetchError
         );
@@ -423,31 +447,9 @@ const PolicyDetailView = () => {
     fetchVehiclePhotoUrls();
   }, [rawPolicyData]);
 
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
-  const formatDateTime = (dateString) => {
-    if (!dateString) return "N/A";
-
-    const parsedDate = new Date(dateString);
-    if (Number.isNaN(parsedDate.getTime())) {
-      return dateString;
-    }
-
-    return parsedDate.toLocaleString("en-PH", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  // Dates in the configured format (System Settings general.date_format)
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
+  const formatDateTime = (dateString) => formatConfiguredDate(dateString, { withTime: true, empty: "N/A" });
 
   const isPolicyExpiringOrExpired = () => {
     const expiryDate = policyDetails?.PolicyExpiry || rawPolicyData?.expiry;
@@ -467,8 +469,10 @@ const PolicyDetailView = () => {
     return daysUntilExpiry <= 5;
   };
 
+  // back to where the policy was opened from (the list reopens with its search and page), or to the list itself
   const handleBack = () => {
-    navigate(-1);
+    if ((window.history.state?.idx || 0) > 0) navigate(-1);
+    else navigate("/agent/policy");
   };
 
   const handleRenew = () => {
@@ -517,7 +521,7 @@ const PolicyDetailView = () => {
         }
       }
 
-      window.open(downloadUrl, "_blank");
+      window.open(downloadUrl, "_blank", "noopener,noreferrer");
 
       toast.current?.show({
         severity: "success",
@@ -526,7 +530,7 @@ const PolicyDetailView = () => {
         life: 3000,
       });
     } catch (downloadError) {
-      console.error("Document open error:", downloadError);
+      logger.error("Document open error:", downloadError);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToOpenDocument"),
@@ -566,7 +570,7 @@ const PolicyDetailView = () => {
       }
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      window.open(url, "_blank");
+      window.open(url, "_blank", "noopener,noreferrer");
       toast.current?.show({
         severity: "success",
         summary: t("policyDetail.documentOpened"),
@@ -574,7 +578,7 @@ const PolicyDetailView = () => {
         life: 3000,
       });
     } catch (err) {
-      console.error("Insurance Placing Slip fetch error:", err);
+      logger.error("Insurance Placing Slip fetch error:", err);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToOpenDocument"),
@@ -621,7 +625,7 @@ const PolicyDetailView = () => {
         });
       }
     } catch (err) {
-      console.error("Policy document preview error:", err);
+      logger.error("Policy document preview error:", err);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToLoad"),
@@ -651,7 +655,7 @@ const PolicyDetailView = () => {
       );
       if (result.success && result.blob) {
         const url = window.URL.createObjectURL(result.blob);
-        window.open(url, "_blank");
+        window.open(url, "_blank", "noopener,noreferrer");
         toast.current?.show({
           severity: "success",
           summary: t("policyDetail.documentOpened"),
@@ -667,7 +671,7 @@ const PolicyDetailView = () => {
         });
       }
     } catch (err) {
-      console.error("Policy document open error:", err);
+      logger.error("Policy document open error:", err);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.failedToOpenDocument"),
@@ -727,7 +731,7 @@ const PolicyDetailView = () => {
         throw new Error(result.error || "Failed to generate invoice");
       }
     } catch (invoiceError) {
-      console.error(`Generate ${type} invoice error:`, invoiceError);
+      logger.error(`Generate ${type} invoice error:`, invoiceError);
       toast.current?.show({
         severity: "error",
         summary: t("policyDetail.invoiceGenerationFailed"),
@@ -873,53 +877,29 @@ const PolicyDetailView = () => {
   ];
   const breadcrumbHome = { label: t("policyDetail.breadcrumbHome") };
 
+  // A stored photo is shown through its signed URL; a bare storage key cannot be opened by the browser.
+  const photoSrc = (key) => {
+    if (!key) return null;
+    const signed = vehiclePhotoUrls[key];
+    if (signed) return signed;
+    return /^(https?:)?\/\//.test(key) || key.startsWith("/") ? browserFileUrl(key) : null;
+  };
   const vehicleImages = [
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleLeftSidePhoto] ||
-        rawPolicyData?.vehicleLeftSidePhoto,
-      alt: t("policyDetail.vehiclePhotoLeftSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleRightSidePhoto] ||
-        rawPolicyData?.vehicleRightSidePhoto,
-      alt: t("policyDetail.vehiclePhotoRightSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleFrontSidePhoto] ||
-        rawPolicyData?.vehicleFrontSidePhoto,
-      alt: t("policyDetail.vehiclePhotoFrontSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleRearSidePhoto] ||
-        rawPolicyData?.vehicleRearSidePhoto,
-      alt: t("policyDetail.vehiclePhotoRearSide"),
-    },
-    {
-      itemImageSrc:
-        vehiclePhotoUrls[rawPolicyData?.vehicleInteriorDashboardPhoto] ||
-        rawPolicyData?.vehicleInteriorDashboardPhoto,
-      alt: t("policyDetail.vehiclePhotoInterior"),
-    },
-  ].filter((image) => image.itemImageSrc);
+    [rawPolicyData?.vehicleLeftSidePhoto, t("policyDetail.vehiclePhotoLeftSide")],
+    [rawPolicyData?.vehicleRightSidePhoto, t("policyDetail.vehiclePhotoRightSide")],
+    [rawPolicyData?.vehicleFrontSidePhoto, t("policyDetail.vehiclePhotoFrontSide")],
+    [rawPolicyData?.vehicleRearSidePhoto, t("policyDetail.vehiclePhotoRearSide")],
+    [rawPolicyData?.vehicleInteriorDashboardPhoto, t("policyDetail.vehiclePhotoInterior")],
+  ]
+    .map(([key, alt]) => ({ itemImageSrc: photoSrc(key), alt }))
+    .filter((image) => image.itemImageSrc);
 
   const galleryItemTemplate = (item) => (
-    <img
-      className="vehicle-gallery-image"
-      src={item.itemImageSrc}
-      alt={item.alt}
-    />
+    <VehiclePhoto className="vehicle-gallery-image" src={item.itemImageSrc} alt={item.alt} />
   );
 
   const galleryThumbnailTemplate = (item) => (
-    <img
-      className="vehicle-gallery-thumbnail"
-      src={item.itemImageSrc}
-      alt={item.alt}
-    />
+    <VehiclePhoto className="vehicle-gallery-thumbnail" src={item.itemImageSrc} alt={item.alt} />
   );
 
   if (loading) {
@@ -967,7 +947,16 @@ const PolicyDetailView = () => {
     policyDetails?.ProductDescription;
   const isFireLOB = isFireLob(productType);
   const isMotorLOB = !isFireLOB;
-  const participantDetails = quotation?.participantDetails || [];
+  // Co-insurance participants: risk_participants from the API (lead first, amounts split by share), else the quotation document
+  const apiParticipants = Array.isArray(rawPolicyData?.participants) ? rawPolicyData.participants : [];
+  const participantDetails = apiParticipants.length
+    ? apiParticipants.map((p) => ({
+        insuranceCompanyName: p.insuranceCompanyName,
+        participantName: p.insurerReference ? `${p.insuranceCompanyName} (${p.insurerReference})` : p.insuranceCompanyName,
+        sharePercentage: String(p.sharePercent),
+        premiumAmount: p.premiumTotal,
+      }))
+    : quotation?.participantDetails || rawPolicyData?.participantDetails || [];
   const hasCoInsuranceParticipants = participantDetails.some(
     (participant) => {
       const name =
@@ -977,7 +966,7 @@ const PolicyDetailView = () => {
     }
   );
   const showCoInsuranceSection =
-    Boolean(rawPolicyData?.isCoInsurance || quotation?.isCoInsurance) &&
+    (apiParticipants.length > 1 || Boolean(rawPolicyData?.isCoInsurance || quotation?.isCoInsurance)) &&
     hasCoInsuranceParticipants;
   const fireRiskDetails =
     rawPolicyData?.fireRiskDetails ||
@@ -1136,7 +1125,7 @@ const PolicyDetailView = () => {
     {
       key: "client",
       label: t("policyDetail.clientId"),
-      value: policyDetails.ClientId || t("policyDetail.nA"),
+      value: policyDetails.ClientCode || rawPolicyData?.client?.clientCode || t("policyDetail.nA"),
       helper:
         policyDetails.ClientName ||
         rawPolicyData?.client?.fullName ||
@@ -1199,7 +1188,7 @@ const PolicyDetailView = () => {
     {
       key: "clientId",
       label: t("policyDetail.clientId"),
-      value: policyDetails.ClientId || t("policyDetail.nA"),
+      value: policyDetails.ClientCode || rawPolicyData?.client?.clientCode || t("policyDetail.nA"),
     },
     {
       key: "idCard",
@@ -1449,6 +1438,15 @@ const PolicyDetailView = () => {
       ? "0%"
       : `${discountPercent}%`;
 
+  // Tax labels show the rate actually priced on this policy (tax / net premium), else the configured rate (tax.*
+  // settings); the labels used to be fixed text (e.g. LGT 2% while 0.75% was applied).
+  const pricedNet = parseAmount(premiumBreakdown?.netPremium || quotation.netPremium);
+  const taxRateLabel = (amount, configuredRate) => {
+    const value = parseAmount(amount);
+    const pct = pricedNet > 0 && value > 0 ? (value / pricedNet) * 100 : Number(configuredRate || 0) * 100;
+    return `${Number(pct.toFixed(2))}%`;
+  };
+
   const premiumLineItems = [
     {
       key: "netPremium",
@@ -1460,7 +1458,7 @@ const PolicyDetailView = () => {
     },
     {
       key: "dst",
-      label: t("policyDetail.documentaryStampTax125"),
+      label: t("policyDetail.documentaryStampTaxRate", { rate: taxRateLabel(premiumBreakdown?.documentaryStampTax || quotation.documentaryStampTax, taxRates.documentaryStampTax) }),
       amount: formatCurrency(
         premiumBreakdown?.documentaryStampTax || quotation.documentaryStampTax
       ),
@@ -1468,7 +1466,7 @@ const PolicyDetailView = () => {
     },
     {
       key: "vat",
-      label: t("policyDetail.valueAddedTax12"),
+      label: t("policyDetail.valueAddedTaxRate", { rate: taxRateLabel(premiumBreakdown?.valueAddedTax || quotation.valueAddedTax, taxRates.valueAddedTax) }),
       amount: formatCurrency(
         premiumBreakdown?.valueAddedTax || quotation.valueAddedTax
       ),
@@ -1476,7 +1474,7 @@ const PolicyDetailView = () => {
     },
     {
       key: "lgt",
-      label: t("policyDetail.localGovernmentTax2"),
+      label: t("policyDetail.localGovernmentTaxRate", { rate: taxRateLabel(premiumBreakdown?.localGovernmentTax || quotation.localGovernmentTax, taxRates.localGovernmentTax) }),
       amount: formatCurrency(
         premiumBreakdown?.localGovernmentTax || quotation.localGovernmentTax
       ),
@@ -1573,7 +1571,9 @@ const PolicyDetailView = () => {
     },
   ];
 
-  const paymentStatusIsPending = rawPolicyData?.paymentStatus === "Pending";
+  // Direct bill: the client pays the premium to the insurer; the broker only collects its commission from the insurer
+  const isDirectBill = rawPolicyData?.billingMode === "direct" || rawPolicyData?.isDirectBilled === true;
+  const paymentStatusIsPending = rawPolicyData?.paymentStatus === "Pending" && !isDirectBill;
 
   return (
     <div className="policy-detail-container">
@@ -1627,7 +1627,6 @@ const PolicyDetailView = () => {
                 className="p-button-success p-button-rounded"
               />
             )}
-            {/* {policyDetails.Payment} */}
 
             <Button
               label={t("policyDetail.claim")}
@@ -1854,34 +1853,34 @@ const PolicyDetailView = () => {
                         {
                           key: "building",
                           label: t("policyDetail.building"),
-                          value: (fireSumInsured.Building ?? 0).toLocaleString(),
+                          value: (fireSumInsured.Building ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "plantAndMachinery",
                           label: t("policyDetail.plantAndMachinery"),
                           value: (
                             fireSumInsured.PlantAndMachinery ?? 0
-                          ).toLocaleString(),
+                          ).toLocaleString(numberLocale()),
                         },
                         {
                           key: "otherContents",
                           label: t("policyDetail.otherContents"),
-                          value: (fireSumInsured.OtherContents ?? 0).toLocaleString(),
+                          value: (fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "grossProfit",
                           label: t("policyDetail.grossProfit"),
-                          value: (fireSumInsured.GrossProfit ?? 0).toLocaleString(),
+                          value: (fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "wages",
                           label: t("policyDetail.wages"),
-                          value: (fireSumInsured.Wages ?? 0).toLocaleString(),
+                          value: (fireSumInsured.Wages ?? 0).toLocaleString(numberLocale()),
                         },
                         {
                           key: "lossOfRent",
                           label: t("policyDetail.lossOfRent"),
-                          value: (fireSumInsured.LossOfRent ?? 0).toLocaleString(),
+                          value: (fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale()),
                         },
                       ]}
                     />
@@ -2099,7 +2098,7 @@ const PolicyDetailView = () => {
                               onClick={() =>
                                 handleDownload(
                                   documentData?.originalUrl,
-                                  `Endorsement_${endorsementRef}.pdf`
+                                  `Endorsement_${endorsement.endorsementNumber || endorsementRef}.pdf`
                                 )
                               }
                               disabled={!documentData?.originalUrl}
@@ -2125,16 +2124,6 @@ const PolicyDetailView = () => {
                     {t("policyDetail.paymentRequiredDescription")}
                   </p>
                   <div className="payment-actions">
-                    {/* <Button
-                      label={t("policyDetail.payLater")}
-                      icon="pi pi-clock"
-                      className="p-button-outlined p-button-secondary"
-                      onClick={() =>
-                        navigate(
-                          `/agent/clientview/${rawPolicyData?.clientId || ""}`
-                        )
-                      }
-                    /> */}
                     <Button
                       label={t("policyDetail.proceedToPayment")}
                       icon="pi pi-credit-card"
@@ -2156,6 +2145,12 @@ const PolicyDetailView = () => {
                       }
                     />
                   </div>
+                </SidebarSection>
+              )}
+
+              {isDirectBill && (
+                <SidebarSection title={t("policyDetail.directBill")} icon="pi pi-building">
+                  <p className="payment-description">{t("policyDetail.directBillDescription")}</p>
                 </SidebarSection>
               )}
 

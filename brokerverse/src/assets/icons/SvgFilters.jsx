@@ -5,10 +5,7 @@ const SvgFilters = (props) => (
 </svg>
   // <svg
   //   xmlns="http://www.w3.org/2000/svg"
-  //   width={40}
-  //   height={40}
   //   fill="none"
-  //   {...props}
   // >
   //   <g clipPath="url(#filters_svg__a)">
   //     <path fill="#fff" d="M-1613-150H307V930h-1920z" />

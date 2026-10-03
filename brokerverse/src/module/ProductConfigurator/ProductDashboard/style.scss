@@ -61,7 +61,7 @@
           }
 
           &.negative {
-            color: #f44336;
+            color: var(--color-danger);
           }
 
           &.neutral {

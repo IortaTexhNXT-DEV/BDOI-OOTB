@@ -78,7 +78,7 @@
     border: none;
     padding: 0;
     font-family: "Nunito", Arial, sans-serif;
-    color: red !important;
+    color: var(--color-danger) !important;
     font-size: 16px;
     font-weight: 400;
   }
@@ -103,7 +103,7 @@
       background-color: #0072d8;
       height: 45px;
       // width: 140px;
-      border-radius: 30px;
+      border-radius: 6px;
       color: #fff;
       font-family: "Nunito", Arial, sans-serif;
       padding: 0 20px;
@@ -210,7 +210,7 @@
 
   .addbutton_container__Journal__Voture {
     background-color: #0072d8;
-    border-radius: 60px;
+    border-radius: 6px;
     width: 100px !important;
     height: 38px;
     display: flex;

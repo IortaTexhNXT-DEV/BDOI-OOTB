@@ -1,0 +1,124 @@
+// Renewal screens (queue, at-risk, retention, performance, negotiations, lapse, quote generation): one quiet
+// enterprise layout. Summary figures read as a compact strip of numbers with their labels; no dials, large icons or
+// coloured card edges. Imported last by each screen's stylesheet.
+@import "../../theme/bdoi/tokens";
+
+:is(.container__renewal__queue__master, .container__at__risk__analysis__master, .container__retention__analytics__master,
+  .container__performance__tracking__master, .container__negotiation__workspace__master, .container__lapse__management__master,
+  .container__quote__generation__master) {
+  .page__title,
+  .top__container h1 {
+    font-size: 26px;
+    font-weight: 700;
+    color: $color-heading;
+    margin-bottom: 8px;
+  }
+
+  .top__container {
+    padding-bottom: 8px;
+    margin-bottom: 12px;
+  }
+
+  // summary figures
+  .dashboard-cards,
+  .kpi-cards,
+  .kpi-grid {
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  :is(.dashboard-card, .kpi-card) {
+    border: 1px solid $color-border !important;
+    border-left-width: 1px !important;
+    border-radius: $radius-sm !important;
+    box-shadow: none !important;
+    background: $color-surface !important;
+
+    .p-card-body,
+    .p-card-content {
+      padding: 12px 16px !important;
+    }
+  }
+
+  :is(.card-content, .kpi-content) {
+    gap: 0 !important;
+    align-items: center;
+  }
+
+  // dials and large icons repeat the number; the figure and its label are enough
+  :is(.card-visual, .kpi-visual, .card-icon) {
+    display: none !important;
+  }
+
+  :is(.card-info, .kpi-info) {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  :is(.card-value, .kpi-value) {
+    font-size: 22px !important;
+    font-weight: 700 !important;
+    color: $color-heading !important;
+    line-height: 1.2;
+  }
+
+  :is(.card-label, .kpi-label) {
+    order: -1;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+    text-transform: none !important;
+    letter-spacing: 0 !important;
+    color: $color-text-muted !important;
+  }
+
+  :is(.kpi-change, .kpi-target) {
+    font-size: 12px !important;
+    color: $color-text-muted !important;
+  }
+
+  // section cards
+  .p-card {
+    border-radius: $radius-sm;
+    box-shadow: none;
+    border: 1px solid $color-border;
+  }
+
+  .chart-caption {
+    font-size: 12px;
+    color: $color-text-muted;
+  }
+
+  .action-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 10px 0;
+      border-bottom: 1px solid $color-border;
+      font-size: 14px;
+
+      &:last-child {
+        border-bottom: 0;
+      }
+
+      span {
+        color: $color-text-muted;
+      }
+    }
+  }
+
+  .risk-indicator .indicator-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+  }
+
+  .risk-bar .p-progressbar-value {
+    background: $brand-blue;
+  }
+}

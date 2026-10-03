@@ -1,6 +1,7 @@
-import React, { useRef } from "react";
+import { useRef, useState } from "react";
+import { useLanguageOptions } from "../../../utility/languages";
+import { ChangePasswordDialog, TwoFactorDialog } from "../../authModule/security/AccountSecurityDialogs";
 import "./index.scss";
-import { Image } from "primereact/image";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { Dropdown } from "primereact/dropdown";
@@ -12,18 +13,19 @@ import { useNavigate } from "react-router-dom";
 import { logout } from "../../../utility/logout";
 import { useNotificationContext } from "../../../context/NotificationContext";
 import SvgArrow from "../../../assets/icons/SvgArrow";
-import Cookies from "js-cookie";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
-
-const getLanguageOptions = (t) => [
-  { label: t("common.english"), value: "en" },
-  { label: t("common.thai"), value: "th" },
-];
+import InitialsAvatar from "../InitialsAvatar";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const AgentNavBar = () => {
   const menuRight = useRef(null);
   const menuProfile = useRef(null);
+  // "password" | "2fa" | "" : the account security dialog that is open
+  const [securityDialog, setSecurityDialog] = useState("");
+  // configured languages that have a translation (see utility/languages.js)
+  const languageOptions = useLanguageOptions();
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { notifications, unreadCount, markAsRead, deleteNotification } =
@@ -31,18 +33,14 @@ const AgentNavBar = () => {
 
   // Get user data from localStorage
   const userName = localStorage.getItem("USER_NAME") || "User";
-  const userEmail = localStorage.getItem("USER_EMAIL") || "user@example.com";
+  const userEmail = localStorage.getItem("USER_EMAIL") || "";
   const currentLanguage = (i18n.language && i18n.language.startsWith("th")) ? "th" : "en";
-
-  // Debug logging
-  console.log("NavBar - Unread Count:", unreadCount);
-  console.log("NavBar - Notifications:", notifications);
 
   const handleLogOut = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error("Logout failed:", error);
+      logger.error("Logout failed:", error);
       // Fallback: clear data and redirect
       navigate("/login");
     }
@@ -90,14 +88,7 @@ const AgentNavBar = () => {
   // Format date for display (use Thai locale when language is Thai)
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const locale = currentLanguage === "th" ? "th-TH" : "en-US";
-    return date.toLocaleDateString(locale, {
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return formatAppDate(date, { withTime: true });
   };
 
   // Handle notification click
@@ -282,6 +273,32 @@ const AgentNavBar = () => {
         },
         {
           label: (
+            <div style={{ fontFamily: "Nunito, Arial, sans-serif", fontWeight: 400, fontSize: "16px", color: "#111927" }}>
+              {t("security.changePassword")}
+            </div>
+          ),
+          icon: (
+            <div className="mr-3">
+              <i className="pi pi-key" aria-hidden="true" style={{ fontSize: "1.1rem", color: "#6C737F" }} />
+            </div>
+          ),
+          command: () => setSecurityDialog("password"),
+        },
+        {
+          label: (
+            <div style={{ fontFamily: "Nunito, Arial, sans-serif", fontWeight: 400, fontSize: "16px", color: "#111927" }}>
+              {t("security.twoFactor")}
+            </div>
+          ),
+          icon: (
+            <div className="mr-3">
+              <i className="pi pi-shield" aria-hidden="true" style={{ fontSize: "1.1rem", color: "#6C737F" }} />
+            </div>
+          ),
+          command: () => setSecurityDialog("2fa"),
+        },
+        {
+          label: (
             <div
               style={{
                 fontFamily: "Nunito, Arial, sans-serif",
@@ -333,17 +350,12 @@ const AgentNavBar = () => {
   return (
     <div className="Agentnavbar__container">
       <div className="bdo-logo-section">
-        {/* <img
-          src="/iorta.png"
-          alt="iortaTechNxt Logo"
-          className="bdo-logo-nav"
-        /> */}
       </div>
       <div className="nav-spacer"></div>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
         <Dropdown
           value={currentLanguage}
-          options={getLanguageOptions(t)}
+          options={languageOptions}
           onChange={(e) => i18n.changeLanguage(e.value)}
           aria-label={t("common.language")}
           style={{ minWidth: "100px" }}
@@ -373,8 +385,7 @@ const AgentNavBar = () => {
               padding: "0.5rem",
               borderRadius: "50%",
               transition: "all 0.3s ease",
-            }}
-          />
+            }} aria-label="Notifications" tooltip="Notifications" tooltipOptions={{ position: "top" }} />
           {unreadCount > 0 && (
             <span className="notification-badge">
               {unreadCount > 99 ? "99+" : unreadCount}
@@ -388,7 +399,6 @@ const AgentNavBar = () => {
         ref={menuProfile}
         id="popup_menu_right"
         popupAlignment="right"
-        //   style={menuStyle}
       />
       <Button
         className="p-0"
@@ -396,13 +406,10 @@ const AgentNavBar = () => {
         aria-controls="popup_menu_right"
         aria-haspopup
       >
-        <Image
-          src="https://i.ibb.co/7jx27CN/Mask-group-1.png"
-          width="40px"
-          height="40px"
-          className="navbar__container__profile__image"
-        />
+        <InitialsAvatar size="40px" className="navbar__container__profile__image" />
       </Button>
+      <ChangePasswordDialog visible={securityDialog === "password"} onHide={() => setSecurityDialog("")} />
+      <TwoFactorDialog visible={securityDialog === "2fa"} onHide={() => setSecurityDialog("")} />
     </div>
   );
 };

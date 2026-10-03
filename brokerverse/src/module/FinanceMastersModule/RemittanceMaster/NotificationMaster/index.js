@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Card } from "primereact/card";
@@ -15,8 +15,39 @@ import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { notificationMasterData, mockCrudOperations } from "../../../../services/mockData/remittanceMockData";
+import remittanceService, { masterService } from "../../../../services/remittanceService";
+import authService from "../../../../services/authService";
+import { showError, showSuccess } from "../../../Remittance/shared";
+import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
+
+const TYPE = "remittance-notification-template";
+const toRow = (template) => ({
+  id: template.id,
+  code: template.code,
+  templateName: template.name,
+  eventType: template.trigger,
+  recipientType: template.recipientType || "Client",
+  channel: template.channel,
+  subject: template.subject || template.message || "",
+  body: template.body || template.message || "",
+  priority: template.priority || "Medium",
+  active: template.status === "Active",
+  autoSend: template.autoSend ?? true
+});
+const toRecord = (row) => ({
+  code: row.code,
+  name: row.templateName,
+  trigger: row.eventType,
+  recipientType: row.recipientType,
+  channel: row.channel,
+  subject: row.subject,
+  body: row.body,
+  priority: row.priority,
+  autoSend: row.autoSend,
+  isActive: row.active
+});
 
 const NotificationMaster = () => {
   const { t } = useTranslation();
@@ -25,23 +56,59 @@ const NotificationMaster = () => {
   const isViewMode = mode === "view";
   const toast = React.useRef(null);
 
-  // Notification templates state from mock data
-  const [notificationTemplates, setNotificationTemplates] = useState(
-    notificationMasterData.templates.map(template => ({
-      id: template.id,
-      templateName: template.name,
-      eventType: template.trigger,
-      recipientType: "Client",
-      channel: template.channel,
-      subject: template.subject || template.message,
-      priority: "Medium",
-      active: template.status === "Active",
-      autoSend: true
-    }))
-  );
+  // Notification templates are records of the remittance-notification-template master
+  const [notificationTemplates, setNotificationTemplates] = useState([]);
+
+  const loadTemplates = () => masterService.list(TYPE)
+    .then((rows) => setNotificationTemplates((rows || []).map(toRow)))
+    .catch((error) => showError(toast, error));
+
+  useEffect(() => {
+    loadTemplates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const saveTemplate = async () => {
+    try {
+      await saveRecord(TYPE, selectedTemplate.id, toRecord(selectedTemplate));
+      showSuccess(toast, `${selectedTemplate.templateName} saved`);
+      setShowTemplateDialog(false);
+      loadTemplates();
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
+
+  const deleteTemplate = async (row) => {
+    if (!(await confirmAction(`Delete template ${row.templateName}?`, { danger: true }))) return;
+    try {
+      await masterService.remove(TYPE, row.id);
+      showSuccess(toast, `${row.templateName} deleted`);
+      loadTemplates();
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
+
+  const editTemplate = (row) => {
+    setSelectedTemplate({ ...row });
+    setShowTemplateDialog(true);
+  };
+
+  const setTemplateField = (field, value) => setSelectedTemplate((tpl) => ({ ...tpl, [field]: value }));
+
+  const sendTestEmail = async () => {
+    const email = authService.getUser()?.email || localStorage.getItem("USER_EMAIL");
+    try {
+      await remittanceService.sendNotification({ type: "Test", subject: "Remittance notification test", content: "Test message from the Notification Master.", recipients: [email], channel: "Email" });
+      showSuccess(toast, `Test email queued for ${email}`, "Test Email Sent");
+    } catch (error) {
+      showError(toast, error);
+    }
+  };
 
   // Notification rules state - enhanced examples
-  const [notificationRules, setNotificationRules] = useState([
+  const [notificationRules] = useState([
     {
       id: 1,
       ruleName: "Payment Overdue Alert",
@@ -96,7 +163,7 @@ const NotificationMaster = () => {
 
   const recipientTypeOptions = [
     { label: "Client", value: "Client" },
-    { label: "Agent", value: "Agent" },
+    { label: "Sales person", value: "Agent" },
     { label: "Approver", value: "Approver" },
     { label: "Manager", value: "Manager" },
     { label: "Finance Head", value: "Finance Head" },
@@ -111,12 +178,6 @@ const NotificationMaster = () => {
     { label: "Push Notification", value: "Push Notification" }
   ];
 
-  const priorityOptions = [
-    { label: "Low", value: "Low" },
-    { label: "Medium", value: "Medium" },
-    { label: "High", value: "High" },
-    { label: "Critical", value: "Critical" }
-  ];
 
   const frequencyOptions = [
     { label: "Immediate", value: "Immediate" },
@@ -153,7 +214,7 @@ const NotificationMaster = () => {
           onClick={() => {
             setSelectedTemplate(rowData);
             setShowTemplateDialog(true);
-          }}
+          }} aria-label="View"
         />
         {!isViewMode && (
           <>
@@ -161,11 +222,13 @@ const NotificationMaster = () => {
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
               tooltip="Edit"
+              onClick={() => editTemplate(rowData)} aria-label="Edit"
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
               tooltip="Delete"
+              onClick={() => deleteTemplate(rowData)} aria-label="Delete"
             />
           </>
         )}
@@ -183,19 +246,19 @@ const NotificationMaster = () => {
           onClick={() => {
             setSelectedRule(rowData);
             setShowRuleDialog(true);
-          }}
+          }} aria-label="View"
         />
         {!isViewMode && (
           <>
             <Button
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
-              tooltip="Edit"
+              tooltip="Edit" aria-label="Edit"
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
-              tooltip="Delete"
+              tooltip="Delete" aria-label="Delete"
             />
           </>
         )}
@@ -203,34 +266,7 @@ const NotificationMaster = () => {
     );
   };
 
-  const handleSave = async () => {
-    try {
-      const configData = {
-        templates: notificationTemplates,
-        rules: notificationRules
-      };
-
-      await mockCrudOperations.update("notificationMaster", 1, configData);
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Success',
-        detail: 'Notification Master configuration saved successfully',
-        life: 3000
-      });
-
-      setTimeout(() => {
-        navigate("/master/finance/remittance");
-      }, 1500);
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save configuration',
-        life: 3000
-      });
-    }
-  };
+  const handleSave = () => navigate(MASTER_HOME);
 
   const handleCancel = () => {
     navigate("/master/finance/remittance");
@@ -248,7 +284,7 @@ const NotificationMaster = () => {
         <Button
           label={t("financeMasters.save")}
           icon="pi pi-check"
-          onClick={() => setShowTemplateDialog(false)}
+          onClick={saveTemplate}
           autoFocus
         />
       )}
@@ -291,14 +327,7 @@ const NotificationMaster = () => {
                     label={t("remittance.addTemplate")}
                     icon="pi pi-plus"
                     className="p-button-primary"
-                    onClick={() => {
-                      toast.current.show({
-                        severity: 'info',
-                        summary: 'Info',
-                        detail: 'Add Template dialog would open here',
-                        life: 3000
-                      });
-                    }}
+                    onClick={() => editTemplate({ id: null, code: `NTF-${Date.now().toString().slice(-6)}`, templateName: "", eventType: "", recipientType: "Client", channel: "Email", subject: "", body: "", priority: "Medium", active: true, autoSend: true })}
                   />
                 </div>
               )}
@@ -358,19 +387,19 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>SMTP Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>SMTP Server</label>
                       <InputText placeholder={t("remittance.placeholderSmtp")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Port</label>
                       <InputNumber placeholder={t("remittance.placeholderPort")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Username</label>
                       <InputText placeholder={t("remittance.placeholderEmail")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Authentication</label>
                       <Dropdown
                         options={[
@@ -388,19 +417,19 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>Default Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>From Email</label>
                       <InputText placeholder={t("remittance.placeholderRemittanceEmail")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>From Name</label>
                       <InputText placeholder={t("remittance.placeholderRemittanceSystem")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Reply To</label>
                       <InputText placeholder={t("remittance.placeholderSupportEmail")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>BCC Recipients</label>
                       <InputText placeholder={t("remittance.placeholderAuditEmail")} disabled={isViewMode} />
                     </div>
@@ -414,14 +443,7 @@ const NotificationMaster = () => {
                     label={t("remittance.testEmailConfiguration")}
                     icon="pi pi-send"
                     className="p-button-secondary"
-                    onClick={() => {
-                      toast.current.show({
-                        severity: 'success',
-                        summary: 'Test Email Sent',
-                        detail: 'Test email sent successfully to configured address',
-                        life: 3000
-                      });
-                    }}
+                    onClick={sendTestEmail}
                   />
                 </div>
               )}
@@ -434,7 +456,7 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>SMS Provider Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>SMS Provider</label>
                       <Dropdown
                         options={[
@@ -446,15 +468,15 @@ const NotificationMaster = () => {
                         disabled={isViewMode}
                       />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>API Endpoint</label>
                       <InputText placeholder={t("remittance.placeholderApiUrl")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>API Key</label>
                       <InputText placeholder={t("remittance.placeholderApiKey")} type="password" disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Sender ID</label>
                       <InputText placeholder={t("remittance.placeholderRemit")} disabled={isViewMode} />
                     </div>
@@ -464,19 +486,19 @@ const NotificationMaster = () => {
                 <div className="config-group">
                   <h3>SMS Settings</h3>
                   <div className="p-fluid">
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Max Message Length</label>
                       <InputNumber value={160} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Country Code</label>
                       <InputText placeholder={t("remittance.placeholderCountryCode")} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <label>Retry Attempts</label>
                       <InputNumber value={3} disabled={isViewMode} />
                     </div>
-                    <div className="p-field">
+                    <div className="p-field field">
                       <div className="field-checkbox">
                         <Checkbox
                           id="enableSMS"
@@ -490,23 +512,6 @@ const NotificationMaster = () => {
                 </div>
               </div>
 
-              {!isViewMode && (
-                <div className="test-section mt-4">
-                  <Button
-                    label="Test SMS Configuration"
-                    icon="pi pi-mobile"
-                    className="p-button-secondary"
-                    onClick={() => {
-                      toast.current.show({
-                        severity: 'success',
-                        summary: 'Test SMS Sent',
-                        detail: 'Test SMS sent successfully to configured number',
-                        life: 3000
-                      });
-                    }}
-                  />
-                </div>
-              )}
             </div>
           </TabPanel>
         </TabView>
@@ -538,43 +543,49 @@ const NotificationMaster = () => {
       >
         {selectedTemplate && (
           <div className="template-details">
-            <div className="p-fluid p-formgrid p-grid">
-              <div className="p-field p-col-12 p-md-6">
+            <div className="p-fluid formgrid grid">
+              <div className="p-field field col-12 md:col-6">
                 <label>Template Name</label>
-                <InputText value={selectedTemplate.templateName} disabled={isViewMode} />
+                <InputText value={selectedTemplate.templateName} onChange={(e) => setTemplateField("templateName", e.target.value)} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Event Type</label>
                 <Dropdown
                   value={selectedTemplate.eventType}
                   options={eventTypeOptions}
+                  onChange={(e) => setTemplateField("eventType", e.value)}
+                  editable
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Recipient Type</label>
                 <Dropdown
                   value={selectedTemplate.recipientType}
                   options={recipientTypeOptions}
+                  onChange={(e) => setTemplateField("recipientType", e.value)}
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Channel</label>
                 <Dropdown
                   value={selectedTemplate.channel}
                   options={channelOptions}
+                  onChange={(e) => setTemplateField("channel", e.value)}
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Subject</label>
-                <InputText value={selectedTemplate.subject} disabled={isViewMode} />
+                <InputText value={selectedTemplate.subject} onChange={(e) => setTemplateField("subject", e.target.value)} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Message Template</label>
                 <InputTextarea
                   rows={5}
+                  value={selectedTemplate.body}
+                  onChange={(e) => setTemplateField("body", e.target.value)}
                   placeholder={t("remittance.placeholderTemplateMessage")}
                   disabled={isViewMode}
                 />
@@ -593,16 +604,16 @@ const NotificationMaster = () => {
       >
         {selectedRule && (
           <div className="rule-details">
-            <div className="p-fluid p-formgrid p-grid">
-              <div className="p-field p-col-12">
+            <div className="p-fluid formgrid grid">
+              <div className="p-field field col-12">
                 <label>Rule Name</label>
                 <InputText value={selectedRule.ruleName} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Condition</label>
                 <InputText value={selectedRule.condition} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Frequency</label>
                 <Dropdown
                   value={selectedRule.frequency}
@@ -610,11 +621,11 @@ const NotificationMaster = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="p-field p-col-12 p-md-6">
+              <div className="p-field field col-12 md:col-6">
                 <label>Escalation Level</label>
                 <InputNumber value={selectedRule.escalationLevel} disabled={isViewMode} />
               </div>
-              <div className="p-field p-col-12">
+              <div className="p-field field col-12">
                 <label>Recipients</label>
                 <MultiSelect
                   value={selectedRule.recipients}

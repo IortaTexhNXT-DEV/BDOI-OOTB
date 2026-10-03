@@ -18,18 +18,19 @@ const mapLogoPresets = (presets) => {
 
 const applyPayloadToState = (state, payload) => {
   if (!payload) return;
-  // Branding is pinned to BDO in code, so any persisted logoUrl is ignored.
-  state.logoUrl = DEFAULT_SYSTEM_SETTINGS.logoUrl;
+  state.logoUrl = payload.logoUrl || state.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl;
   state.logoPresets = mapLogoPresets(payload.logoPresets);
   state.displayCurrency = payload.displayCurrency ?? state.displayCurrency;
   state.primaryColor = payload.primaryColor ?? state.primaryColor;
   state.secondaryColor = payload.secondaryColor ?? state.secondaryColor;
   state.defaultLanguage = payload.defaultLanguage ?? state.defaultLanguage;
   state.faviconUrl = payload.faviconUrl ?? state.faviconUrl;
-  state.appTitle = payload.appTitle ?? state.appTitle;
+  state.systemName = payload.systemName ?? state.systemName;
   if (payload.currencies) {
     state.currencies = payload.currencies;
   }
+  // accounting (ledger) base currency from the Currency master; the display currency only relabels amounts
+  state.baseCurrency = payload.baseCurrency ?? state.baseCurrency ?? null;
 };
 
 export const fetchSystemSettings = createAsyncThunk(

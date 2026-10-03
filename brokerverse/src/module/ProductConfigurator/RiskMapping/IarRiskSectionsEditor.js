@@ -7,6 +7,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { InputNumber } from "primereact/inputnumber";
 import productConfiguratorService from "../../../services/productConfiguratorService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) => {
   const { t } = useTranslation();
@@ -116,6 +117,44 @@ const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) =
     });
   };
 
+  const handleRowEditComplete = async ({ newData }) => {
+    try {
+      await productConfiguratorService.updateRiskSection(mapping.id, newData.id, {
+        remarks: newData.remarks || null,
+        defaultRatePercent: newData.defaultRatePercent ?? null,
+      });
+      toastRef.current?.show({
+        severity: "success",
+        summary: t("productRiskMapping.success", "Success"),
+        detail: t("productRiskMapping.sectionUpdated", "Section updated"),
+      });
+      await onReload();
+    } catch (error) {
+      toastRef.current?.show({
+        severity: "error",
+        summary: t("productRiskMapping.error", "Error"),
+        detail: error.message,
+      });
+    }
+  };
+
+  const textEditor = (options) => (
+    <InputText
+      value={options.value || ""}
+      onChange={(e) => options.editorCallback(e.target.value)}
+    />
+  );
+
+  const rateEditor = (options) => (
+    <InputNumber
+      value={options.value}
+      onValueChange={(e) => options.editorCallback(e.value)}
+      minFractionDigits={0}
+      maxFractionDigits={4}
+      min={0}
+    />
+  );
+
   const activeSections = (mapping.sections || []).filter((s) => s.isActive);
 
   return (
@@ -199,6 +238,9 @@ const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) =
 
       <DataTable
         value={activeSections}
+        dataKey="id"
+        editMode="row"
+        onRowEditComplete={handleRowEditComplete}
         emptyMessage={t(
           "productRiskMapping.noSections",
           "No sections configured"
@@ -212,6 +254,7 @@ const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) =
           field="remarks"
           header={t("productRiskMapping.remarks", "Remarks")}
           body={(row) => row.remarks || "—"}
+          editor={textEditor}
         />
         <Column
           field="defaultRatePercent"
@@ -221,18 +264,18 @@ const IarRiskSectionsEditor = ({ mapping, onReload, toastRef, confirmDialog }) =
           body={(row) =>
             row.defaultRatePercent != null ? row.defaultRatePercent : "—"
           }
+          editor={rateEditor}
         />
         <Column
           header={t("productRiskMapping.updatedColumn", "Updated")}
           headerStyle={{ whiteSpace: "nowrap", minWidth: "7rem" }}
           style={{ whiteSpace: "nowrap", minWidth: "7rem" }}
-          body={(row) => {
-            if (!row.updatedAt) return "—";
-            const d = new Date(row.updatedAt);
-            return Number.isNaN(d.getTime())
-              ? "—"
-              : d.toLocaleDateString();
-          }}
+          body={(row) => formatAppDate(row.updatedAt, { empty: "—" })}
+        />
+        <Column
+          rowEditor
+          headerStyle={{ width: "6rem" }}
+          bodyStyle={{ textAlign: "center" }}
         />
         <Column
           header={t("productRiskMapping.actions", "Actions")}

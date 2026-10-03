@@ -30,7 +30,7 @@
         background-color: #0072d8;
         height: 40px;
         width: 110px;
-        border-radius: 30px;
+        border-radius: 6px;
         color: #fff;
 
     }
@@ -199,7 +199,7 @@
             height: 40px;
             width: 130px;
             background-color: #0072d8;
-            border-radius: 30px;
+            border-radius: 6px;
             font-size: 14px;
             font-family: 500;
             color: #fff;
@@ -298,7 +298,7 @@
 
     .formik__errror {
         font-size: 10px !important;
-        color: red !important;
+        color: var(--color-danger) !important;
     }
 
     .modal-header {
@@ -317,4 +317,19 @@
     }
 
 
+}
+.btn__view__details__JV {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    .save__add__btn__JV {
+        height: 45px;
+        padding: 0 30px;
+        background-color: #0072d8;
+        border-radius: 6px;
+        font-size: 18px;
+        color: #fff;
+        cursor: pointer;
+    }
 }

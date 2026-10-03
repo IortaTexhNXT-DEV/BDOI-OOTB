@@ -1,4 +1,4 @@
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { getpolicyDetailedMiddleware } from "../../quoteModule/policyDetailedView/store/policyDetailedMiddleware";
 import endorsementService from "../../../services/endorsementService";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
+import { notifyError } from "../../../utility/dialogs";
 
 const PersonalDetails = () => {
   const { t } = useTranslation();
@@ -33,6 +34,8 @@ const PersonalDetails = () => {
   const dispatch = useDispatch();
 
   const [submitTargetIndex, setSubmitTargetIndex] = useState(null);
+  // values each section submitted (what the user edited), by section index
+  const sectionValuesRef = useRef({});
   const [currentSectionIndex, setCurrentSectionIndex] = useState(null);
 
   const { policydetailedlist, productConfigurator } = useSelector(
@@ -101,24 +104,28 @@ const PersonalDetails = () => {
 
   // Prepare all data objects BEFORE callbacks
   const personalDetailsData = useMemo(() => {
+    // The client record holds the current details (a completed personal details endorsement updates it); the lead
+    // only has what was captured before the policy, so it is the fallback.
     const lead = policydetailedlist?.lead || {};
+    const client = policydetailedlist?.client || {};
+    const pick = (clientValue, leadValue) => clientValue || leadValue || "";
 
     return {
-      CompanyName: lead?.companyName || "",
-      TaxNumber: lead?.taxNumber || "",
-      FirstName: lead?.firstName || "",
-      LastName: lead?.lastName || "",
+      CompanyName: pick(client.companyName, lead?.companyName),
+      TaxNumber: pick(client.taxNumber, lead?.taxNumber),
+      FirstName: pick(client.firstName, lead?.firstName),
+      LastName: pick(client.lastName, lead?.lastName),
       PreferredName:
-        policydetailedlist?.ClientName || policydetailedlist?.insuredName || "",
-      EmailID: lead?.emailId || "",
-      ContactNumber: lead?.contactNumber || "",
-      HouseNo: lead?.houseNo || "",
-      Barangay: lead?.barangay || "",
-      Country: normalizeCountryName(lead?.country || ""),
-      Province: lead?.province || "",
-      City: lead?.city || "",
-      ZIPCode: lead?.zipCode || "",
-      DateofBirth: lead?.dateOfBirth || "",
+        policydetailedlist?.insuredName || policydetailedlist?.ClientName || client.displayName || "",
+      EmailID: pick(client.emailId || client.email, lead?.emailId),
+      ContactNumber: pick(client.contactNumber || client.phone, lead?.contactNumber),
+      HouseNo: pick(client.houseNo, lead?.houseNo),
+      Barangay: pick(client.barangay, lead?.barangay),
+      Country: normalizeCountryName(pick(client.country, lead?.country)),
+      Province: pick(client.province, lead?.province),
+      City: pick(client.city, lead?.city),
+      ZIPCode: pick(client.zipCode, lead?.zipCode),
+      DateofBirth: pick(client.DOB, lead?.dateOfBirth),
     };
   }, [policydetailedlist]);
 
@@ -166,7 +173,12 @@ const PersonalDetails = () => {
   }, [policydetailedlist]);
 
   const [coverageDetails, setCoverageDetails] = useState({});
-  const [fireEndorsementPayload, setFireEndorsementPayload] = useState(null);
+  // the policy's current gross premium (premium total), the base of the endorsement premium change
+  const currentGrossPremium =
+    policydetailedlist?.grossPremium ??
+    policydetailedlist?.premiumTotal ??
+    policydetailedlist?.quotation?.grossPremium ??
+    "";
 
   useEffect(() => {
     const quotation = policydetailedlist?.quotation || {};
@@ -242,10 +254,36 @@ const PersonalDetails = () => {
       NCD: policydetailedlist?.NCD || "",
       paymentStatus: policydetailedlist?.paymentStatus || "",
       paymentStatusChangedAt: policydetailedlist?.paymentStatusChangedAt || "",
+      // the policy's own CTPL (flat) and cover rates: re-pricing must not add covers the policy does not have
       CtplCoverageRate:
-        productConfigurator?.configuration?.ctplSetting?.[
-          policydetailedlist?.vehicleType
-        ] || "",
+        policydetailedlist?.ctplCoverageRate ??
+        quotation?.ctplCoverageRate ??
+        policydetailedlist?.ctplCoveragePremium ??
+        quotation?.ctplCoveragePremium ??
+        "",
+      RoadsideAssistanceRate:
+        policydetailedlist?.roadsideAssistanceRate ||
+        quotation?.roadsideAssistanceRate ||
+        "",
+      RoadsideAssistancePremium:
+        policydetailedlist?.roadsideAssistancePremium ||
+        quotation?.roadsideAssistancePremium ||
+        "",
+      PersonalAccidentCoverRate:
+        policydetailedlist?.personalAccidentCoverRate ||
+        quotation?.personalAccidentCoverRate ||
+        "",
+      PersonalAccidentCoverPremium:
+        policydetailedlist?.personalAccidentCoverPremium ||
+        quotation?.personalAccidentCoverPremium ||
+        "",
+      BodilyInjuryRate:
+        policydetailedlist?.bodilyInjuryRate || quotation?.bodilyInjuryRate || "",
+      PropertyDamageRate:
+        policydetailedlist?.propertyDamageRate ||
+        quotation?.propertyDamageRate ||
+        "",
+      APPARate: policydetailedlist?.APPARate || quotation?.APPARate || "",
     };
 
     setCoverageDetails(coverageDetailss);
@@ -370,7 +408,7 @@ const PersonalDetails = () => {
           if (response.success) {
             const endorsementId = response.data?.endorsementId;
             if (!endorsementId) {
-              alert(
+              notifyError(
                 "Endorsement created but ID not returned. Response: " +
                   JSON.stringify(response.data)
               );
@@ -392,12 +430,10 @@ const PersonalDetails = () => {
               });
             }, 2000);
           } else {
-            console.error("API returned success: false", response.error);
-            alert(response.error || "Failed to create endorsement");
+            notifyError(response.error || "Failed to create endorsement");
           }
         } catch (error) {
-          console.error("Error creating endorsement:", error);
-          alert("Error creating endorsement: " + error.message);
+          notifyError("Error creating endorsement: " + error.message);
         }
         return;
       }
@@ -408,14 +444,26 @@ const PersonalDetails = () => {
         endorsementTypeIds: endorsementTypes.map(Number),
       };
 
+      const edited = sectionValuesRef.current;
       if (endorsementTypeSet.has("1")) {
-        payload.personalDetails = personalDetailsData;
+        payload.personalDetails = edited[1] || personalDetailsData;
       }
       if (endorsementTypeSet.has("2")) {
-        payload.motorDetails = motorDetailsData;
+        payload.motorDetails = edited[2] || motorDetailsData;
       }
       if (endorsementTypeSet.has("3")) {
-        payload.coverageChanges = coverageDetails;
+        // the edited (re-priced) coverage; the premium change is new gross - the policy's current gross
+        // (positive = additional premium, negative = return premium); the server re-prices and checks it
+        const coverage = edited[3] || coverageDetails;
+        payload.coverageChanges = coverage;
+        const newGross = parseFloat(String(coverage?.Grosspremium ?? "").replace(/,/g, ""));
+        const currentGross = parseFloat(
+          String(currentGrossPremium ?? "").replace(/,/g, "")
+        );
+        if (Number.isFinite(newGross) && Number.isFinite(currentGross)) {
+          payload.premiumDelta =
+            Math.round((newGross - currentGross + Number.EPSILON) * 100) / 100;
+        }
       }
       if (endorsementTypeSet.has("4")) {
         payload.policyExtension = policyExtendDetails;
@@ -446,7 +494,7 @@ const PersonalDetails = () => {
           const endorsementId = response.data?.endorsementId;
 
           if (!endorsementId) {
-            alert(
+            notifyError(
               "Endorsement created but ID not returned. Response: " +
                 JSON.stringify(response.data)
             );
@@ -470,12 +518,10 @@ const PersonalDetails = () => {
             });
           }, 2000);
         } else {
-          console.error("API returned success: false", response.error);
-          alert(response.error || "Failed to create endorsement");
+          notifyError(response.error || "Failed to create endorsement");
         }
       } catch (error) {
-        console.error("Error creating endorsement:", error);
-        alert("Error creating endorsement: " + error.message);
+        notifyError("Error creating endorsement: " + error.message);
       }
     },
     [
@@ -488,6 +534,7 @@ const PersonalDetails = () => {
     personalDetailsData,
     motorDetailsData,
     coverageDetails,
+    currentGrossPremium,
     policyExtendDetails,
     policydetailedlist,
     isFire,
@@ -510,11 +557,17 @@ const PersonalDetails = () => {
     isFire,
   ]);
 
+  const handleSectionInvalid = useCallback(() => {
+    setCurrentSectionIndex(null);
+    setSubmitTargetIndex(null);
+  }, []);
+
   const handleSectionSubmitted = useCallback(
     (index, payload) => {
       if (currentSectionIndex !== index) {
         return;
       }
+      if (payload && typeof payload === "object") sectionValuesRef.current[index] = payload;
 
       if (isFire && payload) {
         if (payload.isCancelPolicy) {
@@ -538,10 +591,6 @@ const PersonalDetails = () => {
       const currentPosition = availableSections.indexOf(currentKey);
       const nextKey =
         currentPosition >= 0 ? availableSections[currentPosition + 1] : null;
-
-      if (index === 4 && payload) {
-        console.debug("Policy extend submission", payload);
-      }
 
       if (!nextKey) {
         setCurrentSectionIndex(null);
@@ -573,7 +622,7 @@ const PersonalDetails = () => {
       parts.push(clientName);
     }
     if (policydetailedlist?.ClientId) {
-      parts.push(`Client ID : ${policydetailedlist?.ClientId}`);
+      parts.push(`Client ID : ${policydetailedlist?.client?.clientCode || policydetailedlist?.client?.generatedClientId || policydetailedlist?.ClientId}`);
     }
 
     return parts.join(" / ") || t("endorsement.client");
@@ -639,6 +688,7 @@ const PersonalDetails = () => {
             disabled={endorsementTypeSet.has("5")}
             shouldSubmit={submitTargetIndex === 1}
             onSectionSubmitted={handleSectionSubmitted}
+            onSectionInvalid={handleSectionInvalid}
             personalDetails={personalDetailsData}
           />
         )}
@@ -660,11 +710,16 @@ const PersonalDetails = () => {
             vehicleType={
               policydetailedlist?.vehicleType ||
               policydetailedlist?.insuranceVehicleDetails?.[0]?.vehicleType ||
-              "ac_and_tourist_cars"
+              ""
+            }
+            seatingCapacity={
+              policydetailedlist?.insuranceVehicleDetails?.[0]?.seatingCapacity ||
+              policydetailedlist?.seatingCapacity
             }
             productConfigurator={productConfigurator}
             coverageDetails={coverageDetails}
             setCoverageDetails={setCoverageDetails}
+            currentGrossPremium={currentGrossPremium}
           />
         )}
         {(endorsementTypeSet.has("4") || endorsementTypeSet.has("5")) && (

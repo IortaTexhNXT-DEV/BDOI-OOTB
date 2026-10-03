@@ -13,10 +13,14 @@ import SvgEmailIcon from "../../../../assets/agentIcon/SvgEmailIcon";
 import SvgSendToInsurerIcon from "../../../../assets/agentIcon/SvgSendToInsurerIcon";
 import emailService from "../../../../services/emailService";
 import documentTemplateService from "../../../../services/documentTemplateService";
-import { InsuranceCompanyOptions } from "../../policyDetails/mock";
+import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
+import { notifyError, notifySuccess, notifyWarn } from "../../../../utility/dialogs";
+import { notifyEmailOutcome } from "../../../../utility/emailNotice";
+import { copyText } from "../../../../utility/clipboard";
 
 const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const { t } = useTranslation();
+  const InsuranceCompanyOptions = useInsuranceCompanyOptions();
   const { formatCurrency } = useFormatCurrency();
   // Detect Fire and Allied Perils LOB
   const isFireLOB = useMemo(
@@ -45,12 +49,19 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   const [emailAddress, setEmailAddress] = useState("");
   const [customMessage, setCustomMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
-  const [useAIContent, setUseAIContent] = useState(false);
-  const [isGeneratingAI, setIsGeneratingAI] = useState(false);
-  const [aiGeneratedContent, setAiGeneratedContent] = useState(null);
-  const [aiSubject, setAiSubject] = useState("");
-  const [aiHtmlContent, setAiHtmlContent] = useState("");
+  const [useSuggestedContent, setUseSuggestedContent] = useState(false);
+  const [isPreparingSuggestion, setIsPreparingSuggestion] = useState(false);
+  const [suggestedContent, setSuggestedContent] = useState(null);
+  const [suggestedSubject, setSuggestedSubject] = useState("");
+  const [suggestedHtml, setSuggestedHtml] = useState("");
   const [quotePdfLoading, setQuotePdfLoading] = useState(false);
+
+  const clearSuggestedContent = () => {
+    setUseSuggestedContent(false);
+    setSuggestedContent(null);
+    setSuggestedSubject("");
+    setSuggestedHtml("");
+  };
 
   const resetInsurerForm = () => {
     setShowInsurerForm(false);
@@ -59,20 +70,15 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
   };
 
   const handleCopyToClipboard = async () => {
-    try {
-      const quoteUrl = `${window.location.origin}/agent/quotedetailview/${quotationData?.quotationId}`;
-      await navigator.clipboard.writeText(quoteUrl);
-      alert("Link copied to clipboard!");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to copy link");
-    }
+    const quoteUrl = `${window.location.origin}/agent/quotedetailview/${quotationData?.quotationId}`;
+    if (await copyText(quoteUrl)) notifySuccess(t("shareOption.linkCopied"));
+    else notifyError(t("shareOption.copyFailed"));
   };
 
   const handleDownload = async () => {
     const quotationId = quotationData?.quotationId;
     if (!quotationId) {
-      alert("Quotation ID is missing. Cannot download quote PDF.");
+      notifyError("Quotation ID is missing. Cannot download quote PDF.");
       return;
     }
     setQuotePdfLoading(true);
@@ -83,11 +89,10 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         { isFire: isFireLOB, fileName }
       );
       if (!result.success) {
-        alert(result.error || "Failed to download quote PDF.");
+        notifyError(result.error || "Failed to download quote PDF.");
       }
     } catch (err) {
-      console.error("Quote PDF download error:", err);
-      alert(err?.message || "Failed to download quote PDF.");
+      notifyError(err?.message || "Failed to download quote PDF.");
     } finally {
       setQuotePdfLoading(false);
     }
@@ -103,13 +108,13 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
 
   const handleSendToInsurers = async () => {
     if (!selectedInsurers || selectedInsurers.length === 0) {
-      alert(t("shareOption.selectAtLeastOneCompany"));
+      notifyWarn(t("shareOption.selectAtLeastOneCompany"));
       return;
     }
 
     const quotationId = quotationData?.quotationId;
     if (!quotationId) {
-      alert("Quotation ID is missing. Cannot send quote.");
+      notifyError("Quotation ID is missing. Cannot send quote.");
       return;
     }
 
@@ -123,31 +128,27 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       });
 
       if (result.success) {
-        alert(
-          result.partial
-            ? t("shareOption.sentToInsurersPartial")
-            : t("shareOption.sentToInsurersSuccess")
-        );
+        if (result.partial) notifyWarn(t("shareOption.sentToInsurersPartial"));
+        else notifyEmailOutcome(t("shareOption.sentToInsurersSuccess"));
         resetInsurerForm();
         setModalVisible(false);
       } else {
-        alert(result.error || t("shareOption.sentToInsurersError"));
+        notifyError(result.error || t("shareOption.sentToInsurersError"));
       }
     } catch (error) {
-      console.error("Send to insurers error:", error);
-      alert(t("shareOption.sentToInsurersError"));
+      notifyError(t("shareOption.sentToInsurersError"));
     } finally {
       setIsSendingToInsurers(false);
     }
   };
 
-  const handleGenerateAIContent = async () => {
+  const handleUseSuggestedContent = async () => {
     if (!quotationData) {
-      alert("Quote data is not available");
+      notifyError("Quote data is not available");
       return;
     }
 
-    setIsGeneratingAI(true);
+    setIsPreparingSuggestion(true);
 
     try {
       const grossPremium = isFireLOB
@@ -192,51 +193,45 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
         } ${quotationData.year || ""}`.trim();
       }
 
+      const lead = quotationData.lead || {};
+      const customerName = [lead.firstName, lead.lastName].filter(Boolean).join(" ") || lead.companyName;
       const result = await emailService.generateEmailContent({
         template: "custom",
         context,
-        recipient: {
-          email: emailAddress || "client@example.com",
-          name: "Valued Client",
-        },
-        brand: {
-          style: "professional",
-          traits: ["warm", "confident", "supportive", "trustworthy"],
-        },
+        recipient: { email: emailAddress, name: customerName || undefined },
       });
 
       if (result.success) {
-        setAiGeneratedContent(result.data);
-        setAiSubject(result.data.subject);
-        setAiHtmlContent(result.data.text);
-        setUseAIContent(true);
-        alert("AI content generated! Review and edit below before sending.");
+        setSuggestedContent(result.data);
+        setSuggestedSubject(result.data.subject);
+        setSuggestedHtml(result.data.html);
+        setUseSuggestedContent(true);
+        notifySuccess(t("shareOption.suggestedContentReady"));
       } else {
-        alert(`Failed to generate AI content: ${result.error}`);
+        notifyError(`${t("shareOption.suggestedContentError")}: ${result.error}`);
       }
-    } catch (error) {
-      console.error("AI generation error:", error);
-      alert("An error occurred while generating AI content");
+    } catch {
+      notifyError(t("shareOption.suggestedContentError"));
     } finally {
-      setIsGeneratingAI(false);
+      setIsPreparingSuggestion(false);
     }
   };
 
   const handleSendEmail = async () => {
     if (!emailAddress) {
-      alert("Please enter an email address");
+      notifyWarn("Please enter an email address");
       return;
     }
 
     // Basic email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(emailAddress)) {
-      alert("Please enter a valid email address");
+      notifyWarn("Please enter a valid email address");
       return;
     }
 
     if (!quotationData) {
-      alert("Quote data is not available");
+      notifyError("Quote data is not available");
       return;
     }
 
@@ -245,16 +240,15 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
     try {
       let result;
 
-      if (useAIContent && aiGeneratedContent) {
-        // Send with AI-generated content
+      if (useSuggestedContent && suggestedContent) {
+        // The subject and body as edited in the dialog; quotationId records the e-mail against the quote.
         result = await emailService.sendEmail({
           to: emailAddress,
-          subject: aiSubject,
-          html: aiHtmlContent,
-          text: aiGeneratedContent.text || customMessage,
+          subject: suggestedSubject,
+          html: suggestedHtml,
+          quotationId: quotationData.quotationId,
         });
       } else {
-        // Send with standard template
         result = await emailService.shareQuote(
           emailAddress,
           quotationData,
@@ -263,21 +257,17 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       }
 
       if (result.success) {
-        alert(`Quote sent successfully to ${emailAddress}!`);
+        notifyEmailOutcome(t("shareOption.sentToRecipient", { to: emailAddress }));
         setEmailAddress("");
         setCustomMessage("");
         setShowEmailForm(false);
-        setUseAIContent(false);
-        setAiGeneratedContent(null);
-        setAiSubject("");
-        setAiHtmlContent("");
+        clearSuggestedContent();
         setModalVisible(false);
       } else {
-        alert(`Failed to send email: ${result.error}`);
+        notifyError(`Failed to send email: ${result.error}`);
       }
     } catch (error) {
-      console.error("Email send error:", error);
-      alert("An error occurred while sending the email");
+      notifyError("An error occurred while sending the email");
     } finally {
       setIsSending(false);
     }
@@ -304,7 +294,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
       }%0A%0ATotal Premium: ${formatCurrency(premiumValue)}%0A%0AFor full details, please contact your agent.`;
     }
     const whatsappUrl = `https://wa.me/?text=${quoteText}`;
-    window.open(whatsappUrl, "_blank");
+    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
   };
 
   const dialogHeader = showInsurerForm
@@ -435,11 +425,11 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
               onChange={(e) => setEmailAddress(e.target.value)}
               placeholder={t("shareOption.emailPlaceholder")}
               className="w-full"
-              disabled={isSending || isGeneratingAI}
+              disabled={isSending || isPreparingSuggestion}
             />
           </div>
 
-          {!useAIContent ? (
+          {!useSuggestedContent ? (
             <>
               <div className="col-12 mb-3">
                 <label htmlFor="message" className="block mb-2 font-semibold">
@@ -452,66 +442,58 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
                   placeholder={t("shareOption.messagePlaceholder")}
                   rows={4}
                   className="w-full"
-                  disabled={isSending || isGeneratingAI}
+                  disabled={isSending || isPreparingSuggestion}
                 />
               </div>
 
               <div className="col-12 mb-3">
                 <Button
                   label={
-                    isGeneratingAI
-                      ? "Generating with AI..."
-                      : "✨ Generate with AI"
+                    isPreparingSuggestion
+                      ? t("shareOption.preparingSuggestedContent")
+                      : t("shareOption.useSuggestedContent")
                   }
-                  icon={
-                    isGeneratingAI ? "pi pi-spin pi-spinner" : "pi pi-sparkles"
-                  }
-                  onClick={handleGenerateAIContent}
+                  icon={isPreparingSuggestion ? "pi pi-spin pi-spinner" : "pi pi-file-edit"}
+                  onClick={handleUseSuggestedContent}
                   className="w-full p-button-help"
-                  loading={isGeneratingAI}
-                  disabled={isSending || isGeneratingAI}
+                  loading={isPreparingSuggestion}
+                  disabled={isSending || isPreparingSuggestion}
                 />
                 <small className="block mt-2 text-500">
-                  Use AI to create a personalized, professional email
+                  {t("shareOption.suggestedContentHint")}
                 </small>
               </div>
             </>
           ) : (
             <>
               <div className="col-12 mb-3">
-                <label
-                  htmlFor="ai-subject"
-                  className="block mb-2 font-semibold"
-                >
-                  Email Subject (AI Generated)
+                <label htmlFor="suggested-subject" className="block mb-2 font-semibold">
+                  {t("shareOption.emailSubject")}
                 </label>
                 <InputText
-                  id="ai-subject"
-                  value={aiSubject}
-                  onChange={(e) => setAiSubject(e.target.value)}
+                  id="suggested-subject"
+                  value={suggestedSubject}
+                  onChange={(e) => setSuggestedSubject(e.target.value)}
                   className="w-full"
                   disabled={isSending}
                 />
               </div>
 
               <div className="col-12 mb-3">
-                <label
-                  htmlFor="ai-content"
-                  className="block mb-2 font-semibold"
-                >
-                  Email Content (AI Generated - HTML)
+                <label htmlFor="suggested-content" className="block mb-2 font-semibold">
+                  {t("shareOption.emailContentHtml")}
                 </label>
                 <InputTextarea
-                  id="ai-content"
-                  value={aiHtmlContent}
-                  onChange={(e) => setAiHtmlContent(e.target.value)}
+                  id="suggested-content"
+                  value={suggestedHtml}
+                  onChange={(e) => setSuggestedHtml(e.target.value)}
                   rows={8}
                   className="w-full"
                   disabled={isSending}
                   style={{ fontFamily: "monospace", fontSize: "12px" }}
                 />
                 <small className="block mt-2 text-500">
-                  You can edit the AI-generated content above before sending
+                  {t("shareOption.suggestedContentEditHint")}
                 </small>
               </div>
 
@@ -519,12 +501,7 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
                 <Button
                   label={t("shareOption.useStandardTemplate")}
                   icon="pi pi-times"
-                  onClick={() => {
-                    setUseAIContent(false);
-                    setAiGeneratedContent(null);
-                    setAiSubject("");
-                    setAiHtmlContent("");
-                  }}
+                  onClick={clearSuggestedContent}
                   className="w-full p-button-text"
                   disabled={isSending}
                 />
@@ -561,10 +538,8 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
                     <br />• Total Premium: {formatCurrency(premiumValue)}
                   </>
                 )}
-                {useAIContent && (
-                  <div className="mt-2 text-success">
-                    ✨ Using AI-generated content
-                  </div>
+                {useSuggestedContent && (
+                  <div className="mt-2 text-success">{t("shareOption.usingSuggestedContent")}</div>
                 )}
               </div>
             </div>
@@ -578,19 +553,16 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
                 setShowEmailForm(false);
                 setEmailAddress("");
                 setCustomMessage("");
-                setUseAIContent(false);
-                setAiGeneratedContent(null);
-                setAiSubject("");
-                setAiHtmlContent("");
+                clearSuggestedContent();
               }}
-              disabled={isSending || isGeneratingAI}
+              disabled={isSending || isPreparingSuggestion}
             />
             <Button
               label={isSending ? "Sending..." : "Send Email"}
               icon="pi pi-send"
               onClick={handleSendEmail}
               loading={isSending}
-              disabled={isSending || isGeneratingAI || !emailAddress}
+              disabled={isSending || isPreparingSuggestion || !emailAddress}
             />
           </div>
         </div>

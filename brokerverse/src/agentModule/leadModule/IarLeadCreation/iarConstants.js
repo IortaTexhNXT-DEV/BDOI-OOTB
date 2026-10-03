@@ -2,7 +2,6 @@
 
 export const IAR_PRODUCT_TYPE = "Industrial All Risks";
 export const IAR_PRODUCT_CODE = "2009";
-export const IAR_VAT_PERCENT = 12;
 
 export const IAR_SECTION_CATALOG = [
   { sectionCode: "MOTOR", sectionLabel: "Motor Commercial" },
@@ -122,7 +121,7 @@ export function recalculateIarPremiumDetails(premiumDetails = {}) {
   const vatPercent =
     premiumDetails.vatPercent != null
       ? Number(premiumDetails.vatPercent)
-      : IAR_VAT_PERCENT;
+      : 0; // callers pass the VAT of the premium tax and charge engine
   const valueAddedTax = Number(
     ((totalPremiumPreLevy * vatPercent) / 100).toFixed(2)
   );

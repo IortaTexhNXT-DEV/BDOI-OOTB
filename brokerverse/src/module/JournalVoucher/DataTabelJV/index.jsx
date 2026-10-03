@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "../DataTabelJV/index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "./data";
 import { Dropdown } from "primereact/dropdown";
 import SvgTable from "../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import { useNavigate } from "react-router-dom";
 import SvgIconeye from "../../../assets/icons/SvgIconeye";
 import { getJournalVoucherViewData } from "../store/journalVoucherMiddleware";
 import { useDispatch } from "react-redux";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 const DataTabelJV = ({ 
   handleEdit, 
@@ -26,7 +25,7 @@ const DataTabelJV = ({
 
   const headerStyle = {
     // width: "19%",
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -52,9 +51,7 @@ const DataTabelJV = ({
 
   const dispatch = useDispatch();
   const handleView = (rowData) => {
-    console.log(rowData.id, "rowdata");
     dispatch(getJournalVoucherViewData(rowData));
-    // const serializedData = JSON.stringify(rowData);
     navigate(`/accounts/journalvoucher/detailsjournalvocture/${rowData.id}`);
   };
 
@@ -70,10 +67,9 @@ const DataTabelJV = ({
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -94,16 +90,6 @@ const DataTabelJV = ({
     },
   };
 
-  const header__style = {
-    display: "flex",
-    justifyContent: "flex-end",
-    paddingRight: 20,
-  };
-  // const body__style = {
-  //     display: 'flex',
-  //     justifyContent: 'flex-end',
-  //     paddingRight: 30
-  // };
 
   return (
     <div className="journal__table__container">
@@ -117,7 +103,7 @@ const DataTabelJV = ({
         rows={rowsPerPage || 20}
         first={first}
         totalRecords={pagination?.total || 0}
-        rowsPerPageOptions={[10, 20, 25, 50]}
+        rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -141,7 +127,7 @@ const DataTabelJV = ({
           headerStyle={headerStyle}
         ></Column>
 
-        <Column
+        <Column body={(row) => formatAppDate(row.date)}
           field="date"
           header={translate("common.date")}
           className="fieldvalue_container"
@@ -149,14 +135,22 @@ const DataTabelJV = ({
         ></Column>
         <Column
           field="transationDescription"
-          header="Date"
+          header="Description"
           className="fieldvalue_container"
-          hidden
           headerStyle={headerStyle}
+        ></Column>
+        <Column
+          field="status"
+          header="Status"
+          className="fieldvalue_container"
+          headerStyle={headerStyle}
+          body={(r) => {
+            const labels = { draft: "Draft", "for-approval": "Awaiting approval", approved: "Approved", posted: "Posted", rejected: "Rejected", reversed: "Reversed" };
+            return labels[r.status] || r.status || "-";
+          }}
         ></Column>
 
         <Column
-          // body={renderEditButton}
 
           body={(columnData) => (
             <SvgIconeye onClick={() => handleView(columnData)} />
@@ -165,8 +159,6 @@ const DataTabelJV = ({
           headerStyle={headaction}
           header={translate("common.view")}
           className="fieldvalue_container"
-          // headerStyle={header__style}
-          // bodyStyle={body__style}
         ></Column>
       </DataTable>
     </div>

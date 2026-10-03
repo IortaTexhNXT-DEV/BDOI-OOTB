@@ -5,6 +5,7 @@ import { Card } from "primereact/card";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import "./index.scss";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const ClaimRejected = () => {
   const { t } = useTranslation();
@@ -49,11 +50,7 @@ const ClaimRejected = () => {
       <Card className="mt-8 claimrequest__overall__card">
         <div className="claimtitle__card_overall">
           <div className="claimtitle__img__overallcontainer mt-8">
-            <img
-              src="https://i.ibb.co/V21pJZs/REJECTED-1.png"
-              className="claimtitle__img__container"
-              alt="Rejected"
-            />
+            <StatusIllustration variant="rejected" className="claimtitle__img__container" />
           </div>
           <div className="claimtitle__txt_container mt-6">
             <div>{t("agent.claimRequestRejected")}</div>

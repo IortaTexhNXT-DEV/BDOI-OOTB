@@ -923,3 +923,9 @@
     }
   }
 }
+// the timeline reads top to bottom on one side; the empty opposite column is dropped
+.negotiation-timeline .p-timeline-event-opposite {
+  display: none;
+}
+
+@import "../renewalPages";

@@ -17,8 +17,9 @@ import { useDispatch, useSelector } from "react-redux";
 
 import SvgFrame from "../../../assets/agentIcon/SvgFrame";
 import { InputText } from "primereact/inputtext";
-import { getClientTableSearchListMiddleware } from "../../quoteModule/clientListing/store/clientsMiddleware";
+import { getClientTableMiddleware } from "../../quoteModule/clientListing/store/clientsMiddleware";
 import EmployeeBenefitIcon from "../../EmployeeFlow/EmployeeBenefitIcon";
+import { getDashboardDataMiddleware } from "./store/homeMiddleware";
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -42,23 +43,15 @@ const Dashboard = () => {
     setVisible(true);
   };
 
-  const userName = localStorage.getItem("USER_NAME");
+
   const { userDetails, commissionList } = useSelector(({ homeReducers }) => {
     return {
       userDetails: homeReducers?.dashboardDetails?.userDetails,
       commissionList: homeReducers?.dashboardDetails?.commission,
-      // clientListTable:clientsReducers?.clientListTable
     };
   });
 
-  const { clientListTable, ClientTableSearchList } = useSelector(
-    ({ clientsReducers }) => {
-      return {
-        clientListTable: clientsReducers?.clientListTable,
-        ClientTableSearchList: clientsReducers?.ClientTableSearchList,
-      };
-    }
-  );
+  const clientListTable = useSelector(({ clientsReducers }) => clientsReducers?.clientListTable) || [];
   const dropdownOptions = [
     {
       label: (
@@ -183,11 +176,16 @@ const Dashboard = () => {
   ];
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
+
   useEffect(() => {
-    if (search?.length > 0) {
-      dispatch(getClientTableSearchListMiddleware(search));
-    }
-  }, [search]);
+    dispatch(getDashboardDataMiddleware());
+  }, [dispatch]);
+  // The existing-client picker lists the first page of clients.
+  useEffect(() => {
+    if (existclient) dispatch(getClientTableMiddleware({ page: 1, pageSize: 50 }));
+  }, [existclient, dispatch]);
+  const clientMatches = (client) =>
+    !search || [client.DisplayName, client.LeadID].some((v) => String(v || "").toLowerCase().includes(search.toLowerCase()));
 
   const handleclick = () => {
     if (selectedQuoteType === "Motor") {
@@ -199,8 +197,9 @@ const Dashboard = () => {
     }
   };
 
-  const handleclientid = () => {
-    navigate(`/agent/createquote/policydetails/createquote/${123}`);
+  const openClient = (client) => {
+    setexistclient(false);
+    navigate(`/agent/clientview/${client.id}`);
   };
 
   return (
@@ -208,11 +207,6 @@ const Dashboard = () => {
       <div className="grid  mt-2">
         <div className="col-12 md:col-6 lg:col-6">
           <div className="dasboard__container__title">{t("dashboard.goodDay")}</div>
-          <div className="dasboard__container__sub__title">
-            {t("dashboard.welcomeUser", {
-              name: userDetails?.name || userName || "User",
-            })}
-          </div>
         </div>
         <div className="col-12 md:col-6 lg:col-6">
           <div className="btn_lable_save_container">
@@ -305,26 +299,14 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {search
-              ? ClientTableSearchList
-              : clientListTable.map((data, index) => {
-                  console.log(data, "find data is coming");
-                  return (
-                    <div
-                      className="dialog__existingclient__carddata"
-                      onClick={() => {
-                        handleclientid();
-                      }}
-                    >
-                      <div className="dialog__existingclient__carddata__name">
-                        {data?.Name}
-                      </div>
-                      <div className="dialog__existingclient__carddata__id">
-                        {t("dashboard.clientId")} :{data?.Category}
-                      </div>
-                    </div>
-                  );
-                })}
+            {clientListTable.filter(clientMatches).map((data) => (
+              <div key={data.id} className="dialog__existingclient__carddata" onClick={() => openClient(data)}>
+                <div className="dialog__existingclient__carddata__name">{data?.DisplayName}</div>
+                <div className="dialog__existingclient__carddata__id">
+                  {t("dashboard.clientId")}: {data?.LeadID}
+                </div>
+              </div>
+            ))}
           </div>
         </Dialog>
       </div>

@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import NavBar from "../../../components/NavBar";
 import { Card } from "primereact/card";
-import DropdownField from "../../component/DropdwonField";
 import InputTextField from "../../component/inputText";
-import DatepickerField from "../../component/datePicker";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 import "./index.scss";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import useClaimHeader from "../useClaimHeader";
 import { useSelector, useDispatch } from "react-redux";
-import { Button } from "primereact/button";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { getClaimDetails } from "../adjusterSubmission/store/adjusterSubmissionMiddleWare";
 import claimsService from "../../../services/claimsService";
+import SettlementCash from "./SettlementCash";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const ClaimSettlement = () => {
   const { t } = useTranslation();
@@ -46,51 +46,48 @@ const ClaimSettlement = () => {
   // Get policy holder data from Redux
   const {
     policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
     claimNumber: reduxClaimNumber,
-    clientDetails: reduxClientDetails,
   } = useSelector(({ claimDetailsMainReducers }) => ({
     policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
     policyNumber: claimDetailsMainReducers?.policyNumber || "",
     claimNumber: claimDetailsMainReducers?.claimNumber || "",
-    clientId: claimDetailsMainReducers?.clientId || "",
-    clientDetails: claimDetailsMainReducers?.claimDetails || "",
   }));
 
-  // Try to get policy holder name from Redux first, then claim details, then fallback
+  // The claim of this page only (the store may still hold a claim opened earlier, or none yet on a direct link)
+  const claim = [claimDetails?.data?.id, claimDetails?.data?.claimId, claimDetails?.data?.claimNumber].includes(claimId)
+    ? claimDetails.data
+    : null;
+  const loadingClaim = claimDetailsLoading || (!claim && !claimDetailsError && Boolean(claimId));
+
+  // Header: the loaded claim, else the header lookup, else what the claim list left in the store
+  const header = useClaimHeader(claimId);
   const policyHolderName =
+    claim?.policyHolderName ||
+    claim?.policy?.policyHolderName ||
+    header.policyHolderName ||
     reduxPolicyHolderName ||
-    claimDetails?.data?.policy?.policyHolderName ||
-    claimDetails?.data?.policy?.PolicyHolderName ||
     t("agent.loading");
 
   const claimNumber =
+    claim?.claimNumber ||
+    header.claimNumber ||
     reduxClaimNumber ||
-    claimDetails?.data?.claimNumber ||
-    claimDetails?.data?.claim_number ||
     t("agent.loading");
 
   // Fetch claim details on component mount
   useEffect(() => {
     if (claimId) {
-      console.log("=== DISPATCHING GET CLAIM DETAILS ===");
-      console.log("Dispatching getClaimDetails with ID:", claimId);
       dispatch(getClaimDetails(claimId));
-      console.log("=== END DISPATCHING GET CLAIM DETAILS ===");
     }
   }, [dispatch, claimId]);
 
-  console.log(claimDetails, "endrosementViewData");
   const handleNavigation = () => {
-    navigate(`/agent/clientview/${claimDetails?.data?.policy?.clientId}`);
+    navigate(`/agent/clientview/${claim?.clientId || claim?.policy?.clientId}`);
   };
 
-  const handleList = () => {
-    navigate(`/agent/clientview/${claimDetails?.data?.policy?.clientId}`);
-  };
   const handleAcknowledgmentsubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
@@ -104,8 +101,6 @@ const ClaimSettlement = () => {
       );
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -117,11 +112,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state
@@ -131,7 +126,7 @@ const ClaimSettlement = () => {
 
   const handleClaimsDischargeVouchersubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
@@ -145,8 +140,6 @@ const ClaimSettlement = () => {
       );
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -158,11 +151,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state
@@ -172,7 +165,7 @@ const ClaimSettlement = () => {
 
   const handleClaimsDatasheetubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
@@ -186,8 +179,6 @@ const ClaimSettlement = () => {
       );
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -199,11 +190,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state
@@ -213,24 +204,17 @@ const ClaimSettlement = () => {
 
   const handleFIRSubmit = async () => {
     if (!claimId) {
-      console.error("No claim ID available for document download");
+      logger.error("No claim ID available for document download");
       return;
     }
 
     // Set loading state
     setDownloadLoading((prev) => ({ ...prev, fir: true }));
 
-    console.log("=== DOWNLOADING FIR DOCUMENT ===");
-    console.log("Claim ID:", claimId);
-    console.log("Document Name: FIR");
-    console.log("=== END DOWNLOADING FIR DOCUMENT ===");
-
     try {
       const result = await claimsService.getClaimDocuments(claimId, "FIR");
 
       if (result.success) {
-        console.log("Document downloaded successfully:", result.data);
-
         // Create download link
         const link = document.createElement("a");
         link.href = result.data.url;
@@ -242,11 +226,11 @@ const ClaimSettlement = () => {
         // Clean up the URL
         window.URL.revokeObjectURL(result.data.url);
       } else {
-        console.error("Failed to download document:", result.error);
+        logger.error("Failed to download document:", result.error);
         // You can add error handling here, like showing a toast
       }
     } catch (error) {
-      console.error("Error downloading document:", error);
+      logger.error("Error downloading document:", error);
       // You can add error handling here
     } finally {
       // Clear loading state
@@ -255,7 +239,7 @@ const ClaimSettlement = () => {
   };
 
   // Show loading state
-  if (claimDetailsLoading) {
+  if (loadingClaim) {
     return (
       <div className="claim__detailssettlemenet__container">
         <div className="claim__details__container__titles">{t("claimSettlementDetail.clients")}</div>
@@ -294,7 +278,7 @@ const ClaimSettlement = () => {
         </div>
         <Card>
           <div className="claim__title">{t("claimSettlementDetail.claimSettlement")}</div>
-          <div className="text-center p-4" style={{ color: "red" }}>
+          <div className="text-center p-4" style={{ color: "var(--color-danger)" }}>
             <div>{t("claimSettlementDetail.errorLoadingClaimDetails", { error: claimDetailsError })}</div>
           </div>
         </Card>
@@ -321,14 +305,14 @@ const ClaimSettlement = () => {
         <div className="grid mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
-              value={claimDetails?.data?.policy?.policyNumber || ""}
+              value={claim?.policyNumber || claim?.policy?.policyNumber || header.policyNumber || ""}
               label={t("claimSettlementDetail.policyNumber")}
               disabled={true}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
-              value={claimDetails?.data?.claimNumber || ""}
+              value={claim?.claimNumber || claim?.claimRefId || header.claimNumber || ""}
               label={t("claimSettlementDetail.claimNumber")}
               disabled={true}
             />
@@ -338,11 +322,7 @@ const ClaimSettlement = () => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               value={
-                claimDetails?.data?.reportedDate
-                  ? new Date(
-                      claimDetails.data.reportedDate
-                    ).toLocaleDateString()
-                  : ""
+                formatAppDate(claim?.reportedDate, { empty: "" })
               }
               label={t("claimSettlementDetail.dateReported")}
               disabled={true}
@@ -351,11 +331,7 @@ const ClaimSettlement = () => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               value={
-                claimDetails?.data?.dateOfIncident
-                  ? new Date(
-                      claimDetails.data.dateOfIncident
-                    ).toLocaleDateString()
-                  : ""
+                formatAppDate(claim?.dateOfIncident, { empty: "" })
               }
               label={t("claimSettlementDetail.dateOfLoss")}
               disabled={true}
@@ -523,10 +499,8 @@ const ClaimSettlement = () => {
             </div>
           </div>
         </div>
-        {/* <div className="listing__button mt-3">
-          <Button onClick={handleList}>Go to listing</Button>
-        </div> */}
       </Card>
+      <SettlementCash claimId={claim?.id || claimId} />
     </div>
   );
 };

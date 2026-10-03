@@ -1,6 +1,7 @@
 import { getRequest, postRequest, putRequest } from '../utility/commonServices';
 import { BASE_URL } from '../utility/constant';
 import { getAccessToken } from '../utility/tokenManager';
+import logger from "../utility/logger";
 
 export const receiptsService = {
   // Get all receipts with pagination
@@ -11,6 +12,18 @@ export const receiptsService = {
     } catch (error) {
       throw error;
     }
+  },
+
+  // Draft receipts (pay-later) for the Add receipt screen
+  getDraftReceipts: async (pageSize = 500) => {
+    const response = await getRequest('receipts', { receiptStatus: 'Draft', page: 1, pageSize });
+    return response.data;
+  },
+
+  // Open (unpaid / partial) bills to collect; params: customerCode, policyNumber, search
+  getOpenReceivables: async (params = {}) => {
+    const response = await getRequest('receipts/open-receivables', params);
+    return response.data?.data || [];
   },
 
   // Get receipt by ID
@@ -72,14 +85,11 @@ export const receiptsService = {
 
       const token = getAccessToken();
       const headers = {};
-      
-      console.log('Receipts bulk upload - Token:', token ? 'Present' : 'Missing');
-      
+
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
-        console.log('Receipts bulk upload - Authorization header set');
       } else {
-        console.warn('Receipts bulk upload - No access token found');
+        logger.warn('Receipts bulk upload - No access token found');
       }
 
       const response = await fetch(`${BASE_URL}/receipts/bulk-upload`, {
@@ -94,14 +104,12 @@ export const receiptsService = {
       }
 
       const data = await response.json();
-      console.log('Receipts bulk upload completed:', data);
       
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error('Bulk upload receipts error:', error);
       return {
         success: false,
         error: error.message || 'Failed to upload receipts file',
@@ -109,27 +117,16 @@ export const receiptsService = {
     }
   },
 
-  // Filter receipts with new API endpoint
-  filterReceipts: async (filterParams) => {
-    try {
-      const { customerCode, name, transactionNumber, transactionCode, page = 1, pageSize = 10 } = filterParams;
-      
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      queryParams.append('page', page);
-      queryParams.append('pageSize', pageSize);
-      
-      // Add filter parameters if they exist
-      if (customerCode) queryParams.append('customerCode', customerCode);
-      if (name) queryParams.append('name', name);
-      if (transactionNumber) queryParams.append('transactionNumber', transactionNumber);
-      if (transactionCode) queryParams.append('transactionCode', transactionCode);
-      
-      const response = await getRequest(`receipts?${queryParams.toString()}`);
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
+  // List receipts with any server-side filters (customerCode, name, receiptStatus, policyId, ...)
+  filterReceipts: async ({ page = 1, pageSize = 10, ...filters } = {}) => {
+    const queryParams = new URLSearchParams({ page, pageSize });
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== "") {
+        queryParams.append(key, value);
+      }
+    });
+    const response = await getRequest(`receipts?${queryParams.toString()}`);
+    return response.data;
   },
 
   // Bulk print receipts

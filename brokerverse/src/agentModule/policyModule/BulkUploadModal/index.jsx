@@ -4,9 +4,11 @@ import { Button } from "primereact/button";
 import { FileUpload } from "primereact/fileupload";
 import { Toast } from "primereact/toast";
 import { ProgressBar } from "primereact/progressbar";
+import { Checkbox } from "primereact/checkbox";
 import policyService from "../../../services/policyService";
 import SvgUpload from "../../../assets/agentIcon/SvgUpload";
 import "./index.scss";
+import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../component/bulkUploadTemplate";
 
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const toast = useRef(null);
@@ -14,21 +16,17 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [uploadResult, setUploadResult] = useState(null);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [goLive, setGoLive] = useState(false);
 
   const handleFileSelect = (e) => {
     const file = e.files[0];
     if (file) {
       // Validate file type
-      const validTypes = [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel'
-      ];
-      
-      if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx')) {
+      if (!isSupportedUploadFile(file)) {
         toast.current.show({
           severity: 'error',
           summary: 'Invalid File',
-          detail: 'Please upload only Excel files (.xlsx)',
+          detail: 'Please upload an Excel (.xlsx) or CSV (.csv) file',
           life: 3000
         });
         fileUploadRef.current.clear();
@@ -66,17 +64,13 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     setUploadResult(null);
 
     try {
-      const result = await policyService.bulkUploadPolicies(selectedFile);
-
-      console.log('Bulk upload result:', result);
+      const result = await policyService.bulkUploadPolicies(selectedFile, goLive ? "go-live" : undefined);
 
       if (result.success) {
         const apiResponse = result.data;
-        console.log('Upload data (API response):', apiResponse);
         
         // Handle the API response structure
         const data = apiResponse.data || apiResponse;
-        console.log('Nested data:', data);
         
         // Store the upload result to show processing status
         setUploadResult(data);
@@ -134,12 +128,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     onHide();
   };
 
-
-  const handleDownloadTemplate = () => {
-    const templateUrl = 'https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/sample-xl/Policies-Bulk-Upload.xlsx';
-    window.open(templateUrl, '_blank');
-  };
-
+  const handleDownloadTemplate = () => downloadBulkUploadTemplate("policies");
 
   return (
     <Dialog
@@ -169,8 +158,16 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 <li>Download the sample template file</li>
                 <li>Fill in the policy details in the Excel file</li>
                 <li>Upload the completed file (max 10MB)</li>
-                <li>Only .xlsx files are supported</li>
+                <li>Only .xlsx or .csv files are supported</li>
               </ul>
+            </div>
+
+            <div className="flex align-items-start gap-2 mb-3">
+              <Checkbox inputId="policy-go-live" checked={goLive} onChange={(e) => setGoLive(e.checked)} disabled={loading} />
+              <label htmlFor="policy-go-live">
+                Existing policies (go-live): create in-force policies of the old system without a bill, journal or commission.
+                Load their unpaid premiums with Import open items (Accounts &gt; Collections).
+              </label>
             </div>
 
             <div className="upload-area">
@@ -178,7 +175,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 ref={fileUploadRef}
                 mode="basic"
                 name="file"
-                accept=".xlsx"
+                accept=".xlsx,.csv"
                 maxFileSize={10485760}
                 customUpload
                 auto={false}

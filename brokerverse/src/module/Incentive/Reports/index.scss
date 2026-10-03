@@ -272,7 +272,7 @@
 
             i {
               &.pi-file-pdf {
-                color: #dc3545;
+                color: var(--color-danger);
               }
 
               &.pi-file-excel {

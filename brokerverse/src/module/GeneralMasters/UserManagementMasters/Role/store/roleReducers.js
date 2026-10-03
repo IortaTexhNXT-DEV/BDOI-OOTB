@@ -4,53 +4,12 @@ import { getRoleListMiddleware, getRoleListByIdMiddleware, postAddRoleMiddleware
 const initialState = {
   loading: false,
   error: "",
-  roleTableList: [
-    {
-      id: 1,
-      roleCode: "AGMR001",
-      roleName: "AGENT-MOTOR",
-      roleDescription: "roleDescription",
-      menuAccess: "BROKER",
-      subMenuAccess: "ORGANIZATION",
-      permissions: "PERMISSIONS",
-      modifiedBy: "JOHNSON",
-      modifiedOn: "12/12/23",
-      status: "",
-      action: ""
-    },
-    {
-      id: 2,
-      roleCode: "AGFR002",
-      roleName: "AGENT-MOTOR",
-      roleDescription: "ROLEDESCRIPTION",
-      menuAccess: "FINANCE",
-      subMenuAccess: "BRANCH",
-      permissions: "PERMISSIONS",
-      modifiedBy: "JOHNSON",
-      modifiedOn: "2/1/24",
-      status: "",
-      action: ""
-    },
-    {
-      id: 3,
-      roleCode: "FINCSR",
-      roleName: "FINANCE-CASHIER",
-      roleDescription: "ROLEDESCRIPTION",
-      menuAccess: "GENERAL",
-      subMenuAccess: "COMPANY",
-      permissions: "PERMISSIONS",
-      modifiedBy: "JOHNSON",
-      modifiedOn: "2/1/24",
-      status: "",
-      action: ""
-    }
-  ],
+  roleTableList: [],
   postRoleData: {},
   roleSearchList: [],
   roleViewData: {},
   roleEditData: {},
 };
-let nextId3 = 4
 const receiptsReducer = createSlice({
   name: "employee",
   initialState,
@@ -66,7 +25,7 @@ const receiptsReducer = createSlice({
     builder.addCase(getRoleListMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.roleTableList = {};
+      state.roleTableList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
     builder.addCase(getRoleListByIdMiddleware.pending, (state) => {
@@ -79,7 +38,7 @@ const receiptsReducer = createSlice({
     builder.addCase(getRoleListByIdMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.roleTableList = {};
+      state.roleTableList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -93,7 +52,7 @@ const receiptsReducer = createSlice({
     builder.addCase(getSearchRoleMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.roleSearchList = {};
+      state.roleSearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -105,15 +64,13 @@ const receiptsReducer = createSlice({
     builder.addCase(
       postAddRoleMiddleware.fulfilled, (state, action) => {
         state.loading = false;
-        const newItem2 = { ...action.payload, id: nextId3++ };
+        const newItem2 = action.payload;
         state.roleTableList = [...state.roleTableList, newItem2];
-        console.log(state.roleTableList, "roleTableList")
       }
     );
     builder.addCase(postAddRoleMiddleware.rejected, (state, action) => {
       state.loading = false;
       state.postRoleData = {}
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -125,7 +82,6 @@ const receiptsReducer = createSlice({
       patchRoleEditMiddleware.fulfilled,
       (state, action) => {
         state.loading = false;
-        console.log(state.roleTableList, "state.countryTableList");
         const updatedIndex = state.roleTableList.findIndex(
           (item) => item.id === action.payload.id
         );

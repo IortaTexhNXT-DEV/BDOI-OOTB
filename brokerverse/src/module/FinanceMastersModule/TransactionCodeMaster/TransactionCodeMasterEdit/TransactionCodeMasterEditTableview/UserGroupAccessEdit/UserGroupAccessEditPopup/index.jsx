@@ -1,32 +1,23 @@
-import React, { useEffect, useState } from "react";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
+import { useEffect, useState } from "react";
 import "./index.scss";
-import SvgTable from "../../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
-import SvgAdd from "../../../../../../../assets/icons/SvgAdd";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../../../../../components/InputField";
 import DropDowns from "../../../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../../../assets/icons/SvgDropdown";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
-import { getUserEditData, patchUserRoleAccess, postAddUserGroupAccess } from "../../../../store/transactionCodeMasterMiddleware";
-import SvgEditicon from "../../../../../../../assets/icons/SvgEdit";
+import { patchUserRoleAccess } from "../../../../store/transactionCodeMasterMiddleware";
 
 const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
-    const { TransactioncodeListsearch, UserGroupAccessList, loading, getUserAccessData } = useSelector(({ transactionCodeMasterReducer }) => {
+    const { getUserAccessData } = useSelector(({ transactionCodeMasterReducer }) => {
         return {
             loading: transactionCodeMasterReducer?.loading,
             UserGroupAccessList: transactionCodeMasterReducer?.UserGroupAccessList,
             // TransactioncodeListsearch: transactionCodeMasterReducer?.TransactioncodeListsearch,
             getUserAccessData: transactionCodeMasterReducer?.getUserAccessData
-
         };
     });
-
 
     const dispatch = useDispatch()
     const initialValues = {
@@ -37,14 +28,13 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
     const handleSubmit = (value) => {
         dispatch(patchUserRoleAccess(value))
         setShowEditData(false)
-        // setShow(false)
     }
 
     const customValidation = (values) => {
         const errors = {};
 
         if (!values.UserRole) {
-            errors.UserRole = "This field Code is required";
+            errors.UserRole = "This field is required";
         }
         if (!values.MinimumTransaction) {
             errors.MinimumTransaction = "This field is required";
@@ -86,23 +76,8 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
     }, [getUserAccessData]);
 
 
-    const handleView = (rowData) => {
-        console.log("View clicked:", rowData);
-        // navigate("/accounts/pettycash/PettyCashCodeDetails")
-    };
-    const headerStyle = {
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        padding: 6,
-        color: "#000",
-        border: "none",
-    };
-
-
     return (
         <div className="transactioncode__master__tableedit_UserGroupAccess">
-
 
             <Dialog
                 header="Edit User Group Access"
@@ -132,15 +107,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
                             dropdownIcon={<SvgDropdown color={"#000"} />}
                         // label="User Role"
                         // placeholder="Select"
-                        // textColor={"#111927"}
-                        // textSize={"16"}
-                        // textWeight={500}
-                        // dropdownIcon={<SvgDropdown color={"#000"} />}
-                        // value={formik.values.Description}
-                        // options={BankAccountCode}
                         // onChange={(e) => {
-                        //   console.log(e.value);
-                        //   formik.setFieldValue("Description", e.value);
                         //   handleAccountcode(e.value.);
                         // }}
                         // optionLabel="Description"
@@ -151,7 +118,7 @@ const UserGroupAccessEditPopup = ({ showEdit, setShowEditData }) => {
                         />
                         {formik.touched.UserRole && formik.errors.UserRole && (
                             <div
-                                style={{ fontSize: 12, color: "red" }}
+                                style={{ fontSize: 12, color: "var(--color-danger)" }}
                                 className="formik__errror__JV"
                             >
                                 {formik.errors.UserRole}

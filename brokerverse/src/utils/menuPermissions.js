@@ -1,206 +1,249 @@
 /**
- * Menu permissions based on user roles
- * Maps roles to allowed menu names and submenu names
+ * Role-based menu and route access.
  *
- * IMPORTANT: Any role not explicitly defined in this object will have FULL ACCESS by default.
- * This means new roles will automatically get access to all menus without needing configuration.
- * Only explicitly defined roles will have restricted permissions.
+ * Deny by default: a role that is not listed here sees no menu and cannot open a menu route.
+ * `all: true` grants every menu. Each other entry maps a top-level menu name (lower case) to the
+ * second-level items the role may open (case-insensitive; a nested group such as "Renewals" or
+ * "Petty Cash" grants all of its children).
+ *
+ * The server enforces the same personas through permissions on every endpoint; this file only
+ * decides what the user sees and which screens the router lets them open.
  */
+
+const OPERATIONS_ALL = [
+  "Home",
+  "Sales & Marketing",
+  "Clients",
+  "Policy",
+  "Claims",
+  "Renewals",
+  "Open Items",
+  "Payments",
+];
+
+// The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
+// quotations and placement slips. Quick Quote creates prospects and quotations, which is Sales and Operations work.
+const OPERATIONS_PROCESSING = [
+  ...OPERATIONS_ALL.filter((item) => item !== "Sales & Marketing"),
+  "Sales & Marketing > Prospects",
+  "Sales & Marketing > Request for Quotation",
+  "Sales & Marketing > Quotations",
+  "Sales & Marketing > Placement Slips",
+];
+
+/** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
+export const ADMIN_ROLE = "system-admin";
+export const ADMIN_ROLES = [ADMIN_ROLE];
 
 export const roleMenuPermissions = {
+  [ADMIN_ROLE]: { all: true },
+  // Sales & Marketing (Account Executive): prospects, leads, clients, quotation requests, renewals follow-up, own production
   sales: {
-    dashboard: ["Dashboard"],
+    dashboard: ["Executive Dashboard", "Sales Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
-    operations: [
-      "Home",
-      "Leads/Prospects",
-      "Clients",
-      "Quotation",
-      "Policy",
-      "Claims",
-      "Renewals",
-      "Open Items",
-      "Payments",
-    ],
-    reports: ["Operational Reports"],
+    operations: OPERATIONS_ALL,
+    commission: ["Commission Dashboard"],
+    reports: ["All Reports", "Operational Reports"],
   },
-  underwriting: {
-    dashboard: ["Dashboard"],
-    "product configurator": ["Dashboard", "Product Templates"],
-    operations: [
-      "Home",
-      "Leads/Prospects",
-      "Clients",
-      "Quotation",
-      "Policy",
-      "Claims",
-      "Renewals",
-      "Open Items",
-      "Payments",
+  // Processing Team (Placement & Policy Processing): broker slips, offer comparison, quotation / placement slips,
+  // insurer confirmation, policy checking and issuance, endorsement processing, reinsurance, product templates
+  processing: {
+    dashboard: ["Processing Dashboard", "Executive Dashboard"],
+    "product configurator": [
+      "Dashboard",
+      "Product Templates",
+      "Coverage Builder",
+      "Rating Engine",
+      "Acceptance Rules",
+      "Document Manager",
+      "Market Mapping",
+      "Risk Mapping",
+      "Product Analytics",
     ],
-    reports: ["Operational Reports"],
+    operations: OPERATIONS_PROCESSING,
+    reinsurance: [
+      "Treaty Dashboard",
+      "Cession Tracking",
+      "Claims Recovery",
+      "Reconciliation",
+      "Analytics",
+    ],
+    reports: ["All Reports", "Operational Reports"],
   },
-  "customer-services": {
-    dashboard: ["Dashboard"],
+  // Operations (Client Servicing): client servicing, endorsement requests, renewals, open items, documents
+  operations: {
+    dashboard: ["Executive Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
-    operations: [
-      "Home",
-      "Leads/Prospects",
-      "Clients",
-      "Quotation",
-      "Policy",
-      "Claims",
-      "Renewals",
-      "Open Items",
-      "Payments",
-    ],
-    reports: ["Operational Reports"],
+    operations: OPERATIONS_ALL,
+    reports: ["All Reports", "Operational Reports"],
+    // data subject requests and the consent register (read:privacy / write:privacy)
+    master: ["Data Privacy"],
   },
   claims: {
-    dashboard: ["Dashboard"],
-    "product configurator": ["Dashboard", "Product Templates"],
-    operations: [
-      "Home",
-      "Leads/Prospects",
-      "Clients",
-      "Quotation",
-      "Policy",
-      "Claims",
-      "Renewals",
-      "Open Items",
-      "Payments",
+    dashboard: ["Claims Dashboard"],
+    operations: ["Home", "Clients", "Policy", "Claims"],
+    reinsurance: ["Claims Recovery"],
+    reports: ["All Reports", "Operational Reports"],
+  },
+  // Accounting: billing, collection, official receipts, remittance, commission, period end, BIR. The Accounting Manager
+  // inherits Accounting (the server returns both roles), so it needs no entry of its own.
+  accounting: {
+    dashboard: ["Executive Dashboard"],
+    operations: ["Open Items", "Payments"],
+    accounts: [
+      "Receipts",
+      "Collections",
+      "Accounting Query",
+      "All Clients Accounting",
+      "Open Entry Matching",
+      "Open Entry Unmatching",
+      "Disbursement",
+      "Petty Cash",
+      "Journal Voucher",
+      "Correction JV",
+      "Reversal JV",
+      "Remittance",
+      // incentives are calculated, approved and paid by Accounting
+      "Incentive",
+      // period-end processing and BIR tax
+      "Period End",
+      "Tax",
+      // bank reconciliation (approval: accounting-manager, approve:bank-reconciliation)
+      "Bank Reconciliation",
+      // insurer statements of account (approval: accounting-manager, approve:insurer-reconciliation)
+      "Insurer Reconciliation",
+      // instalment plans, premium warranty, credit limits, remittance ageing (approvals: accounting-manager, approve:credit-control)
+      "Credit Control",
     ],
-    reports: ["Operational Reports"],
-  },
-  finance: {
-    dashboard: ["Dashboard"],
-    accounts: ["Receipts", "Collections", "Disbursement"],
+    // Account Determination and Posting Rules: Accounting reads them; the Accounting Manager proposes changes and approves
+    // those of another user on Configuration Approvals (the administrator configures too)
+    master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
+      "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
+      // premium taxes (write:premium-charges) and the payment links collected through the gateways
+      "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
-    reports: ["Financial Reports"],
-  },
-  "it-admin": {
-    // All access
-    all: true,
-  },
-  ba: {
-    // All access
-    all: true,
+    // reinsurer statement reconciliation is an Accounting task
+    reinsurance: ["Reconciliation"],
+    // the production, claims and renewal registers are not accounting reports (report catalogue roles)
+    reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission"],
   },
 };
 
-/**
- * Check if a role has access to a specific menu
- * @param {string} role - User role
- * @param {string} menuName - Name of the menu (e.g., "Operations", "Accounts")
- * @param {string} submenuName - Name of the submenu (optional)
- * @returns {boolean}
- *
- * Note: If a role is not defined in roleMenuPermissions, it will have full access by default.
- * This allows new roles to automatically get access to all menus without explicit configuration.
- */
-export const hasMenuAccess = (role, menuName, submenuName = null) => {
-  if (!role) return false;
-
-  const roleKey = role.toLowerCase();
-  const permissions = roleMenuPermissions[roleKey];
-
-  // If user has "all" access, return true
-  if (permissions && permissions.all) {
-    return true;
+/** Roles of the signed-in user, from the login response stored by authService. */
+export const getUserRoles = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem("USER_ROLES") || "[]");
+    if (Array.isArray(stored) && stored.length) return stored.map((r) => String(r).toLowerCase());
+  } catch {
+    /* fall back to the comma-separated form */
   }
-
-  // If no permissions defined for this role, grant all access
-  if (!permissions) {
-    return true;
-  }
-
-  // If checking menu access without submenu
-  if (!submenuName && menuName) {
-    return permissions[menuName.toLowerCase()] !== undefined;
-  }
-
-  // If checking submenu access
-  if (submenuName && menuName) {
-    const menuPerms = permissions[menuName.toLowerCase()];
-    if (menuPerms) {
-      // Check if the submenu is in the allowed list
-      return menuPerms.includes(submenuName);
-    }
-  }
-
-  return false;
+  return (localStorage.getItem("USER_ROLE") || "")
+    .split(",")
+    .map((r) => r.trim().toLowerCase())
+    .filter(Boolean);
 };
 
-/**
- * Check if a role has access to a specific menu item (considering nested structure)
- * @param {string} role - User role
- * @param {string} menuName - Name of the menu (e.g., "Operations", "Accounts")
- * @param {string|object} submenu - Name of submenu or submenu object
- * @returns {boolean}
- */
+const norm = (s) => String(s || "").trim().toLowerCase();
+
+/** Grants of one role for a top-level menu: [["Item"], ["Group", "Item"], ...] (split on " > "). */
+const grantsFor = (role, menuName) => {
+  const perms = roleMenuPermissions[norm(role)];
+  const allowed = perms && perms[norm(menuName)];
+  return Array.isArray(allowed) ? allowed.map((a) => String(a).split(">").map(norm)) : [];
+};
+
+/** True when one role may open a second-level item of a top-level menu (whole item or part of it). */
 export const checkSubmenuAccess = (role, menuName, submenu) => {
-  if (!role) return false;
-
-  const roleKey = role.toLowerCase();
-  const permissions = roleMenuPermissions[roleKey];
-
-  // If user has "all" access, return true
-  if (permissions && permissions.all) {
-    return true;
-  }
-
-  // If no permissions defined for this role, grant all access
-  if (!permissions) return true;
-
-  // Get the submenu name if it's an object
-  const submenuName = typeof submenu === "object" ? submenu.name : submenu;
-
-  const menuPerms = permissions[menuName.toLowerCase()];
-  if (!menuPerms) return false;
-
-  // Check if the submenu is in the allowed list
-  return menuPerms.includes(submenuName);
+  const perms = roleMenuPermissions[norm(role)];
+  if (!perms) return false;
+  if (perms.all) return true;
+  const name = norm(typeof submenu === "object" ? submenu.name : submenu);
+  return grantsFor(role, menuName).some((path) => path[0] === name);
 };
 
-/**
- * Filter menu items based on user role
- * @param {Array} menuList - Array of menu items
- * @param {string} role - User role
- * @returns {Array} Filtered menu list
- */
-export const filterMenuByRole = (menuList, role) => {
-  if (!role) return [];
+/** Keep only the parts of an item a set of grant paths allows (a path that ends at the item keeps it whole). */
+const pruneItem = (item, paths) => {
+  if (paths.some((p) => p.length === 0) || !item.submenu) return item;
+  const submenu = item.submenu
+    .map((child) => {
+      const rest = paths.filter((p) => p[0] === norm(child.name)).map((p) => p.slice(1));
+      return rest.length ? pruneItem(child, rest) : null;
+    })
+    .filter(Boolean);
+  return submenu.length ? { ...item, submenu } : null;
+};
 
-  const roleKey = role.toLowerCase();
+/** True when one role may see a top-level menu (or one of its items). */
+export const hasMenuAccess = (role, menuName, submenuName = null) => {
+  const perms = roleMenuPermissions[norm(role)];
+  if (!perms) return false;
+  if (perms.all) return true;
+  if (submenuName) return checkSubmenuAccess(role, menuName, submenuName);
+  return perms[norm(menuName)] !== undefined;
+};
 
+/** The menu tree reduced to what any of the given roles may see. */
+export const filterMenuForRoles = (menuList, roles) => {
+  const list = (roles || []).map(norm).filter(Boolean);
+  if (!list.length) return [];
+  if (list.some((r) => roleMenuPermissions[r]?.all)) return menuList;
   return menuList
     .map((menu) => {
-      // Handle nested submenus
-      if (menu.submenu) {
-        const filteredSubmenu = menu.submenu
-          .map((submenu) => {
-            if (submenu.submenu) {
-              const filteredNestedSubmenu = submenu.submenu.filter(
-                (nestedSubmenu) =>
-                  checkSubmenuAccess(roleKey, menu.name, nestedSubmenu.name)
-              );
-              return filteredNestedSubmenu.length > 0
-                ? { ...submenu, submenu: filteredNestedSubmenu }
-                : null;
-            }
-            return checkSubmenuAccess(roleKey, menu.name, submenu.name)
-              ? submenu
-              : null;
-          })
-          .filter((item) => item !== null);
-
-        return filteredSubmenu.length > 0
-          ? { ...menu, submenu: filteredSubmenu }
-          : null;
+      if (!menu.submenu) {
+        return list.some((r) => hasMenuAccess(r, menu.name)) ? menu : null;
       }
-
-      // Handle menu without submenus
-      return hasMenuAccess(roleKey, menu.name) ? menu : null;
+      const paths = list.flatMap((r) => grantsFor(r, menu.name));
+      const submenu = menu.submenu
+        .map((item) => {
+          const rest = paths.filter((p) => p[0] === norm(item.name)).map((p) => p.slice(1));
+          return rest.length ? pruneItem(item, rest) : null;
+        })
+        .filter(Boolean);
+      return submenu.length ? { ...menu, submenu } : null;
     })
-    .filter((item) => item !== null);
+    .filter(Boolean);
+};
+
+/** First screen the roles may open (landing page for roles without a dashboard). */
+export const firstAllowedPath = (menuList, roles) => {
+  const walk = (items) => {
+    for (const item of items || []) {
+      if (item.path && !item.submenu) return item.path;
+      const inner = walk(item.submenu);
+      if (inner) return inner;
+    }
+    return null;
+  };
+  return walk(filterMenuForRoles(menuList, roles));
+};
+
+/** Backwards-compatible single-role filter. */
+export const filterMenuByRole = (menuList, role) => filterMenuForRoles(menuList, [role]);
+
+const collectPaths = (items, out = []) => {
+  for (const item of items || []) {
+    if (item.path) out.push(item.path);
+    for (const p of item.includes || []) out.push(p);
+    if (item.submenu) collectPaths(item.submenu, out);
+  }
+  return out;
+};
+
+const matches = (pathname, p) => {
+  const base = p.replace(/\/+$/, "");
+  // the home route "/" matches only itself (it would otherwise prefix every address)
+  if (!base) return pathname === "/" || pathname === "";
+  return pathname === base || pathname.startsWith(`${base}/`);
+};
+
+/**
+ * Route guard: a path that belongs to a menu screen is allowed only when that screen is in the
+ * user's filtered menu. Paths outside the menu (profile, notifications, detail pages reached from
+ * an allowed screen) are allowed.
+ */
+export const isPathAllowed = (pathname, menuList, roles) => {
+  const all = collectPaths(menuList).filter((p) => matches(pathname, p));
+  if (!all.length) return true;
+  const allowed = collectPaths(filterMenuForRoles(menuList, roles));
+  return allowed.some((p) => matches(pathname, p));
 };

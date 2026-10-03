@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "./mastersService";
 
 /**
  * User Service
@@ -49,7 +50,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch users");
       }
 
@@ -61,7 +62,6 @@ class UserService {
         pagination: data.pagination || {},
       };
     } catch (error) {
-      console.error("Get users error:", error);
       return {
         success: false,
         error: error.name === "AbortError" ? "Request timeout" : error.message,
@@ -93,7 +93,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch user");
       }
 
@@ -104,7 +104,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Get user by ID error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch user",
@@ -136,8 +135,8 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to create user");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(apiErrorMessage(errorData, response.status));
       }
 
       const data = await response.json();
@@ -147,7 +146,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Create user error:", error);
       return {
         success: false,
         error: error.message || "Failed to create user",
@@ -179,8 +177,8 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to update user");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(apiErrorMessage(errorData, response.status));
       }
 
       const data = await response.json();
@@ -190,7 +188,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Update user error:", error);
       return {
         success: false,
         error: error.message || "Failed to update user",
@@ -220,7 +217,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to delete user");
       }
 
@@ -231,7 +228,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Delete user error:", error);
       return {
         success: false,
         error: error.message || "Failed to delete user",
@@ -263,7 +259,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to update password");
       }
 
@@ -274,7 +270,6 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Update password error:", error);
       return {
         success: false,
         error: error.message || "Failed to update password",
@@ -303,7 +298,7 @@ class UserService {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to fetch user stats");
       }
 
@@ -314,13 +309,94 @@ class UserService {
         data: data.data,
       };
     } catch (error) {
-      console.error("Get user stats error:", error);
       return {
         success: false,
         error: error.message || "Failed to fetch user stats",
         data: {},
       };
     }
+  }
+
+  /** JSON request that throws the API error message on failure (roles endpoints). */
+  async request(path, { method = "GET", body } = {}) {
+    const response = await fetch(`${this.baseURL}${path}`, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        ...authService.getAuthHeader(),
+      },
+      body: body === undefined ? undefined : JSON.stringify(body),
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok || json.success === false) throw new Error(apiErrorMessage(json, response.status));
+    return json.data;
+  }
+
+  /** Picker list of active users { userId, name, branchCode } (GET /users/lookup; open to petty cash roles). */
+  lookupUsers(search = "") {
+    const q = search ? `?search=${encodeURIComponent(search)}` : "";
+    return this.request(`/users/lookup${q}`);
+  }
+
+  /** Roles with their permission codes and user counts (GET /roles). */
+  getRoles() {
+    return this.request("/roles");
+  }
+
+  /** All permission codes grouped by module (GET /roles/permissions). */
+  getPermissions() {
+    return this.request("/roles/permissions");
+  }
+
+  /** Create a role: { code, name, description, permissions[], status }. */
+  createRole(role) {
+    return this.request("/roles", { method: "POST", body: role });
+  }
+
+  /** Update a role (partial): { name, description, permissions[], status }. */
+  updateRole(id, role) {
+    return this.request(`/roles/${encodeURIComponent(id)}`, { method: "PUT", body: role });
+  }
+
+  /** Delete a non-system role that has no users. */
+  deleteRole(id) {
+    return this.request(`/roles/${encodeURIComponent(id)}`, { method: "DELETE" });
+  }
+
+  /** Activate / deactivate / unlock a user (PATCH /users/:id/status). */
+  setUserStatus(userId, status) {
+    return this.request(`/users/${encodeURIComponent(userId)}/status`, { method: "PATCH", body: { status } });
+  }
+
+  /** Unlock an account locked after too many failed sign-ins (status active, failed sign-ins cleared). */
+  unlockUser(userId) {
+    return this.setUserStatus(userId, "active");
+  }
+
+  /**
+   * Administrator password reset: the server generates a temporary password, returns it once
+   * ({ userId, mustChangePassword, temporaryPassword }) and ends the user's sessions.
+   */
+  resetUserPassword(userId) {
+    return this.request(`/users/${encodeURIComponent(userId)}/reset-password`, { method: "POST", body: { mustChangePassword: true } });
+  }
+
+  /** Turn off a user's two-factor authentication (lost phone); the user enrols again. */
+  resetUserTwoFactor(userId) {
+    return this.request(`/users/${encodeURIComponent(userId)}/2fa/reset`, { method: "POST", body: {} });
+  }
+
+  /** Sign-in history of a user: { items, total, page, perPage } (GET /users/:id/login-history). */
+  async getLoginHistory(userId, { page = 1, perPage = 10, success } = {}) {
+    const q = new URLSearchParams({ page: String(page), perPage: String(perPage) });
+    if (success !== undefined && success !== null && success !== "") q.set("success", String(success));
+    const response = await fetch(`${this.baseURL}/users/${encodeURIComponent(userId)}/login-history?${q}`, {
+      headers: { Accept: "application/json", ...authService.getAuthHeader() },
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok || json.success === false) throw new Error(apiErrorMessage(json, response.status));
+    return { items: json.data || [], total: json.total || 0, page: json.page || page, perPage: json.perPage || perPage };
   }
 }
 

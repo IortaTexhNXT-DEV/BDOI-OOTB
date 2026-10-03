@@ -96,6 +96,18 @@ class DocumentTemplateService {
   }
 
   /**
+   * Download the acknowledgement receipt (AR) of a premium payment recorded on a policy.
+   * @param {string} paymentId - Payment id or AR number
+   * @param {string} [arNumber] - AR number, for the file name
+   * @returns {Promise<{ success: boolean, error?: string }>}
+   */
+  async getAcknowledgementReceiptPdf(paymentId, arNumber) {
+    if (!paymentId) return { success: false, error: "Payment ID is required" };
+    const path = `/document-templates/acknowledgement-receipt/${encodeURIComponent(paymentId)}`;
+    return this._fetchPdfAndDownload(`${this.baseURL}${path}`, `acknowledgement-receipt-${arNumber || paymentId}.pdf`);
+  }
+
+  /**
    * Fetch PDF from URL and return blob (no download)
    * @private
    */
@@ -135,7 +147,6 @@ class DocumentTemplateService {
       const blob = await response.blob();
       return { success: true, blob };
     } catch (error) {
-      console.error("Document template fetch error:", error);
       return {
         success: false,
         error:

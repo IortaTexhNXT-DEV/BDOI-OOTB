@@ -1,34 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getProfileMiddleware, getEmployeeListByIdMiddleware, patchProfileEditMiddleware, getProfileEditMiddleWare } from "./profileMiddleware";
+import { getProfileMiddleware, patchProfileEditMiddleware, getProfileEditMiddleWare } from "./profileMiddleware";
 const initialState = {
   loading: false,
   error: "",
-  profileData: [
-    {
-      id: 1,
-      firstName: "Carson",
-      lastName: "Darrin",
-      prefferedName: "Carson Darrin",
-      dateOfBirth: "03/01/24",
-      gender: "Male",
-      emailId: "Carsondarrin@gmail.com",
-      contactNumber: "987321654",
-      houseNoUnitNoStreet: "Building #1234, Street 132",
-      barangaySubd: "Davao City ",
-      country: "Thailand",
-      province: "Cagayan",
-      city: "Manila",
-      zipCode: "500080"
-
-
-    },
-
-
-
-
-
-
-  ],
+  profileData: [],
   profileEditData: [],
 
 };
@@ -48,7 +23,7 @@ const profileReducers = createSlice({
     builder.addCase(getProfileMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.profileData = {};
+      state.profileData = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -63,17 +38,7 @@ const profileReducers = createSlice({
       patchProfileEditMiddleware.fulfilled,
       (state, action) => {
         state.loading = false;
-        const updatedIndex = state.profileData.findIndex(
-          (item) => item.id === action.payload.id
-        );
-        if (updatedIndex !== -1) {
-          const updatedCurrencyList = [...state.profileData];
-          updatedCurrencyList[updatedIndex] = action.payload;
-          state.profileData = updatedCurrencyList;
-
-        } else {
-          state.profileData = [...state.profileData, action.payload];
-        }
+        state.profileData = [action.payload];
       }
     );
     builder.addCase(

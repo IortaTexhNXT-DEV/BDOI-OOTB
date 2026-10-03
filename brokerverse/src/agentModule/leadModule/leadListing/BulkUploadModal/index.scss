@@ -117,7 +117,7 @@
           }
 
           &.failed .result-value {
-            color: #ef4444;
+            color: var(--color-danger);
           }
 
           &.total .result-value {

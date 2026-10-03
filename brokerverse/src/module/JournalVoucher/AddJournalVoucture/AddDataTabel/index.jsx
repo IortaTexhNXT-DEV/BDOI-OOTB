@@ -5,9 +5,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import SvgEditIcon from "../../../../assets/icons/SvgEditicons";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgDeleteIcon from "../../../../assets/icons/SvgDeleteIcon";
-import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router";
+import { useDispatch } from "react-redux";
 import { Dialog } from "primereact/dialog";
 import "../EditData/index.scss";
 import { useFormik } from "formik";
@@ -15,20 +13,18 @@ import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import { patchJVMiddleware } from "../../store/journalVoucherMiddleware";
+import useJvMasterData from "../../useJvMasterData";
+
+const ENTRY_TYPES = [
+  { label: "Debit", value: "Debit" },
+  { label: "Credit", value: "Credit" },
+];
 
 const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
-  const [first, setFirst] = useState(0);
+  const [, setFirst] = useState(0);
   const [visibleEdit, setVisibleEdit] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const navigate = useNavigate();
-  const handleNavigate = (rowData) => {
-    console.log(rowData, "rowData");
-
-    // setVisibleEdit(true)
-  };
-  console.log(journalVoucherPostTabelData, "jv");
+  const [, setRowsPerPage] = useState(10);
 
   const onPageChange = (event) => {
     setFirst(event.first);
@@ -46,10 +42,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -72,7 +67,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
 
   const handleEdit = (rowData) => {
     setEditID(rowData?.id);
-    console.log("first10", rowData?.id);
     setVisibleEdit(true);
   };
 
@@ -96,33 +90,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     display: "flex",
   };
 
-  const codeOptionsMain = [
-    { label: "Option 1", value: "Main00123" },
-    { label: "Option 2", value: "Main00124" },
-  ];
-  const codeOptionsSub = [
-    { label: "Option 1", value: "Sub00123" },
-    { label: "Option 2", value: "Sub00124" },
-  ];
-  const codeOptionsDept = [
-    { label: "Option 1", value: "Dep00123" },
-    { label: "Option 2", value: "Dep00124" },
-  ];
-  const codeOptionsBranch = [
-    { label: "Option 1", value: "Branch00123" },
-    { label: "Option 2", value: "Branch00124" },
-  ];
-
-  const codeOptionsType = [
-    { label: "Option 1", value: "Credit" },
-    { label: "Option 2", value: "Debit" },
-  ];
-  const codeCurrencyType = [
-    { label: "PHP", value: "PHP" },
-    { label: "THB", value: "THB" },
-    { label: "USD", value: "USD" },
-  ];
-
   const customValidation = (values) => {
     const errors = {};
 
@@ -133,7 +100,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     if (!values.entryType) {
       errors.entryType = "This field is required";
     }
-    if (!values.subAccount) {
+    // a sub account is needed only when the main account has sub accounts
+    const hasSubAccounts = subAccountsData.some((sub) => sub.mainAccount === values.mainAccount);
+    if (hasSubAccounts && !values.subAccount) {
       errors.subAccount = "This field is required";
     }
 
@@ -158,12 +127,17 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
   const dispatch = useDispatch();
   const [EditID, setEditID] = useState(null);
   const handleSubmit = (values) => {
-    console.log(values, "find values in formik");
+    // keep the local amount in step with an edited foreign amount (same rate the line was entered with)
+    const original = (Array.isArray(journalVoucherPostTabelData) ? journalVoucherPostTabelData : []).find((r) => r.id === EditID) || {};
+    const oldForeign = parseFloat(original.foreignAmount);
+    const oldLocal = parseFloat(original.localAmount);
+    const rate = oldForeign > 0 && oldLocal > 0 ? oldLocal / oldForeign : 1;
+    const newForeign = parseFloat(values.foreignAmount);
     const valueWithId = {
       ...values,
+      localAmount: Number.isFinite(newForeign) ? (newForeign * rate).toFixed(2) : values.localAmount,
       id: EditID,
     };
-    console.log(valueWithId, "find values in formik");
     dispatch(patchJVMiddleware(valueWithId));
     setVisibleEdit(false);
   };
@@ -173,18 +147,27 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       setFormikValues();
     }
   }, [EditID]);
-  const [mainAc, setMainAccountcodeData] = useState([]);
-  const [subAcc, setSubAccountData] = useState([]);
-  const [entrytypp, setEnteryTypeData] = useState([]);
-  const [branchh, setBranchCodeData] = useState([]);
-  const [currencyyy, setCurrencyData] = useState([]);
-  const [deptt, setDeptData] = useState([]);
+  const {
+    mainAccountsData,
+    subAccountsData,
+    branchCodesData,
+    departmentCodesData,
+    currencyCodesData,
+  } = useJvMasterData();
+  const toOptions = (rows) =>
+    rows.map((row) => ({ label: row.description, value: row.code }));
+  const describe = (rows, code) =>
+    rows.find((row) => row.code === code)?.description || "";
+  const mainAc = toOptions(mainAccountsData);
+  const entrytypp = ENTRY_TYPES;
+  const branchh = toOptions(branchCodesData);
+  const currencyyy = toOptions(currencyCodesData);
+  const deptt = toOptions(departmentCodesData);
 
   const setFormikValues = () => {
     const targetInvoice = journalVoucherPostTabelData.find(
       (item) => item.id === EditID
     );
-    console.log(targetInvoice, "find data");
     const mainAcc = targetInvoice?.mainAccount;
     const subAc = targetInvoice?.subAccount;
     const entryT = targetInvoice?.entryType;
@@ -206,30 +189,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
       foreignAmount: targetInvoice?.foreignAmount || "",
     };
 
-    if (mainAcc) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setMainAccountcodeData([{ label: mainAcc, value: mainAcc }]);
-    }
-    if (subAc) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setSubAccountData([{ label: subAc, value: subAc }]);
-    }
-    if (entryT) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setEnteryTypeData([{ label: entryT, value: entryT }]);
-    }
-    if (branchC) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setBranchCodeData([{ label: branchC, value: branchC }]);
-    }
-    if (currencyC) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCurrencyData([{ label: currencyC, value: currencyC }]);
-    }
-    if (deptC) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setDeptData([{ label: deptC, value: deptC }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
 
@@ -256,6 +215,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
     },
   });
 
+  const subAcc = toOptions(
+    subAccountsData.filter((sub) => sub.mainAccount === formik.values.mainAccount)
+  );
   return (
     <div className="journal__table__container">
       <DataTable
@@ -265,8 +227,8 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
         className="table__view__Journal__Voture"
         paginator
         paginatorLeft
-        rows={5}
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rows={20}
+        rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         onPage={onPageChange}
@@ -348,11 +310,9 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           <div className="grid m-0">
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 placeholder="Select "
                 className="dropdown__container"
-                // classNames="select__label__jv"
                 optionLabel="value"
                 label="Main Account"
                 value={formik.values.mainAccount}
@@ -361,7 +321,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.mainAccount && formik.errors.mainAccount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.mainAccount}
@@ -370,25 +330,17 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Main Account Description"
-                value={
-                  formik.values.mainAccount
-                    ? `Main Account Description ${formik.values.mainAccount}`
-                    : ""
-                }
+                value={describe(mainAccountsData, formik.values.mainAccount)}
               />
             </div>
 
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 placeholder="Select "
                 className="dropdown__container"
-                // classNames="select__label__jv"
                 optionLabel="value"
                 label="Entry Type"
                 value={formik.values.entryType}
@@ -397,7 +349,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.entryType && formik.errors.entryType && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.entryType}
@@ -407,13 +359,10 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           </div>
           <div
             className="grid m-0 "
-            // style={{ alignItems: "center" }}
           >
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 className="dropdown__container"
                 optionLabel="value"
                 label="Sub Account"
@@ -424,7 +373,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.subAccount && formik.errors.subAccount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.subAccount}
@@ -433,24 +382,16 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6 ">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Sub Account Description"
-                value={
-                  formik.values.subAccount
-                    ? `Sub Account Description ${formik.values.subAccount}`
-                    : ""
-                }
+                value={describe(subAccountsData, formik.values.subAccount)}
               />
             </div>
           </div>
           <div className="grid m-0 ">
             <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 optionLabel="value"
                 className="dropdown__container"
                 label="Branch Code"
@@ -461,7 +402,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.branchCode && formik.errors.branchCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.branchCode}
@@ -470,20 +411,14 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Branch Code Description"
-                value={
-                  formik.values.branchCode
-                    ? `Branch Code Description ${formik.values.branchCode}`
-                    : ""
-                }
+                value={describe(branchCodesData, formik.values.branchCode)}
               />
               {formik.touched.branchCodeDescription &&
                 formik.errors.branchCodeDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.branchCodeDescription}
@@ -494,9 +429,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           <div className="grid m-0 ">
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 className="dropdown__container"
                 optionLabel="value"
                 label="Department Code"
@@ -510,7 +443,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               {formik.touched.departmentCode &&
                 formik.errors.departmentCode && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.departmentCode}
@@ -519,20 +452,14 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Department Description"
-                value={
-                  formik.values.departmentCode
-                    ? `Department Description ${formik.values.departmentCode}`
-                    : ""
-                }
+                value={describe(departmentCodesData, formik.values.departmentCode)}
               />
               {formik.touched.departmentDescription &&
                 formik.errors.departmentDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.departmentDescription}
@@ -542,13 +469,10 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
           </div>
           <div
             className="grid m-0 "
-            // style={{ alignItems: "center" }}
           >
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <DropDowns
-                // className="input__field__jv"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
-                // classNames="select__label__jv"
                 optionLabel="value"
                 className="dropdown__container"
                 label="Currency Code"
@@ -559,7 +483,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.currencyCode && formik.errors.currencyCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.currencyCode}
@@ -568,20 +492,14 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-6 lg:col-6 xl:col-6">
               <InputField
-                // classNames="input__field__jv"
-                // className="input__label__jv"
                 classNames="field__container"
                 label="Currency Description"
-                value={
-                  formik.values.currencyCode
-                    ? `Currency Description ${formik.values.currencyCode}`
-                    : ""
-                }
+                value={describe(currencyCodesData, formik.values.currencyCode)}
               />
               {formik.touched.currencyDescription &&
                 formik.errors.currencyDescription && (
                   <div
-                    style={{ fontSize: 12, color: "red" }}
+                    style={{ fontSize: 12, color: "var(--color-danger)" }}
                     className="formik__errror__JV"
                   >
                     {formik.errors.currencyDescription}
@@ -590,8 +508,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
             </div>
             <div className="col-12 md:col-3 lg:col-3 xl:col-3">
               <InputField
-                // classNames="input__field__jv"
-                // className="select__label__jv"
                 classNames="field__container"
                 label="Foreign Amount"
                 value={formik.values.foreignAmount}
@@ -602,7 +518,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.foreignAmount && formik.errors.foreignAmount && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.foreignAmount}
@@ -614,9 +530,6 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
                 Remarks <span style={{ color: "#B1B1B1" }}>(Options)</span>
               </div>
               <InputField
-                // classNames="input__field__jv"
-                // className="select__label__jv"
-                // label="Remarks (Options)"
                 value={formik.values.remarks}
                 classNames="field__container"
                 onChange={(e) =>
@@ -626,7 +539,7 @@ const AddDataTabel = ({ newDataTable, journalVoucherPostTabelData }) => {
               />
               {formik.touched.remarks && formik.errors.remarks && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
                   className="formik__errror__JV"
                 >
                   {formik.errors.remarks}

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card";
@@ -7,19 +7,21 @@ import SvgCountMinusIcon from "../../../assets/icons/SvgCountMinusIcon";
 import CalculaitionTextInputs from "../../component/calculaitionTextInputs";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Button } from "primereact/button";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import CustomToast from "../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
 import customHistory from "../../../routes/customHistory";
 import { useFormik } from "formik";
-import { AuthorizedSignatureOptions } from "./mock";
+import useSignatoryOptions, { NoSignatoryHint } from "../utils/useSignatoryOptions";
 import { postOrderSummaryMiddleware } from "./store/orderSummaryMiddleware";
 import { useDispatch, useSelector } from "react-redux";
 import { createQuotationMiddleware, updateQuotationMiddleware } from "../Store/quotationMiddleware";
 import { setQuoteOrderSummary, clearCurrentQuoteCreation } from "../Store/quotationReducer";
 import { transformToBackendFormat } from "../utils/quotationDataTransform";
 import { calculateOrderSummary } from "../utils/premiumCalculations";
+import useTaxRates from "../utils/useTaxRates";
 import { fetchProductTemplateByIdMiddleware } from "../../../module/ProductConfigurator/store/productConfiguratorMiddleware";
+import { notifyError } from "../../../utility/dialogs";
 
 const initialValue = {
   NETpremium: "",
@@ -36,7 +38,7 @@ const initialValue = {
 const OrderSummary = () => {
   const { t } = useTranslation();
   const [discount, setDiscount] = useState(0);
-  const [ncd, setNcd] = useState(0);
+  const [ncd] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const dispatch = useDispatch();
   const toastRef = useRef(null);
@@ -52,6 +54,8 @@ const OrderSummary = () => {
     })
   );
 
+  const settingsTaxRates = useTaxRates();
+
   // Fetch product configurator on mount
   useEffect(() => {
     dispatch(
@@ -63,6 +67,8 @@ const OrderSummary = () => {
   
   const isEditMode = currentQuoteCreation?.isEditMode || false;
   const existingOrderSummary = currentQuoteCreation?.orderSummary;
+  // Authorised signatories from the Signatories master
+  const signatoryOptions = useSignatoryOptions(existingOrderSummary?.authorizedSignature);
   
   // Use useMemo to calculate order summary values without causing re-renders
   const calculatedOrderSummary = useMemo(() => {
@@ -72,11 +78,12 @@ const OrderSummary = () => {
         currentQuoteCreation.accessories,
         discount,
         ncd,
-        productConfigurator // Pass productConfigurator for consistent tax rates
+        productConfigurator, // Pass productConfigurator for consistent tax rates
+        settingsTaxRates
       );
     }
     return null;
-  }, [currentQuoteCreation?.coverageDetails, currentQuoteCreation?.accessories, discount, ncd, productConfigurator]);
+  }, [currentQuoteCreation?.coverageDetails, currentQuoteCreation?.accessories, discount, ncd, productConfigurator, settingsTaxRates]);
 
   const handleclick = async (values) => {
     setIsSubmitting(true);
@@ -103,7 +110,7 @@ const OrderSummary = () => {
         ...currentQuoteCreation,
         orderSummary: orderSummaryData,
       },
-      'agent' // TODO: Get actual username
+      localStorage.getItem("USERNAME") || "agent"
     );
     
     try {
@@ -138,8 +145,7 @@ const OrderSummary = () => {
       }, 2000);
       
     } catch (error) {
-      console.error('Failed to save quotation:', error);
-      alert(`${t("agent.failedToSaveQuotation")}: ${error}`);
+      notifyError(`${t("agent.failedToSaveQuotation")}: ${error}`);
     } finally {
       setIsSubmitting(false);
     }
@@ -165,7 +171,7 @@ const OrderSummary = () => {
         Discount: existingOrderSummary.discount || "",
         NCD: existingOrderSummary.NCD || "",
         GrossPremium: existingOrderSummary.grossPremium || "",
-        AuthorizedSignature: existingOrderSummary.authorizedSignature || AuthorizedSignatureOptions[0]?.value,
+        AuthorizedSignature: existingOrderSummary.authorizedSignature || signatoryOptions.defaultValue,
       };
     }
     
@@ -179,7 +185,7 @@ const OrderSummary = () => {
         Discount: calculatedOrderSummary.discount || "",
         NCD: calculatedOrderSummary.NCD || "",
         GrossPremium: calculatedOrderSummary.grossPremium || "",
-        AuthorizedSignature: AuthorizedSignatureOptions[0]?.value || "",
+        AuthorizedSignature: signatoryOptions.defaultValue || "",
       };
     }
     
@@ -299,9 +305,8 @@ const OrderSummary = () => {
             <DropdownField
               label={t("agent.authorizedSignature")}
               value={formik.values.AuthorizedSignature}
-              options={AuthorizedSignatureOptions}
+              options={signatoryOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);
               }}
               optionLabel="label"
@@ -310,6 +315,7 @@ const OrderSummary = () => {
                 formik.errors.AuthorizedSignature
               }
             />
+            <NoSignatoryHint options={signatoryOptions} />
           </div>
 
           <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
@@ -379,7 +385,7 @@ const OrderSummary = () => {
               <div className="back__btn__container">
                 <Button
                   className="back__btn"
-                  onClick={() => handleBackNavigation}
+                  onClick={handleBackNavigation}
                 >
                   {t("agent.back")}
                 </Button>

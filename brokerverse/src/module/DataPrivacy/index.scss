@@ -1,0 +1,72 @@
+// Data privacy: consent card on the client and prospect views, Data Subject Requests and Consent Register.
+// Page frame, filters and fields come from ../Administration/index.scss (admin__*), tiles and tables from
+// ../AccessControl/index.scss (access__*).
+
+.privacy__page {
+  .admin__filters .access__toggle {
+    margin-bottom: 0;
+    align-self: center;
+  }
+}
+
+.privacy__panel {
+  .privacy__panel-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+
+    h3 {
+      margin: 0 0 0.25rem;
+    }
+
+    p {
+      margin: 0;
+      color: var(--text-color-secondary, #6b7280);
+      font-size: 0.875rem;
+    }
+  }
+
+  .privacy__table .p-datatable-thead > tr > th {
+    white-space: nowrap;
+    font-size: 0.8125rem;
+  }
+}
+
+.privacy__purpose {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+
+  small {
+    color: var(--text-color-secondary, #6b7280);
+  }
+}
+
+.privacy__purpose-name {
+  font-weight: 600;
+}
+
+.privacy__row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+}
+
+.privacy__due {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.privacy__blockers ul {
+  margin: 0.5rem 0 0;
+  padding-left: 1.25rem;
+
+  li {
+    margin-bottom: 0.25rem;
+  }
+}

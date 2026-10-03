@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -10,9 +10,26 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { PickList } from "primereact/picklist";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
-import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
+import { Toast } from "primereact/toast";
+import { deleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
+
+const ALL_COLUMNS = [
+  { name: "Policy Number", code: "policyNo" },
+  { name: "Insured Name", code: "insuredName" },
+  { name: "Product", code: "product" },
+  { name: "Effective Date", code: "effectiveDate" },
+  { name: "Premium", code: "premium" },
+  { name: "Commission Rate", code: "commissionRate" },
+  { name: "Commission Amount", code: "commissionAmount" },
+  { name: "Service Tax", code: "serviceTax" },
+  { name: "Net Amount", code: "netAmount" },
+  { name: "Policy Status", code: "policyStatus" },
+  { name: "Branch", code: "branch" },
+  { name: "Agent Code", code: "agentCode" },
+];
 
 const StatementTemplateMaster = () => {
   const { t } = useTranslation();
@@ -20,6 +37,8 @@ const StatementTemplateMaster = () => {
   const location = useLocation();
   const { mode } = useParams();
   const { data } = location.state || {};
+  const toast = useRef(null);
+  const TYPE = "remittance-statement-template";
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
@@ -35,20 +54,7 @@ const StatementTemplateMaster = () => {
     termsConditions: "",
   });
 
-  const [availableColumns, setAvailableColumns] = useState([
-    { name: "Policy Number", code: "policyNo" },
-    { name: "Insured Name", code: "insuredName" },
-    { name: "Product", code: "product" },
-    { name: "Effective Date", code: "effectiveDate" },
-    { name: "Premium", code: "premium" },
-    { name: "Commission Rate", code: "commissionRate" },
-    { name: "Commission Amount", code: "commissionAmount" },
-    { name: "Service Tax", code: "serviceTax" },
-    { name: "Net Amount", code: "netAmount" },
-    { name: "Policy Status", code: "policyStatus" },
-    { name: "Branch", code: "branch" },
-    { name: "Agent Code", code: "agentCode" },
-  ]);
+  const [availableColumns, setAvailableColumns] = useState(ALL_COLUMNS);
 
   const [selectedColumns, setSelectedColumns] = useState([]);
 
@@ -71,31 +77,18 @@ const StatementTemplateMaster = () => {
     if (mode === "edit" || mode === "view") {
       // Load existing data
       if (data) {
-        setFormData({
-          templateCode: data.code || "STM-001",
-          templateName: data.name || "Standard Statement Template",
-          statementType: "Monthly",
-          isActive: data.status || true,
-          showLogo: true,
-          showAddress: true,
-          headerText: "Monthly Remittance Statement",
-          showTotals: true,
-          signatureLines: 2,
-          termsConditions: "This statement is subject to the terms and conditions of the remittance agreement.",
-        });
+        setFormData((prev) => ({
+          ...prev,
+          ...(data.form || {}),
+          templateCode: data.code,
+          templateName: data.name,
+          statementType: data.form?.statementType || data.type || null,
+          isActive: data.status === true || data.status === "Active",
+        }));
 
-        // Set some default selected columns for demo
-        setSelectedColumns([
-          { name: "Policy Number", code: "policyNo" },
-          { name: "Insured Name", code: "insuredName" },
-          { name: "Premium", code: "premium" },
-          { name: "Commission Amount", code: "commissionAmount" },
-          { name: "Net Amount", code: "netAmount" },
-        ]);
-
-        setAvailableColumns(prev => prev.filter(col =>
-          !["policyNo", "insuredName", "premium", "commissionAmount", "netAmount"].includes(col.code)
-        ));
+        const chosen = data.columns || [];
+        setSelectedColumns(ALL_COLUMNS.filter((col) => chosen.includes(col.name)));
+        setAvailableColumns(ALL_COLUMNS.filter((col) => !chosen.includes(col.name)));
       }
     } else {
       // Generate new code for add mode
@@ -118,18 +111,24 @@ const StatementTemplateMaster = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving statement template:", formData);
-    console.log("Selected columns:", selectedColumns);
-    // Add save logic here
-    navigate("/master/finance/remittance");
-  };
+  const handleSave = () => saveAndReturn({
+    type: TYPE,
+    id: data?.id,
+    toast,
+    navigate,
+    record: {
+      code: formData.templateCode,
+      name: formData.templateName,
+      type: formData.statementType,
+      isActive: formData.isActive,
+      columns: selectedColumns.map((col) => col.name),
+      form: formData
+    }
+  });
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this statement template?")) {
-      console.log("Deleting statement template:", formData.templateCode);
-      // Add delete logic here
-      navigate("/master/finance/remittance");
+  const handleDelete = async () => {
+    if (await confirmAction("Are you sure you want to delete this statement template?", { danger: true })) {
+      deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
     }
   };
 
@@ -149,14 +148,14 @@ const StatementTemplateMaster = () => {
 
   return (
     <div className="container__statement__template__master">
+        <Toast ref={toast} />
         <div className="top__container">
           <div className="header-actions">
             <Button
               icon={<SvgBackArrow />}
               className="back-button"
               onClick={handleClose}
-              text
-            />
+              text aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
             <h1 className="page__title">Statement Template Master</h1>
             <span className="mode-badge">{mode?.toUpperCase() || "ADD"}</span>
           </div>

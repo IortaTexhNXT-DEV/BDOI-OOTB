@@ -1,22 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getCountryMiddleware, getCountryListByIdMiddleware, postAddCountryMiddleware, patchCountryEditMiddleware, getSearchCountryMiddleware } from "./countryMiddleware";
-// import SvgIconeye from "../../../assets/icons/SvgIconeye";
 const initialState = {
   loading: false,
   error: "",
-  countryTableList: [
-    {
-      id: 1,
-      "CountryName": "PHILIPPINES",
-      "ISOCode": "PHL",
-      "PhoneCode": "+63",
-      "Modifiedby": "JOHN",
-      "ModifiedOn": "2024-01-12",
-      Description: "Test Purpose"
-    },
-   
-  ]
-  ,
+  countryTableList: [],
   countryDetailList: {},
   postAddCountry: "",
   getSearchCountry: [],
@@ -37,7 +24,7 @@ const countryReducer = createSlice({
     builder.addCase(getCountryMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.countryTableList = {};
+      state.countryTableList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
     builder.addCase(getCountryListByIdMiddleware.pending, (state) => {
@@ -64,7 +51,7 @@ const countryReducer = createSlice({
     builder.addCase(getSearchCountryMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      state.getSearchCountry = {};
+      state.getSearchCountry = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -72,14 +59,12 @@ const countryReducer = createSlice({
       state.loading = true;
     });
     builder.addCase(postAddCountryMiddleware.fulfilled, (state, action) => {
-      console.log(action.payload, 'find action.payload')
       state.loading = false;
       state.countryTableList = [...state.countryTableList, action.payload];
     });
     builder.addCase(postAddCountryMiddleware.rejected, (state, action) => {
       state.loading = false;
 
-      //   state.paymentVocherList = state.paymentVocherList;
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -91,7 +76,6 @@ const countryReducer = createSlice({
       patchCountryEditMiddleware.fulfilled,
       (state, action) => {
         state.loading = false;
-        console.log(state.countryTableList, "state.countryTableList");
         const updatedIndex = state.countryTableList.findIndex(
           (item) => item.id === action.payload.id
         );

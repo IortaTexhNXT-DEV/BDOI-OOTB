@@ -1,294 +1,241 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../../components/NavBar";
-import { useNavigate } from "react-router-dom";
-import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgFilters from "../../../../assets/icons/SvgFilters";
-import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import Productdata from "./mock";
-import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { TieredMenu } from "primereact/tieredmenu";
-import SvgIconeye from "../../../../assets/icons/SvgIconeye";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
-import { useDispatch, useSelector } from "react-redux";
-import SvgEditicon from "../../../../assets/icons/SvgEdit";
-import SvgEdit from "../../../../assets/icons/SvgEdits";
-import ToggleButton from "../../../../components/ToggleButton";
-import SvgTable from "../../../../assets/icons/SvgTable";
-import {
-  getAccountDetailsView,
-  getPatchAccountDetailsView,
-  getSeachAddAccountDetails,
-} from "../store/bankMasterMiddleware";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
+import { Toast } from "primereact/toast";
+import SvgDot from "../../../../assets/icons/SvgDot";
+import SvgAdd from "../../../../assets/icons/SvgAdd";
+import mastersService, { errorMessage } from "../../../../services/mastersService";
+import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
+import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
+import { calendarDateFormat, formatDate, toDate, toIsoDate } from "../../../../utility/dateFormat";
 
-const Index = () => {
+const TYPE = "bank-account";
+const ACCOUNT_TYPES = ["Current Account", "Savings Account", "Time Deposit", "Trust Account"];
+const EMPTY = {
+  accountCode: "",
+  accountName: "",
+  bankCode: "",
+  accountNumber: "",
+  accountType: "Current Account",
+  currency: "PHP",
+  branch: "",
+  swiftCode: "",
+  glAccount: "",
+  openingDate: null,
+  contactPerson: "",
+  contactNumber: "",
+  email: "",
+};
+
+/** What is wrong with a bank account form (empty object when it can be saved). */
+export const bankAccountErrors = (v) => {
+  const e = {};
+  const req = "This field is required";
+  ["accountCode", "accountName", "bankCode", "accountNumber", "accountType", "currency"].forEach((k) => {
+    if (!String(v[k] ?? "").trim()) e[k] = req;
+  });
+  if (v.accountNumber && !/^[0-9][0-9 -]{5,30}$/.test(String(v.accountNumber).trim())) e.accountNumber = "Digits, spaces and dashes only (at least 6)";
+  if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.email)) e.email = "Invalid e-mail address";
+  if (v.contactNumber && !/^\+?[\d\s()-]{7,20}$/.test(v.contactNumber)) e.contactNumber = "Invalid phone number";
+  if (v.swiftCode && !/^[A-Za-z]{6}[A-Za-z0-9]{2}([A-Za-z0-9]{3})?$/.test(String(v.swiftCode).trim())) e.swiftCode = "8 or 11 characters, e.g. BNORPHMM";
+  return e;
+};
+
+/**
+ * Company bank accounts (Master > Finance > Bank > Accounts): the accounts the broker receives into and pays from.
+ * They feed the bank account lists of receipts, settlements to insurers, payment vouchers and bank reconciliation.
+ */
+const BankAccounts = () => {
   const { t } = useTranslation();
-  const [products, setProducts] = useState([]);
+  const toast = useRef(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const { AccountDetailsList, loading, searchAccountDetails } = useSelector(
-    ({ bankMasterReducer }) => {
-      return {
-        loading: bankMasterReducer?.loading,
-        AccountDetailsList: bankMasterReducer?.AccountDetailsList,
-        searchAccountDetails: bankMasterReducer?.searchAccountDetails,
-        // const [products, setProducts] = useState([]);
+  const [form, setForm] = useState(null); // null = dialog closed
+  const [errors, setErrors] = useState({});
+  const [saving, setSaving] = useState(false);
+  const banks = useMasterOptions("bank", { valueKey: "code" });
+  const currencies = useMasterOptions("currency", { valueKey: "code" });
 
-        // const handleView=()=>{
-        //   navigate('/accounts/paymentvoucher/detailview')
-        // }
-      };
+  const load = useCallback(() => {
+    setLoading(true);
+    mastersService
+      .list(TYPE)
+      .then(setRows)
+      .catch((error) => toast.current?.show({ severity: "error", detail: errorMessage(error) }))
+      .finally(() => setLoading(false));
+  }, []);
+  useEffect(load, [load]);
+
+  const shown = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => [r.accountCode, r.accountName, r.accountNumber, r.bankCode, r.bankName].some((x) => String(x || "").toLowerCase().includes(q)));
+  }, [rows, search]);
+
+  const open = (row) => {
+    setErrors({});
+    setForm(row ? { ...EMPTY, ...row, openingDate: toDate(row.openingDate) } : { ...EMPTY });
+  };
+  const set = (key, value) => {
+    setForm((f) => ({ ...f, [key]: value }));
+    setErrors((e) => ({ ...e, [key]: undefined }));
+  };
+  const save = async () => {
+    const found = bankAccountErrors(form);
+    setErrors(found);
+    if (Object.keys(found).length) return;
+    const bank = banks.find((b) => b.value === form.bankCode);
+    const record = { ...form, bankName: bank?.label || form.bankName || "", openingDate: form.openingDate ? toIsoDate(form.openingDate) : null };
+    setSaving(true);
+    try {
+      if (form.id) await mastersService.update(TYPE, form.id, record);
+      else await mastersService.create(TYPE, record);
+      toast.current?.show({ severity: "success", detail: `Bank account ${form.accountCode} saved` });
+      setForm(null);
+      load();
+    } catch (error) {
+      toast.current?.show({ severity: "error", detail: errorMessage(error) });
+    } finally {
+      setSaving(false);
     }
-  );
-  console.log(AccountDetailsList, "AccountDetailsList");
-  const dispatch = useDispatch();
-  const handleView = (columnData) => {
-    dispatch(getAccountDetailsView(columnData));
-    navigate("/master/finance/bank/accountdataview/viewaccountdetail");
-  };
-  const handleEdit = (columnData) => {
-    console.log(columnData, "columnData");
-    dispatch(getPatchAccountDetailsView(columnData));
-    navigate("/master/finance/bank/accountdataview/editaccountdetail");
   };
 
-  const template2 = {
-    layout:
-      "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-    RowsPerPageDropdown: (options) => {
-      const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
-        { label: 20, value: 20 },
-        { label: 120, value: 120 },
-      ];
-
-      return (
-        <React.Fragment>
-          <span
-            className="mx-1"
-            style={{ color: "var(--text-color)", userSelect: "none" }}
-          >
-            {t("financeMasters.rowCount")}{" "}
-          </span>
-          <Dropdown
-            value={options.value}
-            className="pagedropdown_container"
-            options={dropdownOptions}
-            onChange={options.onChange}
-          />
-        </React.Fragment>
-      );
-    },
-  };
-
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: "Name",
-    },
-    {
-      label: "Date",
-    },
-    {
-      label: "Voucher Number",
-    },
-  ];
-
-  const headerStyle = {
-    // width: '19%',
-    // backgroundColor: 'red',
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    padding: 6,
-    color: "#000",
-    border: "none",
-  };
-
-  const items = [
-    { label: t("financeMasters.bank"), url: "/master/finance/bank" },
-    { label: t("financeMasters.accountDetails") },
-  ];
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
-  const home = { label: t("financeMasters.master") };
-
-  const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
-
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
-  const isEmpty = AccountDetailsList?.length === 0 || "undefined";
-  console.log("first", AccountDetailsList);
-  const emptyTableIcon = (
-    <div>
-      <div className="empty-table-icon">
-        <SvgTable />
-      </div>
-      <div style={{ textAlign: "center" }}>No data entered</div>
+  const field = (key, label, input, { required = false, wide = false } = {}) => (
+    <div className={`col-12 ${wide ? "md:col-12" : "md:col-6"} bank-account-field`}>
+      <label htmlFor={`ba-${key}`}>
+        {label}
+        {required && <span className="required__label"> *</span>}
+      </label>
+      {input}
+      {errors[key] && <small className="p-error block">{errors[key]}</small>}
     </div>
   );
-
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
-
-  const handlePolicy = () => {
-    navigate("/master/finance/bank/accountdataview/addaccountdetail");
-  };
-  useEffect(() => {
-    if (search?.length > 0) {
-      dispatch(getSeachAddAccountDetails(search));
-    }
-  }, [search]);
+  const text = (key, props = {}) => (
+    <InputText id={`ba-${key}`} className={`w-full ${errors[key] ? "p-invalid" : ""}`} value={form[key] || ""} onChange={(e) => set(key, e.target.value)} {...props} />
+  );
 
   return (
     <div className="overall__accountdataview__container">
+      <Toast ref={toast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("financeMasters.accountDetails")}</label>
           <BreadCrumb
-            model={items}
-            home={home}
+            model={[{ label: t("financeMasters.bank"), url: "/master/finance/bank" }, { label: t("financeMasters.accountDetails") }]}
+            home={{ label: t("financeMasters.master") }}
             className="breadcrumbs_container"
             separatorIcon={<SvgDot color={"#000"} />}
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
-
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={() => open(null)}>
             <SvgAdd />
             <p className="addtext">{t("financeMasters.addAccount")}</p>
-          </div>
+          </button>
         </div>
       </div>
 
-      <Card
-
-      //   className="overallcard_container"
-      >
-        {/* <div className="searchiput_container"> */}
-
+      <Card>
         <div className="header_search_container">
-          <div class="col-12 md:col-12 lg:col-12" style={{ paddingLeft: 0 }}>
-            {/* <div class="text-center p-3 border-round-sm bg-primary font-bold"> */}
-            <span className="p-input-icon-left" style={{ width: "100%" }}>
-              <i className="pi pi-search" />
-              <InputText
-                placeholder={t("financeMasters.searchByAccountNumber")}
-                className="searchinput_left"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-              />
-            </span>
-          </div>
-          {/* </div> */}
+          <span className="p-input-icon-left" style={{ width: "100%" }}>
+            <i className="pi pi-search" />
+            <InputText
+              placeholder="Search by account code, name, number or bank"
+              className="searchinput_left"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </span>
         </div>
-        <div className="headlist_lable">Bank Account List</div>
-
-        {/* </div> */}
-
-        <div>
-          <DataTable
-            value={search ? searchAccountDetails : AccountDetailsList}
-            tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
-            paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-            currentPageReportTemplate="{first} - {last} of {totalRecords}"
-            paginatorTemplate={template2}
-            scrollable={true}
-            scrollHeight="40vh"
-            emptyMessage={isEmpty ? emptyTableIcon : null}
-          >
-            <Column
-              field="AccountNumber"
-              header={t("financeMasters.accountNumber")}
-              sortable
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column>
-            <Column
-              field="AccountName"
-              header={t("financeMasters.accountName")}
-              sortable
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-              body={(rowData) => rowData.AccountName?.toUpperCase()}
-            ></Column>
-            <Column
-              field="AccountType"
-              header="Account Type"
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-              body={(rowData) => rowData.AccountType?.toUpperCase()}
-            ></Column>
-            <Column
-              field="MainAccount"
-              header={t("financeMasters.mainAccount")}
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-              body={(rowData) => rowData.MainAccount?.toUpperCase()}
-            ></Column>
-
-            <Column
-              field="TransactionLimit"
-              header={t("financeMasters.maxTransactionLimit")}
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column>
-
-            <Column
-              field="MaxTransactionLimit"
-              header={t("financeMasters.maxTransactionLimit")}
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column>
-
-            {/* <Column field="name" header={t("financeMasters.action")} headerStyle={headerStyle}  className='fieldvalue_container'></Column>
-                    <Column field="category" header="Instrument Status" headerStyle={headerStyle}  className='fieldvalue_container'></Column>
-                    <Column field="quantity" header="Amount" headerStyle={headerStyle} className='fieldvalue_container'></Column> */}
-            <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
-              header={t("financeMasters.status")}
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column>
-            <Column
-              body={(columnData) => (
-                <div className="action_icons">
-                  <SvgIconeye onClick={() => handleView(columnData)} />
-                  <SvgEdit onClick={() => handleEdit(columnData)} />
-                </div>
-              )}
-              header={t("financeMasters.action")}
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-            ></Column>
-          </DataTable>
-        </div>
+        <div className="headlist_lable">Company bank accounts</div>
+        <DataTable
+          value={shown}
+          loading={loading}
+          dataKey="id"
+          paginator
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
+          emptyMessage="No bank accounts yet. Add the accounts the company receives premiums into and pays insurers from."
+        >
+          <Column field="accountCode" header="Account Code" sortable />
+          <Column field="accountName" header={t("financeMasters.accountName")} sortable />
+          <Column header="Bank" body={(r) => r.bankName || r.bankCode} sortable sortField="bankCode" />
+          <Column field="accountNumber" header={t("financeMasters.accountNumber")} />
+          <Column field="accountType" header="Account Type" />
+          <Column field="currency" header="Currency" />
+          <Column header="Opened" body={(r) => formatDate(r.openingDate)} />
+          <Column header={t("common.status")} body={(r) => <MasterStatusToggle type={TYPE} record={r} onChanged={load} onError={(e) => toast.current?.show({ severity: "error", detail: e.message })} />} />
+          <Column
+            header={t("financeMasters.action")}
+            body={(r) => <Button icon="pi pi-pencil" text rounded aria-label={`Edit ${r.accountCode}`} onClick={() => open(r)} tooltip={`Edit ${r.accountCode}`} tooltipOptions={{ position: "top" }} />}
+          />
+        </DataTable>
       </Card>
+
+      <Dialog
+        header={form?.id ? `Edit bank account ${form.accountCode}` : "Add bank account"}
+        visible={!!form}
+        style={{ width: "min(760px, 95vw)" }}
+        onHide={() => setForm(null)}
+        footer={
+          <div>
+            <Button label="Cancel" outlined onClick={() => setForm(null)} />
+            <Button label="Save" loading={saving} onClick={save} />
+          </div>
+        }
+      >
+        {form && (
+          <div className="grid">
+            {field("accountCode", "Account Code", text("accountCode", { disabled: !!form.id, placeholder: "e.g. BDO-COLL" }), { required: true })}
+            {field("accountName", "Account Name", text("accountName", { placeholder: "e.g. Premium Collection Account" }), { required: true })}
+            {field(
+              "bankCode",
+              "Bank",
+              <Dropdown inputId="ba-bankCode" className={`w-full ${errors.bankCode ? "p-invalid" : ""}`} value={form.bankCode} options={banks} optionLabel="label" optionValue="value" filter placeholder="Select" onChange={(e) => set("bankCode", e.value)} />,
+              { required: true }
+            )}
+            {field("accountNumber", "Account Number", text("accountNumber", { placeholder: "0012-3456-7890" }), { required: true })}
+            {field(
+              "accountType",
+              "Account Type",
+              <Dropdown inputId="ba-accountType" className="w-full" value={form.accountType} options={ACCOUNT_TYPES} onChange={(e) => set("accountType", e.value)} />,
+              { required: true }
+            )}
+            {field(
+              "currency",
+              "Currency",
+              <Dropdown inputId="ba-currency" className={`w-full ${errors.currency ? "p-invalid" : ""}`} value={form.currency} options={currencies.length ? currencies : [{ label: "PHP", value: "PHP" }]} optionLabel="label" optionValue="value" onChange={(e) => set("currency", e.value)} />,
+              { required: true }
+            )}
+            {field("branch", "Branch", text("branch", { placeholder: "e.g. Makati Ayala" }))}
+            {field("swiftCode", "SWIFT / BIC Code", text("swiftCode", { placeholder: "BNORPHMM" }))}
+            {field("glAccount", "GL Account", text("glAccount", { placeholder: "Chart of accounts code, e.g. 1102004" }))}
+            {field(
+              "openingDate",
+              "Opening Date",
+              <Calendar inputId="ba-openingDate" className="w-full" value={form.openingDate} dateFormat={calendarDateFormat()} showIcon onChange={(e) => set("openingDate", e.value)} />
+            )}
+            {field("contactPerson", "Bank Contact Person", text("contactPerson"))}
+            {field("contactNumber", "Contact Number", text("contactNumber", { placeholder: "+63 2 8840 7000" }))}
+            {field("email", "E-mail", text("email"))}
+            <div className="col-12 text-sm" style={{ color: "#6c737f" }}>
+              The GL cash account and statement format used for bank reconciliation are set in Accounts &gt; Bank Reconciliation.
+            </div>
+          </div>
+        )}
+      </Dialog>
     </div>
   );
 };
 
-export default Index;
+export default BankAccounts;

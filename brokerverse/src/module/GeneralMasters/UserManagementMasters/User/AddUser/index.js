@@ -1,5 +1,5 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
@@ -9,7 +9,6 @@ import { useFormik } from "formik";
 import SvgBack from "../../../../../assets/icons/SvgBack";
 import CustomToast from "../../../../../components/Toast";
 import { useNavigate, useParams } from "react-router-dom";
-import EditUser from "../EditUser";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getUserListByIdMiddleware,
@@ -17,16 +16,31 @@ import {
   postAddUserMiddleware,
 } from "../store/userMiddleware";
 import moment from "moment";
+import userService from "../../../../../services/userService";
+import mastersService from "../../../../../services/mastersService";
+import DropDowns from "../../../../../components/DropDowns";
 import { MultipleSelectRadioGroup } from "../../../../../components/RadioComponent/Multiselect";
-import { unwrapResult } from "@reduxjs/toolkit";
+import { TemporaryPasswordDialog } from "../UserMaster/UserSecurityActions";
+import { ADMIN_ROLES } from "../../../../../utils/menuPermissions";
+
+/** Only a System Administrator may grant the System Administrator role (the server enforces the same rule). */
+const PRIVILEGED_ROLES = ADMIN_ROLES;
+const canGrantPrivileged = () => {
+  try {
+    return (JSON.parse(localStorage.getItem("USER_ROLES") || "[]") || []).some((r) => ADMIN_ROLES.includes(r));
+  } catch {
+    return false;
+  }
+};
 
 const AddUser = ({ action }) => {
   const { t } = useTranslation();
   const { id } = useParams();
-  console.log(id, "find id");
   const navigate = useNavigate();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
+  // temporary password of a user created without one (shown once)
+  const [temporary, setTemporary] = useState(null);
 
   const items = [
     { label: t("generalMasters.userManagement") },
@@ -43,31 +57,54 @@ const AddUser = ({ action }) => {
     displayName: "",
     roles: [],
     permissions: [],
+    branchCode: "",
+    designation: "",
+    reportingTo: "",
   };
-  const { userDetailList, userViewData, userEditData } = useSelector(
+  const { userDetailList, userEditData } = useSelector(
     ({ userReducers }) => {
       return {
         userDetailList: userReducers?.userDetailList,
-        userViewData: userReducers?.userViewData,
         userEditData: userReducers?.userEditData,
       };
     }
   );
-  console.log(userViewData, "userViewData");
-  console.log(userDetailList, "userDetailList");
-  // Define role options
-  const roleOptions = [
-    { name: "roles", label: "Sales", value: "sales" },
-    { name: "roles", label: "Underwriting", value: "underwriting" },
-    { name: "roles", label: "Customer Services", value: "customer-services" },
-    { name: "roles", label: "Claims", value: "claims" },
-    { name: "roles", label: "Finance", value: "finance" },
-    { name: "roles", label: "IT Admin", value: "it-admin" },
-    { name: "roles", label: "BA", value: "ba" },
-  ];
+  // Role options come from GET /roles (active roles; the value is the role code)
+  const [roleOptions, setRoleOptions] = useState([]);
+  useEffect(() => {
+    userService
+      .getRoles()
+      .then((roles) =>
+        setRoleOptions(
+          roles
+            .filter((role) => role.status !== "inactive")
+            .filter((role) => canGrantPrivileged() || !PRIVILEGED_ROLES.includes(role.code))
+            .map((role) => ({ name: "roles", label: role.name, value: role.code }))
+        )
+      )
+      .catch((error) => toastRef.current?.showToast({ severity: "error", detail: error.message }));
+  }, []);
+  // Users are the staff register: the designation comes from the Designation master, the reporting line from users,
+  // the branch from the Branch master (the Employee master is retired).
+  const [designationOptions, setDesignationOptions] = useState([]);
+  const [branchOptions, setBranchOptions] = useState([]);
+  const [userOptions, setUserOptions] = useState([]);
+  useEffect(() => {
+    mastersService
+      .options("designation")
+      .then((rows) => setDesignationOptions(rows.map((r) => ({ name: `${r.code} - ${r.label}`, value: r.label }))))
+      .catch(() => setDesignationOptions([]));
+    mastersService
+      .options("branch")
+      .then((rows) => setBranchOptions(rows.map((r) => ({ name: `${r.code} - ${r.label}`, value: r.code }))))
+      .catch(() => setBranchOptions([]));
+    userService
+      .getUsers({ limit: 200, sortBy: "displayName", sortOrder: "asc" })
+      .then((r) => setUserOptions((r?.data || []).map((u) => ({ name: u.displayName || u.username, value: u.userId }))))
+      .catch(() => setUserOptions([]));
+  }, []);
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
 
     if (!values.username) {
       errors.username = "Username is required";
@@ -87,15 +124,8 @@ const AddUser = ({ action }) => {
       errors.roles = "At least one role is required";
     }
 
-    if (action === "add" && !values.password) {
-      errors.password = "Password is required";
-    } else if (
-      action === "add" &&
-      values.password &&
-      values.password.length < 6
-    ) {
-      errors.password = "Password must be at least 6 characters";
-    }
+    // Password is optional: left empty, the server generates a temporary password (shown once below) that the user
+    // must change at the first sign-in. A typed password is checked against the password policy by the server.
 
     return errors;
   };
@@ -106,12 +136,7 @@ const AddUser = ({ action }) => {
     const { setSubmitting } = formikHelpers || {};
     try {
       if (action === "edit") {
-        const userData =
-          userEditData?.fullUserData || userEditData || userDetailList;
-        const updatePayload = {
-          ...value,
-          id: userData?.id,
-        };
+        const updatePayload = { ...value, id };
         await dispatch(patchUserEditMiddleware(updatePayload)).unwrap();
         toastRef.current.showToast({
           severity: "success",
@@ -123,15 +148,20 @@ const AddUser = ({ action }) => {
         }, 1500);
       }
       if (action === "add") {
-        await dispatch(postAddUserMiddleware(value)).unwrap();
+        const createdUser = await dispatch(postAddUserMiddleware(value)).unwrap();
         toastRef.current.showToast({
           severity: "success",
           summary: "Success",
           detail: "User created successfully",
         });
-        setTimeout(() => {
-          navigate("/master/generals/usermanagement/user");
-        }, 1500);
+        if (createdUser?.temporaryPassword) {
+          // shown once; the list opens when the administrator closes the dialog
+          setTemporary({ username: createdUser.username, temporaryPassword: createdUser.temporaryPassword });
+        } else {
+          setTimeout(() => {
+            navigate("/master/generals/usermanagement/user");
+          }, 1500);
+        }
       }
     } catch (error) {
       const errorMessage =
@@ -158,22 +188,19 @@ const AddUser = ({ action }) => {
   });
 
   const handleRoleChange = (selectedRoles) => {
+    // Mark touched without validating, then set the value with validation: validating on touch as
+    // well ran against the previous (empty) roles and left "At least one role is required" in place.
+    formik.setFieldTouched("roles", true, false);
     formik.setFieldValue("roles", selectedRoles, true);
-    formik.setFieldTouched("roles", true, true);
-    if (selectedRoles.length === 0) {
-      formik.setFieldError("roles", "At least one role is required");
-    } else {
-      formik.setFieldError("roles", undefined);
-    }
   };
 
   // Set form values when user data is loaded (for edit/view)
   const setFormikValues = () => {
-    console.log(userEditData || userDetailList, "user details");
-
-    // Try userEditData first, then userDetailList
+    // The record loaded for this route first, then the row picked in the list
     const userData =
-      userEditData?.fullUserData || userEditData || userDetailList;
+      userDetailList?.userId === id
+        ? userDetailList
+        : userEditData?.fullUserData || userEditData || userDetailList;
 
     const rolesArray = Array.isArray(userData?.roles)
       ? userData.roles
@@ -184,20 +211,19 @@ const AddUser = ({ action }) => {
       : [];
 
     const updatedValues = {
-      id: userData?.id,
+      id: userData?.userId ?? userData?.id,
       username: userData?.username,
       email: userData?.email,
       displayName: userData?.displayName,
       roles: rolesArray,
+      branchCode: userData?.branchCode || "",
+      designation: userData?.designation || "",
+      reportingTo: userData?.reportingTo || "",
       modifiedBy: userData?.modifiedBy,
       modifiedOn: moment().format("DD/MM/YYYY"),
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
-  const formikEdit = useFormik({
-    initialValues: initialValue,
-    onSubmit: handleSubmit,
-  });
   useEffect(() => {
     if (action === "edit" || action === "view") {
       // Use userDetailList or userEditData
@@ -220,14 +246,6 @@ const AddUser = ({ action }) => {
     }
   }, [id, action, dispatch]);
 
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     dispatch(getUserListByIdMiddleware(id)).then(() => {
-  //       setFormikValues();
-  //     });
-  //     setFormikValues();
-  //   }
-  // }, [action, id]);
   return (
     <div className="grid add__user__container">
       <div
@@ -272,10 +290,11 @@ const AddUser = ({ action }) => {
                   ? formik.values.username
                   : action === "edit"
                   ? formik.values.username
-                  : userViewData?.username
+                  : formik.values.username
               }
               onChange={formik.handleChange("username")}
               label={t("generalMasters.username")}
+              required
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder={t("generalMasters.enter")}
@@ -291,10 +310,11 @@ const AddUser = ({ action }) => {
                   ? formik.values.email
                   : action === "edit"
                   ? formik.values.email
-                  : userViewData?.email
+                  : formik.values.email
               }
               onChange={formik.handleChange("email")}
               label={t("generalMasters.eMail")}
+              required
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder={t("generalMasters.enter")}
@@ -310,10 +330,11 @@ const AddUser = ({ action }) => {
                   ? formik.values.displayName
                   : action === "edit"
                   ? formik.values.displayName
-                  : userViewData?.displayName
+                  : formik.values.displayName
               }
               onChange={formik.handleChange("displayName")}
               label={t("generalMasters.displayName")}
+              required
               classNames="dropdown__add__sub"
               className="label__sub__add"
               placeholder={t("generalMasters.enter")}
@@ -330,12 +351,53 @@ const AddUser = ({ action }) => {
                 label={t("generalMasters.password")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
-                placeholder={t("generalMasters.enter")}
+                placeholder={t("security.leaveEmptyForTemporary")}
                 type="password"
                 error={formik.touched.password && formik.errors.password}
               />
             </div>
           )}
+
+          <div className="col-12 md:col-4 lg:col-4">
+            <DropDowns
+              className="dropdown__add__sub"
+              label={t("generalMasters.branch", "Branch")}
+              placeholder={t("generalMasters.select", "Select")}
+              options={branchOptions}
+              optionValue="value"
+              value={formik.values.branchCode || null}
+              onChange={(e) => formik.setFieldValue("branchCode", e.value || "")}
+              disabled={action === "view"}
+            />
+          </div>
+          <div className="col-12 md:col-4 lg:col-4">
+            <DropDowns
+              className="dropdown__add__sub"
+              label={t("generalMasters.designation", "Designation")}
+              placeholder={t("generalMasters.select", "Select")}
+              options={
+                formik.values.designation && !designationOptions.some((o) => o.value === formik.values.designation)
+                  ? [...designationOptions, { name: formik.values.designation, value: formik.values.designation }]
+                  : designationOptions
+              }
+              optionValue="value"
+              value={formik.values.designation || null}
+              onChange={(e) => formik.setFieldValue("designation", e.value || "")}
+              disabled={action === "view"}
+            />
+          </div>
+          <div className="col-12 md:col-4 lg:col-4">
+            <DropDowns
+              className="dropdown__add__sub"
+              label={t("generalMasters.reportingTo", "Reporting To")}
+              placeholder={t("generalMasters.select", "Select")}
+              options={userOptions.filter((u) => u.value !== id)}
+              optionValue="value"
+              value={formik.values.reportingTo || null}
+              onChange={(e) => formik.setFieldValue("reportingTo", e.value || "")}
+              disabled={action === "view"}
+            />
+          </div>
 
           <div className="col-12 md:col-12 lg:col-12">
             <label
@@ -352,18 +414,13 @@ const AddUser = ({ action }) => {
               isRequired={true}
             />
             {formik.touched.roles && formik.errors.roles && (
-              <div className="mt-2" style={{ fontSize: 10, color: "red" }}>
+              <div className="mt-2" style={{ fontSize: 10, color: "var(--color-danger)" }}>
                 {formik.errors.roles}
               </div>
             )}
           </div>
         </div>
       </div>
-      {action === "edit" && (
-        <div style={{ width: "100%" }}>
-          <EditUser />
-        </div>
-      )}
 
       <div className="col-12 btn__view__Add mt-2">
         {action === "add" && (
@@ -373,14 +430,13 @@ const AddUser = ({ action }) => {
             onClick={() => {
               formik.handleSubmit();
             }}
-            disabled={!formik.isValid}
           />
         )}
         {action === "edit" && (
           <Button
             className="save__add__btn"
             onClick={() => {
-              formikEdit.handleSubmit();
+              formik.handleSubmit();
             }}
           >
             Update
@@ -388,6 +444,13 @@ const AddUser = ({ action }) => {
         )}
       </div>
       <CustomToast ref={toastRef} />
+      <TemporaryPasswordDialog
+        result={temporary}
+        onHide={() => {
+          setTemporary(null);
+          navigate("/master/generals/usermanagement/user");
+        }}
+      />
     </div>
   );
 };

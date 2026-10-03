@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import { Button } from "primereact/button";
 import SvgAdd from "../../../assets/agentIcon/SvgAdd"
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
@@ -12,19 +11,19 @@ import SvgTravel from "../../../assets/agentIcon/SvgTravel";
 import SvgHome from "../../../assets/agentIcon/SvgHome";
 import SvgFire from "../../../assets/agentIcon/SvgFire";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { getClientTableMiddleware } from "./store/clientsMiddleware";
+import { canOpen } from "../../../utils/canOpen";
 
 const ClientListing = () => {
   const { t } = useTranslation();
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const items = [
     { label: t("clients.title") },
   ];
-  const Initiate = { label: t("sidebar.Home") };
+  const Initiate = { label: t("sidebar.Operations") };
+  // only roles that may open Leads/Prospects are offered "Create Lead" (claims users view clients only)
+  const canCreateLead = canOpen("/agent/createlead");
 
   const dropdownOptions = [
     {
@@ -105,10 +104,6 @@ const ClientListing = () => {
     navigate("/agent/createlead/fire-allied-perils");
   }
 
-  // Fetch clients on component mount
-  useEffect(() => {
-    dispatch(getClientTableMiddleware({ page: 1, pageSize: 10 }));
-  }, [dispatch]);
 
   return (
     <div className="clientlisting__overal__container">
@@ -119,6 +114,7 @@ const ClientListing = () => {
         </div>
         <div className="col-12 md:col-6 lg:col-6">
           <div className="btn_lable_save_container">
+            {canCreateLead && (
             <Dropdown
               value={selectedOption}
               options={dropdownOptions}
@@ -133,6 +129,7 @@ const ClientListing = () => {
               placeholder={t("clients.createLead")}
               dropdownIcon={<SvgAdd />}
             />
+            )}
           </div>
         </div>
       </div>

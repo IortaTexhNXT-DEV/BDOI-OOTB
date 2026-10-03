@@ -148,7 +148,7 @@
     font-size: 16px;
     transition: background-color 0.2s, color 0.2s, border-color 0.2s,
       box-shadow 0.2s;
-    border-radius: 30px;
+    border-radius: 6px;
     margin-right: 10px;
     width: 100px;
     height: 36px;
@@ -190,7 +190,7 @@
   .submit_button {
     width: 173px;
     height: 50px;
-    border-radius: 30px;
+    border-radius: 6px;
     background: #0072d8;
     font-size: 18px;
     font-weight: 500;
@@ -263,5 +263,56 @@
 
   .calenderlable__container {
     font-size: 14px;
+  }
+}
+
+// Add receipt against an open bill
+.overall_add_policy_receipts_container {
+  .back_button.p-button {
+    padding: 0.25rem;
+    width: auto;
+    background: transparent;
+    border: none;
+    vertical-align: middle;
+  }
+  .exit_print_buttons {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .print.p-button {
+    width: auto;
+    min-width: 100px;
+  }
+  .exit_print_buttons .p-button-outlined {
+    border-radius: 6px;
+  }
+  .section_title {
+    font-family: "Nunito", Arial, sans-serif;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: #111927;
+  }
+  .field_hint {
+    display: block;
+    margin-top: 6px;
+    color: #4b5563;
+    font-size: 13px;
+  }
+  .amount_input,
+  .amount_input .p-inputtext {
+    width: 100%;
+  }
+  .amount_input .p-inputtext {
+    border-radius: 10px;
+    text-align: right;
+  }
+  .payment_capture_actions {
+    display: flex;
+    align-items: flex-end;
+    padding-bottom: 2.1rem;
+  }
+  .payment_capture_actions .p-button {
+    border-radius: 6px;
   }
 }

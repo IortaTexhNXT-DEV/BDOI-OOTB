@@ -9,15 +9,11 @@ import { Button } from 'primereact/button';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
-import { Panel } from 'primereact/panel';
-import { Timeline } from 'primereact/timeline';
 import { Divider } from 'primereact/divider';
-import { ProgressBar } from 'primereact/progressbar';
 import { Chart } from 'primereact/chart';
 import { Dialog } from 'primereact/dialog';
-import { InputTextarea } from 'primereact/inputtextarea';
-import { Dropdown } from 'primereact/dropdown';
-import reinsuranceMockService from '../../../services/mockData/reinsuranceMockData';
+import reinsuranceService from '../../../services/reinsuranceService';
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import './style.scss';
 
 const TreatyDetail = () => {
@@ -26,6 +22,8 @@ const TreatyDetail = () => {
   const [treaty, setTreaty] = useState(null);
   const [cessions, setCessions] = useState([]);
   const [claims, setClaims] = useState([]);
+  const [capacity, setCapacity] = useState(null);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showCessionDialog, setShowCessionDialog] = useState(false);
   const [selectedCession, setSelectedCession] = useState(null);
@@ -40,18 +38,24 @@ const TreatyDetail = () => {
   const loadTreatyDetails = async () => {
     setLoading(true);
     try {
-      const treatyData = await reinsuranceMockService.getTreatyById(id);
-      const cessionsData = await reinsuranceMockService.getCessionsByTreaty(id);
-      const claimsData = await reinsuranceMockService.getClaimsByTreaty(id);
+      const [treatyData, capacityData, cessionsData, claimsData, bordereaux] = await Promise.all([
+        reinsuranceService.getTreatyById(id),
+        reinsuranceService.getTreatyCapacity(id),
+        reinsuranceService.getCessionsByTreaty(id),
+        reinsuranceService.getClaimsByTreaty(id),
+        reinsuranceService.getBordereaux()
+      ]);
 
       setTreaty(treatyData);
+      setCapacity(capacityData);
       setCessions(cessionsData);
       setClaims(claimsData);
+      setDocuments(bordereaux.filter(b => String(b.treatyId) === String(treatyData.id)));
     } catch (error) {
       toast.current?.show({
         severity: 'error',
         summary: t('reinsurance.error'),
-        detail: t('reinsurance.failedToLoadTreatyDetails')
+        detail: error?.message || t('reinsurance.failedToLoadTreatyDetails')
       });
     } finally {
       setLoading(false);
@@ -64,7 +68,7 @@ const TreatyDetail = () => {
   };
 
   const statusBodyTemplate = (rowData) => {
-    const severity = rowData.status === 'Active' ? 'success' :
+    const severity = ['Active', 'Confirmed', 'Recovered'].includes(rowData.status) ? 'success' :
                      rowData.status === 'Pending' ? 'warning' : 'danger';
     return <Tag value={rowData.status} severity={severity} />;
   };
@@ -76,12 +80,13 @@ const TreatyDetail = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text p-button-primary"
           tooltip={t('reinsurance.viewDetails')}
-          onClick={() => handleCessionDetails(rowData)}
+          onClick={() => handleCessionDetails(rowData)} aria-label={t('reinsurance.viewDetails')}
         />
         <Button
           icon="pi pi-file-pdf"
           className="p-button-rounded p-button-text"
           tooltip="Generate Bordereau"
+          onClick={() => navigate('/reinsurance/cessions')} aria-label="Generate Bordereau"
         />
       </div>
     );
@@ -126,11 +131,13 @@ const TreatyDetail = () => {
             label="Edit Treaty"
             icon="pi pi-pencil"
             className="p-button-outlined"
+            onClick={() => navigate('/master/reinsurance/treaty')}
           />
           <Button
             label="Generate Report"
             icon="pi pi-file-pdf"
             className="p-button-primary"
+            onClick={() => navigate('/reinsurance/reports')}
           />
         </div>
       </div>
@@ -148,15 +155,15 @@ const TreatyDetail = () => {
             </div>
             <div className="info-item">
               <label>Reinsurer:</label>
-              <span>{treaty.reinsurer}</span>
+              <span>{treaty.reinsurerDetails?.map(r => r.shortName || r.name).join(', ')}</span>
             </div>
             <div className="info-item">
               <label>Coverage:</label>
-              <span>{treaty.coverage}</span>
+              <span>{treaty.lineOfBusiness}</span>
             </div>
             <div className="info-item">
               <label>Limit:</label>
-              <span>{formatCurrency(treaty.limit)}</span>
+              <span>{formatCurrency(treaty.capacity)}</span>
             </div>
             <div className="info-item">
               <label>Retention:</label>
@@ -164,7 +171,7 @@ const TreatyDetail = () => {
             </div>
             <div className="info-item">
               <label>Period:</label>
-              <span>{treaty.effectiveDate} to {treaty.expiryDate}</span>
+              <span>{formatAppDate(treaty.effectiveDate)} to {formatAppDate(treaty.expiryDate)}</span>
             </div>
             <div className="info-item">
               <label>Status:</label>
@@ -181,15 +188,15 @@ const TreatyDetail = () => {
           <div className="utilization-details">
             <div className="detail-row">
               <span>Total Capacity:</span>
-              <strong>{formatCurrency(treaty.limit)}</strong>
+              <strong>{formatCurrency(capacity?.capacity ?? treaty.capacity)}</strong>
             </div>
             <div className="detail-row">
               <span>Used Capacity:</span>
-              <strong>{formatCurrency((treaty.limit * treaty.utilization) / 100)}</strong>
+              <strong>{formatCurrency(capacity?.used ?? 0)}</strong>
             </div>
             <div className="detail-row">
               <span>Available:</span>
-              <strong>{formatCurrency(treaty.limit * (100 - treaty.utilization) / 100)}</strong>
+              <strong>{formatCurrency(capacity?.available ?? treaty.availableCapacity)}</strong>
             </div>
           </div>
         </Card>
@@ -200,7 +207,7 @@ const TreatyDetail = () => {
           <DataTable
             value={cessions}
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             className="cessions-table"
           >
@@ -209,10 +216,10 @@ const TreatyDetail = () => {
             <Column field="insured" header="Insured" sortable />
             <Column field="sumInsured" header="Sum Insured" sortable
               body={(rowData) => formatCurrency(rowData.sumInsured)} />
-            <Column field="premium" header="Premium" sortable
-              body={(rowData) => formatCurrency(rowData.premium)} />
-            <Column field="cededPercentage" header="Ceded %" sortable
-              body={(rowData) => `${rowData.cededPercentage}%`} />
+            <Column field="grossPremium" header="Premium" sortable
+              body={(rowData) => formatCurrency(rowData.grossPremium)} />
+            <Column field="cessionPercentage" header="Ceded %" sortable
+              body={(rowData) => `${rowData.cessionPercentage}%`} />
             <Column field="status" header="Status" body={statusBodyTemplate} />
             <Column header="Actions" body={actionBodyTemplate} />
           </DataTable>
@@ -222,45 +229,41 @@ const TreatyDetail = () => {
           <DataTable
             value={claims}
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             className="claims-table"
           >
             <Column field="claimNumber" header="Claim No" sortable />
             <Column field="policyNumber" header="Policy" sortable />
-            <Column field="dateOfLoss" header="Loss Date" sortable />
+            <Column body={(row) => formatAppDate(row.dateOfLoss)} field="dateOfLoss" header="Loss Date" sortable />
             <Column field="grossClaim" header="Gross Claim" sortable
               body={(rowData) => formatCurrency(rowData.grossClaim)} />
-            <Column field="recoverable" header="Recoverable" sortable
-              body={(rowData) => formatCurrency(rowData.recoverable)} />
+            <Column field="recoverableAmount" header="Recoverable" sortable
+              body={(rowData) => formatCurrency(rowData.recoverableAmount)} />
             <Column field="status" header="Status" body={statusBodyTemplate} />
-            <Column header="Actions" body={actionBodyTemplate} />
           </DataTable>
         </TabPanel>
 
         <TabPanel header="Documents" leftIcon="pi pi-file">
           <div className="documents-section">
             <div className="document-list">
-              <div className="document-item">
-                <i className="pi pi-file-pdf"></i>
-                <span>Treaty Agreement.pdf</span>
-                <Button icon="pi pi-download" className="p-button-text" />
-              </div>
-              <div className="document-item">
-                <i className="pi pi-file-excel"></i>
-                <span>Premium Bordereau Q3 2025.xlsx</span>
-                <Button icon="pi pi-download" className="p-button-text" />
-              </div>
-              <div className="document-item">
-                <i className="pi pi-file-pdf"></i>
-                <span>Claims Bordereau Q3 2025.pdf</span>
-                <Button icon="pi pi-download" className="p-button-text" />
-              </div>
+              {documents.map((doc) => (
+                <div className="document-item" key={doc.id}>
+                  <i className="pi pi-file-excel"></i>
+                  <span>{doc.type} Bordereau {doc.periodLabel} ({doc.reference})</span>
+                  <Button
+                    icon="pi pi-download"
+                    className="p-button-text"
+                    disabled={!doc.fileUrl}
+                    onClick={() => window.open(doc.fileUrl, '_blank', 'noopener')} aria-label="Download" tooltip="Download" tooltipOptions={{ position: "top" }} />
+                </div>
+              ))}
             </div>
             <Button
-              label="Upload Document"
-              icon="pi pi-upload"
+              label="Generate Bordereau"
+              icon="pi pi-file"
               className="p-button-outlined"
+              onClick={() => navigate('/reinsurance/cessions')}
             />
           </div>
         </TabPanel>
@@ -289,7 +292,7 @@ const TreatyDetail = () => {
               </div>
               <div className="detail-item">
                 <label>Line of Business:</label>
-                <span>{selectedCession.lineOfBusiness || 'Motor'}</span>
+                <span>{selectedCession.lineOfBusiness || '-'}</span>
               </div>
               <div className="detail-item">
                 <label>Sum Insured:</label>
@@ -297,25 +300,24 @@ const TreatyDetail = () => {
               </div>
               <div className="detail-item">
                 <label>Premium:</label>
-                <span>{formatCurrency(selectedCession.premium)}</span>
+                <span>{formatCurrency(selectedCession.grossPremium)}</span>
               </div>
               <div className="detail-item">
                 <label>Ceded Percentage:</label>
-                <span>{selectedCession.cededPercentage}%</span>
+                <span>{selectedCession.cessionPercentage}%</span>
               </div>
               <div className="detail-item">
                 <label>Ceded Amount:</label>
-                <span>{formatCurrency((selectedCession.sumInsured * selectedCession.cededPercentage) / 100)}</span>
+                <span>{formatCurrency(selectedCession.cededSumInsured)}</span>
               </div>
               <div className="detail-item">
                 <label>Status:</label>
-                <Tag value={selectedCession.status} severity={selectedCession.status === 'Active' ? 'success' : 'warning'} />
+                <Tag value={selectedCession.status} severity={selectedCession.status === 'Confirmed' ? 'success' : 'warning'} />
               </div>
             </div>
             <Divider />
             <div className="detail-actions">
-              <Button label="View Policy" className="p-button-text" />
-              <Button label="Generate Bordereau" className="p-button-outlined" />
+              <Button label="Generate Bordereau" className="p-button-outlined" onClick={() => navigate('/reinsurance/cessions')} />
               <Button label="Close" className="p-button-secondary" onClick={() => setShowCessionDialog(false)} />
             </div>
           </div>

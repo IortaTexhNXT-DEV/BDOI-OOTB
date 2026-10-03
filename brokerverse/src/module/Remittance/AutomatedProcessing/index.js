@@ -15,8 +15,9 @@ import { Dialog } from "primereact/dialog";
 import { ProgressBar } from "primereact/progressbar";
 import { Timeline } from "primereact/timeline";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { mockRemittanceService } from "../../../services/mockRemittanceService";
-import { automatedRemittanceData, mockCrudOperations } from "../../../services/mockData/remittanceMockData";
+import remittanceService from "../../../services/remittanceService";
+import authService from "../../../services/authService";
+import { calendarDateFormat, formatDate, formatDateTime, isoDate, showError, statusSeverity } from "../shared";
 import "./index.scss";
 
 const AutomatedRemittanceProcessing = () => {
@@ -33,32 +34,16 @@ const AutomatedRemittanceProcessing = () => {
   const [processingHistory, setProcessingHistory] = useState([]);
   const [validationResults, setValidationResults] = useState(null);
   const [validationDialogVisible, setValidationDialogVisible] = useState(false);
+  const [scheduledRemittances, setScheduledRemittances] = useState([]);
+  const [executionHistory, setExecutionHistory] = useState([]);
   const toast = useRef(null);
 
-  // Load data from mock data service
-  const [configurations, setConfigurations] = useState(automatedRemittanceData.configurations);
-  const [executionHistory, setExecutionHistory] = useState(automatedRemittanceData.executionHistory);
-  const [scheduledRemittances, setScheduledRemittances] = useState(
-    automatedRemittanceData.configurations.map((config, index) => ({
-      id: config.id,
-      scheduleCode: config.code,
-      insurerName: config.code.includes('001') ? "Allianz Insurance" : "AXA Insurance",
-      scheduledDate: new Date(config.nextRun),
-      policyCount: Math.floor(Math.random() * 50) + 10,
-      estimatedAmount: Math.floor(Math.random() * 100000) + 25000,
-      status: config.status === "Active" ? "Ready" : "On Hold",
-      frequency: config.frequency,
-      includeTypes: config.includeTypes,
-      excludeStatuses: config.excludeStatuses
-    }))
-  );
-
-  const [headerData] = useState({
+  const headerData = {
     currentDate: new Date(),
-    lastRun: new Date("2025-09-25 14:30:00"),
-    pendingCount: 3,
-    currentUser: "John Doe"
-  });
+    lastRun: executionHistory[0]?.executionDate ? new Date(executionHistory[0].executionDate) : null,
+    pendingCount: scheduledRemittances.filter((r) => r.status === 'Ready').length,
+    currentUser: authService.getUser()?.displayName || localStorage.getItem("USER_NAME") || ""
+  };
 
   const items = [
     { label: t("remittance.finance"), url: "#" },
@@ -68,13 +53,48 @@ const AutomatedRemittanceProcessing = () => {
 
   const home = { icon: <SvgDot />, url: "#" };
 
+  const loadData = async () => {
+    setLoading(true);
+    try {
+      const [candidates, history] = await Promise.all([
+        remittanceService.automatedCandidates(),
+        remittanceService.automatedHistory()
+      ]);
+      setScheduledRemittances(candidates || []);
+      setExecutionHistory(history || []);
+    } catch (error) {
+      showError(toast, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
   const calculateSummary = () => {
-    const total = selectedRemittances.reduce((acc, item) => acc + item.estimatedAmount, 0);
-    const policies = selectedRemittances.reduce((acc, item) => acc + item.policyCount, 0);
+    const total = selectedRemittances.reduce((acc, item) => acc + Number(item.estimatedAmount || 0), 0);
+    const policies = selectedRemittances.reduce((acc, item) => acc + Number(item.policyCount || 0), 0);
     return {
       count: selectedRemittances.length,
       amount: total,
       policies: policies
+    };
+  };
+
+  const candidateValidation = (items) => {
+    const results = items.map((item) => ({
+      id: item.id,
+      code: `${item.scheduleCode} / ${item.insurerName}`,
+      valid: item.status === 'Ready',
+      errors: item.status === 'Ready' ? [] : [item.status]
+    }));
+    return {
+      totalValidated: results.length,
+      validCount: results.filter((r) => r.valid).length,
+      invalidCount: results.filter((r) => !r.valid).length,
+      results
     };
   };
 
@@ -91,7 +111,10 @@ const AutomatedRemittanceProcessing = () => {
 
     setLoading(true);
     try {
-      const results = await mockRemittanceService.validateRemittances(selectedRemittances);
+      const fresh = await remittanceService.automatedCandidates();
+      setScheduledRemittances(fresh || []);
+      const selectedIds = selectedRemittances.map((r) => r.id);
+      const results = candidateValidation((fresh || []).filter((r) => selectedIds.includes(r.id)));
       setValidationResults(results);
       setValidationDialogVisible(true);
 
@@ -111,12 +134,7 @@ const AutomatedRemittanceProcessing = () => {
         });
       }
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("remittance.validationFailed"),
-        detail: error.message,
-        life: 4000
-      });
+      showError(toast, error, t("remittance.validationFailed"));
     } finally {
       setLoading(false);
     }
@@ -133,15 +151,15 @@ const AutomatedRemittanceProcessing = () => {
       return;
     }
 
-    const totalAmount = selectedRemittances.reduce((sum, item) => sum + item.estimatedAmount, 0);
+    const totalAmount = selectedRemittances.reduce((sum, item) => sum + Number(item.estimatedAmount || 0), 0);
 
     confirmDialog({
       message: (
         <div>
           <p>{t("remittance.youAreAboutToProcess", { count: selectedRemittances.length })}</p>
           <p><strong>{t("remittance.totalAmount")} {formatCurrency(totalAmount)}</strong></p>
-          <p>{t("remittance.processingDate")} {processingDate.toLocaleDateString()}</p>
-          {overrideCutoff && <p style={{color: '#ef4444'}}>⚠ {t("remittance.cutoffOverrideEnabled")}</p>}
+          <p>{t("remittance.processingDate")} {formatDate(processingDate)}</p>
+          {overrideCutoff && <p style={{color: 'var(--color-danger)'}}>⚠ {t("remittance.cutoffOverrideEnabled")}</p>}
           <p>{t("remittance.doYouWantToContinue")}</p>
         </div>
       ),
@@ -159,83 +177,51 @@ const AutomatedRemittanceProcessing = () => {
     });
   };
 
+  // Generate draft remittances for the selected candidates, validate them and submit the valid ones for approval.
   const processRemittances = async () => {
     setProcessing(true);
-    setProcessProgress(0);
-
-    // Simulate progress
-    const interval = setInterval(() => {
-      setProcessProgress((prev) => {
-        if (prev >= 90) {
-          clearInterval(interval);
-          return 90;
-        }
-        return prev + 10;
-      });
-    }, 200);
-
+    setProcessProgress(10);
     try {
-      // Use mock CRUD operations
-      const processResults = await Promise.all(
-        selectedRemittances.map(async (remittance) => {
-          return await mockCrudOperations.update('remittance', remittance.id, {
-            status: 'Processing',
-            processedDate: processingDate.toISOString(),
-            processedBy: 'System Admin'
-          });
-        })
-      );
-
-      clearInterval(interval);
+      const execution = await remittanceService.executeAutomated({ ids: selectedRemittances.map((r) => r.id) });
+      setProcessProgress(40);
+      const generatedIds = (execution.remittances || []).map((r) => r.id);
+      const validation = generatedIds.length ? await remittanceService.validateRemittances(generatedIds) : { results: [] };
+      setProcessProgress(70);
+      const validIds = (validation.results || []).filter((r) => r.valid).map((r) => r.id);
+      if (validIds.length) await remittanceService.processRemittances(validIds);
       setProcessProgress(100);
-
-      const totalAmount = selectedRemittances.reduce((sum, item) => sum + item.estimatedAmount, 0);
-      const processedIds = selectedRemittances.map(item => item.id);
 
       toast.current.show({
         severity: 'success',
         summary: t("remittance.processingComplete"),
-        detail: t("remittance.successfullyProcessed", { count: selectedRemittances.length, amount: formatCurrency(totalAmount) }),
+        detail: t("remittance.successfullyProcessed", { count: validIds.length, amount: formatCurrency(execution.totalAmount) }),
         life: 5000
       });
-
-      // Clear selection after successful processing
+      if (validation.invalidCount) {
+        setValidationResults(validation);
+        setValidationDialogVisible(true);
+      }
       setSelectedRemittances([]);
-
-      // Update the status of processed items
-      setScheduledRemittances(prev =>
-        prev.map(item => {
-          if (processedIds.includes(item.id)) {
-            return { ...item, status: 'Processing' };
-          }
-          return item;
-        })
-      );
-
-      // Add to execution history
-      const newHistoryEntry = {
-        id: executionHistory.length + 1,
-        configCode: 'MANUAL-' + new Date().getTime(),
-        executionDate: processingDate.toISOString().split('T')[0],
-        status: 'Success',
-        recordsProcessed: selectedRemittances.length,
-        totalAmount: totalAmount,
-        duration: '2m 30s'
-      };
-      setExecutionHistory(prev => [newHistoryEntry, ...prev]);
-
+      await loadData();
     } catch (error) {
-      clearInterval(interval);
-      toast.current.show({
-        severity: 'error',
-        summary: t("remittance.processingFailed"),
-        detail: error.message || t("remittance.errorDuringProcessing"),
-        life: 5000
-      });
+      showError(toast, error, t("remittance.processingFailed"));
     } finally {
       setProcessing(false);
       setTimeout(() => setProcessProgress(0), 1000);
     }
+  };
+
+  const createSchedules = async () => {
+    const configs = [...new Map(selectedRemittances.map((r) => [r.scheduleCode, r])).values()];
+    const day = isoDate(processingDate);
+    await Promise.all(configs.map((c) => remittanceService.createSchedule({
+      code: `SCH-${c.scheduleCode}-${day.replace(/-/g, '')}`,
+      name: `${c.configName} (${day})`,
+      type: 'Remittance Processing',
+      frequency: c.frequency,
+      nextRun: day,
+      linkedProcesses: [c.scheduleCode]
+    })));
   };
 
   const handleScheduleLater = () => {
@@ -250,17 +236,22 @@ const AutomatedRemittanceProcessing = () => {
     }
 
     confirmDialog({
-      message: t("remittance.scheduleRemittancesFor", { count: selectedRemittances.length, date: processingDate.toLocaleDateString() }),
+      message: t("remittance.scheduleRemittancesFor", { count: selectedRemittances.length, date: formatDate(processingDate) }),
       header: t("remittance.scheduleProcessing"),
       icon: 'pi pi-clock',
-      accept: () => {
-        toast.current.show({
-          severity: 'info',
-          summary: t("remittance.scheduled"),
-          detail: t("remittance.remittancesScheduledFor", { count: selectedRemittances.length, date: processingDate.toLocaleDateString() }),
-          life: 4000
-        });
-        setSelectedRemittances([]);
+      accept: async () => {
+        try {
+          await createSchedules();
+          toast.current.show({
+            severity: 'info',
+            summary: t("remittance.scheduled"),
+            detail: t("remittance.remittancesScheduledFor", { count: selectedRemittances.length, date: formatDate(processingDate) }),
+            life: 4000
+          });
+          setSelectedRemittances([]);
+        } catch (error) {
+          showError(toast, error);
+        }
       }
     });
   };
@@ -268,46 +259,22 @@ const AutomatedRemittanceProcessing = () => {
   const handleViewHistory = async () => {
     setLoading(true);
     try {
-      // Use data from mock service
-      const history = executionHistory.map(item => ({
-        batchId: item.configCode,
-        status: item.status === 'Success' ? 'Completed' : 'Failed',
-        processedBy: 'System Admin',
-        processedAt: new Date(item.executionDate + 'T10:00:00'),
-        itemCount: item.recordsProcessed,
-        totalAmount: item.totalAmount,
-        duration: item.duration
-      }));
-      setProcessingHistory(history);
+      const history = await remittanceService.processingHistory();
+      setProcessingHistory(history || []);
       setHistoryVisible(true);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("remittance.failedToLoadProcessingHistory"),
-        life: 3000
-      });
+      showError(toast, error, t("remittance.failedToLoadProcessingHistory"));
     } finally {
       setLoading(false);
     }
   };
 
   const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'Ready': return 'success';
-        case 'Processing': return 'info';
-        case 'On Hold': return 'warning';
-        case 'Error': return 'danger';
-        default: return null;
-      }
-    };
-
-    return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
+    return <Tag value={rowData.status} severity={rowData.status === 'Ready' ? 'success' : statusSeverity(rowData.status)} />;
   };
 
   const dateBodyTemplate = (rowData) => {
-    return rowData.scheduledDate.toLocaleDateString();
+    return formatDate(rowData.dueDate);
   };
 
   const amountBodyTemplate = (rowData) => {
@@ -322,12 +289,11 @@ const AutomatedRemittanceProcessing = () => {
         <div className="history-item">
           <div className="history-header">
             <span className="batch-id">{item.batchId}</span>
-            <Tag severity={item.status === 'Completed' ? 'success' : item.status === 'Failed' ? 'danger' : 'warning'}
-                 value={item.status} />
+            <Tag severity={statusSeverity(item.status)} value={item.status} />
           </div>
           <div className="history-details">
             <p><i className="pi pi-user"></i> {item.processedBy}</p>
-            <p><i className="pi pi-calendar"></i> {item.processedAt.toLocaleString()}</p>
+            <p><i className="pi pi-calendar"></i> {formatDateTime(item.processedAt)}</p>
             <p><i className="pi pi-file"></i> {item.itemCount} items</p>
             <p><i className="pi pi-wallet"></i> {formatCurrency(item.totalAmount)}</p>
             <p><i className="pi pi-clock"></i> {item.duration}</p>
@@ -348,11 +314,11 @@ const AutomatedRemittanceProcessing = () => {
           <div className="info-bar">
             <div className="info-item">
               <span className="label">Current Date</span>
-              <span className="value">{headerData.currentDate.toLocaleDateString()}</span>
+              <span className="value">{formatDate(headerData.currentDate)}</span>
             </div>
             <div className="info-item">
               <span className="label">Last Run</span>
-              <span className="value">{headerData.lastRun.toLocaleString()}</span>
+              <span className="value">{headerData.lastRun ? formatDate(headerData.lastRun) : "-"}</span>
             </div>
             <div className="info-item highlight">
               <span className="label">Pending Batches</span>
@@ -371,6 +337,7 @@ const AutomatedRemittanceProcessing = () => {
             <Card title="Scheduled Remittances">
               <DataTable
                 value={scheduledRemittances}
+                loading={loading}
                 selection={selectedRemittances}
                 onSelectionChange={(e) => setSelectedRemittances(e.value)}
                 dataKey="id"
@@ -418,7 +385,7 @@ const AutomatedRemittanceProcessing = () => {
                     id="processingDate"
                     value={processingDate}
                     onChange={(e) => setProcessingDate(e.value)}
-                    dateFormat="mm/dd/yy"
+                    dateFormat={calendarDateFormat()}
                     className="full-width"
                   />
                 </div>
@@ -521,7 +488,7 @@ const AutomatedRemittanceProcessing = () => {
                   <span>Valid: {validationResults.validCount}</span>
                 </div>
                 <div className="summary-item">
-                  <i className="pi pi-times-circle" style={{color: 'red'}}></i>
+                  <i className="pi pi-times-circle" style={{color: 'var(--color-danger)'}}></i>
                   <span>Invalid: {validationResults.invalidCount}</span>
                 </div>
               </div>

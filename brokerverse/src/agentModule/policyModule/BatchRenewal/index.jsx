@@ -7,7 +7,7 @@ import BatchTable from "./BatchTable";
 export default function BatchRenewalPage() {
   const { t } = useTranslation();
   const items = [{ label: t("batchRenewalPage.batchRenewal"), url: "/agent/renewal-batch" }];
-  const Initiate = { label: t("batchRenewalPage.home") };
+  const Initiate = { label: t("sidebar.Operations") };
 
   return (
     <div className="policy__table__container mt-4">

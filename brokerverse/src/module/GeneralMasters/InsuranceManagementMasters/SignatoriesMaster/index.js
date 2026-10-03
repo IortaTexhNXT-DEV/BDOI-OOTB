@@ -1,21 +1,16 @@
-import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import TableData from "./TableData/index";
-import SvgUploade from "../../../../assets/icons/SvgUploade";
 import { useNavigate } from "react-router-dom";
 
 const Index = () => {
   const { t } = useTranslation();
   const navigation = useNavigate();
-  const [visible, setVisible] = useState(false);
 
-  const [popUpAction, setpopUpAction] = useState(null);
 
   const items = [
     {
@@ -54,8 +49,7 @@ const Index = () => {
               </div>
             }
             className="main__btn__action"
-            onClick={() => handleAction()}
-          >
+            onClick={() => handleAction()} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             {t("generalMasters.add")}
           </Button>
           </div>

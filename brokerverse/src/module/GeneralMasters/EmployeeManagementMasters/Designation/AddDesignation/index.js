@@ -1,7 +1,6 @@
 import { BreadCrumb } from "primereact/breadcrumb";
-import React, { useRef, useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import NavBar from "../../../../../components/NavBar";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import "./index.scss";
 import InputField from "../../../../../components/InputField";
@@ -13,11 +12,17 @@ import { useNavigate, useParams } from "react-router-dom";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { useDispatch, useSelector } from "react-redux";
-import { patchDesignationEditMiddleware, postAddDesignationMiddleware } from "../store/designationMiddleware";
+import {
+  getDesignationPatchData,
+  getDesignationViewData,
+  patchDesignationEditMiddleware,
+  postAddDesignationMiddleware,
+} from "../store/designationMiddleware";
+import useMasterOptions, { useMasterRecordOptions } from "../../../common/useMasterOptions";
 
 const AddDesignation = ({ action }) => {
   const { t } = useTranslation();
-  const { getEditData, loading, getViewData } = useSelector(
+  const { getEditData, getViewData } = useSelector(
     ({ designationMainReducers }) => {
       return {
         loading: designationMainReducers?.loading,
@@ -26,14 +31,9 @@ const AddDesignation = ({ action }) => {
       };
     }
   );
-  console.log(getViewData, "getViewData");
   const { id } = useParams();
-  console.log(id, "find id");
   const navigate = useNavigate();
   const toastRef = useRef(null);
-  const [visiblePopup, setVisiblePopup] = useState("");
-
-
 
   const items = [
     { label: t("generalMasters.employeeManagement") },
@@ -41,7 +41,6 @@ const AddDesignation = ({ action }) => {
       label: t("generalMasters.designation"),
       url: "/master/generals/employeemanagement/designation",
     },
-    ,
     {
       label: action === "add"
         ? t("generalMasters.addDesignation")
@@ -51,48 +50,13 @@ const AddDesignation = ({ action }) => {
     },
   ];
   const home = { label: "Master" };
-  const item = [
-    {
-      label: action === "add" ? "Motor" : getViewData?.departmentCode,
-      value: action === "add" ? "Motor" : getViewData?.departmentCode
-    },
-    {
-      label: action === "add" ? "Fire" : getViewData?.departmentCode,
-      value: action === "add" ? "Fire" : getViewData?.departmentCode
-    },
-    {
-      label: action === "add" ? "Engineering" : getViewData?.departmentCode,
-      value: action === "add" ? "Engineering" : getViewData?.departmentCode
-    }
-  ];
-  const item1 = [
-    {
-      label: action === "add" ? "1" : getViewData?.level,
-      value: action === "add" ? "1" : getViewData?.level
-    },
-    {
-      label: action === "add" ? "2" : getViewData?.level,
-      value: action === "add" ? "2" : getViewData?.level
-    },
-    {
-      label: action === "add" ? "3" : getViewData?.level,
-      value: action === "add" ? "3" : getViewData?.level
-    }
-  ];
-  const item2 = [
-    {
-      label: action === "add" ? "1" : getViewData?.reportingtoLevel,
-      value: action === "add" ? "1" : getViewData?.reportingtoLevel
-    },
-    {
-      label: action === "add" ? "2" : getViewData?.reportingtoLevel,
-      value: action === "add" ? "2" : getViewData?.reportingtoLevel
-    },
-     {
-      label: action === "add" ? "3" : getViewData?.reportingtoLevel,
-      value: action === "add" ? "3" : getViewData?.reportingtoLevel
-    }
-  ];
+  const item = useMasterOptions("department", { valueKey: "code" });
+  const levelOptions = useMasterRecordOptions("hierarchy", (row) => ({
+    label: String(row.levelNumber),
+    value: row.levelNumber,
+  }));
+  const item1 = levelOptions;
+  const item2 = levelOptions;
 
   const initialValue = {
     designationCode: action === "view" ? getViewData?.designationCode : "",
@@ -106,7 +70,6 @@ const AddDesignation = ({ action }) => {
   };
   const validate = (values) => {
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.designationCode) {
       errors.designationCode = "Designation Code is required";
     }
@@ -130,25 +93,23 @@ const AddDesignation = ({ action }) => {
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const dispatch = useDispatch()
-  const handleSubmit = (values) => {
-    console.log(values, "values");
-    if (action === "add") {
-      dispatch(postAddDesignationMiddleware(formik.values))
+  useEffect(() => {
+    if (!id) return;
+    if (action === "edit") dispatch(getDesignationPatchData(id));
+    if (action === "view") dispatch(getDesignationViewData(id));
+  }, [action, id, dispatch]);
+  const handleSubmit = async (values) => {
+    const thunk = action === "add" ? postAddDesignationMiddleware : patchDesignationEditMiddleware;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "add" ? undefined : { detail: t("financeMasters.saveSuccessfully") });
+      setTimeout(() => {
+        navigate("/master/generals/employeemanagement/designation");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
-    if (action === "edit") {
-      dispatch(patchDesignationEditMiddleware(values))
-    }
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      setVisiblePopup(false);
-      navigate("/master/generals/employeemanagement/designation")
-    }, 3000);
-
   };
-  const [designationCodeDataOption, setDesignationCodeDataOption] = useState([])
-  const [levelDataOption, setLevelDataOption] = useState([])
-  const [reportingToLevelData, setReportingToLevelData] = useState([])
   const setFormikValues = () => {
     const designationCodeData = getEditData?.departmentCode
     const levelData = getEditData?.level
@@ -156,7 +117,7 @@ const AddDesignation = ({ action }) => {
     const updatedValues = {
       id: getEditData?.id,
       designationCode: getEditData?.designationCode,
-      designationName: getEditData.designationName,
+      designationName: getEditData?.designationName,
       designationDescription: getEditData?.designationDescription,
       departmentCode: designationCodeData,
       level: levelData,
@@ -165,19 +126,6 @@ const AddDesignation = ({ action }) => {
       modifiedOn: getEditData?.modifiedOn,
       reportingtoLevel: reportingToLevelDataOption,
     };
-    if (designationCodeData) {
-      setDesignationCodeDataOption([{ label: designationCodeData, value: designationCodeData }])
-      formik.setValues({ ...formik.values, ...updatedValues });
-    }
-    if (levelData) {
-      setLevelDataOption([{ label: levelData, value: levelData }])
-      formik.setValues({ ...formik.values, ...updatedValues });
-    }
-    if (reportingToLevelDataOption) {
-      setReportingToLevelData([{ label: reportingToLevelDataOption, value: reportingToLevelDataOption }])
-      formik.setValues({ ...formik.values, ...updatedValues });
-
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
   useEffect(() => {
@@ -228,7 +176,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationCode : formik.values.designationCode}
                 onChange={formik.handleChange("designationCode")}
-                // error={formik.errors.designationCode}
                 label={t("generalMasters.designationCode")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -236,7 +183,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.designationCode &&
                 formik.errors.designationCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.designationCode}
                   </div>
                 )}
@@ -246,7 +193,6 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.designationName : formik.values.designationName}
                 onChange={formik.handleChange("designationName")}
-                // error={formik.errors.designationName}
                 label={t("generalMasters.designationName")}
                 classNames="dropdown__add__sub"
                 className="label__sub__add"
@@ -254,7 +200,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.designationName &&
                 formik.errors.designationName && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.designationName}
                   </div>
                 )}
@@ -272,7 +218,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.designationDescription &&
                 formik.errors.designationDescription && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.designationDescription}
                   </div>
                 )}
@@ -282,19 +228,18 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.departmentCode : formik.values.departmentCode}
                 onChange={formik.handleChange("departmentCode")}
-                // error={formik.errors.departmentCode}
                 className="dropdown__add__sub"
                 label={t("generalMasters.departmentCode")}
                 classNames="label__sub__add"
                 placeholder={"Select"}
-                options={action === "add" ? item : action === "edit" ? designationCodeDataOption : item}
+                options={item}
                 optionValue={"label"}
                 optionLabel="label"
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.departmentCode &&
                 formik.errors.departmentCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.departmentCode}
                   </div>
                 )}
@@ -305,13 +250,11 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.level : formik.values.level}
                 onChange={formik.handleChange("level")}
-                // error={formik.errors.level}
                 className="dropdown__add__sub"
                 label={t("generalMasters.level")}
                 classNames="label__sub__add"
                 placeholder={"Select"}
-                // options={item1}
-                options={action === "add" ? item1 : action === "edit" ? levelDataOption : item1}
+                options={item1}
 
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 optionValue={"label"}
@@ -319,7 +262,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.level &&
                 formik.errors.level && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.level}
                   </div>
                 )}
@@ -329,12 +272,11 @@ const AddDesignation = ({ action }) => {
                 disabled={action === "view" ? true : false}
                 value={action === "view" ? getViewData?.reportingtoLevel : formik.values.reportingtoLevel}
                 onChange={formik.handleChange("reportingtoLevel")}
-                // error={formik.errors.reportingtoLevel}
                 className="dropdown__add__sub"
                 label={t("generalMasters.reportingToLevel")}
                 classNames="label__sub__add"
                 placeholder={"Select"}
-                options={action === "add" ? item2 : action === "edit" ? reportingToLevelData : item2}
+                options={item2}
 
                 optionValue={"label"}
                 optionLabel="label"
@@ -342,7 +284,7 @@ const AddDesignation = ({ action }) => {
               />
               {formik.touched.reportingtoLevel &&
                 formik.errors.reportingtoLevel && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.reportingtoLevel}
                   </div>
                 )}
@@ -382,13 +324,11 @@ const AddDesignation = ({ action }) => {
               onClick={() => {
                 formik.handleSubmit();
               }}
-              disabled={!formik.isValid}
             />
           )}
           {action === "edit" && (
             <Button
               className="save__add__btn"
-              disabled={!formik.isValid}
               onClick={formik.handleSubmit}
             >
               {t("generalMasters.update")}
@@ -397,8 +337,7 @@ const AddDesignation = ({ action }) => {
         </div>
         <CustomToast
           ref={toastRef}
-          message="Designation Code CC1234 
-is added"
+          message={`Designation Code ${formik.values.designationCode || ""} is added`}
         />
       </div>
     </div>

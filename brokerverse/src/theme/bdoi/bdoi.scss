@@ -442,3 +442,6 @@ h6 {
     border-color: $brand-field-blue;
   }
 }
+
+// Enterprise consistency layer (tables, page structure, forms, dialogs); see enterprise.scss.
+@import "./enterprise";

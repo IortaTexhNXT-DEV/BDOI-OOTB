@@ -2,14 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import "../CurrencyMaster/index.scss";
-import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
-import NavBar from "../../../components/NavBar";
-import SvgFilters from "../../../assets/icons/SvgFilters";
-import InputField from "../../../components/InputField";
-import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
-import { Paginator } from "primereact/paginator";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
@@ -18,26 +12,36 @@ import { InputText } from "primereact/inputtext";
 import SvgUploade from "../../../assets/icons/SvgUploade";
 import SvgTable from "../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
-import ToggleButton from "../../../components/ToggleButton";
-import SvgEditicon from "../../../assets/icons/SvgEdit";
-// import { useNavigation } from '';
-import { TieredMenu } from "primereact/tieredmenu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getCurrencyDetailEdit,
   getCurrencyDetailView,
   getCurrencySearchList,
+  getCurrencyList,
 } from "./store/currencyMasterMiddlewar";
 import SvgEditicons from "../../../assets/icons/SvgEditicons";
 import { useTranslation } from "react-i18next";
+import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
+import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("currency", "Currencies")];
 
 const CurrencyMaster = () => {
   const { t } = useTranslation();
+  const [showUpload, setShowUpload] = useState(false);
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getCurrencyList());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getCurrencyList());
+  }, [dispatch]);
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
 
-  const { CurrencyList, loading, CurrencySearchList } = useSelector(
+  const { CurrencyList, CurrencySearchList } = useSelector(
     ({ currencyMasterReducer }) => {
       return {
         loading: currencyMasterReducer?.loading,
@@ -53,21 +57,14 @@ const CurrencyMaster = () => {
       <SvgTable />
     </div>
   );
-  const menu = useRef(null);
-  const menuitems = [
-    { label: t("common.name") },
-    { label: t("common.date") },
-    { label: t("accounts.voucherNumber") },
-  ];
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -95,21 +92,11 @@ const CurrencyMaster = () => {
         <Button
           icon={<SvgEyeIcon />}
           className="eye__btn"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
         <Button
           icon={<SvgEditicons />}
           className="eye__btn"
-          onClick={() => handleEdit(rowData)}
-        />
-      </div>
-    );
-  };
-
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
+          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -150,8 +137,6 @@ const CurrencyMaster = () => {
   const items = [{ label: t("sidebar.Currency"), url: "/master/finance/currency" }];
   const home = { label: t("sidebar.Master") };
 
-  const handleClick = () => {};
-
   useEffect(() => {
     if (search?.length > 0) {
       dispatch(getCurrencySearchList(search));
@@ -160,6 +145,7 @@ const CurrencyMaster = () => {
 
   return (
     <div className="grid  container__currency">
+      <Toast ref={statusToast} />
       <div className="col-12 md:col-6 lg:col-6 mb-1">
         <div className="add__icon__title">{t("financeMasters.currencyMaster")}</div>
         <div className="mt-3">
@@ -173,14 +159,12 @@ const CurrencyMaster = () => {
       </div>
       <div className="col-12 md:col-6 lg:col-6 add__icon__alighn mb-1">
         <div className="btn__container">
-          <Button
+          <Button onClick={() => setShowUpload(true)}
             label={t("financeMasters.upload")}
             icon={<SvgUploade color={"#fff"} />}
             className="upload__btn"
-            onClick={() => {
-              handleClick();
-            }}
           />
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload currencies" targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button
             label={t("common.add")}
             icon={<SvgAdd color={"#fff"} />}
@@ -208,13 +192,6 @@ const CurrencyMaster = () => {
                 />
               </div>
             </div>
-            <div className="col-12 md:col-2 lg:col-2">
-              {/* <TieredMenu model={menuitems} popup ref={menu} breakpoint="767px" />
-            <Button label="Search by" outlined icon={<SvgDropdownicon />}
-              className="sorbyfilter_container"
-              onClick={(e) => menu.current.toggle(e)}
-            /> */}
-            </div>
           </div>
           <div className="col-12 ">
             <div className="main__tabel__title p-2">{t("financeMasters.currencyList")}</div>
@@ -233,27 +210,26 @@ const CurrencyMaster = () => {
                 scrollable={true}
                 scrollHeight="40vh"
                 paginator
-                rows={5}
-                rowsPerPageOptions={[5, 10, 25, 50]}
-                // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+                rows={20}
+                rowsPerPageOptions={[20, 50, 100]}
                 currentPageReportTemplate="{first} - {last} of {totalRecords}"
                 paginatorTemplate={template2}
                 emptyMessage={isEmpty ? emptyTableIcon : null}
               >
                 <Column
-                  field="Currencycode"
+                  field="CurrencyCode"
                   header={t("financeMasters.currencyCode")}
                   sortable
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.Currencycode?.toUpperCase()}
+                  body={(rowData) => rowData.CurrencyCode?.toUpperCase()}
                 ></Column>
                 <Column
                   field="CurrencyName"
                   header={t("financeMasters.currencyName")}
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.CurrencyName?.toUpperCase()}
+                  body={(rowData) => rowData.CurrencyName}
                   //   sortable
                 ></Column>
                 <Column
@@ -284,10 +260,17 @@ const CurrencyMaster = () => {
                   header={t("financeMasters.unitDescription")}
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.UnitDescription?.toUpperCase()}
+                  body={(rowData) => rowData.UnitDescription}
                 ></Column>
                 <Column
-                  body={(columnData) => <ToggleButton id={columnData.id} />}
+                  field="isBase"
+                  header={t("financeMasters.baseCurrency", { defaultValue: "Accounting base currency" })}
+                  headerStyle={headerStyle}
+                  className="fieldvalue_container"
+                  body={(rowData) => (rowData.isBase === true ? t("financeMasters.baseCurrencyYes", { defaultValue: "Base currency" }) : "")}
+                ></Column>
+                <Column
+                  body={(columnData) => <MasterStatusToggle type="currency" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header={t("financeMasters.status")}
                   headerStyle={{ textAlign: "center", ...headerStyle }}
                   className="fieldvalue_container"

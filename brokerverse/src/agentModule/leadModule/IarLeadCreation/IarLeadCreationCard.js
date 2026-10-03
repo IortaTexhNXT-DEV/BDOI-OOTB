@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isValidMobile, mobileHint, normalizeMobile } from "../../../utility/phoneFormat";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,7 +13,7 @@ import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -35,11 +36,16 @@ import {
   IAR_PRODUCT_CODE,
   IAR_SECTION_CATALOG,
   IAR_SECTION_SUGGESTIONS,
-  IAR_VAT_PERCENT,
   buildPremiumSectionsFromRisks,
   makeId,
   recalculateIarPremiumDetails,
 } from "./iarConstants";
+import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
+import useTaxRates from "../../quoteModule/utils/useTaxRates";
+import logger from "../../../utility/logger";
+import { notifyWarn } from "../../../utility/dialogs";
+import CustomerResponseActions from "../../quoteModule/customerResponse/CustomerResponseActions";
+import RequestForQuotationButton from "../../../module/Placement/RequestForQuotationButton";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -63,7 +69,7 @@ const personalDetailsInitialValue = {
   gender: "Male",
 };
 
-const getPersonalDetailsValidation = (t) => (values) => {
+const getPersonalDetailsValidation = (t, ageLimits) => (values) => {
   const errors = {};
   if (values.category === "Corporate") {
     if (!values.CompanyName) errors.CompanyName = t("fireLead.fieldRequired");
@@ -79,8 +85,8 @@ const getPersonalDetailsValidation = (t) => (values) => {
   }
   if (!values.ContactNumber) {
     errors.ContactNumber = t("fireLead.phoneRequired");
-  } else if (!/^\d{10}$/.test(values.ContactNumber)) {
-    errors.ContactNumber = t("fireLead.invalidPhone");
+  } else if (!isValidMobile(values.ContactNumber)) {
+    errors.ContactNumber = `${t("fireLead.invalidPhone")} (e.g. ${mobileHint()})`;
   }
   if (!values.HouseNo) errors.HouseNo = t("fireLead.fieldRequired");
   if (!values.Barangay) errors.Barangay = t("fireLead.fieldRequired");
@@ -89,6 +95,7 @@ const getPersonalDetailsValidation = (t) => (values) => {
   if (!values.City) errors.City = t("fireLead.fieldRequired");
   if (!values.ZIPCode) errors.ZIPCode = t("fireLead.fieldRequired");
   if (!values.DateofBirth) errors.DateofBirth = t("fireLead.fieldRequired");
+  else if (birthDateError(values.DateofBirth, ageLimits)) errors.DateofBirth = birthDateError(values.DateofBirth, ageLimits);
   if (!values.category) errors.category = t("fireLead.fieldRequired");
   if (!values.gender) errors.gender = t("fireLead.fieldRequired");
   return errors;
@@ -126,6 +133,10 @@ const leadToPersonalFormValues = (lead) => {
 
 const IarLeadCreationCard = ({ step, onStepChange }) => {
   const { t } = useTranslation();
+  // VAT of the fire line from the premium tax and charge engine, the rate the server prices the quotation with
+  const taxRates = useTaxRates("fire");
+  const vatPercentConfigured = Number(((Number(taxRates.valueAddedTax) || 0) * 100).toFixed(4));
+  const ageLimits = useAgeLimits();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -134,7 +145,9 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   const setStep = onStepChange;
   const currentStep = step;
 
-  const existingLeadFromState = location.state?.lead;
+  // an existing customer picked in Create prospect pre-fills the personal details, and the prospect is linked to it
+  const existingClient = location.state?.existingClient;
+  const existingLeadFromState = location.state?.lead || existingClient;
   const existingLeadRefId =
     location.state?.leadRefId ||
     location.state?.leadId ||
@@ -157,10 +170,14 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   );
   const [premiumDetails, setPremiumDetails] = useState({
     sections: [],
-    vatPercent: IAR_VAT_PERCENT,
+    vatPercent: vatPercentConfigured,
     discount: 0,
     discountPercent: 0,
   });
+  // The configured rate arrives after the first render: re-price with it
+  useEffect(() => {
+    setPremiumDetails((prev) => (prev.vatPercent === vatPercentConfigured ? prev : recalculateIarPremiumDetails({ ...prev, vatPercent: vatPercentConfigured })));
+  }, [vatPercentConfigured]);
   const [discountPct, setDiscountPct] = useState(0);
   const [commissionDetails, setCommissionDetails] = useState(
     defaultCommissionDetails()
@@ -185,7 +202,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       ? leadToPersonalFormValues(existingLeadFromState)
       : personalDetailsInitialValue,
     enableReinitialize: true,
-    validate: getPersonalDetailsValidation(t),
+    validate: getPersonalDetailsValidation(t, ageLimits),
     onSubmit: async (values) => {
       if (existingLeadRefId) {
         setCreatedLeadId(existingLeadRefId);
@@ -196,13 +213,14 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       try {
         const payload = {
           lob: "IAR",
+          ...(existingClient ? { clientId: existingClient.clientId || existingClient.id } : {}),
           companyName: values.CompanyName || null,
           taxInformationNumber: values.TaxNumber || null,
           firstName: values.FirstName,
           lastName: values.LastName,
           preferredName: values.PreferredName,
           emailId: values.EmailID,
-          contactNumber: values.ContactNumber,
+          contactNumber: normalizeMobile(values.ContactNumber),
           houseNo: values.HouseNo,
           barangay: values.Barangay,
           country:
@@ -222,7 +240,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           DOB: values.DateofBirth
             ? typeof values.DateofBirth === "string"
               ? values.DateofBirth
-              : values.DateofBirth.toISOString?.().split("T")[0]
+              : toIsoDate(values.DateofBirth)
             : "",
           leadCategory: values.category || "Retail",
           gender: values.gender || "Male",
@@ -482,7 +500,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     setPremiumDetails((prev) =>
       recalculateIarPremiumDetails({
         ...prev,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
         sections: buildPremiumSectionsFromRisks(iarSections),
       })
     );
@@ -631,7 +649,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     try {
       const premium = recalculateIarPremiumDetails({
         ...calculatedPremium,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
         discount: 0,
         discountPercent: 0,
       });
@@ -685,7 +703,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
         ...prev,
         discountPercent: capped,
         discount: discountAmount,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
       })
     );
   };
@@ -696,7 +714,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     }
     const premium = recalculateIarPremiumDetails({
       ...calculatedPremium,
-      vatPercent: IAR_VAT_PERCENT,
+      vatPercent: vatPercentConfigured,
     });
     const values = policyFormik.values;
     const result = await quotationService.updateIarQuotation(createdQuotationId, {
@@ -747,7 +765,8 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       );
       if (result.success) {
         setQuotationStatus("PendingCustomer");
-        toastRef.current?.showToast({
+        if (result.data?.emailSending === false) notifyWarn(t("customerResponse.emailNotConfigured"));
+        else toastRef.current?.showToast({
           detail: t("iarLead.quoteSentToCustomer", "Quote sent to customer for approval"),
         });
       } else if (result.error?.includes?.("PendingCustomer")) {
@@ -778,7 +797,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
         if (status) setQuotationStatus(status);
       }
     } catch (err) {
-      console.warn("Failed to fetch quotation status:", err);
+      logger.warn("Failed to fetch quotation status:", err);
     }
   }, [createdQuotationId]);
 
@@ -834,7 +853,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.CompanyName &&
               personalFormik.errors.CompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.CompanyName}
                 </div>
               )}
@@ -847,7 +866,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.TaxNumber &&
               personalFormik.errors.TaxNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.TaxNumber}
                 </div>
               )}
@@ -864,7 +883,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.FirstName &&
             personalFormik.errors.FirstName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.FirstName}
               </div>
             )}
@@ -877,7 +896,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.LastName &&
             personalFormik.errors.LastName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.LastName}
               </div>
             )}
@@ -893,7 +912,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.PreferredName &&
             personalFormik.errors.PreferredName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.PreferredName}
               </div>
             )}
@@ -902,13 +921,14 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           <DatepickerField
             label={t("fireLead.dateOfBirth") + "*"}
             value={personalFormik.values.DateofBirth}
+            {...birthDateRange(ageLimits)}
             onChange={(date) =>
               personalFormik.setFieldValue("DateofBirth", date.target.value)
             }
           />
           {personalFormik.touched.DateofBirth &&
             personalFormik.errors.DateofBirth && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.DateofBirth}
               </div>
             )}
@@ -952,7 +972,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.EmailID &&
             personalFormik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.EmailID}
               </div>
             )}
@@ -962,10 +982,12 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             label={t("fireLead.contactNumber") + "*"}
             value={personalFormik.values.ContactNumber}
             onChange={personalFormik.handleChange("ContactNumber")}
+            inputMode="tel"
+            hint={mobileHint()}
           />
           {personalFormik.touched.ContactNumber &&
             personalFormik.errors.ContactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.ContactNumber}
               </div>
             )}
@@ -988,7 +1010,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.Country &&
             personalFormik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.Country}
               </div>
             )}
@@ -1011,7 +1033,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           )}
           {personalFormik.touched.ZIPCode &&
             personalFormik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.ZIPCode}
               </div>
             )}
@@ -1037,7 +1059,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.Province &&
             personalFormik.errors.Province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.Province}
               </div>
             )}
@@ -1058,7 +1080,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             disabled={!personalFormik.values.Province}
           />
           {personalFormik.touched.City && personalFormik.errors.City && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {personalFormik.errors.City}
             </div>
           )}
@@ -1091,7 +1113,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           )}
           {personalFormik.touched.Barangay &&
             personalFormik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.Barangay}
               </div>
             )}
@@ -1104,7 +1126,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.HouseNo &&
             personalFormik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.HouseNo}
               </div>
             )}
@@ -1303,8 +1325,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
                       text
                       rounded
                       severity="danger"
-                      onClick={() => removeItem(section.sectionId, item.id)}
-                    />
+                      onClick={() => removeItem(section.sectionId, item.id)} aria-label="Remove" tooltip="Remove" tooltipOptions={{ position: "top" }} />
                   </div>
                 </div>
                 <div className="mt-2">
@@ -1340,8 +1361,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
                         severity="danger"
                         onClick={() =>
                           removePeril(section.sectionId, item.id, peril.id)
-                        }
-                      />
+                        } aria-label="Remove" tooltip="Remove" tooltipOptions={{ position: "top" }} />
                     </div>
                   ))}
                   <PerilAdder
@@ -1372,6 +1392,21 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       </div>
       <div className="flex justify-content-between gap-2 mt-4">
         <Button label={t("common.back", "Back")} outlined onClick={() => setStep(2)} />
+        {/* same prospect and risk, sent to the market instead of priced from the tariff */}
+        <RequestForQuotationButton
+          disabled={!createdLeadId || !calculatedPremium.totalSumInsured}
+          prefill={{
+            leadRefId: createdLeadId,
+            leadName: personalFormik.values.CompanyName || [personalFormik.values.FirstName, personalFormik.values.LastName].filter(Boolean).join(" "),
+            productType: IAR_PRODUCT_TYPE,
+            riskDetails: Object.fromEntries(iarSections.map((s) => [s.sectionLabel, s.riskLocation || s.remarks])),
+            // one requested cover per section: the sum of its items' perils
+            requestedCovers: (calculatedPremium.sections || []).map((s) => ({
+              cover: iarSections.find((x) => x.id === s.sectionId)?.sectionLabel || s.sectionLabel,
+              sumInsured: (s.items || []).reduce((sum, item) => sum + (item.perils || []).reduce((a, p) => a + (Number(p.sumInsured) || 0), 0), 0),
+            })),
+          }}
+        />
         <Button
           label={t("common.continue", "Continue")}
           loading={isSaving}
@@ -1495,7 +1530,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
               </div>
               <div className="quote_details">
                 <label className="insurance_text">
-                  {t("agent.valueAddedTax", "Value Added Tax")} ({IAR_VAT_PERCENT}
+                  {t("agent.valueAddedTax", "Value Added Tax")} ({vatPercentConfigured}
                   %)
                 </label>
                 <label className="alpha_text">
@@ -1592,23 +1627,11 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             onClick={() => setStep(3)}
           />
           {quotationStatus === "PendingCustomer" ? (
-            <div
-              className="waiting-notice"
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#fef3c7",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                fontSize: 14,
-              }}
-            >
-              <i className="pi pi-clock" style={{ marginRight: "8px" }} />
-              {t(
-                "quoteDetailView.waitingForCustomerApproval",
-                "Waiting for customer approval"
-              )}
-            </div>
+            <CustomerResponseActions
+              quotationId={createdQuotationId}
+              notice={t("quoteDetailView.waitingForCustomerApproval", "Waiting for customer approval")}
+              onRecorded={fetchQuotationStatus}
+            />
           ) : (
             <Button
               label={t(

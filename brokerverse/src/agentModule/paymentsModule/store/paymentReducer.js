@@ -4,146 +4,9 @@ import { getPaymentPaidSearchDataMiddleWare, getPaymentPendingSearchDataMiddleWa
 const initialState = {
   loading: false,
   error: "",
-  paymenttabledata: [
-    {
-      id: 1,
-      type: "Policy",
-      name: "CarsonDarrin",
-      clintid: "123",
-      policyNo: "999",
-      grosspremium: "355",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PAID"
-    },
-    {
-      id: 2,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "456",
-      policyNo: "98456",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PAID"
-    },
-    {
-      id: 3,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "566",
-      policyNo: "123456",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PAID"
-    },
-    {
-      id: 4,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "786",
-      policyNo: "67856",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PAID"
-    },
-
-  ],
-  paymentPendingtabledata: [
-    {
-      id: 1,
-      type: "Policy",
-      name: "CarsonDarrin",
-      clintid: "123",
-      policyNo: "999",
-      grosspremium: "355",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PENDING"
-    },
-    {
-      id: 2,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "456",
-      policyNo: "98456",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PENDING"
-    },
-    {
-      id: 3,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "566",
-      policyNo: "123456",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PENDING"
-    },
-    {
-      id: 4,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "786",
-      policyNo: "67856",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "PENDING"
-    },
-
-  ],
-  paymentRewiwingtabledata:[
-    {
-      id: 1,
-      type: "Policy",
-      name: "CarsonDarrin",
-      clintid: "123",
-      policyNo: "999",
-      grosspremium: "355",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "REVIEWING"
-    },
-    {
-      id: 2,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "456",
-      policyNo: "98456",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2024",
-      status: "REVIEWING"
-    },
-    {
-      id: 3,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "566",
-      policyNo: "123456",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "REVIEWING"
-    },
-    {
-      id: 4,
-      type: "Renewal Policy",
-      name: "Carson Darrin",
-      clintid: "786",
-      policyNo: "67856",
-      grosspremium: "655",
-      policyIssued: "13/12/2024",
-      policyExpird: "13/12/2025",
-      status: "REVIEWING"
-    },
-  ],
+  paymenttabledata: [],
+  paymentPendingtabledata: [],
+  paymentRewiwingtabledata: [],
   paymentSearchList: [],
   postpaymentdata: {},
   paymentPendingSearchList: [],
@@ -245,7 +108,7 @@ const paymentReducer = createSlice({
     builder.addCase(getPaymentSearchDataMiddleWare.rejected, (state, action) => {
       state.loading = false;
 
-      state.paymentSearchList = {};
+      state.paymentSearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -260,7 +123,7 @@ const paymentReducer = createSlice({
     builder.addCase(getPaymentPendingSearchDataMiddleWare.rejected, (state, action) => {
       state.loading = false;
 
-      state.paymentPendingSearchList = {};
+      state.paymentPendingSearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
@@ -275,7 +138,7 @@ const paymentReducer = createSlice({
     builder.addCase(getPaymentPaidSearchDataMiddleWare.rejected, (state, action) => {
       state.loading = false;
 
-      state.paymentPaidSearchList = {};
+      state.paymentPaidSearchList = [];
       state.error = typeof action.payload === "string" ? action.payload : "";
     });
 
