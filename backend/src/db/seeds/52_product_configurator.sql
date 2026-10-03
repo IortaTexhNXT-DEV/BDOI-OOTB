@@ -206,3 +206,15 @@ INSERT INTO product_risk_sections(id, mapping_id, section_code, section_label, r
 VALUES ($s$prs_iar_ctpl$s$, 'prm_iar', $s$CTPL$s$, $s$Compulsory Third Party Liability$s$, NULL, 0.25, 4, 'seed', 'seed') ON CONFLICT (mapping_id, section_code) DO NOTHING;
 INSERT INTO product_risk_sections(id, mapping_id, section_code, section_label, remarks, default_rate_percent, sort_order, created_by, updated_by)
 VALUES ($s$prs_iar_life$s$, 'prm_iar', $s$LIFE$s$, $s$Life$s$, NULL, 0.3, 6, 'seed', 'seed') ON CONFLICT (mapping_id, section_code) DO NOTHING;
+
+-- Templates name their line of business by the Line of Business master code (migration 0242_product_template_lob_codes.sql).
+UPDATE product_templates t SET line_of_business = lob.code, updated_at = now()
+FROM products p, master_records lob
+WHERE p.id = t.product_id AND lob.type_code = 'line-of-business' AND lob.status = 'active' AND lob.code = upper(p.line)
+  AND t.line_of_business IS DISTINCT FROM lob.code;
+
+UPDATE product_templates t SET line_of_business = lob.code, updated_at = now()
+FROM master_records lob
+WHERE lob.type_code = 'line-of-business' AND lob.status = 'active' AND t.line_of_business IS DISTINCT FROM lob.code
+  AND (lower(lob.code) = lower(t.line_of_business) OR lower(lob.name) = lower(t.line_of_business))
+  AND NOT EXISTS (SELECT 1 FROM master_records x WHERE x.type_code = 'line-of-business' AND x.code = t.line_of_business);

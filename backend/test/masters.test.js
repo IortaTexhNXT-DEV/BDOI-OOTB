@@ -152,21 +152,15 @@ describe('master type definitions', () => {
 });
 
 describe('commission master', () => {
-  it('issues the code, leaves Effective To open, keeps several covers and matches every sales person when none is set', async () => {
+  it('is retired: the Commission Rate Matrix is the only commission source, the records stay readable', async () => {
     const base = { desc: 'Motor comprehensive, all sales', insuranceCompany: 'Any Insurer', product: 'Motor', maxRate: 15, effectiveFrom: '2026-01-01' };
     const c = await ctx.api('post', '/masters/commission').send({ ...base, selectCover: ['Own Damage', 'Theft'] });
-    expect(c.status).toBe(201);
-    const rec = c.body.data;
-    expect(rec.commissionCode).toMatch(/^COM-\d+/);
-    expect(rec.effectiveTo ?? null).toBeNull();
-    expect(rec.selectCover).toEqual(['Own Damage', 'Theft']);
-    const byCover = await ctx.api('get', '/masters/commission?selectCover=theft');
-    expect(byCover.body.data.map((x) => x.id)).toContain(rec.id);
-    const bySales = await ctx.api('get', '/masters/commission?selectAgent=ana.reyes');
-    expect(bySales.body.data.map((x) => x.id)).toContain(rec.id);
-    const bad = await ctx.api('post', '/masters/commission').send({ ...base, selectCover: ['Theft'], effectiveTo: '2025-12-31' });
-    expect(bad.status).toBe(400);
-    expect(JSON.stringify(bad.body)).toContain('effectiveTo');
+    expect(c.status).toBe(400);
+    expect(c.body.message).toMatch(/retired .* Commission Rate Matrix/);
+    const all = await ctx.api('get', '/masters/commission');
+    expect(all.status).toBe(200);
+    expect(all.body.data.length).toBeGreaterThan(0);
+    expect(all.body.data.every((r) => r.status === 'Inactive')).toBe(true);
   });
 });
 

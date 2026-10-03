@@ -19,10 +19,8 @@ import { InputNumber } from "primereact/inputnumber";
 import { Checkbox } from "primereact/checkbox";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
-import { Panel } from "primereact/panel";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Chips } from "primereact/chips";
-import { Timeline } from "primereact/timeline";
 import { ProgressBar } from "primereact/progressbar";
 import { Chart } from "primereact/chart";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
@@ -141,6 +139,11 @@ export const ProductTemplateManager = () => {
   } = useSelector((state) => state.productConfiguratorReducer || {});
 
   const [categoryOptions, setCategoryOptions] = useState([]);
+  // line of business and product come from the masters (Line of Business master, products), so the codes match
+  const [lobOptions, setLobOptions] = useState([]);
+  const [productRows, setProductRows] = useState([]);
+
+  const productOptions = productRows.map((p) => ({ label: `${p.productCode} - ${p.productName}`, value: p.id }));
 
   const statusOptions = [
     { label: t("productTemplateManager.active"), value: "Active" },
@@ -154,6 +157,14 @@ export const ProductTemplateManager = () => {
       .options("product-category")
       .then((options) => setCategoryOptions(options.map((o) => ({ label: o.label, value: o.value }))))
       .catch(() => setCategoryOptions([]));
+    mastersService
+      .options("line-of-business")
+      .then((options) => setLobOptions(options.map((o) => ({ label: `${o.code} - ${o.label}`, value: o.code }))))
+      .catch(() => setLobOptions([]));
+    mastersService
+      .list("product", { status: "Active" })
+      .then((rows) => setProductRows(rows))
+      .catch(() => setProductRows([]));
 
     return () => {
       dispatch(clearProductTemplate());
@@ -285,6 +296,7 @@ export const ProductTemplateManager = () => {
         name,
         category,
         lineOfBusiness,
+        productId,
         effectiveDate,
         status,
         description,
@@ -298,6 +310,7 @@ export const ProductTemplateManager = () => {
         name,
         category,
         lineOfBusiness,
+        productId: productId ?? null,
         effectiveDate: formattedEffectiveDate,
         status,
         description: description || "",
@@ -503,16 +516,37 @@ export const ProductTemplateManager = () => {
               <FieldError error={templateErrors.category} />
             </div>
             <div className="field col-12 md:col-6">
+              <label>{t("productTemplateManager.product")}</label>
+              <Dropdown
+                value={selectedTemplate?.productId ?? null}
+                options={productOptions}
+                filter
+                showClear
+                placeholder={t("productTemplateManager.selectProduct")}
+                onChange={(e) => {
+                  const product = productRows.find((p) => p.id === e.value);
+                  const lob = product && lobOptions.find((o) => o.value === String(product.lineofBusiness || "").toUpperCase());
+                  setSelectedTemplate({
+                    ...selectedTemplate,
+                    productId: e.value ?? null,
+                    ...(lob ? { lineOfBusiness: lob.value } : {}),
+                  });
+                }}
+              />
+            </div>
+            <div className="field col-12 md:col-6">
               <label>{t("productTemplateManager.lineOfBusiness")} *</label>
-              <InputText
-                value={selectedTemplate?.lineOfBusiness || ""}
+              <Dropdown
+                value={selectedTemplate?.lineOfBusiness || null}
+                options={lobOptions}
+                filter
+                placeholder={t("productTemplateManager.selectLineOfBusiness")}
                 onChange={(e) =>
                   setSelectedTemplate({
                     ...selectedTemplate,
-                    lineOfBusiness: e.target.value,
+                    lineOfBusiness: e.value,
                   })
                 }
-                placeholder={t("productTemplateManager.lineOfBusinessPlaceholder")}
               />
               <FieldError error={templateErrors.lineOfBusiness} />
             </div>
@@ -1251,223 +1285,6 @@ export const UnderwritingRules = () => {
           </div>
           <Button label={t("underwritingRules.saveRule")} icon="pi pi-check" onClick={saveRule} />
         </div>
-      </Dialog>
-    </div>
-  );
-};
-
-// PC-6: Approval Workflows
-export const ApprovalWorkflows = () => {
-  const { t } = useTranslation();
-  const [selectedWorkflow, setSelectedWorkflow] = useState(null);
-  const toast = useRef(null);
-  const { rows: workflows, load: loadWorkflows } = useComponentList(
-    "workflows",
-    toast,
-    t("approvalWorkflows.error"),
-    t("approvalWorkflows.failedToLoad")
-  );
-
-  const typeOptions = [
-    { label: t("approvalWorkflows.sequential", "Sequential"), value: "Sequential" },
-    { label: t("approvalWorkflows.parallel", "Parallel"), value: "Parallel" },
-  ];
-
-  const updateStage = (index, field, value) => {
-    const stages = selectedWorkflow.stages.map((stage, i) =>
-      i === index ? { ...stage, [field]: value } : stage
-    );
-    setSelectedWorkflow({ ...selectedWorkflow, stages });
-  };
-
-  const addStage = () =>
-    setSelectedWorkflow({
-      ...selectedWorkflow,
-      stages: [...selectedWorkflow.stages, { level: selectedWorkflow.stages.length + 1, role: "", sla: "" }],
-    });
-
-  const saveWorkflow = async () => {
-    const stages = selectedWorkflow.stages.filter((stage) => stage.role.trim());
-    const saved = await persist(
-      () => productConfiguratorService.saveComponent("workflows", { ...selectedWorkflow, stages }),
-      toast,
-      {
-        success: t("common.success"),
-        successDetail: selectedWorkflow.workflowName,
-        error: t("approvalWorkflows.error"),
-        errorDetail: t("approvalWorkflows.failedToSave", "Failed to save workflow"),
-      }
-    );
-    if (saved) {
-      setSelectedWorkflow(null);
-      loadWorkflows();
-    }
-  };
-
-  const workflowTemplate = (workflow) => {
-    const events = (workflow.stages || []).map((stage) => ({
-      status: stage.role,
-      date: `SLA: ${stage.sla}`,
-      icon: "pi pi-user",
-      color: "#9C27B0",
-    }));
-
-    return (
-      <Timeline
-        value={events}
-        align="left"
-        className="customized-timeline"
-        marker={(item) => (
-          <span
-            className="flex align-items-center justify-content-center"
-            style={{
-              backgroundColor: item.color,
-              color: "white",
-              borderRadius: "50%",
-              width: "2rem",
-              height: "2rem",
-            }}
-          >
-            <i className={item.icon}></i>
-          </span>
-        )}
-        content={(item) => (
-          <Card>
-            <h5>{item.status}</h5>
-            <p>{item.date}</p>
-          </Card>
-        )}
-      />
-    );
-  };
-
-  return (
-    <div className="approval-workflows p-3">
-      <Toast ref={toast} />
-      <Card title={t("approvalWorkflows.cardTitle")}>
-        <div className="mb-3 flex justify-content-between">
-          <h3>{t("approvalWorkflows.pageTitle")}</h3>
-          <Button
-            label={t("approvalWorkflows.createWorkflow")}
-            icon="pi pi-plus"
-            onClick={() =>
-              setSelectedWorkflow({ type: "Sequential", triggers: [], stages: [{ level: 1, role: "", sla: "" }] })
-            }
-          />
-        </div>
-
-        {workflows.map((workflow) => (
-          <Panel
-            key={workflow.id}
-            header={workflow.workflowName}
-            toggleable
-            className="mb-3"
-          >
-            <div className="grid">
-              <div className="col-8">{workflowTemplate(workflow)}</div>
-              <div className="col-4">
-                <Card title={t("approvalWorkflows.workflowDetails")}>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.code")}:</label>
-                    <p>{workflow.workflowCode}</p>
-                  </div>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.type")}:</label>
-                    <p>
-                      <Tag value={workflow.type} />
-                    </p>
-                  </div>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.status")}:</label>
-                    <p>
-                      <Tag value={workflow.status} severity="success" />
-                    </p>
-                  </div>
-                  <div className="field">
-                    <label>{t("approvalWorkflows.triggers")}:</label>
-                    {(workflow.triggers || []).map((trigger) => (
-                      <Tag
-                        key={trigger}
-                        value={trigger}
-                        className="mr-2 mb-2"
-                      />
-                    ))}
-                  </div>
-                  <Button
-                    icon="pi pi-pencil"
-                    className="p-button-text"
-                    onClick={() => setSelectedWorkflow({ ...workflow, triggers: workflow.triggers || [], stages: workflow.stages || [] })}
-                  />
-                </Card>
-              </div>
-            </div>
-          </Panel>
-        ))}
-      </Card>
-
-      <Dialog
-        header={t("approvalWorkflows.createWorkflow")}
-        visible={!!selectedWorkflow}
-        style={{ width: "50vw" }}
-        onHide={() => setSelectedWorkflow(null)}
-      >
-        {selectedWorkflow && (
-          <div className="p-fluid">
-            <div className="field">
-              <label>{t("approvalWorkflows.code")}</label>
-              <InputText
-                value={selectedWorkflow.workflowCode || ""}
-                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, workflowCode: e.target.value })}
-              />
-            </div>
-            <div className="field">
-              <label>{t("approvalWorkflows.name", "Name")}</label>
-              <InputText
-                value={selectedWorkflow.workflowName || ""}
-                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, workflowName: e.target.value })}
-              />
-            </div>
-            <div className="field">
-              <label>{t("approvalWorkflows.type")}</label>
-              <Dropdown
-                value={selectedWorkflow.type}
-                options={typeOptions}
-                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, type: e.value })}
-              />
-            </div>
-            <div className="field">
-              <label>{t("approvalWorkflows.triggers")}</label>
-              <Chips
-                value={selectedWorkflow.triggers}
-                onChange={(e) => setSelectedWorkflow({ ...selectedWorkflow, triggers: e.value })}
-              />
-            </div>
-            {selectedWorkflow.stages.map((stage, index) => (
-              <div className="formgrid grid" key={index}>
-                <div className="field col-8">
-                  <label>{t("approvalWorkflows.role", "Role")} {index + 1}</label>
-                  <InputText value={stage.role} onChange={(e) => updateStage(index, "role", e.target.value)} />
-                </div>
-                <div className="field col-4">
-                  <label>SLA</label>
-                  <InputText value={stage.sla} onChange={(e) => updateStage(index, "sla", e.target.value)} />
-                </div>
-              </div>
-            ))}
-            <Button
-              label={t("approvalWorkflows.addStage", "Add Stage")}
-              icon="pi pi-plus"
-              className="p-button-text mb-3"
-              onClick={addStage}
-            />
-            <Button
-              label={t("common.save")}
-              icon="pi pi-check"
-              onClick={saveWorkflow}
-              disabled={!selectedWorkflow.workflowCode || !selectedWorkflow.workflowName}
-            />
-          </div>
-        )}
       </Dialog>
     </div>
   );

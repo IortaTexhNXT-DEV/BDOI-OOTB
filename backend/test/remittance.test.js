@@ -193,11 +193,9 @@ describe('work items', () => {
     expect(file.text).toContain('Policy Number');
     expect((await ctx.api('post', '/remittance/statements/generate').send({})).status).toBe(400);
     expect((await ctx.api('get', '/remittance/statements')).body.total).toBe(1);
-    const tpl = await ctx.api('get', '/remittance/reports/templates');
-    const rep = await ctx.api('post', '/remittance/reports/generate').send({ templateCode: tpl.body.data[0].code, from: '2025-01-01', to: '2026-12-31' });
-    expect(rep.body.data).toMatchObject({ status: 'Completed', format: 'CSV' });
-    const gen = await pool.query('SELECT count(*)::int AS n FROM generated_reports WHERE code LIKE \'remittance:%\'');
-    expect(gen.rows[0].n).toBe(1);
+    // the orphan Remittance > Reports screen and its template master are gone: Reports > Remittance summary is the report
+    expect((await ctx.api('get', '/remittance/reports/templates')).status).toBe(404);
+    expect((await ctx.api('post', '/remittance/reports/generate').send({ templateCode: 'RPT-001' })).status).toBe(404);
     const e = await ctx.api('post', '/remittance/exceptions').send({ type: 'Amount Mismatch', severity: 'High', amount: 800, description: 'Short credit' });
     expect(e.body.data).toMatchObject({ status: 'Open', severity: 'High', age: 0 });
     expect((await ctx.api('post', `/remittance/exceptions/${e.body.data.id}/resolve`).send({})).status).toBe(400);
@@ -205,7 +203,7 @@ describe('work items', () => {
     expect(r.body.data.status).toBe('Resolved');
     expect((await ctx.api('get', '/remittance/exceptions?status=Open')).body.data.length).toBeGreaterThanOrEqual(2);
   });
-  it('notifications, schedules and delegations', async () => {
+  it('notifications and schedules', async () => {
     const n = await ctx.api('post', '/remittance/notifications').send({ type: 'Payment Reminder', subject: 'Payment due', content: 'Please pay', recipients: 'a@x.example; b@x.example', channel: 'Email' });
     expect(n.body.data).toMatchObject({ status: 'Sent', recipients: 'a@x.example, b@x.example', queuedEmails: 2 });
     expect((await ctx.api('get', '/remittance/notifications/inbox')).body.data.length).toBeGreaterThan(0);
@@ -220,8 +218,8 @@ describe('work items', () => {
     const paused = await ctx.api('patch', `/remittance/schedules/${created.body.data.id}/status`).send({ status: 'Paused' });
     expect(paused.body.data.status).toBe('Inactive');
     expect((await ctx.api('post', `/remittance/schedules/${created.body.data.id}/run`)).status).toBe(409);
-    const d = await ctx.api('post', '/remittance/approvals/delegations').send({ delegateTo: 'r.finance', fromDate: '2026-10-01', toDate: '2026-10-07', reason: 'Leave' });
-    expect(d.body.data).toMatchObject({ delegatedTo: 'R Finance', status: 'Active' });
+    // approval cover is given in Master > User Management > Delegations (user_delegations), not on the Remittance screen
+    expect((await ctx.api('post', '/remittance/approvals/delegations').send({ delegateTo: 'r.finance', fromDate: '2026-10-01', toDate: '2026-10-07', reason: 'Leave' })).status).toBe(404);
   });
   it('automated candidates and execution', async () => {
     const c = await ctx.api('get', '/remittance/automated/candidates');
@@ -271,7 +269,8 @@ describe('work items', () => {
     expect(au.body.data.length).toBeGreaterThan(0);
     expect((await ctx.api('get', '/remittance/history/system-logs')).body.data.length).toBeGreaterThan(0);
     const m = await ctx.api('get', '/remittance/masters');
-    expect(new Set(m.body.data.map((x) => x.type)).size).toBe(16);
+    // the configuration types of the Remittance Master; schedules (Scheduling) and the retired types are not listed
+    expect([...new Set(m.body.data.map((x) => x.type))].sort()).toEqual(['Adjustment', 'AgencyBill', 'Automated', 'BulkProcessing', 'Exception', 'Notification', 'Settlement', 'Statement']);
     expect((await ctx.api('get', '/remittance/masters?type=Automated')).body.data.every((x) => x.type === 'Automated')).toBe(true);
   });
   it('denies users without remittance permission', async () => {

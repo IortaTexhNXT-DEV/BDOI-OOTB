@@ -6,7 +6,6 @@ import exchangeMasterReducer from "../module/FinanceMastersModule/ExchangeRateMa
 import bankMasterReducer from "../module/FinanceMastersModule/BankMaster/store/bankMasterReducer";
 import accountCategoryReducer from "../module/FinanceMastersModule/AccountCategoryMaster/store/accountCategoryReducer";
 import mainAccoutReducers from "../module/FinanceMastersModule/MainAccountMaster/store/mainAccountReducer";
-import commissionMianReducers from "../module/GeneralMasters/Commission/store/commissionReducers";
 import subAccountMainReducers from "../module/FinanceMastersModule/SubAccountMaster/store/subAccountReducers";
 import receiptsTableReducers from "../module/Receipts/store/receiptsReducers";
 import pettyCashInitiateReducer from "../module/PettyCashManagement/Initiate/store/pettyCashInitiateReducer";
@@ -15,7 +14,6 @@ import pettyCashReceiptsReducer from "../module/PettyCashManagement/Receipts/sto
 import pettyCashReplenishReducer from "../module/PettyCashManagement/Replenish/store/pettyCashReplenishReducer";
 import pettyCashRequestReducer from "../module/PettyCashManagement/Request/store/pettyCashRequestReducer";
 
-import pettyCashMainReducers from "../module/FinanceMastersModule/PettyCashMaster/store/pettyCashMasterReducers";
 import receivableTableReducers from "../module/Receipts/store/receiptsReducers";
 import editReducers from "../module/Receipts/store/receiptsReducers";
 import reversalMainReducers from "../module/Reversals/store/reversalReducers";
@@ -27,7 +25,6 @@ import organizationBranchMainReducers from "../module/GeneralMasters/Organizatio
 import organizationCompanyMainReducers from "../module/GeneralMasters/OrganizationMasters/CompanyMaster/store/companyReducers";
 import countryReducers from "../module/GeneralMasters/LocationMasters/CountryMaster/store/countryReducers";
 import cityReducers from "../module/GeneralMasters/LocationMasters/CityMaster/store/cityReducers";
-import employeeReducers from "../module/GeneralMasters/EmployeeManagementMasters/Employee/store/employeeReducers";
 import userReducers from "../module/GeneralMasters/UserManagementMasters/User/store/userReducers";
 import roleMainReducers from "../module/GeneralMasters/UserManagementMasters/Role/store/roleReducers";
 import insuranceLineOfBusinessReducers from "../module/GeneralMasters/InsuranceManagementMasters/LineOfBusiness/store/insuranceLineOfBusinessReducers";
@@ -73,9 +70,7 @@ const reducers = {
   bankMasterReducer,
   accountCategoryReducer,
   mainAccoutReducers,
-  commissionMianReducers,
   subAccountMainReducers,
-  pettyCashMainReducers,
   receiptsTableReducers,
   pettyCashInitiateReducer,
   pettyCashDisbursementReducers,
@@ -92,7 +87,6 @@ const reducers = {
   organizationCompanyMainReducers,
   countryReducers,
   cityReducers,
-  employeeReducers,
   userReducers,
   roleMainReducers,
   insuranceLineOfBusinessReducers,

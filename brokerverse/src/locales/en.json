@@ -1087,7 +1087,9 @@
     "rejectReason": "Reason",
     "disbursementRecorded": "Petty cash disbursement recorded",
     "receiptRecorded": "Petty cash receipt recorded",
-    "replenishmentRecorded": "Petty cash replenishment recorded"
+    "replenishmentRecorded": "Petty cash replenishment recorded",
+    "pettyCashSizeRequired": "Petty Cash Size must be greater than zero",
+    "pettyCashCodeAuto": "Leave empty for the next code"
   },
   "employeeBenefit": {
     "lead": "Prospect",
@@ -1539,7 +1541,27 @@
     "validationFailed": "Validation failed",
     "validationSuccessful": "Validation successful",
     "view": "View",
-    "youAreAboutToProcess": "You are about to process"
+    "youAreAboutToProcess": "You are about to process",
+    "approvalLimitsTitle": "Approval limits",
+    "approvalLimitsNote": "Who may approve a settlement, and up to what amount, is set in the Authority Matrix (transaction type \"Remittance settlement, adjustment and transfer\").",
+    "openAuthorityMatrix": "Open the Authority Matrix",
+    "approvalAuthorityNote": "Approval limits come from the Authority Matrix; cover for an absent approver is given in User Management > Delegations.",
+    "authorityMatrix": "Authority Matrix",
+    "userDelegations": "Delegations",
+    "scheduleSaved": "Schedule saved",
+    "schedulingNote": "A schedule names the insurers to remit and the cut-off. Due schedules run on the \"Remittance schedules\" job of Master > Schedules (time zone {{timeZone}}).",
+    "scheduleJobOn": "Job on",
+    "scheduleJobOff": "Job off",
+    "openSchedules": "Open Master > Schedules",
+    "scheduleInsurers": "Insurers to remit",
+    "cutOffDays": "Cut-off (days)",
+    "cutOffDaysHelp": "Policies incepted up to this many days before the run date are remitted.",
+    "editSchedule": "Edit Schedule",
+    "scheduleCode": "Code",
+    "scheduleAutomated": "Automated remittance (when no insurers are named)",
+    "scheduleAutomatedHelp": "Used only by a schedule without insurers.",
+    "transferredToday": "Transferred today",
+    "transferLimitsNote": "Limits per method: Master > Configuration (remittance.transfer_methods)"
   },
   "incentive": {
     "incentive": "Incentive",
@@ -2074,7 +2096,9 @@
     "pettyCashBreadcrumb": "Petty Cash",
     "accountCategoryList": "Account Category List",
     "accountCategoryCodeHeader": "Account Category Code",
-    "accountCategoryNameHeader": "Account Category Name"
+    "accountCategoryNameHeader": "Account Category Name",
+    "remittanceMasterNote": "Approval limits, schedules and remittance settings are kept on their own screens:",
+    "configurationSettings": "Configuration (remittance settings)"
   },
   "automatedRemittance": {
     "pageTitle": "Automated Remittance Master",
@@ -3769,7 +3793,10 @@
     "inactive": "Inactive",
     "draft": "Draft",
     "retire": "Retire",
-    "reactivate": "Reactivate"
+    "reactivate": "Reactivate",
+    "product": "Product",
+    "selectProduct": "Select a product",
+    "selectLineOfBusiness": "Select a line of business"
   },
   "productRiskMapping": {
     "cardTitle": "Risk Mapping",

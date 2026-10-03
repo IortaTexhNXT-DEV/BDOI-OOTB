@@ -486,9 +486,22 @@ export async function setRecordStatus(t, id, status, user) {
 /**
  * Master types withdrawn from use, with the screen that replaced them. Their records are kept for reference (read
  * only); creating, changing or (de)activating a record is refused. taxation: the legacy taxation master, whose records
- * also wrote tax.* settings, replaced by the tax codes master and Premium Taxes & LGU Rates (migration 0233).
+ * also wrote tax.* settings, replaced by the tax codes master and Premium Taxes & LGU Rates (migration 0233). The
+ * others duplicated another screen or were read by nothing (migration 0241): each value now has one place.
  */
-export const RETIRED_TYPES = new Map([['taxation', 'Master > Finance > Taxation (tax codes) and Master > Finance > Premium Taxes & LGU Rates']]);
+export const RETIRED_TYPES = new Map([
+  ['taxation', 'Master > Finance > Taxation (tax codes) and Master > Finance > Premium Taxes & LGU Rates'],
+  ['remittance-approval-workflow', 'Master > User Management > Authority Matrix (remittance approval limits)'],
+  ['remittance-reconciliation-rule', 'Master > Configuration (remittance.reconciliation_tolerance)'],
+  ['remittance-electronic-transfer', 'Master > Configuration (remittance.transfer_methods)'],
+  ['remittance-history-config', 'Accounts > Remittance > History'],
+  ['remittance-analytics-config', 'Master > Configuration (remittance.kpi_targets)'],
+  ['remittance-direct-bill', 'Master > Configuration (direct_bill.* settings)'],
+  ['remittance-report-template', 'Reports > Remittance summary'],
+  ['commission', 'Master > Finance > Commission Rate Matrix'],
+  ['employee', 'Master > User Management > User'],
+  ['petty-cash', 'Accounts > Petty Cash > Initiate'],
+]);
 function assertNotRetired(t) {
   if (RETIRED_TYPES.has(t.code)) throw badRequest(`The ${t.label} master is retired and can no longer be changed; use ${RETIRED_TYPES.get(t.code)}`);
 }

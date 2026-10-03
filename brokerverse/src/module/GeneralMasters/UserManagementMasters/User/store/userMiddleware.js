@@ -58,6 +58,9 @@ export const postAddUserMiddleware = createAsyncThunk(
         password: payload?.password || undefined,
         roles: Array.isArray(payload?.roles) ? payload.roles : [],
         permissions: payload?.permissions || [],
+        branchCode: payload?.branchCode || undefined,
+        designation: payload?.designation || undefined,
+        reportingTo: payload?.reportingTo || undefined,
       };
 
       const response = await userService.createUser(userData);
@@ -81,6 +84,10 @@ export const patchUserEditMiddleware = createAsyncThunk(
         displayName: payload?.displayName,
         roles: Array.isArray(payload?.roles) ? payload.roles : undefined,
         permissions: payload?.permissions || undefined,
+        // empty clears the field (the server keeps a value that is not sent)
+        branchCode: payload?.branchCode ?? undefined,
+        designation: payload?.designation ?? undefined,
+        reportingTo: payload?.reportingTo ?? undefined,
       };
 
       const response = await userService.updateUser(payload.id, userData);

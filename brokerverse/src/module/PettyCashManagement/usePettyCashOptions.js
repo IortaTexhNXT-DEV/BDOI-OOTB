@@ -5,7 +5,6 @@ import pettyCashService from "../../services/pettyCashService";
 import userService from "../../services/userService";
 
 const EMPTY = {
-  masterCodes: [],
   funds: [],
   banks: [],
   bankAccounts: [],
@@ -29,16 +28,6 @@ const fromAccount = (a) => ({
   accountType: a.accountType,
 });
 const fromFund = (f) => ({ ...f, label: f.code, description: f.description || "" });
-const fromMasterPettyCash = (p) => ({
-  code: p.pettycashcode,
-  label: p.pettycashcode,
-  description: p.pettycashname,
-  size: p.pettycashsize,
-  availableCash: p.avilabelcash,
-  maxLimit: p.transactionlimit,
-  minimumCashbox: p.minicashbox,
-  branchCode: p.branchCode,
-});
 const fromBankAccount = (a) => ({
   code: a.accountCode,
   label: a.accountNumber || a.accountCode,
@@ -52,14 +41,16 @@ const fromUser = (u) => {
 
 const settle = (promise, fallback = []) => promise.catch(() => fallback);
 
-/** Dropdown data for the petty cash screens, loaded from the masters and petty-cash APIs. */
+/**
+ * Dropdown data for the petty cash screens, loaded from the masters and petty-cash APIs. The funds themselves (code,
+ * size, limits) are established in Initiate; there is no petty cash master to read them from.
+ */
 const usePettyCashOptions = () => {
   const [options, setOptions] = useState(EMPTY);
 
   useEffect(() => {
     let active = true;
     Promise.all([
-      settle(mastersService.list("petty-cash", { status: "Active" })),
       settle(pettyCashService.list("funds", { status: "active" }).then((r) => r.data || [])),
       settle(mastersService.options("bank")),
       settle(mastersService.list("bank-account", { status: "Active" })),
@@ -69,11 +60,10 @@ const usePettyCashOptions = () => {
       settle(mastersService.options("department")),
       settle(mastersService.options("transaction-code")),
       settle(userService.getUsers({ limit: 200 }).then((r) => r?.data || []).catch(() => [])),
-    ]).then(([masters, funds, banks, bankAccounts, accounts, currencies, branches, departments, codes, users]) => {
+    ]).then(([funds, banks, bankAccounts, accounts, currencies, branches, departments, codes, users]) => {
       if (!active) return;
       const glAccounts = accounts.map(fromAccount);
       setOptions({
-        masterCodes: masters.map(fromMasterPettyCash),
         funds: funds.map(fromFund),
         banks: banks.map(fromMasterOption),
         bankAccounts: bankAccounts.map(fromBankAccount),

@@ -82,6 +82,7 @@ A job switched off can still be run with Run now. This is the way to use the per
 | Renewal pipeline (`renewal-pipeline`) | Daily 05:30 | On | `renewalPipeline` | `renewals.pipeline_days` (90), `renewals.grace_period_days` (30) |
 | Bank reconciliation auto-match (`bank-auto-match`) | Daily 05:45 | Off | `bankAutoMatch` | `bank_reconciliation.date_window_days`, `bank_reconciliation.group_max_lines`, match rules |
 | Renewal notices (`renewal-notices`) | Daily 06:00 | On | `renewalNotices` | `notification.renewal_reminder`, `limits.renewal_notice_days` (60, 30, 15) |
+| Remittance schedules (`remittance-schedules`) | Daily 06:15 | Off | `remittanceSchedules` | the schedules of Accounts > Remittance > Scheduling (insurers, cut-off days, frequency, next run date) |
 | Receivable ageing (`receivable-ageing`) | Daily 07:00 | On | `receivableAgeing` | `limits.receivable_ageing_buckets` (30, 60, 90, 120) |
 | Month-end close reminder (`month-end-reminder`) | Daily 08:00 | Off | `monthEndReminder` | job parameter `daysBefore` (3) |
 | Collection reminders (`collection-reminders`) | Daily 08:00 | On | `collectionReminders` | `collections.reminder_days_before` (7), `collections.reminder_repeat_days` (7), `collections.email_subject`, `collections.email_template` |
@@ -302,7 +303,7 @@ The full column lists are in the templates and in `docs/templates/README.md`.
 |---|---|---|---|
 | Automated Processing | Accounts > Remittance > Automated Processing | Active automated remittance configurations (Remittance Master, for example ARM-001 Monthly Auto Remittance): insurers, frequency. Candidates are the unremitted policies per insurer. | Execute creates draft remittances; Process submits the selected drafts for approval as one batch and notifies holders of `write:remittance` ("Remittances awaiting approval"). |
 | Bulk Processing | Accounts > Remittance > Bulk Processing | A remittance file with the configuration BFM-001 (CSV) or BFM-002 (XLSX): PolicyNo, Premium, Commission, InsuredName. | Upload / Validate lists every row error (policy not found, premium not positive, commission above premium, duplicate policy); Process creates draft remittances from the valid rows. |
-| Scheduling | Accounts > Remittance > Scheduling | Remittance schedules (Remittance Master), linked to automated configurations. | Run Now executes the linked automated remittance. Pause and resume. |
+| Scheduling | Accounts > Remittance > Scheduling | Remittance schedules: insurers to remit, cut-off days, frequency and next run date. | No timer of its own: the job `remittance-schedules` (Master > Schedules, daily, disabled until switched on) runs the due schedules. Run Now runs one at once. Pause and resume. |
 | Approval | Accounts > Remittance > Approval Workflow | Submitted remittances | Approve or reject (the approver must not be the submitter); the initiator is notified. |
 | Statements | Accounts > Remittance > Statements | Period and insurers | CSV statement, optionally e-mailed as a link. |
 

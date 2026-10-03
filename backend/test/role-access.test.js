@@ -248,11 +248,12 @@ describe('notifications reach only the roles that can act on them', () => {
 });
 
 describe('remittance schedule next run (upcoming events)', () => {
-  it('shows the time once and rolls a past run forward by the frequency', () => {
-    const now = new Date('2026-09-29T08:00:00');
-    expect(nextRunOf({ nextRun: '2025-09-27 02:00:00', time: '02:00', frequency: 'Daily' }, now)).toBe('2026-09-30 02:00');
-    expect(nextRunOf({ nextRun: '2026-09-27', time: '18:00', frequency: 'Weekly' }, now)).toBe('2026-10-04 18:00');
-    expect(nextRunOf({ nextRun: '2026-10-01', time: '09:00', frequency: 'Monthly' }, now)).toBe('2026-10-01 09:00');
-    expect(nextRunOf({ nextRun: null }, now)).toBeNull();
+  it('is a date (the schedules job runs in the business time zone) rolled forward by the frequency when past', () => {
+    const asOf = '2026-09-29';
+    expect(nextRunOf({ nextRun: '2025-09-27 02:00:00', frequency: 'Daily' }, asOf)).toBe('2026-09-29');
+    expect(nextRunOf({ nextRun: '2026-09-27', frequency: 'Weekly' }, asOf)).toBe('2026-10-04');
+    expect(nextRunOf({ nextRun: '2026-10-01', frequency: 'Monthly' }, asOf)).toBe('2026-10-01');
+    expect(nextRunOf({ nextRun: '2026-01-31', frequency: 'Monthly' }, asOf)).toBe('2026-09-30');
+    expect(nextRunOf({ nextRun: null }, asOf)).toBeNull();
   });
 });

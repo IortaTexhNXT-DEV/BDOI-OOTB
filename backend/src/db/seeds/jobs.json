@@ -75,5 +75,13 @@
     "description": "Deactivate active accounts with no sign-in for access.dormant_days days (the built-in administrator excepted)",
     "cron": "45 1 * * *",
     "handler": "dormantUsers"
+  },
+  {
+    "code": "remittance-schedules",
+    "name": "Remittance schedules",
+    "description": "Run the remittance schedules of Accounts > Remittance > Scheduling whose next run date has come: draft remittances per insurer for the policies up to the cut-off date, then move the next run date on by the frequency. Disabled until switched on here",
+    "cron": "15 6 * * *",
+    "handler": "remittanceSchedules",
+    "enabled": false
   }
 ]

@@ -49,13 +49,13 @@ BrokerVerse. Balances and open items are taken from the old system at the close 
 
 ## Step 4. Insurers, credit terms and commission
 
-- **Screen:** Master > Generals > Insurance Management > Insurance Company (Upload button); commission rules in
-  Master > Generals > Commission and Master > Finance > Commission Rate Matrix.
+- **Screen:** Master > Generals > Insurance Management > Insurance Company (Upload button); commission rates in
+  Master > Finance > Commission Rate Matrix.
 - **Enter:** every insurer you place with: code, name, TIN, address, e-mail for remittances and debit notes, default
   commission rate (a fraction: 0.20 for 20%), premium payment warranty days, remittance terms in days, default billing
   (broker or direct). Then the commission rates per insurer, product or line of business.
-- **Template:** `Insurance_Company_Upload_Template.xlsx`, `Commission_Upload_Template.xlsx` (no Upload button on the
-  Commission screen). The Commission Rate Matrix has no upload; enter it on the screen.
+- **Template:** `Insurance_Company_Upload_Template.xlsx`. The Commission Rate Matrix (Master > Finance) is the only
+  commission source pricing reads; it has no upload, enter it on the screen.
 - **Check:** create a test quotation for each main insurer and compare the commission with the insurer's agreement.
 
 ## Step 5. Products, motor tariff and tax codes

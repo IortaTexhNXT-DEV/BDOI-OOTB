@@ -324,21 +324,6 @@ for (const action of ['approve', 'reject', 'delegate']) {
     },
   });
 }
-define({
-  method: 'GET', path: '/approvals/delegations', summary: 'Approval delegations', screen: S('Approval > Delegation'), middleware: read,
-  response: { success: true, data: [{ delegatedTo: 'Finance Head', fromDate: '2026-09-25', toDate: '2026-09-30', transTypes: ['All'], status: 'Active' }] },
-  handler: async (_req, res) => ok(res, await svc.listDelegations()),
-});
-define({
-  method: 'POST', path: '/approvals/delegations', summary: 'Delegate approval authority for a period', screen: S('Approval > Delegation'), middleware: write,
-  request: { delegateTo: 'finance.head', fromDate: '2026-10-01', toDate: '2026-10-07', transTypes: ['All'], amountLimit: 500000, reason: 'Annual leave' }, response: { success: true, data: { id: 1, status: 'Active' } },
-  handler: async (req, res) => {
-    const d = await svc.createDelegation(req.body || {}, req.user);
-    await audit(req, { entity: 'remittance_delegation', entityId: d.id, action: 'create', after: d });
-    created(res, d, 'Delegation saved');
-  },
-});
-
 // ---------------- refunds due from insurers ----------------
 define({
   method: 'GET', path: '/insurer-credits', summary: 'Refunds due from insurers (return premium on premium already remitted); open credits are netted against the next premium remittance voucher to the insurer',
@@ -532,20 +517,35 @@ define({
 });
 
 // ---------------- scheduling ----------------
+// What to remit (insurers, cut-off, frequency, next run date). The schedules have no timer of their own: the
+// "Remittance schedules" job of Master > Schedules runs the due ones (items.runDueSchedules).
 define({
-  method: 'GET', path: '/schedules', summary: 'Scheduled remittance jobs (remittance-schedule master) and upcoming runs', screen: S('Scheduling'), middleware: read,
-  response: { success: true, data: { scheduledJobs: [{ id: 1, name: 'Monthly Remittance Schedule', nextRun: '2026-10-01 09:00', frequency: 'Monthly', status: 'Active' }], upcomingEvents: [{ status: '2026-10-01 09:00', date: '2026-10-01', content: 'Monthly Remittance Schedule' }] } },
+  method: 'GET', path: '/schedules', summary: 'Remittance schedules (remittance-schedule master), upcoming run dates and the Master > Schedules job that runs them', screen: S('Scheduling'), middleware: read,
+  response: { success: true, data: { scheduledJobs: [{ id: 1, code: 'SCH-001', name: 'Monthly remittance - Malayan', insurers: ['MALAYAN'], cutOffDays: 5, nextRun: '2026-10-01', frequency: 'Monthly', status: 'Active' }],
+    upcomingEvents: [{ status: '2026-10-01', date: '2026-10-01', content: 'Monthly remittance - Malayan' }], timeZone: 'Asia/Manila', job: { code: 'remittance-schedules', cron: '15 6 * * *', enabled: false } } },
   handler: async (_req, res) => ok(res, await items.schedules()),
 });
 define({
-  method: 'POST', path: '/schedules', summary: 'New schedule (stored in the remittance-schedule master)', screen: S('Scheduling > New Schedule'), middleware: write,
-  request: { code: 'SCH-0003', name: 'Weekly Settlement - Pioneer', frequency: 'Weekly', time: '14:00', nextRun: '2026-10-05', linkedProcesses: ['ARM-001'] },
+  method: 'POST', path: '/schedules', summary: 'New remittance schedule: insurers, cut-off days, frequency and next run date (stored in the remittance-schedule master)', screen: S('Scheduling > New Schedule'), middleware: write,
+  request: { code: 'SCH-0003', name: 'Weekly remittance - Pioneer', insurers: ['PIONEER'], cutOffDays: 3, frequency: 'Weekly', nextRun: '2026-10-05' },
   response: { success: true, data: { id: 3, code: 'SCH-0003', status: 'Active' } },
   handler: async (req, res) => {
     const t = await masters.getType('remittance-schedule');
+    await items.assertScheduleInsurers(req.body || {});
     const s = await masters.createRecord(t, { timezone: await businessTimeZone(), ...(req.body || {}) }, req.user);
     await audit(req, { entity: 'master:remittance-schedule', entityId: s.id, action: 'create', after: s });
     created(res, s, 'Schedule created');
+  },
+});
+define({
+  method: 'PUT', path: '/schedules/:id', summary: 'Change a remittance schedule (insurers, cut-off days, frequency, next run date)', screen: S('Scheduling > Edit Schedule'), middleware: write,
+  request: { insurers: ['PIONEER', 'MALAYAN'], cutOffDays: 5, nextRun: '2026-10-12' }, response: { success: true, data: { id: 3, code: 'SCH-0003', status: 'Active' } },
+  handler: async (req, res) => {
+    const t = await masters.getType('remittance-schedule');
+    await items.assertScheduleInsurers(req.body || {});
+    const { before, after } = await masters.updateRecord(t, req.params.id, req.body || {}, req.user);
+    await audit(req, { entity: 'master:remittance-schedule', entityId: req.params.id, action: 'update', before, after });
+    ok(res, after, 'Schedule saved');
   },
 });
 define({
@@ -559,7 +559,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/schedules/:id/run', summary: 'Run a schedule now (executes its linked automated remittance)', screen: S('Scheduling > Run Now'), middleware: write,
+  method: 'POST', path: '/schedules/:id/run', summary: 'Run a schedule now: draft remittances for its insurers up to the cut-off date (or its linked automated remittance)', screen: S('Scheduling > Run Now'), middleware: write,
   response: { success: true, data: { schedule: { id: 1 }, execution: { executionId: 'BLK-2026-00003', remittances: [] } } },
   handler: async (req, res) => ok(res, await logged('remittance_schedule', 'run', (r) => items.runSchedule(r.params.id, r.user))(req, res), 'Schedule executed'),
 });
@@ -615,30 +615,11 @@ define({
   handler: async (req, res) => ok(res, await logged('remittance_reconciliation', 'unmatch', (r) => items.unmatch(r.body?.bankId, r.user))(req, res), 'Unmatched'),
 });
 
-// ---------------- analytics / reports / history / masters ----------------
+// ---------------- analytics / history / masters ----------------
 define({
   method: 'GET', path: '/analytics', summary: 'KPIs (targets from configuration), top insurers, monthly trend, status distribution', screen: S('Analytics'), middleware: read, query: { from: '2026-04-01', to: '2026-09-30' },
   response: { success: true, data: { kpiData: [{ id: 1, name: 'Settlement Efficiency', value: 92, target: 95, trend: 2.1, status: 'warning', unit: '%' }], topClients: [{ clientName: 'Malayan Insurance Co., Inc.', transactionCount: 12, totalValue: 560000, avgProcessingTime: 16, successRate: 98.5 }], monthlyTrend: [], statusDistribution: {} } },
   handler: async (req, res) => ok(res, await items.analytics(req.query)),
-});
-define({
-  method: 'GET', path: '/reports/templates', summary: 'Remittance report templates (remittance-report-template master)', screen: S('Reports'), middleware: read,
-  response: { success: true, data: [{ id: 1, code: 'RPT-001', name: 'Daily Remittance Report', category: 'Operational', status: 'Active' }] },
-  handler: async (req, res) => ok(res, (await masters.listRecords(await masters.getType('remittance-report-template'), { ...req.query, status: 'active' }, { limit: 500, offset: 0 })).rows),
-});
-define({
-  method: 'GET', path: '/reports', summary: 'Generated remittance reports', screen: S('Reports'), middleware: read,
-  response: { success: true, data: [{ id: 'rmi_8', templateCode: 'RPT-001', generatedOn: '2026-09-28T00:00:00Z', period: '2026-09-01 to 2026-09-28', fileSize: '2 KB', fileUrl: 'http://host/api/s3/object/...', status: 'Completed' }] },
-  handler: async (req, res) => listOf(req, res, 'report'),
-});
-define({
-  method: 'POST', path: '/reports/generate', summary: 'Generate a remittance report (CSV) from a template for a date range', screen: S('Reports > Generate'), middleware: write,
-  request: { templateCode: 'RPT-001', from: '2026-09-01', to: '2026-09-28', insurers: [] }, response: { success: true, data: { referenceNo: 'RPT-2026-00001', fileUrl: 'http://host/api/s3/object/...', status: 'Completed' } },
-  handler: async (req, res) => {
-    const r = await items.generateReport(req.body || {}, req.user);
-    await audit(req, { entity: 'remittance_item', entityId: r.id, action: 'generate-report', after: r });
-    created(res, r, 'Report generated');
-  },
 });
 define({
   method: 'GET', path: '/history', summary: 'Transaction history across remittances, settlements, adjustments and transfers', screen: S('History'), middleware: read, query: { search: 'REM', type: 'Settlement', page: 1 },
@@ -660,7 +641,7 @@ define({
   handler: async (_req, res) => ok(res, await items.systemLogs()),
 });
 define({
-  method: 'GET', path: '/masters', summary: 'Remittance Master overview: all 16 configuration types in one list (edit through /masters/:type)', screen: 'Master > Finance > Remittance Master', middleware: canRead('remittance', 'read:masters'),
+  method: 'GET', path: '/masters', summary: 'Remittance Master overview: the remittance configuration types in one list (edit through /masters/:type)', screen: 'Master > Finance > Remittance Master', middleware: canRead('remittance', 'read:masters'),
   query: { type: 'Automated', search: 'ARM' }, response: { success: true, data: [{ id: 1, code: 'ARM-001', name: 'Monthly Auto Remittance', type: 'Automated', typeCode: 'remittance-automated', status: true, lastUpdated: '2026-09-15' }] },
   handler: async (req, res) => ok(res, await items.masterOverview(req.query)),
 });

@@ -40,9 +40,15 @@ async function fundAccount(db, f) {
   return account('petty_cash_fund');
 }
 
+/**
+ * Establish a petty cash fund (Accounts > Petty Cash > Initiate, the owner of the fund: code, size, limits). A code
+ * left empty is issued from the petty_cash_fund numbering series (Petty Cash Code).
+ */
 export async function createFund(db, b, user) {
+  b = { ...b, code: str(b.code) || (await nextDocumentNumber('petty_cash_fund', { db })) };
   const exists = (await db.query('SELECT 1 FROM petty_cash_funds WHERE code = $1', [b.code])).rows[0];
   if (exists) throw conflict(`Petty cash code ${b.code} already exists`);
+  if (!(Number(num(b.fundSize)) > 0)) throw badRequest('Validation failed', [{ path: 'fundSize', message: 'Fund size must be greater than zero' }]);
   const size = round2(num(b.fundSize));
   const txn = await nextDocumentNumber('petty_cash', { db });
   const f = (await db.query(`INSERT INTO petty_cash_funds(code, description, transaction_number, transaction_date, fund_size, max_limit, minimum_cashbox, available_cash, bank_code, bank_account_code,

@@ -14,7 +14,9 @@ FROM (VALUES
  ('journal_voucher', 'accounting', 1000000), ('journal_voucher', 'accounting-manager', NULL),
  ('write_off', 'accounting', 1000), ('write_off', 'accounting-manager', 50000),
  ('commission_payout', 'accounting', 500000), ('commission_payout', 'accounting-manager', NULL),
- ('petty_cash', 'accounting', 10000), ('petty_cash', 'accounting-manager', 50000)
+ ('petty_cash', 'accounting', 10000), ('petty_cash', 'accounting-manager', 50000),
+ ('remittance', 'accounting', 1000000), ('remittance', 'accounting-manager', NULL),
+ ('remittance_settlement', 'accounting', 1000000), ('remittance_settlement', 'accounting-manager', NULL)
 ) AS v(type, role, amount)
 WHERE EXISTS (SELECT 1 FROM roles r WHERE r.code = v.role)
   AND NOT EXISTS (SELECT 1 FROM authority_limits l WHERE l.transaction_type = v.type AND l.role_code = v.role);

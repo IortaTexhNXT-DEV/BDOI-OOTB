@@ -11,7 +11,7 @@ import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
-import remittanceService, { masterService } from "../../../services/remittanceService";
+import remittanceService from "../../../services/remittanceService";
 import { dateBody, downloadCsv, isoDate, loadInsurerOptions, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
 import { promptText } from "../../../utility/dialogs";
@@ -30,7 +30,6 @@ const ElectronicTransfer = () => {
   const [transferMethods, setTransferMethods] = useState([]);
   const [approvals, setApprovals] = useState([]);
   const [insurers, setInsurers] = useState([]);
-  const [dailyLimit, setDailyLimit] = useState(0);
   const [loading, setLoading] = useState(false);
 
   const loadTransfers = async () => {
@@ -55,9 +54,6 @@ const ElectronicTransfer = () => {
     loadTransfers();
     remittanceService.transferMethods().then(setTransferMethods).catch((e) => showError(toast, e));
     loadInsurerOptions().then((rows) => setInsurers(rows.map((r) => ({ label: r.label, value: r.label, code: r.value })))).catch((e) => showError(toast, e));
-    masterService.list("remittance-electronic-transfer", { status: "Active" })
-      .then((rows) => setDailyLimit((rows || []).reduce((s, r) => s + Number(r.limits?.dailyLimit || 0), 0)))
-      .catch((e) => showError(toast, e));
   }, []);
 
   const today = isoDate(new Date());
@@ -199,9 +195,9 @@ const ElectronicTransfer = () => {
         </Card>
         <Card className="summary-card">
           <div className="card-content">
-            <div className="card-label">{t("remittance.dailyLimitUsed")}</div>
-            <div className="card-value">{dailyLimit ? Math.round((usedToday / dailyLimit) * 100) : 0}%</div>
-            <div className="card-detail">{formatCurrency(usedToday)} of {formatCurrency(dailyLimit)}</div>
+            <div className="card-label">{t("remittance.transferredToday")}</div>
+            <div className="card-value">{formatCurrency(usedToday)}</div>
+            <div className="card-detail">{t("remittance.transferLimitsNote")}</div>
           </div>
         </Card>
       </div>

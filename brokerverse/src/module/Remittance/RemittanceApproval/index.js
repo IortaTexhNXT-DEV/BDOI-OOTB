@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { Link } from "react-router-dom";
 import { TabView, TabPanel } from "primereact/tabview";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -12,8 +13,6 @@ import { Dialog } from "primereact/dialog";
 import { InputTextarea } from "primereact/inputtextarea";
 import { RadioButton } from "primereact/radiobutton";
 import { Calendar } from "primereact/calendar";
-import { MultiSelect } from "primereact/multiselect";
-import { InputNumber } from "primereact/inputnumber";
 import { Toast } from "primereact/toast";
 import remittanceService from "../../../services/remittanceService";
 import authService from "../../../services/authService";
@@ -21,21 +20,16 @@ import { calendarDateFormat, dateBody, isoDate, loadSettings, showError, showSuc
 import "./index.scss";
 import { promptText } from "../../../utility/dialogs";
 
-const emptyDelegation = {
-  delegateTo: "",
-  fromDate: null,
-  toDate: null,
-  transTypes: ["All"],
-  amountLimit: null,
-  reason: ""
-};
+// Delegating one pending approval to another approver. Standing cover for a period (leave) is given in
+// Master > User Management > Delegations, which the approval check (Authority Matrix) follows.
+const emptyDelegation = { delegateTo: "", reason: "" };
 const AGE_LIMITS = { "1": [0, 24], "3": [24, 72], "7": [72, 168], "7+": [168, Infinity] };
 const ageHours = (row) => (Date.now() - new Date(String(row.submissionDate).replace(" ", "T")).getTime()) / 3600000;
 const toOptions = (values) => [{ label: "All", value: "All" }, ...values.map((v) => ({ label: v, value: v }))];
 
 const RemittanceApproval = () => {
   const { t } = useTranslation();
-  const { formatCurrency, currencyCode } = useFormatCurrency();
+  const { formatCurrency } = useFormatCurrency();
   const toast = useRef(null);
   const currentUserId = authService.getUser()?.userId || localStorage.getItem("USER_ID");
   const [activeIndex, setActiveIndex] = useState(0);
@@ -45,11 +39,9 @@ const RemittanceApproval = () => {
   const [approvalAction, setApprovalAction] = useState("");
   const [comments, setComments] = useState("");
   const [showDelegationDialog, setShowDelegationDialog] = useState(false);
-  const [delegateSelected, setDelegateSelected] = useState(false);
   const [delegationData, setDelegationData] = useState(emptyDelegation);
   const [pendingApprovals, setPendingApprovals] = useState([]);
   const [approvalHistory, setApprovalHistory] = useState([]);
-  const [activeDelegations, setActiveDelegations] = useState([]);
   const [userOptions, setUserOptions] = useState([]);
   const [priorities, setPriorities] = useState([]);
   const [filters, setFilters] = useState({ transactionType: "All", priority: "All", age: "All" });
@@ -59,18 +51,16 @@ const RemittanceApproval = () => {
   const loadAll = async (f = filters) => {
     setLoading(true);
     try {
-      const [queue, history, delegations] = await Promise.all([
+      const [queue, history] = await Promise.all([
         remittanceService.listApprovals({
           transactionType: f.transactionType === "All" ? undefined : f.transactionType,
           priority: f.priority === "All" ? undefined : f.priority
         }),
-        remittanceService.approvalHistory(),
-        remittanceService.listDelegations()
+        remittanceService.approvalHistory()
       ]);
       const limits = AGE_LIMITS[f.age];
       setPendingApprovals(limits ? queue.filter((r) => ageHours(r) >= limits[0] && ageHours(r) < limits[1]) : queue);
       setApprovalHistory(history || []);
-      setActiveDelegations(delegations || []);
       setSelectedRows([]);
     } catch (e) {
       showError(toast, e);
@@ -149,13 +139,6 @@ const RemittanceApproval = () => {
     return <Tag value={rowData.action} severity={statusSeverity(rowData.action)} />;
   };
 
-  const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      return status === 'Active' ? 'success' : 'secondary';
-    };
-    return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
-  };
-
   const actionsBodyTemplate = (rowData) => {
     return (
       <div className="action-buttons">
@@ -194,17 +177,14 @@ const RemittanceApproval = () => {
     if (done) setShowDetailDialog(false);
   };
 
-  const openDelegation = (forSelection) => {
-    setDelegateSelected(forSelection);
+  const openDelegation = () => {
     setDelegationData(emptyDelegation);
     setShowDelegationDialog(true);
   };
 
   const handleDelegation = async () => {
     const d = delegationData;
-    const done = delegateSelected
-      ? await run(() => Promise.all(selectedRows.map((r) => remittanceService.delegate(r.id, d.delegateTo, d.reason))), `${selectedRows.length} approval(s) delegated`)
-      : await run(() => remittanceService.createDelegation({ ...d, fromDate: isoDate(d.fromDate), toDate: isoDate(d.toDate) }), t("remittance.addDelegation"));
+    const done = await run(() => Promise.all(selectedRows.map((r) => remittanceService.delegate(r.id, d.delegateTo, d.reason))), `${selectedRows.length} approval(s) delegated`);
     if (done) setShowDelegationDialog(false);
   };
 
@@ -219,7 +199,7 @@ const RemittanceApproval = () => {
   const delegationDialogFooter = (
     <div>
       <Button label={t("common.cancel")} icon="pi pi-times" onClick={() => setShowDelegationDialog(false)} className="p-button-text" />
-      <Button label={delegateSelected ? t("remittance.delegate") : t("remittance.addDelegation")} icon="pi pi-check" onClick={handleDelegation} autoFocus
+      <Button label={t("remittance.delegate")} icon="pi pi-check" onClick={handleDelegation} autoFocus
         disabled={!delegationData.delegateTo || !delegationData.reason} />
     </div>
   );
@@ -228,6 +208,12 @@ const RemittanceApproval = () => {
     <div className="remittance-approval">
       <Toast ref={toast} />
       <h2>{t("remittance.approvalWorkflow")}</h2>
+      <p className="approval-authority-note">
+        {t("remittance.approvalAuthorityNote")}{" "}
+        <Link to="/master/generals/usermanagement/authority-matrix">{t("remittance.authorityMatrix")}</Link>
+        {" · "}
+        <Link to="/master/generals/usermanagement/delegations">{t("remittance.userDelegations")}</Link>
+      </p>
 
       <div className="summary-cards">
         <Card className="summary-card">
@@ -324,7 +310,7 @@ const RemittanceApproval = () => {
               <div className="bulk-actions mt-3">
                 <Button label={t("remittance.bulkApprove")} icon="pi pi-check" className="p-button-success mr-2" onClick={() => approveRows(selectedRows)} />
                 <Button label={t("remittance.bulkReject")} icon="pi pi-times" className="p-button-danger mr-2" onClick={() => rejectRows(selectedRows)} />
-                <Button label={t("remittance.delegate")} icon="pi pi-forward" className="p-button-secondary" onClick={() => openDelegation(true)} />
+                <Button label={t("remittance.delegate")} icon="pi pi-forward" className="p-button-secondary" onClick={openDelegation} />
               </div>
             )}
           </TabPanel>
@@ -351,27 +337,6 @@ const RemittanceApproval = () => {
               <Column field="actionDate" body={dateBody("actionDate")} header={t("remittance.actionDate")} />
               <Column field="remarks" header={t("remittance.remarks")} />
             </DataTable>
-          </TabPanel>
-
-          <TabPanel header={t("remittance.delegation")}>
-            <div className="delegation-section">
-              <div className="section-header mb-3">
-                <h3>{t("remittance.activeDelegations")}</h3>
-                <Button
-                  label={t("remittance.addNewDelegation")}
-                  icon="pi pi-plus"
-                  onClick={() => openDelegation(false)}
-                />
-              </div>
-
-              <DataTable value={activeDelegations} stripedRows>
-                <Column field="delegatedTo" header={t("remittance.delegatedTo")} />
-                <Column field="fromDate" body={dateBody("fromDate")} header={t("remittance.fromDate")} />
-                <Column field="toDate" body={dateBody("toDate")} header={t("remittance.toDate")} />
-                <Column field="transTypes" header={t("remittance.scope")} body={(d) => (d.transTypes || []).join(", ")} />
-                <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
-              </DataTable>
-            </div>
           </TabPanel>
         </TabView>
       </Card>
@@ -447,7 +412,7 @@ const RemittanceApproval = () => {
       </Dialog>
 
       <Dialog
-        header={delegateSelected ? t("remittance.delegate") : t("remittance.addNewDelegation")}
+        header={t("remittance.delegate")}
         visible={showDelegationDialog}
         style={{ width: '50vw' }}
         footer={delegationDialogFooter}
@@ -463,40 +428,6 @@ const RemittanceApproval = () => {
                 editable
                 onChange={(e) => setDelegationData({ ...delegationData, delegateTo: e.value })}
                 placeholder={t("remittance.selectUser")}
-              />
-            </div>
-            <div className="p-field field col-12 md:col-6">
-              <label>{t("remittance.delegationPeriod")} *</label>
-              <div className="date-range">
-                <Calendar dateFormat={calendarDateFormat()}
-                  value={delegationData.fromDate}
-                  onChange={(e) => setDelegationData({ ...delegationData, fromDate: e.value })}
-                  placeholder={t("remittance.fromDate")}
-                  className="mr-2"
-                />
-                <Calendar dateFormat={calendarDateFormat()}
-                  value={delegationData.toDate}
-                  onChange={(e) => setDelegationData({ ...delegationData, toDate: e.value })}
-                  placeholder={t("remittance.toDate")}
-                />
-              </div>
-            </div>
-            <div className="p-field field col-12 md:col-6">
-              <label>{t("remittance.transactionTypes")}</label>
-              <MultiSelect
-                value={delegationData.transTypes}
-                options={transactionTypeOptions}
-                onChange={(e) => setDelegationData({ ...delegationData, transTypes: e.value })}
-                display="chip"
-              />
-            </div>
-            <div className="p-field field col-12 md:col-6">
-              <label>{t("remittance.amountLimit")}</label>
-              <InputNumber
-                value={delegationData.amountLimit}
-                onValueChange={(e) => setDelegationData({ ...delegationData, amountLimit: e.value })}
-                mode="currency"
-                currency={currencyCode}
               />
             </div>
             <div className="p-field field col-12">

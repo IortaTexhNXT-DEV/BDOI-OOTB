@@ -368,12 +368,6 @@ const ProductDashboard = () => {
                   className="p-button-text action-button"
                   onClick={() => navigate('/product-configurator/documents')}
                 />
-                <Button
-                  label={t('productConfiguratorDashboard.approvalWorkflows')}
-                  icon="pi pi-sitemap"
-                  className="p-button-text action-button"
-                  onClick={() => navigate('/product-configurator/workflows')}
-                />
               </div>
             </Card>
 

@@ -375,7 +375,6 @@ SCENES = [
       ['viewport', 800], ['shot', 'm-insurer-edit'], ['viewport', 1000]),
     S('m-upload', 'bea.admin', ['goto', '/master/generals/location/city'], ['btn', '^Upload$', {'force': True}], ['wait', 1200],
       ['shot', 'm-upload']),
-    S('m-commission', 'bea.admin', ['goto', '/master/generals/commission'], ['shot', 'm-commission']),
     S('m-branch', 'bea.admin', ['goto', '/master/generals/organization/branchmaster'], ['shot', 'm-branch']),
     S('m-docnum', 'bea.admin', ['goto', '/master/configuration/document-numbering', {'wait': 2500}], ['shot', 'm-docnum']),
     S('m-crm', 'bea.admin', ['goto', '/master/finance/commission-rate-matrix', {'wait': 2500}], ['shot', 'm-crm']),

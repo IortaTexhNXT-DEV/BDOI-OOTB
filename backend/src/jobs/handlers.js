@@ -97,3 +97,12 @@ export const dormantUsers = async () => {
   if (!(await pool.query("SELECT to_regclass('authority_limits') IS NOT NULL AS ok")).rows[0].ok) return { skipped: 'access control not migrated' };
   return (await import('../modules/access-control/service.js')).deactivateDormant(pool);
 };
+
+/**
+ * Remittance schedules (Accounts > Remittance > Scheduling): run the active schedules whose next run date has come
+ * (draft remittances per insurer up to the cut-off date) and move their next run date on. Daily, disabled by default.
+ */
+export async function remittanceSchedules() {
+  if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
+  return (await import('../modules/remittance/items.js')).runDueSchedules();
+}

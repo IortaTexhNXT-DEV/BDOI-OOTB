@@ -257,7 +257,7 @@ Maker-checker means the person who enters a transaction cannot approve it. The s
 | Claim settlement | Claims user who submits it | Another Claims user | `claims.settlement_maker_checker` |
 | Journal voucher | Accounting user who submits it | Another Accounting or Accounting Manager user | `journal.require_approval`, `finance.maker_checker_enabled` |
 | Payment voucher, cheque, commission payout | Accounting | Another Accounting user | `finance.maker_checker_enabled` |
-| Remittance, settlement, adjustment | Accounting | Another Accounting user, level by amount | `remittance.approval_levels` |
+| Remittance, settlement, adjustment | Accounting | Another Accounting user within their Authority Matrix limit (`remittance`, `remittance_settlement`) | Authority Matrix; `remittance.approval_levels` only while no limit is set |
 | Direct-bill debit note | Accounting | Another Accounting user | built in |
 | Month-end close, year-end close | Accounting | Accounting Manager | `accounting.period_close_requires_approval` |
 | Bank reconciliation | Accounting | Accounting Manager | built in |
@@ -1251,7 +1251,7 @@ A second Accounting user opens the voucher, reviews the cheque details and appro
 | Receipts | Record money returned to the fund. |
 | Replenish | Top the fund back up from the bank. |
 
-The funds are defined in Master > Finance > Petty cash. The custodian is notified when a fund drops below its minimum. Requests are maker-checker.
+The funds are established in Accounts > Petty Cash > Initiate (code, fund size, transaction limit and minimum cash box). The custodian is notified when a fund drops below its minimum. Requests are maker-checker.
 
 ## Journal vouchers
 
@@ -1333,7 +1333,7 @@ The Remittance menu pays the insurers. For broker-billed policies, Accounting re
 
 1. Automated Processing: tick the insurers that are Ready, select Validate, then Process Selected. Draft remittances REM- are created. The due date follows the insurer's Remittance Terms (days after collection), else `remittance.default_due_days`.
 2. Tracking: find the draft and select Process. It goes for approval.
-3. Approval Workflow: a second Accounting user approves it. The level depends on the amount (level 1 up to ₱ 100,000, level 2 up to ₱ 1,000,000, level 3 above). The initiator cannot approve.
+3. Approval Workflow: a second Accounting user approves it, within their limit in Master > User Management > Authority Matrix (Remittance approval: ₱ 1,000,000 for Accounting, no limit for the Accounting Manager out of the box). The initiator cannot approve. Cover for an absent approver is given in Master > User Management > Delegations.
 4. Settlement: choose the Insurer code, select Add policies, select Calculate (premium − commission − tax ± adjustments = net settlement) and Submit for approval.
 5. The checker approves the settlement (SET-). The system raises the insurer payment voucher in Disbursement for the net amount.
 6. Issue and approve the cheque in Disbursement. The voucher becomes Paid and the remittance Completed.
@@ -1717,7 +1717,6 @@ The Product Configurator holds the products the broker places and the rules that
 | Rating Engine | Rating factors and their rules, with a Test Calculator. |
 | Acceptance Rules | Acceptance, validation and loading rules. |
 | Document Manager | Document templates per stage. |
-| Approval Workflows | Approval steps for product and rate changes. |
 | Market Mapping, Risk Mapping | Products mapped to insurers; product definitions by line (IAR by risk section). |
 | Product Analytics | Policies, premium, loss ratio and margin by product. |
 
@@ -1774,8 +1773,6 @@ The masters hold the reference data the other screens offer in their lists. Each
 
 ![Master > Generals > Organization > Branch](m-branch)
 
-![Master > Generals > Commission: commission sharing with referrers](m-commission)
-
 ## Company master and the letterhead
 
 ![Master > Generals > Organization > Company](m-company)
@@ -1826,7 +1823,7 @@ The result shows how many rows were created or updated and lists each failed row
 | Vehicle (brands, models, variants, vehicles) | `Vehicle_Brand_...`, `Vehicle_Model_...`, `Vehicle_Variant_...`, `Vehicle_Upload_Template.xlsx` |
 | Country, State, City Master | `Country_...`, `State_...`, `City_Upload_Template.xlsx` |
 | Bank (banks and bank accounts) | `Bank_Upload_Template.xlsx`, `Bank_Account_Upload_Template.xlsx` |
-| Currency, Transaction code, Petty cash | `Currency_...`, `Transaction_Code_...`, `Petty_Cash_Upload_Template.xlsx` |
+| Currency, Transaction code | `Currency_...`, `Transaction_Code_Upload_Template.xlsx` (petty cash funds are set up in Accounts > Petty Cash > Initiate) |
 | Main Account and Sub Account (chart of accounts) | `Chart_of_Accounts_Upload_Template.xlsx` |
 | Leads/Prospects, Quotation, Policy, Receipts, Disbursement | `Leads_...`, `Quotations_...`, `Policies_...`, `Receipts_...`, `Disbursements_Upload_Template.xlsx` |
 | Collections (Import open items), Period Management (Import opening balances) | `Open_Items_...`, `Opening_Balances_Upload_Template.xlsx` |
@@ -2299,7 +2296,7 @@ All settings are on Master > Configuration unless noted. Changes apply at once a
 | `bir.withholding_agent_tin`, `bir.registered_name`, `bir.registered_address`, `bir.zip_code` | empty | Broker details on the BIR forms. Fill in before the first filing. |
 | `claims.settlement_maker_checker`, `claims.block_unpaid_premium`, `claims.sla_days` | on, on, 20 | Claims controls. |
 | `renewals.pipeline_days`, `limits.renewal_notice_days`, `renewals.grace_period_days` | 90; 60, 30, 15; 30 | Renewal timetable. |
-| `remittance.approval_levels` | 100,000; 1,000,000; above | Approval levels by amount. |
+| `remittance.approval_levels` | 100,000; 1,000,000; above | Fallback approval levels, used only while the Authority Matrix has no remittance limit. |
 | `limits.receivable_ageing_buckets` | 30, 60, 90, 120 | Ageing buckets. |
 | `security.password_min_length`, `security.password_history_count`, `security.password_max_age_days` | 8, 5, 90 | Password rules. |
 | `limits.max_login_attempts`, `limits.session_idle_minutes` | 5, 30 | Lockout and idle sign-out. |

@@ -92,3 +92,10 @@ export async function postingDate(documentDate) {
 
 /** YYYY-MM-DD plus n calendar days (date arithmetic in UTC, so no time-zone shift). */
 export const addDays = (iso, n) => new Date(Date.parse(`${iso}T00:00:00Z`) + Number(n) * DAY_MS).toISOString().slice(0, 10);
+
+/** YYYY-MM-DD plus n calendar months, the same day of the month (the month end when that month is shorter: 31 Jan + 1 = 28/29 Feb). */
+export const addCalendarMonths = (iso, n) => {
+  const [y, m, day] = String(iso).slice(0, 10).split('-').map(Number);
+  const last = new Date(Date.UTC(y, m + Number(n), 0)).getUTCDate();
+  return new Date(Date.UTC(y, m - 1 + Number(n), Math.min(day, last))).toISOString().slice(0, 10);
+};

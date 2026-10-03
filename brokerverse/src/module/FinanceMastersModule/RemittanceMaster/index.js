@@ -12,7 +12,7 @@ import { Paginator } from "primereact/paginator";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import SvgTable from "../../../assets/icons/SvgTable";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import ToggleButton from "../../../components/ToggleButton";
@@ -58,19 +58,11 @@ const RemittanceMaster = () => {
     { label: t("financeMasters.automatedRemittance"), value: "automated" },
     { label: t("financeMasters.statementTemplates"), value: "statement" },
     { label: t("financeMasters.settlementParameters"), value: "settlement" },
-    { label: t("financeMasters.reconciliation"), value: "reconciliation" },
     { label: t("financeMasters.bulkProcessing"), value: "bulkprocessing" },
-    { label: t("financeMasters.schedule"), value: "schedule" },
-    { label: t("financeMasters.electronicTransfer"), value: "electronic" },
-    { label: t("financeMasters.approvalWorkflow"), value: "approvalworkflow" },
     { label: t("financeMasters.exception"), value: "exception" },
-    { label: t("financeMasters.reportTemplate"), value: "reporttemplate" },
     { label: t("financeMasters.agencyBill"), value: "agencybill" },
-    { label: t("financeMasters.directBill"), value: "directbill" },
     { label: t("financeMasters.adjustment"), value: "adjustment" },
     { label: t("financeMasters.notification"), value: "notification" },
-    { label: t("financeMasters.history"), value: "history" },
-    { label: t("financeMasters.analytics"), value: "analytics" },
   ];
 
   const filteredData = remittanceData.filter((item) => {
@@ -83,19 +75,11 @@ const RemittanceMaster = () => {
       (selectedCategory === "automated" && item.type === "Automated") ||
       (selectedCategory === "statement" && item.type === "Statement") ||
       (selectedCategory === "settlement" && item.type === "Settlement") ||
-      (selectedCategory === "reconciliation" && item.type === "Reconciliation") ||
       (selectedCategory === "bulkprocessing" && item.type === "BulkProcessing") ||
-      (selectedCategory === "schedule" && item.type === "Schedule") ||
-      (selectedCategory === "electronic" && item.type === "Electronic") ||
-      (selectedCategory === "approvalworkflow" && item.type === "ApprovalWorkflow") ||
       (selectedCategory === "exception" && item.type === "Exception") ||
-      (selectedCategory === "reporttemplate" && item.type === "ReportTemplate") ||
       (selectedCategory === "agencybill" && item.type === "AgencyBill") ||
-      (selectedCategory === "directbill" && item.type === "DirectBill") ||
       (selectedCategory === "adjustment" && item.type === "Adjustment") ||
-      (selectedCategory === "notification" && item.type === "Notification") ||
-      (selectedCategory === "history" && item.type === "History") ||
-      (selectedCategory === "analytics" && item.type === "Analytics");
+      (selectedCategory === "notification" && item.type === "Notification");
 
     return matchesSearch && matchesCategory;
   });
@@ -188,19 +172,11 @@ const RemittanceMaster = () => {
       automated: "automatedremittance",
       statement: "statementtemplate",
       settlement: "settlementparameter",
-      reconciliation: "reconciliationmaster",
       bulkprocessing: "bulkprocessingmaster",
-      schedule: "schedulemaster",
-      electronic: "electronictransfermaster",
-      approvalworkflow: "approvalworkflowmaster",
       exception: "exceptionmaster",
-      reporttemplate: "reporttemplatemaster",
       agencybill: "agencybillmaster",
-      directbill: "directbillmaster",
       adjustment: "adjustmentmaster",
       notification: "notificationmaster",
-      history: "historyconfiguration",
-      analytics: "analyticsconfiguration",
     };
 
     const route = selectedCategory === "all"
@@ -216,19 +192,11 @@ const RemittanceMaster = () => {
       "Automated": `${baseRoute}/automatedremittance/${mode}`,
       "Statement": `${baseRoute}/statementtemplate/${mode}`,
       "Settlement": `${baseRoute}/settlementparameter/${mode}`,
-      "Reconciliation": `${baseRoute}/reconciliationmaster/${mode}`,
       "BulkProcessing": `${baseRoute}/bulkprocessingmaster/${mode}`,
-      "Schedule": `${baseRoute}/schedulemaster/${mode}`,
-      "Electronic": `${baseRoute}/electronictransfermaster/${mode}`,
-      "ApprovalWorkflow": `${baseRoute}/approvalworkflowmaster/${mode}`,
       "Exception": `${baseRoute}/exceptionmaster/${mode}`,
-      "ReportTemplate": `${baseRoute}/reporttemplatemaster/${mode}`,
       "AgencyBill": `${baseRoute}/agencybillmaster/${mode}`,
-      "DirectBill": `${baseRoute}/directbillmaster/${mode}`,
       "Adjustment": `${baseRoute}/adjustmentmaster/${mode}`,
       "Notification": `${baseRoute}/notificationmaster/${mode}`,
-      "History": `${baseRoute}/historyconfiguration/${mode}`,
-      "Analytics": `${baseRoute}/analyticsconfiguration/${mode}`,
     };
     return typeRoutes[type] || baseRoute;
   };
@@ -263,6 +231,15 @@ const RemittanceMaster = () => {
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
           <div className="remittance__master__title">Remittance Master</div>
+          {/* each value has one place: approval limits, schedules and the remittance settings live on their own screens */}
+          <div className="remittance__master__note">
+            {t("financeMasters.remittanceMasterNote")}{" "}
+            <Link to="/master/generals/usermanagement/authority-matrix">{t("remittance.authorityMatrix")}</Link>
+            {" · "}
+            <Link to="/finance/remittance/scheduling">{t("remittance.scheduling")}</Link>
+            {" · "}
+            <Link to="/master/configuration/settings">{t("financeMasters.configurationSettings")}</Link>
+          </div>
         </div>
         <div className="col-12 p-0 flex justify-content-end">
           <Button
@@ -338,11 +315,8 @@ const RemittanceMaster = () => {
                   body={(rowData) => {
                     if (rowData.type === "Automated") return rowData.frequency;
                     if (rowData.type === "Statement") return rowData.format;
-                    if (rowData.type === "Settlement") return `${rowData.approvalLevels} Levels`;
-                    if (rowData.type === "Reconciliation") return rowData.matchingRules;
+                    if (rowData.type === "Settlement") return rowData.settlementFrequency || "-";
                     if (rowData.type === "BulkProcessing") return rowData.fileFormat;
-                    if (rowData.type === "Schedule") return rowData.frequency;
-                    if (rowData.type === "Electronic") return rowData.transferType;
                     return "-";
                   }}
                   header={t("financeMasters.configuration")}
@@ -352,7 +326,6 @@ const RemittanceMaster = () => {
                   body={(rowData) => {
                     if (rowData.type === "Automated") return formatAppDate(rowData.lastRun);
                     if (rowData.type === "Statement") return formatAppDate(rowData.lastUsed);
-                    if (rowData.type === "Schedule") return formatAppDate(rowData.nextRun);
                     return formatAppDate(rowData.lastUpdated);
                   }}
                   header={t("financeMasters.lastActivity")}

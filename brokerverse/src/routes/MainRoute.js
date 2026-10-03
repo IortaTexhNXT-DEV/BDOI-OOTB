@@ -24,7 +24,6 @@ import CurrencyMaster from "../module/FinanceMastersModule/CurrencyMaster";
 import ExchangeRateMaster from "../module/FinanceMastersModule/ExchangeRateMaster";
 // Main / Sub Account masters are the GL chart of accounts
 import ChartOfAccounts from "../module/FinanceMastersModule/ChartOfAccounts";
-import PettyCashMaster from "../module/FinanceMastersModule/PettyCashMaster";
 import PaymentDetails from "../module/Receipts/PaymentDetails";
 import TransactionCodeMaster from "../module/FinanceMastersModule/TransactionCodeMaster";
 import DepartmentMasterInitial from "../module/FinanceMastersModule/DepartmentMaster/DepartmentMasterInitial";
@@ -35,8 +34,6 @@ import AddCurrency from "../module/FinanceMastersModule/CurrencyMaster/AddCurren
 import AddExchange from "../module/FinanceMastersModule/ExchangeRateMaster/AddExchange";
 import SaveAndEditExchange from "../module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange";
 
-import AddPettyCash from "../module/FinanceMastersModule/PettyCashMaster/AddPettyCash";
-import PettyCashdetails from "../module/FinanceMastersModule/PettyCashMaster/PettyCashdetails";
 import AddJournalVoucture from "../module/JournalVoucher/AddJournalVoucture";
 import DetailsJournalVocture from "../module/JournalVoucher/DetailsJournalVocture";
 
@@ -64,11 +61,6 @@ import TransactionCodeMasterView from "../module/FinanceMastersModule/Transactio
 import TransactionCodeDetails from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeDetails";
 import ViewCurrency from "../module/FinanceMastersModule/CurrencyMaster/ViewCurrency";
 import EditCurrency from "../module/FinanceMastersModule/CurrencyMaster/EditCurrency";
-import Commission from "../module/GeneralMasters/Commission";
-import AddCommission from "../module/GeneralMasters/Commission/AddCommission";
-import EditCommission from "../module/GeneralMasters/Commission/EditCommission";
-import ViewCommission from "../module/GeneralMasters/Commission/ViewCommission";
-import EditPettyCash from "../module/FinanceMastersModule/PettyCashMaster/EditPettyCash";
 import TransactioncodeEdit from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeMasterEdit/index";
 import ViewExchange from "../module/FinanceMastersModule/ExchangeRateMaster/ViewExchange";
 import BankMaster from "../module/FinanceMastersModule/BankMaster";
@@ -106,8 +98,6 @@ import VehicleDetailsAction from "../module/GeneralMasters/InsuranceManagementMa
 
 import Designation from "../module/GeneralMasters/EmployeeManagementMasters/Designation/DesignationMaster";
 import AddDesignation from "../module/GeneralMasters/EmployeeManagementMasters/Designation/AddDesignation";
-import Employee from "../module/GeneralMasters/EmployeeManagementMasters/Employee/EmployeeMaster";
-import AddEmployee from "../module/GeneralMasters/EmployeeManagementMasters/Employee/AddEmployee";
 import User from "../module/GeneralMasters/UserManagementMasters/User/UserMaster";
 import AddUser from "../module/GeneralMasters/UserManagementMasters/User/AddUser";
 import Role from "../module/GeneralMasters/UserManagementMasters/Role/RoleMaster";
@@ -178,7 +168,6 @@ import UpcomingEvents from "../agentModule/openItems/upcomingEvents";
 import ExpiringPolicy from "../agentModule/openItems/expiringPolicy";
 import RenewalRequest from "../agentModule/openItems/renewalRequest";
 import QuotePending from "../agentModule/openItems/quotePending";
-import EditCommissionPopup from "../module/GeneralMasters/Commission/EditCommission/EditCommissionPopup";
 import ClaimRejected from "../agentModule/claimsModule/claimRejected";
 import ClaimDocumentUpload from "../agentModule/claimsModule/claimDocumentUpload";
 import LeadEdit from "../agentModule/leadModule/leadEdit";
@@ -236,13 +225,8 @@ import RemittanceMaster from "../module/FinanceMastersModule/RemittanceMaster";
 import AutomatedRemittanceMaster from "../module/FinanceMastersModule/RemittanceMaster/AutomatedRemittance";
 import StatementTemplateMaster from "../module/FinanceMastersModule/RemittanceMaster/StatementTemplate";
 import SettlementParameterMaster from "../module/FinanceMastersModule/RemittanceMaster/SettlementParameter";
-import ReconciliationMaster from "../module/FinanceMastersModule/RemittanceMaster/ReconciliationMaster";
 import BulkProcessingMaster from "../module/FinanceMastersModule/RemittanceMaster/BulkProcessingMaster";
-import ScheduleMaster from "../module/FinanceMastersModule/RemittanceMaster/ScheduleMaster";
-import ElectronicTransferMaster from "../module/FinanceMastersModule/RemittanceMaster/ElectronicTransferMaster";
-import ApprovalWorkflowMaster from "../module/FinanceMastersModule/RemittanceMaster/ApprovalWorkflowMaster";
 import ExceptionMaster from "../module/FinanceMastersModule/RemittanceMaster/ExceptionMaster";
-import ReportTemplateMaster from "../module/FinanceMastersModule/RemittanceMaster/ReportTemplateMaster";
 import AgencyBillMaster from "../module/FinanceMastersModule/RemittanceMaster/AgencyBillMaster";
 import AccountDetermination from "../module/FinanceMastersModule/AccountDetermination";
 import PostingRules from "../module/FinanceMastersModule/PostingRules";
@@ -251,11 +235,8 @@ import AccountingFlow from "../module/FinanceMastersModule/AccountingFlow";
 import CoInsuranceRegister from "../module/Reports/FinancialReports/CoInsuranceRegister";
 import DueToInsurers from "../module/Reports/FinancialReports/DueToInsurers";
 // K13-K17 Remittance Masters
-import DirectBillMaster from "../module/FinanceMastersModule/RemittanceMaster/DirectBillMaster";
 import AdjustmentMaster from "../module/FinanceMastersModule/RemittanceMaster/AdjustmentMaster";
 import NotificationMaster from "../module/FinanceMastersModule/RemittanceMaster/NotificationMaster";
-import HistoryConfiguration from "../module/FinanceMastersModule/RemittanceMaster/HistoryConfiguration";
-import AnalyticsConfiguration from "../module/FinanceMastersModule/RemittanceMaster/AnalyticsConfiguration";
 
 // Incentive Module
 import IncentiveProgramMaster from "../module/FinanceMastersModule/IncentiveMaster/IncentiveProgramMaster";
@@ -285,7 +266,6 @@ import SchedulingDashboard from "../module/Remittance/Scheduling";
 import ElectronicTransfer from "../module/Remittance/ElectronicTransfer";
 import RemittanceApproval from "../module/Remittance/RemittanceApproval";
 import RemittanceExceptions from "../module/Remittance/RemittanceExceptions";
-import RemittanceReports from "../module/Remittance/RemittanceReports";
 import AgencyBillProcessing from "../module/Remittance/AgencyBillProcessing";
 // K13-K17 Remittance Transactions
 import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
@@ -338,7 +318,6 @@ import {
   CoverageBuilder,
   RatingEngine,
   UnderwritingRules,
-  ApprovalWorkflows,
   MarketMapping,
   DocumentManager,
   ProductAnalytics,
@@ -806,26 +785,6 @@ const Maincomponent = () => {
             path="master/generals/employeemanagement/adddesignation"
             element={<AddDesignation />}
           />
-          <Route
-            path="master/generals/employeemanagement/employee"
-            element={<Employee />}
-          />
-          <Route
-            path="master/generals/employeemanagement/employee/add/:id"
-            element={<AddEmployee action="add" />}
-          />
-          <Route
-            path="master/generals/employeemanagement/employee/edit/:id"
-            element={<AddEmployee action="edit" />}
-          />
-          <Route
-            path="master/generals/employeemanagement/employee/view/:id"
-            element={<AddEmployee action="view" />}
-          />
-          <Route
-            path="master/generals/employeemanagement/addemployee"
-            element={<AddEmployee />}
-          />
 
           {/* User Management */}
           <Route
@@ -910,23 +869,7 @@ const Maincomponent = () => {
 
 
           {/* pettycash */}
-          <Route
-            path="master/finance/pettycash"
-            element={<PettyCashMaster />}
-          />
-          <Route
-            path="master/finance/pettycash/addpettycash"
-            element={<AddPettyCash />}
-          />
-          <Route
-            path="master/finance/pettycash/pettycashdetail/:id"
-            element={<PettyCashdetails />}
-          />
 
-          <Route
-            path="master/finance/pettycash/editpettycash/:id"
-            element={<EditPettyCash />}
-          />
 
           <Route />
           <Route
@@ -1081,40 +1024,16 @@ const Maincomponent = () => {
             element={<SettlementParameterMaster />}
           />
           <Route
-            path="master/finance/remittance/reconciliationmaster/:mode"
-            element={<ReconciliationMaster />}
-          />
-          <Route
             path="master/finance/remittance/bulkprocessingmaster/:mode"
             element={<BulkProcessingMaster />}
-          />
-          <Route
-            path="master/finance/remittance/schedulemaster/:mode"
-            element={<ScheduleMaster />}
-          />
-          <Route
-            path="master/finance/remittance/electronictransfermaster/:mode"
-            element={<ElectronicTransferMaster />}
-          />
-          <Route
-            path="master/finance/remittance/approvalworkflowmaster/:mode"
-            element={<ApprovalWorkflowMaster />}
           />
           <Route
             path="master/finance/remittance/exceptionmaster/:mode"
             element={<ExceptionMaster />}
           />
           <Route
-            path="master/finance/remittance/reporttemplatemaster/:mode"
-            element={<ReportTemplateMaster />}
-          />
-          <Route
             path="master/finance/remittance/agencybillmaster/:mode"
             element={<AgencyBillMaster />}
-          />
-          <Route
-            path="master/finance/remittance/directbillmaster/:mode"
-            element={<DirectBillMaster />}
           />
           <Route
             path="master/finance/remittance/adjustmentmaster/:mode"
@@ -1123,14 +1042,6 @@ const Maincomponent = () => {
           <Route
             path="master/finance/remittance/notificationmaster/:mode"
             element={<NotificationMaster />}
-          />
-          <Route
-            path="master/finance/remittance/historyconfiguration/:mode"
-            element={<HistoryConfiguration />}
-          />
-          <Route
-            path="master/finance/remittance/analyticsconfiguration/:mode"
-            element={<AnalyticsConfiguration />}
           />
 
           {/* Remittance Transaction Routes */}
@@ -1173,10 +1084,6 @@ const Maincomponent = () => {
           <Route
             path="finance/remittance/exceptions"
             element={<RemittanceExceptions />}
-          />
-          <Route
-            path="finance/remittance/reports"
-            element={<RemittanceReports />}
           />
           <Route
             path="finance/remittance/agencybill"
@@ -1326,10 +1233,6 @@ const Maincomponent = () => {
             element={<DocumentManager />}
           />
           <Route
-            path="product-configurator/workflows"
-            element={<ApprovalWorkflows />}
-          />
-          <Route
             path="product-configurator/market-mapping"
             element={<MarketMapping />}
           />
@@ -1365,23 +1268,6 @@ const Maincomponent = () => {
           <Route
             path="master/finance/currency/viewcurrency"
             element={<ViewCurrency />}
-          />
-          <Route path="master/generals/commission" element={<Commission />} />
-          <Route
-            path="master/generals/commission/addcommission"
-            element={<AddCommission />}
-          />
-          <Route
-            path="master/generals/commission/editcommission"
-            element={<EditCommission />}
-          />
-          <Route
-            path="master/generals/commission/editcommissionpopup"
-            element={<EditCommissionPopup />}
-          />
-          <Route
-            path="master/generals/commission/viewcommission/:id"
-            element={<ViewCommission />}
           />
 
           {/* // Dashboard Routes */}

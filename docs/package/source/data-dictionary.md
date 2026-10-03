@@ -293,7 +293,7 @@ Broker-billed premium collected from clients is remitted to the insurers net of 
 |---|---|
 | `remittances`, `remittance_lines` | Remittance bills to insurers and the policies included. |
 | `remittance_allocations` | Co-insurance split of each collection by insurer. |
-| `remittance_items`, `remittance_approvals`, `remittance_delegations` | Work items, approval requests and approval delegations. |
+| `remittance_items`, `remittance_approvals` | Work items and approval requests (approval limits and delegations: `authority_limits`, `user_delegations`). |
 | `insurer_refund_credits` | Refunds due from insurers, netted against later remittances. |
 | `direct_bill_items`, `commission_debit_notes`, `commission_debit_note_lines`, `commission_debit_note_collections` | Direct-bill commission receivable, debit notes and their collection. |
 | `direct_bill_client_payments` | Client payments made directly to the insurer (no journal). |
@@ -754,7 +754,7 @@ This appendix lists every table and view with a one-line description and the num
 | `insurer_refund_credits` | Refunds due from insurers on returned premium already remitted; netted against the next remittance | 0 |
 | `remittance_allocations` | Premium collected on a co-insured policy, split for remittance to each insurer | 19 |
 | `remittance_approvals` | Multi-level approval requests with SLA and history | 44 |
-| `remittance_delegations` | Approval delegations (period, transaction types, amount limit) | 0 |
+| `remittance_delegations` | Approval delegations of earlier releases; no longer read or written (see `user_delegations`) | 0 |
 | `remittance_items` | Remittance work items (settlements, adjustments, transfers, exceptions) | 44 |
 | `remittance_lines` | Policies included in a remittance | 52 |
 | `remittances` | Premium remittances / bills to insurers (REM-): gross, commission, net due, approval, settlement | 22 |

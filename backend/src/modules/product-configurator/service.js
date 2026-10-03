@@ -108,6 +108,36 @@ function motorTariffErrors(cfg) {
   return errors;
 }
 
+/**
+ * A template names its line of business and product by the codes of the masters, so they match the rest of the
+ * system: line_of_business is a Line of Business master code (its code or name is accepted and stored as the code),
+ * product_id a row of the products table. A template with a product and no line of business takes the product's line.
+ */
+async function masterCodes(vals, errors) {
+  let product = null;
+  if (vals.product_id !== undefined && vals.product_id !== null) {
+    product = await one('SELECT id, code, line FROM products WHERE id = $1', [Number.isFinite(vals.product_id) ? vals.product_id : -1]);
+    if (!product) errors.push({ path: 'productId', message: 'Product must be one of the products (Master > Generals > Insurance Management > Product)' });
+  }
+  if (vals.line_of_business === undefined && product && (await lobCode(product.line))) vals.line_of_business = await lobCode(product.line);
+  if (vals.line_of_business === undefined || vals.line_of_business === null || String(vals.line_of_business).trim() === '') return;
+  const code = await lobCode(vals.line_of_business);
+  if (!code) {
+    errors.push({ path: 'lineOfBusiness', message: `Line of business ${vals.line_of_business} is not in the Line of Business master` });
+    return;
+  }
+  vals.line_of_business = code;
+  const productLob = product ? await lobCode(product.line) : null;
+  if (productLob && productLob !== code) errors.push({ path: 'lineOfBusiness', message: `Product ${product.code} belongs to line of business ${productLob}` });
+}
+/** Line of Business master code for a code or name (case-insensitive); null when the master has none. */
+async function lobCode(v) {
+  if (v === undefined || v === null || String(v).trim() === '') return null;
+  const r = await one(`SELECT code FROM master_records WHERE type_code = 'line-of-business' AND status = 'active'
+    AND (lower(code) = lower($1) OR lower(name) = lower($1)) ORDER BY (lower(code) = lower($1)) DESC, id LIMIT 1`, [String(v).trim()]);
+  return r?.code || null;
+}
+
 async function templateValues(body, partial) {
   const errors = [];
   const required = ['templateCode', 'name', 'category', 'lineOfBusiness', 'effectiveDate', 'status'];
@@ -127,6 +157,7 @@ async function templateValues(body, partial) {
     if (NUM_COLS.has(col) && Number.isNaN(v)) errors.push({ path: field, message: `${field} must be a number` });
     vals[col] = JSON_COLS.has(col) ? JSON.stringify(v ?? (col === 'insurers' || col === 'tags' ? [] : {})) : v;
   }
+  await masterCodes(vals, errors);
   if (vals.effective_date && vals.expiry_date && vals.expiry_date < vals.effective_date) errors.push({ path: 'expiryDate', message: 'Expiry date must be after the effective date' });
   if (body.configuration && typeof body.configuration === 'object') errors.push(...motorTariffErrors(body.configuration));
   if (errors.length) throw badRequest('Validation failed', errors);
