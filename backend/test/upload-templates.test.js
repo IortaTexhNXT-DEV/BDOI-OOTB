@@ -168,6 +168,15 @@ describe('go-live imports', () => {
     expect((await query('SELECT action FROM audit_log WHERE entity = \'opening_balances\'')).rows.length).toBe(2);
   });
 
+  it('the trial balance report starts from the go-live opening balances (they are not journals)', async () => {
+    const r = await api('post', '/reports/trial-balance/run').send({ FromDate: '2026-01-01', ToDate: '2026-12-31' });
+    expect(r.status, JSON.stringify(r.body)).toBe(200);
+    const acc = Object.fromEntries(r.body.data.rows.map((x) => [x.accountCode, x]));
+    expect(acc['1102001']).toMatchObject({ openingBalance: 1000000, closingDebit: 1000000 });
+    expect(acc['5101001']).toMatchObject({ openingBalance: -1010000, closingCredit: 1010000 });
+    expect(r.body.data.summary.balanced).toBe(true);
+  });
+
   it('refuses a go-live date after journals already posted in its fiscal year', async () => {
     expect((await api('post', '/period-end/fiscal-years').send({})).status).toBe(201);
     await withTransaction((db) => createJournal(db, { date: '2027-02-10', description: 'test', status: 'posted',

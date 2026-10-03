@@ -15334,6 +15334,146 @@
         }
       }
     },
+    "/claims/config": {
+      "get": {
+        "operationId": "getClaimsConfig",
+        "summary": "Claim masters for the claim screens: status labels, settlement types, causes of loss per line, sections per line of business",
+        "tags": [
+          "Claims"
+        ],
+        "description": "Front-end touchpoint: Operations > Claims (all steps)\n\nAccess: read:claims",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "statusLabels": {
+                          "type": "object",
+                          "properties": {
+                            "registered": {
+                              "type": "string"
+                            },
+                            "in-review": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "settlementTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lossCauses": {
+                          "type": "object",
+                          "properties": {
+                            "MOTOR": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "default": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "lobFields": {
+                          "type": "object",
+                          "properties": {
+                            "MOTOR": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "default": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        },
+                        "makerChecker": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "statusLabels": {
+                      "registered": "Pending",
+                      "in-review": "Processing"
+                    },
+                    "settlementTypes": [
+                      {
+                        "value": "Cheque",
+                        "label": "Cheque to claimant (insurer direct)"
+                      },
+                      {
+                        "value": "Through Broker",
+                        "label": "Paid through the broker",
+                        "paidThroughBroker": true
+                      }
+                    ],
+                    "lossCauses": {
+                      "MOTOR": [
+                        "Collision",
+                        "Other"
+                      ],
+                      "default": [
+                        "Other"
+                      ]
+                    },
+                    "lobFields": {
+                      "MOTOR": [
+                        "driver",
+                        "vehicle"
+                      ],
+                      "default": []
+                    },
+                    "makerChecker": true
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Claims (all steps)",
+        "x-permissions": [
+          "read:claims"
+        ]
+      }
+    },
     "/claims/getdocuments/{id}": {
       "get": {
         "operationId": "getClaimsGetdocumentsId",
@@ -25629,6 +25769,242 @@
         ]
       }
     },
+    "/dashboard/sales/overview": {
+      "get": {
+        "operationId": "getDashboardSalesOverview",
+        "summary": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
+        "tags": [
+          "Dashboards"
+        ],
+        "description": "Front-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations",
+        "parameters": [
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "month"
+          },
+          {
+            "name": "salesPerson",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "usr_0123"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "period": {
+                          "type": "object",
+                          "properties": {
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "kpis": {
+                          "type": "object",
+                          "properties": {
+                            "prospects": {
+                              "type": "integer"
+                            },
+                            "newProspects": {
+                              "type": "integer"
+                            },
+                            "quotations": {
+                              "type": "integer"
+                            },
+                            "policies": {
+                              "type": "integer"
+                            },
+                            "premium": {
+                              "type": "integer"
+                            },
+                            "prospectConversionRate": {
+                              "type": "integer"
+                            },
+                            "pipelineValue": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "pipeline": {
+                          "type": "object",
+                          "properties": {
+                            "prospects": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "stage": {
+                                    "type": "string"
+                                  },
+                                  "count": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "quotations": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "stage": {
+                                    "type": "string"
+                                  },
+                                  "count": {
+                                    "type": "integer"
+                                  },
+                                  "premium": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "bySalesPerson": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "userId": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "prospects": {
+                                "type": "integer"
+                              },
+                              "quotations": {
+                                "type": "integer"
+                              },
+                              "policies": {
+                                "type": "integer"
+                              },
+                              "premium": {
+                                "type": "integer"
+                              },
+                              "conversionRate": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "salesPersons": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "scoped": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "period": {
+                      "from": "2026-09-01",
+                      "to": "2026-09-30"
+                    },
+                    "kpis": {
+                      "prospects": 61,
+                      "newProspects": 12,
+                      "quotations": 9,
+                      "policies": 4,
+                      "premium": 125000,
+                      "prospectConversionRate": 25,
+                      "pipelineValue": 350000
+                    },
+                    "pipeline": {
+                      "prospects": [
+                        {
+                          "stage": "New",
+                          "count": 7
+                        }
+                      ],
+                      "quotations": [
+                        {
+                          "stage": "Draft",
+                          "count": 2,
+                          "premium": 45000
+                        }
+                      ]
+                    },
+                    "bySalesPerson": [
+                      {
+                        "userId": "usr_0123",
+                        "name": "Paolo Dizon",
+                        "prospects": 5,
+                        "quotations": 3,
+                        "policies": 2,
+                        "premium": 64000,
+                        "conversionRate": 40
+                      }
+                    ],
+                    "salesPersons": [
+                      {
+                        "id": "usr_0123",
+                        "name": "Paolo Dizon"
+                      }
+                    ],
+                    "scoped": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Dashboard > Sales Dashboard",
+        "x-permissions": [
+          "read:leads",
+          "read:quotations"
+        ]
+      }
+    },
     "/disbursements": {
       "get": {
         "operationId": "getDisbursements",
@@ -28407,6 +28783,53 @@
         "x-permissions": [
           "read:settings",
           "write:settings"
+        ]
+      }
+    },
+    "/document-templates/acknowledgement-receipt/{paymentId}": {
+      "get": {
+        "operationId": "getDocumentTemplatesAcknowledgementReceiptPaymentId",
+        "summary": "Acknowledgement receipt (AR) PDF of a premium payment recorded on a policy (payment id or AR number)",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Payment > Payments recorded > Print acknowledgement receipt\n\nAccess: read:policies, read:receipts",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Payment > Payments recorded > Print acknowledgement receipt",
+        "x-permissions": [
+          "read:policies",
+          "read:receipts"
         ]
       }
     },
@@ -58960,6 +59383,106 @@
         ]
       }
     },
+    "/policy-renewals/batches/{id}/generate-quotes": {
+      "post": {
+        "operationId": "postPolicyRenewalsBatchesIdGenerateQuotes",
+        "summary": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)",
+        "tags": [
+          "Policy renewals"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Batch > Generate Renewal Quotes\n\nAccess: write:renewals",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "jobId": {
+                          "type": "string"
+                        },
+                        "queued": {
+                          "type": "integer"
+                        },
+                        "batchId": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Renewal quotes queued",
+                  "data": {
+                    "jobId": "17",
+                    "queued": 2,
+                    "batchId": "RB-2026-00001"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Batch > Generate Renewal Quotes",
+        "x-permissions": [
+          "write:renewals"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "selectedPolicyIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "selectedPolicyIds": [
+                  "pol_1",
+                  "pol_2"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
     "/policy-renewals/batches/{id}/notice-status": {
       "get": {
         "operationId": "getPolicyRenewalsBatchesIdNoticeStatus",
@@ -59689,6 +60212,120 @@
         }
       }
     },
+    "/policy-renewals/options": {
+      "get": {
+        "operationId": "getPolicyRenewalsOptions",
+        "summary": "Renewal criteria defaults (expiry window from today, grace period) and insurer / product choices",
+        "tags": [
+          "Policy renewals"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Batch > Create Batch; Renewal Policy\n\nAccess: read:renewals, write:renewals, write:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "today": {
+                          "type": "string"
+                        },
+                        "windowDays": {
+                          "type": "integer"
+                        },
+                        "expiryFrom": {
+                          "type": "string"
+                        },
+                        "expiryTo": {
+                          "type": "string"
+                        },
+                        "graceDays": {
+                          "type": "integer"
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "products": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "line": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "today": "2026-09-30",
+                    "windowDays": 30,
+                    "expiryFrom": "2026-09-30",
+                    "expiryTo": "2026-10-30",
+                    "graceDays": 30,
+                    "insurers": [
+                      {
+                        "id": "ic_1",
+                        "name": "MAPFRE Insurance Corporation"
+                      }
+                    ],
+                    "products": [
+                      {
+                        "id": 2,
+                        "name": "Motor Vehicle Insurance",
+                        "line": "motor"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Batch > Create Batch; Renewal Policy",
+        "x-permissions": [
+          "read:renewals",
+          "write:renewals",
+          "write:quotations"
+        ]
+      }
+    },
     "/policy-renewals/policies/{policyId}/prefill": {
       "get": {
         "operationId": "getPolicyRenewalsPoliciesPolicyIdPrefill",
@@ -60046,7 +60683,7 @@
     "/policy-renewals/policies/{policyId}/renewals": {
       "post": {
         "operationId": "postPolicyRenewalsPoliciesPolicyIdRenewals",
-        "summary": "Create (or update the open) renewal of a policy with the wizard data",
+        "summary": "Create (or update the open) renewal of a policy with the wizard data (422 with field errors when a step does not validate)",
         "tags": [
           "Policy renewals"
         ],
@@ -60235,6 +60872,121 @@
         }
       }
     },
+    "/policy-renewals/policies/{policyId}/validate": {
+      "post": {
+        "operationId": "postPolicyRenewalsPoliciesPolicyIdValidate",
+        "summary": "Validate the renewal wizard data of a step (full=true: every step and the premium) without saving; answers { valid, errors: [{ path, message }] }",
+        "tags": [
+          "Policy renewals"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (Next on each step)\n\nAccess: read:renewals, write:renewals, write:quotations",
+        "parameters": [
+          {
+            "name": "policyId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "valid": {
+                          "type": "boolean"
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "path": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "valid": false,
+                    "errors": [
+                      {
+                        "path": "coverageDetails.appaSeats",
+                        "message": "Enter the number of seats covered (driver and passengers) for Auto Passenger Personal Accident"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Policy > Renewal (Next on each step)",
+        "x-permissions": [
+          "read:renewals",
+          "write:renewals",
+          "write:quotations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "coverageDetails": {
+                    "type": "object",
+                    "properties": {
+                      "autoPassengerPersonalAccident": {
+                        "type": "string"
+                      },
+                      "appaSeats": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "coverageDetails": {
+                  "autoPassengerPersonalAccident": "25000",
+                  "appaSeats": 5
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/policy-renewals/queue-stats": {
       "get": {
         "operationId": "getPolicyRenewalsQueueStats",
@@ -60412,6 +61164,165 @@
         "x-screen": "Operations > Renewals > Renewal Batch (polling)",
         "x-permissions": [
           "read:renewals"
+        ]
+      }
+    },
+    "/policy-renewals/renewable-policies": {
+      "get": {
+        "operationId": "getPolicyRenewalsRenewablePolicies",
+        "summary": "Policies due for renewal with their renewal state (due, in grace period, lapsed renewable, in progress, renewed); expiryFrom, expiryTo, search, insurerId, productId, premiumMin, premiumMax, clientName, paymentStatus, state, includeRenewed, renewableOnly",
+        "tags": [
+          "Policy renewals"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Renewal Policy; Renewal Batch > Generate Policy List\n\nAccess: read:renewals, write:renewals, write:quotations",
+        "parameters": [
+          {
+            "name": "expiryFrom",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          },
+          {
+            "name": "expiryTo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-30"
+          },
+          {
+            "name": "paymentStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "All"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "policyId": {
+                            "type": "string"
+                          },
+                          "policyNumber": {
+                            "type": "string"
+                          },
+                          "clientName": {
+                            "type": "string"
+                          },
+                          "expiryDate": {
+                            "type": "string"
+                          },
+                          "daysToExpiry": {
+                            "type": "integer"
+                          },
+                          "renewalState": {
+                            "type": "string"
+                          },
+                          "renewalStateLabel": {
+                            "type": "string"
+                          },
+                          "canRenew": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "pagination": {
+                      "type": "object",
+                      "properties": {
+                        "page": {
+                          "type": "integer"
+                        },
+                        "limit": {
+                          "type": "integer"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "totalPages": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "policyId": "pol_1",
+                      "policyNumber": "POL-2025-00012",
+                      "clientName": "Maria Santos",
+                      "expiryDate": "2026-10-20",
+                      "daysToExpiry": 20,
+                      "renewalState": "due",
+                      "renewalStateLabel": "Due for renewal",
+                      "canRenew": true
+                    }
+                  ],
+                  "pagination": {
+                    "page": 1,
+                    "limit": 50,
+                    "total": 1,
+                    "totalPages": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Renewal Policy; Renewal Batch > Generate Policy List",
+        "x-permissions": [
+          "read:renewals",
+          "write:renewals",
+          "write:quotations"
         ]
       }
     },
@@ -71557,7 +72468,7 @@
     "/master/signatory/get-all-signatory": {
       "get": {
         "operationId": "getMasterSignatoryGetAllSignatory",
-        "summary": "Authorised signatories",
+        "summary": "Authorised signatories (active), the default one first",
         "tags": [
           "Quotation masters"
         ],
@@ -71587,6 +72498,10 @@
                           },
                           "designation": {
                             "type": "string"
+                          },
+                          "signatureKey": {},
+                          "isDefault": {
+                            "type": "boolean"
                           }
                         }
                       }
@@ -71599,7 +72514,9 @@
                     {
                       "id": 1,
                       "name": "Maria Regina Cruz",
-                      "designation": "President & CEO"
+                      "designation": "President & CEO",
+                      "signatureKey": null,
+                      "isDefault": true
                     }
                   ]
                 }
@@ -73411,6 +74328,86 @@
           }
         },
         "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Record customer response",
+        "x-permissions": [
+          "read:quotations"
+        ]
+      }
+    },
+    "/quotations/{id}/kyc-prefill": {
+      "get": {
+        "operationId": "getQuotationsIdKycPrefill",
+        "summary": "ID and vehicle identifiers already captured for the insured (earlier policies of the client, the renewed policy, the quotation), to pre-fill the convert-to-policy form",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Convert policy > Customer information\n\nAccess: read:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "idType": {
+                          "type": "string"
+                        },
+                        "idCardNumber": {
+                          "type": "string"
+                        },
+                        "chassisNumber": {
+                          "type": "string"
+                        },
+                        "motorNumber": {
+                          "type": "string"
+                        },
+                        "plateNumber": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "idType": "PhilSys ID",
+                    "idCardNumber": "1234-5678-9012",
+                    "chassisNumber": "MR0FB8CD3P0123456",
+                    "motorNumber": "2GD1234567",
+                    "plateNumber": "NBC 1234"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Convert policy > Customer information",
         "x-permissions": [
           "read:quotations"
         ]
@@ -92515,6 +93512,99 @@
         }
       }
     },
+    "/renewals/{id}/timeline": {
+      "get": {
+        "operationId": "getRenewalsIdTimeline",
+        "summary": "Negotiation timeline of a renewal, newest first (notes, contacts, notices, quotes, quotations, status changes)",
+        "tags": [
+          "Renewals workspace"
+        ],
+        "description": "Front-end touchpoint: Operations > Renewals > Negotiations\n\nAccess: read:renewals",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "category": {
+                            "type": "string"
+                          },
+                          "method": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "by": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "act-5",
+                      "date": "2026-09-27T05:31:28Z",
+                      "type": "Counter Offer",
+                      "category": "offer",
+                      "method": "Phone",
+                      "description": "Client asked for a 5% discount",
+                      "by": "ana.reyes"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Renewals > Negotiations",
+        "x-permissions": [
+          "read:renewals"
+        ]
+      }
+    },
     "/renewals/{id}/win-back": {
       "post": {
         "operationId": "postRenewalsIdWinBack",
@@ -95502,7 +96592,7 @@
         "tags": [
           "Schedules"
         ],
-        "description": "Front-end touchpoint: Master > Schedules > Edit\n\nAccess: role:accounting",
+        "description": "Front-end touchpoint: Master > Schedules > Edit\n\nAccess: write:schedules",
         "parameters": [
           {
             "name": "code",
@@ -95543,6 +96633,9 @@
           }
         },
         "x-screen": "Master > Schedules > Edit",
+        "x-permissions": [
+          "write:schedules"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -95574,7 +96667,7 @@
         "tags": [
           "Schedules"
         ],
-        "description": "Front-end touchpoint: Master > Schedules > Run now\n\nAccess: role:accounting",
+        "description": "Front-end touchpoint: Master > Schedules > Run now\n\nAccess: write:schedules",
         "parameters": [
           {
             "name": "code",
@@ -95640,7 +96733,10 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > Schedules > Run now"
+        "x-screen": "Master > Schedules > Run now",
+        "x-permissions": [
+          "write:schedules"
+        ]
       }
     },
     "/schedules/{code}/runs": {

@@ -116,7 +116,6 @@ const AddPettyCash = () => {
             classNames="input__field__reversal__inactive"
             className={"input__label__reversal"}
             label={t("financeMasters.pettyCashCode")}
-            placeholder={t("financeMasters.enter")}
             value={formik.values.pettycashcode}
             disabled
             placeholder={t("generalMasters.issuedOnSave")}

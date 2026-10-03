@@ -140,8 +140,6 @@ const CurrencyMaster = () => {
   const items = [{ label: t("sidebar.Currency"), url: "/master/finance/currency" }];
   const home = { label: t("sidebar.Master") };
 
-  const handleClick = () => {};
-
   useEffect(() => {
     if (search?.length > 0) {
       dispatch(getCurrencySearchList(search));
@@ -168,9 +166,6 @@ const CurrencyMaster = () => {
             label={t("financeMasters.upload")}
             icon={<SvgUploade color={"#fff"} />}
             className="upload__btn"
-            onClick={() => {
-              handleClick();
-            }}
           />
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload currencies" targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button

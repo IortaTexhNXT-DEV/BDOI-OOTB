@@ -26,6 +26,13 @@ describe('core', () => {
     const get = await ctx.api('get', '/settings?group=tax');
     expect(get.body.data.find((s) => s.key === 'tax.vat_rate').value).toBe(0.12);
   });
+  it('refuses a schedule that is not a valid cron expression', async () => {
+    const bad = await ctx.api('put', '/schedules/policy-expiry').send({ cron: 'every morning' });
+    expect(bad.status).toBe(400);
+    expect(bad.body.errors[0].path).toBe('cron');
+    expect((await ctx.api('put', '/schedules/policy-expiry').send({ cron: '15 0 * * *' })).status).toBe(200);
+  });
+
   it('runs a scheduled job and records the run', async () => {
     const r = await ctx.api('post', '/schedules/policy-expiry/run');
     expect(r.body.data.status).toBe('success');

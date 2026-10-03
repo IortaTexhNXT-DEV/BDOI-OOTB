@@ -626,7 +626,7 @@ function main() {
   }
 
   const where = (c) => `${c.file}:${c.line}`;
-  const label = (c) => `${(c.method || "ANY").padEnd(6)} ${c.path}${c.dynamic ? "  (built at run time)" : ""}`;
+  const label = (c) => `${String(c.method || "ANY").padEnd(6)} ${c.path}${c.dynamic ? "  (built at run time)" : ""}`;
   console.log(`Backend routes: ${routes.length}. Front-end call sites: ${sites.length}.`);
   if (SHOW_CALLS) {
     console.log("\nCall sites:");
@@ -637,7 +637,7 @@ function main() {
   console.log(`\nCalls with a method the route does not accept: ${wrongMethod.length}`);
   wrongMethod.forEach((c) => console.log(`  ${label(c)}  ${where(c)}  (route accepts ${c.allowed})`));
   console.log(`\nCall sites whose path is only known at run time (not checked): ${unresolved.length}`);
-  unresolved.forEach(([c]) => console.log(`  ${(c.method || "ANY").padEnd(6)} ${where(c)}`));
+  unresolved.forEach(([c]) => console.log(`  ${String(c.method || "ANY").padEnd(6)} ${where(c)}`));
   const unused = routes.filter((r) => !r.used);
   console.log(`\nBackend routes no screen calls: ${unused.length}${SHOW_UNUSED ? "" : " (list them with --unused)"}`);
   if (SHOW_UNUSED) unused.forEach((r) => console.log(`  ${r.method.padEnd(6)} ${r.path}`));

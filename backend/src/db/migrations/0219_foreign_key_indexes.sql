@@ -1,0 +1,37 @@
+-- Indexes on the foreign keys added since migration 0146 (generated with scripts/fk-index-report.js --sql): deletes and
+-- joins on the referenced rows no longer scan these tables. Small master-to-master references are left out by the report.
+CREATE INDEX IF NOT EXISTS access_review_items_decided_by_fk_idx ON access_review_items (decided_by);
+CREATE INDEX IF NOT EXISTS access_review_items_user_id_fk_idx ON access_review_items (user_id);
+CREATE INDEX IF NOT EXISTS access_reviews_closed_by_fk_idx ON access_reviews (closed_by);
+CREATE INDEX IF NOT EXISTS accounting_config_changes_rule_id_fk_idx ON accounting_config_changes (rule_id);
+CREATE INDEX IF NOT EXISTS authority_limits_decided_by_fk_idx ON authority_limits (decided_by);
+CREATE INDEX IF NOT EXISTS authority_limits_replaces_id_fk_idx ON authority_limits (replaces_id);
+CREATE INDEX IF NOT EXISTS authority_limits_requested_by_fk_idx ON authority_limits (requested_by);
+CREATE INDEX IF NOT EXISTS authority_limits_role_code_fk_idx ON authority_limits (role_code);
+CREATE INDEX IF NOT EXISTS authority_limits_user_id_fk_idx ON authority_limits (user_id);
+CREATE INDEX IF NOT EXISTS claim_settlement_movements_insurance_company_id_fk_idx ON claim_settlement_movements (insurance_company_id);
+CREATE INDEX IF NOT EXISTS claim_settlement_movements_journal_id_fk_idx ON claim_settlement_movements (journal_id);
+CREATE INDEX IF NOT EXISTS client_credit_exceptions_policy_id_fk_idx ON client_credit_exceptions (policy_id);
+CREATE INDEX IF NOT EXISTS commission_adjustments_journal_id_fk_idx ON commission_adjustments (journal_id);
+CREATE INDEX IF NOT EXISTS direct_bill_client_payments_insurance_company_id_fk_idx ON direct_bill_client_payments (insurance_company_id);
+CREATE INDEX IF NOT EXISTS insurer_rate_tables_insurance_company_id_fk_idx ON insurer_rate_tables (insurance_company_id);
+CREATE INDEX IF NOT EXISTS insurer_refund_credits_journal_id_fk_idx ON insurer_refund_credits (journal_id);
+CREATE INDEX IF NOT EXISTS insurer_statement_formats_insurance_company_id_fk_idx ON insurer_statement_formats (insurance_company_id);
+CREATE INDEX IF NOT EXISTS insurer_statement_lines_policy_id_fk_idx ON insurer_statement_lines (policy_id);
+CREATE INDEX IF NOT EXISTS insurer_statement_resolutions_journal_id_fk_idx ON insurer_statement_resolutions (journal_id);
+CREATE INDEX IF NOT EXISTS package_endorsements_insurance_company_id_fk_idx ON package_endorsements (insurance_company_id);
+CREATE INDEX IF NOT EXISTS package_quotes_bundle_id_fk_idx ON package_quotes (bundle_id);
+CREATE INDEX IF NOT EXISTS package_quotes_lead_id_fk_idx ON package_quotes (lead_id);
+CREATE INDEX IF NOT EXISTS package_quotes_owner_user_id_fk_idx ON package_quotes (owner_user_id);
+CREATE INDEX IF NOT EXISTS package_quotes_renewal_of_fk_idx ON package_quotes (renewal_of);
+CREATE INDEX IF NOT EXISTS package_sections_product_id_fk_idx ON package_sections (product_id);
+CREATE INDEX IF NOT EXISTS package_sections_rate_table_id_fk_idx ON package_sections (rate_table_id);
+CREATE INDEX IF NOT EXISTS payment_links_client_id_fk_idx ON payment_links (client_id);
+CREATE INDEX IF NOT EXISTS payment_links_policy_id_fk_idx ON payment_links (policy_id);
+CREATE INDEX IF NOT EXISTS payment_links_receipt_id_fk_idx ON payment_links (receipt_id);
+CREATE INDEX IF NOT EXISTS premium_warranty_actions_extension_id_fk_idx ON premium_warranty_actions (extension_id);
+CREATE INDEX IF NOT EXISTS quote_customer_responses_recorded_by_fk_idx ON quote_customer_responses (recorded_by);
+CREATE INDEX IF NOT EXISTS sod_rules_role_a_fk_idx ON sod_rules (role_a);
+CREATE INDEX IF NOT EXISTS sod_rules_role_b_fk_idx ON sod_rules (role_b);
+CREATE INDEX IF NOT EXISTS user_delegations_delegator_id_fk_idx ON user_delegations (delegator_id);
+CREATE INDEX IF NOT EXISTS user_delegations_revoked_by_fk_idx ON user_delegations (revoked_by);

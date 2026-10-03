@@ -239,7 +239,6 @@ const AddEmployee = ({ action }) => {
               label={t("generalMasters.employeeCode")}
               classNames="dropdown__add__sub"
               className="label__sub__add"
-              placeholder={t("generalMasters.enter")}
             />
             {formik.touched.employeeCode && formik.errors.employeeCode && (
               <div style={{ fontSize: 12, color: "var(--color-danger)" }}>

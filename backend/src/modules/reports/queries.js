@@ -362,7 +362,14 @@ export const QUERIES = {
     sql: `SELECT jl.account_code AS "accountCode", COALESCE(ga.name, jl.account_name, jl.account_code) AS "accountName", ga.account_type AS "accountType",
         ga.fs_group AS "fsGroup", jv.jv_date AS _date, jl.debit, jl.credit, ${CREATOR_DIMS}
       FROM journal_lines jl JOIN journal_vouchers jv ON jv.id = jl.jv_id LEFT JOIN gl_accounts ga ON ga.code = jl.account_code ${creatorJoin('jv.created_by')}
-      WHERE jv.jv_date <= $2 AND jv.status = ANY($3::text[])`,
+      WHERE jv.jv_date <= $2 AND jv.status = ANY($3::text[])
+      UNION ALL
+      -- go-live opening balances (Period Management > Import opening balances) are not journals: they count as at the day
+      -- before the go-live date; balances written by a year-end close are left out, the journals behind them are already here
+      SELECT o.account_code, COALESCE(ga.name, o.account_code), ga.account_type, ga.fs_group, substr(o.source_run, 9)::date - 1,
+        GREATEST(o.balance, 0), GREATEST(-o.balance, 0), NULL, NULL, NULL, NULL, NULL
+      FROM opening_balances o LEFT JOIN gl_accounts ga ON ga.code = o.account_code
+      WHERE o.source_run LIKE 'go-live:%' AND substr(o.source_run, 9)::date - 1 <= $2`,
     extras: [setting('reports.trial_balance_statuses', ['approved', 'posted'], 'text[]')],
     filters: ['agent', 'branch'],
     criteria: { Overall: { dims: TB_DIMS }, Agent: { dims: TB_DIMS }, 'Principal Insurer': { dims: TB_DIMS }, Branch: { dims: ['branch', ...TB_DIMS] } },

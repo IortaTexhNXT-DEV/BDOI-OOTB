@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (845 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (854 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -10930,6 +10930,55 @@
           ]
         },
         {
+          "name": "Claim masters for the claim screens: status labels, settlement types, causes of loss per line, sections per line of business",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/claims/config",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "claims",
+                "config"
+              ]
+            },
+            "description": "Claim masters for the claim screens: status labels, settlement types, causes of loss per line, sections per line of business\n\nFront-end touchpoint: Operations > Claims (all steps)\n\nAccess: read:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/claims/config",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "claims",
+                    "config"
+                  ]
+                },
+                "description": "Claim masters for the claim screens: status labels, settlement types, causes of loss per line, sections per line of business\n\nFront-end touchpoint: Operations > Claims (all steps)\n\nAccess: read:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"statusLabels\": {\n      \"registered\": \"Pending\",\n      \"in-review\": \"Processing\"\n    },\n    \"settlementTypes\": [\n      {\n        \"value\": \"Cheque\",\n        \"label\": \"Cheque to claimant (insurer direct)\"\n      },\n      {\n        \"value\": \"Through Broker\",\n        \"label\": \"Paid through the broker\",\n        \"paidThroughBroker\": true\n      }\n    ],\n    \"lossCauses\": {\n      \"MOTOR\": [\n        \"Collision\",\n        \"Other\"\n      ],\n      \"default\": [\n        \"Other\"\n      ]\n    },\n    \"lobFields\": {\n      \"MOTOR\": [\n        \"driver\",\n        \"vehicle\"\n      ],\n      \"default\": []\n    },\n    \"makerChecker\": true\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Download a claim document (uploaded file, or generated PDF: Claims Acknowledgement Letter, Claims Discharge Voucher, Claims Data Sheet)",
           "request": {
             "method": "GET",
@@ -16583,6 +16632,77 @@
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"funnel\": {\n      \"leads\": 16,\n      \"quotations\": 14,\n      \"policies\": 8,\n      \"leadToPolicyRate\": 50\n    },\n    \"leadsByStatus\": [\n      {\n        \"status\": \"New\",\n        \"count\": 4\n      }\n    ]\n  }\n}"
             }
           ]
+        },
+        {
+          "name": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&salesPerson=usr_0123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "dashboard",
+                "sales",
+                "overview"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "month"
+                },
+                {
+                  "key": "salesPerson",
+                  "value": "usr_0123"
+                }
+              ]
+            },
+            "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/dashboard/sales/overview?period=month&salesPerson=usr_0123",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "dashboard",
+                    "sales",
+                    "overview"
+                  ],
+                  "query": [
+                    {
+                      "key": "period",
+                      "value": "month"
+                    },
+                    {
+                      "key": "salesPerson",
+                      "value": "usr_0123"
+                    }
+                  ]
+                },
+                "description": "Sales Dashboard: prospects, quotations, conversion and premium for a date range (period=month|quarter|year or from/to), pipeline by stage, figures by sales person, premium by product, monthly trend. Scoped roles see their own book; others the whole book or one sales person (salesPerson=user id)\n\nFront-end touchpoint: Dashboard > Sales Dashboard\n\nAccess: read:leads, read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": {\n      \"from\": \"2026-09-01\",\n      \"to\": \"2026-09-30\"\n    },\n    \"kpis\": {\n      \"prospects\": 61,\n      \"newProspects\": 12,\n      \"quotations\": 9,\n      \"policies\": 4,\n      \"premium\": 125000,\n      \"prospectConversionRate\": 25,\n      \"pipelineValue\": 350000\n    },\n    \"pipeline\": {\n      \"prospects\": [\n        {\n          \"stage\": \"New\",\n          \"count\": 7\n        }\n      ],\n      \"quotations\": [\n        {\n          \"stage\": \"Draft\",\n          \"count\": 2,\n          \"premium\": 45000\n        }\n      ]\n    },\n    \"bySalesPerson\": [\n      {\n        \"userId\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\",\n        \"prospects\": 5,\n        \"quotations\": 3,\n        \"policies\": 2,\n        \"premium\": 64000,\n        \"conversionRate\": 40\n      }\n    ],\n    \"salesPersons\": [\n      {\n        \"id\": \"usr_0123\",\n        \"name\": \"Paolo Dizon\"\n      }\n    ],\n    \"scoped\": false\n  }\n}"
+            }
+          ]
         }
       ]
     },
@@ -18209,6 +18329,71 @@
     {
       "name": "Documents",
       "item": [
+        {
+          "name": "Acknowledgement receipt (AR) PDF of a premium payment recorded on a policy (payment id or AR number)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-templates/acknowledgement-receipt/:paymentId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-templates",
+                "acknowledgement-receipt",
+                ":paymentId"
+              ],
+              "variable": [
+                {
+                  "key": "paymentId",
+                  "value": "",
+                  "description": "paymentId (path parameter)"
+                }
+              ]
+            },
+            "description": "Acknowledgement receipt (AR) PDF of a premium payment recorded on a policy (payment id or AR number)\n\nFront-end touchpoint: Operations > Policy > Payment > Payments recorded > Print acknowledgement receipt\n\nAccess: read:policies, read:receipts"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-templates/acknowledgement-receipt/:paymentId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-templates",
+                    "acknowledgement-receipt",
+                    ":paymentId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "paymentId",
+                      "value": "",
+                      "description": "paymentId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Acknowledgement receipt (AR) PDF of a premium payment recorded on a policy (payment id or AR number)\n\nFront-end touchpoint: Operations > Policy > Payment > Payments recorded > Print acknowledgement receipt\n\nAccess: read:policies, read:receipts"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
         {
           "name": "Fire / IAR policy schedule PDF",
           "request": {
@@ -37446,6 +37631,101 @@
           ]
         },
         {
+          "name": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policy-renewals/batches/:id/generate-quotes",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policy-renewals",
+                "batches",
+                ":id",
+                "generate-quotes"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Generate Renewal Quotes\n\nAccess: write:renewals",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"selectedPolicyIds\": [\n    \"pol_1\",\n    \"pol_2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policy-renewals/batches/:id/generate-quotes",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policy-renewals",
+                    "batches",
+                    ":id",
+                    "generate-quotes"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Prepare re-rated renewal quotes for the selected policies of a batch (background job; poll /queue/:jobId)\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Generate Renewal Quotes\n\nAccess: write:renewals",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"selectedPolicyIds\": [\n    \"pol_1\",\n    \"pol_2\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Renewal quotes queued\",\n  \"data\": {\n    \"jobId\": \"17\",\n    \"queued\": 2,\n    \"batchId\": \"RB-2026-00001\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Notice status counts of a batch",
           "request": {
             "method": "GET",
@@ -38088,6 +38368,55 @@
           ]
         },
         {
+          "name": "Renewal criteria defaults (expiry window from today, grace period) and insurer / product choices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policy-renewals/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policy-renewals",
+                "options"
+              ]
+            },
+            "description": "Renewal criteria defaults (expiry window from today, grace period) and insurer / product choices\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Create Batch; Renewal Policy\n\nAccess: read:renewals, write:renewals, write:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policy-renewals/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policy-renewals",
+                    "options"
+                  ]
+                },
+                "description": "Renewal criteria defaults (expiry window from today, grace period) and insurer / product choices\n\nFront-end touchpoint: Operations > Renewals > Renewal Batch > Create Batch; Renewal Policy\n\nAccess: read:renewals, write:renewals, write:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"today\": \"2026-09-30\",\n    \"windowDays\": 30,\n    \"expiryFrom\": \"2026-09-30\",\n    \"expiryTo\": \"2026-10-30\",\n    \"graceDays\": 30,\n    \"insurers\": [\n      {\n        \"id\": \"ic_1\",\n        \"name\": \"MAPFRE Insurance Corporation\"\n      }\n    ],\n    \"products\": [\n      {\n        \"id\": 2,\n        \"name\": \"Motor Vehicle Insurance\",\n        \"line\": \"motor\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Renewal wizard prefill: saved wizard data of the open renewal, else the expiring policy (its quotation, document or policy row)",
           "request": {
             "method": "GET",
@@ -38250,7 +38579,7 @@
           ]
         },
         {
-          "name": "Create (or update the open) renewal of a policy with the wizard data",
+          "name": "Create (or update the open) renewal of a policy with the wizard data (422 with field errors when a step does not validate)",
           "request": {
             "method": "POST",
             "header": [
@@ -38278,7 +38607,7 @@
                 }
               ]
             },
-            "description": "Create (or update the open) renewal of a policy with the wizard data\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals, write:quotations",
+            "description": "Create (or update the open) renewal of a policy with the wizard data (422 with field errors when a step does not validate)\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals, write:quotations",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"850000\",\n    \"bodilyInjury\": \"200000\"\n  },\n  \"accessories\": [],\n  \"orderSummary\": {\n    \"netPremium\": 17800,\n    \"grossPremium\": 21450.5\n  },\n  \"effectiveDate\": \"2026-10-31\",\n  \"expiryDate\": \"2027-10-30\"\n}",
@@ -38319,7 +38648,7 @@
                     }
                   ]
                 },
-                "description": "Create (or update the open) renewal of a policy with the wizard data\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals, write:quotations",
+                "description": "Create (or update the open) renewal of a policy with the wizard data (422 with field errors when a step does not validate)\n\nFront-end touchpoint: Operations > Policy > Renew (coverage details, order summary)\n\nAccess: write:renewals, write:quotations",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"coverageDetails\": {\n    \"lossAndDamageCoverage\": \"850000\",\n    \"bodilyInjury\": \"200000\"\n  },\n  \"accessories\": [],\n  \"orderSummary\": {\n    \"netPremium\": 17800,\n    \"grossPremium\": 21450.5\n  },\n  \"effectiveDate\": \"2026-10-31\",\n  \"expiryDate\": \"2027-10-30\"\n}",
@@ -38341,6 +38670,101 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Renewal saved\",\n  \"data\": {\n    \"id\": \"rnw_1\",\n    \"renewalNumber\": \"RN-2026-00001\",\n    \"policyId\": \"pol_1\",\n    \"policyNumber\": \"POL-2025-00012\",\n    \"clientId\": \"cl_1\",\n    \"insuredName\": \"Maria Santos\",\n    \"status\": \"Quote Sent\",\n    \"statusCode\": \"quoted\",\n    \"policyExpiry\": \"2026-10-30\",\n    \"grossPremium\": 21450.5,\n    \"paymentStatus\": \"Paid\",\n    \"coverageDetails\": {\n      \"lossAndDamageCoverage\": \"850000\",\n      \"totalSumInsured\": \"850000\"\n    },\n    \"policy\": {\n      \"policyNumber\": \"POL-2025-00012\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Validate the renewal wizard data of a step (full=true: every step and the premium) without saving; answers { valid, errors: [{ path, message }] }",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/policy-renewals/policies/:policyId/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policy-renewals",
+                "policies",
+                ":policyId",
+                "validate"
+              ],
+              "variable": [
+                {
+                  "key": "policyId",
+                  "value": "",
+                  "description": "policyId (path parameter)"
+                }
+              ]
+            },
+            "description": "Validate the renewal wizard data of a step (full=true: every step and the premium) without saving; answers { valid, errors: [{ path, message }] }\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (Next on each step)\n\nAccess: read:renewals, write:renewals, write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"coverageDetails\": {\n    \"autoPassengerPersonalAccident\": \"25000\",\n    \"appaSeats\": 5\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/policy-renewals/policies/:policyId/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policy-renewals",
+                    "policies",
+                    ":policyId",
+                    "validate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "policyId",
+                      "value": "",
+                      "description": "policyId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Validate the renewal wizard data of a step (full=true: every step and the premium) without saving; answers { valid, errors: [{ path, message }] }\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy > Renewal (Next on each step)\n\nAccess: read:renewals, write:renewals, write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"coverageDetails\": {\n    \"autoPassengerPersonalAccident\": \"25000\",\n    \"appaSeats\": 5\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"valid\": false,\n    \"errors\": [\n      {\n        \"path\": \"coverageDetails.appaSeats\",\n        \"message\": \"Enter the number of seats covered (driver and passengers) for Auto Passenger Personal Accident\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -38467,6 +38891,99 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"jobId\": \"15\",\n    \"status\": \"processing\",\n    \"progress\": {\n      \"total\": 10,\n      \"processed\": 4,\n      \"succeeded\": 4,\n      \"failed\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Policies due for renewal with their renewal state (due, in grace period, lapsed renewable, in progress, renewed); expiryFrom, expiryTo, search, insurerId, productId, premiumMin, premiumMax, clientName, paymentStatus, state, includeRenewed, renewableOnly",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/policy-renewals/renewable-policies?expiryFrom=2026-09-30&expiryTo=2026-10-30&paymentStatus=All&page=1&limit=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "policy-renewals",
+                "renewable-policies"
+              ],
+              "query": [
+                {
+                  "key": "expiryFrom",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "expiryTo",
+                  "value": "2026-10-30"
+                },
+                {
+                  "key": "paymentStatus",
+                  "value": "All"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            },
+            "description": "Policies due for renewal with their renewal state (due, in grace period, lapsed renewable, in progress, renewed); expiryFrom, expiryTo, search, insurerId, productId, premiumMin, premiumMax, clientName, paymentStatus, state, includeRenewed, renewableOnly\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy; Renewal Batch > Generate Policy List\n\nAccess: read:renewals, write:renewals, write:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/policy-renewals/renewable-policies?expiryFrom=2026-09-30&expiryTo=2026-10-30&paymentStatus=All&page=1&limit=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "policy-renewals",
+                    "renewable-policies"
+                  ],
+                  "query": [
+                    {
+                      "key": "expiryFrom",
+                      "value": "2026-09-30"
+                    },
+                    {
+                      "key": "expiryTo",
+                      "value": "2026-10-30"
+                    },
+                    {
+                      "key": "paymentStatus",
+                      "value": "All"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "50"
+                    }
+                  ]
+                },
+                "description": "Policies due for renewal with their renewal state (due, in grace period, lapsed renewable, in progress, renewed); expiryFrom, expiryTo, search, insurerId, productId, premiumMin, premiumMax, clientName, paymentStatus, state, includeRenewed, renewableOnly\n\nFront-end touchpoint: Operations > Renewals > Renewal Policy; Renewal Batch > Generate Policy List\n\nAccess: read:renewals, write:renewals, write:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2025-00012\",\n      \"clientName\": \"Maria Santos\",\n      \"expiryDate\": \"2026-10-20\",\n      \"daysToExpiry\": 20,\n      \"renewalState\": \"due\",\n      \"renewalStateLabel\": \"Due for renewal\",\n      \"canRenew\": true\n    }\n  ],\n  \"pagination\": {\n    \"page\": 1,\n    \"limit\": 50,\n    \"total\": 1,\n    \"totalPages\": 1\n  }\n}"
             }
           ]
         }
@@ -46267,7 +46784,7 @@
           ]
         },
         {
-          "name": "Authorised signatories",
+          "name": "Authorised signatories (active), the default one first",
           "request": {
             "method": "GET",
             "header": [],
@@ -46282,7 +46799,7 @@
                 "get-all-signatory"
               ]
             },
-            "description": "Authorised signatories\n\nFront-end touchpoint: Operations > Quotation > Create Quote (policy / coverage details) > Order summary\n\nAccess: read:quotations, read:masters"
+            "description": "Authorised signatories (active), the default one first\n\nFront-end touchpoint: Operations > Quotation > Create Quote (policy / coverage details) > Order summary\n\nAccess: read:quotations, read:masters"
           },
           "response": [
             {
@@ -46301,7 +46818,7 @@
                     "get-all-signatory"
                   ]
                 },
-                "description": "Authorised signatories\n\nFront-end touchpoint: Operations > Quotation > Create Quote (policy / coverage details) > Order summary\n\nAccess: read:quotations, read:masters"
+                "description": "Authorised signatories (active), the default one first\n\nFront-end touchpoint: Operations > Quotation > Create Quote (policy / coverage details) > Order summary\n\nAccess: read:quotations, read:masters"
               },
               "status": "OK",
               "code": 200,
@@ -46313,7 +46830,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Maria Regina Cruz\",\n      \"designation\": \"President & CEO\"\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Maria Regina Cruz\",\n      \"designation\": \"President & CEO\",\n      \"signatureKey\": null,\n      \"isDefault\": true\n    }\n  ]\n}"
             }
           ]
         },
@@ -47508,6 +48025,71 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"outcome\": \"accepted\",\n      \"channel\": \"Viber/WhatsApp\",\n      \"responseDate\": \"2026-09-30\",\n      \"reference\": \"Viber 09:14\",\n      \"fromStatus\": \"PendingCustomer\",\n      \"toStatus\": \"CustomerAccepted\"\n    }\n  ],\n  \"channels\": [\n    \"E-mail\",\n    \"Phone\",\n    \"Viber/WhatsApp\",\n    \"Meeting\",\n    \"Signed form\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "ID and vehicle identifiers already captured for the insured (earlier policies of the client, the renewed policy, the quotation), to pre-fill the convert-to-policy form",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/kyc-prefill",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "kyc-prefill"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "ID and vehicle identifiers already captured for the insured (earlier policies of the client, the renewed policy, the quotation), to pre-fill the convert-to-policy form\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Convert policy > Customer information\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/kyc-prefill",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "kyc-prefill"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "ID and vehicle identifiers already captured for the insured (earlier policies of the client, the renewed policy, the quotation), to pre-fill the convert-to-policy form\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Convert policy > Customer information\n\nAccess: read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"idType\": \"PhilSys ID\",\n    \"idCardNumber\": \"1234-5678-9012\",\n    \"chassisNumber\": \"MR0FB8CD3P0123456\",\n    \"motorNumber\": \"2GD1234567\",\n    \"plateNumber\": \"NBC 1234\"\n  }\n}"
             }
           ]
         },
@@ -59950,6 +60532,71 @@
           ]
         },
         {
+          "name": "Negotiation timeline of a renewal, newest first (notes, contacts, notices, quotes, quotations, status changes)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/renewals/:id/timeline",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "renewals",
+                ":id",
+                "timeline"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Negotiation timeline of a renewal, newest first (notes, contacts, notices, quotes, quotations, status changes)\n\nFront-end touchpoint: Operations > Renewals > Negotiations\n\nAccess: read:renewals"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/renewals/:id/timeline",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "renewals",
+                    ":id",
+                    "timeline"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Negotiation timeline of a renewal, newest first (notes, contacts, notices, quotes, quotations, status changes)\n\nFront-end touchpoint: Operations > Renewals > Negotiations\n\nAccess: read:renewals"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"act-5\",\n      \"date\": \"2026-09-27T05:31:28Z\",\n      \"type\": \"Counter Offer\",\n      \"category\": \"offer\",\n      \"method\": \"Phone\",\n      \"description\": \"Client asked for a 5% discount\",\n      \"by\": \"ana.reyes\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Record a win-back offer on a lapsed renewal (optionally linked to a campaign)",
           "request": {
             "method": "POST",
@@ -61756,7 +62403,7 @@
                 }
               ]
             },
-            "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: role:accounting",
+            "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: write:schedules",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"cron\": \"0 7 * * *\",\n  \"enabled\": true\n}",
@@ -61795,7 +62442,7 @@
                     }
                   ]
                 },
-                "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: role:accounting",
+                "description": "Change a job schedule, parameters or enabled flag\n\nFront-end touchpoint: Master > Schedules > Edit\n\nAccess: write:schedules",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"cron\": \"0 7 * * *\",\n  \"enabled\": true\n}",
@@ -61843,7 +62490,7 @@
                 }
               ]
             },
-            "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: role:accounting"
+            "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: write:schedules"
           },
           "response": [
             {
@@ -61869,7 +62516,7 @@
                     }
                   ]
                 },
-                "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: role:accounting"
+                "description": "Run a job now\n\nFront-end touchpoint: Master > Schedules > Run now\n\nAccess: write:schedules"
               },
               "status": "OK",
               "code": 200,

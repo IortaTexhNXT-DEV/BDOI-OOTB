@@ -3,6 +3,7 @@ import { many, one, pool, query } from '../db/pool.js';
 import * as handlers from './handlers.js';
 import { businessTimeZone } from '../lib/dates.js';
 import { logger } from '../lib/logger.js';
+import { notify } from '../modules/notifications/service.js';
 
 const tasks = new Map();
 /** State of the schedules loaded on this instance: time zone, signature of the jobs table, change-watch timer. */
@@ -84,6 +85,10 @@ async function execute(job, triggeredBy) {
   } catch (e) {
     await query('UPDATE job_runs SET finished_at = now(), status = \'failed\', error = $2 WHERE id = $1', [run.id, e.message]);
     await query('UPDATE scheduled_jobs SET last_run_at = now(), last_status = \'failed\' WHERE id = $1', [job.id]);
+    // whoever looks after the schedules sees the failure on the bell, not only in the server log
+    await notify({ audience: 'read:schedules', type: 'alert', priority: 'high', title: `Scheduled job failed: ${job.name || job.code}`,
+      message: String(e.message || 'Unknown error').slice(0, 500), link: '/master/configuration/schedules', entity: 'scheduled_job', entityId: job.code })
+      .catch((err) => logger.warn?.(`job ${job.code}: failure notification not created: ${err.message}`));
     return { runId: run.id, status: 'failed', error: e.message };
   }
 }
