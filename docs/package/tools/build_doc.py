@@ -186,6 +186,8 @@ class Builder:
 
     def heading(self, level, text):
         if level == 1:
+            if self.h[0] > 2:
+                self.drop_trailing_spacer()
             p = self.para('Heading 1')
             # page break before every chapter but the first
             # (the template already breaks the page after the acronyms)
@@ -198,6 +200,16 @@ class Builder:
         else:
             self.h[2] += 1
             p = self.para('Heading 3'); add_inline(p, f'{self.h[0]}.{self.h[1]}.{self.h[2]}  {text}', 11.5, True, NAVY)
+
+    def drop_trailing_spacer(self):
+        """Removes the empty spacing paragraphs just before a heading that starts a new page: when the page before is
+        full, such a paragraph flows onto a page of its own and leaves it blank."""
+        prev = self.signoff.getprevious()
+        while prev is not None and prev.tag == qn('w:p') and not ''.join(t.text or '' for t in prev.iter(qn('w:t'))).strip() \
+                and prev.find('.//' + qn('w:drawing')) is None and prev.find('.//' + qn('w:br')) is None \
+                and prev.find('.//' + qn('w:numPr')) is None and prev.find('.//' + qn('w:pStyle')) is None:
+            gone, prev = prev, prev.getprevious()
+            gone.getparent().remove(gone)
 
     def body(self, text):
         p = self.para()
@@ -342,6 +354,7 @@ class Builder:
         ts = list(self.signoff.iter(qn('w:t')))
         for k, t in enumerate(ts):
             t.text = f'{self.h[0] + 1}.  Document Sign-Off' if k == 0 else ''
+        self.drop_trailing_spacer()
         self.signoff_page_break()
         items = tables[-2]
         for row in items.rows[1:]:
