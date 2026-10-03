@@ -87,6 +87,8 @@ const PaymentConfirmation = () => {
     dst: pick(policy.documentaryStampTax, quote.documentaryStampTax),
     vat: pick(policy.valueAddedTax, quote.valueAddedTax),
     lgt: pick(policy.localGovernmentTax, quote.localGovernmentTax),
+    fst: pick(policy.fireServiceTax, quote.fireServiceTax),
+    ctpl: pick(quote.ctplCoveragePremium, policy.premiumBreakdown?.ctplCoveragePremium),
     others: pick(policy.accountPremiumOthers, quote.accountPremiumOthers),
     discount: pick(policy.discount, quote.discount, quote.firePremiumDetails?.totalDiscount),
     gross: pick(policy.grossPremium, state?.grossPremium, state?.GrossPremium, quote.grossPremium),
@@ -195,6 +197,8 @@ const PaymentConfirmation = () => {
         {row(t("agent.dst", "DST"), formatCurrency(premium.dst))}
         {row(t("agent.vat", "VAT"), formatCurrency(premium.vat))}
         {row(t("agent.lgt", "LGT"), formatCurrency(premium.lgt))}
+        {Number(premium.fst) > 0 && row(t("agent.fst", "FST"), formatCurrency(premium.fst))}
+        {Number(premium.ctpl) > 0 && row(t("agent.ctpl", "CTPL"), formatCurrency(premium.ctpl))}
         {row(t("agent.others", "Others"), formatCurrency(premium.others))}
         {row(t("agent.discount", "Discount"), `- ${formatCurrency(premium.discount)}`)}
         <div className="premium__header mt-5">

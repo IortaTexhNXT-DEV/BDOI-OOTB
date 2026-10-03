@@ -17,10 +17,12 @@ import policyRenewalService from "../../../../../services/policyRenewalService";
 import { Skeleton } from "primereact/skeleton";
 import { notifyWarn } from "../../../../../utility/dialogs";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import { useFormatCurrency } from "../../../../../hooks/useFormatCurrency";
 import logger from "../../../../../utility/logger";
 
 const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const menu = useRef(null);
   const [displayDialog, setDisplayDialog] = useState(false);
   const [selectedProducts] = useState([]);
@@ -490,7 +492,7 @@ const Index = ({ clientId, action }) => {
     if (showSkeleton) return <Skeleton width="4rem" />;
     const premium =
       rowData.grossPremium || rowData.totalPremium || rowData.GrossPremium || 0;
-    return <div className="category__text">{premium}</div>;
+    return <div className="category__text">{formatCurrency(Number(String(premium).replace(/,/g, "")) || 0)}</div>;
   };
 
   const renderProductDescription = (rowData) => {

@@ -3,7 +3,7 @@
  * dated the period end (source period-close) that is reversed automatically on day 1 of the next period.
  */
 import { getSetting } from '../../lib/settings.js';
-import { round2 } from '../../lib/money.js';
+import { formatMoney, round2 } from '../../lib/money.js';
 import { addDays, DAY_MS } from '../../lib/dates.js';
 import { account, createJournal } from '../accounting/lib/ledger.js';
 import { bounds } from './checks.js';
@@ -47,7 +47,7 @@ export async function deferCommission(db, p, { user, runId }) {
     referenceType: 'PeriodClose', referenceId: runId, status: 'posted', lines }, user);
   await record(db, { runId, period: p.period, step: 'deferral', jv, reverseOn: addDays(end, 1) });
   const amount = round2(detail.reduce((s, d) => s + d.deferred, 0));
-  return { status: 'done', message: `Deferred ${amount} of commission on ${detail.length} polic${detail.length === 1 ? 'y' : 'ies'}`, amount, journals: [jv.id], detail };
+  return { status: 'done', message: `Deferred ${await formatMoney(amount)} of commission on ${detail.length} polic${detail.length === 1 ? 'y' : 'ies'}`, amount, journals: [jv.id], detail };
 }
 
 /** Month-end rate of a currency into the base currency from the dated Exchange Rate master (null when missing). */

@@ -4,6 +4,7 @@
  * app_settings (limits.receivable_ageing_buckets, collections.*).
  */
 import { getSetting } from '../../lib/settings.js';
+import { formatMoney } from '../../lib/money.js';
 import { today } from '../../lib/dates.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { queueEmail } from '../../lib/mailer.js';
@@ -141,9 +142,8 @@ export async function setCommitment(db, id, date, reason, user) {
 
 const fill = (tpl, vars) => String(tpl ?? '').replace(/\{\{(\w+)\}\}/g, (_, k) => (vars[k] ?? ''));
 async function emailVars(x) {
-  const symbol = await getSetting('currency.symbol', '₱');
   return { clientName: x.client.displayName || `${x.client.firstName} ${x.client.lastName}`.trim(), policyNumber: x.policyNumber, billNumber: x.billNumber,
-    amount: `${symbol}${Number(x.outstandingAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`, dueDate: x.dueDate, daysPastDue: x.daysPastDue,
+    amount: await formatMoney(x.outstandingAmount), dueDate: x.dueDate, daysPastDue: x.daysPastDue,
     companyName: await companyName() };
 }
 

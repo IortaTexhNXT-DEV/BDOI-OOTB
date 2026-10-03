@@ -110,19 +110,7 @@ const QuoteDetailView = ({ action }) => {
     }
   );
   const settingsTaxRates = useTaxRates();
-  useEffect(() => {
-    const productType = quotationData?.productType || "";
-    const isFire = productType.toLowerCase().includes("fire");
-    const isIar = isIarLob(productType);
-    if (quotationData && !isFire && !isIar) {
-      dispatch(
-        fetchProductTemplateByIdMiddleware({
-          templateCode: "MOT-003-2025",
-        })
-      );
-    }
-  }, [quotationData, dispatch]);
-
+  // Fire / IAR layouts (built on the fire and IAR premium details of the quote wizard)
   const isIarLOB = useMemo(
     () => isIarLob(quotationData?.productType),
     [quotationData?.productType]
@@ -132,6 +120,20 @@ const QuoteDetailView = ({ action }) => {
     () => !isIarLOB && isFireLob(quotationData?.productType),
     [quotationData?.productType, isIarLOB]
   );
+  // Vehicle details and motor covers only for a motor quotation: the line of business of the quotation (product
+  // master line), since a fire or casualty product need not say so in its name (e.g. Householder Insurance)
+  const quoteLob = String(quotationData?.lob || "").toUpperCase();
+  const isMotorLOB = quoteLob ? quoteLob === "MOTOR" : !isFireLOB && !isIarLOB;
+
+  useEffect(() => {
+    if (quotationData && isMotorLOB) {
+      dispatch(
+        fetchProductTemplateByIdMiddleware({
+          templateCode: "MOT-003-2025",
+        })
+      );
+    }
+  }, [quotationData, isMotorLOB, dispatch]);
 
   const fireRiskDetails = quotationData?.fireRiskDetails || quotationData?.fireRisk || {};
   const firePremiumDetails = quotationData?.firePremiumDetails || quotationData?.firePremium || {};
@@ -428,7 +430,7 @@ const QuoteDetailView = ({ action }) => {
   if (isLoading) {
     return (
       <div className="overall__quotedetails__view__container">
-        <div className="header_title">{t("quoteDetailView.leads")}</div>
+        <div className="header_title">{t("quoteDetailView.pageTitle")}</div>
         <Card className="mt-4">
           <div style={{ textAlign: "center", padding: "40px" }}>
             <i
@@ -446,7 +448,7 @@ const QuoteDetailView = ({ action }) => {
   if (!quotationData) {
     return (
       <div className="overall__quotedetails__view__container">
-        <div className="header_title">{t("quoteDetailView.leads")}</div>
+        <div className="header_title">{t("quoteDetailView.pageTitle")}</div>
         <Card className="mt-4">
           <div style={{ textAlign: "center", padding: "40px" }}>
             <p>{t("quoteDetailView.noQuotationDataAvailable")}</p>
@@ -463,7 +465,7 @@ const QuoteDetailView = ({ action }) => {
 
   return (
     <div className="overall__quotedetails__view__container">
-      <div className="header_title">{t("quoteDetailView.leads")}</div>
+      <div className="header_title">{t("quoteDetailView.pageTitle")}</div>
       <div
         onClick={handleLeadNavigation}
         className="left_arrow mt-3 cursor-pointer"
@@ -951,6 +953,7 @@ const QuoteDetailView = ({ action }) => {
             </div>
             {!isFireLOB && !isIarLOB && (
               <>
+                {isMotorLOB && (
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.insuranceVehicleDetails")}</label>
                   <div className="quote_details">
@@ -1004,6 +1007,7 @@ const QuoteDetailView = ({ action }) => {
                     </label>
                   </div>
                 </div>
+                )}
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.coverageDetails")}</label>
                   <div className="quote_details">
@@ -1017,7 +1021,7 @@ const QuoteDetailView = ({ action }) => {
                     </label>
                   </div>
                   {/* Priced covers of the quote: the detail showed the sum insured, CTPL and APPA only */}
-                  {[
+                  {isMotorLOB && [
                     [t("coverageDetailsCard.ownDamageCoverage"), quotationData?.lossAndDamageCoverage, quotationData?.lossAndDamageCoverageRate, quotationData?.lossAndDamageCoveragePremium],
                     [t("coverageDetailsCard.actsOfNature", "Acts of Nature"), null, quotationData?.actsOfNatureRate, quotationData?.actsOfNaturePremium],
                     [t("coverageDetailsCard.bodilyInjury", "Bodily Injury"), quotationData?.bodilyInjury, null, quotationData?.bodilyInjuryCoveragePremium],
@@ -1040,6 +1044,8 @@ const QuoteDetailView = ({ action }) => {
                         </label>
                       </div>
                     ))}
+                  {isMotorLOB && (
+                  <>
                   <div className="quote_details">
                     <label className="insurance_text">{t("coverageDetailsCard.ctplTariffPremium")}</label>
                     <label className="alpha_text">
@@ -1056,6 +1062,8 @@ const QuoteDetailView = ({ action }) => {
                         : t("quoteDetailView.notIncluded", "Not included")}
                     </label>
                   </div>
+                  </>
+                  )}
                 </div>
               </>
             )}

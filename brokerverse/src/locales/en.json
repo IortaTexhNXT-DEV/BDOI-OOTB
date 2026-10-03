@@ -703,7 +703,19 @@
     "recordedPrintedTitle": "Payment voucher {{voucher}} printed",
     "recordedPayee": "Payee: {{payee}}. The voucher is listed below with its current status.",
     "recordAnother": "Create another voucher",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "voucherNumber": "Voucher Number",
+    "voucherDate": "Voucher Date",
+    "payeeName": "Payee",
+    "paymentMode": "Payment Mode",
+    "grossAmount": "Gross Amount",
+    "whtAmount": "Withholding Tax",
+    "netAmount": "Net Amount",
+    "paidAt": "Paid On",
+    "paymentLines": "Payment lines",
+    "reference": "Reference",
+    "description": "Description",
+    "noChequeIssued": "No cheque has been issued on this voucher"
   },
   "renewal": {
     "renewals": "Renewals",
@@ -1608,7 +1620,8 @@
     "incentiveStatement": "Incentive Statement",
     "incentiveReports": "Incentive Reports",
     "incentiveApprovals": "Incentive Approvals",
-    "approve": "Approve"
+    "approve": "Approve",
+    "currentPeriod": "Current period"
   },
   "reinsurance": {
     "reinsurance": "Reinsurance",
@@ -2759,7 +2772,9 @@
     "vehicleTypeRequired": "Choose the vehicle type (it sets the CTPL tariff premium)",
     "seatingCapacityInvalid": "Enter the seating capacity (1 to 99), including the driver",
     "noSignatories": "No active signatory in the Signatories master yet.",
-    "openSignatoryMaster": "Add one"
+    "openSignatoryMaster": "Add one",
+    "fst": "FST",
+    "ctpl": "CTPL"
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -4902,7 +4917,8 @@
     "waitingForCustomerApproval": "Waiting for customer approval",
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
     "errorSendingQuoteForApproval": "Error sending quote for approval",
-    "notIncluded": "Not included"
+    "notIncluded": "Not included",
+    "pageTitle": "Quotation Slip"
   },
   "policyList": {
     "title": "Policies",

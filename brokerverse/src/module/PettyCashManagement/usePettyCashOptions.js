@@ -34,10 +34,7 @@ const fromBankAccount = (a) => ({
   description: a.accountName,
   bankCode: a.bankCode,
 });
-const fromUser = (u) => {
-  const name = u.displayName || u.username;
-  return { code: u.userId, label: name, description: name };
-};
+const fromUser = (u) => ({ code: u.userId, label: u.name, description: u.name, branchCode: u.branchCode });
 
 const settle = (promise, fallback = []) => promise.catch(() => fallback);
 
@@ -59,7 +56,7 @@ const usePettyCashOptions = () => {
       settle(mastersService.options("branch")),
       settle(mastersService.options("department")),
       settle(mastersService.options("transaction-code")),
-      settle(userService.getUsers({ limit: 200 }).then((r) => r?.data || []).catch(() => [])),
+      settle(userService.lookupUsers()),
     ]).then(([funds, banks, bankAccounts, accounts, currencies, branches, departments, codes, users]) => {
       if (!active) return;
       const glAccounts = accounts.map(fromAccount);

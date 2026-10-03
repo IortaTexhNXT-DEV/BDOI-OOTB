@@ -53,20 +53,25 @@ const ClaimSettlement = () => {
     claimNumber: claimDetailsMainReducers?.claimNumber || "",
   }));
 
-  // Try to get policy holder name from Redux first, then claim details, then fallback
+  // The claim of this page only (the store may still hold a claim opened earlier, or none yet on a direct link)
+  const claim = [claimDetails?.data?.id, claimDetails?.data?.claimId, claimDetails?.data?.claimNumber].includes(claimId)
+    ? claimDetails.data
+    : null;
+  const loadingClaim = claimDetailsLoading || (!claim && !claimDetailsError && Boolean(claimId));
+
+  // Header: the loaded claim, else the header lookup, else what the claim list left in the store
   const header = useClaimHeader(claimId);
   const policyHolderName =
+    claim?.policyHolderName ||
+    claim?.policy?.policyHolderName ||
     header.policyHolderName ||
     reduxPolicyHolderName ||
-    claimDetails?.data?.policy?.policyHolderName ||
-    claimDetails?.data?.policy?.PolicyHolderName ||
     t("agent.loading");
 
   const claimNumber =
+    claim?.claimNumber ||
     header.claimNumber ||
     reduxClaimNumber ||
-    claimDetails?.data?.claimNumber ||
-    claimDetails?.data?.claim_number ||
     t("agent.loading");
 
   // Fetch claim details on component mount
@@ -77,7 +82,7 @@ const ClaimSettlement = () => {
   }, [dispatch, claimId]);
 
   const handleNavigation = () => {
-    navigate(`/agent/clientview/${claimDetails?.data?.policy?.clientId}`);
+    navigate(`/agent/clientview/${claim?.clientId || claim?.policy?.clientId}`);
   };
 
   const handleAcknowledgmentsubmit = async () => {
@@ -234,7 +239,7 @@ const ClaimSettlement = () => {
   };
 
   // Show loading state
-  if (claimDetailsLoading) {
+  if (loadingClaim) {
     return (
       <div className="claim__detailssettlemenet__container">
         <div className="claim__details__container__titles">{t("claimSettlementDetail.clients")}</div>
@@ -300,14 +305,14 @@ const ClaimSettlement = () => {
         <div className="grid mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
-              value={claimDetails?.data?.policy?.policyNumber || ""}
+              value={claim?.policyNumber || claim?.policy?.policyNumber || header.policyNumber || ""}
               label={t("claimSettlementDetail.policyNumber")}
               disabled={true}
             />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
-              value={claimDetails?.data?.claimNumber || ""}
+              value={claim?.claimNumber || claim?.claimRefId || header.claimNumber || ""}
               label={t("claimSettlementDetail.claimNumber")}
               disabled={true}
             />
@@ -317,7 +322,7 @@ const ClaimSettlement = () => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               value={
-                formatAppDate(claimDetails?.data?.reportedDate, { empty: "" })
+                formatAppDate(claim?.reportedDate, { empty: "" })
               }
               label={t("claimSettlementDetail.dateReported")}
               disabled={true}
@@ -326,7 +331,7 @@ const ClaimSettlement = () => {
           <div className="col-12 md:col-6 lg:col-6">
             <InputTextField
               value={
-                formatAppDate(claimDetails?.data?.dateOfIncident, { empty: "" })
+                formatAppDate(claim?.dateOfIncident, { empty: "" })
               }
               label={t("claimSettlementDetail.dateOfLoss")}
               disabled={true}
@@ -495,7 +500,7 @@ const ClaimSettlement = () => {
           </div>
         </div>
       </Card>
-      <SettlementCash claimId={claimDetails?.data?.id || claimId} />
+      <SettlementCash claimId={claim?.id || claimId} />
     </div>
   );
 };

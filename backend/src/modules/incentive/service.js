@@ -151,6 +151,39 @@ export async function achievement(metric, agentId, from, to) {
   return 0;
 }
 
+/** Months in one calculation period of a program (Master > Incentive Programs, incentive.calculation_frequencies). */
+const FREQUENCY_MONTHS = { monthly: 1, quarterly: 3, 'semi-annual': 6, semiannual: 6, 'half-yearly': 6, annual: 12, annually: 12, yearly: 12 };
+const maxDate = (a, b) => (a > b ? a : b);
+const minDate = (a, b) => (a < b ? a : b);
+
+/**
+ * The calculation period of a program that contains a date: the calendar month, quarter, half or year of its
+ * calculation frequency, within the program's own dates (the whole program period when the frequency is not known).
+ * Targets and tiers apply per calculation period, so this is the window "My Programs" shows progress for.
+ */
+export function programPeriodOn(program, date) {
+  const months = FREQUENCY_MONTHS[String(program.calculation_frequency || '').trim().toLowerCase()];
+  if (!months) return { from: program.period_from, to: program.period_to };
+  const d = new Date(`${String(date).slice(0, 10)}T00:00:00Z`);
+  const start = new Date(Date.UTC(d.getUTCFullYear(), Math.floor(d.getUTCMonth() / months) * months, 1));
+  const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + months, 0));
+  const iso = (x) => x.toISOString().slice(0, 10);
+  return { from: maxDate(iso(start), program.period_from), to: minDate(iso(end), program.period_to) };
+}
+
+/**
+ * Achievement of one agent in a program over a window: the program's metric, within the program's dates, and never
+ * counting activity dated after today (a policy incepting next week is not achieved yet). The single source of the
+ * calculation run and of My Programs.
+ */
+export async function programAchievement(program, agentId, from, to) {
+  const t = await today();
+  const start = maxDate(from, program.period_from);
+  const end = minDate(minDate(to, program.period_to), t);
+  if (start > end) return 0;
+  return achievement(program.metric, agentId, start, end);
+}
+
 function tierRange(level) {
   const s = String(level);
   const range = s.match(/(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)/);
@@ -250,10 +283,8 @@ export async function runCalculation(b, user) {
   const agents = await eligibleAgents();
   const lines = [];
   for (const p of programs) {
-    const from = p.period_from > period.from ? p.period_from : period.from;
-    const to = p.period_to < period.to ? p.period_to : period.to;
     for (const a of agents) {
-      const achieved = await achievement(p.metric, a.id, from, to);
+      const achieved = await programAchievement(p, a.id, period.from, period.to);
       if (!achieved) continue;
       const pay = payout(p, achieved, Number(p.target));
       lines.push({ program: p, agent: a, achieved, ...pay });
@@ -383,15 +414,18 @@ export async function agentPrograms(agentId) {
   for (const a of agents) {
     const assigned = [];
     for (const p of programs) {
-      const to = p.period_to < t ? p.period_to : t;
-      const achieved = await achievement(p.metric, a.id, p.period_from, to);
+      // progress in the current calculation period (targets and tiers apply per period), to date
+      const current = programPeriodOn(p, minDate(t, p.period_to));
+      const achieved = await programAchievement(p, a.id, current.from, current.to);
       const pay = payout(p, achieved, Number(p.target));
       assigned.push({ programId: p.id, programCode: p.program_code, programName: p.name, targetMetric: p.target_metric, target: p.target, stretchTarget: p.stretch_target, achieved,
         achievementPercent: pay.achievementPercent, potentialEarning: pay.amount, tier: pay.tier, daysRemaining: Math.max(0, Math.ceil((Date.parse(p.period_to) - Date.parse(t)) / 86400000)),
-        startDate: p.period_from, endDate: p.period_to, lastUpdated: t });
+        startDate: p.period_from, endDate: p.period_to, calculationFrequency: p.calculation_frequency, periodFrom: current.from, periodTo: current.to,
+        periodDaysRemaining: Math.max(0, Math.ceil((Date.parse(current.to) - Date.parse(t)) / 86400000)), lastUpdated: t });
     }
+    // activity to date only: a policy incepting after today is not an achievement yet
     const acts = await many(`SELECT p.inception_date, p.premium_total, p.renewed_from, pr.name AS product FROM policies p LEFT JOIN products pr ON pr.id = p.product_id
-                             WHERE p.owner_user_id = $1 ORDER BY p.inception_date DESC LIMIT 10`, [a.id]);
+                             WHERE p.owner_user_id = $1 AND p.inception_date <= $2::date AND p.status <> 'cancelled' ORDER BY p.inception_date DESC LIMIT 10`, [a.id, t]);
     out.push({ agentId: a.id, agentName: a.display_name, agentCode: a.code, branch: a.branch_name || a.branch_code, assignedPrograms: assigned,
       recentActivities: acts.map((x) => ({ date: x.inception_date, activity: `${x.renewed_from ? 'Policy Renewal' : 'New Policy'} - ${x.product || 'Policy'}`, impact: round2(x.premium_total), points: Math.round(Number(x.premium_total) / 100) })) });
   }
@@ -420,6 +454,17 @@ export async function statement(agentId, periodRef) {
   const key = period.from.slice(0, 7);
   const lines = await many(`SELECT r.*, p.name, p.structure, p.metric FROM incentive_results r JOIN incentive_programs p ON p.id = r.program_id
                             WHERE r.agent_user_id = $1 AND r.period = $2 AND r.status <> 'Rejected'`, [a.id, key]);
+  // Programs running in the period that are not calculated yet: progress to date from the same source as My Programs
+  const running = await many(`SELECT * FROM incentive_programs WHERE status = 'Active' AND period_from <= $2::date AND period_to >= $1::date
+                              AND id <> ALL($3::int[]) ORDER BY period_from`, [period.from, period.to, lines.map((l) => l.program_id)]);
+  const inProgress = [];
+  for (const p of running) {
+    const achieved = await programAchievement(p, a.id, period.from, period.to);
+    if (!achieved) continue;
+    const pay = payout(p, achieved, Number(p.target));
+    inProgress.push({ program: p.name, target: Number(p.target), achievement: achieved, achievementPercent: pay.achievementPercent, rate: pay.tier || '-', earnedAmount: 0,
+      potentialEarning: pay.amount, status: 'In Progress' });
+  }
   const earned = (statuses, extra = '', params = []) => one(`SELECT COALESCE(sum(payout), 0) AS v FROM incentive_results WHERE agent_user_id = $1 AND status = ANY($2) ${extra}`, [a.id, statuses, ...params]);
   const ytd = await earned(['Approved', 'Paid'], 'AND left(period, 4) = $3', [key.slice(0, 4)]);
   const pending = await earned(['Approved']);
@@ -433,7 +478,8 @@ export async function statement(agentId, periodRef) {
     lastPayment: last ? round2(last.v) : 0, lastPaymentDate: last?.paid_at ? new Date(last.paid_at).toISOString().slice(0, 10) : null,
     // incentive periods of the last payment and of the approved, unpaid results (labels such as "August 2026")
     lastPaymentPeriods: periodLabels(last?.periods || []), pendingPeriods: periodLabels(pendingPeriods), contact: await statementContact(),
-    programBreakdown: lines.map((l) => ({ program: l.name, target: l.target, achievement: l.achieved, achievementPercent: l.achievement_percent, rate: l.tier || '-', earnedAmount: l.payout, status: l.status })),
+    programBreakdown: [...lines.map((l) => ({ program: l.name, target: l.target, achievement: l.achieved, achievementPercent: l.achievement_percent, rate: l.tier || '-', earnedAmount: l.payout, status: l.status })),
+      ...inProgress],
     monthlyTrend: months.map(({ key: k }) => ({ month: new Date(`${k}-01T00:00:00Z`).toLocaleString('en-US', { month: 'short', timeZone: 'UTC' }) + '-' + k.slice(2, 4), period: k, earnings: round2(trend.find((t) => t.period === k)?.v || 0) })),
   };
 }

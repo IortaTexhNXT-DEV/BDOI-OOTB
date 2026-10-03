@@ -397,6 +397,15 @@ const MyPrograms = () => {
                     <label>Program Name:</label>
                     <span>{selectedProgram.programName}</span>
                   </div>
+                  {selectedProgram.periodFrom && (
+                    <div className="detail-item">
+                      <label>{t("incentive.currentPeriod", "Current period")}:</label>
+                      <span>
+                        {formatAppDate(selectedProgram.periodFrom)} – {formatAppDate(selectedProgram.periodTo)}
+                        {selectedProgram.calculationFrequency ? ` (${selectedProgram.calculationFrequency})` : ""}
+                      </span>
+                    </div>
+                  )}
                   <div className="detail-item">
                     <label>Target:</label>
                     <span>{formatCurrency(selectedProgram.target)}</span>

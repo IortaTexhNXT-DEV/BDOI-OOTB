@@ -21,6 +21,7 @@ import {
 } from "../../../../endorsementModule/constants/endorsementCategories";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import { notifyWarn } from "../../../../../utility/dialogs";
+import { useFormatCurrency } from "../../../../../hooks/useFormatCurrency";
 
 const normalizePolicyRecord = (policy) => {
   if (!policy) {
@@ -60,6 +61,7 @@ const normalizePolicyRecord = (policy) => {
 
 const LeadListingAllTable = ({ action, clientId }) => {
   const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filteredPolicies, setFilteredPolicies] = useState([]);
@@ -385,7 +387,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
 
   const renderGrossPremium = (rowData) => {
     return (
-      <div className="category__text">{rowData.grossPremium || "0.00"}</div>
+      <div className="category__text">{formatCurrency(Number(rowData.grossPremium) || 0)}</div>
     );
   };
 

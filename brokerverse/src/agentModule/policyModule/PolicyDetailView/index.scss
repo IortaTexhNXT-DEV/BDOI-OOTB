@@ -414,6 +414,30 @@ $tablet-md: 1024px;
         display: block;
         object-fit: cover;
       }
+
+      .vehicle-photo-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 12rem;
+        background: var(--surface-100, #f1f5f9);
+        color: var(--text-color-secondary, #64748b);
+        font-size: 0.875rem;
+
+        .pi {
+          font-size: 2rem;
+        }
+      }
+
+      .vehicle-gallery-thumbnail.vehicle-photo-placeholder {
+        min-height: 3rem;
+
+        span {
+          display: none;
+        }
+      }
     }
   }
 

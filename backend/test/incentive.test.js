@@ -84,7 +84,14 @@ describe('agent views and reports', () => {
     const mp = await as(agentTok, 'get', '/incentive/my-programs');
     expect(mp.status).toBe(200);
     expect(mp.body.data).toMatchObject({ agentId, agentCode: 'AG900' });
-    expect(mp.body.data.assignedPrograms.find((p) => p.programCode === 'INC-2026-002').achieved).toBeGreaterThanOrEqual(2);
+    // progress of the current calculation period of the monthly program (the target applies per month), to date
+    const nbc = mp.body.data.assignedPrograms.find((p) => p.programCode === 'INC-2026-002');
+    const { today } = await import('../src/lib/dates.js');
+    const t = await today();
+    expect(nbc).toMatchObject({ calculationFrequency: 'Monthly', periodFrom: `${t.slice(0, 7)}-01` });
+    const inMonth = (await pool.query(`SELECT count(*)::int AS n FROM policies WHERE owner_user_id = $1 AND status <> 'cancelled'
+      AND inception_date BETWEEN $2::date AND $3::date`, [agentId, `${t.slice(0, 7)}-01`, t])).rows[0].n;
+    expect(nbc.achieved).toBe(inMonth);
     expect(mp.body.data.recentActivities.length).toBe(2);
     const st = await as(agentTok, 'get', '/incentive/statement?period=2026-09');
     expect(st.body.data).toMatchObject({ agentName: 'Ivy Agent', period: 'September 2026', totalEarnings: 1000, lastPayment: 1000 });

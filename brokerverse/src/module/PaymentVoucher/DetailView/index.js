@@ -18,9 +18,11 @@ import { getDisbursementDetailsMiddleware } from "../store/paymentVocherMiddlewa
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 
 function Detailview() {
   const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const { id } = useParams();
   const dispatch = useDispatch();
   const toastRef = useRef(null);
@@ -248,33 +250,51 @@ function Detailview() {
   };
 
   const processedChequeBookData = useMemo(() => {
-    if (!disbursementDetails?.invoiceList) {
-      return [];
-    }
-
-    const chequeBooks = [];
-    disbursementDetails.invoiceList.forEach((invoice) => {
-      if (invoice.checkbooks && invoice.checkbooks.length > 0) {
-        invoice.checkbooks.forEach((checkbook) => {
-          chequeBooks.push({
-            id: checkbook.checkbookId,
-            VoucherNumber: checkbook.customerCode || "",
-            TransactionNumber: checkbook.customerName || "",
-            CustomerCode: checkbook.mainAccount || "",
-            VoucheDate: checkbook.instrumentBookId || "",
-            Amount: checkbook.instrumentNo || "",
-            InstrumentDate: checkbook.instrumentDate || "",
-            TotalAmount: checkbook.totaleAmount || "",
-            status: checkbook.status || "",
-            action: checkbook.checkbookId,
-            rawData: checkbook,
-          });
-        });
-      }
-    });
-
-    return chequeBooks;
+    // Every cheque of the voucher (on its invoice-list lines or on the voucher itself), whatever its status
+    const cheques =
+      disbursementDetails?.cheques ||
+      (disbursementDetails?.invoiceList || []).flatMap((invoice) => invoice.checkbooks || []);
+    return cheques.map((checkbook) => ({
+      id: checkbook.checkbookId,
+      VoucherNumber: checkbook.customerCode || "",
+      TransactionNumber: checkbook.customerName || "",
+      CustomerCode: checkbook.mainAccount || "",
+      VoucheDate: checkbook.instrumentBookId || "",
+      Amount: checkbook.instrumentNo || "",
+      InstrumentDate: checkbook.instrumentDate || "",
+      TotalAmount: checkbook.totaleAmount || "",
+      status: checkbook.status || "",
+      action: checkbook.checkbookId,
+      rawData: checkbook,
+    }));
   }, [disbursementDetails]);
+
+  // What the voucher pays: commission lines of a referrer payout, else its invoice-list (payable) lines
+  const paymentLines = useMemo(() => {
+    if (disbursementDetails?.commissionLines?.length) {
+      return disbursementDetails.commissionLines.map((l) => ({
+        id: l.id,
+        reference: l.policyNo,
+        description: [l.productInsurer, l.cycle].filter(Boolean).join(" · "),
+        gross: l.comsub,
+        wht: l.wht,
+        net: l.net,
+        status: l.status,
+      }));
+    }
+    return (disbursementDetails?.invoiceList || [])
+      .filter((i) => i.disbursementId === disbursementDetails?.disbursementId)
+      .map((i) => ({
+        id: i.invoiceListId || i.id,
+        reference: i.invoiceNumber,
+        description: i.policyNumber || i.customerCode || "",
+        gross: i.payables,
+        wht: i.wht,
+        net: i.totalAmount,
+        status: i.status,
+      }));
+  }, [disbursementDetails]);
+  const money = (v) => (v === null || v === undefined || v === "" ? "" : formatCurrency(v));
 
   const hasPendingItems = useMemo(() => {
     return processedChequeBookData.some((item) => item.status === "Pending");
@@ -393,6 +413,24 @@ function Detailview() {
       />
 
       <Card className="cardstyle_container">
+        <div className="grid">
+          {[
+            [t("paymentVoucher.voucherNumber", "Voucher Number"), disbursementDetails?.voucherNumber],
+            [t("paymentVoucher.transactionNumber"), disbursementDetails?.transactionNumber],
+            [t("paymentVoucher.voucherDate", "Voucher Date"), formatAppDate(disbursementDetails?.voucherDate, { empty: "" })],
+            [t("paymentVoucher.status"), disbursementDetails?.status],
+            [t("paymentVoucher.payeeName", "Payee"), disbursementDetails?.payeeName],
+            [t("paymentVoucher.paymentMode", "Payment Mode"), disbursementDetails?.paymentMode],
+            [t("paymentVoucher.grossAmount", "Gross Amount"), money(disbursementDetails?.grossAmount || disbursementDetails?.amount)],
+            [t("paymentVoucher.whtAmount", "Withholding Tax"), money(disbursementDetails?.whtAmount)],
+            [t("paymentVoucher.netAmount", "Net Amount"), money(disbursementDetails?.amount)],
+            [t("paymentVoucher.paidAt", "Paid On"), formatAppDate(disbursementDetails?.paidAt, { empty: "" })],
+          ].map(([label, value]) => (
+            <div key={label} className="sm-col-12 col-12 md:col-3 lg-col-3">
+              <InputField classNames="field__container" label={label} value={value || ""} disabled={true} />
+            </div>
+          ))}
+        </div>
         <div className="grid">
           <div className="sm-col-12 col-12 md:col-3 lg-col-4">
             <InputField
@@ -649,6 +687,22 @@ function Detailview() {
         </Card>
       ) : null}
 
+      {paymentLines.length > 0 && (
+        <>
+          <label className="headlist_lable">{t("paymentVoucher.paymentLines", "Payment lines")}</label>
+          <div className="tablegap_container">
+            <DataTable value={paymentLines} dataKey="id" tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}>
+              <Column field="reference" header={t("paymentVoucher.reference", "Reference")} headerStyle={headerStyle} className="fieldvalue_container" />
+              <Column field="description" header={t("paymentVoucher.description", "Description")} headerStyle={headerStyle} className="fieldvalue_container" />
+              <Column field="gross" header={t("paymentVoucher.grossAmount", "Gross Amount")} body={(r) => money(r.gross)} headerStyle={headerStyle} className="fieldvalue_container" />
+              <Column field="wht" header={t("paymentVoucher.whtAmount", "Withholding Tax")} body={(r) => money(r.wht)} headerStyle={headerStyle} className="fieldvalue_container" />
+              <Column field="net" header={t("paymentVoucher.netAmount", "Net Amount")} body={(r) => money(r.net)} headerStyle={headerStyle} className="fieldvalue_container" />
+              <Column field="status" header={t("paymentVoucher.status")} headerStyle={headerStyle} className="fieldvalue_container" />
+            </DataTable>
+          </div>
+        </>
+      )}
+
       <label className="headlist_lable">
         {t("paymentVoucher.chequeBookDetails")}
       </label>
@@ -656,6 +710,7 @@ function Detailview() {
       <div className="tablegap_container">
         <DataTable
           value={processedChequeBookData}
+          emptyMessage={t("paymentVoucher.noChequeIssued", "No cheque has been issued on this voucher")}
           tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
           paginator
           rows={5}
@@ -731,6 +786,7 @@ function Detailview() {
           ></Column>
           <Column
             field="TotalAmount"
+            body={(row) => money(row.TotalAmount)}
             header={t("paymentVoucher.totalAmount")}
             headerStyle={headerStyle}
             className="fieldvalue_container"
