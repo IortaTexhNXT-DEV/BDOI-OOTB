@@ -7,8 +7,9 @@ import { dataOf, listOf } from '../http.js';
 import { addDays, minDate, monthEnd } from '../dates.js';
 
 /**
- * Pending remittance / settlement approval of an entity. The number of levels follows the amount
- * (remittance.approval_levels) and each level is approved by a different user: a second accountant, then the managers.
+ * Pending remittance / settlement approval of an entity. With an Authority Matrix limit for the type, one approval
+ * within the approver's limit decides (a second accountant up to PHP 1,000,000, a manager above); without one, the
+ * number of levels follows remittance.approval_levels and each level is approved by a different user.
  */
 async function approveItem(ctx, entityId, remarks) {
   const approvers = [ctx.as.accounting2, ctx.as.manager1, ctx.as.manager2];
@@ -16,7 +17,16 @@ async function approveItem(ctx, entityId, remarks) {
     const queue = listOf(await approver.get('/remittance/approvals', { status: 'Pending', perPage: 500 }));
     const a = queue.find((x) => x.entityId === entityId);
     if (!a) return;
-    await approver.post(`/remittance/approvals/${a.id}/approve`, { comments: remarks });
+    try {
+      await approver.post(`/remittance/approvals/${a.id}/approve`, { comments: remarks });
+    } catch (err) {
+      // Above this approver's Authority Matrix limit: the next approver (an Accounting Manager) decides.
+      if (err.status === 403 && /approval authority/.test(err.message)) {
+        ctx.log.count('Remittance approvals above the Accounting limit (escalated)');
+        continue;
+      }
+      throw err;
+    }
     ctx.log.count('Remittance approvals (per level)');
   }
   const left = listOf(await ctx.as.accounting2.get('/remittance/approvals', { status: 'Pending', perPage: 500 })).find((x) => x.entityId === entityId);
