@@ -16,6 +16,7 @@ import { resolveCommissionRate } from '../commission-rates/resolve.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
 import { commissionTaxSetup, commissionTaxes, ratesOf } from '../accounting/lib/commissionTax.js';
 import { syncDueDate } from '../credit-control/instalments.js';
+import { autoEmailBill } from './email.js';
 
 export const POLICY_SQL = `SELECT p.*, c.display_name AS client_name, c.client_code, c.email AS client_email, c.first_name, c.last_name,
   ic.name AS insurer_name, ic.short_name AS insurer_short, ic.commission_rate AS insurer_commission_rate, pr.name AS product_name, pr.line AS product_line
@@ -137,6 +138,7 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const jv = await postBooking(db, r, policy, split, user, bookedOn);
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
+  await autoEmailBill(db, r);
   return { ...r, booking_jv_id: jv.id };
 }
 

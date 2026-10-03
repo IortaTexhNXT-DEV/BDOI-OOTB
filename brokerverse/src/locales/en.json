@@ -7044,9 +7044,28 @@
       "remarks": "Enter a reference or remarks"
     }
   },
+  "emailDocument": {
+    "to": "To",
+    "toHelp": "The client's e-mail address; change it to send elsewhere",
+    "toPlaceholder": "client@example.com",
+    "cc": "Cc",
+    "ccHelp": "Optional; separate several addresses with commas",
+    "note": "Note to the client",
+    "notePlaceholder": "Optional message added to the e-mail",
+    "attachment": "Attached: {{file}}",
+    "send": "Send",
+    "cancel": "Cancel",
+    "toRequired": "Enter the recipient's e-mail address",
+    "queued": "E-mail to {{to}} queued",
+    "failed": "E-mail not sent",
+    "emailReceipt": "E-mail receipt",
+    "emailReceiptTitle": "E-mail receipt {{number}}",
+    "emailInvoice": "E-mail invoice",
+    "emailInvoiceTitle": "E-mail invoice {{number}}"
+  },
   "emailOutbox": {
     "title": "E-mail Outbox",
-    "intro": "Every e-mail the system has queued: quotations, approval links, broker slips, placement orders, notices. Queued messages are sent by the E-mail outbox schedule; a failed message can be retried.",
+    "intro": "Every e-mail the system has queued: quotations, approval links, broker slips, placement orders, receipts, invoices, notices. Attached documents are generated as PDFs when the e-mail is sent. Queued messages are sent by the E-mail outbox schedule; a failed message can be retried.",
     "refresh": "Refresh",
     "bannerActive": "E-mail sending is enabled: queued messages go out on the next run of the E-mail outbox schedule.",
     "bannerInactive": "E-mail sending is not configured, so queued messages stay here and are not delivered.",
@@ -7067,6 +7086,7 @@
       "to": "To",
       "subject": "Subject",
       "about": "Record",
+      "attachments": "Attachments",
       "attempts": "Attempts",
       "lastError": "Last error",
       "created": "Created",

@@ -99,6 +99,8 @@ const receiptsReducer = createSlice({
         ...(state.currentReceiptDetails || {}),
         receiptId: action.payload.receiptId || null,
         receiptNumber: action.payload.receiptNumber || null,
+        clientEmail: action.payload.clientEmail || null,
+        receiptStatus: action.payload.receiptStatus || null,
       };
       state.receiptDetailList = (action.payload.receiptDetailList || []).map((item) => ({
         ...item,

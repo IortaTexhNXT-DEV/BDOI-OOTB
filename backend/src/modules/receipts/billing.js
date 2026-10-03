@@ -46,6 +46,29 @@ export async function endorsementStatement(db, id) {
   return { fileName: `endorsement-billing-statement-${endorsement?.endorsement_number || policy.policy_number}.pdf`, pdf: buildPdf(spec) };
 }
 
+/** A bill (receivable) by id or bill number with its policy; 404 when unknown. */
+export async function findBill(db, ref) {
+  const bill = (await db.query('SELECT * FROM receivables WHERE id = $1 OR bill_number = $1', [String(ref)])).rows[0];
+  if (!bill) throw notFound('Bill not found');
+  const policy = await findPolicy(db, bill.policy_id);
+  if (!policy) throw notFound('Policy of the bill not found');
+  return { bill, policy };
+}
+
+const SOURCE_KIND = { endorsement: 'Endorsement', renewal: 'Renewal' };
+
+/** Premium invoice / statement of account of one bill: its premium, taxes and charges, the gross amount and the due date. */
+export async function billStatement(db, ref) {
+  const { bill: b, policy } = await findBill(db, ref);
+  const n = (v) => Number(v || 0);
+  const extra = (f) => [['Bill no.', b.bill_number], ['Bill date', f.date(b.created_at)], ['Due date', f.date(b.due_date)], ['Net premium', f.ccy(n(b.net_premium), b.currency)],
+    ['VAT', f.ccy(n(b.vat), b.currency)], ['Documentary stamp tax', f.ccy(n(b.dst), b.currency)], ['Local government tax', f.ccy(n(b.lgt), b.currency)],
+    ...(n(b.other_charges) ? [['Other charges', f.ccy(n(b.other_charges), b.currency)]] : []), ...(n(b.discount) ? [['Discount', f.ccy(-n(b.discount), b.currency)]] : []),
+    ['Gross premium (with taxes)', f.ccy(n(b.amount), b.currency), { bold: true }]];
+  const spec = await billingStatementDoc(SOURCE_KIND[b.source] || 'Premium', { policy, bills: [b], extra, number: b.bill_number, client: await client(db, b.client_id || policy.client_id) });
+  return { fileName: `invoice-${b.bill_number}.pdf`, pdf: buildPdf(spec) };
+}
+
 export async function renewalStatement(db, policyRef) {
   const p = await findPolicy(db, policyRef);
   if (!p) throw notFound('Policy not found');

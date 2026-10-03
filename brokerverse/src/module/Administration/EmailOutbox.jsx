@@ -105,6 +105,11 @@ const EmailOutbox = () => {
         <Column field="to" header={t("emailOutbox.columns.to")} />
         <Column field="subject" header={t("emailOutbox.columns.subject")} />
         <Column header={t("emailOutbox.columns.about")} body={(r) => (r.entity ? `${r.entity} ${r.entityId || ""}` : "-")} />
+        <Column header={t("emailOutbox.columns.attachments")} body={(r) => (r.attachments?.length ? (
+          <span className="flex flex-column gap-1">
+            {r.attachments.map((a) => <span key={a.fileName} className="white-space-nowrap"><i className="pi pi-paperclip mr-1" aria-hidden="true" />{a.fileName}</span>)}
+          </span>
+        ) : "-")} />
         <Column field="attempts" header={t("emailOutbox.columns.attempts")} />
         <Column header={t("emailOutbox.columns.lastError")} body={(r) => r.lastError || "-"} style={{ maxWidth: "20rem", wordBreak: "break-word" }} />
         <Column header={t("emailOutbox.columns.created")} body={(r) => fmt(r.createdAt)} />

@@ -6,7 +6,7 @@ import { paging } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
 import { one, withTransaction } from '../../db/pool.js';
 import { kycPrefill } from '../policies/kyc.js';
-import { queueEmail } from '../../lib/mailer.js';
+import { documentAttachment, queueEmail } from '../../lib/mailer.js';
 import { sendEntity, actor, renderTemplate, emailTemplate } from '../documents/common.js';
 import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
 import { getPolicyRow, toPolicy } from '../policies/service.js';
@@ -251,7 +251,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/:id/send-mail-policy-quote/customer', summary: 'E-mail the policy / quotation summary to the customer', screen: `${SCREEN} > Coverage detailed view`,
+  method: 'POST', path: '/:id/send-mail-policy-quote/customer', summary: 'E-mail the policy / quotation summary to the customer (a policy goes with its policy schedule PDF attached)', screen: `${SCREEN} > Coverage detailed view`,
   middleware: [...canWrite, ownRecord('quote')], query: { policyId: 'pol_1' }, response: { success: true, message: 'E-mail queued', data: { to: 'juan@example.com' } },
   handler: async (req, res) => {
     const q = await svc.getQuoteRow(req.params.id);
@@ -261,7 +261,8 @@ define({
     const t = await emailTemplate(policy ? 'policy_issued' : 'share_quote');
     const v = { customerName: policy?.insuredName || q.lead_row?.first_name || 'Customer', quotationNumber: q.quote_number, policyNumber: policy?.policyNumber || '',
       grossPremium: Number(q.premium_total).toLocaleString('en-US', { minimumFractionDigits: 2 }), currency: q.currency, productType: q.product_type || q.lob, message: '' };
-    const id = await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: policy ? 'policy_issued' : 'share_quote', entity: policy ? 'policy' : 'quotation', entityId: policy?.id || q.id });
+    const id = await queueEmail({ to, subject: renderTemplate(t.subject, v, { html: false }), html: renderTemplate(t.html, v), template: policy ? 'policy_issued' : 'share_quote', entity: policy ? 'policy' : 'quotation', entityId: policy?.id || q.id,
+      attachments: policy ? [documentAttachment('policy-schedule', { policyId: policy.id }, `policy-schedule-${policy.policyNumber}.pdf`)] : [] });
     await audit(req, { entity: 'quotation', entityId: q.id, action: 'email-customer', after: { to, emailId: id, policyId: policy?.id } });
     res.json({ success: true, message: 'E-mail queued', data: { to, emailId: id } });
   },

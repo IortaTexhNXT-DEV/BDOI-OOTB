@@ -18,12 +18,15 @@ const STATUSES = ['queued', 'sent', 'failed'];
 const row = (m) => ({
   id: Number(m.id), status: m.status, to: m.to_address, cc: m.cc, subject: m.subject, template: m.template, entity: m.entity, entityId: m.entity_id,
   attempts: m.attempts, lastError: m.error, createdAt: m.created_at, sentAt: m.sent_at,
+  // what is attached (file names; a document is generated as a PDF when the message is sent)
+  attachments: (Array.isArray(m.attachments) ? m.attachments : []).map((a) => ({ fileName: a.fileName, contentType: a.contentType, kind: a.kind, document: a.document || null })),
 });
 
 define({
   method: 'GET', path: '/outbox', summary: 'E-mail outbox (status queued / sent / failed, search on recipient or subject; paging) with whether sending is enabled', screen: SCREEN, middleware: admin,
   query: { status: 'failed', search: 'juan@', page: 1, pageSize: 20 },
-  response: { success: true, data: [{ id: 12, status: 'failed', to: 'juan@example.com', subject: 'Your quotation QT-2026-00001', attempts: 5, lastError: 'Connection timeout', createdAt: '2026-09-30T02:00:00Z' }],
+  response: { success: true, data: [{ id: 12, status: 'failed', to: 'juan@example.com', subject: 'Official receipt OR-2026-00001 for policy POL-2026-00001', attempts: 5, lastError: 'Connection timeout', createdAt: '2026-09-30T02:00:00Z',
+      attachments: [{ fileName: 'receipt-OR-2026-00001.pdf', contentType: 'application/pdf', kind: 'document', document: 'official-receipt' }] }],
     sending: { enabled: false, smtpConfigured: false, active: false }, counts: { queued: 3, sent: 40, failed: 1 }, total: 1, page: 1, pageSize: 20 },
   handler: async (req, res) => {
     const pg = paging(req.query, { page: 1, perPage: 20 });
@@ -31,7 +34,7 @@ define({
     const search = req.query.search ? `%${String(req.query.search).trim()}%` : null;
     const where = `($1::text IS NULL OR status = $1) AND ($2::text IS NULL OR to_address ILIKE $2 OR subject ILIKE $2 OR entity_id ILIKE $2)`;
     const total = (await one(`SELECT count(*)::int AS n FROM email_outbox WHERE ${where}`, [status, search])).n;
-    const rows = await many(`SELECT id, status, to_address, cc, subject, template, entity, entity_id, attempts, error, created_at, sent_at FROM email_outbox
+    const rows = await many(`SELECT id, status, to_address, cc, subject, template, entity, entity_id, attempts, error, created_at, sent_at, attachments FROM email_outbox
       WHERE ${where} ORDER BY id DESC LIMIT $3 OFFSET $4`, [status, search, pg.limit, pg.offset]);
     const counts = Object.fromEntries(STATUSES.map((s) => [s, 0]));
     for (const c of await many('SELECT status, count(*)::int AS n FROM email_outbox GROUP BY status')) counts[c.status] = c.n;

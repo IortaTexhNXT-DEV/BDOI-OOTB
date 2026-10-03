@@ -15,6 +15,8 @@ import { mapColumns } from '../documents/tabular.js';
 import { ownRecord, withScope, scopeOf, scopeSql, canSee } from '../../lib/scope.js';
 import * as svc from './service.js';
 import * as billing from './billing.js';
+import { emailBill, emailReceipt } from './email.js';
+import { emailSendingStatus } from '../../lib/mailer.js';
 import { loadOpenItem, OPEN_ITEM_COLUMNS } from './opening.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
 
@@ -33,6 +35,12 @@ const lineSchema = z.object({
   paid: z.union([z.string(), z.number()]).optional(), unPaid: z.union([z.string(), z.number()]).optional(), lcAmount: z.union([z.string(), z.number()]).optional(),
   status: z.string().optional(),
 }).passthrough();
+const emailList = z.string().trim().max(1000).refine((v) => v.split(/[,;]/).map((x) => x.trim()).filter(Boolean).every((x) => z.string().email().safeParse(x).success), 'Enter e-mail addresses separated by commas');
+/** Body of the e-mail actions: recipients (default: the client's e-mail address) and a note added to the message. */
+const emailSchema = z.object({ to: z.string().trim().email().optional().or(z.literal('')), cc: emailList.optional().or(z.literal('')), note: z.string().max(2000).optional() });
+const emailExample = { emailId: 41, to: 'maria.santos@example.ph', cc: null, subject: 'Official receipt OR-2026-00001 for policy POL-2026-00001' };
+const queuedMessage = async (to) => ((await emailSendingStatus()).active ? `E-mail to ${to} queued` : `E-mail to ${to} queued; it goes out once e-mail sending is enabled`);
+
 const receiptSchema = z.object({
   receiptType: z.string().optional(), receiptDate: z.string().optional(), customerCode: z.string().optional(), currencyCode: z.string().optional(), transactionCode: z.string().optional(),
   transactionNumber: z.string().optional(), remarks: z.string().optional(), policyRefId: z.string().optional(), name: z.string().optional(), branchCode: z.string().nullable().optional(),
@@ -183,6 +191,17 @@ define({
   },
 });
 
+define({
+  method: 'POST', path: '/:id/email', summary: 'E-mail the official receipt to the client with its PDF attached (to: default the client\'s e-mail address; cc; note); 400 without an address',
+  screen: `${SCREEN} > View > E-mail receipt`, middleware: [...write, ownRecord('receipt'), validate(emailSchema)], request: { to: 'maria.santos@example.ph', cc: 'accounts@example.ph', note: 'Thank you for your prompt payment.' },
+  response: { success: true, message: 'E-mail to maria.santos@example.ph queued', data: emailExample },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => emailReceipt(db, req.params.id, req.body || {}));
+    await audit(req, { entity: 'receipt', entityId: r.receiptId, action: 'email', after: { emailId: r.emailId, to: r.to, cc: r.cc, subject: r.subject } });
+    ok(res, r, await queuedMessage(r.to));
+  },
+});
+
 // Billing statements (PDF) used by Policy detail > Generate invoice
 const b = moduleRouter('Billing statements', '/billing-statement');
 const bRead = [requireAuth, requirePermission('read:policies', 'read:receipts')];
@@ -191,6 +210,13 @@ const ownPolicy = ownRecord('policy', 'policyId');
 const ownEndorsementOrPolicy = (req, _res, next) => (async () => {
   const scope = await scopeOf(req);
   if (scope && !(await canSee(scope, 'endorsement', req.params.id)) && !(await canSee(scope, 'policy', req.params.id))) throw notFound('Endorsement not found');
+})().then(() => next(), next);
+/** A bill (receivable id or bill number) of a policy the user may see. */
+const ownBill = (req, _res, next) => (async () => {
+  const scope = await scopeOf(req);
+  if (!scope) return;
+  const { policy } = await billing.findBill(pool, req.params.id);
+  if (!(await canSee(scope, 'policy', policy.id))) throw notFound('Bill not found');
 })().then(() => next(), next);
 const sendPdf = (res, { fileName, pdf }) => { res.setHeader('Content-Type', 'application/pdf'); res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`); res.send(pdf); };
 b.define({ method: 'GET', path: '/policy/:policyId/generate', summary: 'Policy billing statement (PDF)', screen: 'Agent > Policy detail > Generate invoice (policy)', middleware: [...bRead, ownPolicy], response: '(application/pdf)',
@@ -202,6 +228,18 @@ b.define({ method: 'GET', path: '/endorsement/:id/generate', summary: 'Endorseme
   handler: async (req, res) => sendPdf(res, await billing.endorsementStatement(pool, req.params.id)) });
 b.define({ method: 'GET', path: '/renewal/:policyId/generate', summary: 'Renewal billing statement (PDF)', screen: 'Agent > Policy detail > Generate invoice (renewal)', middleware: [...bRead, ownPolicy], response: '(application/pdf)',
   handler: async (req, res) => sendPdf(res, await billing.renewalStatement(pool, req.params.policyId)) });
+
+b.define({ method: 'GET', path: '/bills/:id/generate', summary: 'Premium invoice / statement of account of one bill (PDF); id = receivable id or bill number', screen: 'Accounts > Collections > Detail > Invoice',
+  middleware: [...bRead, ownBill], response: '(application/pdf)', handler: async (req, res) => sendPdf(res, await billing.billStatement(pool, req.params.id)) });
+b.define({ method: 'POST', path: '/bills/:id/email', summary: 'E-mail the premium invoice / statement of account of a bill to the client with its PDF attached (to: default the client\'s e-mail address; cc; note); 400 without an address',
+  screen: 'Accounts > Collections > Detail > E-mail invoice', middleware: [requireAuth, requirePermission('write:receipts', 'write:collections'), ownBill, validate(emailSchema)],
+  request: { to: 'maria.santos@example.ph', note: 'The first instalment is due on 28 October.' },
+  response: { success: true, message: 'E-mail to maria.santos@example.ph queued', data: { ...emailExample, subject: 'Premium invoice INV-2026-00002 for policy POL-2026-00001' } },
+  handler: async (req, res) => {
+    const r = await withTransaction((db) => emailBill(db, req.params.id, req.body || {}, { user: req.user }));
+    await audit(req, { entity: 'receivable', entityId: r.receivableId, action: 'email', after: { emailId: r.emailId, to: r.to, cc: r.cc, subject: r.subject } });
+    ok(res, r, await queuedMessage(r.to));
+  } });
 
 export default router;
 export const mount = '/receipts';

@@ -9,6 +9,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { applyToPolicy, ensureBilled, findClient, findPolicy, requirePolicy, reverseReceiptApplications } from './receivables.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { autoEmailReceipt } from './email.js';
 
 const money = (v) => round2(v).toFixed(2);
 const SOURCE_BY_TXN = { ENDORSEMENT_PAYMENT: 'endorsement', ENDORSEMENT: 'endorsement', RENEWAL: 'renewal', RENEWAL_PAYMENT: 'renewal' };
@@ -42,14 +43,14 @@ export function receiptRow(r, lines = []) {
     departmentCode: r.department_code, customerCode: r.customer_code, currencyCode: r.currency_code, transactionCode: r.transaction_code,
     transactionNumber: r.transaction_number, remarks: r.remarks, name: r.customer_name, policyRefId: r.policy_id, policyNumber: r.policy_number,
     receiptStatus: r.receipt_status, status: r.status, amount: Number(r.amount), paymentMode: r.payment_mode, referenceNo: r.reference_no, bankId: r.bank_id,
-    receivableId: r.receivable_id, clientId: r.client_id, externalRef: r.external_ref,
+    receivableId: r.receivable_id, clientId: r.client_id, clientEmail: r.client_email || null, externalRef: r.external_ref,
     policy: r.policy_id ? { policyId: r.policy_id, id: r.policy_id, policyNumber: r.policy_number, insurer: r.insurer_name || null, status: r.policy_status || null } : null,
     receiptsList: lines.map(lineRow), createdBy: r.created_by, createdAt: r.created_at, updatedAt: r.updated_at, cancelledAt: r.cancelled_at, cancelReason: r.cancel_reason,
   };
 }
 
-const HEADER_SQL = `SELECT r.*, p.status AS policy_status, ic.name AS insurer_name FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
-  LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id`;
+const HEADER_SQL = `SELECT r.*, p.status AS policy_status, ic.name AS insurer_name, cl.email AS client_email FROM receipts r LEFT JOIN policies p ON p.id = r.policy_id
+  LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id LEFT JOIN clients cl ON cl.id = r.client_id`;
 const linesOf = async (db, ids) => {
   if (!ids.length) return new Map();
   const rows = (await db.query('SELECT * FROM receipt_lines WHERE receipt_id = ANY($1) ORDER BY receipt_id, line_no', [ids])).rows;
@@ -185,6 +186,7 @@ export async function createReceipt(db, b, user, { source = 'api' } = {}) {
     await processLine(db, header, line, user, l.receivableId || null);
   }
   await refreshHeader(db, header.id);
+  await autoEmailReceipt(db, header.id);
   return getReceipt(db, header.id);
 }
 
@@ -223,6 +225,7 @@ export async function updateReceipt(db, id, b, user) {
     }
   }
   await refreshHeader(db, r.id);
+  await autoEmailReceipt(db, r.id);
   return { before, after: await getReceipt(db, r.id) };
 }
 

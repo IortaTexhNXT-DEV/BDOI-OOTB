@@ -9,6 +9,8 @@ import { Column } from "primereact/column";
 import { Tooltip } from "primereact/tooltip";
 import { useParams, useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
+import emailService from "../../../services/emailService";
+import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
 import FollowUpModal from "../FollowUpModal";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
@@ -26,6 +28,7 @@ const CollectionDetail = () => {
   const [loadingFollowUp, setLoadingFollowUp] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpType, setFollowUpType] = useState("");
+  const [showInvoiceEmail, setShowInvoiceEmail] = useState(false);
 
   const loadCollectionDetails = useCallback(async () => {
     setLoading(true);
@@ -441,6 +444,13 @@ const CollectionDetail = () => {
             onClick={() => handleFollowUpAction("Email")}
           />
           <Button
+            label={t("emailDocument.emailInvoice")}
+            icon="pi pi-file-pdf"
+            className="p-button-outlined p-button-primary"
+            disabled={!collection.receivableId}
+            onClick={() => setShowInvoiceEmail(true)}
+          />
+          <Button
             label={t("collectionDetail.addNote")}
             icon="pi pi-file-edit"
             className="p-button-outlined p-button-warning"
@@ -561,6 +571,19 @@ const CollectionDetail = () => {
           />
         </DataTable>
       </Card>
+
+      {/* E-mail the invoice / statement of account of the bill with its PDF */}
+      {collection.receivableId && (
+        <EmailDocumentDialog
+          visible={showInvoiceEmail}
+          onHide={() => setShowInvoiceEmail(false)}
+          title={t("emailDocument.emailInvoiceTitle", { number: collection.billNumber || "" })}
+          defaultTo={collection.client?.email || ""}
+          fileName={`invoice-${collection.billNumber}.pdf`}
+          send={(body) => emailService.emailInvoice(collection.receivableId, body)}
+          onSent={loadCollectionDetails}
+        />
+      )}
 
       {/* Follow-Up Modal */}
       <FollowUpModal
