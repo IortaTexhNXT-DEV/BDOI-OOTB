@@ -51,7 +51,7 @@ Five rules follow from that definition:
 
 ## The product at a glance
 
-| Item | iNXT BrokerVerse OOTB (tested release) |
+| Item | iNXT BrokerVerse OOTB release 1.0 |
 |---|---|
 | Scope | Full broking cycle and broker accounting: prospects to renewals, billing to month-end close, BIR working papers |
 | Roles | 7: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager |

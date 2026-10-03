@@ -1297,7 +1297,7 @@ The following points were found while preparing this book. They are recorded so 
 
 | No. | Observation | Effect | Suggested action |
 |---|---|---|---|
-| 1 | No front-end screen for report schedules and for the generated-file history (API only). | Users cannot set up e-mailed reports themselves. | Add Reports > Schedules and Reports > Generated reports screens, or have the administrator create schedules through the API. |
+| 1 | No front-end screen for report schedules and for the generated-file history (API only). | Users cannot set up e-mailed reports themselves. | Add screens for report schedules and generated reports, or have the administrator create schedules through the API. |
 | 2 | Scheduled report e-mails carry a download link, not the file. | Recipients need the link within 72 hours. | Keep `reports.download_link_ttl_hours` in line with how recipients work. |
 | 3 | No Insurance Commission report in the prescribed format; the IC Quarterly Submission template writes the treaty list. | IC returns are prepared outside the system. | Specify the IC schedules required and add them as catalogue reports. |
 | 4 | Remittance report templates (Daily Remittance Summary, Monthly Commission Analysis) produce the same statement CSV; the sections, pivots and PDF / Excel formats in the templates are not applied. Remittance statement templates STM-001 (PDF) and STM-002 (Excel) also produce CSV. | Output differs from the template description. | Use the catalogue Remittance Summary for formatted output, or extend the generator. |
