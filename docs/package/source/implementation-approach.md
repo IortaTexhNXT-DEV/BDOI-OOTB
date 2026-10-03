@@ -48,11 +48,11 @@ What the broker can set without code:
 | Users and the seven delivered roles | Master > Generals > User Management (User, Role, User Access Matrix, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
 | Insurers, credit and remittance terms, billing mode | Master > Generals > Insurance Management > Insurance Company |
 | Lines of business, products, covers, vehicles | Master > Generals > Insurance Management |
-| Product templates, motor tariff (CTPL and Auto Passenger PA), rating, acceptance rules, approval workflows | Product Configurator |
+| Product templates, motor tariff (CTPL and Auto Passenger PA), rating, acceptance rules | Product Configurator |
 | Commission rates and referrer sharing | Master > Finance > Commission Rate Matrix |
 | Premium taxes and LGU rates, tax codes with BIR ATC | Master > Finance > Premium Taxes & LGU Rates; Master > Finance > Taxation |
 | Chart of accounts, account determination, posting rules | Master > Finance > Main Account, Sub Account, Account Determination, Posting Rules, Configuration Approvals |
-| Document numbering (52 series) | Master > Document Numbering |
+| Document numbering (61 series) | Master > Document Numbering |
 | Business rules, limits, maker-checker switches, security policy, e-mail texts | Master > Configuration |
 | Scheduled jobs | Master > Schedules |
 | Banks, bank accounts, statement formats, transaction types | Master > Finance > Bank, Bank Statement Formats, Bank Transaction Types |

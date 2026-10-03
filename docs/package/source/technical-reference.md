@@ -305,25 +305,25 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 
 | Area | Files | Lines |
 |---|---|---|
-| Back end: modules (`src/modules`) | 162 | 32,442 |
-| Back end: shared libraries (`src/lib`) | 37 | 2,681 |
-| Back end: migrations | 95 | 4,828 |
-| Back end: seeds (reference and sample) | 33 | 2,861 |
-| Back end: jobs, tools, server, configuration, database runners | 10 | 1,050 |
-| Back end: tests (`test/`) | 67 | 11,759 |
+| Back end: modules (`src/modules`) | 169 | 34,207 |
+| Back end: shared libraries (`src/lib`) | 39 | 2,919 |
+| Back end: migrations | 95 | 5,324 |
+| Back end: seeds (reference and sample) | 35 | 3,555 |
+| Back end: jobs, tools, server, configuration, database runners | 10 | 1,069 |
+| Back end: tests (`test/`) | 74 | 13,455 |
 | Back end: scripts (settings check, UAT scenario, purge, templates) | 28 | 3,158 |
-| Front end: `module/` | 634 | 155,413 |
-| Front end: `agentModule/` | 362 | 87,516 |
-| Front end: `services/` | 49 | 10,543 |
+| Front end: `module/` | 575 | 138,962 |
+| Front end: `agentModule/` | 351 | 81,730 |
+| Front end: `services/` | 50 | 10,650 |
 | Front end: components, routes, utilities, store, hooks, context | 80 | 11,211 |
 | Front end: theme and styles | 5 | 8,266 |
-| Front end: translations (`en.json`, `th.json`) | 2 | 13,070 |
+| Front end: translations (`en.json`, `th.json`) | 2 | 13,373 |
 
 | Inventory item | Count |
 |---|---|
-| Back-end module folders / module labels in the API | 44 / 54 |
+| Back-end module folders / module labels in the API | 45 / 55 |
 | Endpoints in the route registry (plus 2 health endpoints) | 868 |
-| Menu screens / route elements in `MainRoute.js` | 172 / 439 |
+| Menu screens / route elements in `MainRoute.js` | 170 / 439 |
 | Front-end service files / API call sites found by the checker | 49 / 767 |
 | Database tables / functions after migration | 167 / 59 |
 | Settings / permissions / roles / master types / report definitions | 404 / 64 / 7 / 53 / 39 |
@@ -345,7 +345,7 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 | `npm run check:settings` (back end) | Every key read in code exists in a migration or seed; lists unread keys | 0 missing; 1 unread (`product.component_kinds`); 5 read only by the front end |
 | `npm run check:api` (front end) | Every front-end call matches a back-end route and method | 0 calls to missing routes against the current routes; 2 method warnings caused by a helper that chooses GET or POST at run time |
 | `npm run check:i18n` (front end) | Translation keys used in code and missing from `en.json` | 2 keys without an English text; 1,861 keys not yet in `th.json` |
-| `npm run export:api` (back end) | Loads every module and writes OpenAPI, Postman and the touchpoint workbook | 854 routes, no module skipped |
+| `npm run export:api` (back end) | Loads every module and writes OpenAPI, Postman and the touchpoint workbook | 868 routes, no module skipped |
 
 > `check:api` compares against `backend/docs/api/openapi.json`. Run `npm run export:api` in `backend/` first, so that the check uses the current routes.
 

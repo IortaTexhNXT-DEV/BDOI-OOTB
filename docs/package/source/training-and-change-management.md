@@ -106,7 +106,7 @@ Durations are in hours of classroom time; a day is 7 hours. The manual chapters 
 | Policy issue | 2.5 | Issue from the placement slip or the motor quotation; KYC and vehicle identifiers; Record Issued Policy; documents and billing | Chapters 7, 9 |
 | Endorsements | 2 | Endorsement types, premium recalculation, additional and return premium, completing with the insurer's document | Chapter 10 |
 | Renewals | 1 | Approving renewal terms; renewal batch and queue | Chapter 12 |
-| Product Configurator | 2.5 | Product templates, the motor tariff (CTPL and Auto Passenger PA), coverage builder, rating engine, acceptance rules, approval workflows, market and risk mapping | Chapter 22 |
+| Product Configurator | 2.5 | Product templates, the motor tariff (CTPL and Auto Passenger PA), coverage builder, rating engine, acceptance rules, market and risk mapping | Chapter 22 |
 | Reinsurance and reports | 2 | Treaties, cession tracking, claims recovery; Placement Pipeline, Market Response, Co-insurance Register, Production Register | Chapters 20, 24 |
 
 ## Operations (10.5 hours, 1.5 days)

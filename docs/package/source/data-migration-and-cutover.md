@@ -44,7 +44,7 @@ It applies the step-by-step set-up of `docs/onboarding/GO_LIVE_DATA_SETUP.md` to
 | Group | Data object | Source in the old system | Loaded into |
 |---|---|---|---|
 | Organisation | Company, branches, departments | Company records | Master > Generals > Organization |
-| Organisation | Employee hierarchy, designations, employees | HR list | Master > Generals > Employee Management |
+| Organisation | Employee hierarchy and designations; staff branch, designation and reporting line | HR list | Master > Generals > Employee Management; Master > Generals > User Management > User |
 | Access | Users with one role each | User list | Master > Generals > User Management > User, or the provisioning script |
 | Reference | Countries, states (provinces), cities | Address tables (delivered data covers the Philippines; load only what is missing) | Master > Generals > Location |
 | Reference | Currencies, exchange rates | Finance | Master > Finance > Currency, Exchange Rate |
@@ -54,7 +54,7 @@ It applies the step-by-step set-up of `docs/onboarding/GO_LIVE_DATA_SETUP.md` to
 | Insurance | Signatories | Authorised signatories | Master > Generals > Insurance Management > Signatories |
 | Commission | Commission rates per insurer, product and line of business | Commission tables | Master > Finance > Commission Rate Matrix |
 | Finance | Chart of accounts | GL account list | Master > Finance > Main Account, Sub Account |
-| Finance | Transaction codes, write-off reasons, petty cash funds | Finance set-up | Master > Finance |
+| Finance | Transaction codes, write-off reasons; petty cash funds | Finance set-up | Master > Finance; Accounts > Petty Cash > Initiate |
 | Finance | Banks and the broker's bank accounts | Bank list | Master > Finance > Bank |
 | Open business | In-force policies and their clients | Policy register at go-live | Operations > Policy > Bulk Upload, go-live mode |
 | Open business | Open premium receivables | Receivable ageing at the day before go-live | Accounts > Collections > Import open items |
@@ -143,7 +143,7 @@ The order follows the dependencies between objects. A step starts only when the 
 | 2 | Location masters (only what is missing) | 1 | System Administrator |
 | 3 | Branches, departments | 1, 2 | System Administrator |
 | 4 | Users and roles; security settings | 3 | System Administrator |
-| 5 | Employee hierarchy, designations, employees (if used) | 3 | System Administrator |
+| 5 | Employee hierarchy and designations (if used) | 3 | System Administrator |
 | 6 | Currencies and exchange rates (if foreign currency business) | 1 | Accounting |
 | 7 | Chart of accounts review and load; account determination | 1 | Accounting Manager with iorta TechNXT |
 | 8 | Banks, bank accounts, signatories; transaction codes, write-off reasons, petty cash | 7 | Accounting |

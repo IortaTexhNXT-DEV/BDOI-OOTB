@@ -33,7 +33,7 @@ For each module it gives what the module does, its key features, the Philippine 
 | Personas | 7 roles: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager |
 | Screens | 173 menu screens checked per role in the release test |
 | Reports | 39 catalogue reports in Excel, CSV and PDF, plus dashboards and document outputs |
-| APIs | 854 registered API routes, documented in OpenAPI, a Postman collection and an Excel touchpoint list |
+| APIs | 868 registered API routes, documented in OpenAPI, a Postman collection and an Excel touchpoint list |
 | Scheduled jobs | 18 jobs in Asia/Manila time; the remittance schedules job and the overdue data subject request reminder are delivered switched off |
 | Number series | 61 document number series, counters only move forward |
 | Release test | 497 test cases (480 passed, 8 failed, 3 blocked, 6 not run); 634 automated business rule tests; a full UAT cycle of 371 business steps |
@@ -673,7 +673,7 @@ Prices of optional services and day rates for change requests are in the commerc
 ## Maintainability and interfaces
 
 - React 18, Node.js 22, PostgreSQL 16; 13 direct runtime dependencies in the API, all under permissive licences.
-- 854 API routes listed in OpenAPI, a Postman collection and an Excel touchpoint workbook from screen to route.
+- 868 API routes listed in OpenAPI, a Postman collection and an Excel touchpoint workbook from screen to route.
 - Database migrations applied on start under a lock; migrations only add to the schema.
 - Automated backend tests against a real PostgreSQL database on every pull request.
 

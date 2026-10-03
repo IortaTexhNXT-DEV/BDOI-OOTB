@@ -50,7 +50,7 @@ BrokerVerse OOTB is the operating system of a non-life insurance broker. It cove
 |---|---|
 | Style | Three-tier web application: SPA, stateless REST API, relational database. The API is a modular monolith. |
 | Presentation tier | React 18 SPA (PrimeReact, Redux Toolkit), served as static files from object storage and a CDN, or from an nginx container |
-| Application tier | Node.js 22 with Express 4. 44 module folders under `/api`, 854 registered routes, two health endpoints, a built-in scheduler of 16 jobs in Asia/Manila time |
+| Application tier | Node.js 22 with Express 4. 45 module folders under `/api`, 868 registered routes, two health endpoints, a built-in scheduler of 18 jobs in Asia/Manila time |
 | Data tier | PostgreSQL 16, database time zone Asia/Manila, 80 migration files applied on start under an advisory lock |
 | File store | Persistent volume at `UPLOAD_DIR` (documents, ID images, photos, generated reports) |
 | Security | JWT sessions with refresh-token rotation, role and permission checks on every route, maker-checker, authority matrix, SoD rules, access reviews, TOTP two-factor, audit log |

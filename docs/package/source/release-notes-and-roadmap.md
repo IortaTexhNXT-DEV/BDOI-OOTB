@@ -30,7 +30,7 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | Delivered roles | 7 (System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager) |
 | Menu screens checked per role in the release test | 173 |
 | Catalogue reports in Excel, CSV and PDF | 39, plus dashboards and printed documents |
-| Registered API routes | 854, documented in OpenAPI, Postman and an Excel touchpoint list |
+| Registered API routes | 868, documented in OpenAPI, Postman and an Excel touchpoint list |
 | Scheduled jobs (Asia/Manila time) | 18, of which 7 are delivered switched off (including the remittance schedules and the overdue data subject request reminder) |
 | Document number series | 61, counters that only move forward |
 | Upload templates for go-live data | About 40, each verified against its importer |

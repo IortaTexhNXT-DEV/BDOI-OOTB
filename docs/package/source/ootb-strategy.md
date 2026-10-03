@@ -57,9 +57,9 @@ Five rules follow from that definition:
 | Roles | 7: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager |
 | Screens | 173 menu screens checked per role in the release test |
 | Reports | 39 catalogue reports in Excel, CSV and PDF, plus dashboards and document outputs |
-| APIs | 854 registered API routes |
-| Scheduled jobs | 16 jobs in Asia/Manila time |
-| Number series | 52 document number series |
+| APIs | 868 registered API routes |
+| Scheduled jobs | 18 jobs in Asia/Manila time |
+| Number series | 61 document number series |
 | Release test | 497 test cases (480 passed, 8 failed, 3 blocked, 6 not run); 634 automated business rule tests; a UAT cycle of 371 business steps |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
 | Documentation | User manual of 199 pages, seven role decks, reports book, data dictionary, technical reference |
