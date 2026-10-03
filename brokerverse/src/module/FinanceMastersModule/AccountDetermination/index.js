@@ -132,7 +132,6 @@ const AccountDetermination = ({ section = "premium" }) => {
       <div className="posting-rules__title">{t("postingRules.accountDetermination")}</div>
       <BreadCrumb home={{ label: t("postingRules.master") }} className="posting-rules__crumbs" separatorIcon={<SvgDot color={"#000"} />}
         model={[{ label: t("postingRules.finance") }, { label: t("postingRules.accountDetermination"), url: "/master/finance/account-determination" }]} />
-      <p className="posting-rules__intro">{t("postingRules.accountDeterminationIntro")}</p>
       {/* the row is there before the data arrives, so the tabs below do not move */}
       <div className="mb-2 bv-tag-row">
         {data && (
@@ -147,8 +146,9 @@ const AccountDetermination = ({ section = "premium" }) => {
           ))}
         </div>
       )}
-      <div className="posting-rules__card">
-        <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)}>
+      {/* the tabs depend on the sections configured: they appear once, with the data, instead of being added one by one */}
+      <div className="posting-rules__card" style={data ? undefined : { minHeight: "24rem" }}>
+        {data && <TabView activeIndex={tab} onTabChange={(e) => setTab(e.index)}>
           {sections.map((s) => (
             <TabPanel key={s} header={t(`postingRules.section.${s}`)}>
               {rolesTable(data.sections.find((x) => x.section === s)?.roles || [])}
@@ -173,10 +173,10 @@ const AccountDetermination = ({ section = "premium" }) => {
               <Column header={t("postingRules.glAccount")} body={(r) => `${r.glAccount} ${r.glName || ""}`} />
               <Column header={t("postingRules.maxAmount")} body={(r) => (r.maxAmount === null ? "—" : r.maxAmount.toLocaleString("en-US", { minimumFractionDigits: 2 }))} />
               <Column header={t("postingRules.status")} body={(r) => <Tag value={r.status} severity={r.status === "active" ? "success" : "secondary"} />} />
-              <Column style={{ width: "4rem" }} body={(r) => <Button icon="pi pi-pencil" className="p-button-text p-button-sm" onClick={() => setReason({ ...r, maxAmount: r.maxAmount ?? "", isNew: false })} />} />
+              <Column style={{ width: "4rem" }} body={(r) => <Button icon="pi pi-pencil" className="p-button-text p-button-sm" onClick={() => setReason({ ...r, maxAmount: r.maxAmount ?? "", isNew: false })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />} />
             </DataTable>
           </TabPanel>
-        </TabView>
+        </TabView>}
       </div>
 
       <Dialog header={reason?.isNew ? t("postingRules.addReason") : reason?.code} visible={!!reason} style={{ width: "min(560px, 95vw)" }} onHide={() => setReason(null)}

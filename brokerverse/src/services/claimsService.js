@@ -580,7 +580,7 @@ class ClaimsService {
    * @param {number} pageSize - Number of items per page
    * @returns {Promise<Object>} API response
    */
-  async getClaimsList(page = 1, pageSize = 10) {
+  async getClaimsList(page = 1, pageSize = 10, filters = {}) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
@@ -594,7 +594,9 @@ class ClaimsService {
       }
 
       const response = await fetch(
-        `${this.baseURL}/claims?page=${page}&pageSize=${pageSize}`,
+        // server-side search (claim / policy number, client) and status filter
+        `${this.baseURL}/claims?${new URLSearchParams({ page: String(page), pageSize: String(pageSize),
+          ...Object.fromEntries(Object.entries(filters || {}).filter(([, v]) => v !== undefined && v !== null && v !== "")) }).toString()}`,
         {
           method: "GET",
           headers: {

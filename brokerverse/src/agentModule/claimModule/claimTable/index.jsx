@@ -1,30 +1,24 @@
-import { InputText } from "primereact/inputtext";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import SvgArrow from "../../../assets/icons/SvgArrow";
 import { Dropdown } from "primereact/dropdown";
-import SvgDownArrow from "../../../assets/agentIcon/SvgDownArrow";
-import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { Tag } from "primereact/tag";
 import "../../claimModule/index.scss";
-import SvgMotorTable from "../../../assets/agentIcon/SvgMotorTable";
-import { Skeleton } from "primereact/skeleton";
 import claimsService from "../../../services/claimsService";
 import { setPolicyHolderData } from "../../claimsModule/claimDetails/store/claimDetailsReducers";
 import { notifyError } from "../../../utility/dialogs";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+import { useListState, useServerList } from "../../../hooks/useServerList";
+import { statusLabel, statusSeverity } from "../../../utils/statusSeverity";
 
-const STATUS_CLASS_MAP = {
-  processing: "company__status__type__green",
-  pending: "company__status__type__green",
-  approved: "company__status__type__blue",
-  completed: "company__status__type__blue",
-  rejected: "client__view__type__red",
-};
+// claim status codes of the server (it also accepts "open" for every status still being worked on)
+const STATUSES = ["open", "registered", "in-review", "pending-approval", "approved", "settled", "closed", "rejected"];
 
 const normalizeClaimRecord = (record) => {
   if (!record) {
@@ -115,60 +109,25 @@ const normalizeClaimRecord = (record) => {
   };
 };
 
+/**
+ * Operations > Claims list: paged, searched (claim number, policy number, client) and filtered by status on the
+ * server. The search, status and page are kept while a claim is opened.
+ */
 const ClaimTable = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const [claims, setClaims] = useState([]);
-  const [filteredClaims, setFilteredClaims] = useState([]);
-  const [loading, setLoading] = useState(false);
-  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
-  const showSkeleton = loading && !filteredClaims.length;
-  const [error, setError] = useState(null);
-  const [selectedProducts, setSelectedProducts] = useState([]);
-  const [search, setSearch] = useState("");
-  const [globalFilter, setGlobalFilter] = useState("claimNumber");
+  const [state, patch] = useListState("claims", { search: "", status: "" });
 
-  const cities = [
-    { name: t("claims.claimNumberFilter"), code: "claimNumber" },
-    { name: t("claims.policyNumberFilter"), code: "policyNumber" },
-  ];
-
-  const template2 = useMemo(
-    () => ({
-      layout:
-        "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
-      RowsPerPageDropdown: (options) => {
-        const dropdownOptions = [
-          { label: 5, value: 5 },
-          { label: 10, value: 10 },
-          { label: 20, value: 20 },
-          { label: 120, value: 120 },
-        ];
-
-        return (
-          <div className="table__selector">
-            <React.Fragment>
-              <span
-                className="table__selector__text"
-                style={{ color: "var(--text-color)", userSelect: "none" }}
-              >
-                Rows per page:{" "}
-              </span>
-              <Dropdown
-                value={options.value}
-                className="pagedropdown_container"
-                options={dropdownOptions}
-                onChange={options.onChange}
-                dropdownIcon={<SvgDownArrow />}
-              />
-            </React.Fragment>
-          </div>
-        );
-      },
-    }),
-    []
-  );
+  const fetchPage = useCallback(async ({ page, pageSize }) => {
+    const res = await claimsService.getClaimsList(page, pageSize, { search: state.search.trim(), status: state.status });
+    if (!res.success) throw new Error(res.error || t("claims.loadFailed", { defaultValue: "Claims could not be loaded" }));
+    const body = res.data || {};
+    const claims = body.data?.claims || body.claims || [];
+    const total = body.data?.pagination?.total ?? body.total ?? claims.length;
+    return { rows: claims, total };
+  }, [state.search, state.status, t]);
+  const list = useServerList(fetchPage, { key: "claims" });
 
   const handleAuditTrail = (rowData) => {
     const claimId = rowData.id || rowData.claimId || rowData.claim_id;
@@ -178,200 +137,6 @@ const ClaimTable = () => {
       logger.error("No claimId found for audit trail");
     }
   };
-
-  const renderViewEditButton = (rowData) => {
-    return (
-      <div
-        className="btn__container__view__edit"
-        style={{
-          display: "flex",
-          gap: "8px",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <Button
-          icon="pi pi-eye"
-          className="p-button-info p-button-text"
-          onClick={() => handleViewDetail(rowData)}
-          tooltip={t("claims.viewDetails")}
-          tooltipOptions={{ position: "top" }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: "40px",
-            height: "40px",
-          }}
-        />
-        <Button
-          icon={<SvgArrow />}
-          className="view__btn"
-          onClick={() => handleView(rowData)}
-          tooltip={t("claims.viewClaim")}
-          tooltipOptions={{ position: "top" }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: "40px",
-            height: "40px",
-          }}
-        />
-        <Button
-          icon="pi pi-history"
-          className="p-button-warning p-button-text"
-          onClick={() => handleAuditTrail(rowData)}
-          tooltip="Audit Trail"
-          tooltipOptions={{ position: "top" }}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            minWidth: "40px",
-            height: "40px",
-          }}
-        />
-      </div>
-    );
-  };
-
-  const renderClaimNumber = (rowData) => {
-    const normalized = normalizeClaimRecord(rowData);
-    if (showSkeleton) {
-      return <Skeleton width="8rem" />;
-    }
-
-    return (
-      <div className="name__box__container">
-        <div>
-          <SvgMotorTable />
-        </div>
-        <div>
-          <div className="name__text">
-            {normalized?.claimNumber?.toString().toUpperCase() || t("policyDetail.nA")}
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderClientName = (rowData) => {
-    if (showSkeleton) {
-      return <Skeleton width="8rem" />;
-    }
-
-    const clientName =
-      rowData.ClientName ||
-      rowData.clientName ||
-      rowData.policyHolderName ||
-      rowData.policy_holder_name ||
-      (rowData.lead?.firstName && rowData.lead?.lastName
-        ? `${rowData.lead.firstName} ${rowData.lead.lastName}`
-        : rowData.policy?.insuredName) ||
-      t("policyDetail.nA");
-
-    return <div className="category__text">{clientName}</div>;
-  };
-
-  const renderPolicyNumber = (rowData) => {
-    const normalized = normalizeClaimRecord(rowData);
-    if (showSkeleton) {
-      return <Skeleton width="8rem" />;
-    }
-    return (
-      <div className="category__text">
-        {normalized?.policyNumber?.toString().toUpperCase() || t("policyDetail.nA")}
-      </div>
-    );
-  };
-
-  const renderDate = (rowData) => {
-    if (showSkeleton) {
-      return <Skeleton width="6rem" />;
-    }
-    const normalized = normalizeClaimRecord(rowData);
-    return <div className="date__text">{formatDate(normalized?.issued)}</div>;
-  };
-
-  const renderProductDescription = (rowData) => {
-    if (showSkeleton) {
-      return <Skeleton width="8rem" />;
-    }
-
-    const description =
-      rowData.ProductDescription ||
-      rowData.productDescription ||
-      rowData.product_description ||
-      rowData.lob ||
-      t("policyDetail.nA");
-
-    return <div className="category__text">{(description || "").toUpperCase()}</div>;
-  };
-
-  const renderStatus = (rowData) => {
-    if (showSkeleton) {
-      return <Skeleton width="4rem" />;
-    }
-    const normalized = normalizeClaimRecord(rowData);
-    const status = normalized?.status || "processing";
-    const className = STATUS_CLASS_MAP[status] || STATUS_CLASS_MAP.processing;
-
-    return <div className={className}>{status.toUpperCase()}</div>;
-  };
-
-  const formatDate = (dateString) => {
-    if (!dateString) return t("policyDetail.nA");
-    return formatAppDate(dateString, { empty: t("policyDetail.nA") });
-  };
-
-  const fetchClaims = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await claimsService.getClaimsList(1, 100);
-      if (response.success) {
-        const claimsData =
-          response.data?.data?.claims || response.data?.claims || [];
-        setClaims(claimsData);
-        setFilteredClaims(claimsData);
-      } else {
-        setError(response.error || "Failed to fetch claims");
-      }
-    } catch (err) {
-      setError("An error occurred while fetching claims");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch claims list on component mount
-  useEffect(() => {
-    fetchClaims();
-  }, []);
-
-  useEffect(() => {
-    if (search) {
-      const filtered = claims.filter((claim) => {
-        const normalized = normalizeClaimRecord(claim);
-        if (globalFilter === "claimNumber") {
-          return normalized?.claimNumber
-            ?.toString()
-            .toLowerCase()
-            .includes(search.toLowerCase());
-        } else if (globalFilter === "policyNumber") {
-          return normalized?.policyNumber
-            ?.toString()
-            .toLowerCase()
-            .includes(search.toLowerCase());
-        }
-        return false;
-      });
-      setFilteredClaims(filtered);
-    } else {
-      setFilteredClaims(claims);
-    }
-  }, [search, claims, globalFilter]);
 
   const getLobFromClaim = (row) => {
     return (
@@ -515,117 +280,45 @@ const ClaimTable = () => {
     });
   };
 
-  const selectionMode = "multiple";
-
-  const ViewheaderStyle = {
-    textalign: "center",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
+  const nA = t("policyDetail.nA");
+  const actions = (rowData) => (
+    <div className="flex gap-1 justify-content-end">
+      <Button icon="pi pi-eye" text rounded size="small" aria-label={t("claims.viewDetails")} tooltip={t("claims.viewDetails")} tooltipOptions={{ position: "top" }}
+        onClick={() => handleViewDetail(rowData)} />
+      <Button icon="pi pi-arrow-right" text rounded size="small" aria-label={t("claims.viewClaim")} tooltip={t("claims.viewClaim")} tooltipOptions={{ position: "top" }}
+        onClick={() => handleView(rowData)} />
+      <Button icon="pi pi-history" text rounded size="small" aria-label={t("claims.auditTrail", { defaultValue: "Audit trail" })} tooltip={t("claims.auditTrail", { defaultValue: "Audit trail" })}
+        tooltipOptions={{ position: "top" }} onClick={() => handleAuditTrail(rowData)} />
+    </div>
+  );
+  const clientName = (r) => r.ClientName || r.clientName || r.policyHolderName || r.policy_holder_name
+    || (r.lead?.firstName && r.lead?.lastName ? `${r.lead.firstName} ${r.lead.lastName}` : r.policy?.insuredName) || nA;
+  const status = (r) => {
+    const value = r.status || r.claimStatus;
+    return value ? <Tag value={statusLabel(value)} severity={statusSeverity(value)} /> : null;
   };
-
-  const headerStyle = {
-    textalign: "center",
-    fontSize: 16,
-    fontFamily: "Nunito, Arial, sans-serif",
-    fontWeight: 500,
-    color: "#000",
-    border: " none",
-  };
-
-  const renderCheckedHeader = (value) => value;
-
-  const renderUncheckedHeader = (value) =>
-    selectedProducts.length === 0 ? value : null;
+  const statusOptions = [{ label: t("claims.allStatuses", { defaultValue: "All statuses" }), value: "" }, ...STATUSES.map((s) => ({ label: t(`claims.statusFilter.${s}`, { defaultValue: statusLabel(s) }), value: s }))];
 
   return (
     <div>
-      <div className="grid">
-        <div className="col-12 md:col-9 lg:col-9">
-          <span className="p-input-icon-left" style={{ width: "100%" }}>
-            <i className="pi pi-search" />
-            <InputText
-              placeholder="Search"
-              style={{
-                width: "100%",
-                padding: "1rem 2.75rem",
-                borderRadius: "10px",
-              }}
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </span>
-        </div>
-        <div className="col-12 md:col-3 lg:col-3">
-          <Dropdown
-            value={globalFilter}
-            onChange={(e) => setGlobalFilter(e.value)}
-            options={cities}
-            optionLabel="name"
-            optionValue="code"
-            placeholder="Search by"
-            className="feat_searchby_container"
-            dropdownIcon={<SvgDownArrow />}
-          />
-        </div>
+      <div className="bv-list-toolbar">
+        <span className="p-input-icon-left bv-list-search">
+          <i className="pi pi-search" />
+          <InputText placeholder={t("claims.searchPlaceholder", { defaultValue: "Search by claim number, policy number or client" })} aria-label={t("listCommon.search")}
+            value={state.search} onChange={(e) => patch({ search: e.target.value })} />
+        </span>
+        <Dropdown value={state.status} options={statusOptions} onChange={(e) => patch({ status: e.value })} className="bv-list-filter" aria-label={t("claims.colStatus", { defaultValue: "Status" })} />
       </div>
-      <div className="lead__table__container">
-        <DataTable
-          value={filteredClaims}
-          paginator
-          rows={5}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          currentPageReportTemplate="{first} - {last} of {totalRecords}"
-          paginatorTemplate={template2}
-          className="corrections__table__main"
-          dataKey="id"
-          tableStyle={{ minWidth: "50rem" }}
-          scrollable
-          scrollHeight="60vh"
-          loading={loading}
-          emptyMessage={
-            loading ? "Loading claims..." : error ? error : "No claims found"
-          }
-        >
-          <Column
-            body={renderClaimNumber}
-            header={renderCheckedHeader("Claim Number")}
-            headerStyle={headerStyle}
-          ></Column>
-          <Column
-            body={renderClientName}
-            header={renderUncheckedHeader("Client Name")}
-            headerStyle={headerStyle}
-          ></Column>
-          <Column
-            body={renderPolicyNumber}
-            header={renderUncheckedHeader("Policy Number")}
-            headerStyle={headerStyle}
-          ></Column>
-          <Column
-            body={renderDate}
-            header={renderUncheckedHeader("Policy Issued")}
-            headerStyle={headerStyle}
-          ></Column>
-          <Column
-            body={renderProductDescription}
-            header={renderUncheckedHeader("Product Description")}
-            headerStyle={headerStyle}
-          ></Column>
-          <Column
-            body={renderStatus}
-            header={renderUncheckedHeader("Status")}
-            headerStyle={ViewheaderStyle}
-          ></Column>
-          <Column
-            body={renderViewEditButton}
-            header={renderUncheckedHeader("Actions")}
-            headerStyle={{ ...headerStyle, textAlign: "center" }}
-          ></Column>
-        </DataTable>
-      </div>
+      <DataTable {...list.tableProps} scrollable dataKey="id" size="small" stripedRows className="corrections__table__main"
+        emptyMessage={list.error || t("claims.noClaims", { defaultValue: "No claims found" })}>
+        <Column header={t("claims.colClaimNumber", { defaultValue: "Claim Number" })} body={(r) => <span className="nowrap">{normalizeClaimRecord(r)?.claimNumber?.toString().toUpperCase() || nA}</span>} />
+        <Column header={t("claims.colClientName", { defaultValue: "Client Name" })} body={clientName} style={{ minWidth: "11rem" }} />
+        <Column header={t("claims.colPolicyNumber", { defaultValue: "Policy Number" })} body={(r) => <span className="nowrap">{normalizeClaimRecord(r)?.policyNumber?.toString().toUpperCase() || nA}</span>} />
+        <Column header={t("claims.colReported", { defaultValue: "Reported" })} body={(r) => formatAppDate(r.reportedDate || normalizeClaimRecord(r)?.issued, { empty: nA })} />
+        <Column header={t("claims.colProduct", { defaultValue: "Product" })} body={(r) => r.ProductDescription || r.productDescription || r.productType || r.lob || nA} />
+        <Column header={t("claims.colStatus", { defaultValue: "Status" })} body={status} />
+        <Column header={t("claims.colActions", { defaultValue: "Actions" })} body={actions} className="bv-actions" headerClassName="bv-actions" frozen alignFrozen="right" />
+      </DataTable>
     </div>
   );
 };

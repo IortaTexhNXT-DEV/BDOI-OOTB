@@ -12,19 +12,13 @@ import { SelectButton } from "primereact/selectbutton";
 import placementService from "../../services/placementService";
 import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { formatDate as formatConfiguredDate } from "../../utility/dateFormat";
+import { statusSeverity as sharedSeverity } from "../../utils/statusSeverity";
 
 export const round2 = (n) => Math.round((Number(n) || 0) * 100) / 100;
 export const formatDate = (d) => formatConfiguredDate(d, { empty: "-" });
 
-/** PrimeReact tag severity per status code of broker slips, offers, placement slips and participants. */
-export const statusSeverity = (status) => {
-  const s = String(status || "").toLowerCase();
-  if (["offered", "bound", "confirmed", "issued", "closed", "active", "responses-in"].includes(s)) return "success";
-  if (["declined", "cancelled"].includes(s)) return "danger";
-  if (["pending", "sent", "submitted"].includes(s)) return "warning";
-  if (["draft"].includes(s)) return "info";
-  return "secondary";
-};
+/** Tag severity per status of broker slips, offers, placement slips and participants: the one scheme of every list. */
+export const statusSeverity = (status) => sharedSeverity(status);
 
 export const StatusTag = ({ status }) => {
   const { t } = useTranslation();
@@ -126,7 +120,7 @@ export const ParticipantEditor = ({ value, onChange, insurers, totals = {}, show
               <td className="num">{formatCurrency(preview[i]?.premium || 0)}</td>
               <td className="num">{formatCurrency(preview[i]?.premiumTotal || 0)}</td>
               <td className="num">{formatCurrency(preview[i]?.commissionAmount || 0)}</td>
-              <td className="center">{!disabled && <Button icon="pi pi-trash" text rounded severity="danger" onClick={() => remove(i)} aria-label={t("placement.actions.remove")} />}</td>
+              <td className="center">{!disabled && <Button icon="pi pi-trash" text rounded severity="danger" onClick={() => remove(i)} aria-label={t("placement.actions.remove")} tooltip={t("placement.actions.remove")} tooltipOptions={{ position: "top" }} />}</td>
             </tr>
           ))}
         </tbody>
@@ -287,14 +281,14 @@ export const RiskDetailsEditor = ({ value, onChange }) => {
         <div key={k} className="grid align-items-center">
           <div className="col-12 md:col-4 risk-key">{k.replace(/([a-z])([A-Z])/g, "$1 $2").replace(/^./, (c) => c.toUpperCase())}</div>
           <div className="col-10 md:col-7"><InputText value={v} onChange={(e) => onChange({ ...value, [k]: e.target.value })} className="w-full" /></div>
-          <div className="col-2 md:col-1"><Button icon="pi pi-times" text rounded severity="secondary" onClick={() => { const n = { ...value }; delete n[k]; onChange(n); }} aria-label={t("placement.actions.remove")} /></div>
+          <div className="col-2 md:col-1"><Button icon="pi pi-times" text rounded severity="secondary" onClick={() => { const n = { ...value }; delete n[k]; onChange(n); }} aria-label={t("placement.actions.remove")} tooltip={t("placement.actions.remove")} tooltipOptions={{ position: "top" }} /></div>
         </div>
       ))}
       <div className="grid align-items-center">
         <div className="col-12 md:col-4"><InputText value={label} onChange={(e) => setLabel(e.target.value)} placeholder={t("placement.risk.itemPlaceholder")} className="w-full" /></div>
         <div className="col-10 md:col-7"><InputText value={text} onChange={(e) => setText(e.target.value)} placeholder={t("placement.risk.valuePlaceholder")} className="w-full" /></div>
         <div className="col-2 md:col-1">
-          <Button icon="pi pi-plus" text rounded disabled={!label.trim()} onClick={() => { onChange({ ...(value || {}), [toKey(label)]: text }); setLabel(""); setText(""); }} aria-label={t("placement.actions.add")} />
+          <Button icon="pi pi-plus" text rounded disabled={!label.trim()} onClick={() => { onChange({ ...(value || {}), [toKey(label)]: text }); setLabel(""); setText(""); }} aria-label={t("placement.actions.add")} tooltip={t("placement.actions.add")} tooltipOptions={{ position: "top" }} />
         </div>
       </div>
     </div>
@@ -304,7 +298,7 @@ export const RiskDetailsEditor = ({ value, onChange }) => {
 export const PageHeader = ({ title, subtitle, children, onBack }) => (
   <div className="placement-header">
     <div className="placement-header-text">
-      {onBack && <Button icon="pi pi-arrow-left" text rounded onClick={onBack} className="mr-2" aria-label="Back" />}
+      {onBack && <Button icon="pi pi-arrow-left" text rounded onClick={onBack} className="mr-2" aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />}
       <div>
         <h2>{title}</h2>
         {subtitle && <p className="subtitle">{subtitle}</p>}

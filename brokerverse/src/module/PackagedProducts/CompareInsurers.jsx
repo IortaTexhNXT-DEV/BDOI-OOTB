@@ -88,7 +88,7 @@ const CompareInsurers = () => {
 
   return (
     <div className="placement-page pkg-page">
-      <PageHeader title={k("title")} subtitle={k("subtitle")} onBack={() => navigate("/sales/quick-quote")} />
+      <PageHeader title={k("title")} onBack={() => navigate("/sales/quick-quote")} />
       <div className="placement-card">
         <div className="grid">
           <div className="col-12 md:col-4">

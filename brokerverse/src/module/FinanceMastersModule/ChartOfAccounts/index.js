@@ -130,7 +130,7 @@ const ChartOfAccounts = ({ level = "main" }) => {
           </div>
           <div className="flex gap-2">
             <Button type="button" icon="pi pi-upload" label={t("financeMasters.upload", "Upload")} className="p-button-outlined" onClick={() => setShowUpload(true)} />
-            <Button icon={<div className="pr-2"><SvgAdd /></div>} className="main__btn__action" onClick={openNew}>
+            <Button icon={<div className="pr-2"><SvgAdd /></div>} className="main__btn__action" onClick={openNew} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
               {t("financeMasters.add", "Add")}
             </Button>
           </div>
@@ -172,9 +172,10 @@ const ChartOfAccounts = ({ level = "main" }) => {
         <Column header="Status" body={(r) => <Tag value={r.status === "active" ? "Active" : "Inactive"} severity={r.status === "active" ? "success" : "secondary"} />} style={{ width: "6rem" }} />
         <Column header="Actions" style={{ width: "7rem" }} body={(r) => (
           <div className="flex gap-1">
-            <Button icon="pi pi-pencil" className="p-button-text p-button-sm" tooltip="Edit" onClick={() => openEdit(r)} />
+            <Button icon="pi pi-pencil" className="p-button-text p-button-sm" tooltip="Edit" onClick={() => openEdit(r)} aria-label="Edit" />
             <Button icon={r.status === "active" ? "pi pi-ban" : "pi pi-check-circle"} className="p-button-text p-button-sm" tooltip={r.status === "active" ? "Deactivate" : "Activate"}
-              disabled={r.status === "active" && r.isSystem} onClick={() => toggleStatus(r)} />
+              disabled={r.status === "active" && r.isSystem} onClick={() => toggleStatus(r)} aria-label={r.status === "active" ? "Deactivate" : "Activate"}
+              />
           </div>
         )} />
       </DataTable>

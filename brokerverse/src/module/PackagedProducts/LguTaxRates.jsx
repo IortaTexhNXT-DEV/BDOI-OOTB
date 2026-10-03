@@ -95,11 +95,11 @@ const LguTaxRates = () => {
 
   return (
     <div className="placement-page pkg-page">
-      <PageHeader title={k("title")} subtitle={k("subtitle")} />
+      <PageHeader title={k("title")} />
       <TabView>
         <TabPanel header={k("lguTab")}>
           <div className="pkg-toolbar"><Button label={k("addLgu")} icon="pi pi-plus" onClick={() => setLgu({ ...EMPTY_LGU })} /></div>
-          <DataTable value={lgus} loading={loading} dataKey="id" size="small" stripedRows paginator rows={15} emptyMessage={k("noLgu")} responsiveLayout="scroll">
+          <DataTable value={lgus} loading={loading} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={k("noLgu")} responsiveLayout="scroll">
             <Column field="code" header={k("code")} sortable />
             <Column field="name" header={k("lguName")} sortable />
             <Column field="province" header={k("province")} sortable />
@@ -109,8 +109,8 @@ const LguTaxRates = () => {
             <Column header={t("packagedProducts.active")} body={active} />
             <Column body={(r) => (
               <div className="admin__actions">
-                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setLgu({ ...r, effectiveTo: r.effectiveTo || "", remarks: r.remarks || "" })} />
-                <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeLgu(r)} />
+                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setLgu({ ...r, effectiveTo: r.effectiveTo || "", remarks: r.remarks || "" })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
+                <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeLgu(r)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />
               </div>
             )} style={{ width: "7rem" }} />
           </DataTable>
@@ -128,8 +128,8 @@ const LguTaxRates = () => {
             <Column header={t("packagedProducts.active")} body={active} />
             <Column body={(r) => (
               <div className="admin__actions">
-                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setRule({ ...r, lines: r.lines || [], regimes: r.regimes || [], effectiveTo: r.effectiveTo || "", remarks: r.remarks || "", original: true })} />
-                {r.kind === "other" && <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeRule(r)} />}
+                <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setRule({ ...r, lines: r.lines || [], regimes: r.regimes || [], effectiveTo: r.effectiveTo || "", remarks: r.remarks || "", original: true })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }} />
+                {r.kind === "other" && <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => removeRule(r)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />}
               </div>
             )} style={{ width: "7rem" }} />
           </DataTable>

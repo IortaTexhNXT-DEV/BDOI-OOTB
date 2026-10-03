@@ -110,7 +110,7 @@ const BrokerSlipCreate = () => {
   return (
     <div className="placement-page">
       <Toast ref={toast} />
-      <PageHeader title={t("placement.brokerSlip.newTitle")} subtitle={t("placement.brokerSlip.newSubtitle")} onBack={() => navigate("/placement/broker-slips")} />
+      <PageHeader title={t("placement.brokerSlip.newTitle")} onBack={() => navigate("/placement/broker-slips")} />
 
       <div className="placement-card">
         <h3 className="section-title">{t("placement.sections.customerRisk")}</h3>
@@ -178,7 +178,7 @@ const BrokerSlipCreate = () => {
                 <td><Dropdown value={c.cover} options={coverChoices(c.cover)} onChange={(e) => setCover(i, { cover: e.value })} filter className="w-full" disabled={!product} placeholder={product ? t("placement.fields.chooseCover") : t("placement.fields.chooseProductFirst")} emptyMessage={t("placement.fields.noCovers")} /></td>
                 <td style={{ width: "14rem" }}><InputNumber value={c.sumInsured} onValueChange={(e) => setCover(i, { sumInsured: e.value })} mode="decimal" minFractionDigits={2} className="w-full" inputClassName="w-full text-right" /></td>
                 <td><InputText value={c.deductible} onChange={(e) => setCover(i, { deductible: e.target.value })} className="w-full" /></td>
-                <td className="center"><Button icon="pi pi-trash" text rounded severity="danger" onClick={() => setCovers(covers.length > 1 ? covers.filter((_, k) => k !== i) : [blankCover()])} aria-label={t("placement.actions.remove")} /></td>
+                <td className="center"><Button icon="pi pi-trash" text rounded severity="danger" onClick={() => setCovers(covers.length > 1 ? covers.filter((_, k) => k !== i) : [blankCover()])} aria-label={t("placement.actions.remove")} tooltip={t("placement.actions.remove")} tooltipOptions={{ position: "top" }} /></td>
               </tr>
             ))}
           </tbody>

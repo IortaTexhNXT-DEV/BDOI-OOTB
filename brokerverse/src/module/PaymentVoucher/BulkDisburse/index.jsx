@@ -113,10 +113,6 @@ const BulkDisburse = () => {
       />
 
       <Card className="mt-3">
-        <p className="bulk-disburse-desc">
-          Agents with approved commission ready to pay. Tick agents and disburse
-          — each agent gets their own voucher (net of WHT).
-        </p>
         {summary ? (
           <div className="bulk-disburse-summary">
             <span>
@@ -139,7 +135,7 @@ const BulkDisburse = () => {
           dataKey="id"
           emptyMessage="No agents with approved commission"
           paginator={agents.length > 10}
-          rows={10}
+          rows={20}
         >
           <Column selectionMode="multiple" headerStyle={{ width: "3rem" }} />
           <Column field="name" header="Agent / Referrer" />

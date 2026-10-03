@@ -344,9 +344,6 @@ const AllClientsAccountingView = () => {
         <div className="header-content">
           <div>
             <h1>{t("accounting.allClientsTitle")}</h1>
-            <p className="subtitle">
-              {t("accounting.allClientsSubtitle")}
-            </p>
           </div>
           <Button
             label={t("accounting.exportCsv")}
@@ -661,7 +658,7 @@ const AllClientsAccountingView = () => {
               });
             }}
             template="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink RowsPerPageDropdown"
-            rowsPerPageOptions={[10, 20, 50, 100]}
+            rowsPerPageOptions={[20, 50, 100]}
             onRowsChange={(e) => {
               setPagination({
                 ...pagination,

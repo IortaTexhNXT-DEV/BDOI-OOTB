@@ -43,4 +43,16 @@ describe('core', () => {
     const a = await ctx.api('get', '/settings/audit?entity=user');
     expect(a.body.data.some((x) => x.action === 'create')).toBe(true);
   });
+  it('pages the audit trail on the server, newest first', async () => {
+    const all = (await ctx.api('get', '/settings/audit?limit=1000')).body.data;
+    expect(all.length).toBeGreaterThan(3);
+    const p1 = (await ctx.api('get', '/settings/audit?page=1&pageSize=2')).body;
+    const p2 = (await ctx.api('get', '/settings/audit?page=2&pageSize=2')).body;
+    expect(p1.data.map((x) => x.id)).toEqual(all.slice(0, 2).map((x) => x.id));
+    expect(p2.data.map((x) => x.id)).toEqual(all.slice(2, 4).map((x) => x.id));
+    expect(p1).toMatchObject({ page: 1, pageSize: 2, total: all.length, totalPages: Math.ceil(all.length / 2) });
+    const users = (await ctx.api('get', '/settings/audit?entity=user&page=1&pageSize=50')).body;
+    expect(users.total).toBe(all.filter((x) => x.entity === 'user').length);
+    expect(users.data.every((x) => x.entity === 'user')).toBe(true);
+  });
 });

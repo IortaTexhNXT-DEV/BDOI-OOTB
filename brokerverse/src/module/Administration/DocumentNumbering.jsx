@@ -164,14 +164,14 @@ const DocumentNumbering = () => {
   );
   const actions = (r) => (
     <div className="admin__actions">
-      <Button icon="pi pi-pencil" rounded text title={t("numberingMasters.edit")} aria-label={t("numberingMasters.edit")} onClick={() => openEdit(r)} />
+      <Button icon="pi pi-pencil" rounded text aria-label={t("numberingMasters.edit")} onClick={() => openEdit(r)} tooltip={t("numberingMasters.edit")} tooltipOptions={{ position: "top" }} />
       <Button
         icon="pi pi-forward"
         rounded
         text
         title={k("setNext")}
         aria-label={k("setNext")}
-        onClick={() => setNextDialog({ row: r, value: r.nextNumber })}
+        onClick={() => setNextDialog({ row: r, value: r.nextNumber })} tooltip={k("setNext")} tooltipOptions={{ position: "top" }}
       />
     </div>
   );
@@ -183,14 +183,13 @@ const DocumentNumbering = () => {
     <div className="admin__page dn__page">
       <Toast ref={toast} />
       <BreadCrumb
-        model={[{ label: t("numberingMasters.master") }, { label: k("title") }]}
-        home={{ icon: "pi pi-home", url: "/" }}
+        model={[{ label: k("title") }]}
+        home={{ label: t("numberingMasters.master") }}
         className="admin__breadcrumb"
       />
       <div className="admin__header">
         <div>
           <h2>{k("title")}</h2>
-          <p>{k("subtitle")}</p>
         </div>
         <Button icon="pi pi-refresh" outlined label={t("numberingMasters.refresh")} className="dn__refresh" onClick={load} loading={loading} />
       </div>
@@ -234,8 +233,8 @@ const DocumentNumbering = () => {
         stripedRows
         size="small"
         paginator
-        rows={15}
-        rowsPerPageOptions={[15, 30, 60]}
+        rows={20}
+        rowsPerPageOptions={[20, 50, 100]}
         sortField="module"
         sortOrder={1}
         emptyMessage={k("empty")}

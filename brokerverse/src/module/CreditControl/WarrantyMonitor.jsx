@@ -87,10 +87,10 @@ const WarrantyMonitor = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("creditControl.warrantyMonitor")} trail={[t("creditControl.warrantyMonitor")]} subtitle={t("creditControl.warrantyHelp")} />
-      {s && (
+      <PageHeader title={t("creditControl.warrantyMonitor")} trail={[t("creditControl.warrantyMonitor")]} />
+      {(
         <div className="grid mb-2">
-          {[["breached", `${s.breached} · ${money(s.breachedAmount)}`], ["atRisk", `${s.atRisk} · ${money(s.atRiskAmount)}`], ["pendingExtensions", pending.length]].map(([k, v]) => (
+          {[["breached", s ? `${s.breached} · ${money(s.breachedAmount)}` : "-"], ["atRisk", s ? `${s.atRisk} · ${money(s.atRiskAmount)}` : "-"], ["pendingExtensions", s ? pending.length : "-"]].map(([k, v]) => (
             <div className="col-12 md:col-4" key={k}><div className="pe-card p-3"><div className="pe-muted text-sm">{t(`creditControl.summary.${k}`)}</div><div className="text-xl font-semibold">{v}</div></div></div>
           ))}
         </div>
@@ -107,8 +107,8 @@ const WarrantyMonitor = () => {
             <Column field="requestedBy" header={t("creditControl.requestedBy")} />
             <Column body={(r) => (
               <div className="flex gap-1">
-                <Button icon="pi pi-check" text size="small" severity="success" tooltip={t("creditControl.approve")} onClick={() => decide(r, "approve")} />
-                <Button icon="pi pi-times" text size="small" severity="danger" tooltip={t("creditControl.reject")} onClick={() => decide(r, "reject")} />
+                <Button icon="pi pi-check" text size="small" severity="success" tooltip={t("creditControl.approve")} onClick={() => decide(r, "approve")} aria-label={t("creditControl.approve")} />
+                <Button icon="pi pi-times" text size="small" severity="danger" tooltip={t("creditControl.reject")} onClick={() => decide(r, "reject")} aria-label={t("creditControl.reject")} />
               </div>
             )} />
           </DataTable>
@@ -127,17 +127,21 @@ const WarrantyMonitor = () => {
           <Column header={t("creditControl.deadline")} body={(r) => <span>{date(r.deadline)}{r.extendedTo ? ` (${t("creditControl.extended")})` : ""}</span>} />
           <Column header={t("creditControl.daysPast")} body={(r) => (r.daysPastDeadline ? r.daysPastDeadline : `-${r.daysToDeadline}`)} className="bv-num" headerClassName="bv-num" />
           <Column header={t("creditControl.premiumDue")} body={(r) => money(r.premiumDue)} className="bv-num" headerClassName="bv-num" />
-          <Column header={t("creditControl.statusLabel")} body={(r) => (
-            <div className="flex flex-column gap-1"><CcTag status={r.status} />{r.onInstalmentPlan && <span className="pe-muted text-sm">{t("creditControl.onPlan")}</span>}
-              {r.pendingExtension && <CcTag status="pending" />}{r.cancellationRequest && <span className="text-sm">{r.cancellationRequest}</span>}</div>
+          <Column header={t("creditControl.statusLabel")} style={{ minWidth: "11rem" }} body={(r) => (
+            <div className="cc-status-cell">
+              <span className="flex align-items-center gap-1 flex-wrap"><CcTag status={r.status} />{r.pendingExtension && <CcTag status="pending" />}</span>
+              {r.onInstalmentPlan && <span className="bv-cell-sub nowrap">{t("creditControl.onPlan")}</span>}
+              {r.cancellationRequest && <span className="bv-cell-sub">{r.cancellationRequest}</span>}
+            </div>
           )} />
           <Column body={(r) => (
             <div className="flex gap-1">
-              <Button icon="pi pi-envelope" text size="small" tooltip={t("creditControl.remind")} onClick={() => remind(r)} />
+              <Button icon="pi pi-envelope" text size="small" tooltip={t("creditControl.remind")} onClick={() => remind(r)} aria-label={t("creditControl.remind")} />
               <Button icon="pi pi-calendar-plus" text size="small" tooltip={t("creditControl.requestExtension")} disabled={!!r.pendingExtension}
-                onClick={() => setExtension({ row: r, requestedDeadline: null, reason: "" })} />
-              <Button icon="pi pi-ban" text size="small" severity="danger" tooltip={t("creditControl.requestCancellation")} disabled={r.status !== "breached" || !!r.cancellationRequest} onClick={() => cancellation(r)} />
-              <Button icon="pi pi-history" text size="small" tooltip={t("creditControl.history")} onClick={() => showActions(r)} />
+                onClick={() => setExtension({ row: r, requestedDeadline: null, reason: "" })} aria-label={t("creditControl.requestExtension")}
+                />
+              <Button icon="pi pi-ban" text size="small" severity="danger" tooltip={t("creditControl.requestCancellation")} disabled={r.status !== "breached" || !!r.cancellationRequest} onClick={() => cancellation(r)} aria-label={t("creditControl.requestCancellation")} />
+              <Button icon="pi pi-history" text size="small" tooltip={t("creditControl.history")} onClick={() => showActions(r)} aria-label={t("creditControl.history")} />
             </div>
           )} />
         </DataTable>

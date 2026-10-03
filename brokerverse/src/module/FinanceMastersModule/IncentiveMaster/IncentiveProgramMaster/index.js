@@ -303,13 +303,13 @@ const IncentiveProgramMaster = () => {
           icon={<SvgEyeIcon />}
           className="view-eye-button"
           onClick={() => handleView(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         <Button
           icon={<SvgEditicons />}
           className="edit-button"
           onClick={() => handleEdit(rowData)}
-          tooltip="Edit"
+          tooltip="Edit" aria-label="Edit"
         />
         <ToggleButton
           isChecked={rowData.status === "Active"}
@@ -351,8 +351,7 @@ const IncentiveProgramMaster = () => {
           <Button
             icon={<div className="pr-2"><SvgAdd /></div>}
             className="main__btn__action"
-            onClick={handleAdd}
-          >
+            onClick={handleAdd} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             {t("incentiveProgramMaster.addProgram")}
           </Button>
         </div>
@@ -406,7 +405,7 @@ const IncentiveProgramMaster = () => {
             className="incentive-table"
             stripedRows
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             emptyMessage="No incentive programs found"
           >

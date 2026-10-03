@@ -134,6 +134,16 @@
 
     .kpi-card {
       min-width: 0;
+      // the figures are cut with an ellipsis inside the card, never past its edge
+      overflow: hidden;
+
+      .p-card-body,
+      .p-card-content,
+      .kpi-content {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
 
       .p-card-content {
         padding: 1rem;
@@ -167,12 +177,17 @@
         .kpi-details {
           display: flex;
           flex-direction: column;
-          flex: 1;
+          flex: 1 1 0;
+          min-width: 0;
 
           .kpi-label {
             font-size: 0.875rem;
             color: #6c757d;
             margin-bottom: 0.25rem;
+            // the card keeps one height whether or not its figure has arrived
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
 
             @include mobile-sm {
               font-size: 0.8rem;
@@ -183,6 +198,12 @@
             font-size: 1.75rem;
             font-weight: 600;
             color: #2c3e50;
+            // one line whatever the figure (a long province name is cut, its full text in the tooltip)
+            display: block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
 
             @include tablet-sm {
               font-size: 1.5rem;

@@ -251,7 +251,7 @@ const ReconciliationProcess = () => {
                 <h4>Bank Transactions</h4>
                 <div className="panel-actions">
                   <Button icon="pi pi-upload" className="p-button-sm" label="Import" onClick={() => fileInput.current?.click()} />
-                  <Button icon="pi pi-refresh" className="p-button-sm" onClick={loadReconciliation} />
+                  <Button icon="pi pi-refresh" className="p-button-sm" onClick={loadReconciliation} aria-label="Refresh" tooltip="Refresh" tooltipOptions={{ position: "top" }} />
                 </div>
               </div>
               <DataTable
@@ -328,7 +328,7 @@ const ReconciliationProcess = () => {
                 <h4>System Transactions</h4>
                 <div className="panel-actions">
                   <Button icon="pi pi-database" className="p-button-sm" label="Load" onClick={loadReconciliation} />
-                  <Button icon="pi pi-filter" className={`p-button-sm ${unmatchedOnly ? "" : "p-button-outlined"}`} onClick={() => setUnmatchedOnly(!unmatchedOnly)} />
+                  <Button icon="pi pi-filter" className={`p-button-sm ${unmatchedOnly ? "" : "p-button-outlined"}`} onClick={() => setUnmatchedOnly(!unmatchedOnly)} aria-label="Filter" tooltip="Filter" tooltipOptions={{ position: "top" }} />
                 </div>
               </div>
               <DataTable

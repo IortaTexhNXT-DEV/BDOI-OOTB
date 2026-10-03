@@ -35,12 +35,15 @@ class ClientService {
     }
   }
 
-  async getClients(page = 1, pageSize = 10) {
+  async getClients(page = 1, pageSize = 10, filters = {}) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+      // server-side search (name, client code, e-mail, phone) and client type (individual / corporate)
+      Object.entries(filters || {}).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "") query.append(k, v); });
 
-      const response = await fetch(`${this.baseURL}/clients?page=${page}&pageSize=${pageSize}`, {
+      const response = await fetch(`${this.baseURL}/clients?${query.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -20,8 +20,8 @@ const ClientListingCard = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
 
-  const items = [{ label: t("quotationPage.title"), url: "/agent/clientlisting" }];
-  const Initiate = { label: t("quotationPage.home") };
+  const items = [{ label: t("quotationPage.title") }];
+  const Initiate = { label: t("sidebar.Operations") };
 
   const handleBulkUploadSuccess = () => {
     // Refresh the quotations table by updating key

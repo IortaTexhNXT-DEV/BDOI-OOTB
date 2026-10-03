@@ -203,27 +203,27 @@ const RemittanceNotifications = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
           tooltip="View"
-          onClick={() => openDetail(rowData)}
+          onClick={() => openDetail(rowData)} aria-label="View"
         />
         <Button
           icon="pi pi-reply"
           className="p-button-rounded p-button-text"
           tooltip="Reply"
           disabled={isInbox(rowData)}
-          onClick={() => reply(rowData)}
+          onClick={() => reply(rowData)} aria-label="Reply"
         />
         <Button
           icon="pi pi-forward"
           className="p-button-rounded p-button-text"
           tooltip="Forward"
-          onClick={() => forward(rowData)}
+          onClick={() => forward(rowData)} aria-label="Forward"
         />
         <Button
           icon="pi pi-trash"
           className="p-button-rounded p-button-danger p-button-text"
           tooltip="Delete"
           disabled={!isInbox(rowData)}
-          onClick={() => deleteRows([rowData])}
+          onClick={() => deleteRows([rowData])} aria-label="Delete"
         />
       </div>
     );
@@ -236,19 +236,19 @@ const RemittanceNotifications = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
           tooltip="Preview"
-          onClick={() => openDetail({ subject: rowData.subject || rowData.name, type: rowData.trigger, channel: rowData.channel, status: rowData.status, content: rowData.body || rowData.message, sender: "Template" })}
+          onClick={() => openDetail({ subject: rowData.subject || rowData.name, type: rowData.trigger, channel: rowData.channel, status: rowData.status, content: rowData.body || rowData.message, sender: "Template" })} aria-label="Preview"
         />
         <Button
           icon="pi pi-pencil"
           className="p-button-rounded p-button-text"
           tooltip="Edit"
-          onClick={() => navigate(`${TEMPLATE_ROUTE}/edit`, { state: { data: rowData, mode: "edit" } })}
+          onClick={() => navigate(`${TEMPLATE_ROUTE}/edit`, { state: { data: rowData, mode: "edit" } })} aria-label="Edit"
         />
         <Button
           icon="pi pi-send"
           className="p-button-rounded p-button-success p-button-text"
           tooltip="Use Template"
-          onClick={() => applyTemplate(rowData)}
+          onClick={() => applyTemplate(rowData)} aria-label="Use Template"
         />
       </div>
     );

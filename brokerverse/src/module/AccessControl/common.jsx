@@ -23,20 +23,20 @@ export const limitText = (measure, value, unlimited, noLimit) => {
 export const shortDate = (d) => formatDate(d, { empty: "" });
 export const dateTime = (d) => formatDate(d, { withTime: true, empty: "" });
 
-/** Page frame shared by the screens: breadcrumb, title, one-line purpose and the actions on the right. */
+/** Page frame shared by the screens: breadcrumb, title (with a facts line on a detail page) and the actions on the right. */
 export const PageHeader = ({ title, intro, actions }) => {
   const k = useLabels();
   return (
     <>
       <BreadCrumb
-        model={[{ label: k("master", "Master") }, { label: k("userManagement", "User Management") }, { label: title }]}
-        home={{ icon: "pi pi-home", url: "/" }}
+        model={[{ label: k("userManagement", "User Management") }, { label: title }]}
+        home={{ label: k("master", "Master") }}
         className="admin__breadcrumb"
       />
       <div className="admin__header">
         <div>
           <h2>{title}</h2>
-          <p>{intro}</p>
+          {intro ? <p>{intro}</p> : null}
         </div>
         {actions ? <div className="admin__actions">{actions}</div> : null}
       </div>

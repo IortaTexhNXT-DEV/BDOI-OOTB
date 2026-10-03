@@ -162,7 +162,7 @@ const RemittanceHistory = () => {
         icon="pi pi-history"
         className="p-button-rounded p-button-text"
         tooltip="View Audit Trail"
-        onClick={() => openAudit(rowData)}
+        onClick={() => openAudit(rowData)} aria-label="View Audit Trail"
       />
     ) : (
       <span className="text-muted">No audit trail</span>
@@ -181,19 +181,19 @@ const RemittanceHistory = () => {
           onClick={() => {
             setSelectedRecord(rowData);
             setShowDetailDialog(true);
-          }}
+          }} aria-label="View Details"
         />
         <Button
           icon="pi pi-history"
           className="p-button-rounded p-button-text"
           tooltip="View History"
-          onClick={() => openAudit(rowData)}
+          onClick={() => openAudit(rowData)} aria-label="View History"
         />
         <Button
           icon="pi pi-download"
           className="p-button-rounded p-button-text"
           tooltip="Export"
-          onClick={() => exportRows([rowData], rowData.referenceNo || "record", Object.keys(rowData).map((k) => ({ field: k, header: k })))}
+          onClick={() => exportRows([rowData], rowData.referenceNo || "record", Object.keys(rowData).map((k) => ({ field: k, header: k })))} aria-label="Export"
         />
       </div>
     );

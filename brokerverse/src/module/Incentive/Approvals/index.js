@@ -64,11 +64,11 @@ const Approvals = () => {
 
   // Breadcrumb items
   const items = [
-    { label: t("incentive.incentive"), url: "/incentive" },
+    { label: t("incentive.incentive") },
     { label: t("incentive.approvals"), url: "/incentive/approvals" }
   ];
 
-  const home = { label: t("incentive.dashboard") };
+  const home = { label: t("sidebar.Accounts") };
 
   // Initialize data
   useEffect(() => {
@@ -235,7 +235,7 @@ const Approvals = () => {
           icon={<SvgEyeIcon />}
           className="view-details-button"
           onClick={() => handleViewDetails(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         {rowData.status === "Pending Approval" && (
           <>
@@ -243,7 +243,7 @@ const Approvals = () => {
               icon="pi pi-check"
               className="approve-button"
               onClick={() => handleApprove(rowData)}
-              tooltip="Quick Approve"
+              tooltip="Quick Approve" aria-label="Quick Approve"
             />
             <Button
               icon="pi pi-times"
@@ -253,7 +253,7 @@ const Approvals = () => {
                 setApprovalComment("");
                 setDetailsVisible(true);
               }}
-              tooltip="Review & Reject"
+              tooltip="Review & Reject" aria-label="Review & Reject"
             />
           </>
         )}
@@ -262,7 +262,7 @@ const Approvals = () => {
             icon="pi pi-wallet"
             className="approve-button"
             onClick={() => handlePay(rowData)}
-            tooltip="Mark as Paid"
+            tooltip="Mark as Paid" aria-label="Mark as Paid"
           />
         )}
       </div>
@@ -412,7 +412,7 @@ const Approvals = () => {
             className="approvals-table"
             stripedRows
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             emptyMessage="No approvals found"
           >

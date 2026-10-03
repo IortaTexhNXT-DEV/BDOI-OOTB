@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
@@ -11,6 +11,7 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import emailService from "../../services/emailService";
 import { formatDate as formatAppDate } from "../../utility/dateFormat";
+import { useListState, useServerList } from "../../hooks/useServerList";
 import "./index.scss";
 
 const STATUSES = ["queued", "sent", "failed"];
@@ -21,38 +22,20 @@ const fmt = (d) => formatAppDate(d, { withTime: true });
 const EmailOutbox = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
-  const [rows, setRows] = useState([]);
   const [sending, setSending] = useState(null);
   const [counts, setCounts] = useState({});
-  const [total, setTotal] = useState(0);
-  const [filters, setFilters] = useState({ status: null, search: "" });
-  const [page, setPage] = useState({ first: 0, rows: 20 });
-  const [loading, setLoading] = useState(false);
+  const [filters, setFilters] = useListState("email-outbox", { status: null, search: "" });
   const [retrying, setRetrying] = useState(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const r = await emailService.getOutbox({
-        status: filters.status,
-        search: filters.search.trim(),
-        page: page.first / page.rows + 1,
-        pageSize: page.rows,
-      });
-      setRows(r.data || []);
-      setSending(r.sending || null);
-      setCounts(r.counts || {});
-      setTotal(r.total || 0);
-    } catch (e) {
-      toast.current?.show({ severity: "error", summary: t("emailOutbox.title"), detail: e.message });
-    } finally {
-      setLoading(false);
-    }
-  }, [filters, page, t]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  // paged and searched by the server; the sending status and the counts per status come with each page
+  const fetchPage = useCallback(async ({ page, pageSize }) => {
+    const r = await emailService.getOutbox({ status: filters.status, search: filters.search.trim(), page, pageSize });
+    setSending(r.sending || null);
+    setCounts(r.counts || {});
+    return { rows: r.data || [], total: r.total || 0 };
+  }, [filters.status, filters.search]);
+  const list = useServerList(fetchPage, { key: "email-outbox" });
+  const load = list.reload;
 
   const retry = async (row) => {
     setRetrying(row.id);
@@ -69,15 +52,15 @@ const EmailOutbox = () => {
     }
   };
 
+  // the banner has a fixed slot: it appears with the sending status without moving the list below
   const banner = () => {
-    // same height as the banner until the sending status arrives, so the list below does not jump
-    if (!sending) return <div className="bv-banner-placeholder" aria-hidden="true" />;
-    if (sending.active) return <Message severity="success" className="w-full mb-3" text={t("emailOutbox.bannerActive")} />;
+    if (!sending) return <div className="bv-banner-slot" aria-hidden="true" />;
+    if (sending.active) return <div className="bv-banner-slot"><Message severity="success" className="w-full" text={t("emailOutbox.bannerActive")} /></div>;
     const reasons = [
       !sending.smtpConfigured && t("emailOutbox.reasonSmtp"),
       !sending.enabled && t("emailOutbox.reasonSwitch"),
     ].filter(Boolean);
-    return <Message severity="warn" className="w-full mb-3" text={`${t("emailOutbox.bannerInactive")} ${reasons.join(" ")}`} />;
+    return <div className="bv-banner-slot"><Message severity="warn" className="w-full" text={`${t("emailOutbox.bannerInactive")} ${reasons.join(" ")}`} /></div>;
   };
 
   const statusOptions = [{ label: t("emailOutbox.allStatuses"), value: null }, ...STATUSES.map((s) => ({ label: `${t(`emailOutbox.status.${s}`)} (${counts[s] || 0})`, value: s }))];
@@ -85,25 +68,25 @@ const EmailOutbox = () => {
   return (
     <div className="admin__page">
       <Toast ref={toast} />
-      <BreadCrumb model={[{ label: t("sidebar.Master") }, { label: t("emailOutbox.title") }]} home={{ icon: "pi pi-home", url: "/" }} className="admin__breadcrumb" />
+      <BreadCrumb model={[{ label: t("emailOutbox.title") }]} home={{ label: t("sidebar.Master") }} className="admin__breadcrumb" />
       <div className="admin__header">
         <div>
           <h2>{t("emailOutbox.title")}</h2>
-          <p>{t("emailOutbox.intro")}</p>
         </div>
-        <Button icon="pi pi-refresh" label={t("emailOutbox.refresh")} outlined onClick={load} loading={loading} />
+        <Button icon="pi pi-refresh" label={t("emailOutbox.refresh")} outlined onClick={load} />
       </div>
       {banner()}
-      <div className="flex flex-wrap gap-2 mb-3">
-        <Dropdown value={filters.status} options={statusOptions} onChange={(e) => { setPage((p) => ({ ...p, first: 0 })); setFilters((f) => ({ ...f, status: e.value })); }} />
-        <InputText value={filters.search} placeholder={t("emailOutbox.searchPlaceholder")}
-          onChange={(e) => { setPage((p) => ({ ...p, first: 0 })); setFilters((f) => ({ ...f, search: e.target.value })); }} />
+      <div className="bv-list-toolbar">
+        <span className="p-input-icon-left bv-list-search">
+          <i className="pi pi-search" />
+          <InputText value={filters.search} placeholder={t("emailOutbox.searchPlaceholder")} aria-label={t("emailOutbox.searchPlaceholder")} onChange={(e) => setFilters({ search: e.target.value })} />
+        </span>
+        <Dropdown value={filters.status} options={statusOptions} onChange={(e) => setFilters({ status: e.value })} placeholder={t("emailOutbox.allStatuses")} className="bv-list-filter" aria-label={t("emailOutbox.columns.status")} />
       </div>
-      <DataTable value={rows} dataKey="id" stripedRows size="small" lazy paginator first={page.first} rows={page.rows} totalRecords={total}
-        rowsPerPageOptions={[20, 50, 100]} onPage={(e) => setPage({ first: e.first, rows: e.rows })} loading={loading} emptyMessage={t("emailOutbox.empty")}>
+      <DataTable {...list.tableProps} dataKey="id" stripedRows size="small" emptyMessage={list.error || t("emailOutbox.empty")}>
         <Column header={t("emailOutbox.columns.status")} body={(r) => <Tag value={t(`emailOutbox.status.${r.status}`, r.status)} severity={SEVERITY[r.status] || "info"} />} />
-        <Column field="to" header={t("emailOutbox.columns.to")} />
-        <Column field="subject" header={t("emailOutbox.columns.subject")} />
+        <Column header={t("emailOutbox.columns.to")} body={(r) => <span className="bv-break">{r.to}</span>} style={{ minWidth: "12rem" }} />
+        <Column field="subject" header={t("emailOutbox.columns.subject")} style={{ minWidth: "16rem" }} />
         <Column header={t("emailOutbox.columns.about")} body={(r) => (r.entity ? `${r.entity} ${r.entityId || ""}` : "-")} />
         <Column header={t("emailOutbox.columns.attachments")} body={(r) => (r.attachments?.length ? (
           <span className="flex flex-column gap-1">
@@ -115,7 +98,7 @@ const EmailOutbox = () => {
         <Column header={t("emailOutbox.columns.created")} body={(r) => fmt(r.createdAt)} />
         <Column header={t("emailOutbox.columns.sent")} body={(r) => fmt(r.sentAt)} />
         <Column header="" body={(r) => (r.status === "sent" ? null : (
-          <Button icon="pi pi-replay" label={t("emailOutbox.retry")} text size="small" loading={retrying === r.id} onClick={() => retry(r)} />
+          <Button icon="pi pi-replay" text rounded size="small" aria-label={t("emailOutbox.retry")} tooltip={t("emailOutbox.retry")} tooltipOptions={{ position: "top" }} loading={retrying === r.id} onClick={() => retry(r)} />
         ))} />
       </DataTable>
     </div>

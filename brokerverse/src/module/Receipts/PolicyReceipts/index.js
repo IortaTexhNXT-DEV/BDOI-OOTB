@@ -142,10 +142,9 @@ const PolicyReceipts = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -222,7 +221,7 @@ const PolicyReceipts = () => {
   };
 
   const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(10);
+  const [rows, setRows] = useState(20);
   const [globalFilter, setGlobalFilter] = useState();
   const dispatch = useDispatch();
   const [searches, setSearch] = useState("");
@@ -696,7 +695,7 @@ const PolicyReceipts = () => {
                   {recorded.receiptId && <Button type="button" size="small" outlined icon="pi pi-print" label={t("accounts.receipts.printReceipt")} onClick={printRecorded} />}
                   {recorded.receiptId && <Button type="button" size="small" outlined icon="pi pi-envelope" label={t("emailDocument.emailReceipt")} onClick={() => setEmailRecordedOpen(true)} />}
                   <Button type="button" size="small" outlined icon="pi pi-plus" label={t("accounts.receipts.recordAnother")} onClick={() => navigate("/accounts/receipts/addreceipts")} />
-                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("accounts.receipts.dismiss")} onClick={dismissRecorded} />
+                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("accounts.receipts.dismiss")} onClick={dismissRecorded} tooltip={t("accounts.receipts.dismiss")} tooltipOptions={{ position: "top" }} />
                 </div>
               </div>
             }
@@ -739,7 +738,7 @@ const PolicyReceipts = () => {
               totalRecords={pagination?.total ?? safeReceiptsList.length}
               first={first}
               onPage={onPageChange}
-              rowsPerPageOptions={[5, 10, 25, 50]}
+              rowsPerPageOptions={[20, 50, 100]}
               currentPageReportTemplate="{first} - {last} of {totalRecords}"
               paginatorTemplate={template2}
               className="datatable_container"

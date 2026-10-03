@@ -105,7 +105,7 @@ const SalesDashboard = () => {
       <div className="sales-dashboard__header">
         <div>
           <h1>{t("salesDashboard.title")}</h1>
-          <p>{data?.scoped ? t("salesDashboard.ownBook") : t("salesDashboard.subtitle")}{periodText ? ` (${periodText})` : ""}</p>
+          <p>{[data?.scoped ? t("salesDashboard.ownBook") : null, periodText].filter(Boolean).join(" · ") || "\u00a0"}</p>
         </div>
         <div className="sales-dashboard__filters">
           {!data?.scoped && (

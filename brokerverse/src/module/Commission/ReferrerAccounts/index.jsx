@@ -63,13 +63,6 @@ const ReferrerAccounts = () => {
     <div className="referrer-accounts-page">
       <div className="page-header">
         <h1>Agents / Referrer Accounts</h1>
-        <p className="page-desc">
-          Click a referrer to open their account — policies split by payment
-          cycle (current / future / past). Run the lifecycle (mark eligible →
-          approve → generate payout) and override per-policy rates from inside
-          the account. Identity only — <strong>no fixed rate</strong> (rates
-          live on each policy line).
-        </p>
       </div>
 
       <div className="referrer-card">

@@ -366,8 +366,7 @@ const ExceptionMaster = () => {
                       icon="pi pi-trash"
                       className="p-button-sm p-button-text p-button-danger"
                       onClick={() => deleteExceptionType(rowData)}
-                      disabled={mode === "view"}
-                    />
+                      disabled={mode === "view"} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                   )}
                   style={{ width: '10%' }}
                 />

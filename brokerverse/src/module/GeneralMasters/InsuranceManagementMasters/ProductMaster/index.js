@@ -49,8 +49,7 @@ style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
               </div>
             }
             className="main__btn__action"
-            onClick={() => handleAction()}
-          >
+            onClick={() => handleAction()} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             {t("generalMasters.add")}
           </Button>
           </div>

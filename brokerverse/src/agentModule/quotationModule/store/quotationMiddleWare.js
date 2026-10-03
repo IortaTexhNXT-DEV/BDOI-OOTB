@@ -7,6 +7,30 @@ import quotationService from "../../../services/quotationService";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 
+/** One quotation as a list row (also used by the server-paged quotation list). */
+export const toQuotationRow = (quotation, index = 0) => {
+  // Get lead name from lead object
+  // the insured party: the prospect (person or company), else the client of a renewal or an existing-client quotation
+  const leadName = quotation.insured?.name || quotation.leadName || "";
+
+  return {
+    id: quotation.quotationId || quotation.id || (index + 1).toString(),
+    QuoteId:
+      quotation.quotationNumber ||
+      quotation.quotationId ||
+      `Q-${String(index + 1).padStart(6, "0")}`,
+    LeadName: leadName,
+    PolicyType:
+      quotation.insurancePolicyType || quotation.productType || "MOTOR",
+    GrossPremium: formatCurrency(quotation.grossPremium),
+    GrossPremiumValue: parseFloat(quotation.grossPremium || 0), // For sorting
+    Date: formatConfiguredDate(quotation.createdAt || new Date()),
+    Status: quotation.quotationStatus || quotation.status || "Draft",
+    rawData: quotation, // Store full quotation data for navigation
+    Actions: null, // Will be rendered by the component
+  };
+};
+
 export const quotationListDataMiddleWare = createAsyncThunk(
   QUOTATION_LIST_DATA,
   async (
@@ -23,28 +47,7 @@ export const quotationListDataMiddleWare = createAsyncThunk(
 
       if (result.success) {
         // Transform API data to match the expected format
-        const transformedData = result.data.map((quotation, index) => {
-          // Get lead name from lead object
-          // the insured party: the prospect (person or company), else the client of a renewal or an existing-client quotation
-          const leadName = quotation.insured?.name || quotation.leadName || "";
-
-          return {
-            id: quotation.quotationId || quotation.id || (index + 1).toString(),
-            QuoteId:
-              quotation.quotationNumber ||
-              quotation.quotationId ||
-              `Q-${String(index + 1).padStart(6, "0")}`,
-            LeadName: leadName,
-            PolicyType:
-              quotation.insurancePolicyType || quotation.productType || "MOTOR",
-            GrossPremium: formatCurrency(quotation.grossPremium),
-            GrossPremiumValue: parseFloat(quotation.grossPremium || 0), // For sorting
-            Date: formatConfiguredDate(quotation.createdAt || new Date()),
-            Status: quotation.quotationStatus || quotation.status || "Draft",
-            rawData: quotation, // Store full quotation data for navigation
-            Actions: null, // Will be rendered by the component
-          };
-        });
+        const transformedData = result.data.map(toQuotationRow);
 
         return {
           data: transformedData,

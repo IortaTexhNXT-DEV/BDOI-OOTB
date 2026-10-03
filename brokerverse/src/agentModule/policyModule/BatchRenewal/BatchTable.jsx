@@ -544,8 +544,8 @@ export default function BatchTable() {
             value={batches}
             loading={batchesLoading}
             paginator
-            rows={10}
-            rowsPerPageOptions={[5, 10, 25]}
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             className="p-datatable-sm"
             emptyMessage="No batches found"
           >
@@ -611,7 +611,7 @@ export default function BatchTable() {
                     icon="pi pi-eye"
                     className="p-button-outlined p-button-sm"
                     tooltip="View Details"
-                    onClick={() => handleViewBatchDetails(rowData)}
+                    onClick={() => handleViewBatchDetails(rowData)} aria-label="View Details"
                   />
                   <Button
                     icon="pi pi-trash"
@@ -625,7 +625,7 @@ export default function BatchTable() {
                       ) {
                         // Implement delete functionality
                       }
-                    }}
+                    }} aria-label="Delete Batch"
                   />
                 </div>
               )}
@@ -816,8 +816,8 @@ export default function BatchTable() {
                   value={selectedPolicies}
                   dataKey="policyId"
                   paginator
-                  rows={10}
-                  rowsPerPageOptions={[5, 10, 25]}
+                  rows={20}
+                  rowsPerPageOptions={[20, 50, 100]}
                   className="p-datatable-sm"
                   emptyMessage="No policies found"
                 >
@@ -1148,8 +1148,8 @@ export default function BatchTable() {
               <DataTable
                 value={selectedBatch.policies}
                 paginator
-                rows={10}
-                rowsPerPageOptions={[5, 10, 25]}
+                rows={20}
+                rowsPerPageOptions={[20, 50, 100]}
                 className="p-datatable-sm"
                 emptyMessage="No policies found"
               >

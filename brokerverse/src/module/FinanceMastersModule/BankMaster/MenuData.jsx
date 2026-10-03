@@ -21,7 +21,7 @@ const MenuData = ({ menuitems, rowData }) => {
                 onClick={(e) => menu.current.toggle(e)}
                 className="menubutton_popup"
                 aria-label="Actions"
-                aria-haspopup
+                aria-haspopup tooltip="Actions" tooltipOptions={{ position: "top" }}
             />
         </div>
     )

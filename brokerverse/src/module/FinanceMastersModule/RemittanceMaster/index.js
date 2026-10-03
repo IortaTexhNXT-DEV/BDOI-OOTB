@@ -97,10 +97,9 @@ const RemittanceMaster = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
         { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -128,8 +127,7 @@ const RemittanceMaster = () => {
         <Button
           icon={<SvgEyeIcon />}
           className="view-eye-button"
-          onClick={() => handleView(rowData)}
-        />
+          onClick={() => handleView(rowData)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -140,8 +138,7 @@ const RemittanceMaster = () => {
         <Button
           icon={<SvgEditicons />}
           className="edit-button"
-          onClick={() => handleEdit(rowData)}
-        />
+          onClick={() => handleEdit(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -249,8 +246,7 @@ const RemittanceMaster = () => {
               </div>
             }
             className="main__btn__action"
-            onClick={handleAdd}
-          >
+            onClick={handleAdd} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             {t("financeMasters.add")}
           </Button>
         </div>
@@ -290,8 +286,7 @@ const RemittanceMaster = () => {
               <Button
                 icon={<SvgFilters />}
                 onClick={(event) => menu.current.toggle(event)}
-                className="filter-button"
-              />
+                className="filter-button" aria-label="Filter" tooltip="Filter" tooltipOptions={{ position: "top" }} />
               <TieredMenu model={menuitems} popup ref={menu} />
             </div>
           </div>

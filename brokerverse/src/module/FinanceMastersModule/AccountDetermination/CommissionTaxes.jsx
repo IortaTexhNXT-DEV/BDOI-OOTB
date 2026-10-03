@@ -72,7 +72,6 @@ const CommissionTaxes = ({ onSaved, onError }) => {
 
   return (
     <div>
-      <p className="posting-rules__intro">{t("postingRules.commissionTaxes.intro")}</p>
       {row("vat", "VAT")}
       {row("ewt", "EWT")}
       {(!data.vat.codeActive || !data.ewt.codeActive) && <Message severity="warn" text={t("postingRules.commissionTaxes.inactiveCode")} className="mb-3" />}

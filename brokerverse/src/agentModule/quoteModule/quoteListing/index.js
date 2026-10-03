@@ -44,7 +44,7 @@ const QuoteListing = () => {
       command: () => navigate("/agent/quotelisting"),
     },
   ];
-  const Initiate = { label: t("quoteListing.home") };
+  const Initiate = { label: t("sidebar.Operations") };
 
   return (
     <div className="quotelisting__overal__container">

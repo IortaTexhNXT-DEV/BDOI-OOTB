@@ -68,7 +68,7 @@ const CreditLimits = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("creditControl.creditLimits")} trail={[t("creditControl.creditLimits")]} subtitle={t("creditControl.creditLimitsHelp")} />
+      <PageHeader title={t("creditControl.creditLimits")} trail={[t("creditControl.creditLimits")]} />
       <div className="pe-card">
         <TabView>
           <TabPanel header={t("creditControl.clients")}>
@@ -83,7 +83,7 @@ const CreditLimits = () => {
               <Column header={t("creditControl.exposure")} body={(r) => money(r.exposure)} className="bv-num" headerClassName="bv-num" />
               <Column header={t("creditControl.available")} body={(r) => (r.available === null ? "-" : <span className={r.overLimit ? "text-red-600 font-semibold" : ""}>{money(r.available)}</span>)} className="bv-num" headerClassName="bv-num" />
               <Column header={t("creditControl.updated")} body={(r) => (r.updatedAt ? `${dateTime(r.updatedAt)} ${r.updatedBy || ""}` : "")} />
-              <Column body={(r) => <Button icon="pi pi-pencil" text size="small" tooltip={t("creditControl.setLimit")} onClick={() => setEdit({ row: r, value: r.creditLimit })} />} />
+              <Column body={(r) => <Button icon="pi pi-pencil" text size="small" tooltip={t("creditControl.setLimit")} onClick={() => setEdit({ row: r, value: r.creditLimit })} aria-label={t("creditControl.setLimit")} />} />
             </DataTable>
           </TabPanel>
           <TabPanel header={`${t("creditControl.exceptions")} (${exceptions.length})`}>

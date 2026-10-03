@@ -122,7 +122,7 @@ export const RecordsEditor = ({ id, value, original, onChange, disabled }) => {
                     : <InputText value={row[c] ?? ""} onChange={(e) => setCell(i, c, e.target.value)} aria-label={heading(c)} disabled={disabled} />}
                 </td>
               ))}
-              <td><Button type="button" icon="pi pi-trash" text rounded aria-label="Remove row" onClick={() => onChange(value.filter((_, n) => n !== i))} disabled={disabled} /></td>
+              <td><Button type="button" icon="pi pi-trash" text rounded aria-label="Remove row" onClick={() => onChange(value.filter((_, n) => n !== i))} disabled={disabled} tooltip="Remove row" tooltipOptions={{ position: "top" }} /></td>
             </tr>
           ))}
         </tbody>

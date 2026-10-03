@@ -125,11 +125,14 @@ const SchedulingDashboard = () => {
     return (
       <div className="action-buttons">
         <Button icon="pi pi-play" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.runNow")}
-          disabled={rowData.status !== "Active"} onClick={() => runNow(rowData)} />
+          disabled={rowData.status !== "Active"} onClick={() => runNow(rowData)} aria-label={t("remittance.runNow")}
+          />
         <Button icon={rowData.status === "Active" ? "pi pi-pause" : "pi pi-refresh"} className="p-button-rounded p-button-warning p-button-text"
-          onClick={() => togglePause(rowData)} />
-        <Button icon="pi pi-pencil" className="p-button-rounded p-button-text" tooltip={t("common.edit", "Edit")}
-          onClick={() => openEdit(rowData)} />
+          onClick={() => togglePause(rowData)}
+          aria-label={rowData.status === "Active" ? t("remittance.pause", "Pause") : t("remittance.resume", "Resume")}
+          tooltip={rowData.status === "Active" ? t("remittance.pause", "Pause") : t("remittance.resume", "Resume")} tooltipOptions={{ position: "top" }} />
+        <Button icon="pi pi-pencil" className="p-button-rounded p-button-text" tooltip={t("common.edit", "Edit")} tooltipOptions={{ position: "top" }}
+          aria-label={t("common.edit", "Edit")} onClick={() => openEdit(rowData)} />
       </div>
     );
   };

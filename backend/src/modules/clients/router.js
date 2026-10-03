@@ -22,7 +22,7 @@ const clientBody = z.object({
 const example = { clientId: 'cl_1', generatedClientId: 'CL-2026-00001', firstName: 'Juan', lastName: 'Dela Cruz', emailId: 'juan@example.com', contactNumber: '09171234567', leadCategory: 'Retail', policies: [{ policyId: 'pol_1', policyNumber: 'POL-2026-00001', status: 'Active' }] };
 
 define({
-  method: 'GET', path: '/', summary: 'List clients (search, leadCategory, status; paging)', screen: SCREEN, middleware: canRead,
+  method: 'GET', path: '/', summary: 'List clients (search, leadCategory, clientType individual / corporate, status; paging)', screen: SCREEN, middleware: canRead,
   query: { page: 1, pageSize: 10, search: 'juan' },
   response: { success: true, data: { clients: [example], pagination: { page: 1, pageSize: 10, totalCount: 1, totalPages: 1 } } },
   handler: async (req, res) => {

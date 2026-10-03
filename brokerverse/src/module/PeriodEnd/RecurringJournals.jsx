@@ -86,7 +86,7 @@ const RecurringJournals = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.recurringJournals")} trail={[t("periodEnd.recurringJournals")]} subtitle={t("periodEnd.recurringHelp")}>
+      <PageHeader title={t("periodEnd.recurringJournals")} trail={[t("periodEnd.recurringJournals")]}>
         <Dropdown value={kind} options={kindOptions} onChange={(e) => setKind(e.value)} placeholder={t("periodEnd.allKinds")} showClear style={{ minWidth: 180 }} />
         <Button icon="pi pi-bolt" outlined label={t("periodEnd.postDueNow")} onClick={() => runDue(null)} />
         <Button icon="pi pi-plus" label={t("periodEnd.newTemplate")} onClick={() => open(null)} />
@@ -106,9 +106,9 @@ const RecurringJournals = () => {
           <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.status} />} />
           <Column header={t("periodEnd.actions")} body={(r) => (
             <div className="flex gap-1">
-              <Button icon="pi pi-pencil" text size="small" tooltip={t("periodEnd.edit")} onClick={() => open(r)} />
-              <Button icon="pi pi-list" text size="small" tooltip={t("periodEnd.generated")} onClick={async () => { try { setDetail(await periodEndService.recurringJournal(r.id)); } catch (e) { showError(toast, e); } }} />
-              {r.kind === "recurring" && r.status === "active" && <Button icon="pi pi-bolt" text size="small" tooltip={t("periodEnd.postDueNow")} onClick={() => runDue(r)} />}
+              <Button icon="pi pi-pencil" text size="small" tooltip={t("periodEnd.edit")} onClick={() => open(r)} aria-label={t("periodEnd.edit")} />
+              <Button icon="pi pi-list" text size="small" tooltip={t("periodEnd.generated")} onClick={async () => { try { setDetail(await periodEndService.recurringJournal(r.id)); } catch (e) { showError(toast, e); } }} aria-label={t("periodEnd.generated")} />
+              {r.kind === "recurring" && r.status === "active" && <Button icon="pi pi-bolt" text size="small" tooltip={t("periodEnd.postDueNow")} onClick={() => runDue(r)} aria-label={t("periodEnd.postDueNow")} />}
             </div>
           )} />
         </DataTable>

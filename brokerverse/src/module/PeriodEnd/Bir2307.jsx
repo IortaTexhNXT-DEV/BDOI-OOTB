@@ -101,7 +101,7 @@ const Bir2307 = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.bir2307")} section={t("periodEnd.tax")} trail={[t("periodEnd.bir2307")]} subtitle={t("periodEnd.bir2307Help")}>
+      <PageHeader title={t("periodEnd.bir2307")} section={t("periodEnd.tax")} trail={[t("periodEnd.bir2307")]}>
         <SelectButton value={direction} onChange={(e) => e.value && setDirection(e.value)} options={[{ label: t("periodEnd.bir.issued"), value: "issued" }, { label: t("periodEnd.bir.received"), value: "received" }]} />
         <Dropdown value={year} options={years} onChange={(e) => setYear(e.value)} />
         <Dropdown value={quarter} options={[1, 2, 3, 4].map((q) => ({ label: `Q${q}`, value: q }))} onChange={(e) => setQuarter(e.value)} />

@@ -456,7 +456,7 @@ const AdjusterSubmission = () => {
                     onClick={() => {
                       formik.setFieldValue("file", null);
                       fileUploadRef.current?.clear();
-                    }}
+                    }} tooltip={t("claimJourney.removeFile")} tooltipOptions={{ position: "top" }}
                   />
                 </span>
               ) : (

@@ -101,11 +101,11 @@ const Workspace = () => {
   ) : null);
   const lineActions = (l) => (draft ? (
     <div className="flex gap-1">
-      {l.matchStatus !== "matched" && <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(l)} />}
+      {l.matchStatus !== "matched" && <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(l)} aria-label={t("insurerRec.resolve")} />}
       {l.matchStatus === "unmatched"
-        ? <Button icon="pi pi-link" text size="small" tooltip={t("insurerRec.matchByHand")} onClick={() => searchCandidates(l, l.policyNumber)} />
-        : <Button icon="pi pi-times" text size="small" tooltip={t("insurerRec.unmatch")} onClick={() => run(() => service.unmatch(st.id, l.id), t("insurerRec.unmatched"))} />}
-      {l.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => run(() => service.removeResolution(st.id, l.resolution.id), t("insurerRec.resolutionRemoved"))} />}
+        ? <Button icon="pi pi-link" text size="small" tooltip={t("insurerRec.matchByHand")} onClick={() => searchCandidates(l, l.policyNumber)} aria-label={t("insurerRec.matchByHand")} />
+        : <Button icon="pi pi-times" text size="small" tooltip={t("insurerRec.unmatch")} onClick={() => run(() => service.unmatch(st.id, l.id), t("insurerRec.unmatched"))} aria-label={t("insurerRec.unmatch")} />}
+      {l.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => run(() => service.removeResolution(st.id, l.resolution.id), t("insurerRec.resolutionRemoved"))} aria-label={t("insurerRec.removeResolution")} />}
     </div>
   ) : null);
 
@@ -176,8 +176,8 @@ const Workspace = () => {
               <Column header={t("insurerRec.resolution")} body={resolutionBody} style={{ minWidth: "14rem" }} />
               <Column body={(r) => (draft ? (
                 <div className="flex gap-1">
-                  <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(r)} />
-                  {r.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => run(() => service.removeResolution(st.id, r.resolution.id), t("insurerRec.resolutionRemoved"))} />}
+                  <Button icon="pi pi-comment" text size="small" tooltip={t("insurerRec.resolve")} onClick={() => openResolve(r)} aria-label={t("insurerRec.resolve")} />
+                  {r.resolution && <Button icon="pi pi-undo" text size="small" tooltip={t("insurerRec.removeResolution")} onClick={() => run(() => service.removeResolution(st.id, r.resolution.id), t("insurerRec.resolutionRemoved"))} aria-label={t("insurerRec.removeResolution")} />}
                 </div>
               ) : null)} />
             </DataTable>
@@ -219,7 +219,7 @@ const Workspace = () => {
           <div>
             <div className="flex gap-2 mb-2">
               <InputText value={match.search} onChange={(e) => setMatch({ ...match, search: e.target.value })} placeholder={t("insurerRec.searchCandidates")} className="w-full" />
-              <Button icon="pi pi-search" onClick={() => searchCandidates(match.line, match.search)} />
+              <Button icon="pi pi-search" onClick={() => searchCandidates(match.line, match.search)} aria-label="Search" tooltip="Search" tooltipOptions={{ position: "top" }} />
             </div>
             <DataTable value={match.candidates} dataKey="id" size="small" stripedRows scrollable scrollHeight="360px" emptyMessage={t("insurerRec.none")}>
               <Column header={t("insurerRec.brokerRecord")} body={(r) => t(`insurerRec.record.${r.type}`)} />

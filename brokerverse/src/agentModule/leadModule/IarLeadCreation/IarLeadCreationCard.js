@@ -1325,8 +1325,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
                       text
                       rounded
                       severity="danger"
-                      onClick={() => removeItem(section.sectionId, item.id)}
-                    />
+                      onClick={() => removeItem(section.sectionId, item.id)} aria-label="Remove" tooltip="Remove" tooltipOptions={{ position: "top" }} />
                   </div>
                 </div>
                 <div className="mt-2">
@@ -1362,8 +1361,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
                         severity="danger"
                         onClick={() =>
                           removePeril(section.sectionId, item.id, peril.id)
-                        }
-                      />
+                        } aria-label="Remove" tooltip="Remove" tooltipOptions={{ position: "top" }} />
                     </div>
                   ))}
                   <PerilAdder

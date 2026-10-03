@@ -286,8 +286,7 @@ const RequestForm = ({ action }) => {
                     >
                       <Button
                         icon={<SvgDeleteIcon />}
-                        className="delete__btn"
-                      />
+                        className="delete__btn" aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                     </div>
                   )}
                 ></Column>

@@ -28,6 +28,15 @@ const adminService = {
     const q = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== "")).toString();
     return call(`/settings/audit${q ? `?${q}` : ""}`).then((r) => r.data || []);
   },
+  /** One page of the audit trail, newest first: { rows, total } (paged by the server). */
+  getAuditPage: async (params = {}, { page = 1, pageSize = 20 } = {}) => {
+    const q = new URLSearchParams(Object.entries({ ...params, page, pageSize }).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
+    const r = await call(`/settings/audit?${q}`);
+    const rows = r.data || [];
+    // a server without paging answers with its latest entries only: page through those
+    if (r.total === undefined) return { rows: rows.slice((page - 1) * pageSize, page * pageSize), total: rows.length };
+    return { rows, total: r.total };
+  },
 };
 
 export default adminService;

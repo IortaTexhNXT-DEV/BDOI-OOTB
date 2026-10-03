@@ -182,7 +182,6 @@ const PostingRules = () => {
           <div className="posting-rules__title">{t("postingRules.title")}</div>
           <BreadCrumb home={{ label: t("postingRules.master") }} className="posting-rules__crumbs" separatorIcon={<SvgDot color={"#000"} />}
             model={[{ label: t("postingRules.finance") }, { label: t("postingRules.title"), url: "/master/finance/posting-rules" }]} />
-          <p className="posting-rules__intro">{t("postingRules.intro")}</p>
         </div>
       </div>
 
@@ -284,8 +283,8 @@ const PostingRules = () => {
                         <SelectButton value={l.side} options={meta.sides.map((x) => ({ label: x, value: x }))} onChange={(e) => e.value && setLine(i, { side: e.value })} className="posting-rules__side" />
                         <Dropdown value={l.accountType} options={typeOptions} onChange={(e) => setLine(i, { accountType: e.value, account: "" })} className="posting-rules__type" />
                         <div className="posting-rules__grow">{accountEditor(l, i)}</div>
-                        <Button icon="pi pi-arrow-up" className="p-button-text p-button-sm" onClick={() => moveLine(i, -1)} disabled={i === 0} tooltip={t("postingRules.moveUp")} />
-                        <Button icon="pi pi-trash" className="p-button-text p-button-sm p-button-danger" onClick={() => setEdit({ ...edit, lines: edit.lines.filter((_, j) => j !== i) })} tooltip={t("postingRules.removeLine")} />
+                        <Button icon="pi pi-arrow-up" className="p-button-text p-button-sm" onClick={() => moveLine(i, -1)} disabled={i === 0} tooltip={t("postingRules.moveUp")} aria-label={t("postingRules.moveUp")} />
+                        <Button icon="pi pi-trash" className="p-button-text p-button-sm p-button-danger" onClick={() => setEdit({ ...edit, lines: edit.lines.filter((_, j) => j !== i) })} tooltip={t("postingRules.removeLine")} aria-label={t("postingRules.removeLine")} />
                       </div>
                       <div className="posting-rules__row">
                         <span className="posting-rules__no" />

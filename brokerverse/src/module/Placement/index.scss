@@ -135,9 +135,38 @@
   .nowrap, .placement-status { white-space: nowrap; }
 }
 
+// Product: the product name and its line-of-business chip, the chip right after the name (on the same line where
+// the column allows, never split from the last word of the name).
+.placement-grid .product-cell {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.4rem;
+  row-gap: 2px;
+
+  .lob-chip { margin-left: 0; }
+}
+
+.placement-grid .period-cell {
+  display: inline-block;
+  min-width: 6.5rem;
+}
+
+// Lead insurer: the insurer name, and the "+n co-insurer(s)" chip on its own line under it, left-aligned with the name.
+.placement-grid .insurer-cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+
+  .co-chip { margin-left: 0; }
+}
+
 .lob-chip, .co-chip {
   display: inline-block;
   margin-left: 0.4rem;
+  line-height: 1.5;
+  white-space: nowrap;
   padding: 0.05rem 0.45rem;
   border-radius: 999px;
   font-size: 0.7rem;

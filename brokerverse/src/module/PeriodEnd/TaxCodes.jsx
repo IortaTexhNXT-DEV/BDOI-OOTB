@@ -70,7 +70,6 @@ const TaxCodes = () => {
       <div className="pe-header">
         <div>
           <h1 className="pe-title">{t("periodEnd.taxCodes")}</h1>
-          <p className="pe-subtitle">{t("periodEnd.taxCodesHelp")}</p>
         </div>
         <div className="pe-header-actions">
           <Dropdown value={filters.taxType} options={TYPES.map((x) => ({ label: x, value: x }))} onChange={(e) => setFilters({ ...filters, taxType: e.value })} placeholder={t("periodEnd.allTaxTypes")} showClear />
@@ -79,7 +78,7 @@ const TaxCodes = () => {
         </div>
       </div>
       <div className="pe-card">
-        <DataTable value={rows} loading={loading} dataKey="code" size="small" stripedRows paginator rows={15} emptyMessage={t("periodEnd.noRows")}>
+        <DataTable value={rows} loading={loading} dataKey="code" size="small" stripedRows paginator rows={20} emptyMessage={t("periodEnd.noRows")}>
           <Column field="code" header={t("periodEnd.code")} sortable />
           <Column field="taxType" header={t("periodEnd.taxType")} sortable />
           <Column field="atc" header="ATC" sortable />
@@ -90,7 +89,7 @@ const TaxCodes = () => {
           <Column header={t("periodEnd.effectiveFrom")} body={(r) => date(r.effectiveFrom)} />
           <Column header={t("periodEnd.statusLabel")} body={(r) => <StatusTag status={r.active ? "active" : "inactive"} />} />
           <Column body={(r) => <Button icon="pi pi-pencil" text size="small" disabled={!r.editable}
-            onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, atc: r.atc || "", natureOfPayment: r.natureOfPayment || "", remarks: r.remarks || "", effectiveFrom: toDate(r.effectiveFrom), effectiveTo: toDate(r.effectiveTo) } })} />} />
+            onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, atc: r.atc || "", natureOfPayment: r.natureOfPayment || "", remarks: r.remarks || "", effectiveFrom: toDate(r.effectiveFrom), effectiveTo: toDate(r.effectiveTo) } })} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />} />
         </DataTable>
       </div>
       <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("periodEnd.addTaxCode") : v.code) : ""} visible={!!editing} style={{ width: "min(760px, 95vw)" }} onHide={() => setEditing(null)}

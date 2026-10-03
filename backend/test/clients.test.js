@@ -32,6 +32,16 @@ describe('clients', () => {
     const s = await sales('get', '/clients?search=Kalayaan');
     expect(s.body.data.clients[0].companyName).toBe('Kalayaan Foods Corp.');
   });
+  it('filters the list by client type on the server (the Individual / Company tabs page through all clients)', async () => {
+    const all = (await sales('get', '/clients?page=1&pageSize=500')).body.data;
+    const corporate = (await sales('get', '/clients?clientType=corporate&page=1&pageSize=2')).body.data;
+    const individual = (await sales('get', '/clients?clientType=Individual&page=1&pageSize=500')).body.data;
+    expect(corporate.clients.length).toBeLessThanOrEqual(2);
+    expect(corporate.clients.every((c) => c.clientType === 'corporate')).toBe(true);
+    expect(individual.clients.every((c) => c.clientType === 'individual')).toBe(true);
+    expect(corporate.pagination.totalCount).toBe(all.clients.filter((c) => c.clientType === 'corporate').length);
+    expect(corporate.pagination.totalCount + individual.pagination.totalCount).toBe(all.pagination.totalCount);
+  });
   it('returns a client with its policies (by id or code)', async () => {
     const r = await sales('get', '/clients/cl_sls_01');
     expect(r.body.clientId).toBe('cl_sls_01');

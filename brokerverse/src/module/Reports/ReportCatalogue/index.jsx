@@ -42,7 +42,6 @@ export const ReportCatalogue = () => {
         <div>
           <h1 className="page-title">{t("reports.heading")}</h1>
           <BreadCrumb model={[{ label: "All Reports" }]} home={{ label: t("reports.heading") }} separatorIcon={<SvgDot color={"#000"} />} />
-          <p className="report-screen__description">Every report you can run, grouped by category. Open one to set its filters, preview it on screen and download it as Excel, CSV or PDF.</p>
         </div>
         <span className="p-input-icon-left">
           <i className="pi pi-search" />

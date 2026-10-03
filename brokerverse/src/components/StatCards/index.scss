@@ -1,0 +1,63 @@
+@import "../../theme/bdoi/tokens";
+
+.bv-stat-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  gap: 12px;
+  margin: 12px 0 16px;
+
+  .bv-stat-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    height: 6rem;
+    padding: 12px 16px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+    text-align: left;
+    font: inherit;
+    overflow: hidden;
+
+    &.clickable {
+      cursor: pointer;
+
+      &:hover {
+        border-color: $brand-field-blue;
+      }
+    }
+
+    &.active {
+      border-color: $brand-blue;
+      box-shadow: inset 0 0 0 1px $brand-blue;
+    }
+  }
+
+  .bv-stat-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bv-stat-value {
+    font-size: 24px;
+    font-weight: 800;
+    line-height: 1.25;
+    color: $color-heading;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .bv-stat-note {
+    font-size: 12px;
+    color: $color-text-muted;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}

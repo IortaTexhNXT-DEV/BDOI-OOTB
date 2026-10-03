@@ -28,6 +28,7 @@ import {
 } from "./store/paymentVocherMiddleware";
 import clientService from "../../services/clientService";
 import BulkUploadModal from "./BulkUploadModal";
+import { PAGE_SIZE, PAGE_SIZES } from "../../hooks/useServerList";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../utility/dateFormat";
 import logger from "../../utility/logger";
 
@@ -58,8 +59,10 @@ const Index = () => {
     paymentVocherFilterList,
     pagination,
     bulkPrintLoading,
+    loading,
   } = useSelector(({ paymentVoucherReducers }) => {
     return {
+      loading: paymentVoucherReducers?.loading,
       paymentVocherList: paymentVoucherReducers?.paymentVocherList,
       paymentVocherSearchList: paymentVoucherReducers?.paymentVocherSearchList,
       paymentVocherFilterList: paymentVoucherReducers?.paymentVocherFilterList,
@@ -315,10 +318,9 @@ const Index = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -381,7 +383,7 @@ const Index = () => {
     dispatch({ type: "paymentVoucher/clearData" });
 
     // Dispatch the middleware
-    dispatch(paymentVocherMiddleware({ page: 1, pageSize: 10 }));
+    dispatch(paymentVocherMiddleware({ page: 1, pageSize: PAGE_SIZE }));
   }, [dispatch]);
 
   // Fetch clients data from API for bulk print modal
@@ -413,7 +415,7 @@ const Index = () => {
             field: globalFilter,
             value: search,
             page: 1,
-            pageSize: 10,
+            pageSize: PAGE_SIZE,
           })
         );
       }
@@ -433,7 +435,7 @@ const Index = () => {
 
   const handleBulkUploadSuccess = () => {
     // Refresh the disbursements list after successful upload
-    dispatch(paymentVocherMiddleware({ page: 1, pageSize: 10 }));
+    dispatch(paymentVocherMiddleware({ page: 1, pageSize: PAGE_SIZE }));
   };
 
   return (
@@ -555,7 +557,7 @@ const Index = () => {
                 </div>
                 <div className="voucher-recorded__actions">
                   <Button type="button" size="small" outlined icon="pi pi-plus" label={t("paymentVoucher.recordAnother")} onClick={handlePolicy} />
-                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("paymentVoucher.dismiss")} onClick={dismissRecorded} />
+                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("paymentVoucher.dismiss")} onClick={dismissRecorded} tooltip={t("paymentVoucher.dismiss")} tooltipOptions={{ position: "top" }} />
                 </div>
               </div>
             }
@@ -579,10 +581,14 @@ const Index = () => {
                   ? "voucher-row--recorded"
                   : ""
               }
+              // paged by the server: the table shows the page it was given
+              lazy
               paginator
-              rows={pagination?.pageSize || 10}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              totalRecords={pagination?.totalRecords || 0}
+              first={((pagination?.currentPage || pagination?.page || 1) - 1) * (pagination?.pageSize || PAGE_SIZE)}
+              rows={pagination?.pageSize || PAGE_SIZE}
+              rowsPerPageOptions={PAGE_SIZES}
+              totalRecords={pagination?.totalRecords ?? pagination?.total ?? 0}
+              loading={loading}
               currentPageReportTemplate="{first} - {last} of {totalRecords}"
               paginatorTemplate={template2}
               scrollable={true}

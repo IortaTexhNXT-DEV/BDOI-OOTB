@@ -61,7 +61,7 @@ const Formats = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader master title={t("insurerRec.formats")} trail={[t("insurerRec.formats")]} subtitle={t("insurerRec.formatsHelp")}>
+      <PageHeader master title={t("insurerRec.formats")} trail={[t("insurerRec.formats")]}>
         <Button icon="pi pi-plus" label={t("insurerRec.addFormat")} onClick={() => setEditing({ isNew: true, values: { ...EMPTY } })} />
       </PageHeader>
       <div className="pe-card">
@@ -72,7 +72,8 @@ const Formats = () => {
           <Column field="dateFormat" header={t("insurerRec.dateFormat")} />
           <Column header={t("insurerRec.statusLabel")} body={(r) => <IrTag status={r.active ? "approved" : "cancelled"} />} />
           <Column body={(r) => <Button icon="pi pi-pencil" text size="small" aria-label={t("insurerRec.edit")}
-            onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "", skipPattern: r.skipPattern || "" } })} />} />
+            onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "", skipPattern: r.skipPattern || "" } })} tooltip={t("insurerRec.edit")} tooltipOptions={{ position: "top" }}
+            />} />
         </DataTable>
       </div>
 

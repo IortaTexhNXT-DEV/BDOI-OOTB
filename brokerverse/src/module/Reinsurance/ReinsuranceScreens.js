@@ -145,7 +145,7 @@ export const CessionDashboard = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
           tooltip={t('reinsurance.viewDetails')}
-          onClick={() => viewCessionDetails(rowData)}
+          onClick={() => viewCessionDetails(rowData)} aria-label={t('reinsurance.viewDetails')}
         />
         {rowData.status === 'Pending' && (
           <>
@@ -153,13 +153,13 @@ export const CessionDashboard = () => {
               icon="pi pi-check"
               className="p-button-rounded p-button-text p-button-success"
               tooltip={t('common.confirm')}
-              onClick={() => runAction(() => reinsuranceService.confirmCession(rowData.id), t('reinsurance.cessionConfirmed', 'Cession confirmed'))}
+              onClick={() => runAction(() => reinsuranceService.confirmCession(rowData.id), t('reinsurance.cessionConfirmed', 'Cession confirmed'))} aria-label={t('common.confirm')}
             />
             <Button
               icon="pi pi-times"
               className="p-button-rounded p-button-text p-button-danger"
               tooltip={t('common.reject', 'Reject')}
-              onClick={() => setRejecting(rowData)}
+              onClick={() => setRejecting(rowData)} aria-label={t('common.reject', 'Reject')}
             />
           </>
         )}
@@ -167,7 +167,7 @@ export const CessionDashboard = () => {
           icon="pi pi-file-pdf"
           className="p-button-rounded p-button-text"
           tooltip={t('reinsurance.generateReport')}
-          onClick={() => openBordereauFor(rowData)}
+          onClick={() => openBordereauFor(rowData)} aria-label={t('reinsurance.generateReport')}
         />
       </div>
     );
@@ -304,7 +304,7 @@ export const CessionDashboard = () => {
           </TabPanel>
         </TabView>
 
-        <DataTable value={filteredCessions} loading={loading} paginator rows={10} className="mt-3">
+        <DataTable value={filteredCessions} loading={loading} paginator rows={20} className="mt-3">
           <Column field="policyNumber" header="Policy Number" sortable />
           <Column field="insured" header="Insured" sortable />
           <Column field="lineOfBusiness" header="Line of Business" sortable />
@@ -557,18 +557,21 @@ export const RecoveryDashboard = () => {
     <div className="flex gap-2">
       {['Pending', 'Disputed'].includes(rowData.status) && (
         <Button icon="pi pi-send" className="p-button-rounded p-button-text" tooltip={t('reinsurance.submitRecovery', 'Submit to reinsurers')}
-          onClick={() => runAction(() => reinsuranceService.submitRecovery(rowData.id), t('reinsurance.recoverySubmitted', 'Recovery submitted'))} />
+          onClick={() => runAction(() => reinsuranceService.submitRecovery(rowData.id), t('reinsurance.recoverySubmitted', 'Recovery submitted'))} aria-label={t('reinsurance.submitRecovery', 'Submit to reinsurers')}
+          />
       )}
       {rowData.status === 'Processing' && (
         <Button icon="pi pi-wallet" className="p-button-rounded p-button-text p-button-success" tooltip={t('reinsurance.settle', 'Record settlement')}
           onClick={() => {
             setSettlement({ settlementAmount: rowData.recoverableAmount, recoveryDate: new Date() });
             setSettling(rowData);
-          }} />
+          }} aria-label={t('reinsurance.settle', 'Record settlement')}
+          />
       )}
       {['Pending', 'Processing'].includes(rowData.status) && (
         <Button icon="pi pi-flag" className="p-button-rounded p-button-text p-button-danger" tooltip={t('reinsurance.dispute', 'Mark as disputed')}
-          onClick={() => setDisputing(rowData)} />
+          onClick={() => setDisputing(rowData)} aria-label={t('reinsurance.dispute', 'Mark as disputed')}
+          />
       )}
     </div>
   );
@@ -631,7 +634,7 @@ export const RecoveryDashboard = () => {
 
         <TabView>
           <TabPanel header={t('reinsurance.pendingRecoveries')}>
-            <DataTable value={claims.filter(c => c.status !== 'Recovered')} loading={loading} paginator rows={10}>
+            <DataTable value={claims.filter(c => c.status !== 'Recovered')} loading={loading} paginator rows={20}>
               <Column field="claimNumber" header={t('reinsurance.claimNumber')} sortable />
               <Column field="policyNumber" header={t('reinsurance.policyNumber')} sortable />
               <Column field="insured" header={t('reinsurance.insured')} sortable />
@@ -644,7 +647,7 @@ export const RecoveryDashboard = () => {
             </DataTable>
           </TabPanel>
           <TabPanel header={t('reinsurance.recoveredClaims')}>
-            <DataTable value={claims.filter(c => c.status === 'Recovered')} loading={loading} paginator rows={10}>
+            <DataTable value={claims.filter(c => c.status === 'Recovered')} loading={loading} paginator rows={20}>
               <Column field="claimNumber" header={t('reinsurance.claimNumber')} sortable />
               <Column field="insured" header={t('reinsurance.insured')} sortable />
               <Column field="recoverableAmount" header={t('reinsurance.recoveredAmount')} sortable body={amount('recoverableAmount')} />
@@ -752,14 +755,16 @@ export const ReinsuranceReports = () => {
     <div className="flex gap-2">
       {rowData.status === 'Draft' && (
         <Button icon="pi pi-send" className="p-button-rounded p-button-text" tooltip={t('common.submit')}
-          onClick={() => bordereauAction(reinsuranceService.submitBordereau, rowData)} />
+          onClick={() => bordereauAction(reinsuranceService.submitBordereau, rowData)} aria-label={t('common.submit')}
+          />
       )}
       {rowData.status === 'Submitted' && (
         <Button icon="pi pi-check" className="p-button-rounded p-button-text p-button-success" tooltip={t('common.confirm')}
-          onClick={() => bordereauAction(reinsuranceService.confirmBordereau, rowData)} />
+          onClick={() => bordereauAction(reinsuranceService.confirmBordereau, rowData)} aria-label={t('common.confirm')}
+          />
       )}
       {rowData.fileUrl && (
-        <Button icon="pi pi-download" className="p-button-rounded p-button-text" onClick={() => openFile(rowData.fileUrl)} />
+        <Button icon="pi pi-download" className="p-button-rounded p-button-text" onClick={() => openFile(rowData.fileUrl)} aria-label="Download" tooltip="Download" tooltipOptions={{ position: "top" }} />
       )}
     </div>
   );
@@ -785,7 +790,7 @@ export const ReinsuranceReports = () => {
         </div>
       </Card>
       <Card title={t('reinsurance.bordereaux', 'Bordereaux')} className="mt-3">
-        <DataTable value={bordereaux} paginator rows={10}>
+        <DataTable value={bordereaux} paginator rows={20}>
           <Column field="reference" header={t('reinsurance.reference', 'Reference')} sortable />
           <Column field="type" header={t('reinsurance.type')} sortable />
           <Column field="periodLabel" header={t('reinsurance.period')} sortable />
@@ -859,7 +864,8 @@ export const ReconciliationDashboard = () => {
   const resolveTemplate = (kind) => (rowData) => (
     ['Resolved', 'Matched'].includes(rowData.status) ? null : (
       <Button icon="pi pi-check-circle" className="p-button-rounded p-button-text" tooltip={t('reinsurance.resolve', 'Resolve')}
-        onClick={() => setResolving({ kind, row: rowData })} />
+        onClick={() => setResolving({ kind, row: rowData })} aria-label={t('reinsurance.resolve', 'Resolve')}
+        />
     )
   );
 
@@ -883,7 +889,7 @@ export const ReconciliationDashboard = () => {
         </div>
         <TabView>
           <TabPanel header={t('reinsurance.pendingReconciliations')}>
-            <DataTable value={reconciliations} paginator rows={10}>
+            <DataTable value={reconciliations} paginator rows={20}>
               <Column field="type" header={t('reinsurance.type')} sortable />
               <Column field="reinsurerName" header={t('reinsurance.reinsurer')} sortable />
               <Column field="period" header={t('reinsurance.period')} sortable />
@@ -895,7 +901,7 @@ export const ReconciliationDashboard = () => {
             </DataTable>
           </TabPanel>
           <TabPanel header={t('reinsurance.exceptions')}>
-            <DataTable value={exceptions} paginator rows={10}>
+            <DataTable value={exceptions} paginator rows={20}>
               <Column body={(row) => formatAppDate(row.date)} field="date" header={t('remittance.date')} sortable />
               <Column field="type" header={t('reinsurance.type')} sortable />
               <Column field="description" header={t('reinsurance.description')} sortable />

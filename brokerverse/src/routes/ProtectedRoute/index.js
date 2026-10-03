@@ -120,7 +120,7 @@ const ProtectedLayout = () => {
           e.stopPropagation();
           toggleSidebar();
         }}
-        aria-label="Toggle navigation"
+        aria-label="Toggle navigation" tooltip="Toggle navigation" tooltipOptions={{ position: "top" }}
       />
 
       {/* Mobile/Tablet Overlay */}
@@ -154,7 +154,7 @@ const ProtectedLayout = () => {
             e.stopPropagation();
             closeSidebar();
           }}
-          aria-label="Close sidebar"
+          aria-label="Close sidebar" tooltip="Close sidebar" tooltipOptions={{ position: "top" }}
         />
         <NewSideBar onNavigate={handleSidebarNavigation} />
       </div>

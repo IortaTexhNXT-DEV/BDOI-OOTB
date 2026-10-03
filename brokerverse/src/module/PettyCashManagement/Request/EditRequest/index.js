@@ -333,8 +333,7 @@ const EditRequestForm = ({ action }) => {
                                             icon={<SvgDeleteIcon />}
                                             className="delete__btn"
                                             disabled={action === "view"}
-                                            onClick={() => dispatch(removeRequestLine(rowData.id))}
-                                        />
+                                            onClick={() => dispatch(removeRequestLine(rowData.id))} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                                     </div>
                                 )}
                             ></Column>

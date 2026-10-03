@@ -101,13 +101,8 @@ const RemittanceTracking = () => {
   };
 
   const handleSearch = async () => {
-    const rows = await loadRemittances(currentFilters());
-    toast.current.show({
-      severity: 'info',
-      summary: 'Search Complete',
-      detail: `Found ${rows.length} remittances`,
-      life: 3000
-    });
+    // the list itself shows the result: no pop-up
+    await loadRemittances(currentFilters());
   };
 
   const handleClear = () => {
@@ -116,12 +111,6 @@ const RemittanceTracking = () => {
     setDateRange([null, null]);
     setInsurerCode(null);
     loadRemittances();
-    toast.current.show({
-      severity: 'info',
-      summary: 'Filters Cleared',
-      detail: 'All filters have been reset',
-      life: 2000
-    });
   };
 
   const handleStatusCard = (code) => {
@@ -211,21 +200,21 @@ const RemittanceTracking = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleView(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         {rowData.statusCode === 'draft' && (
           <Button
             icon="pi pi-play"
             className="p-button-text"
             onClick={() => handleProcess(rowData)}
-            tooltip="Process"
+            tooltip="Process" aria-label="Process"
           />
         )}
         <Button
           icon="pi pi-print"
           className="p-button-text"
           onClick={() => handlePrint(rowData)}
-          tooltip="Print"
+          tooltip="Print" aria-label="Print"
         />
       </div>
     );
@@ -463,13 +452,13 @@ const RemittanceTracking = () => {
                   icon="pi pi-refresh"
                   className="p-button-text"
                   onClick={handleRefresh}
-                  tooltip="Refresh"
+                  tooltip="Refresh" aria-label="Refresh"
                 />
                 <Button
                   icon="pi pi-file-excel"
                   className="p-button-text"
                   onClick={handleExport}
-                  tooltip="Export to Excel"
+                  tooltip="Export to Excel" aria-label="Export to Excel"
                 />
               </div>
             </div>
@@ -478,7 +467,7 @@ const RemittanceTracking = () => {
               className="remittance-table"
               stripedRows
               paginator
-              rows={10}
+              rows={20}
               loading={loading}
               emptyMessage="No remittances found"
             >

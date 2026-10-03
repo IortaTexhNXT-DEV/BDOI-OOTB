@@ -104,11 +104,11 @@ const Calculations = () => {
 
   // Breadcrumb items
   const items = [
-    { label: t("incentive.incentive"), url: "/incentive" },
+    { label: t("incentive.incentive") },
     { label: t("incentive.calculations"), url: "/incentive/calculations" }
   ];
 
-  const home = { label: t("incentive.dashboard") };
+  const home = { label: t("sidebar.Accounts") };
 
   // Steps for new calculation
   const calculationSteps = [
@@ -281,14 +281,14 @@ const Calculations = () => {
           icon={<SvgEyeIcon />}
           className="view-details-button"
           onClick={() => handleViewDetails(rowData)}
-          tooltip={t("incentive.viewDetails")}
+          tooltip={t("incentive.viewDetails")} aria-label={t("incentive.viewDetails")}
         />
         {["Calculated", "Rejected"].includes(rowData.status) && (
           <Button
             icon="pi pi-send"
             className="approve-button"
             onClick={() => handleSubmitForApproval(rowData)}
-            tooltip="Submit for Approval"
+            tooltip="Submit for Approval" aria-label="Submit for Approval"
           />
         )}
         {rowData.status === "Pending Approval" && (
@@ -297,13 +297,13 @@ const Calculations = () => {
               icon="pi pi-check"
               className="approve-button"
               onClick={() => handleApprove(rowData)}
-              tooltip={t("incentive.approve", "Approve")}
+              tooltip={t("incentive.approve", "Approve")} aria-label={t("incentive.approve", "Approve")}
             />
             <Button
               icon="pi pi-times"
               className="reject-button"
               onClick={() => handleReject(rowData)}
-              tooltip={t("common.reject", "Reject")}
+              tooltip={t("common.reject", "Reject")} aria-label={t("common.reject", "Reject")}
             />
           </>
         )}
@@ -393,8 +393,7 @@ const Calculations = () => {
           <Button
             icon={<div className="pr-2"><SvgAdd /></div>}
             className="main__btn__action"
-            onClick={handleNewCalculation}
-          >
+            onClick={handleNewCalculation} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             {t("incentive.newCalculation")}
           </Button>
         </div>
@@ -448,7 +447,7 @@ const Calculations = () => {
             className="calculations-table"
             stripedRows
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             emptyMessage="No calculations found"
           >
@@ -649,7 +648,7 @@ const Calculations = () => {
                   } />
                   {["Calculated", "Rejected"].includes(calculationDetails.status) && (
                     <Column body={(data) => (
-                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" tooltip="Adjust" onClick={() => handleAdjustLine(data)} />
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" tooltip="Adjust" onClick={() => handleAdjustLine(data)} aria-label="Adjust" />
                     )} />
                   )}
                 </DataTable>

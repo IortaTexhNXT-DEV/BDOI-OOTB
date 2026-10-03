@@ -95,23 +95,19 @@ const Schedules = () => {
 
   const actions = (job) => (
     <div className="admin__actions">
-      <Button icon="pi pi-play" rounded text title="Run now" aria-label="Run now" loading={busy === job.code} onClick={() => run(job)} />
-      <Button icon="pi pi-history" rounded text title="Run history" aria-label="Run history" onClick={() => showRuns(job)} />
-      <Button icon="pi pi-pencil" rounded text title="Edit schedule" aria-label="Edit schedule" onClick={() => setEdit({ ...job })} />
+      <Button icon="pi pi-play" rounded text aria-label="Run now" loading={busy === job.code} onClick={() => run(job)} tooltip="Run now" tooltipOptions={{ position: "top" }} />
+      <Button icon="pi pi-history" rounded text aria-label="Run history" onClick={() => showRuns(job)} tooltip="Run history" tooltipOptions={{ position: "top" }} />
+      <Button icon="pi pi-pencil" rounded text aria-label="Edit schedule" onClick={() => setEdit({ ...job })} tooltip="Edit schedule" tooltipOptions={{ position: "top" }} />
     </div>
   );
 
   return (
     <div className="admin__page">
       <Toast ref={toast} />
-      <BreadCrumb model={[{ label: "Master" }, { label: "Schedules" }]} home={{ icon: "pi pi-home", url: "/" }} className="admin__breadcrumb" />
+      <BreadCrumb model={[{ label: "Schedules" }]} home={{ label: "Master" }} className="admin__breadcrumb" />
       <div className="admin__header">
         <div>
           <h2>Schedules</h2>
-          <p>
-            Jobs run automatically on the timetable below, in the {timeZone ? <strong>{timeZone}</strong> : "configured"} time zone (System Settings, General).
-            Run a job now to test it.
-          </p>
         </div>
       </div>
       <DataTable value={jobs} dataKey="code" stripedRows size="small">

@@ -122,7 +122,7 @@ const OpenItems = () => {
             onClick={handleHomeNavigation}
           >
             <SvgLeftArrow />
-            <div className="activity__tracker">HOME</div>
+            <div className="activity__tracker">{t("openItems.home")}</div>
           </div>
         </div>
         <div className="btn__container__new__event col-12 md:col-6 lg:col-6">

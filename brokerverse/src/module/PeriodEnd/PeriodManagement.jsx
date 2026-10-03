@@ -116,8 +116,8 @@ const PeriodManagement = () => {
           <Button key={status} icon={icon} label={label} size="small" outlined={status !== "closed"} severity={status === "open" ? "warning" : undefined}
             onClick={() => { setAction({ period: row.period, status, current: row.status }); setRemarks(""); }} />
         ))}
-        <Button icon="pi pi-check-square" size="small" text tooltip={t("periodEnd.previewChecks")} onClick={() => openChecks(row)} />
-        <Button icon="pi pi-history" size="small" text tooltip={t("periodEnd.history")} onClick={() => openHistory(row)} />
+        <Button icon="pi pi-check-square" size="small" text tooltip={t("periodEnd.previewChecks")} onClick={() => openChecks(row)} aria-label={t("periodEnd.previewChecks")} />
+        <Button icon="pi pi-history" size="small" text tooltip={t("periodEnd.history")} onClick={() => openHistory(row)} aria-label={t("periodEnd.history")} />
       </div>
     );
   };
@@ -127,7 +127,7 @@ const PeriodManagement = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.periodManagement")} trail={[t("periodEnd.periodManagement")]} subtitle={t("periodEnd.periodManagementHelp")}>
+      <PageHeader title={t("periodEnd.periodManagement")} trail={[t("periodEnd.periodManagement")]}>
         <Dropdown value={selected} options={years.map((y) => ({ label: `${y.code} (${t(`periodEnd.status.${y.status}`)})`, value: y.code }))} onChange={(e) => setSelected(e.value)} style={{ minWidth: 220 }} />
         <Button icon="pi pi-plus" label={t("periodEnd.nextFiscalYear")} onClick={createNext} />
         {hasPermission("write:period-end") && (
@@ -137,15 +137,14 @@ const PeriodManagement = () => {
       <ImportDialog visible={showOpening} onHide={() => setShowOpening(false)} title="Import opening balances (go-live)" targets={OPENING_UPLOAD} goLiveDate onDone={loadYears}
         note="Load the trial balance of the old system at the close of the day before the go-live date. Debits must equal credits; nothing is loaded if any row is wrong. Loading again with the same go-live date replaces the earlier load." />
 
-      {fy && (
-        <div className="pe-kpis">
-          <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.fiscalYear")}</div><div className="pe-kpi-value">{fy.code}</div><div className="pe-muted">{date(fy.startDate)} – {date(fy.endDate)}</div></div>
-          <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.yearStatus")}</div><div className="pe-kpi-value"><StatusTag status={fy.status} /></div></div>
-          {["open", "soft_closed", "closed", "locked"].map((s) => (
-            <div className="pe-kpi" key={s}><div className="pe-kpi-label">{t(`periodEnd.status.${s}`)}</div><div className="pe-kpi-value">{counts[s] || 0}</div></div>
-          ))}
-        </div>
-      )}
+      {/* the figures keep their place before the year is loaded, so the periods below do not move */}
+      <div className="pe-kpis">
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.fiscalYear")}</div><div className="pe-kpi-value">{fy ? fy.code : "-"}</div><div className="pe-muted">{fy ? `${date(fy.startDate)} – ${date(fy.endDate)}` : "\u00a0"}</div></div>
+        <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.yearStatus")}</div><div className="pe-kpi-value">{fy ? <StatusTag status={fy.status} /> : "-"}</div></div>
+        {["open", "soft_closed", "closed", "locked"].map((s) => (
+          <div className="pe-kpi" key={s}><div className="pe-kpi-label">{t(`periodEnd.status.${s}`)}</div><div className="pe-kpi-value">{fy ? counts[s] || 0 : "-"}</div></div>
+        ))}
+      </div>
 
       <div className="pe-card">
         <div className="pe-card-title">

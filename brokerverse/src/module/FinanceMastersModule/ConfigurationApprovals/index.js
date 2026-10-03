@@ -77,7 +77,6 @@ const ConfigurationApprovals = () => {
       <div className="posting-rules__title">{t("postingRules.approvalsTitle")}</div>
       <BreadCrumb home={{ label: t("postingRules.master") }} className="posting-rules__crumbs" separatorIcon={<SvgDot color={"#000"} />}
         model={[{ label: t("postingRules.finance") }, { label: t("postingRules.approvalsTitle"), url: "/master/finance/configuration-approvals" }]} />
-      <p className="posting-rules__intro">{t("postingRules.approvalsIntro")}</p>
       <div className="posting-rules__card">
         <Dropdown value={status} options={STATUSES.map((s) => ({ label: t(`postingRules.approval.${s}`), value: s }))} onChange={(e) => setStatus(e.value)} className="mb-2 w-12rem" />
         <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows emptyMessage={t("postingRules.noChanges")}
@@ -94,9 +93,9 @@ const ConfigurationApprovals = () => {
           )} />
           <Column body={(r) => (r.status === "pending" ? (
             <div className="flex gap-1">
-              <Button icon="pi pi-check" className="p-button-text p-button-success p-button-sm" tooltip={t("postingRules.approve")} onClick={() => act(r, "approve")} />
-              <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip={t("postingRules.reject")} onClick={() => act(r, "reject")} />
-              <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip={t("postingRules.withdraw")} onClick={() => act(r, "withdraw")} />
+              <Button icon="pi pi-check" className="p-button-text p-button-success p-button-sm" tooltip={t("postingRules.approve")} onClick={() => act(r, "approve")} aria-label={t("postingRules.approve")} />
+              <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip={t("postingRules.reject")} onClick={() => act(r, "reject")} aria-label={t("postingRules.reject")} />
+              <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip={t("postingRules.withdraw")} onClick={() => act(r, "withdraw")} aria-label={t("postingRules.withdraw")} />
             </div>
           ) : null)} />
         </DataTable>

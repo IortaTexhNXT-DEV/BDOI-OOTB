@@ -47,6 +47,8 @@ export async function listClients(q, pg) {
   if (search) add("(c.display_name ILIKE '%' || ? || '%' OR c.client_code ILIKE '%' || ? || '%' OR c.email ILIKE '%' || ? || '%' OR c.phone ILIKE '%' || ? || '%')", search);
   if (q.leadCategory || q.category) add('c.lead_category = ?', q.leadCategory || q.category);
   if (q.status) add('c.status = ?', q.status);
+  // individual / corporate by the client type (a company may still carry the Retail lead category of its prospect)
+  if (q.clientType) add("lower(c.client_type) = lower(?)", String(q.clientType));
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'client', 'c', params));
   const w = where.join(' AND ');
   const total = (await one(`SELECT count(*)::int AS n FROM clients c WHERE ${w}`, params)).n;

@@ -214,7 +214,7 @@ const NotificationMaster = () => {
           onClick={() => {
             setSelectedTemplate(rowData);
             setShowTemplateDialog(true);
-          }}
+          }} aria-label="View"
         />
         {!isViewMode && (
           <>
@@ -222,13 +222,13 @@ const NotificationMaster = () => {
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
               tooltip="Edit"
-              onClick={() => editTemplate(rowData)}
+              onClick={() => editTemplate(rowData)} aria-label="Edit"
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
               tooltip="Delete"
-              onClick={() => deleteTemplate(rowData)}
+              onClick={() => deleteTemplate(rowData)} aria-label="Delete"
             />
           </>
         )}
@@ -246,19 +246,19 @@ const NotificationMaster = () => {
           onClick={() => {
             setSelectedRule(rowData);
             setShowRuleDialog(true);
-          }}
+          }} aria-label="View"
         />
         {!isViewMode && (
           <>
             <Button
               icon="pi pi-pencil"
               className="p-button-rounded p-button-text"
-              tooltip="Edit"
+              tooltip="Edit" aria-label="Edit"
             />
             <Button
               icon="pi pi-trash"
               className="p-button-rounded p-button-danger p-button-text"
-              tooltip="Delete"
+              tooltip="Delete" aria-label="Delete"
             />
           </>
         )}

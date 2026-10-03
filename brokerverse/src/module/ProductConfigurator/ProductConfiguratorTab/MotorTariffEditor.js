@@ -111,7 +111,7 @@ const MotorTariffEditor = ({ configuration = {}, fallbackClasses = [], onChange,
             <InputText className={inputClass} aria-label="CTPL 3 years" keyfilter="num" placeholder="not offered" value={ctpl3[c.code] ?? ""} disabled={!c.code} onChange={(e) => setAmount("ctplSetting3Year", c.code, e.target.value)} />
           </div>
           <div className="col-12 md:col-1">
-            <Button icon="pi pi-trash" className="p-button-text p-button-danger p-button-sm" tooltip="Remove class" onClick={() => removeClass(i)} />
+            <Button icon="pi pi-trash" className="p-button-text p-button-danger p-button-sm" tooltip="Remove class" onClick={() => removeClass(i)} aria-label="Remove class" />
           </div>
         </div>
       ))}

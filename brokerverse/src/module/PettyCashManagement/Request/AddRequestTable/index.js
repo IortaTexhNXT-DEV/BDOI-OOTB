@@ -222,8 +222,7 @@ const AddRequestTable = () => {
                   <Button
                     icon={<SvgDelete />}
                     className="delete__btn"
-                    onClick={() => handleDelete(rowData.id)}
-                  />
+                    onClick={() => handleDelete(rowData.id)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                 </div>
               )}
             ></Column>

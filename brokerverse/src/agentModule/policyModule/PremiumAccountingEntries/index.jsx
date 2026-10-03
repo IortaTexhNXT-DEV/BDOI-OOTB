@@ -319,8 +319,8 @@ const PremiumAccountingEntries = () => {
         <DataTable
           value={displayedEntries}
           paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate={t("accounting.pageReportTemplate")}
           emptyMessage={t("accounting.noEntriesFound")}

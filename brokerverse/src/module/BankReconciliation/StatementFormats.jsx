@@ -67,7 +67,7 @@ const StatementFormats = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader master title={t("bankReconciliation.statementFormats")} trail={[t("bankReconciliation.statementFormats")]} subtitle={t("bankReconciliation.formatsHelp")}>
+      <PageHeader master title={t("bankReconciliation.statementFormats")} trail={[t("bankReconciliation.statementFormats")]}>
         <Button icon="pi pi-plus" label={t("bankReconciliation.addFormat")} onClick={() => setEditing({ isNew: true, values: { ...EMPTY } })} />
       </PageHeader>
       <div className="pe-card">
@@ -80,7 +80,7 @@ const StatementFormats = () => {
           <Column header={t("bankReconciliation.status.label")} body={(r) => <span className="flex gap-1"><BrTag status={r.active ? "active" : "inactive"} />{r.isExample && <BrTag status="example" />}</span>} />
           <Column body={(r) => (
             <div className="flex gap-1">
-              <Button icon="pi pi-pencil" text size="small" onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, bankCode: r.bankCode || "", description: r.description || "", skipPattern: r.skipPattern || "" } })} aria-label={t("bankReconciliation.edit")} />
+              <Button icon="pi pi-pencil" text size="small" onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, bankCode: r.bankCode || "", description: r.description || "", skipPattern: r.skipPattern || "" } })} aria-label={t("bankReconciliation.edit")} tooltip={t("bankReconciliation.edit")} tooltipOptions={{ position: "top" }} />
               <Button icon="pi pi-file-import" text size="small" tooltip={t("bankReconciliation.testFile")} onClick={() => setTest({ code: r.code })} aria-label={t("bankReconciliation.testFile")} />
             </div>
           )} />

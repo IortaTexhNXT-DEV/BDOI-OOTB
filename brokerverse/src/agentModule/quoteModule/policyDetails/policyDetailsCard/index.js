@@ -270,7 +270,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
         className="p-button-rounded p-button-danger p-button-text"
         onClick={() => handleDeleteCoInsurer(rowData)}
         tooltip={t("agent.removeCoInsurer")}
-        tooltipOptions={{ position: "top" }}
+        tooltipOptions={{ position: "top" }} aria-label={t("agent.removeCoInsurer")}
       />
     );
   };

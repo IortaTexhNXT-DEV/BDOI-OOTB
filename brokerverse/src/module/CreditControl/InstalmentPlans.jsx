@@ -93,7 +93,7 @@ const InstalmentPlans = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("creditControl.instalmentPlans")} trail={[t("creditControl.instalmentPlans")]} subtitle={t("creditControl.instalmentPlansHelp")} />
+      <PageHeader title={t("creditControl.instalmentPlans")} trail={[t("creditControl.instalmentPlans")]} />
       <div className="pe-card mb-3">
         <div className="flex gap-2 mb-3">
           <InputText value={policyRef} onChange={(e) => setPolicyRef(e.target.value)} onKeyDown={(e) => e.key === "Enter" && load()} placeholder={t("creditControl.policyNumber")} className="w-20rem" />
@@ -115,14 +115,14 @@ const InstalmentPlans = () => {
                 <Calendar value={terms.firstDueDate} onChange={(e) => setTerms({ ...terms, firstDueDate: e.value })} showIcon className="w-full" /></div>
               <div className="col-6 md:col-2"><label>{t("creditControl.downPayment")}</label>
                 <InputNumber value={terms.downPayment} mode="decimal" minFractionDigits={2} min={0} onValueChange={(e) => setTerms({ ...terms, downPayment: e.value })} className="w-full" /></div>
-              <div className="col-12 md:col-1 flex align-items-end"><Button icon="pi pi-refresh" tooltip={t("creditControl.generate")} onClick={generate} /></div>
+              <div className="col-12 md:col-1 flex align-items-end"><Button icon="pi pi-refresh" tooltip={t("creditControl.generate")} onClick={generate} aria-label={t("creditControl.generate")} /></div>
             </div>
             <DataTable value={draft.map((d, i) => ({ ...d, seq: i + 1 }))} dataKey="seq" size="small" className="mt-2"
               footer={t("creditControl.scheduleTotal", { total: money(sum(draft)), bill: money(bill?.amount) })}>
               <Column field="seq" header="#" />
               <Column header={t("creditControl.dueDate")} body={(r) => <Calendar value={r.dueDate} onChange={(e) => setLine(r.seq - 1, { dueDate: e.value })} showIcon />} />
               <Column header={t("creditControl.amount")} body={(r) => <InputNumber value={r.amount} mode="decimal" minFractionDigits={2} maxFractionDigits={2} onValueChange={(e) => setLine(r.seq - 1, { amount: e.value })} />} />
-              <Column body={(r) => <Button icon="pi pi-trash" text size="small" disabled={draft.length < 2} onClick={() => setDraft((d) => d.filter((_, k) => k !== r.seq - 1))} />} />
+              <Column body={(r) => <Button icon="pi pi-trash" text size="small" disabled={draft.length < 2} onClick={() => setDraft((d) => d.filter((_, k) => k !== r.seq - 1))} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />} />
             </DataTable>
             <div className="flex gap-2 mt-2">
               <Button icon="pi pi-plus" label={t("creditControl.addInstalment")} outlined onClick={() => setDraft((d) => [...d, { dueDate: d.at(-1)?.dueDate || null, amount: 0 }])} />

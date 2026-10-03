@@ -1,18 +1,17 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { Tag } from "primereact/tag";
+import { statusSeverity } from "../../utils/statusSeverity";
 import { PageHeader as PeriodEndHeader, date, dateTime, money, showError, showSuccess } from "../PeriodEnd/common";
 
 export { date, dateTime, money, showError, showSuccess };
 
-const SEVERITY = { paid: "success", partial: "info", due: "info", overdue: "danger", breached: "danger", "at-risk": "warning", within: "success",
-  pending: "warning", approved: "success", rejected: "secondary", active: "success", cancelled: "secondary" };
 
 /** Status chip with a translated label (creditControl.status.<status>). */
 export const CcTag = ({ status }) => {
   const { t } = useTranslation();
   if (!status) return null;
-  return <Tag className="pe-tag" value={t(`creditControl.status.${status}`, { defaultValue: String(status) })} severity={SEVERITY[status] || "info"} />;
+  return <Tag className="pe-tag" value={t(`creditControl.status.${status}`, { defaultValue: String(status) })} severity={statusSeverity(status)} />;
 };
 
 /** Page header with the Accounts > Credit Control breadcrumb. */

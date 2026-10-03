@@ -76,7 +76,7 @@ class QuotationService {
         queryParams += `&leadRefId=${leadRefId}`;
       }
       if (search) {
-        queryParams += `&search=${search}`;
+        queryParams += `&search=${encodeURIComponent(search)}`;
       }
       if (lob) {
         queryParams += `&lob=${lob}`;

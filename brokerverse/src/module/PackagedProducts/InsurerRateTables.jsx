@@ -75,14 +75,14 @@ const InsurerRateTables = () => {
 
   return (
     <div className="placement-page pkg-page">
-      <PageHeader title={k("title")} subtitle={k("subtitle")}>
+      <PageHeader title={k("title")}>
         <Button label={k("add")} icon="pi pi-plus" onClick={() => setEdit({ ...EMPTY, productId: filter.productId })} />
       </PageHeader>
       <div className="pkg-toolbar">
         <Dropdown value={filter.productId} options={products} onChange={(e) => setFilter({ ...filter, productId: e.value })} placeholder={k("anyProduct")} showClear filter aria-label={k("product")} />
         <Dropdown value={filter.insuranceCompanyId} options={insurers} onChange={(e) => setFilter({ ...filter, insuranceCompanyId: e.value })} placeholder={k("anyInsurer")} showClear filter aria-label={k("insurer")} />
       </div>
-      <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows paginator rows={15} emptyMessage={k("empty")} responsiveLayout="scroll">
+      <DataTable value={rows} loading={loading} dataKey="id" size="small" stripedRows paginator rows={20} emptyMessage={k("empty")} responsiveLayout="scroll">
         <Column field="productName" header={k("product")} sortable />
         <Column field="insurerName" header={k("insurer")} sortable />
         <Column header={k("basis")} body={(r) => basisLabel(r.rateBasis)} />
@@ -96,8 +96,9 @@ const InsurerRateTables = () => {
         <Column body={(r) => (
           <div className="admin__actions">
             <Button icon="pi pi-pencil" rounded text aria-label={t("common.edit")} onClick={() => setEdit({ ...r, effectiveTo: r.effectiveTo || "", remarks: r.remarks || "", deductible: r.deductible || "",
-              commissionPercent: r.commissionRate === null ? null : Math.round(r.commissionRate * 10000) / 100 })} />
-            <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => remove(r)} />
+              commissionPercent: r.commissionRate === null ? null : Math.round(r.commissionRate * 10000) / 100 })} tooltip={t("common.edit")} tooltipOptions={{ position: "top" }}
+              />
+            <Button icon="pi pi-trash" rounded text severity="danger" aria-label={t("common.delete")} onClick={() => remove(r)} tooltip={t("common.delete")} tooltipOptions={{ position: "top" }} />
           </div>
         )} style={{ width: "7rem" }} />
       </DataTable>

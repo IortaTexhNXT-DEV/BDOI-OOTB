@@ -151,18 +151,7 @@ const CommissionDashboard = () => {
         <div className="page-header-row">
           <div className="page-header-text">
             <h1>Commission Dashboard</h1>
-            {viewMode === "management" ? (
-              <p>
-                Live figures from the commission ledger ·{" "}
-                <span className="readonly-note">read-only (management)</span>.
-                Approve lines or run a payout and these update.
-              </p>
-            ) : (
-              <p>
-                Live figures from the commission ledger. Approve lines or run a
-                payout and these update.
-              </p>
-            )}
+            {viewMode === "management" && <p><span className="readonly-note">read-only (management)</span></p>}
           </div>
           <div className="view-mode-toggle" role="group" aria-label="View mode">
             <button

@@ -218,6 +218,60 @@ $text-strong: #1f2937;
     height: 32px;
   }
 
+  // One colour for row actions: view, edit, e-mail, schedule, history, download, approve... in the brand blue,
+  // neutral grey when disabled, red only for the destructive ones (delete, cancel, reject: severity "danger").
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only:is(.p-button-text, .p-button-outlined, .p-button-link):not(.p-button-danger) {
+    color: $brand-blue !important;
+    border-color: transparent;
+    background: transparent;
+
+    &:enabled:hover {
+      background: $brand-blue-050 !important;
+      color: $brand-blue-600 !important;
+    }
+  }
+
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only.p-button-danger:is(.p-button-text, .p-button-outlined) {
+    color: $color-danger !important;
+    background: transparent;
+
+    &:enabled:hover {
+      background: $color-danger-050 !important;
+    }
+  }
+
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only:disabled {
+    color: $color-placeholder !important;
+    opacity: 0.6;
+  }
+
+  // Avatars in a list row use one neutral tint instead of a colour per row.
+  .p-datatable-tbody > tr > td .p-avatar {
+    background-color: $brand-blue-050 !important;
+    color: $brand-navy !important;
+  }
+
+  // The action column sits at the right edge with a fixed width; its buttons stay on one line.
+  :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td).bv-actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right !important;
+
+    .p-column-header-content {
+      justify-content: flex-end;
+    }
+  }
+
+  // Dates and document numbers (marked by utility/tableNumericAlign.js) never wrap.
+  .p-datatable-tbody > tr > td.bv-code {
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr > td.bv-date {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
   .p-paginator {
     border: 0;
     border-top: 1px solid $color-border;
@@ -729,13 +783,33 @@ small.p-error {
   }
 }
 
+// ---------------------------------------------------------------- delayed loading indicators
+// Most reads answer in well under half a second. A loading mask, skeleton or spinner that appears for 100 ms and
+// vanishes reads as a flicker, so every loading indicator stays transparent for its first 400 ms and only then fades
+// in; a quick load never shows one. Button spinners are left alone (they confirm the click at once).
+@keyframes bv-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.p-datatable-loading-overlay,
+.p-progress-spinner,
+.p-skeleton,
+.p-progressbar-indeterminate,
+.bv-delayed-loading {
+  animation: bv-reveal 150ms ease-out 400ms both !important;
+}
+
+.pi-spinner.pi-spin:not(.p-button-icon):not(.p-button-loading-icon) {
+  animation: bv-reveal 150ms ease-out 400ms both, fa-spin 2s linear 400ms infinite !important;
+}
+
 // ---------------------------------------------------------------- table loading
 
 // A table that is refreshing keeps its rows visible under a light veil with a thin progress line on top,
-// instead of the dark full-table mask of the stock theme. No fade animation, so nothing flickers.
+// instead of the dark full-table mask of the stock theme (shown only after the 400 ms delay above).
 .p-datatable .p-datatable-loading-overlay {
   background-color: rgba(255, 255, 255, 0.55) !important;
-  animation: none !important;
   align-items: flex-start;
 
   &::before {
@@ -838,5 +912,132 @@ small.p-error {
   .p-button .p-button-label {
     font-size: inherit;
     font-weight: inherit;
+  }
+}
+
+// ---------------------------------------------------------------- list toolbars
+// Search box and filters above a list: one line, the search taking the free width up to a sensible maximum.
+#{$shell} {
+  .bv-list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    .bv-list-search {
+      flex: 1 1 18rem;
+      max-width: 32rem;
+
+      input {
+        width: 100%;
+      }
+    }
+
+    .bv-list-filter {
+      width: 12rem;
+    }
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  // a secondary line under a cell value (a note, a reference): muted, smaller, on its own line
+  .bv-cell-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+    color: $color-text-muted;
+  }
+
+  // breadcrumbs read as words, never in capitals
+  .p-breadcrumb,
+  .p-breadcrumb .p-menuitem-text {
+    text-transform: none !important;
+  }
+
+  .p-breadcrumb a.p-menuitem-link[href]:not([href="#"]) .p-menuitem-text,
+  .p-breadcrumb .p-menuitem-link.bv-crumb-link .p-menuitem-text {
+    color: $brand-blue;
+    cursor: pointer;
+  }
+}
+
+// A status cell: the status chip(s) on the first line, notes as muted secondary lines under it.
+#{$shell} .cc-status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+// A summary table above another list holds the height of five rows before its rows arrive.
+#{$shell} .p-datatable.bv-hold-rows-5 > .p-datatable-wrapper {
+  min-height: calc(#{$row-height} * 6);
+}
+
+// First load of a table: until its first rows arrive it shows neither its column headings (whose widths change with
+// the data), nor a "No records" line, nor the paginator (pushed down by the rows) - the table appears once, complete.
+// (utility/tableNumericAlign.js marks such a table "bv-awaiting" for at most 1.5 s.)
+#{$shell} .p-datatable:has(.p-datatable-loading-overlay):has(tr.p-datatable-emptymessage),
+#{$shell} .p-datatable.bv-awaiting {
+  > .p-datatable-wrapper > table > thead,
+  tr.p-datatable-emptymessage > td,
+  > .p-paginator {
+    visibility: hidden;
+  }
+}
+
+// a paged list waiting for its first page holds the height of the page, so what is under it does not move
+#{$shell} .p-datatable.bv-awaiting:has(> .p-paginator) > .p-datatable-wrapper {
+  min-height: 70vh;
+}
+
+// A status banner that appears with the data has a slot of fixed height from the start.
+#{$shell} .bv-banner-slot {
+  min-height: 4.5rem;
+  margin-bottom: 0.75rem;
+
+  .p-message {
+    margin: 0 !important;
+  }
+}
+
+// Lists whose actions column is frozen at the right: the rows scroll under it inside the card on a narrow window.
+#{$shell} .p-datatable {
+  .p-datatable-tbody > tr > td.p-frozen-column {
+    background: inherit;
+  }
+
+  :is(td, th).p-frozen-column.bv-actions {
+    box-shadow: inset 1px 0 0 $color-border;
+  }
+}
+
+// e-mail addresses and other long unbroken values may break anywhere instead of widening the column
+#{$shell} .bv-break {
+  overflow-wrap: anywhere;
+}
+
+// a TabView used as a tab bar over one shared list (no panel content)
+.bv-tabbar .p-tabview-panels {
+  display: none;
+}
+
+// Every list keeps its row actions in view: when a wide table scrolls inside its card, the actions column (marked
+// "bv-actions", by the screen or by utility/tableNumericAlign.js) stays pinned at the right edge.
+#{$shell} .p-datatable > .p-datatable-wrapper > table {
+  > thead > tr > th.bv-actions,
+  > tbody > tr > td.bv-actions {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    box-shadow: inset 1px 0 0 $color-border;
+  }
+
+  > tbody > tr > td.bv-actions {
+    background: inherit;
   }
 }

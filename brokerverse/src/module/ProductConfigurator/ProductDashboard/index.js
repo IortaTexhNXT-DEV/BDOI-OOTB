@@ -83,19 +83,19 @@ const ProductDashboard = () => {
           icon="pi pi-pencil"
           className="p-button-rounded p-button-text p-button-primary"
           tooltip={t('productConfiguratorDashboard.configureProduct')}
-          onClick={() => navigate(`/product-configurator/template/${rowData.id}`)}
+          onClick={() => navigate(`/product-configurator/template/${rowData.id}`)} aria-label={t('productConfiguratorDashboard.configureProduct')}
         />
         <Button
           icon="pi pi-copy"
           className="p-button-rounded p-button-text"
           tooltip={t('productConfiguratorDashboard.cloneProduct')}
-          onClick={() => cloneProduct(rowData)}
+          onClick={() => cloneProduct(rowData)} aria-label={t('productConfiguratorDashboard.cloneProduct')}
         />
         <Button
           icon="pi pi-chart-line"
           className="p-button-rounded p-button-text"
           tooltip={t('productConfiguratorDashboard.viewAnalytics')}
-          onClick={() => navigate('/product-configurator/analytics')}
+          onClick={() => navigate('/product-configurator/analytics')} aria-label={t('productConfiguratorDashboard.viewAnalytics')}
         />
       </div>
     );
@@ -267,7 +267,7 @@ const ProductDashboard = () => {
           <DataTable
             value={filteredTemplates}
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             globalFilter={globalFilter}
             className="product-table"

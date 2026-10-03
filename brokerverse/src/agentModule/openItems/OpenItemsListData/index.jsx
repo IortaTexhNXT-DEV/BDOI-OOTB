@@ -1,183 +1,68 @@
 import { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import "../OpenItemsListData/index.scss";
-import SvgArrow from "../../../assets/agentIcon/SvgArrow";
-import SvgMotorTable from "../../../assets/agentIcon/SvgMotorTable";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { getOpenItemsListMiddleware } from "../store/openItemsMiddleware";
-import SvgDocumentIcon from "../../../assets/agentIcon/SvgDocumentIcon";
-import SvgGreenDocument from "../../../assets/agentIcon/SvgGreenDocument";
-import SvgPaymentIcon from "../../../assets/agentIcon/SvgPaymentIcon";
-import SvgRenewalIcon from "../../../assets/agentIcon/SvgRenewalIcon";
-import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
+import { Button } from "primereact/button";
+import { getOpenItemsListMiddleware } from "../store/openItemsMiddleware";
 import SvgDots from "../../../assets/agentIcon/SvgDots";
+import "./index.scss";
 
-const ICONS = {
-  expiring: <SvgDocumentIcon />,
-  quote: <SvgGreenDocument />,
-  payment: <SvgPaymentIcon />,
-  renewal: <SvgRenewalIcon />,
-};
-const LEFT_TYPES = ["expiring", "quote"];
-const RIGHT_TYPES = ["payment", "renewal"];
+// card order: what needs attention first on the left, then what is waiting on the client
+const CARDS = [
+  { type: "expiring", icon: "pi pi-calendar-times", to: "/agent/openitems/expiringpolicy" },
+  { type: "payment", icon: "pi pi-wallet", to: "/agent/payments" },
+  { type: "quote", icon: "pi pi-file", to: "/agent/openitems/quotepending" },
+  { type: "renewal", icon: "pi pi-refresh", to: "/agent/openitems/renewalrequest" },
+];
 
-/** One card per open-item type: count and the first two items. */
-const toCards = (types, summary, items) =>
-  types.map((type) => {
-    const entry = summary.find((s) => s.type === type) || { status: type, count: 0 };
-    const [first = {}, second = {}] = items.filter((item) => item.type === type);
-    return { ...entry, icon: ICONS[type], first, second };
-  });
-
+/** Operations > Open Items: one card per kind of open item with its count and the two most recent items. */
 const OpenItemsListData = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { summary, openItems } = useSelector(({ openitemsReducers }) => ({
+  const { summary, openItems, loaded } = useSelector(({ openitemsReducers }) => ({
     summary: openitemsReducers?.summary || [],
     openItems: openitemsReducers?.items || [],
+    loaded: Array.isArray(openitemsReducers?.summary) && openitemsReducers.summary.length > 0,
   }));
   useEffect(() => {
     dispatch(getOpenItemsListMiddleware());
   }, [dispatch]);
-  const data = toCards(LEFT_TYPES, summary, openItems);
-  const mock = toCards(RIGHT_TYPES, summary, openItems);
-  const items = [{ label: t("openItems.openItems") }];
-  const Initiate = { label: t("openItems.home") };
-  const handleNavigate = (data) => {
-    if (data === "Pending Payments") {
-      navigate("/agent/payments");
-    } else if (data === "Quote Pending") {
-      navigate("/agent/openitems/quotepending");
-    } else if (data === "Renewal Request") {
-      navigate("/agent/openitems/renewalrequest");
-    } else {
-      navigate("/agent/openitems/expiringpolicy");
-    }
-  };
+
+  const cards = CARDS.map((card) => {
+    const entry = summary.find((s) => s.type === card.type) || {};
+    return { ...card, title: entry.status || t(`openItems.type.${card.type}`), count: entry.count, items: openItems.filter((i) => i.type === card.type).slice(0, 2) };
+  });
 
   return (
-    <div className="grid mt-3 open_item_container">
-      <div className="col-12">
-        <label className="open_item_title">{t("openItems.openItems")}</label>
-      </div>
-      <div className="col-12 pt-0 open__item__goBack">
-        <BreadCrumb
-          model={items}
-          home={Initiate}
-          className="breadCrums"
-          separatorIcon={<SvgDots color={"#000"} />}
-        />
-      </div>
-      <div className="col-6 open__item__card__view">
-        {data.map((val, index) => {
-          return (
-            <div className="grid m-0" key={index}>
-              <div className="col-12 md:col-12 lg:col-12 xl:col-12 open__item__sub__data">
-                <div className="item_header">
-                  <div className="item_status">
-                    <div className="svg_icon">{val.icon}</div>
-                    {val.status}
-                  </div>
-                  <div className="item_count">{val.count}</div>
-                </div>
-                <div className="body__card__view">
-                  <div>
-                    <div className="item__name">{val.first.name}</div>
-                    <div className="item__client__id">
-                      {t("openItems.clientId")}: {val.first.clientId}
-                    </div>
-                  </div>
-                  <div className="policy__data__view">
-                    <div>
-                      <SvgMotorTable />
-                    </div>
-                    <div className="item_policy_no">{val.first.policyNo || val.first.quoteId}</div>
-                  </div>
-                </div>
-                <div className="body__card__view">
-                  <div>
-                    <div className="item__name">{val.second.name}</div>
-                    <div className="item__client__id">
-                      {t("openItems.clientId")}: {val.second.clientId}
-                    </div>
-                  </div>
-                  <div className="policy__data__view">
-                    <div>
-                      <SvgMotorTable />
-                    </div>
-                    <div className="item_policy_no">{val.second.policyNo || val.second.quoteId}</div>
-                  </div>
-                </div>
-                <div className="bottom__view__card ">
-                  <div
-                    onClick={() => handleNavigate(val.status)}
-                    className="cursor-pointer arrow__controller"
-                  >
-                    {t("openItems.seeMore")}
-                    <SvgArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-      <div className="col-6 open__item__card__view">
-        {mock.map((val, index) => {
-          return (
-            <div className="grid m-0" key={index}>
-              <div className="col-12 md:col-12 lg:col-12 xl:col-12 open__item__sub__data">
-                <div className="item_header">
-                  <div className="item_status">
-                    <div className="svg_icon">{val.icon}</div>
-                    {val.status}
-                  </div>
-                  <div className="item_count">{val.count}</div>
-                </div>
-                <div className="body__card__view">
-                  <div>
-                    <div className="item__name">{val.first.name}</div>
-                    <div className="item__client__id">
-                      Client ID: {val.first.clientId}
-                    </div>
-                  </div>
-                  <div className="policy__data__view">
-                    <div>
-                      <SvgMotorTable />
-                    </div>
-                    <div className="item_policy_no">{val.first.policyNo || val.first.quoteId}</div>
-                  </div>
-                </div>
-                <div className="body__card__view">
-                  <div>
-                    <div className="item__name">{val.second.name}</div>
-                    <div className="item__client__id">
-                      Client ID: {val.second.clientId}
-                    </div>
-                  </div>
-                  <div className="policy__data__view">
-                    <div>
-                      <SvgMotorTable />
-                    </div>
-                    <div className="item_policy_no">{val.second.policyNo || val.second.quoteId}</div>
-                  </div>
-                </div>
-                <div className="bottom__view__card">
-                  <div
-                    onClick={() => handleNavigate(val.status)}
-                    className="cursor-pointer arrow__controller"
-                  >
-                    See More
-                    <SvgArrow />
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+    <div className="open_item_container">
+      <div className="open_item_title">{t("openItems.openItems")}</div>
+      <BreadCrumb model={[{ label: t("openItems.openItems") }]} home={{ label: t("sidebar.Operations") }} className="breadCrums" separatorIcon={<SvgDots color={"#000"} />} />
+      <div className="open-items-grid">
+        {cards.map((card) => (
+          <section key={card.type} className="open-items-card" aria-label={card.title}>
+            <header className="open-items-card__head">
+              <span className="open-items-card__title"><i className={card.icon} aria-hidden="true" />{card.title}</span>
+              <span className="open-items-card__count">{loaded ? card.count || 0 : "-"}</span>
+            </header>
+            <ul className="open-items-card__rows">
+              {card.items.map((item, i) => (
+                <li key={`${item.policyNo || item.quoteId || i}`}>
+                  <span className="open-items-card__who">
+                    <span className="open-items-card__name">{item.name || "-"}</span>
+                    <span className="bv-cell-sub">{t("openItems.clientId")}: {item.clientId || "-"}</span>
+                  </span>
+                  <span className="open-items-card__ref">{item.policyNo || item.quoteId || ""}</span>
+                </li>
+              ))}
+              {loaded && !card.items.length && <li className="open-items-card__empty">{t("openItems.none", { defaultValue: "Nothing open" })}</li>}
+            </ul>
+            <footer className="open-items-card__foot">
+              <Button label={t("openItems.seeMore")} icon="pi pi-arrow-right" iconPos="right" text size="small" onClick={() => navigate(card.to)} />
+            </footer>
+          </section>
+        ))}
       </div>
     </div>
   );

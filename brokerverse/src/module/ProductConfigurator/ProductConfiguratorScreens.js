@@ -378,7 +378,7 @@ export const ProductTemplateManager = () => {
                 value={templates}
                 loading={templatesLoading}
                 paginator
-                rows={10}
+                rows={20}
               >
                 <Column field="templateCode" header={t("productTemplateManager.templateCode")} sortable />
                 <Column field="name" header={t("productTemplateManager.productName")} sortable />
@@ -407,21 +407,20 @@ export const ProductTemplateManager = () => {
                             `/product-configurator/template/${rowData.id}`
                           );
                           setSelectedTemplate(rowData);
-                        }}
-                      />
+                        }} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                       {rowData.status === "Retired" ? (
                         <Button
                           icon="pi pi-replay"
                           className="p-button-text"
                           tooltip={t("productTemplateManager.reactivate", "Reactivate")}
-                          onClick={() => setLifecycle(rowData, "reactivate")}
+                          onClick={() => setLifecycle(rowData, "reactivate")} aria-label={t("productTemplateManager.reactivate", "Reactivate")}
                         />
                       ) : (
                         <Button
                           icon="pi pi-ban"
                           className="p-button-text p-button-danger"
                           tooltip={t("productTemplateManager.retire", "Retire")}
-                          onClick={() => setLifecycle(rowData, "retire")}
+                          onClick={() => setLifecycle(rowData, "retire")} aria-label={t("productTemplateManager.retire", "Retire")}
                         />
                       )}
                     </div>
@@ -681,7 +680,7 @@ export const CoverageBuilder = () => {
           />
         </div>
 
-        <DataTable value={coverages} loading={loading} paginator rows={10}>
+        <DataTable value={coverages} loading={loading} paginator rows={20}>
           <Column field="coverageCode" header={t("coverageBuilder.code")} sortable />
           <Column field="coverageName" header={t("coverageBuilder.coverageName")} sortable />
           <Column header={t("coverageBuilder.type")} body={typeBodyTemplate} sortable />
@@ -699,20 +698,17 @@ export const CoverageBuilder = () => {
                 <Button
                   icon="pi pi-pencil"
                   className="p-button-text"
-                  onClick={() => openCoverage(rowData)}
-                />
+                  onClick={() => openCoverage(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                 <Button
                   icon="pi pi-copy"
                   className="p-button-text"
                   onClick={() =>
                     openCoverage({ ...rowData, id: undefined, coverageCode: `${rowData.coverageCode}-COPY` })
-                  }
-                />
+                  } aria-label="Copy" tooltip="Copy" tooltipOptions={{ position: "top" }} />
                 <Button
                   icon="pi pi-trash"
                   className="p-button-text p-button-danger"
-                  onClick={() => deleteCoverage(rowData)}
-                />
+                  onClick={() => deleteCoverage(rowData)} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
               </div>
             )}
           />
@@ -943,7 +939,7 @@ export const RatingEngine = () => {
           value={ratingFactors}
           loading={loading}
           paginator
-          rows={10}
+          rows={20}
           dataKey="id"
           expandedRows={expandedRows}
           onRowToggle={(e) => setExpandedRows(e.data)}
@@ -980,15 +976,13 @@ export const RatingEngine = () => {
                 <Button
                   icon="pi pi-pencil"
                   className="p-button-text"
-                  onClick={() => openFactor(rowData)}
-                />
+                  onClick={() => openFactor(rowData)} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                 <Button
                   icon="pi pi-copy"
                   className="p-button-text"
                   onClick={() =>
                     openFactor({ ...rowData, id: undefined, factorCode: `${rowData.factorCode}-COPY` })
-                  }
-                />
+                  } aria-label="Copy" tooltip="Copy" tooltipOptions={{ position: "top" }} />
               </div>
             )}
           />
@@ -1371,7 +1365,7 @@ export const MarketMapping = () => {
           value={mappings}
           loading={loading}
           paginator
-          rows={10}
+          rows={20}
           onRowClick={(e) => setSelectedMapping(e.data)}
         >
           <Column field="templateCode" header={t("marketMapping.product")} />
@@ -1538,7 +1532,7 @@ export const DocumentManager = () => {
           />
         </div>
 
-        <DataTable value={documents} loading={loading} paginator rows={10}>
+        <DataTable value={documents} loading={loading} paginator rows={20}>
           <Column header={t("documentManager.format")} body={formatBodyTemplate} />
           <Column field="documentCode" header={t("documentManager.documentCode")} sortable />
           <Column field="documentName" header={t("documentManager.documentName")} sortable />
@@ -1563,19 +1557,19 @@ export const DocumentManager = () => {
                   icon="pi pi-download"
                   className="p-button-text"
                   tooltip={t("documentManager.download")}
-                  onClick={() => openTemplate(rowData)}
+                  onClick={() => openTemplate(rowData)} aria-label={t("documentManager.download")}
                 />
                 <Button
                   icon="pi pi-pencil"
                   className="p-button-text"
                   tooltip={t("documentManager.edit")}
-                  onClick={() => setSelectedDocument(rowData)}
+                  onClick={() => setSelectedDocument(rowData)} aria-label={t("documentManager.edit")}
                 />
                 <Button
                   icon="pi pi-eye"
                   className="p-button-text"
                   tooltip={t("documentManager.preview")}
-                  onClick={() => openTemplate(rowData)}
+                  onClick={() => openTemplate(rowData)} aria-label={t("documentManager.preview")}
                 />
               </div>
             )}

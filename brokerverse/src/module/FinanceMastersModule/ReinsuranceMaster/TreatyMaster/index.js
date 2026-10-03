@@ -266,13 +266,13 @@ const TreatyMaster = () => {
           icon="pi pi-pencil"
           className="p-button-rounded p-button-text p-button-primary"
           onClick={() => handleEdit(rowData)}
-          tooltip={t('reinsuranceTreaty.editTreaty')}
+          tooltip={t('reinsuranceTreaty.editTreaty')} aria-label={t('reinsuranceTreaty.editTreaty')}
         />
         <Button
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
           tooltip={t('reinsuranceTreaty.viewDetails')}
-          onClick={() => navigate(`/reinsurance/treaty/${rowData.id}`)}
+          onClick={() => navigate(`/reinsurance/treaty/${rowData.id}`)} aria-label={t('reinsuranceTreaty.viewDetails')}
         />
         {rowData.status === 'Pending Approval' && (
           <>
@@ -280,7 +280,7 @@ const TreatyMaster = () => {
               icon="pi pi-check"
               className="p-button-rounded p-button-text p-button-success"
               tooltip={t('common.approve', 'Approve')}
-              onClick={() => decide('approve', rowData)}
+              onClick={() => decide('approve', rowData)} aria-label={t('common.approve', 'Approve')}
             />
             <Button
               icon="pi pi-times"
@@ -289,7 +289,7 @@ const TreatyMaster = () => {
               onClick={() => {
                 setRejectReason('');
                 setRejecting(rowData);
-              }}
+              }} aria-label={t('common.reject', 'Reject')}
             />
           </>
         )}
@@ -625,8 +625,8 @@ const TreatyMaster = () => {
           value={treaties}
           loading={loading}
           paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25]}
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           className="treaty-table"
           emptyMessage={t('reinsuranceTreaty.noTreatiesFound')}
           responsiveLayout="scroll"

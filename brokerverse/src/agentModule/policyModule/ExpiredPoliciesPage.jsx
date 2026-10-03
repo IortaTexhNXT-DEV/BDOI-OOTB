@@ -108,7 +108,7 @@ const ExpiredPoliciesPage = () => {
         <div className="col-12">
           <label className="leadlisting__overal__container__title">{t("expiredPolicies.title")}</label>
           <div className="mt-3">
-            <BreadCrumb model={[{ label: t("expiredPolicies.breadcrumb") }]} home={{ label: t("expiredPolicies.home") }} className="breadCrums" />
+            <BreadCrumb model={[{ label: t("expiredPolicies.breadcrumb") }]} home={{ label: t("sidebar.Operations") }} className="breadCrums" />
           </div>
         </div>
 

@@ -168,7 +168,7 @@ const Login = () => {
             className="p-button-text p-button-rounded login__password__toggle"
             aria-label={showPassword ? t("security.hidePassword") : t("security.showPassword")}
             aria-pressed={showPassword}
-            onClick={() => setShowPassword((v) => !v)}
+            onClick={() => setShowPassword((v) => !v)} tooltip={showPassword ? t("security.hidePassword") : t("security.showPassword")} tooltipOptions={{ position: "top" }}
           />
         </div>
         {formik.touched.Password && formik.errors.Password && (

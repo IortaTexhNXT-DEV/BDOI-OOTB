@@ -44,7 +44,7 @@ const RemittanceAgeing = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("creditControl.remittanceAgeing")} trail={[t("creditControl.remittanceAgeing")]} subtitle={t("creditControl.remittanceAgeingHelp")}>
+      <PageHeader title={t("creditControl.remittanceAgeing")} trail={[t("creditControl.remittanceAgeing")]}>
         <Button icon="pi pi-file-excel" label="Excel" outlined onClick={() => service.downloadRemittanceAgeing(params()).catch((e) => showError(toast, e))} />
       </PageHeader>
       <div className="pe-card mb-3">
@@ -53,15 +53,16 @@ const RemittanceAgeing = () => {
           <Calendar value={filter.asOf} onChange={(e) => setFilter({ ...filter, asOf: e.value })} showIcon />
           <span className="flex align-items-center gap-2"><Checkbox inputId="ra-overdue" checked={filter.overdueOnly} onChange={(e) => setFilter({ ...filter, overdueOnly: e.checked })} /><label htmlFor="ra-overdue">{t("creditControl.overdueOnly")}</label></span>
         </div>
-        <DataTable value={data?.insurers || []} dataKey="insurerId" loading={loading} size="small" stripedRows emptyMessage={t("creditControl.none")}
-          footer={data ? `${t("creditControl.total")}: ${money(data.summary.total)} (${data.summary.count})` : null}>
+        {/* the summary keeps the height of a few insurers and its total line from the start, so the detail below does not jump */}
+        <DataTable value={data?.insurers || []} dataKey="insurerId" loading={loading} size="small" stripedRows emptyMessage={data ? t("creditControl.none") : " "}
+          className="bv-hold-rows-5" footer={`${t("creditControl.total")}: ${data ? `${money(data.summary.total)} (${data.summary.count})` : "-"}`}>
           <Column field="insurerName" header={t("creditControl.insurer")} />
           {BUCKETS.map((b) => <Column key={b} header={labels[b]} body={(r) => money(r[b])} className="bv-num" headerClassName="bv-num" />)}
           <Column header={t("creditControl.total")} body={(r) => <b>{money(r.total)}</b>} className="bv-num" headerClassName="bv-num" />
         </DataTable>
       </div>
       <div className="pe-card">
-        <DataTable value={data?.rows || []} dataKey="applicationId" loading={loading} size="small" stripedRows paginator rows={25} emptyMessage={t("creditControl.none")}>
+        <DataTable value={data?.rows || []} dataKey="applicationId" loading={loading} size="small" stripedRows paginator rows={20} emptyMessage={t("creditControl.none")}>
           <Column field="insurerName" header={t("creditControl.insurer")} />
           <Column field="policyNumber" header={t("creditControl.policyNumber")} />
           <Column field="clientName" header={t("creditControl.client")} />

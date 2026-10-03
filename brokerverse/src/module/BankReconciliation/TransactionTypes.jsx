@@ -26,6 +26,8 @@ const TransactionTypes = () => {
   const [data, setData] = useState({ items: [], accountRoles: [] });
   const [rules, setRules] = useState([]);
   const [loading, setLoading] = useState(false);
+  // the matching rules under the types appear with them (not first at the top, then pushed down)
+  const [loaded, setLoaded] = useState(false);
   const [editing, setEditing] = useState(null);
 
   const load = useCallback(async () => {
@@ -38,6 +40,7 @@ const TransactionTypes = () => {
       showError(toast, e);
     } finally {
       setLoading(false);
+      setLoaded(true);
     }
   }, []);
   useEffect(() => { load(); }, [load]);
@@ -70,7 +73,7 @@ const TransactionTypes = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader master title={t("bankReconciliation.transactionTypes")} trail={[t("bankReconciliation.transactionTypes")]} subtitle={t("bankReconciliation.typesHelp")}>
+      <PageHeader master title={t("bankReconciliation.transactionTypes")} trail={[t("bankReconciliation.transactionTypes")]}>
         <Button icon="pi pi-plus" label={t("bankReconciliation.addType")} onClick={() => setEditing({ isNew: true, values: { ...EMPTY } })} />
       </PageHeader>
       <div className="pe-card">
@@ -84,13 +87,13 @@ const TransactionTypes = () => {
           <Column field="matchPattern" header={t("bankReconciliation.matchPattern")} body={(r) => <code>{r.matchPattern || ""}</code>} />
           <Column header={t("bankReconciliation.status.label")} body={(r) => <BrTag status={r.active ? "active" : "inactive"} />} />
           <Column body={(r) => <Button icon="pi pi-pencil" text size="small" aria-label={t("bankReconciliation.edit")}
-            onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "", accountRole: r.accountRole || "", glAccountCode: r.glAccountCode || "", matchPattern: r.matchPattern || "" } })} />} />
+            onClick={() => setEditing({ isNew: false, values: { ...EMPTY, ...r, description: r.description || "", accountRole: r.accountRole || "", glAccountCode: r.glAccountCode || "", matchPattern: r.matchPattern || "" } })} tooltip={t("bankReconciliation.edit")} tooltipOptions={{ position: "top" }}
+            />} />
         </DataTable>
       </div>
 
-      <div className="pe-card">
+      {loaded && <div className="pe-card">
         <div className="pe-card-title">{t("bankReconciliation.matchRules")}</div>
-        <p className="pe-muted mt-0">{t("bankReconciliation.matchRulesHelp")}</p>
         <DataTable value={rules} dataKey="code" size="small" stripedRows>
           <Column header={t("bankReconciliation.order")} body={(r) => <InputNumber value={r.sortOrder} onValueChange={(e) => e.value !== r.sortOrder && e.value !== null && saveRule(r, { sortOrder: e.value })} inputStyle={{ width: 70 }} />} />
           <Column header={t("bankReconciliation.rule")} body={(r) => <div><div>{r.name}</div><div className="pe-muted">{r.description}</div></div>} />
@@ -100,7 +103,7 @@ const TransactionTypes = () => {
             : "-")} />
           <Column header={t("bankReconciliation.status.active")} body={(r) => <Checkbox checked={r.active} onChange={(e) => saveRule(r, { active: e.checked })} />} />
         </DataTable>
-      </div>
+      </div>}
 
       <Dialog className="pe-dialog" header={editing ? (editing.isNew ? t("bankReconciliation.addType") : v.code) : ""} visible={!!editing} style={{ width: "min(720px, 96vw)" }} onHide={() => setEditing(null)}
         footer={(

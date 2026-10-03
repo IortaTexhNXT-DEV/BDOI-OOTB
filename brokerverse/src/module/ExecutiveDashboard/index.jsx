@@ -237,7 +237,6 @@ const ExecutiveDashboard = () => {
         <div className="header-content">
           <div className="header-left">
             <h1>{t("executiveDashboard.title")}</h1>
-            <p>{t("executiveDashboard.subtitle")}</p>
           </div>
           <div className="header-right">
             <Calendar
@@ -315,6 +314,14 @@ const ExecutiveDashboard = () => {
                   style={{ height: "6px" }}
                 />
               </div>
+            </Card>
+          ))}
+          {/* before the figures arrive the cards hold their places, so the charts below do not move */}
+          {!dashboard && [...Object.keys(kpiTitleKeys), "receivableClients", "receivableInsurers"].map((key) => (
+            <Card key={`placeholder-${key}`} className="kpi-card" aria-hidden="true">
+              <div className="kpi-header"><span className="kpi-title">{kpiTitleKeys[key] ? t(kpiTitleKeys[key]) : "\u00a0"}</span></div>
+              <div className="kpi-value">-</div>
+              <div className="kpi-target"><span>{"\u00a0"}</span></div>
             </Card>
           ))}
           {dashboard?.receivables && (

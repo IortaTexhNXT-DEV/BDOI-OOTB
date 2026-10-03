@@ -29,6 +29,8 @@ const AuthorityMatrix = () => {
   const [pending, setPending] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
+  // the parts under the matrix appear with it (not above it first, then pushed down)
+  const [loaded, setLoaded] = useState(false);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -46,6 +48,7 @@ const AuthorityMatrix = () => {
       notify("error", k("loadFailed", "Could not load the users"), e.message);
     } finally {
       setLoading(false);
+      setLoaded(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -113,7 +116,6 @@ const AuthorityMatrix = () => {
       <Toast ref={toast} />
       <PageHeader
         title={k("authorityTitle", "Authority Matrix")}
-        intro={k("authorityIntro", "Approval limits per role and transaction type (amounts in PHP; discounts in percent). A change applies once a second administrator approves it.")}
         actions={<>
           <Button icon="pi pi-user-plus" label={k("addUserLimit", "Limit for one person")} outlined onClick={() => setForm({ ...EMPTY })} />
           <Button icon="pi pi-refresh" label={k("refresh", "Refresh")} outlined onClick={load} disabled={loading} />
@@ -155,9 +157,8 @@ const AuthorityMatrix = () => {
         ))}
       </DataTable>
 
-      <div className="access__panel">
+      {loaded && <div className="access__panel">
         <h3>{k("userLimitsTitle", "Limits for individual people")}</h3>
-        <p className="access__muted">{k("userLimitsIntro", "A personal limit replaces the limits of the person's roles for that transaction type.")}</p>
         <DataTable value={matrix.userLimits} dataKey="id" size="small" emptyMessage={k("noUserLimits", "No personal limits")} className="access__table">
           <Column field="userName" header={k("colPerson", "Person")} />
           <Column field="transactionName" header={k("colTransaction", "Transaction")} />
@@ -166,7 +167,7 @@ const AuthorityMatrix = () => {
           <Column header="" style={{ width: "9rem" }} body={(l) => (l.status === "active"
             ? <Button label={k("withdraw", "Withdraw")} text size="small" onClick={() => withdraw(l)} /> : null)} />
         </DataTable>
-      </div>
+      </div>}
 
       <Dialog header={form?.roleCode ? k("setRoleLimit", "Set approval limit") : k("setUserLimit", "Set a limit for one person")} visible={!!form}
         style={{ width: "32rem" }} onHide={() => setForm(null)} modal

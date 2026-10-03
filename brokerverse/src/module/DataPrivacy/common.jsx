@@ -50,14 +50,14 @@ export const PageHeader = ({ title, intro, actions }) => {
   return (
     <>
       <BreadCrumb
-        model={[{ label: t("privacy.master") }, { label: t("privacy.menu") }, { label: title }]}
-        home={{ icon: "pi pi-home", url: "/" }}
+        model={[{ label: t("privacy.menu") }, { label: title }]}
+        home={{ label: t("privacy.master") }}
         className="admin__breadcrumb"
       />
       <div className="admin__header">
         <div>
           <h2>{title}</h2>
-          <p>{intro}</p>
+          {intro ? <p>{intro}</p> : null}
         </div>
         {actions ? <div className="admin__actions">{actions}</div> : null}
       </div>

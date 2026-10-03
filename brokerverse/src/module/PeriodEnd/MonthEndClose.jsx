@@ -63,7 +63,7 @@ const MonthEndClose = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.monthEndClose")} trail={[t("periodEnd.monthEndClose")]} subtitle={t("periodEnd.monthEndCloseHelp")}>
+      <PageHeader title={t("periodEnd.monthEndClose")} trail={[t("periodEnd.monthEndClose")]}>
         <Dropdown value={fiscalYear} options={years.map((y) => ({ label: y.code, value: y.code }))} onChange={(e) => setFiscalYear(e.value)} style={{ minWidth: 160 }} />
         <Button icon="pi pi-plus" label={t("periodEnd.newCloseRun")} onClick={() => {
           const prev = previousPeriod();

@@ -25,8 +25,8 @@ const ClientListingCard = () => {
     display: false,
     policyId: null,
   });
-  const items = [{ label: t("policyList.policy"), url: "/agent/clientlisting" }];
-  const Initiate = { label: t("policyList.home") };
+  const items = [{ label: t("policyList.title") }];
+  const Initiate = { label: t("sidebar.Operations") };
 
   const handleBulkUploadSuccess = () => {
     // Refresh the policies table by updating key

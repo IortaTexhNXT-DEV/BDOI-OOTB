@@ -84,7 +84,7 @@ const Statements = () => {
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("insurerRec.statements")} trail={[t("insurerRec.statements")]} subtitle={t("insurerRec.statementsHelp")}>
+      <PageHeader title={t("insurerRec.statements")} trail={[t("insurerRec.statements")]}>
         <Button icon="pi pi-upload" label={t("insurerRec.importStatement")} onClick={() => { setForm(EMPTY()); setPreview(null); }} />
       </PageHeader>
       <div className="pe-card">
