@@ -90,7 +90,7 @@ The cache follows changes made through any instance. At most every `SETTINGS_CHE
 
 ## Notifications and audience
 
-`notify({ userId, type, priority, title, message, link, entity, entityId, audience })` inserts a row in `notifications`. A notification goes to one user or, without a user, to everyone who holds the permission in `audience` (for example `write:journal-vouchers` for journal vouchers awaiting approval). The front end polls the unread count every 30 seconds while signed in. Switches: `notification.approval_requests`, `notification.claim_status`, `notification.renewal_reminder`.
+`notify({ userId, type, priority, title, message, link, entity, entityId, audience })` inserts a row in `notifications`. A notification goes to one user or, without a user, to everyone who holds the permission in `audience` (for example `write:journal-vouchers` for journal vouchers awaiting approval). The front end polls the unread count every 30 seconds while signed in. Switches: `notification.approval_requests`, `notification.claim_status`, `notification.renewal_reminder`. The maker-checker flows use `notifications/approvals.js`: `notifyApprovers` sends "<document> <number> awaiting approval" to the permission of the approve endpoint (or to named users where a role approves), `notifyDecision` sends "<document> <number> approved / rejected" (with the reason) to the maker. `notification.approval_requests` switches both off; a notification that cannot be created is logged and never fails the transaction.
 
 ## E-mail outbox (lib/mailer.js)
 

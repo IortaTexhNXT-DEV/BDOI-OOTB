@@ -103,6 +103,7 @@ export async function postBankAdjustment(db, account, line, b, user) {
   }
   const [cashLine] = await cashLines(db, account, [jv.id]);
   return { status: jv.status, journal: { id: jv.id, jv_number: jv.jv_number }, journals: [{ id: jv.id, jv_number: jv.jv_number }], matchId, cashLineId: cashLine ? Number(cashLine.id) : null,
+    typeName: t.name, amount,
     message: jv.status === 'posted' ? null : `Journal ${jv.jv_number} awaits approval by a second user; it is matched to the bank line once posted` };
 }
 

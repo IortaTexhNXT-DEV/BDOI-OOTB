@@ -26,7 +26,7 @@ import { many, one, pool, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { documentAttachment, queueEmail } from '../../lib/mailer.js';
-import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { cashAccountFor, reverseJournal } from '../accounting/lib/ledger.js';
 import { bankAccountGl, postEvent } from '../accounting/lib/posting.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
@@ -408,12 +408,13 @@ export async function raiseDebitNote(b, user) {
     return d.id;
   });
   const out = await getDebitNote(id);
-  if (out.statusCode === 'for-approval') await askApproval(out);
+  if (out.statusCode === 'for-approval') await askApproval(out, user);
   return out;
 }
 
-const askApproval = async (dn) => notify({ audience: 'write:remittance', type: 'approval', title: 'Commission debit note awaiting approval', message: `${dn.dnNumber} to ${dn.insurerName} for ${await formatMoney(dn.amount, dn.currency)} needs approval`,
-  link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: dn.id });
+// approved with write:remittance (Remittance > Direct Bill)
+const askApproval = async (dn, user) => notifyApprovers({ audience: 'write:remittance', document: 'Commission debit note', number: dn.dnNumber, by: user?.username || 'system',
+  detail: `${dn.insurerName}, ${await formatMoney(dn.amount, dn.currency)}`, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: dn.id });
 
 /** Release the items of a rejected / cancelled note so they can be billed again. */
 async function releaseItems(db, dnId) {
@@ -428,7 +429,7 @@ export async function submitDebitNote(id, user) {
     await db.query('UPDATE commission_debit_notes SET status = \'for-approval\', submitted_by = $2, submitted_at = now(), updated_by = $2, updated_at = now() WHERE id = $1', [d.id, user.id]);
   });
   const after = await getDebitNote(id);
-  await askApproval(after);
+  await askApproval(after, user);
   return { before, after };
 }
 
@@ -452,10 +453,8 @@ export async function decideDebitNote(id, action, body, user) {
     }
   });
   const after = await getDebitNote(id);
-  if (before.createdById) {
-    await notify({ userId: before.createdById, type: 'info', title: `Debit note ${action === 'approve' ? 'approved' : 'rejected'}`, message: `${after.dnNumber} to ${after.insurerName} was ${action === 'approve' ? 'approved' : `rejected: ${reason}`}`,
-      link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: after.id });
-  }
+  await notifyDecision({ userId: before.createdById, decidedBy: user.id, document: 'Commission debit note', number: after.dnNumber, approved: action === 'approve', by: user.username,
+    reason: action === 'approve' ? null : reason, link: '/finance/remittance/directbill', entity: 'commission_debit_note', entityId: after.id });
   return { before, after: { ...after, decisionRemarks: reason } };
 }
 

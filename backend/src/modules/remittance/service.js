@@ -9,7 +9,8 @@ import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { renderTemplate } from '../documents/common.js';
 import { today as businessToday } from '../../lib/dates.js';
-import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
+import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { isoDate, params, round2, toNumber } from '../masters/helpers.js';
 import { createInsurerRemittance } from '../disbursements/service.js';
@@ -296,6 +297,15 @@ export async function postItemJournal(c, item, user) {
   return jv;
 }
 
+// Remittance > Approval: every approval of the workflow is decided there with write:remittance.
+export const APPROVAL_LINK = '/finance/remittance/approval';
+
+/** Tell the approvers (write:remittance) that a transaction opened with openApproval awaits them; call after the commit. */
+export async function askApproval({ transactionType, referenceNo, amount, description, user, entity = 'item', entityId }) {
+  await notifyApprovers({ audience: 'write:remittance', document: transactionType, number: referenceNo, by: user.username,
+    detail: `${description ? `${description}, ` : ''}${await formatMoney(amount)}`, link: APPROVAL_LINK, entity, entityId });
+}
+
 export async function openApproval(c, { entity, entityId, referenceNo, transactionType, amount, description, initiatorId }) {
   const { priority, slaHours } = await priorityFor(amount);
   const levels = await levelsFor(amount);
@@ -325,7 +335,8 @@ export async function processRemittances(ids, user) {
     await c.query(`INSERT INTO remittance_items(kind, reference_no, amount, status, data, created_by, updated_by) VALUES ('batch', $1, $2, 'Pending Approval', $3, $4, $4)`,
       [batchId, round2(total), JSON.stringify({ processedIds: ok.map((x) => x.id), itemCount: ok.length, durationMs: Date.now() - started }), user.id]);
   });
-  await notify({ audience: 'write:remittance', type: 'approval', title: 'Remittances awaiting approval', message: `${ok.length} remittance(s) in batch ${batchId} need approval`, link: '/finance/remittance/approval', entity: 'remittance_batch', entityId: batchId });
+  await notifyApprovers({ audience: 'write:remittance', document: 'Remittance batch', number: batchId, by: user.username, link: APPROVAL_LINK, entity: 'remittance_batch', entityId: batchId,
+    message: `${user.username} submitted ${ok.length} remittance(s) in batch ${batchId} (${await formatMoney(round2(total))})` });
   return { success: true, message: `Successfully submitted ${ok.length} remittance(s) for approval`, processedIds: ok.map((x) => x.id), failed: v.results.filter((x) => !x.valid), batchId, processedAt: new Date().toISOString() };
 }
 
@@ -460,7 +471,8 @@ export async function decide(id, action, body, user) {
   });
   const after = approvalOut(await getApproval(id));
   if (after.status !== 'Pending') {
-    await notify({ userId: a.initiator_id, type: 'info', title: `${a.transaction_type} ${after.status.toLowerCase()}`, message: `${a.reference_no} was ${after.status.toLowerCase()} by ${await userName(user.id)}`, link: '/finance/remittance/approval', entity: a.entity, entityId: a.entity_id });
+    await notifyDecision({ userId: a.initiator_id, decidedBy: user.id, document: a.transaction_type, number: a.reference_no, approved: after.status === 'Approved', by: await userName(user.id),
+      reason: after.status === 'Rejected' ? remarks : null, link: APPROVAL_LINK, entity: a.entity, entityId: a.entity_id });
   }
   return { before: approvalOut(a), after };
 }

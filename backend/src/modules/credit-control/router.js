@@ -15,6 +15,7 @@ import { sendTable } from '../documents/tabular.js';
 import * as inst from './instalments.js';
 import * as wr from './warranty.js';
 import * as lim from './limits.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { AGEING_HEADER, ageingRows, remittanceAgeing } from './remittanceAgeing.js';
 
 const { router, define } = moduleRouter('Credit Control', '/credit-control');
@@ -25,6 +26,8 @@ const readRemittance = [requireAuth, requirePermission('read:collections', 'read
 const S = 'Accounts > Credit Control';
 const tx = (fn) => withTransaction(fn);
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+const WARRANTY = '/accounts/credit-control/warranty';
+const day = (d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d || '').slice(0, 10));
 
 const planExample = { id: 'ipl_1', policyId: 'pol_1', receivableId: 'rcv_1', billNumber: 'INV-2026-00012', frequency: 'monthly', instalmentCount: 4, status: 'active',
   instalments: [{ seq: 1, dueDate: '2026-10-15', amount: 3131.25, paid: 3131.25, outstanding: 0, status: 'paid', daysPastDue: 0 }] };
@@ -102,6 +105,9 @@ define({
   handler: async (req, res) => {
     const r = await tx((db) => wr.requestExtension(db, req.params.policyId, req.body, req.user));
     await audit(req, { entity: 'premium_warranty_extension', entityId: r.id, action: 'request', after: r });
+    // decided with approve:credit-control (not the requester)
+    await notifyApprovers({ audience: 'approve:credit-control', document: 'Warranty extension', number: r.policyNumber, by: req.user.username,
+      detail: `${r.clientName ? `${r.clientName}, ` : ''}deadline ${day(r.currentDeadline)} to ${day(r.requestedDeadline)}: ${req.body.reason}`, link: WARRANTY, entity: 'premium_warranty_extension', entityId: String(r.id) });
     created(res, r, `Extension of ${r.policyNumber} to ${r.requestedDeadline} sent for approval`);
   },
 });
@@ -113,6 +119,9 @@ for (const action of ['approve', 'reject']) {
     handler: async (req, res) => {
       const r = await tx((db) => wr.decideExtension(db, req.params.id, action, req.body?.remarks, req.user));
       await audit(req, { entity: 'premium_warranty_extension', entityId: r.id, action, after: r });
+      await notifyDecision({ userId: r.requestedBy, decidedBy: req.user.id, document: 'Warranty extension', number: r.policyNumber, approved: action === 'approve', by: req.user.username,
+        reason: req.body?.remarks || null, message: action === 'approve' ? `Deadline moved to ${day(r.requestedDeadline)}; approved by ${req.user.username}` : null,
+        link: WARRANTY, entity: 'premium_warranty_extension', entityId: String(r.id) });
       ok(res, r, `Extension ${r.status}`);
     },
   });

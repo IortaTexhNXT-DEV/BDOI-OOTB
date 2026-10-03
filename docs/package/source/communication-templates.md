@@ -626,7 +626,7 @@ Messages are quoted as in the code; text in angle brackets is filled from the re
 |---|---|---|---|---|---|
 | Quotation sent to customer for approval | Users with roles in quotations.approval_notify_roles (Processing Team) | approval | Quotation sent for approval | Quotation <number> (<customer>, <premium>) was sent to the customer for approval | notification.approval_requests |
 | Customer accepts by the approval link, or staff record an acceptance | Quotation creator | task | Customer accepted quotation | The customer accepted quotation <number>; you can proceed to policy (recorded: "... (<channel>); ...") | None |
-| Quotation approved | Quotation owner | info | Quotation approved | Quotation <number> was approved and can be converted to a policy | None |
+| Quotation approved | Quotation owner (not when they approved it) | info | Quotation <number> approved | Quotation <number> was approved by <user> and can be converted to a policy | notification.approval_requests |
 
 ## Policy issue
 
@@ -639,12 +639,13 @@ Messages are quoted as in the code; text in angle brackets is filled from the re
 
 | Event | Recipient | Type | Title | Message | On / off |
 |---|---|---|---|---|---|
-| Premium payment captured on a policy, not yet verified | Accounting role users | approval | Premium payment to verify | <mode> <amount> (ref <reference>) on policy <number> | None |
+| Premium payment captured on a policy, not yet verified | Accounting role users except the user who recorded it | approval | Premium payment to verify | <user> recorded <mode> <amount> (ref <reference>) on policy <number> | notification.approval_requests |
+| Captured payment confirmed or rejected | User who recorded it | info / alert | Premium payment <reference> confirmed / rejected | Confirmed by <user> on policy <number>, receipt <OR> / Rejected by <user>: <reason> | notification.approval_requests |
 | Online payment received, failed to apply or amount differs | Link creator and roles in payments.notify_roles_on_error (Accounting) | task | Online payment received / Online payment not applied / Online payment to review | <link number>: ... (amount, target and reason) | None |
 | Collection reminder sent | Policy owner and holders of write:collections | reminder | Premium due <date> – <policy> / Premium overdue <n> day(s) – <policy> | <client>: <amount> outstanding on <bill> | None |
 | Policy issued over the client credit limit | Holders of write:collections | warning | Client credit limit exceeded | <client>: open premium <exposure> is over the credit limit <limit> by <excess> after <policy> | None |
-| Premium warranty extension requested | Holders of approve:credit-control | approval | Premium warranty extension to approve | <policy> (<client>) until <date> | None |
-| Premium warranty extension decided | Requester | info | Warranty extension approved / rejected | <policy> until <date>: <remarks> | None |
+| Premium warranty extension requested | Holders of approve:credit-control | approval | Warranty extension <policy> awaiting approval | <user> submitted <policy> (<client>, deadline <date> to <date>: <reason>) | notification.approval_requests |
+| Premium warranty extension decided | Requester | info / alert | Warranty extension <policy> approved / rejected | Deadline moved to <date>; approved by <user> / Rejected by <user>: <remarks> | notification.approval_requests |
 | Cancellation for non-payment requested | Holders of write:endorsements | action | Cancellation for non-payment requested | <policy> (<client>): <endorsement number> | None |
 
 ## Policy servicing
@@ -659,7 +660,8 @@ Messages are quoted as in the code; text in angle brackets is filled from the re
 |---|---|---|---|---|---|
 | Claim registered | Claim handler and policy owner | task | New claim <number> | Claim <number> registered on policy <number> | notification.claim_status |
 | Claim status changes | Claim handler and policy owner | info | Claim <number>: <status> | <note> or "Claim <number> is now <status>" | notification.claim_status |
-| Settlement submitted (maker-checker) | Claims role users except the submitter | approval | Settlement approval: <claim> | Settlement of <amount> on claim <claim> awaits approval | claims.settlement_maker_checker |
+| Settlement submitted (maker-checker) | Claims role users except the submitter | approval | Claim settlement <claim> awaiting approval | <user> submitted <claim> (<amount>, <settlement type>) | claims.settlement_maker_checker, notification.approval_requests |
+| Settlement approved or returned | Submitter | info / alert | Claim settlement <claim> approved / returned | Approved by <user> / Returned by <user>: <note> | notification.approval_requests |
 
 ## Renewal
 
@@ -667,8 +669,8 @@ Messages are quoted as in the code; text in angle brackets is filled from the re
 |---|---|---|---|---|---|
 | Renewal notice sent | Policy owner | reminder | <notice label>: <policy> | <notice label> sent for policy <policy> expiring <date> | None |
 | Renewal notices job (60, 30, 15 days) | Policy owner | reminder | Renewal due in <n> days | Policy <number> expires on <date> | notification.renewal_reminder |
-| Renewal terms submitted | Users with roles in renewals.approver_roles (Processing Team) | approval | Renewal approval: <policy> | Renewal <number> (<premium>) awaits approval | None |
-| Renewal approved or returned | Submitter | info | Renewal approved / returned: <policy> | <note> or "Renewal <number> was approved / returned" | None |
+| Renewal terms submitted | Users with roles in renewals.approver_roles (Processing Team) except the submitter | approval | Renewal <number> awaiting approval | <user> submitted <number> (policy <policy>, <premium>) | notification.approval_requests |
+| Renewal approved or returned | Submitter (else the policy owner) | info / alert | Renewal <number> approved / returned | Approved / Returned by <user>: <note> | notification.approval_requests |
 | Renewal completed | Policy owner | info | Policy renewed: <policy> | New term <new policy> from <inception> to <expiry> | None |
 | Renewal lapsed (manual or pipeline job) | Policy owner | alert | Policy lapsed: <policy> | <reason> | None |
 
@@ -676,31 +678,57 @@ Messages are quoted as in the code; text in angle brackets is filled from the re
 
 | Event | Recipient | Type | Title | Message | On / off |
 |---|---|---|---|---|---|
-| Remittances submitted for approval | Holders of write:remittance | approval | Remittances awaiting approval | <n> remittance(s) in batch <batch> need approval | None |
-| Remittance, settlement or transfer approved or rejected | Initiator | info | <transaction type> approved / rejected | <reference> was approved / rejected by <user> | None |
-| Commission debit note submitted | Holders of write:remittance | approval | Commission debit note awaiting approval | <DN number> to <insurer> for <amount> needs approval | None |
-| Commission debit note decided | Creator | info | Debit note approved / rejected | <DN number> to <insurer> was approved / rejected: <reason> | None |
-| Incentive calculation submitted | Holders of write:incentive | approval | Incentive calculation awaiting approval | <batch> (<period>) needs approval | None |
-| Incentive batch decided | Submitter | info | Incentive batch approved / rejected | <batch> (<period>) | None |
+| Remittances submitted for approval | Holders of write:remittance | approval | Remittance batch <batch> awaiting approval | <user> submitted <n> remittance(s) in batch <batch> (<total>) | notification.approval_requests |
+| Settlement submitted, adjustment needing approval, electronic transfer | Holders of write:remittance | approval | Settlement / Adjustment / Electronic transfer <reference> awaiting approval | <user> submitted <reference> (<description>, <amount>) | notification.approval_requests |
+| Remittance, settlement, adjustment or transfer approved or rejected | Initiator | info / alert | <transaction type> <reference> approved / rejected | Approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
+| Commission debit note submitted | Holders of write:remittance | approval | Commission debit note <DN number> awaiting approval | <user> submitted <DN number> (<insurer>, <amount>) | notification.approval_requests |
+| Commission debit note decided | Creator | info / alert | Commission debit note <DN number> approved / rejected | Approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
+| Incentive calculation submitted | Holders of write:incentive | approval | Incentive calculation <batch> awaiting approval | <user> submitted <batch> (period <period>) | notification.approval_requests |
+| Incentive batch decided | Submitter | info / alert | Incentive calculation <batch> approved / rejected | Approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
+| Commission lines eligible (marked by a user, or premium fully collected) | Holders of write:commission | approval | Commission payout <referrer> awaiting approval | <user> marked lines eligible / Premium of <policy> fully collected: <n> line(s) of <referrer> awaiting approval (<amount>) | notification.approval_requests |
+| Commission lines approved | User who marked them eligible | info | Commission payout <referrer> approved | Approved by <user> | notification.approval_requests |
 
 ## Reinsurance
 
 | Event | Recipient | Type | Title | Message | On / off |
 |---|---|---|---|---|---|
-| Treaty submitted for approval | Holders of write:reinsurance | approval | Treaty awaiting approval | <number> <name> needs approval | None |
-| Treaty decided | Submitter | info | Treaty approved / rejected | <number> <name> | None |
+| Treaty created or changed (reinsurance.treaty_requires_approval) | Holders of write:reinsurance | approval | Treaty <number> awaiting approval | <user> submitted <number> (<name>) | notification.approval_requests |
+| Treaty decided | Submitter | info / alert | Treaty <number> approved / rejected | Approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
 
 ## Finance and period end
 
 | Event | Recipient | Type | Title | Message | On / off |
 |---|---|---|---|---|---|
-| Journal voucher submitted for approval | Holders of write:journal-vouchers | approval | Journal voucher <number> awaiting approval | <user> submitted <number> (<amount>) | None |
-| Journal voucher approved | Creator | info | Journal voucher <number> approved | Approved and posted by <user> | None |
-| Journal voucher rejected | Creator | alert | Journal voucher <number> rejected | <reason> | None |
-| Petty cash request submitted | Holders of write:disbursements | approval | Petty cash request <number> awaiting approval | <requester>: <amount> | None |
-| Petty cash request decided | Creator | info | Petty cash request <number> approved / rejected | <reason> or "By <user>" | None |
+| Journal voucher submitted for approval (manual, reversal, correction) | Holders of write:journal-vouchers | approval | Journal voucher <number> awaiting approval | <user> submitted <number> (<amount>) | notification.approval_requests |
+| Bank adjustment journal awaiting approval; year-end adjustment journal (period 13) | Holders of write:journal-vouchers | approval | Journal voucher <number> awaiting approval | <user> submitted <number> (bank adjustment: <type>, <amount> / year-end adjustment, period <period>) | notification.approval_requests |
+| Journal voucher approved (Journal Voucher, accounting queue, bank adjustment) | Creator | info | Journal voucher <number> approved | Approved and posted by <user> | notification.approval_requests |
+| Journal voucher rejected | Creator | alert | Journal voucher <number> rejected | Rejected by <user>: <reason> | notification.approval_requests |
+| Payment voucher submitted for approval (status For approval, agent payout vouchers) | Holders of write:disbursements | approval | Payment voucher <number> awaiting approval | <user> submitted <number> (<payee>, <amount>) | notification.approval_requests |
+| Payment voucher approved (cheque approved, agent payout approved), or sent back to draft / cancelled while awaiting approval | Creator | info / alert | Payment voucher <number> approved / rejected / cancelled | Approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
+| Cheque issued (Pending) | Holders of write:disbursements | approval | Cheque <number> awaiting approval | <user> submitted <number> (<payee>, <amount>) | notification.approval_requests |
+| Cheque approved or cancelled while Pending | Creator | info / alert | Cheque <number> approved / cancelled | Approved / Cancelled by <user> | notification.approval_requests |
+| Petty cash request submitted | Holders of write:disbursements | approval | Petty cash request <number> awaiting approval | <user> submitted <number> (<requester>, <amount>) | notification.approval_requests |
+| Petty cash request decided | Creator | info / alert | Petty cash request <number> approved / rejected | Approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
+| Posting rule or account determination change requested (accounting.configuration_maker_checker) | Holders of approve:posting-rules | approval | Configuration change <id> awaiting approval | <user> requested <kind>: <target> (<note>) | notification.approval_requests |
+| Configuration change decided | Requester | info / alert | Configuration change <id> approved / rejected | <kind>: <target> approved by <user> and in effect / Rejected by <user>: <reason> | notification.approval_requests |
+| Insurer reconciliation submitted | Holders of approve:insurer-reconciliation | approval | Insurer reconciliation <number> awaiting approval | <user> submitted <number> (<insurer>, <period>, paid <amount>) | notification.approval_requests |
+| Insurer reconciliation decided | Submitter | info / alert | Insurer reconciliation <number> approved / rejected | Approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
+| Bank reconciliation prepared | Holders of approve:bank-reconciliation | approval | Bank reconciliation <number> awaiting approval | <user> submitted <number> (<bank account>, period <period>, bank balance <amount>) | notification.approval_requests |
+| Bank reconciliation approved, or reopened (rejected when it was prepared) | Preparer | info / alert | Bank reconciliation <number> approved / rejected / reopened | Approved by <user> / Rejected by <user>: <remarks> | notification.approval_requests |
+| Month-end close submitted (accounting.period_close_requires_approval) | Holders of approve:period-end | approval | Month-end close <number> awaiting approval | <user> submitted <number>: close / soft close of period <period> | notification.approval_requests |
+| Month-end close approved or rejected | Submitter | info / alert | Month-end close <number> approved / rejected | Period <period> closed; approved by <user> / Rejected by <user>: <reason> | notification.approval_requests |
 | Petty cash fund below minimum | Custodian, holders of write:disbursements | alert | Petty cash <code> below minimum | Available <amount>; minimum cashbox <amount>. Replenish the fund. | None |
 | Month-end reminder job | Holders of write:period-end (high priority) | reminder | Month-end close: <period> ends in <n> day(s) / Month-end close: <period> is still open | Accounting period <period> ends on <date>. Post pending journals and prepare the month-end close run. / ... ended on <date> and is not closed yet. | Job month-end-reminder (off by default) |
+
+## Access control
+
+| Event | Recipient | Type | Title | Message | On / off |
+|---|---|---|---|---|---|
+| Authority limit proposed | Holders of approve:access-control | approval | Authority limit #<id> awaiting approval | <user> proposed <transaction type> for <role or user>: <limit> (<remarks>) | notification.approval_requests |
+| Authority limit decided | Proposer | info / alert | Authority limit #<id> approved / rejected | <transaction type> for <role or user>: <limit>, approved by <user> and in effect / Rejected by <user>: <note> | notification.approval_requests |
+| Access review started | Holders of write:access-control | approval | Access review <name> awaiting decisions | <user> started <name>: <n> user(s) to keep or revoke by <due date> | notification.approval_requests |
+
+Segregation-of-duties rules and delegations take effect when saved (no approval step). Instalment plans have no approval; a credit limit exception is reported to holders of write:collections, who acknowledge it. Endorsements are approved by the customer, not by a second user.
 
 # Printed documents
 
@@ -738,7 +766,7 @@ Seeded wording used on documents:
 |---|---|---|
 | `notification.email_enabled` | false | No e-mail leaves the system while off (all e-mails stay queued). |
 | `notification.from_address` | BrokerVerse <connect@iortatechnxt.com> | Sender of every e-mail. |
-| `notification.approval_requests` | true | Only the "Quotation sent for approval" notification to the Processing Team reads it. |
+| `notification.approval_requests` | true | Every approval notification: the requests to the approvers (type approval) and the decisions sent to the makers, in every maker-checker flow listed above. |
 | `notification.claim_status` | true | Claim registration and status notifications to the handler and owner. |
 | `notification.renewal_reminder` | true | The Renewal notices job (in-app reminders 60, 30, 15 days before expiry). |
 | `claims.pla_enabled` | true | Preliminary Loss Advice e-mail on claim registration. |
@@ -759,10 +787,8 @@ Seeded wording used on documents:
 | 2 | No e-mail is sent to the client for the official receipt, the billing statement (invoice / SOA), the policy schedule at issue, or the claim acknowledgement. The documents exist as PDFs (see Printed documents). The "Policy issued" e-mail is sent only from the coverage detailed view and carries no schedule. | Clients get these documents only when staff send them by hand. | Add e-mail templates for OR, billing statement, policy schedule and claim acknowledgement. |
 | 3 | No commission statement e-mail to agents or referrers; the Broker Commission Statement and the incentive statement are on screen only. | Agents receive statements outside the system. | Add a commission statement template, or schedule the report per agent. |
 | 4 | Remittance notification templates NTF-001 (trigger "Due Date - 5 days") and NTF-002 (SMS, trigger "Payment Received") are not automated, and SMS is not sent. | Templates suggest automation that does not exist. | Remove the triggers from the templates or implement them. |
-| 5 | No approval-request notification for payment vouchers, posting rule and configuration approvals, access-control requests, commission payouts, insurer reconciliations, bank reconciliations and month-end close runs. | Approvers must check the screens. | Add notify calls to these approval flows. |
-| 6 | `notification.approval_requests` only switches the quotation notification; other approval notifications cannot be switched off. | The setting name suggests more. | Rename it or apply it to all approval notifications. |
-| 7 | No welcome or credentials e-mail when a user is created or provisioned; initial passwords are handed over outside the system. | Manual step at user creation. | Keep the handover procedure in the security policy. |
-| 8 | The payment reminder body says the premium "is due on" also when the bill is overdue. | Wording. | Add an overdue variant using `{{daysPastDue}}`. |
-| 9 | `claims.pla_default_recipient` is seeded with a placeholder address (claims@brokerverse.local). | PLAs for insurers without e-mail go nowhere. | Set the broker's claims mailbox before go-live. |
-| 10 | Remittance bill subject reads "Statement of account {{billNumber}}" and the body has no greeting or company name. | Plain message to agents and insurers. | Review the wording with the broker. |
-| 11 | No e-mail or notification when a scheduled job fails (see the Schedules and Batch Jobs document). | Failures can go unnoticed. | Add an alert. |
+| 5 | No welcome or credentials e-mail when a user is created or provisioned; initial passwords are handed over outside the system. | Manual step at user creation. | Keep the handover procedure in the security policy. |
+| 6 | The payment reminder body says the premium "is due on" also when the bill is overdue. | Wording. | Add an overdue variant using `{{daysPastDue}}`. |
+| 7 | `claims.pla_default_recipient` is seeded with a placeholder address (claims@brokerverse.local). | PLAs for insurers without e-mail go nowhere. | Set the broker's claims mailbox before go-live. |
+| 8 | Remittance bill subject reads "Statement of account {{billNumber}}" and the body has no greeting or company name. | Plain message to agents and insurers. | Review the wording with the broker. |
+| 9 | No e-mail or notification when a scheduled job fails (see the Schedules and Batch Jobs document). | Failures can go unnoticed. | Add an alert. |

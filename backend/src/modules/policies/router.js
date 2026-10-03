@@ -6,7 +6,7 @@ import { audit } from '../../lib/audit.js';
 import { paging } from '../../lib/respond.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { usersWithRoles } from '../documents/common.js';
-import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as payments from './payments.js';
 import { config } from '../../config.js';
 import { badRequest, forbidden } from '../../lib/errors.js';
@@ -57,6 +57,11 @@ define({
   },
 });
 const canConfirmPayments = [requireAuth, requirePermission('write:receipts')];
+/** A captured payment confirmed or rejected by Accounting: the user who recorded it is told. */
+const tellPaymentMaker = (policy, capture, req, confirmed) => notifyDecision({ userId: capture?.submittedById, decidedBy: req.user.id, document: 'Premium payment',
+  number: capture?.referenceNo || capture?.arNumber || policy.policy_number, approved: confirmed, status: confirmed ? 'confirmed' : 'rejected', by: req.user.username,
+  reason: confirmed ? null : req.body.reason, message: confirmed ? `Confirmed by ${req.user.username} on policy ${policy.policy_number}${capture?.receiptNumber ? `, receipt ${capture.receiptNumber}` : ''}` : null,
+  link: `/agent/policydetail/${policy.id}`, entity: 'policy', entityId: policy.id });
 const captureExample = { id: 'pp_1', policyId: 'pol_1', policyNumber: 'POL-2026-00001', receivableId: 'rcv_1', billNumber: 'INV-2026-00001', amount: 11862.5, paymentMode: 'bank-transfer', referenceNo: 'BDO-778812', paymentDate: '2026-09-28', status: 'submitted', receiptNumber: null };
 define({
   method: 'GET', path: '/payment-captures', summary: 'Premium payments captured on policies, for finance verification (status submitted | confirmed | rejected | all)', screen: `${SCREEN} > Payment (finance verification)`,
@@ -84,10 +89,10 @@ define({
     const r = await withTransaction((db) => payments.capturePayment(db, policy, req.body, req.user));
     await audit(req, { entity: 'policy', entityId: policy.id, action: r.option === 'pay-later' ? 'pay-later' : 'payment-capture', after: { ...(r.capture || {}), receiptNumber: r.receipt?.receiptNumber } });
     if (r.capture && !r.posted) {
-      for (const u of await usersWithRoles(['accounting'])) {
-        await notify({ userId: u.id, type: 'approval', title: 'Premium payment to verify', message: `${r.capture.paymentModeLabel} ${await formatMoney(r.capture.amount)} (ref ${r.capture.referenceNo || '-'}) on policy ${policy.policy_number}`,
-          link: `/agent/policy/paymentoptions/${policy.id}`, entity: 'policy', entityId: policy.id });
-      }
+      // verified by Accounting (the confirm route also accepts other finance permissions; the role is who is asked)
+      await notifyApprovers({ users: (await usersWithRoles(['accounting'])).map((u) => u.id).filter((id) => id !== req.user.id), title: 'Premium payment to verify',
+        message: `${req.user.username} recorded ${r.capture.paymentModeLabel} ${await formatMoney(r.capture.amount)} (ref ${r.capture.referenceNo || '-'}) on policy ${policy.policy_number}`,
+        link: `/agent/policy/paymentoptions/${policy.id}`, entity: 'policy', entityId: policy.id });
     }
     const message = r.option === 'pay-later' ? 'Pay later recorded: the bill stays open' : r.posted ? `Payment confirmed, receipt ${r.receipt.receiptNumber}` : 'Payment recorded; Accounting will verify it';
     res.status(r.capture ? 201 : 200).json({ success: true, message, data: r });
@@ -100,6 +105,7 @@ define({
     const policy = await svc.getPolicyRow(req.params.id);
     const r = await withTransaction((db) => payments.confirmCapture(db, policy, req.params.paymentId, req.user));
     await audit(req, { entity: 'policy', entityId: policy.id, action: 'payment-confirm', after: { paymentId: req.params.paymentId, receiptNumber: r.receipt.receiptNumber } });
+    await tellPaymentMaker(policy, r.capture, req, true);
     res.json({ success: true, message: `Payment confirmed, receipt ${r.receipt.receiptNumber}`, data: r });
   },
 });
@@ -110,6 +116,7 @@ define({
     const policy = await svc.getPolicyRow(req.params.id);
     const r = await withTransaction((db) => payments.rejectCapture(db, policy, req.params.paymentId, req.body.reason, req.user));
     await audit(req, { entity: 'policy', entityId: policy.id, action: 'payment-reject', after: { paymentId: req.params.paymentId, reason: req.body.reason } });
+    await tellPaymentMaker(policy, r.capture, req, false);
     res.json({ success: true, message: 'Payment rejected', data: r });
   },
 });

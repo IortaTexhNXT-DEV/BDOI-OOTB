@@ -9,6 +9,7 @@ import { formatMoney } from '../../lib/money.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { lobOf, num } from '../documents/common.js';
 import { renderTemplate } from '../claims/docs.js';
@@ -474,7 +475,8 @@ export async function submitForApproval(id, user, note) {
   const roles = (await getSetting('renewals.approver_roles', ['processing'])) || [];
   const approvers = new Set();
   for (const role of roles) for (const u of await usersWithRole(role)) if (u.id !== user.id) approvers.add(u.id);
-  for (const a of approvers) await notify({ userId: a, type: 'approval', title: `Renewal approval: ${r.policy_number}`, message: `Renewal ${r.renewal_number} (${await formatMoney(r.premium_new)}) awaits approval`, link: '/renewal/negotiations', entity: 'renewal', entityId: r.id });
+  await notifyApprovers({ users: [...approvers], document: 'Renewal', number: r.renewal_number, by: user.username, detail: `policy ${r.policy_number}, ${await formatMoney(r.premium_new)}`,
+    link: '/renewal/negotiations', entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
 }
 
@@ -488,7 +490,8 @@ export async function decide(id, user, { decision, note }) {
     [r.id, approve ? 'approved' : 'quoted', approve ? user.id : null, approve, note || null]);
   await activity(null, r.id, user, { type: approve ? 'Approved' : 'Returned', description: note || (approve ? 'Renewal terms approved' : 'Renewal terms returned for revision') });
   const target = r.submitted_by || r.policy_owner;
-  if (target) await notify({ userId: target, type: 'info', title: `Renewal ${approve ? 'approved' : 'returned'}: ${r.policy_number}`, message: note || `Renewal ${r.renewal_number} was ${approve ? 'approved' : 'returned'}`, link: '/renewal/queue', entity: 'renewal', entityId: r.id });
+  await notifyDecision({ userId: target, decidedBy: user.id, document: 'Renewal', number: r.renewal_number, approved: approve, status: approve ? 'approved' : 'returned', by: user.username,
+    reason: note || null, link: '/renewal/queue', entity: 'renewal', entityId: r.id });
   return { before: r, renewal: await getRenewal(r.id) };
 }
 

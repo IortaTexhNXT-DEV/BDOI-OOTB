@@ -12,6 +12,14 @@ const { router, define } = moduleRouter('Commission', '/commission');
 const read = [requireAuth, requirePermission('read:commission', 'read:quotations')];
 const write = [requireAuth, requirePermission('write:commission')];
 const SCREEN = 'Commission > Agents/Referrer Accounts';
+
+/** Lines marked eligible go to the approvers (write:commission); approved lines are reported to whoever made them eligible. */
+async function notifyPayout(req, action, makers) {
+  try {
+    if (action === 'mark-eligible') await svc.askPayoutApproval(pool, req.params.id, { by: req.user.username });
+    else if (action === 'approve') await svc.tellPayoutApproved(pool, req.params.id, makers, req.user);
+  } catch { /* notifications never fail the action */ }
+}
 const lineExample = { id: 'cm_1', policyNo: 'POL-2026-00001', productInsurer: 'Motor · Malayan', cycle: 'Sep 2026', comsub: 1200, comsubRateLabel: '8%', wht: 60, net: 1140, status: 'Eligible', lifecycle: { accruedAt: '02 Sep', eligibleAt: '10 Sep', approvedAt: null, paidAt: null } };
 const accountExample = { referrer: { id: 'ref-dcruz', name: 'Juan Dela Cruz', type: 'Agent', level: 'L1', whtApplicable: true }, summary: { cycleLabel: 'Sep 2026', dueThisCycle: 1140, upcoming: 0, paidToDate: 0 }, currentCycle: { label: 'Sep 2026', totalNet: 1140, lines: [lineExample] }, futureCycles: { totalNet: 0, lines: [] }, past: { totalNet: 0, lines: [] }, actions: { approveCount: 1, generatePayoutCount: 0, markEligibleCount: 0 } };
 
@@ -75,8 +83,10 @@ for (const action of ['approve', 'mark-eligible']) {
     method: 'POST', path: `/referrer-accounts/:id/${action}`, summary: action === 'approve' ? 'Approve every Eligible line (maker-checker; posts comsub accrual)' : 'Mark Accrued lines with fully collected premium as Eligible',
     screen: SCREEN, middleware: write, request: {}, response: { success: true, data: accountExample },
     handler: async (req, res) => {
+      const makers = action === 'approve' ? await svc.eligibleMakers(pool, req.params.id) : [];
       const data = await withTransaction((db) => svc.accountAction(db, req.params.id, action, req.user));
       await audit(req, { entity: 'commission_referrer', entityId: req.params.id, action });
+      await notifyPayout(req, action, makers);
       ok(res, data, action === 'approve' ? 'Lines approved' : 'Lines marked eligible');
     },
   });
@@ -143,8 +153,10 @@ for (const [action, summary] of Object.entries(LINE_ACTIONS)) {
     middleware: [...write, validate(action === 'rate' ? z.object({ comsubPct: z.coerce.number().min(0).max(100).optional(), comsubFixed: z.coerce.number().min(0).optional() }) : z.object({}).passthrough())],
     request: action === 'rate' ? { comsubPct: 7.5, comsubFixed: 0 } : {}, response: { success: true, data: { account: accountExample, line: lineExample } },
     handler: async (req, res) => {
+      const makers = action === 'approve' ? await svc.eligibleMakers(pool, req.params.id, req.params.lineId) : [];
       const data = await withTransaction((db) => svc.lineAction(db, req.params.id, req.params.lineId, action, req.user, req.body));
       await audit(req, { entity: 'commission_line', entityId: req.params.lineId, action, after: { ...req.body, status: data.line.status } });
+      await notifyPayout(req, action, makers);
       ok(res, data, `Line ${action} done`);
     },
   });

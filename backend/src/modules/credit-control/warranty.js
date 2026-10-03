@@ -127,9 +127,7 @@ export async function requestExtension(db, policyRef, b, user) {
   const x = (await db.query(`INSERT INTO premium_warranty_extensions(policy_id, current_deadline, requested_deadline, reason, requested_by) VALUES ($1,$2,$3,$4,$5) RETURNING id`,
     [m.policyId, m.deadline, until, String(b.reason).trim(), user?.id ?? null])).rows[0];
   await logAction(db, m.policyId, 'extension-requested', { notes: `Until ${until}: ${String(b.reason).trim()}`, extensionId: x.id, user });
-  await notify({ audience: 'approve:credit-control', type: 'approval', title: 'Premium warranty extension to approve', message: `${m.policyNumber} (${m.clientName || ''}) until ${until}`,
-    link: '/accounts/credit-control/warranty', entity: 'premium_warranty_extension', entityId: String(x.id) });
-  return { id: Number(x.id), policyNumber: m.policyNumber, currentDeadline: m.deadline, requestedDeadline: until, status: 'pending' };
+  return { id: Number(x.id), policyNumber: m.policyNumber, clientName: m.clientName || null, currentDeadline: m.deadline, requestedDeadline: until, status: 'pending' };
 }
 
 /** Approve or reject a pending extension (approve:credit-control; not the requester). */
@@ -142,11 +140,7 @@ export async function decideExtension(db, id, action, remarks, user) {
   const status = action === 'approve' ? 'approved' : 'rejected';
   await db.query('UPDATE premium_warranty_extensions SET status = $2, decided_by = $3, decided_at = now(), decision_remarks = $4 WHERE id = $1', [x.id, status, user?.id ?? null, remarks || null]);
   await logAction(db, x.policy_id, action === 'approve' ? 'extension-approved' : 'extension-rejected', { notes: remarks || null, extensionId: x.id, user });
-  if (x.requested_by) {
-    await notify({ userId: x.requested_by, type: 'info', title: `Warranty extension ${status}`, message: `${x.policy_number} until ${x.requested_deadline}${remarks ? `: ${remarks}` : ''}`,
-      link: '/accounts/credit-control/warranty', entity: 'premium_warranty_extension', entityId: String(x.id) });
-  }
-  return { id: Number(x.id), policyNumber: x.policy_number, requestedDeadline: x.requested_deadline, status };
+  return { id: Number(x.id), policyNumber: x.policy_number, requestedDeadline: x.requested_deadline, status, requestedBy: x.requested_by };
 }
 
 /** Pending extension requests (approval queue). */
