@@ -16,7 +16,6 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('quotations.approval_notify_roles', '["processing"]', 'quotations', 'Roles notified when a quotation is sent for approval', 'json'),
  ('workflow.quote_maker_checker', 'true', 'quotations', 'Quotation approval must be done by a different user than the creator', 'boolean'),
  ('premium.default_rates', '{"bodilyInjuryRate":1,"propertyDamageRate":1,"APPARate":0.5}', 'premium', 'Default cover rates (% of sum insured) when the quote gives none', 'json'),
- ('premium.taxes_by_lob', '{"MOTOR":["vat","dst","lgt"],"FIRE":["vat","dst","lgt","fst"],"IAR":["vat","dst","lgt","fst"],"DEFAULT":["vat","dst","lgt"]}', 'premium', 'Premium taxes applied per line of business', 'json'),
  ('policies.payment_statuses', '["Pending","Reviewing","Partial","Completed","Refunded"]', 'policies', 'Policy payment statuses', 'json'),
  ('policies.default_term_months', '12', 'policies', 'Default policy term (months) when no expiry is given', 'number'),
  ('receivables.due_days', '30', 'policies', 'Days from inception to the premium bill due date', 'number'),

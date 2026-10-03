@@ -80,7 +80,7 @@
     "key": "currency.default",
     "value": "PHP",
     "group": "currency",
-    "label": "Default currency"
+    "label": "Display currency: labels amounts on screens and documents (the ledger is kept in the base currency of Master > Finance > Currency)"
   },
   {
     "key": "currency.symbol",
@@ -99,35 +99,28 @@
     "key": "tax.vat_rate",
     "value": 0.12,
     "group": "tax",
-    "label": "VAT rate",
+    "label": "Fallback VAT rate: used only when Premium Taxes & LGU Rates has no VAT rule",
     "type": "number"
   },
   {
     "key": "tax.dst_rate",
     "value": 0.125,
     "group": "tax",
-    "label": "Documentary stamp tax rate",
+    "label": "Fallback documentary stamp tax rate: used only when Premium Taxes & LGU Rates has no DST rule",
     "type": "number"
   },
   {
     "key": "tax.lgt_rate",
     "value": 0.0075,
     "group": "tax",
-    "label": "Local government tax rate",
+    "label": "Fallback local government tax rate: used only when Premium Taxes & LGU Rates has no LGT rule",
     "type": "number"
   },
   {
     "key": "tax.fst_rate",
     "value": 0.02,
     "group": "tax",
-    "label": "Fire service tax rate",
-    "type": "number"
-  },
-  {
-    "key": "tax.withholding_rate",
-    "value": 0.05,
-    "group": "tax",
-    "label": "Withholding tax on commission",
+    "label": "Fallback fire service tax rate (fire lines): used only when Premium Taxes & LGU Rates has no FST rule",
     "type": "number"
   },
   {
@@ -355,25 +348,11 @@
     "type": "boolean"
   },
   {
-    "key": "direct_bill.commission_vat_rate",
-    "value": 0.12,
-    "group": "direct_bill",
-    "label": "VAT rate on direct-bill commission",
-    "type": "number"
-  },
-  {
     "key": "direct_bill.commission_vat_inclusive",
     "value": false,
     "group": "direct_bill",
     "label": "Commission amounts already include VAT (VAT is extracted) instead of VAT being added on top",
     "type": "boolean"
-  },
-  {
-    "key": "direct_bill.insurer_ewt_rate",
-    "value": 0.1,
-    "group": "direct_bill",
-    "label": "Expanded withholding tax the insurer deducts from the commission (creditable, BIR Form 2307)",
-    "type": "number"
   },
   {
     "key": "direct_bill.debit_note_due_days",

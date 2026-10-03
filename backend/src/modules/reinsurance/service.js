@@ -4,6 +4,7 @@
  * bordereaux, reconciliation, analytics and reports.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
@@ -184,7 +185,7 @@ export async function createTreaty(b, user) {
       reinsurer_ids, terms, currency, retention, commission_rate, created_by, updated_by, submitted_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$17,$17) RETURNING id`,
   [b.name, rs.map((x) => x.name).join(', '), lowest, b.type, c.capacity, c.share, from, to, status, number, b.lineOfBusiness, JSON.stringify(b.reinsurers.map(String)), JSON.stringify(c.terms),
-    b.currency || (await getSetting('currency.default', 'PHP')), c.retention, c.commission, user.id]);
+    b.currency || (await baseCurrency()), c.retention, c.commission, user.id]);
   if (approval) await notify({ audience: 'write:reinsurance', type: 'approval', title: 'Treaty awaiting approval', message: `${number} ${b.name} needs approval`, link: '/master/reinsurance/treaty', entity: 'treaty', entityId: r.id });
   return getTreaty(r.id);
 }

@@ -77,7 +77,7 @@ define({
   handler: async (req, res) => res.json({ success: true, data: await svc.auditTrail(req.params.id, req.query.sort) }),
 });
 define({
-  method: 'POST', path: '/calculate-premium', summary: 'Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission) from rates in settings and the coverages master', screen: `${SCREEN} > Coverage details / Order summary`,
+  method: 'POST', path: '/calculate-premium', summary: 'Premium breakdown (cover premiums, VAT, DST, LGT, FST, gross, commission): cover rates from settings and the coverages master, taxes from Premium Taxes & LGU Rates', screen: `${SCREEN} > Coverage details / Order summary`,
   middleware: canRead, request: { productType: 'Motor', lossAndDamageCoverage: 1000000, lossAndDamageCoverageRate: 1.5, actsOfNatureRate: 0.5, bodilyInjury: 200000, propertyDamage: 200000, APPAtotalCoverage: 250000, discount: 0 },
   response: { success: true, data: { netPremium: 26250, valueAddedTax: 3150, documentaryStampTax: 3281.25, localGovernmentTax: 196.88, grossPremium: 32878.13 } },
   handler: async (req, res) => res.json({ success: true, data: await premiumBreakdown(req.body || {}) }),

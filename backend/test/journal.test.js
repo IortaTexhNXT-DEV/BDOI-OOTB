@@ -40,11 +40,16 @@ describe('journal vouchers', () => {
     expect((await ctx.as('checker')('post', `/journal-vouchers/${jv.id}/approve`)).status).toBe(409);
   });
 
-  it('foreign currency lines convert at the master rate; unbalanced or unknown accounts are rejected', async () => {
-    const usd = await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV05', entries: [
-      { mainAccount: '4401006', entryType: 'Debit', currencyCode: 'USD', foreignAmount: 177 }, { mainAccount: '2206001', entryType: 'Credit', currencyCode: 'USD', foreignAmount: 177 }] });
+  // Rates come from the dated Exchange Rate master (sample USD 56.50 effective 1-30 Sep 2026), no longer from the
+  // Currency master's rate (USD 0.0177 per peso): 177 USD on 15 Sep 2026 = 10,000.50 (was 177 / 0.0177 = 10,000).
+  it('foreign currency lines convert at the dated Exchange Rate master rate of the voucher date; unbalanced or unknown accounts are rejected', async () => {
+    const usdLines = [{ mainAccount: '4401006', entryType: 'Debit', currencyCode: 'USD', foreignAmount: 177 }, { mainAccount: '2206001', entryType: 'Credit', currencyCode: 'USD', foreignAmount: 177 }];
+    const usd = await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV05', date: '2026-09-15', entries: usdLines });
     expect(usd.status).toBe(201);
-    expect(usd.body.data.totalDebit).toBe(10000);
+    expect(usd.body.data.totalDebit).toBe(10000.5);
+    const noRate = await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV05', date: '2026-08-15', entries: usdLines });
+    expect(noRate.status).toBe(400);
+    expect(noRate.body.message).toMatch(/No exchange rate from USD to PHP in force on 2026-08-15/);
     expect((await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV01', entries: [entries()[0], { ...entries()[1], foreignAmount: 100 }] })).status).toBe(400);
     expect((await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV01', entries: [entries()[0], { ...entries()[1], mainAccount: '9999999' }] })).status).toBe(400);
     expect((await ctx.as('maker')('post', '/journal-vouchers').send({ transactionCode: 'JV01', entries: [entries()[0]] })).status).toBe(400);

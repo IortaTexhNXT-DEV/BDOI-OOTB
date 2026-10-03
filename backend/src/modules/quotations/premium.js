@@ -4,14 +4,16 @@
  * taxes and fees, added to the gross outside the taxable net premium) and Auto
  * Passenger PA is limit per person x seats x rate (motorTariff.js); flat BI / PD premiums come from the coverages master
  * when an id is given; net premium = sum of cover premiums (Fire / IAR use the premium details they send);
- * taxes (VAT, DST, LGT, FST) use app_settings rates and the per-LOB tax set; gross = net + taxes + others - discount.
+ * taxes (VAT, DST, LGT, FST, premium tax, other charges) come from the premium tax and charge engine (Master > Premium
+ * Taxes & LGU Rates, premium-charges/service.js#chargesFor); gross = net + taxes + others - discount.
  */
 import { one } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { getSetting } from '../../lib/settings.js';
 import { num, round2, lobOf } from '../documents/common.js';
 import { motorFixedCovers } from './motorTariff.js';
 import { resolveCommissionRate } from '../commission-rates/resolve.js';
-import { engineOn, quotationCharges } from '../premium-charges/service.js';
+import { quotationCharges } from '../premium-charges/service.js';
 
 const RATE_COVERS = [
   // [premium field, sum-insured field, rate field, default-rate key]
@@ -42,12 +44,15 @@ async function coverPremiums(v) {
   return { premiums: out, amounts };
 }
 
-/** Tax rates and which taxes apply to the LOB (premium.taxes_by_lob in app_settings). */
-export async function taxRates(lob) {
-  const byLob = await getSetting('premium.taxes_by_lob', {});
-  const apply = byLob[lob] || byLob.DEFAULT || ['vat', 'dst', 'lgt'];
-  const rate = async (k) => (apply.includes(k) ? Number(await getSetting(`tax.${k}_rate`, 0)) : 0);
-  return { valueAddedTax: await rate('vat'), documentaryStampTax: await rate('dst'), localGovernmentTax: await rate('lgt'), fireServiceTax: await rate('fst') };
+/**
+ * Effective tax rates (fractions) of a line of business from the charge engine, priced on a nominal premium:
+ * { valueAddedTax, documentaryStampTax, localGovernmentTax, fireServiceTax }. For screens and callers that need rates
+ * rather than amounts; amounts are always computed with chargesFor() on the actual premium.
+ */
+export async function taxRates(lob, { productId = null } = {}) {
+  const NOMINAL = 1000000;
+  const c = await quotationCharges({ productId }, NOMINAL, lob);
+  return Object.fromEntries(Object.entries(c.tax).map(([k, x]) => [k, Math.round((x / NOMINAL) * 1e6) / 1e6]));
 }
 
 /**
@@ -91,19 +96,13 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   const ncdPct = num(v.ncdPercent);
   const ncd = ncdPct ? round2((net * ncdPct) / 100) : num(v.NCD);
   net = round2(net - (ncdPct ? ncd : 0));
-  let rates = await taxRates(lob);
-  let tax = Object.fromEntries(Object.entries(rates).map(([k, r]) => [k, round2(net * r)]));
-  let others = round2(num(v.accountPremiumOthers));
-  // Premium tax and charge engine (premium-charges module): LGU rate, DST per P4.00, FST on property lines, premium tax
-  // regime of the product. Used when the setting is on or the quotation was priced from a comparison / package.
-  let charges = null;
-  if (await engineOn(v)) {
-    const c = await quotationCharges(v, net, lob);
-    tax = c.tax;
-    others = round2(others + c.others);
-    charges = c.charges;
-    rates = Object.fromEntries(Object.entries(tax).map(([k, x]) => [k, net ? Math.round((x / net) * 1e6) / 1e6 : 0]));
-  }
+  // Premium tax and charge engine (premium-charges module): VAT by the product's tax regime, DST, FST on fire / property
+  // lines, LGT at the LGU rate of the location (else the LGT rule rate), premium tax and other charges.
+  const c = await quotationCharges(v, net, lob);
+  const tax = c.tax;
+  const others = round2(round2(num(v.accountPremiumOthers)) + c.others);
+  const charges = c.charges;
+  const rates = net ? Object.fromEntries(Object.entries(tax).map(([k, x]) => [k, Math.round((x / net) * 1e6) / 1e6])) : await taxRates(lob, { productId: v.productId || null });
   // CTPL is the tariff amount and is never discounted: a discount reduces at most the rest of the premium
   const discountable = round2(net + tax.valueAddedTax + tax.documentaryStampTax + tax.localGovernmentTax + tax.fireServiceTax + others);
   const discount = Math.min(Math.max(0, round2(num(v.discount))), Math.max(0, discountable));
@@ -115,7 +114,7 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   return {
     lob, ...covers, ...(lob === 'MOTOR' ? { vehicleType: motor.vehicleType, ctplCoverageRate: motor.ctplCoverageRate, ctplTermYears: motor.ctplTermYears ?? null, appaSeats: motor.appaSeats ?? null,
       APPAtotalCoverage: amounts.APPAtotalCoverage, APPARate: motor.APPARate ?? null } : {}), netPremium: net, ...tax, accountPremiumOthers: others, discount, NCD: ncd, grossPremium: gross,
-    totalSumInsured: sumInsured, taxRates: rates, commissionRate: cRate, commissionAmount: round2(net * cRate), ...(charges ? { charges } : {}),
-    currency: await getSetting('currency.default', 'PHP'),
+    totalSumInsured: sumInsured, taxRates: rates, commissionRate: cRate, commissionAmount: round2(net * cRate), charges,
+    currency: await baseCurrency(),
   };
 }

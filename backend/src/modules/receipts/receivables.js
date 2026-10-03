@@ -4,6 +4,7 @@
  * collections.
  */
 import { getSetting } from '../../lib/settings.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, notFound } from '../../lib/errors.js';
 import { reverseJournal } from '../accounting/lib/ledger.js';
 import { num, round2, today } from '../accounting/lib/http.js';
@@ -131,7 +132,7 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   const r = (await db.query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status, source, reference, currency,
       net_premium, vat, dst, lgt, other_charges, discount, commission_amount, created_by, commission_vat, commission_ewt)
     VALUES ($1,$2,$3,$4,$4,$5,'open',$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18) RETURNING *`,
-  [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || (await getSetting('currency.default', 'PHP')), round2(breakdown.netPremium || gross),
+  [billNumber, policy.id, policy.client_id, gross, due, source, reference, policy.currency || (await baseCurrency()), round2(breakdown.netPremium || gross),
     round2(breakdown.vat), round2(breakdown.dst), round2(breakdown.lgt), round2(breakdown.other), round2(breakdown.discount), commission, user?.id ?? null,
     split.commissionTaxes.commission_vat, split.commissionTaxes.commission_ewt])).rows[0];
   const jv = await postBooking(db, r, policy, split, user, bookedOn);

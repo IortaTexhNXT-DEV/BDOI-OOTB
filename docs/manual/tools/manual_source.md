@@ -207,7 +207,7 @@ If you type the address of a screen your role may not open, the system shows Not
 | ZIP code | 4 digits, for example 1226 (Makati). |
 | TIN | Required for corporate prospects and on the Company master for the letterhead. |
 | Government ID (KYC) | PhilSys ID, UMID, Passport, Driver's License, PRC ID, SSS ID, GSIS ID, TIN ID, Postal ID, Voter's ID or Senior Citizen ID (`policy.kyc_id_types`). |
-| Taxes on premium | VAT 12%, documentary stamp tax (DST) 12.5%, local government tax (LGT) 0.75%, fire service tax (FST) 2% for fire and IAR (`tax.*`, `premium.taxes_by_lob`). |
+| Taxes on premium | VAT 12%, documentary stamp tax (DST) 12.5%, local government tax (LGT) 0.75% or the rate of the city, fire service tax (FST) 2% for fire and IAR (Master > Finance > Premium Taxes & LGU Rates). |
 | Withholding tax | Expanded withholding tax on commission paid to agents and referrers (5% individual, 10% corporate or external), and the 10% the insurer withholds on direct-bill commission, certified on BIR Form 2307. |
 
 # The broking cycle
@@ -1302,7 +1302,7 @@ The dashboard shows brokerage income, comsub, net margin and margin %, the outst
 The list shows every referrer with type (Agent, Sub-agent, External), level, number of policies, net payable, WHT type and bank account. The header shows the amount due this cycle and the amount ready to pay.
 
 1. Choose Commission > Agents/Referrer Accounts and select the referrer.
-2. Check Apply WHT (individual agents 5%, companies 10%, `commission.wht_rate_by_type`).
+2. Check Apply WHT (the referrer's tax code, else the code of its type in `commission.wht_code_by_type`: individual agents WI515 5%, companies WC515 10%).
 3. Under Current cycle, check the eligible lines.
 4. Select Approve. Another Accounting user must approve lines you prepared.
 5. Select Generate payout. The system creates a draft payout voucher and opens it in Disbursement.
@@ -2278,14 +2278,13 @@ All settings are on Master > Configuration unless noted. Changes apply at once a
 | `placement.journey` | see Chapter 3 | Steps each line must, may or does not use. |
 | `placement.offer_validity_days` | 30 | Default validity of an insurer offer. |
 | `placement.journey_applies_to_renewals` | off | Whether renewals follow the placement journey. |
-| `tax.vat_rate`, `tax.dst_rate`, `tax.lgt_rate`, `tax.fst_rate` | 12%, 12.5%, 0.75%, 2% | Taxes on the net premium. |
-| `premium.taxes_by_lob` | Motor: VAT, DST, LGT; Fire and IAR add FST | Which taxes apply per line. |
+| `tax.vat_rate`, `tax.dst_rate`, `tax.lgt_rate`, `tax.fst_rate` | 12%, 12.5%, 0.75%, 2% | Fallback only: used when Premium Taxes & LGU Rates has no rule of that tax. |
 | `limits.quote_validity_days` | 30 | Quotation validity. |
 | `quotations.approval_link_ttl_hours` | 168 | Validity of the client's approval link. |
 | `quotations.approval_notify_roles` | processing | Roles notified of quotations sent to clients. |
 | `workflow.quote_maker_checker` | on | A quotation cannot be approved by its creator. |
 | `commission.default_rate` | 15% | Brokerage when neither the matrix nor the insurer has a rate. |
-| `commission.wht_rate_by_type` | Agent 5%, Sub-agent 5%, External 10% | Withholding tax on comsub. |
+| `commission.wht_code_by_type` | Agent WI515, Sub-agent WI515, External WC515 | Withholding tax code on comsub (rate from Master > Finance > Taxation). |
 | `commission.eligible_roles`, `incentive.eligible_roles` | sales | Who earns commission and incentives. |
 | `commission.require_full_payment`, `commission.require_bank_account` | on | When commission can be paid. |
 | `direct_bill.default_billing_mode` | broker | Default billing mode. |

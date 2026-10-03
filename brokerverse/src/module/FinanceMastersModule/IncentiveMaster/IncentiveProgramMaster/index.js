@@ -27,6 +27,7 @@ import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
 import ToggleButton from "../../../../components/ToggleButton";
 import InputField from "../../../../components/InputField";
 import incentiveService from "../../../../services/incentiveService";
+import mastersService from "../../../../services/mastersService";
 import { isoDate, loadSettings, showError, showSuccess } from "../../../Remittance/shared";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
@@ -82,13 +83,14 @@ const IncentiveProgramMaster = () => {
 
   useEffect(() => {
     loadPrograms();
-    loadSettings()
-      .then((s) => setConfig({
+    // currencies: the active Currency master rows; a program defaults to the accounting base currency
+    Promise.all([loadSettings(), mastersService.list("currency", { status: "Active" }).catch(() => [])])
+      .then(([s, currencies]) => setConfig({
         types: s["incentive.program_types"] || [],
         frequencies: s["incentive.calculation_frequencies"] || [],
         metrics: Object.keys(s["incentive.metric_map"] || {}),
-        currencies: (s["currency.allowed"] || []).map((c) => c.code),
-        defaultCurrency: s["currency.default"] || ""
+        currencies: currencies.map((c) => c.CurrencyCode).filter(Boolean),
+        defaultCurrency: (currencies.find((c) => c.isBase === true) || {}).CurrencyCode || s["currency.default"] || ""
       }))
       .catch((error) => showError(toast, error));
   }, []);

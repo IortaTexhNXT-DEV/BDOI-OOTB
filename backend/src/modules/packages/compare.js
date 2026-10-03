@@ -5,6 +5,7 @@
  * company letterhead) never shows the commission. The chosen insurer becomes a quotation priced with the engine.
  */
 import { withTransaction } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
@@ -58,7 +59,7 @@ export async function compareInsurers({ productId, sumInsured, lguCode = null, c
   columns.sort((a, b) => a.total - b.total || a.insurerName.localeCompare(b.insurerName));
   return {
     product: { id: profile.productId, code: profile.code, name: profile.name, line: profile.line, lob, taxRegime: profile.regime },
-    sumInsured: si, date: on, lgu: lgu ? { code: lgu.code, name: lgu.name, rate: lgu.rate } : null, currency: await getSetting('currency.default', 'PHP'),
+    sumInsured: si, date: on, lgu: lgu ? { code: lgu.code, name: lgu.name, rate: lgu.rate } : null, currency: await baseCurrency(),
     columns, cheapestId: columns[0]?.insuranceCompanyId ?? null,
   };
 }

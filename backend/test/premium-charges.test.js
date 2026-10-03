@@ -103,8 +103,9 @@ describe('premium charges API', () => {
     const r = await sales('post', '/premium-charges/calculate').send({ premium: 10000, productId: 'HOME', lguCode: 'MKT' });
     expect(r.status).toBe(200);
     expect(r.body.data).toMatchObject({ vat: 1200, dst: 1250, fst: 200, lgt: 20, total: 12670, line: 'fire', regime: 'vat', lgu: { code: 'MKT' } });
+    // no location: the LGT rule rate, 0.75% since migration 0236 (the rate tax.lgt_rate charged; it was 0.2%)
     const pa = await sales('post', '/premium-charges/calculate').send({ premium: 1000, productId: 'PA' });
-    expect(pa.body.data).toMatchObject({ fst: 0, lgt: 2, total: 1000 + 120 + 125 + 2 });
+    expect(pa.body.data).toMatchObject({ fst: 0, lgt: 7.5, total: 1000 + 120 + 125 + 7.5 });
     expect((await sales('post', '/premium-charges/calculate').send({ premium: 'x' })).status).toBe(400);
   });
 
@@ -130,17 +131,20 @@ describe('premium charges API', () => {
     expect((await sales('put', '/premium-charges/rules/VAT').send({ rate: 10 })).status).toBe(403);
   });
 
-  it('keeps quotations on the settings rates unless the engine is asked for', async () => {
+  // Migration 0236: every quotation is priced through the engine (no tax.charge_engine.quotations switch). The default
+  // rules give what the flat settings gave (DST 12.5% of the premium, LGT 0.75% where no LGU rate applies); a
+  // quotation naming a city takes its LGU rate. DST is no longer rounded up per P4.00 (125.50 -> 125.13).
+  it('prices every quotation through the engine: default rules match the former flat rates, an LGU rate replaces the LGT', async () => {
     const lead = await sales('post', '/leads').send({ firstName: 'Tess', lastName: 'Aquino', emailId: 'tess.aquino@example.ph', contactNumber: '09170000011', leadCategory: 'Retail' });
     const plain = await sales('post', '/quotations').send({ leadRefId: lead.body.leadId, productType: 'Fire', lob: 'FIRE', netPremium: '1001', participantDetails: [{ insuranceCompanyName: 'Malayan Insurance Co., Inc.' }] });
     expect(plain.status).toBe(201);
     const row = (await pool.query('SELECT vat, dst, lgt, fst, others FROM quotes WHERE id = $1', [plain.body.quotationId])).rows[0];
     expect(row).toMatchObject({ vat: 120.12, dst: 125.13, lgt: 7.51, fst: 20.02 });
-    const engine = await sales('post', '/quotations').send({ leadRefId: lead.body.leadId, productType: 'Fire', lob: 'FIRE', netPremium: '1001', chargeEngine: true, lguCode: 'MKT',
+    const engine = await sales('post', '/quotations').send({ leadRefId: lead.body.leadId, productType: 'Fire', lob: 'FIRE', netPremium: '1001', lguCode: 'MKT',
       participantDetails: [{ insuranceCompanyName: 'Malayan Insurance Co., Inc.' }] });
     expect(engine.status).toBe(201);
     const e = (await pool.query('SELECT vat, dst, lgt, fst, others, premium_total, doc FROM quotes WHERE id = $1', [engine.body.quotationId])).rows[0];
-    expect(e).toMatchObject({ vat: 120.12, dst: 125.5, lgt: 2, fst: 20.02, premium_total: 1268.64 });
+    expect(e).toMatchObject({ vat: 120.12, dst: 125.13, lgt: 2, fst: 20.02, premium_total: 1268.27 });
     expect(e.doc.premiumBreakdown.charges.lgu).toMatchObject({ code: 'MKT' });
   });
 });

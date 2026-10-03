@@ -478,6 +478,15 @@ const SystemSettingsPage = () => {
                 )}
                 className="w-full"
               />
+              {settings.baseCurrency && (
+                <small className="block mt-1">
+                  {t("systemSettings.baseCurrencyHint", {
+                    defaultValue:
+                      "Accounts are kept in the base currency {{base}} (Master > Finance > Currency); the display currency only changes how amounts are labelled.",
+                    base: settings.baseCurrency,
+                  })}
+                </small>
+              )}
             </div>
             <div className="col-12 md:col-6 lg:col-3 field">
               <label>

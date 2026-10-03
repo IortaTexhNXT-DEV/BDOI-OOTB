@@ -3,6 +3,8 @@
  * (product_components) and risk mappings (product_risk_mappings / product_risk_sections).
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
+import { chargesFor } from '../premium-charges/service.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
@@ -220,7 +222,7 @@ export async function setInsurerPanel(id, insurers, user) {
   return updateTemplate(id, { insurers: names }, user);
 }
 
-/** Premium illustration: base rate x sum insured, rating factors, minimum premium, statutory taxes, commission. */
+/** Premium illustration: base rate x sum insured, rating factors, minimum premium, statutory taxes (charge engine), commission. */
 export async function calculatePremium(id, body) {
   const t = await getConfigurator({ id });
   const sumInsured = toNumber(body.sumInsured, NaN);
@@ -242,13 +244,11 @@ export async function calculatePremium(id, body) {
   let adjusted = premium;
   if (min !== null && adjusted < min) adjusted = min;
   if (max !== null && adjusted > max) adjusted = max;
-  let taxes = t.taxes.filter((x) => x.status === 'Active').map((x) => ({ code: x.taxCode, name: x.taxName, rate: toNumber(x.rate), basis: x.basis || 'Premium' }));
-  if (!taxes.length) {
-    const keys = [['DST', 'Documentary stamp tax', 'tax.dst_rate'], ['LGT', 'Local government tax', 'tax.lgt_rate']];
-    taxes = [];
-    for (const [code, name, key] of keys) taxes.push({ code, name, rate: toNumber(await getSetting(key, 0)) * 100, basis: 'Premium' });
-  }
-  const taxLines = taxes.map((x) => ({ ...x, amount: round2(x.basis === 'Sum Insured' ? sumInsured * x.rate / 100 : adjusted * x.rate / 100) }));
+  // Statutory taxes through the premium tax and charge engine (Master > Premium Taxes & LGU Rates), as a quotation of
+  // the template's product / line is taxed; the template's own tax components are descriptive only.
+  const charges = await chargesFor({ premium: round2(adjusted), productId: t.productId || null, lob: t.lineOfBusiness || t.category || null,
+    lguCode: body.lguCode || null, city: body.city || null });
+  const taxLines = charges.lines.map((l) => ({ code: l.code, name: l.name, kind: l.kind, method: l.method, rate: l.rate, basis: l.method === 'flat' ? 'Flat' : 'Premium', amount: l.amount }));
   const totalTax = round2(taxLines.reduce((s, x) => s + x.amount, 0));
   const commRate = toNumber(t.commissionRate ?? (toNumber(await getSetting('commission.default_rate', 0.15)) * 100));
   const commission = round2(adjusted * commRate / 100);
@@ -256,7 +256,7 @@ export async function calculatePremium(id, body) {
     templateId: t.id, templateCode: t.templateCode, sumInsured, baseRate: rate, basePremium, factors: applied, ratedPremium: premium,
     minimumApplied: min !== null && premium < min, maximumApplied: max !== null && premium > max, adjustedPremium: round2(adjusted),
     taxes: taxLines, totalTax, grossPremium: round2(adjusted + totalTax), commissionRate: commRate, commission, netPremium: round2(adjusted - commission),
-    currency: await getSetting('currency.default', 'PHP'),
+    currency: await baseCurrency(),
   };
 }
 

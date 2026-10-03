@@ -131,8 +131,8 @@ FROM policies p WHERE p.id LIKE 'pol_sls_%' AND p.payment_status = 'Completed'
 ON CONFLICT (id) DO NOTHING;
 INSERT INTO commissions(id, policy_id, quote_id, agent_user_id, basis_amount, rate, amount, withholding, net_amount, status, period, created_at)
 SELECT 'cm_sls_' || right(p.id, 2), p.id, p.quote_id, p.owner_user_id, p.net_premium, q.commission_rate, round(p.net_premium * q.commission_rate, 2),
-  round(p.net_premium * q.commission_rate * (SELECT (value#>>'{}')::numeric FROM app_settings WHERE key = 'tax.withholding_rate'), 2),
-  round(p.net_premium * q.commission_rate, 2) - round(p.net_premium * q.commission_rate * (SELECT (value#>>'{}')::numeric FROM app_settings WHERE key = 'tax.withholding_rate'), 2),
+  round(p.net_premium * q.commission_rate * COALESCE((SELECT tc.rate / 100 FROM tax_codes tc WHERE tc.active AND tc.code = (SELECT value#>>'{}' FROM app_settings WHERE key = 'commission.default_wht_code')), 0), 2),
+  round(p.net_premium * q.commission_rate, 2) - round(p.net_premium * q.commission_rate * COALESCE((SELECT tc.rate / 100 FROM tax_codes tc WHERE tc.active AND tc.code = (SELECT value#>>'{}' FROM app_settings WHERE key = 'commission.default_wht_code')), 0), 2),
   (SELECT value#>>'{}' FROM app_settings WHERE key = 'commission.initial_status'), to_char(p.inception_date, 'YYYY-MM'), p.created_at
 FROM policies p JOIN quotes q ON q.id = p.quote_id WHERE p.id LIKE 'pol_sls_%'
   -- commission accrues only to producers holding a commission-earning role (commission.eligible_roles), never to an administrator

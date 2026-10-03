@@ -175,7 +175,7 @@ const EndorsementSummary = ({ action }) => {
   }, [coverageChanges, state?.endorsementId]);
 
   // tax rates the premium was priced with: the server's (premiumChange.taxRates), else the quotation's source
-  // (product template, then app_settings tax.vat_rate / tax.dst_rate / tax.lgt_rate)
+  // (the premium tax and charge engine, Premium Taxes & LGU Rates)
   const settingsTaxRates = useTaxRates();
   const taxRates = useMemo(() => {
     const priced =

@@ -15,7 +15,7 @@
  *   commission was booked at issue, so approval opens the note for collection without a second posting.
  * - Collections from the insurer (partial allowed) post:
  *     Dr Cash in Bank                        (cash received)
- *     Dr Creditable Withholding Tax          (EWT the insurer withheld, direct_bill.insurer_ewt_rate of the commission)
+ *     Dr Creditable Withholding Tax          (EWT the insurer withheld: tax code direct_bill.insurer_ewt_code)
  *        Cr Commission Receivable – Insurers (cash + EWT)
  *   The note moves Open -> Partially collected -> Collected; when collected, agent commission on its policies becomes
  *   eligible (commission.require_full_payment).
@@ -23,6 +23,7 @@
  *   note's lines show it, and direct_bill.client_payment_required can hold the approval of a note until it is recorded.
  */
 import { many, one, pool, withTransaction } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
@@ -35,6 +36,7 @@ import { renderTemplate } from '../documents/common.js';
 import { formatMoney } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { resolveCreditTerms } from '../commission-rates/terms.js';
+import { taxCodeRate } from '../accounting/lib/commissionTax.js';
 import { companyName } from '../../lib/letterhead.js';
 import { addDays } from '../../lib/dates.js';
 import { assertClientPaid, clientPaymentStatus } from './clientPayments.js';
@@ -63,13 +65,13 @@ export async function billingModeFor(requested, insurerId = null) {
 }
 
 /**
- * Split a commission into commission (net of VAT), VAT and amount due, from direct_bill.broker_vat_registered,
- * direct_bill.commission_vat_rate (falls back to tax.vat_rate) and direct_bill.commission_vat_inclusive.
+ * Split a commission into commission (net of VAT), VAT and amount due. The VAT rate is the rate of the tax code
+ * direct_bill.commission_vat_code (Master > Finance > Taxation), charged when direct_bill.broker_vat_registered;
+ * direct_bill.commission_vat_inclusive says whether the commission already includes it.
  */
 export async function commissionTax(gross) {
   const registered = (await getSetting('direct_bill.broker_vat_registered', true)) !== false;
-  const configured = await getSetting('direct_bill.commission_vat_rate', null);
-  const rate = registered ? Number(configured ?? (await getSetting('tax.vat_rate', 0.12))) || 0 : 0;
+  const rate = registered ? (await taxCodeRate(null, await getSetting('direct_bill.commission_vat_code', 'VAT12-OUT'))).rate : 0;
   const inclusive = (await getSetting('direct_bill.commission_vat_inclusive', false)) === true;
   const value = round2(gross);
   if (!rate) return { commission: value, vat: 0, amount: value, vatRate: 0 };
@@ -81,7 +83,8 @@ export async function commissionTax(gross) {
   return { commission: value, vat, amount: round2(value + vat), vatRate: rate };
 }
 
-export const ewtRate = async () => Number(await getSetting('direct_bill.insurer_ewt_rate', 0.1)) || 0;
+/** EWT the insurer withholds on direct-bill commission: the rate of the tax code direct_bill.insurer_ewt_code. */
+export const ewtRate = async () => (await taxCodeRate(null, await getSetting('direct_bill.insurer_ewt_code', 'WC139'))).rate;
 
 async function policyRow(db, id) {
   const { findPolicy } = await import('../receipts/receivables.js');
@@ -139,7 +142,7 @@ async function bookDirectBillShare(db, p, { insurerId, insurerName, commissionPo
   const it = (await db.query(`INSERT INTO direct_bill_items(policy_id, endorsement_id, insurance_company_id, source, reference, booked_on, currency, gross_premium, net_premium,
       commission_rate, commission, vat, amount, created_by)
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14) RETURNING *`,
-  [p.id, endorsementId, insurerId, source, reference || p.policy_number, bookedOn, p.currency || (await getSetting('currency.default', 'PHP')), gross,
+  [p.id, endorsementId, insurerId, source, reference || p.policy_number, bookedOn, p.currency || (await baseCurrency()), gross,
     round2(sign * (net || Math.abs(gross))), rate, round2(sign * tax.commission), round2(sign * tax.vat), round2(sign * tax.amount), user?.id ?? null])).rows[0];
   const insurer = insurerName || 'insurer';
   const refSuffix = reference && reference !== p.policy_number ? ` (${reference})` : '';
@@ -394,7 +397,7 @@ export async function raiseDebitNote(b, user) {
     const d = (await db.query(`INSERT INTO commission_debit_notes(dn_number, insurance_company_id, period_from, period_to, dn_date, due_date, currency, gross_premium, commission, vat, amount,
         ewt_rate, expected_ewt, balance, status, remarks, created_by, updated_by, submitted_by, submitted_at)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$11,$14,$15,$16,$16,$17,$18) RETURNING id`,
-    [number, ins.id, from, to, dnDate, due, items[0].currency || (await getSetting('currency.default', 'PHP')), sum('gross_premium'), commission, sum('vat'), amount,
+    [number, ins.id, from, to, dnDate, due, items[0].currency || (await baseCurrency()), sum('gross_premium'), commission, sum('vat'), amount,
       rate, round2(commission * rate), submit ? 'for-approval' : 'draft', b.remarks || null, user.id, submit ? user.id : null, submit ? new Date() : null])).rows[0];
     let n = 0;
     for (const it of items) {

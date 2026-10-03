@@ -19,7 +19,7 @@ const SCREEN = 'Master > System Settings';
 const example = {
   logoUrl: '/bdoi/iorta-technxt.png', logoPresets: [{ id: 'iorta-technxt', label: 'iorta TechNXT (BrokerVerse)', url: '/bdoi/iorta-technxt.png', builtIn: true }], displayCurrency: 'PHP',
   primaryColor: '#0072d8', secondaryColor: '#004ea8', defaultLanguage: 'en', faviconUrl: '/favicon.ico', appTitle: 'Brokerverse',
-  currencies: [{ code: 'PHP', name: 'Philippine Peso', locale: 'en-PH', region: 'Asia' }], updatedAt: '2026-09-28T00:00:00.000Z',
+  currencies: [{ code: 'PHP', name: 'Philippine Peso', symbol: '₱', decimals: 2, isBase: true, locale: 'en-PH', region: 'Asia' }], baseCurrency: 'PHP', updatedAt: '2026-09-28T00:00:00.000Z',
 };
 
 define({

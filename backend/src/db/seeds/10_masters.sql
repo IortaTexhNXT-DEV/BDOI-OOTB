@@ -28,8 +28,9 @@ SELECT s.id, v.city FROM (VALUES
  ('Pampanga','Angeles'),('Bulacan','Meycauayan'),('Batangas','Lipa'),('Pangasinan','Dagupan'),('Negros Oriental','Dumaguete')) AS v(state, city)
 JOIN states s ON s.name = v.state JOIN countries c ON c.id = s.country_id AND c.code = 'PH'
 WHERE NOT EXISTS (SELECT 1 FROM cities ci WHERE ci.state_id = s.id AND ci.name = v.city);
-INSERT INTO currencies(code, name, symbol, decimals, is_base, exchange_rate) VALUES
- ('PHP','Philippine Peso','₱',2,true,1),('USD','US Dollar','$',2,false,0.0177),('EUR','Euro','€',2,false,0.0163),('SGD','Singapore Dollar','S$',2,false,0.0238),('JPY','Japanese Yen','¥',0,false,2.65)
+-- Exchange rates are kept in the dated Exchange Rate master (master_records type exchange-rate), not here.
+INSERT INTO currencies(code, name, symbol, decimals, is_base) VALUES
+ ('PHP','Philippine Peso','₱',2,true),('USD','US Dollar','$',2,false),('EUR','Euro','€',2,false),('SGD','Singapore Dollar','S$',2,false),('JPY','Japanese Yen','¥',0,false)
 ON CONFLICT (code) DO NOTHING;
 INSERT INTO banks(code, name, swift_code) VALUES
  ('BDO','Banco de Oro','BNORPHMM'),('BPI','Bank of the Philippine Islands','BOPIPHMM'),('MBT','Metrobank','MBTCPHMM'),('LBP','Land Bank of the Philippines','TLBPPHMM'),('SECB','Security Bank','SETCPHMM'),('CBC','China Banking Corporation','CHBKPHMM')

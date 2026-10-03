@@ -10,14 +10,14 @@ import { postAddJournalVoucher } from "../../store/journalVoucherMiddleware";
 import { useDispatch } from "react-redux";
 import useJvMasterData from "../../useJvMasterData";
 
-const AddData = ({ visible, setVisible, handleUpdate }) => {
+const AddData = ({ visible, setVisible, handleUpdate, voucherDate }) => {
   const {
     mainAccountsData,
     subAccountsData,
     branchCodesData,
     departmentCodesData,
     currencyCodesData,
-    exchangeRates,
+    rateOn,
   } = useJvMasterData();
 
   const mainAccountsWithSubAccounts = mainAccountsData;
@@ -135,7 +135,11 @@ const AddData = ({ visible, setVisible, handleUpdate }) => {
       return "";
     }
 
-    const exchangeRate = exchangeRates[currencyCode] || 1;
+    // the Exchange Rate master rate in force on the voucher date, as the server converts it; blank when none
+    const exchangeRate = rateOn(currencyCode, voucherDate);
+    if (exchangeRate === null) {
+      return "";
+    }
     const localAmount = foreignAmountNum * exchangeRate;
     return localAmount.toFixed(2);
   };

@@ -30,6 +30,8 @@ const applyPayloadToState = (state, payload) => {
   if (payload.currencies) {
     state.currencies = payload.currencies;
   }
+  // accounting (ledger) base currency from the Currency master; the display currency only relabels amounts
+  state.baseCurrency = payload.baseCurrency ?? state.baseCurrency ?? null;
 };
 
 export const fetchSystemSettings = createAsyncThunk(

@@ -17,6 +17,7 @@ import { Divider } from "primereact/divider";
 import { Badge } from "primereact/badge";
 import { ProgressSpinner } from "primereact/progressspinner";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
+import quotationService from "../../../services/quotationService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
@@ -87,13 +88,16 @@ const QuoteGeneration = () => {
     const loadRenewal = async () => {
       setLoading(true);
       try {
-        const [renewal, taxSettings, renewalSettings, accountingSettings] = await Promise.all([
+        const [renewal, renewalSettings, accountingSettings] = await Promise.all([
           renewalsWorkspaceService.getRenewal(renewalId || location.state?.policy?.id),
-          renewalsWorkspaceService.getSettings("tax"),
           renewalsWorkspaceService.getSettings("renewals"),
           renewalsWorkspaceService.getSettings("accounting")
         ]);
-        const allSettings = { ...taxSettings, ...renewalSettings, ...accountingSettings };
+        // Statutory taxes: the effective rates of the premium tax and charge engine (Premium Taxes & LGU Rates) for
+        // the policy's line, the same engine the server quotes the renewal with
+        const engine = await quotationService.getTaxRates(renewal?.lob || "motor").catch(() => ({}));
+        const taxRates = { vat: engine.valueAddedTax, dst: engine.documentaryStampTax, lgt: engine.localGovernmentTax, fst: engine.fireServiceTax };
+        const allSettings = { ...renewalSettings, ...accountingSettings, taxRates };
         setSettings(allSettings);
         setPolicyData(renewal);
         initializeFormData(renewal, allSettings);
@@ -159,14 +163,13 @@ const QuoteGeneration = () => {
     const subtotal = basePremium + claimsLoading + riskAdjustment + inflationAdjustment
                     - loyaltyDiscount - multiPolicyDiscount - earlyRenewalDiscount - noClaimsBonus;
 
-    // Statutory taxes at the configured rates (Settings > tax)
-    const rate = (key) => Number(settings[key] || 0);
-    const isFire = policyData.lob === 'fire';
+    // Statutory taxes at the charge engine's rates for the policy's line (preview; the generated quote is server-rated)
+    const rate = (key) => Number(settings.taxRates?.[key] || 0);
     const taxes = {
-      vat: subtotal * rate("tax.vat_rate"),
-      dst: subtotal * rate("tax.dst_rate"),
-      lgt: subtotal * rate("tax.lgt_rate"),
-      fst: isFire ? subtotal * rate("tax.fst_rate") : 0
+      vat: subtotal * rate("vat"),
+      dst: subtotal * rate("dst"),
+      lgt: subtotal * rate("lgt"),
+      fst: subtotal * rate("fst")
     };
 
     const totalTaxes = Object.values(taxes).reduce((sum, tax) => sum + tax, 0);
@@ -558,7 +561,7 @@ const QuoteGeneration = () => {
               </div>
 
               <div className="breakdown-row">
-                <span>VAT ({Number(settings["tax.vat_rate"] || 0) * 100}%):</span>
+                <span>VAT ({Math.round(Number(settings.taxRates?.vat || 0) * 1e6) / 1e4}%):</span>
                 <span>{formatCurrency(premiumCalculation.taxes.vat)}</span>
               </div>
 

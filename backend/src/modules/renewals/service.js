@@ -12,6 +12,7 @@ import { notify } from '../notifications/service.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { lobOf, num } from '../documents/common.js';
 import { renderTemplate } from '../claims/docs.js';
+import { quotationCharges } from '../premium-charges/service.js';
 import { daysBetween, round2, today, unprocessable, usersWithRole } from '../claims/util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
@@ -348,7 +349,10 @@ export const quoteApi = (q) => ({
   rating: q.rating, createdBy: q.created_by,
 });
 
-/** Re-rate at current rates: base rate on sum insured, claims loading, loyalty discount, current taxes; returns premium variance. */
+/**
+ * Re-rate at current rates: base rate on sum insured, claims loading, loyalty discount, taxes from the premium tax and
+ * charge engine (the same as a quotation); returns premium variance.
+ */
 export async function rate(r) {
   const line = r.product_line || 'default';
   const rates = (await getSetting('renewals.rating_rates', {})) || {};
@@ -360,8 +364,10 @@ export async function rate(r) {
   const claimsLoading = round2(base * loadingPct);
   const loyaltyDiscount = round2(base * loyaltyPct);
   const net = round2(base + claimsLoading - loyaltyDiscount);
-  const taxRates = { vat: Number(await getSetting('tax.vat_rate', 0.12)), dst: Number(await getSetting('tax.dst_rate', 0.125)), lgt: Number(await getSetting('tax.lgt_rate', 0.0075)), fst: line === 'fire' ? Number(await getSetting('tax.fst_rate', 0.02)) : 0 };
-  const taxes = Object.fromEntries(Object.entries(taxRates).map(([k, v]) => [k, round2(net * v)]));
+  // taxes through the premium tax and charge engine, exactly as the quotation pricer (quotations/premium.js) taxes a net premium
+  const c = await quotationCharges({ productId: r.product_id || null }, net, lineOf(r));
+  const taxes = { vat: c.tax.valueAddedTax, dst: c.tax.documentaryStampTax, lgt: c.tax.localGovernmentTax, fst: c.tax.fireServiceTax, ...(c.others ? { others: round2(c.others) } : {}) };
+  const taxRates = Object.fromEntries(Object.entries(taxes).map(([k, v]) => [k, net ? Math.round((v / net) * 1e6) / 1e6 : 0]));
   const total = round2(net + Object.values(taxes).reduce((s, v) => s + v, 0));
   const variance = round2(total - previous);
   return {

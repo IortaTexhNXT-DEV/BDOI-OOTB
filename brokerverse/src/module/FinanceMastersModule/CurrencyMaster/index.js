@@ -268,6 +268,13 @@ const CurrencyMaster = () => {
                   body={(rowData) => rowData.UnitDescription}
                 ></Column>
                 <Column
+                  field="isBase"
+                  header={t("financeMasters.baseCurrency", { defaultValue: "Accounting base currency" })}
+                  headerStyle={headerStyle}
+                  className="fieldvalue_container"
+                  body={(rowData) => (rowData.isBase === true ? t("financeMasters.baseCurrencyYes", { defaultValue: "Base currency" }) : "")}
+                ></Column>
+                <Column
                   body={(columnData) => <MasterStatusToggle type="currency" record={columnData} onChanged={reloadList} onError={showStatusError} />}
                   header={t("financeMasters.status")}
                   headerStyle={{ textAlign: "center", ...headerStyle }}

@@ -9,6 +9,7 @@
  * own commission (the rate table's commission rate, else the Commission Rate Matrix).
  */
 import { query, withTransaction } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { addDays, today, isoDate } from '../../lib/dates.js';
@@ -80,7 +81,7 @@ export async function priceBundle(db, bundle, { sections: given = [], lguCode = 
     });
   }
   return { bundle: { id: bundle.id, code: bundle.code, name: bundle.name, termMonths: bundle.termMonths, autoIssue: bundle.autoIssue }, date: on, discountPercent: pct,
-    lgu: lgu ? { code: lgu.code, name: lgu.name, rate: lgu.rate } : null, sections, totals: totalsOf(sections), currency: await getSetting('currency.default', 'PHP') };
+    lgu: lgu ? { code: lgu.code, name: lgu.name, rate: lgu.rate } : null, sections, totals: totalsOf(sections), currency: await baseCurrency() };
 }
 
 // ------------------------------------------------------------------ sections storage

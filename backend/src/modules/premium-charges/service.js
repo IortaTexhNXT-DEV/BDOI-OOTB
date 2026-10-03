@@ -1,6 +1,9 @@
 /**
  * Premium taxes and charges master (premium_charge_rules), LGU tax rates (lgu_tax_rates) and chargesFor(), the one
- * entry point the quick quote comparison, package bundles, quotations and payment links use to price taxes.
+ * entry point every premium is taxed through: the quick quote comparison, package bundles, quotations (and so
+ * endorsements and placement slips), insurer offers on broker slips, the renewal queue quote, the renewal quotation
+ * and the product configurator illustration. The flat tax.* settings are only the fallback of a tax kind that has no
+ * rule at all (fallbackRules()).
  */
 import { query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
@@ -170,11 +173,38 @@ export async function lguFor({ lguCode = null, lguId = null, cityId = null, city
 
 // ------------------------------------------------------------------ calculation
 
-/** Rules in force on a date (rows in API shape). */
+/**
+ * Fallback rules from the flat tax.* settings for the statutory taxes that have no rule at all in the table (not
+ * merely switched off or out of date: a rule switched off means the tax is not charged). VAT on products under the
+ * VAT regime, DST and LGT on every premium, FST on fire lines, all as a percent of the premium.
+ */
+export const FALLBACK_SETTINGS = [
+  { kind: 'vat', key: 'tax.vat_rate', code: 'VAT', name: 'Value Added Tax', regimes: ['vat'], lines: null, sortOrder: 10 },
+  { kind: 'dst', key: 'tax.dst_rate', code: 'DST', name: 'Documentary Stamp Tax', regimes: null, lines: null, sortOrder: 30 },
+  { kind: 'fst', key: 'tax.fst_rate', code: 'FST', name: 'Fire Service Tax', regimes: null, lines: ['fire'], sortOrder: 40 },
+  { kind: 'lgt', key: 'tax.lgt_rate', code: 'LGT', name: 'Local Government Tax', regimes: null, lines: null, sortOrder: 50 },
+];
+
+export async function fallbackRules(db = null) {
+  const kinds = new Set((await run(db).query('SELECT DISTINCT kind FROM premium_charge_rules')).rows.map((r) => r.kind));
+  const out = [];
+  for (const f of FALLBACK_SETTINGS) {
+    if (kinds.has(f.kind)) continue;
+    const rate = Number(await getSetting(f.key, 0)) || 0;
+    if (rate > 0) {
+      out.push({ code: f.code, name: f.name, kind: f.kind, method: 'percent', rate: Math.round(rate * 100 * 1e6) / 1e6, unitAmount: 0, unitSize: 0, fractionRule: 'round_up',
+        lines: f.lines, regimes: f.regimes, minimumAmount: 0, sortOrder: f.sortOrder, active: true, effectiveFrom: null, effectiveTo: null, remarks: `Fallback: ${f.key}`, fallback: true });
+    }
+  }
+  return out;
+}
+
+/** Rules in force on a date (rows in API shape), plus the settings fallback of a tax kind that has no rule. */
 export async function rulesInForce(date = null, db = null) {
   const d = date || (await today());
-  return (await run(db).query(`SELECT * FROM premium_charge_rules WHERE active AND effective_from <= $1::date AND (effective_to IS NULL OR effective_to >= $1::date)
+  const rows = (await run(db).query(`SELECT * FROM premium_charge_rules WHERE active AND effective_from <= $1::date AND (effective_to IS NULL OR effective_to >= $1::date)
     ORDER BY sort_order, code`, [d])).rows.map(toRule);
+  return [...rows, ...(await fallbackRules(db))];
 }
 
 /** Line and tax regime of a product (by id or code); { line: null, regime: 'vat' } when unknown. */
@@ -213,10 +243,4 @@ export async function quotationCharges(v, net, lob, db = null) {
     others: c.premiumTax + c.other,
     charges: { lines: c.lines, premiumTax: c.premiumTax, other: c.other, taxes: c.taxes, totalCharges: c.totalCharges, regime: c.regime, lgu: c.lgu, line: c.line, date: c.date },
   };
-}
-
-/** Does a quotation use the engine (setting on, or a quotation priced from a comparison / package)? */
-export async function engineOn(v) {
-  if (v && (v.chargeEngine === true || v.chargeEngine === 'true')) return true;
-  return (await getSetting('tax.charge_engine.quotations', false)) === true;
 }

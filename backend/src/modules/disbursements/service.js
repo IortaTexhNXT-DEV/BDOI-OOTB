@@ -4,6 +4,7 @@
  * Cheque approval is maker-checker and posts Dr <payable account for the payee type> / Cr Cash in Bank.
  */
 import { getSetting } from '../../lib/settings.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { reverseJournal } from '../accounting/lib/ledger.js';
 import { postEvent, splitTaxes } from '../accounting/lib/posting.js';
@@ -105,7 +106,7 @@ export async function createDisbursement(db, b, user, { source = 'manual', statu
     status, isoDate(b.voucherDate) || (await today()), txn, str(b.transactionCode), str(b.transactionDescription), str(b.departmentCode), str(b.branchCode), str(b.criteria),
     str(b.customerCode) || (referrer ? referrer.id : null), client?.id || null, referrer?.id || str(b.referrerId), referrer?.name || str(b.referrerName),
     insurer?.id || null, insurer?.name || str(b.insurerName), policy?.id || null, policy?.policy_number || str(b.policyNumber),
-    b.instrumentCurrency || (await getSetting('currency.default', 'PHP')), str(b.remarks), source, user?.id ?? null])).rows[0];
+    b.instrumentCurrency || (await baseCurrency()), str(b.remarks), source, user?.id ?? null])).rows[0];
   return d;
 }
 

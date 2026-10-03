@@ -33,7 +33,7 @@ define({
 const referrerSchema = z.object({
   id: z.string().regex(/^[a-z0-9-]+$/).optional(), name: z.string().min(2), type: z.enum(['Agent', 'Sub-agent', 'External']).optional(), level: z.enum(['L1', 'L2']).nullable().optional(),
   parentReferrerId: z.string().nullable().optional(), userId: z.string().nullable().optional(), tin: z.string().optional(), email: z.string().email().optional().or(z.literal('')),
-  phone: z.string().optional(), whtRate: z.number().min(0).max(1).nullable().optional(), whtApplicable: z.boolean().optional(), bankName: z.string().optional(),
+  phone: z.string().optional(), whtCode: z.string().nullable().optional(), whtApplicable: z.boolean().optional(), bankName: z.string().optional(),
   bankAccountNo: z.string().optional(), status: z.enum(['Active', 'Inactive']).optional(),
 }).passthrough();
 define({
@@ -51,7 +51,7 @@ define({
   handler: async (req, res) => {
     const before = await svc.getReferrer(pool, req.params.id);
     const b = { name: before.name, type: before.referrer_type, level: before.level, parentReferrerId: before.parent_referrer_id, userId: before.user_id, tin: before.tin, email: before.email, phone: before.phone,
-      whtRate: before.wht_rate, whtApplicable: before.wht_applicable, bankName: before.bank_name, bankAccountNo: before.bank_account_no, status: before.status, ...req.body };
+      whtCode: before.wht_code, whtApplicable: before.wht_applicable, bankName: before.bank_name, bankAccountNo: before.bank_account_no, status: before.status, ...req.body };
     await withTransaction((db) => svc.upsertReferrer(db, req.params.id, b, req.user));
     await audit(req, { entity: 'commission_referrer', entityId: req.params.id, action: 'update', before, after: req.body });
     ok(res, await svc.buildAccount(pool, req.params.id), 'Referrer updated');

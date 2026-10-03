@@ -5,6 +5,7 @@
 import crypto from 'node:crypto';
 import { many, one } from '../../db/pool.js';
 import { getSetting, setSetting } from '../../lib/settings.js';
+import { baseCurrency, currencyChoices } from '../../lib/currency.js';
 import { badRequest } from '../../lib/errors.js';
 import { saveFile } from '../masters/helpers.js';
 import { detectType } from '../uploads/fileTypes.js';
@@ -45,7 +46,10 @@ export async function getSystemSettings() {
     defaultLanguage: map['general.default_language'],
     faviconUrl: map['branding.favicon_url'],
     appTitle: map['general.app_title'],
-    currencies: Array.isArray(map['currency.allowed']) ? map['currency.allowed'] : [],
+    // display currency choices: the active currencies of the Currency master (currency.allowed adds the locale)
+    currencies: await currencyChoices(),
+    // the accounting (ledger) base currency, Currency master: the display currency only relabels amounts
+    baseCurrency: await baseCurrency().catch(() => null),
     languages: map['general.languages'] || [],
     companyName: map['general.company_name'],
     systemName: map['general.system_name'],
@@ -78,8 +82,9 @@ export async function updateSystemSettings(body, userId) {
     changes[key] = v;
   }
   if (changes['currency.default'] !== undefined) {
-    const allowed = (await getSetting('currency.allowed', [])) || [];
-    if (!allowed.some((c) => c.code === changes['currency.default'])) errors.push({ path: 'displayCurrency', message: 'Currency is not in the allowed list' });
+    const choices = await currencyChoices();
+    changes['currency.default'] = String(changes['currency.default'] || '').toUpperCase();
+    if (!choices.some((c) => c.code === changes['currency.default'])) errors.push({ path: 'displayCurrency', message: 'Currency is not an active currency of the Currency master' });
   }
   if (errors.length) throw badRequest('Validation failed', errors);
   for (const [k, v] of Object.entries(changes)) await setSetting(k, v, userId);

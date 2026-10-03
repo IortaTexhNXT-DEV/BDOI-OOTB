@@ -4,6 +4,7 @@
  * and the selected one(s) become the Quotation Slip (a quotation) or, when the journey allows, the Placement Slip.
  */
 import { many, one, query, withTransaction } from '../../db/pool.js';
+import { baseCurrency } from '../../lib/currency.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { queueEmail } from '../../lib/mailer.js';
@@ -12,7 +13,7 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { num, round2, renderTemplate, emailTemplate, amountText } from '../documents/common.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { insurerId } from '../policies/service.js';
-import { taxRates } from '../quotations/premium.js';
+import { quotationCharges } from '../premium-charges/service.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
 import { createLead } from '../leads/service.js';
 
@@ -164,7 +165,7 @@ export async function createSlip(input, userId) {
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$17) RETURNING id`,
     [number, body.leadRefId || null, body.clientId || null, productId, body.productType || null, lob, body.insuredName || await partyName(db, body),
       JSON.stringify(body.riskDetails || {}), JSON.stringify(body.doc || {}), JSON.stringify(covers), round2(num(body.sumInsured) || coversTotal(covers)),
-      body.currency || await getSetting('currency.default', 'PHP'), isoDate(body.inceptionDate), isoDate(body.expiryDate), isoDate(body.responseDueDate), body.remarks || null, userId]);
+      body.currency || await baseCurrency(), isoDate(body.inceptionDate), isoDate(body.expiryDate), isoDate(body.responseDueDate), body.remarks || null, userId]);
     await addOffers(db, r.rows[0].id, insurers, userId);
     return r.rows[0].id;
   });
@@ -259,7 +260,7 @@ export async function addInsurer(id, ref, user) {
 }
 
 /**
- * Record an insurer's response: offered (premium required; taxes from the LOB tax rates, gross and rate derived when not
+ * Record an insurer's response: offered (premium required; taxes from the premium tax and charge engine, gross and rate derived when not
  * given, validity defaulted from placement.offer_validity_days) or declined. When no insurer is pending any more the slip
  * is Responses-in.
  */
@@ -277,8 +278,9 @@ export async function recordOffer(id, offerId, body, user) {
     const si = num(body.sumInsured) || num(slip.sum_insured);
     let taxes = body.taxes === undefined || body.taxes === null || body.taxes === '' ? null : round2(num(body.taxes));
     if (taxes === null) {
-      const rates = await taxRates(slip.lob);
-      taxes = round2(Object.values(rates).reduce((s, r) => s + round2(premium * r), 0));
+      // the same engine the quotation is priced with (Premium Taxes & LGU Rates)
+      const c = await quotationCharges({ productId: slip.product_id || null }, premium, slip.lob);
+      taxes = round2(c.tax.valueAddedTax + c.tax.documentaryStampTax + c.tax.localGovernmentTax + c.tax.fireServiceTax + c.others);
     }
     const validity = isoDate(body.validityDate) || addDays(await today(), Number(await getSetting('placement.offer_validity_days', 30)));
     Object.assign(cols, {
