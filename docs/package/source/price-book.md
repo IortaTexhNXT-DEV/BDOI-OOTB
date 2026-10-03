@@ -222,7 +222,7 @@ This option adds round-the-clock response to P1 incidents reported by telephone.
 
 - A trainer day covers up to 15 participants. The broker provides the room and the devices.
 - A standard integration is one documented API or file exchange in one direction. A complex integration is two-way, has no API, or is a batch with reconciliation.
-- Travel, lodging and meals outside Metro Manila are billed at cost. Recurring optional items increase 5% a year.
+- Travel, lodging and meals outside Metro Manila are billed at cost. The recurring 24x7 Severity 1 support option increases 5% a year, like the AMC and the subscription. Hosting fees do not increase each year; they change only under the pass-through clause of the Hosting and Infrastructure Services Agreement.
 
 # Change requests
 

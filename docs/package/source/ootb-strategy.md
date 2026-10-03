@@ -587,9 +587,9 @@ The plan starts on the date management approves this playbook (Day 1). Owners ar
 | 1 | Confirm the discount limits (5%, 10%, 15%) and the floor | Confirm |
 | 2 | Confirm that the AMC is computed on the quoted (net) licence fee | Confirm, as the contracts state |
 | 3 | Early termination fee for committed terms: all or 50% of the remaining recurring fees | Decide before the first contract |
-| 4 | Hosting fees: no yearly increase (price book) while "recurring optional items" increase 5% (Rate Card wording) | Keep hosting and additional hosted environments without yearly increase, and align the Rate Card wording |
-| 5 | Hypercare length: the Commercial Proposal Note says four weeks; the SOW and Implementation Approach set 2, 3 and 4 to 6 weeks by size | Align the Commercial Proposal Note to the SOW |
-| 6 | Size thresholds: commercial tiers use 26 to 100 users for Medium; the Implementation Approach uses 26 to 75 users for a Medium project | Keep the commercial tier for price; let the delivery size follow data volumes at mobilisation, and state this in both documents |
+| 4 | Hosting fees: no yearly increase (price book) while "recurring optional items" increase 5% (Rate Card wording) | Done: hosting and additional hosted environments have no yearly increase; the Rate Card wording is aligned |
+| 5 | Hypercare length: the Commercial Proposal Note says four weeks; the SOW and Implementation Approach set 2, 3 and 4 to 6 weeks by size | Done: the Commercial Proposal Note now follows the SOW |
+| 6 | Size thresholds: commercial tiers use 26 to 100 users for Medium; the Implementation Approach uses 26 to 75 users for a Medium project | Done: both documents use 26 to 100 users; data volumes can still move a project to the next delivery size at mobilisation |
 | 7 | Versioning scheme and release cadence (Proposed in this playbook) | Approve |
 | 8 | Create the product manager role and the product council | Approve |
 | 9 | Mobile: the FAQ says "not planned in OOTB, to confirm roadmap" | Keep it as a roadmap theme for responsive layouts; no mobile application commitment |

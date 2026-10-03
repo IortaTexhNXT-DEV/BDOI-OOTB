@@ -87,7 +87,7 @@ The implementation fee is calculated, not quoted as a flat figure:
 
 Lines of business drive effort because each one needs products and covers in the product configurator, rating and tax lines (documentary stamp tax, VAT or premium tax, local government tax and fire service tax where they apply), policy and endorsement document templates, insurer commission rates and its own UAT test cases. A motor-only broker and a broker writing motor, fire, marine, casualty, engineering and bonds do not need the same effort.
 
-The implementation includes configuration, data load by the broker with the standard upload templates (about 40 templates are delivered with the product), the training days included for the tier, UAT support, go-live support and four weeks of hypercare. The man-day counts are estimates for the OOTB version.
+The implementation includes configuration, data load by the broker with the standard upload templates (about 40 templates are delivered with the product), the training days included for the tier, UAT support, go-live support and hypercare of 2 weeks (Small), 3 weeks (Medium) or 4 to 6 weeks (Large and Enterprise), extended to cover the first month-end close. The man-day counts are estimates for the OOTB version.
 
 # Model B: subscription
 

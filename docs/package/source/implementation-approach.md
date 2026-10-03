@@ -75,8 +75,8 @@ The plan has three sizes. The size is agreed at mobilisation from the figures be
 | Size | Typical profile (assumption) | Duration to hypercare exit |
 |---|---|---|
 | Small | One office, up to 25 users, up to 10 insurers, up to 5,000 in-force policies, one or two bank accounts | 8 weeks |
-| Medium | Up to 3 offices, 26 to 75 users, up to 25 insurers, up to 25,000 in-force policies, co-insurance in use | 12 weeks |
-| Large | More than 3 offices, more than 75 users, many insurers, more than 25,000 in-force policies, several bank accounts and referrer networks | 16 to 20 weeks |
+| Medium | Up to 3 offices, 26 to 100 users, up to 25 insurers, up to 25,000 in-force policies, co-insurance in use | 12 weeks |
+| Large | More than 3 offices, more than 100 users, many insurers, more than 25,000 in-force policies, several bank accounts and referrer networks | 16 to 20 weeks |
 
 An import file holds at most 20,000 data rows (`IMPORT_MAX_ROWS`). Larger books are loaded in several files, which the large plan allows for.
 

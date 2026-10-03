@@ -695,8 +695,8 @@ Hosting in Singapore is a cross-border transfer under the Data Privacy Act, whic
 | Size | Typical profile | Duration to hypercare exit | Go-live |
 |---|---|---|---|
 | Small | One office, up to 25 users, up to 10 insurers, up to 5,000 in-force policies | 8 weeks | Start of week 7 |
-| Medium | Up to 3 offices, 26 to 75 users, up to 25 insurers, up to 25,000 in-force policies | 12 weeks | Start of week 10 |
-| Large | More than 3 offices, more than 75 users, more than 25,000 in-force policies | 16 to 20 weeks | Start of week 15 (20-week plan) |
+| Medium | Up to 3 offices, 26 to 100 users, up to 25 insurers, up to 25,000 in-force policies | 12 weeks | Start of week 10 |
+| Large | More than 3 offices, more than 100 users, more than 25,000 in-force policies | 16 to 20 weeks | Start of week 15 (20-week plan) |
 
 Phases: mobilisation, discovery and fit-gap, environment set-up, configuration, data migration, integrations, training, system integration test, user acceptance test, cutover, go-live and hypercare until the first month-end close is done.
 

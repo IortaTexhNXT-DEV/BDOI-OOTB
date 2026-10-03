@@ -131,7 +131,7 @@ The price is only part of the deal. The following positions protect the value of
 
 | Position | Standard | Who may change it |
 |---|---|---|
-| Limitation of liability | Fees paid in the 12 months before the claim; no indirect or consequential loss | CEO with legal counsel |
+| Limitation of liability | Fees paid and payable in the 12 months before the event giving rise to the claim (as in the MSA); no indirect or consequential loss | CEO with legal counsel |
 | Platform IP | iorta TechNXT retains all rights in the platform; the client owns its data | Not negotiable |
 | Payment term | 30 days from invoice | SH up to 45 days |
 | Suspension | Subscription and hosting after 60 days of non-payment, with notice | CEO |
