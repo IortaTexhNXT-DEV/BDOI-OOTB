@@ -219,7 +219,7 @@ The monitoring design is in architecture document 11. The standard checks are:
 | Sign-in journey with a monitoring user without business permissions | Every 15 minutes | Monitoring |
 | `GET /api/version`: no pending migration, expected commit | Every 15 minutes | Monitoring |
 | HTTP 5xx rate, response time, container CPU and memory, database CPU, storage and connections | Continuous, alarms as in document 11 | DevOps |
-| Scheduled jobs: last status of each job in Master > Configuration > Schedules; failed runs in `job_runs` | Daily, 09:00 PHT | L2 |
+| Scheduled jobs: last status of each job in Master > Schedules; failed runs in `job_runs` | Daily, 09:00 PHT | L2 |
 | E-mail Outbox: queued older than 15 minutes, failed messages | Daily, and alarm | L2 |
 | Failed sign-ins, locked accounts, refresh-token reuse | Daily, and alarm | L2, security |
 | Backup status and latest restorable time | Daily | DevOps |

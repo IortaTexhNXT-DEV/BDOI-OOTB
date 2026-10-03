@@ -392,9 +392,9 @@ Two-factor sign-in uses authenticator codes (TOTP, RFC 6238, `backend/src/lib/to
 ## Authorisation
 
 - **Permission on every route.** Of the 854 endpoints, 796 require a permission or role through `requirePermission()` or `requireRole()`, 39 require only a signed-in user (own profile, own notifications, own calendar events, address look-ups, file upload and download, global search, permission list for the role screen), and 19 are public by design (section 9.3). A missing permission answers 403 naming the permission.
-- **Roles.** Seven roles are seeded: System Administrator (`system-admin`, every permission), Sales & Marketing, Processing Team, Operations, Claims, Accounting and Accounting Manager. Roles can inherit other roles (`user_effective_roles()`); administrators change grants on Master > User Management.
+- **Roles.** Seven roles are seeded: System Administrator (`system-admin`, every permission), Sales & Marketing, Processing Team, Operations, Claims, Accounting and Accounting Manager. Roles can inherit other roles (`user_effective_roles()`); administrators change grants on Master > Generals > User Management.
 - **Record scoping.** Users whose roles are all listed in `security.scoped_roles` see only their own book: lists add an ownership predicate (`scopeSql()`), and detail routes answer 404 for another user's record (`ownRecord()`), so the record's existence is not disclosed. The scope travels under a JavaScript Symbol, so it cannot be set from the query string.
-- **Approvals.** The maker-checker rule (`backend/src/lib/makerChecker.js`) refuses an approval by the user who created the record; the authority matrix (`assertAuthority()` in `access-control/service.js`) checks the approver's limit per transaction type, raised by active delegations; segregation-of-duties rules are kept under Master > User Management.
+- **Approvals.** The maker-checker rule (`backend/src/lib/makerChecker.js`) refuses an approval by the user who created the record; the authority matrix (`assertAuthority()` in `access-control/service.js`) checks the approver's limit per transaction type, raised by active delegations; segregation-of-duties rules are kept under Master > Generals > User Management.
 - **Front end.** `roleMenuPermissions` in `brokerverse/src/utils/menuPermissions.js` denies by default and lists, per role, the menu entries it may open; `ProtectedRoute` applies the same rule to typed URLs. This only hides screens; the server enforces the permissions.
 
 ## SQL injection prevention
@@ -690,10 +690,10 @@ Database records that support the logs: `audit_log` (changes), `login_history` (
 
 | Symptom on screen | Likely cause | Where to look |
 |---|---|---|
-| "Invalid username or password", then "Account locked" | Wrong passwords reached `limits.max_login_attempts` | `login_history`; unlock on Master > User Management |
+| "Invalid username or password", then "Account locked" | Wrong passwords reached `limits.max_login_attempts` | `login_history`; unlock on Master > Generals > User Management |
 | 429 "Too many requests" | Sign-in or API rate limit | `security.login_rate_limit`, `security.api_rate_limit`; wait for `Retry-After` |
 | "Session ended; sign in again" | Token version raised (password reset, role change, deactivation) | `users.token_version`; expected behaviour |
-| 403 "Requires permission: write:..." | Role lacks the permission | Master > User Management > Role Permissions |
+| 403 "Requires permission: write:..." | Role lacks the permission | Master > Generals > User Management > Role Permissions |
 | Screen missing from the menu | Role not granted the menu entry | `roleMenuPermissions` in `utils/menuPermissions.js` |
 | "Accounting period ... is closed / soft-closed / locked" | Posting date in a closed period | Accounts > Period End > Period Management |
 | "No active posting rule for event ..." or "GL account setting ... is not configured" | Posting configuration incomplete | Master > Finance > Posting Rules and Account Determination |

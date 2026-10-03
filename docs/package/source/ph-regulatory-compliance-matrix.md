@@ -32,7 +32,7 @@ Several controls support every obligation in this matrix. They are referred to b
 | Personal user IDs and role-based access | Seven roles; deny by default; menus and every API action checked against the role's permissions (Master > Generals > User Management) |
 | Maker-checker | Quotations, journal vouchers, payment vouchers, commission payouts, remittances, debit notes, claim settlements, month-end and year-end close, bank reconciliations (user manual, chapter 3) |
 | Audit trail | Master > Audit Trail: every create, update, approval, report run and sign-in, with before and after values; entries are kept (`housekeeping.audit_log_days` is 0) |
-| Numbered documents | 52 number series in Master > Configuration > Document Numbering; counters only move forward |
+| Numbered documents | 52 number series in Master > Document Numbering; counters only move forward |
 | Period control | Accounts > Period End > Period Management: open, soft-closed, closed and locked periods; reopening needs a remark and is recorded |
 | Printed documents | Every document and report PDF carries the letterhead of the primary company (name, address, TIN, contact details) from the Company master |
 

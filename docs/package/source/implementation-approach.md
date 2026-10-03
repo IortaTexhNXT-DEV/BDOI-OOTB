@@ -52,9 +52,9 @@ What the broker can set without code:
 | Commission rates and referrer sharing | Master > Finance > Commission Rate Matrix |
 | Premium taxes and LGU rates, tax codes with BIR ATC | Master > Finance > Premium Taxes & LGU Rates; Master > Finance > Taxation |
 | Chart of accounts, account determination, posting rules | Master > Finance > Main Account, Sub Account, Account Determination, Posting Rules, Configuration Approvals |
-| Document numbering (52 series) | Master > Configuration > Document Numbering |
+| Document numbering (52 series) | Master > Document Numbering |
 | Business rules, limits, maker-checker switches, security policy, e-mail texts | Master > Configuration |
-| Scheduled jobs | Master > Configuration > Schedules |
+| Scheduled jobs | Master > Schedules |
 | Banks, bank accounts, statement formats, transaction types | Master > Finance > Bank, Bank Statement Formats, Bank Transaction Types |
 | Payment gateways | Master > Finance > Payment Gateways |
 
@@ -141,19 +141,19 @@ Configuration follows the order of `GO_LIVE_DATA_SETUP.md`, steps 1 to 10, first
 |---|---|---|
 | Company and letterhead, system name and logo | Master > Generals > Organization > Company; Master > System Settings | `Company_Upload_Template.xlsx` |
 | Branches, departments | Master > Generals > Organization > Branch | `Branch_…`, `Department_Upload_Template.xlsx` |
-| Users and roles, security settings | Master > Generals > User Management > User; Master > Configuration > Security | `Users_Provisioning_Template.xlsx` |
+| Users and roles, security settings | Master > Generals > User Management > User; Master > Configuration > Security & Access | `Users_Provisioning_Template.xlsx` |
 | Insurers, credit and remittance terms | Master > Generals > Insurance Management > Insurance Company | `Insurance_Company_Upload_Template.xlsx` |
 | Commission | Master > Finance > Commission Rate Matrix | On screen |
 | Lines of business, products, policy types, covers, vehicles | Master > Generals > Insurance Management | `Line_of_Business_…`, `Product_…`, `Policy_Type_…`, `Cover_…`, `Vehicle_…` templates |
-| Product templates, motor tariff, rating, acceptance rules | Product Configurator (approval limits: Master > User Management > Authority Matrix) | On screen |
+| Product templates, motor tariff, rating, acceptance rules | Product Configurator (approval limits: Master > Generals > User Management > Authority Matrix) | On screen |
 | Tax codes, premium taxes and LGU rates | Master > Finance > Taxation; Premium Taxes & LGU Rates | On screen |
 | Chart of accounts | Master > Finance > Main Account, Sub Account | `Chart_of_Accounts_Upload_Template.xlsx` |
 | Account determination and posting rules | Master > Finance > Account Determination, Posting Rules (Simulate), Configuration Approvals | On screen |
 | Banks, bank accounts, signatories | Master > Finance > Bank; Insurance Management > Signatories | `Bank_…`, `Bank_Account_…`, `Signatories_Upload_Template.xlsx` |
-| Document numbering | Master > Configuration > Document Numbering | On screen |
+| Document numbering | Master > Document Numbering | On screen |
 | Approvals and maker-checker | Master > Configuration (switches and remittance approval levels); User Management > Authority Matrix | On screen |
 | E-mail texts, notification recipients | Master > Configuration | On screen |
-| Scheduled jobs | Master > Configuration > Schedules | On screen |
+| Scheduled jobs | Master > Schedules | On screen |
 
 The delivered data already holds Philippine lines of business, products, covers, vehicle makes, the 2025 motor tariff, the tax codes (VAT 12%, DST 12.5%, LGT 0.75% and expanded withholding codes with ATC) and a Philippine broker chart of accounts. Configuration therefore reviews and adjusts more than it builds. The broker's accountant and tax adviser confirm tax rates, ATC and GL accounts.
 

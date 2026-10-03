@@ -424,7 +424,7 @@ Business and financial records are kept; financial documents are cancelled or re
 
 ![Data lifecycle: online, archive, purge (architecture document 10, recommended)](/home/user/BDOI-OOTB/docs/architecture/diagrams/d10_data_lifecycle.png)
 
-> **Recommended:** Document 10 proposes keeping financial and policy records 10 years after the financial year end or policy expiry, unconverted leads and quotations 3 years then anonymised or deleted, and an annual export of closed years to write-once archive storage. There is no archive or anonymisation function in the application today; these steps are database procedures run by the hosting team under change control.
+> **Recommended:** Document 10 proposes keeping financial and policy records 10 years after the financial year end or policy expiry, unconverted leads and quotations 3 years then anonymised or deleted, and an annual export of closed years to write-once archive storage. The application anonymises the personal data of a client or prospect on request (Master > Data Privacy > Data Subject Requests, Anonymise, with a dry run first); it refuses while the records must still be kept (`privacy.retention_years`, 10 years after the last policy expiry). There is no archive function: the annual export of closed years is a database procedure run by the hosting team under change control.
 
 ## Monitoring and alerting
 
@@ -454,13 +454,13 @@ Severity P1 is a 24 x 7 response, P2 the same business day and P3 the next busin
 
 | Control | Implementation |
 |---|---|
-| Accounts | Named users only; no shared or agent sign-in. Users are created in Master > User Management or from a CSV with `scripts/provision-users.js`; each must change the initial password at first sign-in. |
+| Accounts | Named users only; no shared or agent sign-in. Users are created in Master > Generals > User Management or from a CSV with `scripts/provision-users.js`; each must change the initial password at first sign-in. |
 | Password storage | bcrypt (cost 10); reset codes stored only as keyed HMAC hashes |
 | Password policy | Minimum 8 characters, upper and lower case, digit and symbol, history of 5, maximum age 90 days (`security.password_*`) |
 | Lockout | Account locked after 5 wrong passwords (`limits.max_login_attempts`); 10 attempts per 5 minutes per IP and per username (`security.login_rate_limit`) |
 | Two-factor | TOTP (RFC 6238); secrets encrypted with AES-256-GCM; compulsory for the roles in `security.require_2fa_roles` (empty by default) |
 | Sessions | Access token 30 minutes, refresh token 30 days rotated on each use; reuse of a rotated token revokes the token family and is logged |
-| Revocation | Password change or reset, deactivation, role or permission change raise the token version and end sessions at once; Master > User Management can end every session of a user |
+| Revocation | Password change or reset, deactivation, role or permission change raise the token version and end sessions at once; Master > Generals > User Management can end every session of a user |
 | Idle sign-out | 30 minutes (`limits.session_idle_minutes`) with a one-minute warning |
 | Sign-in history | Every attempt in `login_history` with result, reason, IP and user agent |
 
@@ -487,10 +487,10 @@ Permissions are `read:<module>`, `write:<module>` and `approve:<area>` codes, ch
 | Administrator protection | Only a System Administrator can grant that role or change an administrator; nobody can change their own roles or status |
 | Record scope | Roles listed in `security.scoped_roles` see only their own records and clients (empty by default) |
 | Maker-checker | A different user approves journal vouchers, payment vouchers and cheques, commission payouts, remittances and settlements, debit notes, claim settlements, incentive calculations, treaties, petty cash, period closes, reconciliations, quotation and renewal approvals, authority limits and posting rule changes (`finance.maker_checker_enabled`) |
-| Authority matrix | Approval limits per transaction type and role or user (Master > User Management > Authority Matrix); a new limit applies only after another administrator approves it; default limits in PHP are seeded and replaced by the board-approved signing authority |
-| Delegation of authority | Time-bound delegation of approval authority (leave, travel), revocable (Master > User Management > Delegations) |
+| Authority matrix | Approval limits per transaction type and role or user (Master > Generals > User Management > Authority Matrix); a new limit applies only after another administrator approves it; default limits in PHP are seeded and replaced by the board-approved signing authority |
+| Delegation of authority | Time-bound delegation of approval authority (leave, travel), revocable (Master > Generals > User Management > Delegations) |
 | Segregation of duties | Rules on pairs of roles, checked when roles are assigned (`access.sod_enforced`). Seeded: placement and payment, placement and payment approval, claims and payment (block); sales and collection, sales and claims (warn) |
-| Access reviews | Recertification campaigns over every active user; "revoke" deactivates the account and signs it out (Master > User Management > Access Reviews) |
+| Access reviews | Recertification campaigns over every active user; "revoke" deactivates the account and signs it out (Master > Generals > User Management > Access Reviews) |
 | Access reports | User Access Matrix and Role Permissions, downloadable as XLSX or CSV |
 | Period control | Postings refused in closed or locked periods; soft-closed periods only with `approve:period-end` |
 
@@ -625,21 +625,25 @@ Government-issued identifiers and some claim information (for example injury det
 | KYC identification | Legal obligation and the insurers' underwriting requirements |
 | Marketing to leads, win-back campaigns | Consent, or legitimate interest where the DPO concludes it applies |
 
-> **Gap:** BrokerVerse has no consent capture, privacy notice acknowledgement or marketing opt-out field. **Recommended:** the broker gives its privacy notice in its own forms and proposal documents, records consent outside the system or in a document attached to the client, and excludes opted-out clients from campaigns by a master or remark until a consent field is added.
+Consent is recorded per client or prospect and per purpose (processing, that is the privacy notice acknowledged; marketing; sharing with insurers and reinsurers) on the Data privacy tab of the client and on the prospect view, with the channel, the evidence and the notice version in force (`privacy.notice_version`). A withdrawal is stamped on the consent it ends; records are never deleted. Master > Data Privacy > Consent Register lists every consent across clients and prospects.
+
+> **Recommended:** the broker keeps the wording of its privacy notice in its own forms and proposal documents, raises `privacy.notice_version` when the notice changes, and checks the marketing consent before a campaign.
 
 ## Data subject rights
 
 | Right (DPA section 16 and following) | How it is handled with BrokerVerse |
 |---|---|
-| To be informed | Broker's privacy notice (outside the system) |
-| Access | Client view with its policies; reports and exports in XLSX, CSV or PDF; documents in the document viewers |
+| To be informed | Broker's privacy notice; acknowledgement recorded as the processing consent with the notice version |
+| Access | Export personal data (JSON or Excel) from the data subject request; client view with its policies; documents in the document viewers |
 | Rectification | Edit the client or lead (Operations screens); every change is in the audit log |
-| Object and withdraw consent | Remove the person from marketing lists and campaigns; record the decision |
-| Erasure or blocking | Leads can be deleted (soft delete, blocked once a policy exists); stored files can be deleted by the uploader, module writer or administrator. Records that support policies, claims and accounting are kept for the legal retention period. |
-| Data portability | Exports in XLSX and CSV |
+| Object and withdraw consent | Withdraw the consent on the client or prospect; the request is logged with type Objection or Withdraw consent |
+| Erasure or blocking | Anonymise from the data subject request (dry run first); refused while policy, claim and accounting records must be kept (`privacy.retention_years`). Leads can also be deleted (soft delete). Amounts, numbers and dates stay for the books. |
+| Data portability | Export personal data in JSON or Excel |
 | Damages and complaints | Broker's DPO and complaints procedure |
 
-> **Gap:** There is no dedicated data subject request register, client anonymisation function or client data export screen. **Recommended:** keep a rights request log outside the system (date received, identity check, response within the period the DPO sets) and, after the retention period, anonymise records through a reviewed database procedure.
+Master > Data Privacy > Data Subject Requests is the register of requests: number from the DSR series, requester, type (Access, Rectification, Erasure or blocking, Objection, Data portability, Withdraw consent), date received and a due date `privacy.request_due_days` (15 calendar days) later, status, assignee, outcome and the exports and anonymisation done for it. The `privacy-requests-due` job (07:00 daily, delivered switched off) notifies the holders of `read:privacy` of open requests past their due date.
+
+> **Recommended:** the DPO confirms the response period and switches on the `privacy-requests-due` job at go-live (Master > Schedules).
 
 ## Retention and disposal
 
@@ -664,7 +668,7 @@ When BrokerVerse is hosted in Singapore (options A and B), personal data is stor
 | Step | Practice with BrokerVerse |
 |---|---|
 | Detect | Alarms on failed sign-ins, token reuse, 5xx spikes; audit and sign-in history; WAF logs |
-| Contain | End user sessions (Master > User Management), deactivate accounts, rotate `JWT_SECRET` to sign everyone out, block addresses at the WAF |
+| Contain | End user sessions (Master > Generals > User Management), deactivate accounts, rotate `JWT_SECRET` to sign everyone out, block addresses at the WAF |
 | Assess | Use the audit log, `login_history` and request ids to find which records were affected |
 | Notify | The broker's DPO notifies the NPC and affected data subjects within 72 hours of knowledge where NPC Circular 16-03 requires it; iorta TechNXT informs the broker without undue delay |
 | Record | Incident and breach records kept for the annual report to the NPC |
@@ -703,9 +707,9 @@ The Amended Insurance Code (Republic Act 10607) and the circulars of the Insuran
 | Vulnerability management | Lock files; backend audit clean at review | Scan in CI; patch OS and middleware; yearly penetration test |
 | Change management | Pull request CI; migrations on start under a lock | Branch protection; UAT sign-off; pre-release snapshot |
 | DPO and registration | Not a system function | Appoint the DPO; register with the NPC where required |
-| Privacy notice and consent | No consent field in the system | Issue the notice; record consent; manage opt-outs |
-| Data subject rights | View, edit, export; lead and file deletion | Keep a request log; respond within the agreed period |
-| Retention and disposal | Housekeeping of temporary data; financial records kept | Approve retention periods; run archival and anonymisation |
+| Privacy notice and consent | Consent per purpose with notice version; Consent Register | Issue the notice; record consent; act on withdrawals |
+| Data subject rights | Data Subject Requests register with due dates; export; anonymisation | Log every request; respond within the agreed period |
+| Retention and disposal | Housekeeping of temporary data; financial records kept; anonymisation after the retention period | Approve retention periods; run archival |
 | Cross-border transfer | Hosting choice of Singapore or the Philippines | Document the transfer; sign the provider's data processing terms |
 | Data processing agreement | iorta TechNXT acts on instructions | Sign the agreement with iorta TechNXT and the hosting partner |
 | Breach notification | Logs and audit data to assess a breach | Breach response team; notify NPC and data subjects within 72 hours |

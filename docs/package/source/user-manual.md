@@ -227,7 +227,7 @@ BrokerVerse records every create, change, approval, report run and sign-in with 
 
 | Where | What you see | Who |
 |---|---|---|
-| Master > Configuration > Audit Trail | Every audited action, searchable by record type, record ID, user and dates. | System Administrator |
+| Master > Audit Trail | Every audited action, searchable by record type, record ID, user and dates. | System Administrator |
 | **Audit Trail** tab of a quotation | Every change of the quotation with date, field, old and new value and user. | Users who open the quotation |
 | Claim audit trail (icon on the claims list) | Every status change of the claim with user and time. | Claims |
 | History of a period, reconciliation, close run or posting rule | Each status change with user, time and remarks. | Accounting, Accounting Manager |
@@ -524,8 +524,8 @@ The System Administrator can open every Master > Finance screen. The Accounting 
 
 ## Reinsurance treaties and incentive programmes
 
-- **Master > Reinsurance Treaty**: **Add Treaty** with **Treaty Number**, **Treaty Name**, **Treaty Type** (quota share, surplus, excess of loss, stop loss), **Line of Business**, **Reinsurers**, **Effective Date** and **Expiry Date**, then the tabs Coverage & Limits and Commission. A new treaty needs a second user's approval (`reinsurance.treaty_requires_approval`); reinsurers must meet the minimum security rating A- (`reinsurance.min_security_rating`).
-- **Master > Incentive Programs**: **Add Program** with the code, name, type (Target Based, Commission Based, Hybrid, Contest), target metric, base target, frequency and dates. Accounting calculates and pays the programmes but cannot change them.
+- **Master > Finance > Reinsurance Treaty**: **Add Treaty** with **Treaty Number**, **Treaty Name**, **Treaty Type** (quota share, surplus, excess of loss, stop loss), **Line of Business**, **Reinsurers**, **Effective Date** and **Expiry Date**, then the tabs Coverage & Limits and Commission. A new treaty needs a second user's approval (`reinsurance.treaty_requires_approval`); reinsurers must meet the minimum security rating A- (`reinsurance.min_security_rating`).
+- **Master > Finance > Incentive Programs**: **Add Program** with the code, name, type (Target Based, Commission Based, Hybrid, Contest), target metric, base target, frequency and dates. Accounting calculates and pays the programmes but cannot change them.
 
 ## Approvals
 
@@ -1686,7 +1686,7 @@ The year-end close needs all twelve periods closed. Choose the fiscal year and s
 
 ![New Incentive Calculation](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-inc-calc-new.png)
 
-Only Sales & Marketing users take part (`incentive.eligible_roles`). Accounting cannot change the programmes it pays; the System Administrator keeps them on Master > Incentive Programs.
+Only Sales & Marketing users take part (`incentive.eligible_roles`). Accounting cannot change the programmes it pays; the System Administrator keeps them on Master > Finance > Incentive Programs.
 
 ## Finance masters kept by Accounting
 

@@ -38,7 +38,7 @@ The scheduler starts with the API server (`backend/src/server.js`). It loads eve
 | Picking up changes | Every instance checks every `SCHEDULER_RELOAD_SECONDS` (default 30) whether any job's cron, enabled flag, handler or parameters, or the time zone, changed, and reloads its timetable. | Environment variable |
 | One run at a time | Each run takes a PostgreSQL advisory lock on the job code. A second instance that fires the same job at the same time skips it. A scheduled run also skips when another instance already started a scheduled run of the same job in the same minute. A skipped run records nothing. | Automatic |
 | Missed runs | A run that falls while no instance is running is not caught up. The next scheduled time runs normally. Jobs that work on "everything due up to today" (policy expiry, recurring journals, accrual reversal, ageing) recover on their next run; jobs that look at one exact day (renewal notices) do not. | Design |
-| Run history | Each run writes a `job_runs` row and updates Last run and Last status on the job. Run history is kept for `housekeeping.job_runs_days` (90 days). | Master > Configuration > Data Retention & Uploads |
+| Run history | Each run writes a `job_runs` row and updates Last run and Last status on the job. Run history is kept for `housekeeping.job_runs_days` (90 days). | Master > Configuration > Data Retention, Privacy & Uploads |
 
 ## Master > Schedules
 
@@ -171,7 +171,7 @@ One job per report schedule, code `report-<schedule id>`, created when a report 
 
 ## Housekeeping
 
-Deletes, in batches of 5,000 rows, data past its retention period. Every period is a setting on Master > Configuration > Data Retention & Uploads (days; 0 keeps forever).
+Deletes, in batches of 5,000 rows, data past its retention period. Every period is a setting on Master > Configuration > Data Retention, Privacy & Uploads (days; 0 keeps forever).
 
 | Data | Setting | OOTB days | Rows deleted |
 |---|---|---|---|
