@@ -1063,7 +1063,7 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 
 ## Home and Open Items
 
-**Home** (Operations > Home) greets the user and shows **Create Quote**, the counts of prospects, clients and policies sold with **See More**, the commission chart, upcoming events from the activity monitor, and earned commission, collected premium, receivables and gross premium of the user's own book.
+**Home** (Operations > Home), titled Dashboard, shows **Create Quote**, the counts of prospects, clients and policies sold with **See More**, the commission chart, upcoming events from the activity monitor, and earned commission, collected premium, receivables and gross premium of the user's own book.
 
 **Open Items** (Operations > Open Items) is the daily worklist. Four boxes show a count and the first records: **Expiring Policy**, **Quote Pending**, **Pending Payments** and **Renewal Request**. Select **See More** to open the full list of a box, and a record to open it.
 
