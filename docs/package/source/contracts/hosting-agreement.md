@@ -54,7 +54,7 @@ iorta TechNXT provides, for each environment in the Order Form:
 
 1. provisioning and configuration of the infrastructure, sized for the Client's size and confirmed by the UAT performance test;
 2. deployment of iNXT BrokerVerse releases under the release process of the Support Agreement;
-3. operating system, database and middleware patching (monthly, and within [7] days for critical security patches);
+3. operating system, database and middleware patching (monthly; critical security patches within 14 days and high within 30 days);
 4. TLS certificates for the iorta TechNXT-provided domain [or the Client's domain, with the Client's DNS cooperation];
 5. monitoring and alarms (health checks, errors, response time, capacity, scheduled jobs, failed sign-ins, backups and certificate expiry);
 6. daily backups and restore testing as in the Backup and recovery chapter;
@@ -139,7 +139,7 @@ iorta TechNXT applies at least the following controls:
 3. encryption in transit (HTTPS; TLS to the database) and at rest (database, file store, backups) with keys held in the provider's key service under the hosting account;
 4. secrets in a secret store; separate secrets per environment; sealed escrow copy of the data encryption key;
 5. least-privilege administrator access, named accounts, multi-factor authentication and quarterly access reviews;
-6. vulnerability scanning of images and dependencies, monthly patching and critical patches within [7] days;
+6. vulnerability scanning of images and dependencies, monthly patching, critical patches within 14 days and high within 30 days;
 7. a yearly penetration test of production by an independent tester, with a summary shared with the Client and findings fixed on a risk basis;
 8. logs of administrator access and security events kept for at least [2] years;
 9. incident response under the Support Agreement and breach notification under the Data Processing Agreement.

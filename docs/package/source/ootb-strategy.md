@@ -350,7 +350,7 @@ Service credits apply for missed P1 and P2 restore targets and for response and 
 | Deployment | In the maintenance window (default Saturday 20:00 to Sunday 06:00 PHT), announced at least 5 business days ahead; database snapshot before; smoke test after |
 | Rollback | Previous image and front-end build; migrations only add, so the previous version runs on the newer schema |
 | Supported versions | The current release and the two previous planned releases |
-| Patching | Runtime and dependency advisories reviewed monthly; critical fixes as an emergency release; container base image at least quarterly; operating system and database patches monthly and critical security patches within 7 days where iorta TechNXT hosts |
+| Patching | Runtime and dependency advisories reviewed monthly; critical fixes as an emergency release; container base image at least quarterly; operating system and database patches monthly critical security patches within 14 days and high within 30 days where iorta TechNXT hosts |
 
 ## AMC and the subscription
 
@@ -485,7 +485,7 @@ Targets marked Proposed are starting values for management to confirm at the fir
 | Regression pass | Business-rule tests passing at release | 100% |
 | Escaped defects | P1 and P2 incidents caused by a release, per release | 0 P1 (Proposed) |
 | Merge ratio | Change requests merged into the product / change requests delivered | Tracked; rising (Proposed) |
-| Security advisories | Critical advisories fixed in an emergency release | Within 7 days |
+| Security advisories | Critical advisories fixed in an emergency release; high in the next release | Critical within 14 days, high within 30 days |
 | Release test status | Failed, blocked and not-run cases of the release test closed | All closed before the next major release (Proposed) |
 
 ## Finance and management

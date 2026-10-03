@@ -31,8 +31,8 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | Menu screens checked per role in the release test | 173 |
 | Catalogue reports in Excel, CSV and PDF | 39, plus dashboards and printed documents |
 | Registered API routes | 854, documented in OpenAPI, Postman and an Excel touchpoint list |
-| Scheduled jobs (Asia/Manila time) | 16, plus the overdue data subject request reminder (delivered switched off) |
-| Document number series | 52 in the release test, counters that only move forward |
+| Scheduled jobs (Asia/Manila time) | 18, of which 7 are delivered switched off (including the remittance schedules and the overdue data subject request reminder) |
+| Document number series | 61, counters that only move forward |
 | Upload templates for go-live data | About 40, each verified against its importer |
 | Test cases | 497 prepared: 480 passed, 8 failed, 3 blocked, 6 not run |
 | Automated business-rule tests | 634, all passed |
@@ -69,7 +69,7 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | Billing, official receipts, receipt and invoice e-mails with PDF | Accounts > Receipts |
 | Collections, reminders, credit control: instalment plans, premium warranty monitor, client credit limits, remittance ageing | Accounts > Collections; Credit Control |
 | Disbursement and payment vouchers, petty cash from request to replenishment | Accounts > Disbursement; Petty Cash |
-| Remittance to insurers by share, with tracking, statements, settlement, approval workflow, exceptions, electronic transfer records, agency bill and direct bill processing | Accounts > Remittance |
+| Remittance to insurers by share, with tracking, statements, settlement, approval within the Authority Matrix limits, schedules run by the `remittance-schedules` job, exceptions, electronic transfer records, agency bill and direct bill processing | Accounts > Remittance |
 | Commission: referrer and sub-agent accounts, commission rate matrix, payout after collection with withholding | Commission |
 | Incentive programmes, calculations, approvals and statements | Accounts > Incentive |
 | General ledger from posting rules; Journal Voucher, Correction JV, Reversal JV; open entry matching | Accounts |
@@ -82,12 +82,13 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 
 | Capability | Main screens |
 |---|---|
-| Product Configurator: product templates, coverage builder, rating engine, acceptance rules, document manager, approval workflows, market and risk mapping | Product Configurator |
-| Masters for organisation, insurers, lines of business, products, covers, vehicles, locations, employees, finance | Master > Generals; Master > Finance |
+| Product Configurator: product templates, coverage builder, rating engine, acceptance rules, document manager, market and risk mapping | Product Configurator |
+| Masters for organisation, insurers, lines of business, products, covers, vehicles, locations, designations and hierarchy, finance | Master > Generals; Master > Finance |
 | System Settings, Configuration by business area, Document Numbering, Schedules, E-mail Outbox, Audit Trail | Master |
 | User management: users, roles, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews | Master > Generals > User Management |
 | Security: password policy, lockout, TOTP two-step verification by role, session rotation and idle sign-out, permission check on every API route | Master > Configuration |
 | Data privacy: Consent Register, Data Subject Requests, personal data export, anonymisation with dry run | Master > Data Privacy |
+| Approval notifications in every maker-checker flow: the request to the approvers and the decision to the maker (`notification.approval_requests`) | Notifications (bell) |
 | Reports: operational and financial reports, co-insurance register, due to insurers by co-insurer; dashboards for executives, claims, processing, sales and commission | Reports; Dashboard |
 | Payment links through PayMongo and Dragonpay (sandbox provider for testing); a confirmed payment posts the official receipt | Master > Finance > Payment Gateways |
 
@@ -103,6 +104,21 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | Invoices and receipts | Number series for invoices, official receipts, debit notes and Form 2307; next numbers can continue the old system's numbering; cancelled documents kept with a reason |
 | Local formats | Asia/Manila time zone, PHP base currency, +63 mobile numbers, Philippine provinces and cities with all NCR LGUs, Philippine banks |
 | Data privacy | Consent per purpose with notice version; data subject requests due in 15 calendar days; anonymisation refused within 10 years of the last policy expiry |
+
+## Changes after the release test
+
+These changes were made on the release branch after the release test of 03 and 04 October 2026. The cases they touch are re-run in the next manual cycle.
+
+| Change | Effect for users |
+|---|---|
+| Data privacy module (Master > Data Privacy) | Consents, data subject requests, export and anonymisation in the system instead of outside it |
+| E-mail attachments | Official receipt, premium invoice, policy schedule and commission debit note e-mailed with the PDF attached; attachments listed in the E-mail Outbox |
+| Approval notifications | Every maker-checker request and decision notified under the bell |
+| Remittance approvals in the Authority Matrix | Transaction types Remittance approval and Remittance settlement; delivered limits Accounting PHP 1,000,000.00, Accounting Manager without limit; `remittance.approval_levels` only as a fallback; cover through User Management > Delegations (the separate remittance delegation tab is removed) |
+| Remittance schedules job | The schedules of Accounts > Remittance > Scheduling run daily through `remittance-schedules` on Master > Schedules (delivered switched off) |
+| Duplicate masters retired | Remittance Master keeps automated remittance, statement templates, settlement parameters, bulk processing, exceptions, agency bill, adjustments and notifications; the tabs Reconciliation Rule, Electronic Transfer, History, Analytics, Direct Bill and Report Template are removed (their values are in Master > Configuration). The Commission, Employee and Petty Cash masters are removed from the menu: commission rates are in Master > Finance > Commission Rate Matrix, staff details on the user form (branch, designation, reporting to), petty cash fund size and limits on Accounts > Petty Cash > Initiate. Product Configurator > Approval Workflows is removed |
+| One source for currency, exchange rates and premium taxes | One base currency in the Currency master; dated rates only from the Exchange Rate master; premium taxes only from Premium Taxes & LGU Rates |
+| Screen stability | Lists paged by the server (20, 50 or 100 rows), Prospects shown as a table, description paragraphs removed from working screens, steadier loading |
 
 # Known limitations and open items
 

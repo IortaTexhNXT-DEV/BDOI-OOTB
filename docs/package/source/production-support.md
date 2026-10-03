@@ -202,10 +202,10 @@ A correction of business data through the database is a normal change. It needs:
 
 | Component | Standard |
 |---|---|
-| Node.js runtime and npm dependencies | Security advisories reviewed monthly; critical fixes as an emergency release, others in the next planned release |
+| Node.js runtime and npm dependencies | Security advisories reviewed monthly; critical fixes within 14 days as an emergency release, high within 30 days, others in the next planned release |
 | Container base image | Rebuilt with each release; at least quarterly |
 | PostgreSQL 16 (managed service) | Minor versions applied in the maintenance window; major upgrades planned as a project |
-| Operating system and managed services | Managed by the cloud provider; maintenance windows aligned with the broker's window |
+| Operating system and managed services | Managed by the cloud provider; monthly, critical security patches within 14 days and high within 30 days where iorta TechNXT hosts; maintenance windows aligned with the broker's window |
 | TLS certificates | Renewal alarm at 30 days before expiry |
 
 # Monitoring and health checks
@@ -396,6 +396,16 @@ BrokerVerse holds personal data of prospects, clients, claimants and users (name
 | Breach register entry and annual report of breaches | Broker's DPO | As required by the NPC rules |
 
 iorta TechNXT supports the broker with the facts (what, when, which records, which users, containment) but does not notify the NPC or data subjects on the broker's behalf unless the agreement says so. The broker's DPO confirms the current NPC rules on breach notification.
+
+## Data subject requests
+
+Requests of data subjects are the broker's: its privacy team logs and answers them in Master > Data Privacy > Data Subject Requests (due date 15 calendar days after receipt, export of personal data, anonymisation with a dry run) and records consents on the client and prospect screens. Support takes part only when a screen cannot do what the request needs:
+
+| Situation | Support action |
+|---|---|
+| A request arrives at iorta TechNXT directly | Forwarded to the broker's DPO within 2 business days, not answered |
+| Anonymise is refused although the DPO has decided the data may go | L2 reviews the reasons shown by the dry run with the DPO; any database procedure is a normal change with the DPO's written instruction |
+| Overdue requests are not notified | Check that the job `privacy-requests-due` is switched on in Master > Schedules and that the privacy team holds `read:privacy` |
 
 # Support exclusions
 

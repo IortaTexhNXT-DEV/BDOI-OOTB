@@ -333,5 +333,5 @@ Disclose these when the topic comes up. Each has a workaround or a change reques
 | Report schedules | Scheduled e-mail delivery of reports exists in the API; no screen to set it up | System Administrator sets schedules through the API |
 | Bank payments | Transfers approved and their result recorded; no bank payment file | CR for a bank file format |
 | Two-factor enrolment | Shows the key and a link, not a QR code | Users type the key in the authenticator app |
-| Mobile | Web application for desktop and laptop browsers | Not planned in OOTB [to confirm roadmap] |
+| Mobile | Web application for desktop and laptop browsers | Mobile-friendly screens for sales and claims are on the later part of the indicative roadmap (Release Notes and Product Roadmap) |
 | E-mail | Needs the broker's SMTP mailbox and the "Send e-mails" switch | Set up during implementation |

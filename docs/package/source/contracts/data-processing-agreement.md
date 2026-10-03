@@ -99,8 +99,8 @@ Each Party bears its own costs of a breach. Where the breach is caused by the Pr
 # Data subject requests
 
 1. The Processor forwards to the Controller, within 2 Business Days, any request it receives directly from a data subject concerning Personal Data, and does not answer it except on the Controller's instructions.
-2. The Controller handles requests to be informed, to access, to object, to erasure or blocking, to rectification, to data portability and to damages and complaints. iNXT BrokerVerse supports access and portability through its reports and exports, and rectification through the client and lead screens, with every change recorded in the audit trail.
-3. Erasure that cannot be performed through the screens (for example anonymisation of records after the retention period) is performed by the Processor as a reviewed database procedure on the Controller's written instruction.
+2. The Controller handles requests to be informed, to access, to object, to erasure or blocking, to rectification, to data portability and to damages and complaints. iNXT BrokerVerse supports these requests through its Data Privacy screens: a register of data subject requests with due dates, consent per purpose with withdrawal, export of the personal data of a client or prospect for access and portability, rectification through the client and prospect screens, and anonymisation once the retention period has passed, with every action recorded in the audit trail.
+3. Erasure is performed by the Controller's authorised users with the anonymisation function of iNXT BrokerVerse. Erasure that cannot be performed through the screens is performed by the Processor as a reviewed database procedure on the Controller's written instruction.
 
 # Audits
 
@@ -132,7 +132,7 @@ The Controller:
 2. appoints a DPO and registers its data processing systems with the NPC where required;
 3. gives only lawful instructions and configures iNXT BrokerVerse (roles, two-step verification, retention settings) in line with its privacy management programme;
 4. does not send Personal Data to the Processor beyond what the Services need (for example, covers client personal data in screenshots attached to tickets);
-5. manages consent and marketing opt-outs, which iNXT BrokerVerse OOTB does not record in a dedicated field.
+5. records consent, marketing opt-outs and withdrawals of consent, using the consent function of iNXT BrokerVerse or its own records.
 
 # Liability and term
 
@@ -205,7 +205,7 @@ The Controller:
 - Network zones with private application and data zones; WAF; administrator access with multi-factor sign-in, logged.
 - Secrets in a secret store, separate per environment, with a sealed escrow copy of the data encryption key under dual control.
 - Daily backups with point-in-time recovery, restore tests quarterly, and the retention and recovery objectives of the Hosting and Infrastructure Services Agreement.
-- Monitoring and alarms, including on failed sign-ins and token reuse; patching monthly and critical patches within [7] days; yearly independent penetration test.
+- Monitoring and alarms, including on failed sign-ins and token reuse; patching monthly, critical security patches within 14 days and high within 30 days; yearly independent penetration test.
 
 # Annex 3: authorised sub-processors
 

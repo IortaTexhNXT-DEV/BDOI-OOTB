@@ -50,7 +50,7 @@ BrokerVerse is one repository with two applications and their deployment files.
 | `backend/` | REST API and scheduled jobs: Node.js 22, ECMAScript modules, Express 4, PostgreSQL through `pg` |
 | `backend/src/modules/` | 44 business modules, one folder each (router, service, SQL) |
 | `backend/src/lib/` | Shared libraries: authentication, errors, validation, settings, audit, logging, PDF, uploads |
-| `backend/src/db/` | Connection pool, migration runner, seed runner, 80 migrations, reference and sample seeds |
+| `backend/src/db/` | Connection pool, migration runner, seed runner, 95 migrations, reference and sample seeds |
 | `backend/src/jobs/` | Cron scheduler, job handlers, housekeeping |
 | `backend/test/` | vitest suite (65 test files) with helpers and fixtures |
 | `backend/scripts/` | Settings check, UAT scenario, sample-data purge, database creation, upload templates |
@@ -144,7 +144,7 @@ define({
 
 The database is PostgreSQL 16 (the version in `docker-compose.yml` and in CI). A database migrated and seeded on 03 October 2026 holds 167 tables, 59 functions, 404 settings, 7 roles, 64 permissions, 53 master types, 39 report definitions and 16 scheduled jobs.
 
-- **Migrations** (`backend/src/db/migrations`, 80 files from `0001_core.sql` to `0216_claim_settlement_repair_shop.sql`) run in file-name order. Each runs in its own transaction and is recorded in `schema_migrations`. Applied migrations are never edited; a correction is a new file.
+- **Migrations** (`backend/src/db/migrations`, 95 files from `0001_core.sql` to `0242_product_template_lob_codes.sql`) run in file-name order. Each runs in its own transaction and is recorded in `schema_migrations`. Applied migrations are never edited; a correction is a new file.
 - **Seeds** (`backend/src/db/seeds`) run on every start and are idempotent: rows are inserted by natural key and existing rows and administrator edits are kept. `settings.json` holds configuration keys, `jobs.json` the scheduled jobs, the numbered SQL files the reference data (masters, chart of accounts, motor tariff, product templates, report catalogue, security). `seeds/sample/` holds demo data, loaded only when `SEED_SAMPLE_DATA` is on.
 - **Connection pool** (`backend/src/db/pool.js`): one `pg` pool of 10 connections; `query()`, `one()`, `many()` and `withTransaction(fn)`. NUMERIC and BIGINT values come back as numbers and DATE values as `YYYY-MM-DD` strings.
 
@@ -307,7 +307,7 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 |---|---|---|
 | Back end: modules (`src/modules`) | 162 | 32,442 |
 | Back end: shared libraries (`src/lib`) | 37 | 2,681 |
-| Back end: migrations | 80 | 4,828 |
+| Back end: migrations | 95 | 4,828 |
 | Back end: seeds (reference and sample) | 33 | 2,861 |
 | Back end: jobs, tools, server, configuration, database runners | 10 | 1,050 |
 | Back end: tests (`test/`) | 67 | 11,759 |
@@ -322,7 +322,7 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 | Inventory item | Count |
 |---|---|
 | Back-end module folders / module labels in the API | 44 / 54 |
-| Endpoints in the route registry (plus 2 health endpoints) | 854 |
+| Endpoints in the route registry (plus 2 health endpoints) | 868 |
 | Menu screens / route elements in `MainRoute.js` | 172 / 439 |
 | Front-end service files / API call sites found by the checker | 49 / 767 |
 | Database tables / functions after migration | 167 / 59 |
@@ -391,7 +391,7 @@ Two-factor sign-in uses authenticator codes (TOTP, RFC 6238, `backend/src/lib/to
 
 ## Authorisation
 
-- **Permission on every route.** Of the 854 endpoints, 796 require a permission or role through `requirePermission()` or `requireRole()`, 39 require only a signed-in user (own profile, own notifications, own calendar events, address look-ups, file upload and download, global search, permission list for the role screen), and 19 are public by design (section 9.3). A missing permission answers 403 naming the permission.
+- **Permission on every route.** Of the 868 endpoints, 807 require a permission or role through `requirePermission()` or `requireRole()`, 42 require only a signed-in user (own profile, own notifications, own calendar events, address look-ups, file upload and download, global search, permission list for the role screen), and 19 are public by design (section 9.3). A missing permission answers 403 naming the permission.
 - **Roles.** Seven roles are seeded: System Administrator (`system-admin`, every permission), Sales & Marketing, Processing Team, Operations, Claims, Accounting and Accounting Manager. Roles can inherit other roles (`user_effective_roles()`); administrators change grants on Master > Generals > User Management.
 - **Record scoping.** Users whose roles are all listed in `security.scoped_roles` see only their own book: lists add an ownership predicate (`scopeSql()`), and detail routes answer 404 for another user's record (`ownRecord()`), so the record's existence is not disclosed. The scope travels under a JavaScript Symbol, so it cannot be set from the query string.
 - **Approvals.** The maker-checker rule (`backend/src/lib/makerChecker.js`) refuses an approval by the user who created the record; the authority matrix (`assertAuthority()` in `access-control/service.js`) checks the approver's limit per transaction type, raised by active delegations; segregation-of-duties rules are kept under Master > Generals > User Management.
@@ -587,7 +587,7 @@ The UAT scenario script loads a new database in the order below before it create
 
 ## Endpoints per module
 
-854 endpoints are registered: 390 GET, 336 POST, 85 PUT, 7 PATCH and 36 DELETE. The table shows the count per back-end module and the number of menu screens that call it. The workbook sheet **APIs** lists each endpoint with its summary, permission and screen.
+868 endpoints are registered: 397 GET, 341 POST, 87 PUT, 7 PATCH and 36 DELETE. The table shows the count per back-end module and the number of menu screens that call it. The workbook sheet **APIs** lists each endpoint with its summary, permission and screen.
 
 | Back-end module | Base path(s) under /api | Endpoints | Menu screens |
 |---|---|---|---|
@@ -620,12 +620,13 @@ The UAT scenario script loads a new database in the order below before it create
 | placement | /broker-slips, /placements | 26 | 10 |
 | policies | /policies | 12 | 8 |
 | posting-rules | /posting-rules, /account-determination | 22 | 4 |
+| privacy | /privacy | 14 | 4 |
 | premium-charges | /premium-charges | 9 | 6 |
 | product-configurator | /product-configurator | 72 | 11 |
 | quotations | /quotations, /quote, /master, /email and coverage look-ups | 42 | 4 |
-| receipts | /receipts, /billing-statement | 16 | 3 |
+| receipts | /receipts, /billing-statement | 19 | 3 |
 | reinsurance | /reinsurance | 38 | 6 |
-| remittance | /remittance | 90 | 17 |
+| remittance | /remittance | 86 | 17 |
 | renewals | /renewals, /policy-renewals | 47 | 10 |
 | reports | /reports | 13 | 31 |
 | schedules | /schedules | 4 | 1 |
@@ -634,7 +635,7 @@ The UAT scenario script loads a new database in the order below before it create
 | system | /version | 1 | 0 |
 | system-settings | /system-settings | 7 | 12 |
 | uploads | /s3, /upload | 11 | 12 |
-| users | /users, /roles | 16 | 7 |
+| users | /users, /roles | 17 | 7 |
 
 > The menu screen count of shared modules (masters, accounting, clients, settings, reports) is high because many screens read masters, settings and account lists or upload files. The two health endpoints (`GET /api/health`, `GET /api/health/live`) are mounted in `src/app.js` outside the registry.
 
