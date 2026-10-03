@@ -8,6 +8,7 @@ import { endorsementStatusOut, endorsementStatusIn } from '../documents/statuses
 import { getPolicyRow, createReceivable } from '../policies/service.js';
 import { publicUrl } from '../uploads/storage.js';
 import { premiumBreakdown } from '../quotations/premium.js';
+import { quotationCharges } from '../premium-charges/service.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
@@ -103,8 +104,24 @@ async function priceCoverageChange(cc, policy) {
   if (given(cc.appaSeats)) input.appaSeats = cc.appaSeats;
   const keep = { ctplCoveragePremium: num(doc.ctplCoveragePremium ?? doc.ctplCoverageRate), ctplCoverageRate: doc.ctplCoverageRate ?? '',
     ...(appaChanged ? {} : { APPAcoveragePremium: num(doc.APPAcoveragePremium), APPAtotalCoverage: num(doc.APPAtotalCoverage) }) };
-  const next = await premiumBreakdown(input, { keep });
-  return { changed, current, next: { ...next, grossPremium: round2(next.grossPremium), netPremium: round2(next.netPremium) } };
+  const priced = await premiumBreakdown(input, { keep });
+  // The additional (or return) premium carries its own taxes, charged on its amount with the policy's product and
+  // location: DST on each P4.00 of the additional premium, not the difference of two separately rounded totals.
+  const netDelta = round2(priced.netPremium - current.netPremium);
+  const sign = Math.sign(netDelta);
+  const ap = sign ? await quotationCharges({ productId: policy.product_id || null, lguCode: doc.lguCode || null, lguCity: doc.lguCity || null,
+    premiumTaxRegime: doc.premiumTaxRegime || null }, Math.abs(netDelta), policy.lob) : null;
+  const t = (k) => (ap ? sign * num(ap.tax[k]) : 0);
+  const taxes = ap ? sign * (num(ap.tax.valueAddedTax) + num(ap.tax.documentaryStampTax) + num(ap.tax.localGovernmentTax) + num(ap.tax.fireServiceTax) + num(ap.others)) : 0;
+  const next = {
+    ...priced,
+    netPremium: round2(priced.netPremium),
+    valueAddedTax: round2(current.valueAddedTax + t('valueAddedTax')),
+    documentaryStampTax: round2(current.documentaryStampTax + t('documentaryStampTax')),
+    localGovernmentTax: round2(current.localGovernmentTax + t('localGovernmentTax')),
+    grossPremium: round2(current.grossPremium + netDelta + taxes),
+  };
+  return { changed, current, next };
 }
 
 /** The coverage change as stored: the edited inputs with the server-priced figures. */

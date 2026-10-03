@@ -16,6 +16,13 @@ async function grossOf(net) {
   return r2(net + r2(net * rate['tax.vat_rate']) + r2(net * rate['tax.dst_rate']) + r2(net * rate['tax.lgt_rate']));
 }
 
+/** Taxes of an additional premium on its own: VAT and LGT at the rates, DST P0.50 on each P4.00 or fractional part. */
+async function apGross(net) {
+  const rows = await q("SELECT key, (value#>>'{}')::numeric AS v FROM app_settings WHERE key IN ('tax.vat_rate', 'tax.lgt_rate')");
+  const rate = Object.fromEntries(rows.map((r) => [r.key, Number(r.v)]));
+  return r2(net + r2(net * rate['tax.vat_rate']) + Math.ceil(net / 4 - 1e-9) * 0.5 + r2(net * rate['tax.lgt_rate']));
+}
+
 /** The booking journal of a receivable balances and hits premium receivable for the billed amount. */
 async function expectBooked(receivableId, amount) {
   const [rcv] = await q('SELECT amount, booking_jv_id, source FROM receivables WHERE id = $1', [receivableId]);
@@ -51,7 +58,7 @@ describe('endorsements', () => {
     grossBefore = (await cs('get', '/policies/pol_sls_05')).body.grossPremium;
     // pol_sls_05: own damage 1,150,000 at 1.65% = 18,975 net; adding bodily injury 300,000 at the default 1% adds 3,000
     expect(grossBefore).toBeCloseTo(await grossOf(18975), 2);
-    expectedDelta = r2((await grossOf(18975 + 3000)) - grossBefore);
+    expectedDelta = await apGross(3000);
     const r = await cs('post', '/endorsements/create-endorsement').send({
       policyId: 'pol_sls_05', endorsementTypeIds: [1, 2, 3],
       personalDetails: { FirstName: 'Bianca', LastName: 'Lorenzo-Reyes', ContactNumber: '09178881234', City: 'Bacoor', EmailID: 'bianca.lr@example.ph' },
@@ -178,7 +185,9 @@ describe('coverage change endorsements (premium delta)', () => {
     expect(e.status).toBe(201);
     expect(e.body.premiumDelta).toBe(5010);
     expect(e.body.coverageChanges).toMatchObject({ LossandDamagecoveragepremium: '28000.00', NETpremium: '32005.00', Grosspremium: '40086.27' });
-    expect(e.body.premiumChange.taxRates).toMatchObject({ valueAddedTax: 0.12, documentaryStampTax: 0.125, localGovernmentTax: 0.0075 });
+    expect(e.body.premiumChange.taxRates).toMatchObject({ valueAddedTax: 0.12, localGovernmentTax: 0.0075 });
+    // the effective DST rate of the premium: P0.50 on each P4.00 or fraction, so a little over 12.5% when rounded up
+    expect(e.body.premiumChange.taxRates.documentaryStampTax).toBeCloseTo(0.125, 3);
   });
 
   it('does not bill a zero delta', async () => {
