@@ -95,7 +95,7 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 
 | Area | Rule as delivered |
 |---|---|
-| Premium taxes | DST 12.5% of net premium (or per PHP 4.00 unit, rounded up), VAT 12% for products under the VAT regime, LGT by the client's city or municipality (0.75% delivered default), FST 2% on fire lines; set in Master > Finance > Premium Taxes & LGU Rates |
+| Premium taxes | DST of PHP 0.50 on each PHP 4.00 of premium, a fraction counting as a whole unit (12.5%), VAT 12% for products under the VAT regime, LGT by the client's city or municipality (0.75% delivered default), FST 2% on fire lines; set in Master > Finance > Premium Taxes & LGU Rates |
 | CTPL | 1-year and 3-year CTPL per vehicle class from the motor template MOT-003-2025; inclusive of taxes and fees, never discounted; certificate number and authentication code on the policy |
 | KYC | Government ID type, number and image, chassis, motor and plate or MV file number required before motor issue; accepted IDs include PhilSys ID, UMID, passport and driver's licence |
 | Commission tax | Output VAT on commission (VAT12-OUT); EWT on referrer commission by payee type (WI515 5% for agents and sub-agents, WC515 10% for external referrers, delivered); insurer EWT on direct-bill commission (WC139 10%) to Creditable Withholding Tax |
