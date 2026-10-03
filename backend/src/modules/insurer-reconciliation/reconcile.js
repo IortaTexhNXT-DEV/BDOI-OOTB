@@ -82,7 +82,7 @@ export async function decide(db, id, action, remarks, user) {
     if (!String(remarks || '').trim()) throw badRequest('Validation failed', [{ path: 'remarks', message: 'A reason is required to reject' }]);
     await db.query(`UPDATE insurer_statements SET status = 'draft', rejected_by = $2, rejected_at = now(), rejection_reason = $3, submitted_by = NULL, submitted_at = NULL,
       updated_by = $2, updated_at = now() WHERE id = $1`, [s.id, user.id, String(remarks).trim()]);
-    return { before: { status: s.status }, after: await getStatement(db, s.id) };
+    return { before: { status: s.status }, after: await getStatement(db, s.id), submittedBy: s.submitted_by };
   }
   const adjustments = (await db.query('SELECT * FROM insurer_statement_resolutions WHERE statement_id = $1 AND kind = \'adjustment\' AND journal_id IS NULL ORDER BY id', [s.id])).rows;
   for (const r of adjustments) {
@@ -99,7 +99,7 @@ export async function decide(db, id, action, remarks, user) {
   }
   await db.query('UPDATE insurer_statements SET status = \'approved\', approved_by = $2, approved_at = now(), approval_remarks = $3, updated_by = $2, updated_at = now() WHERE id = $1',
     [s.id, user.id, remarks || null]);
-  return { before: { status: s.status }, after: await getStatement(db, s.id), journals: adjustments.length };
+  return { before: { status: s.status }, after: await getStatement(db, s.id), journals: adjustments.length, submittedBy: s.submitted_by };
 }
 
 /** Cancel a draft statement imported in error (the same file can then be imported again). */

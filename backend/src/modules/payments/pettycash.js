@@ -10,6 +10,7 @@ import { account, reverseJournal } from '../accounting/lib/ledger.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 
 export const fundRow = (f) => ({ id: f.id, code: f.code, pettyCashCode: f.code, description: f.description, transactionNumber: f.transaction_number, transactionDate: f.transaction_date,
@@ -107,13 +108,15 @@ export async function transitionRequest(db, id, action, user, reason) {
     if (!['draft', 'rejected'].includes(r.status)) throw conflict(`Request is ${r.status}`);
     if (!(Number(r.total_amount) > 0)) throw badRequest('Add at least one line before submitting');
     await db.query('UPDATE petty_cash_requests SET status = \'submitted\', updated_at = now() WHERE id = $1', [r.id]);
-    await notify({ audience: 'write:disbursements', type: 'approval', title: `Petty cash request ${r.request_number} awaiting approval`, message: `${r.requester_name}: ${await formatMoney(r.total_amount)}`, entity: 'petty_cash_request', entityId: r.id });
+    await notifyApprovers({ audience: 'write:disbursements', document: 'Petty cash request', number: r.request_number, by: user.username,
+      detail: `${r.requester_name}, ${await formatMoney(r.total_amount)}`, link: `/accounts/pettycash/editrequestform/view/${r.id}`, entity: 'petty_cash_request', entityId: r.id });
   } else {
     if (r.status !== 'submitted') throw conflict(`Request is ${r.status}; only submitted requests can be ${action === 'approve' ? 'approved' : 'rejected'}`);
     await assertChecker(user, r.created_by, 'petty cash request');
     if (action === 'approve') await db.query('UPDATE petty_cash_requests SET status = \'approved\', approved_by = $2, approved_at = now(), updated_at = now() WHERE id = $1', [r.id, user.id]);
     else await db.query('UPDATE petty_cash_requests SET status = \'rejected\', rejected_by = $2, rejected_at = now(), rejection_reason = $3, updated_at = now() WHERE id = $1', [r.id, user.id, reason]);
-    if (r.created_by) await notify({ userId: r.created_by, type: 'info', title: `Petty cash request ${r.request_number} ${action === 'approve' ? 'approved' : 'rejected'}`, message: reason || `By ${user.username}`, entity: 'petty_cash_request', entityId: r.id });
+    await notifyDecision({ userId: r.created_by, decidedBy: user.id, document: 'Petty cash request', number: r.request_number, approved: action === 'approve', by: user.username,
+      reason: action === 'approve' ? null : reason, link: `/accounts/pettycash/editrequestform/view/${r.id}`, entity: 'petty_cash_request', entityId: r.id });
   }
   return getRequest(db, r.id);
 }

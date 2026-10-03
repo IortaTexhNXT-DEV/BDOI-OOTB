@@ -6,7 +6,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
-import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { assertChecker, fileUrl, isoDate, lastMonths, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { getLetterhead } from '../../lib/letterhead.js';
@@ -307,7 +307,8 @@ export async function submitCalculation(batchId, user) {
   const c = await calcRow(batchId);
   if (!['Calculated', 'Rejected'].includes(c.status)) throw conflict(`Batch is already ${c.status.toLowerCase()}`);
   await query('UPDATE incentive_calculations SET status = \'Pending Approval\', submitted_by = $2, submitted_date = now(), rejection_reason = NULL, updated_at = now() WHERE batch_id = $1', [c.batch_id, user.id]);
-  await notify({ audience: 'write:incentive', type: 'approval', title: 'Incentive calculation awaiting approval', message: `${c.batch_id} (${c.period}) needs approval`, link: '/incentive/approvals', entity: 'incentive_calculation', entityId: c.batch_id });
+  await notifyApprovers({ audience: 'write:incentive', document: 'Incentive calculation', number: c.batch_id, by: user.username, detail: `period ${c.period}`,
+    link: '/incentive/approvals', entity: 'incentive_calculation', entityId: c.batch_id });
   return { before: await calcOut(c, false), after: await getCalculation(c.batch_id) };
 }
 
@@ -334,7 +335,8 @@ export async function decideCalculation(batchId, action, b, user) {
       await tx.query('UPDATE incentive_results SET status = \'Rejected\' WHERE calculation_id = $1', [c.batch_id]);
     }
   });
-  await notify({ userId: c.submitted_by || c.created_by, type: 'info', title: `Incentive batch ${action === 'approve' ? 'approved' : 'rejected'}`, message: `${c.batch_id} (${c.period})`, link: '/incentive/calculations', entity: 'incentive_calculation', entityId: c.batch_id });
+  await notifyDecision({ userId: c.submitted_by || c.created_by, decidedBy: user.id, document: 'Incentive calculation', number: c.batch_id, approved: action === 'approve', by: user.username,
+    reason: action === 'approve' ? null : b.reason, link: '/incentive/calculations', entity: 'incentive_calculation', entityId: c.batch_id });
   return { before: await calcOut(c, false), after: await getCalculation(c.batch_id) };
 }
 

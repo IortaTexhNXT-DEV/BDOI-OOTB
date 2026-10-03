@@ -15,6 +15,7 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { queueEmail } from '../../lib/mailer.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { assertAuthority } from '../access-control/service.js';
 import { renderTemplate } from './docs.js';
 import { companyName } from '../../lib/letterhead.js';
@@ -497,6 +498,8 @@ export async function rejectClaim(id, user, reason) {
   return { from, claim: await getClaim(row.id) };
 }
 
+const settlementLink = (row) => `/agent/claimrequest/settlementapproval/${row.id}`;
+
 /**
  * PUT /claims/settle/:id. On an in-review claim this records the settlement; with maker-checker on it waits for
  * approval by another user (pending-approval), otherwise it is settled at once. On an approved claim it marks it settled.
@@ -536,10 +539,10 @@ export async function settleClaim(id, input, user, files) {
   settlement.requestedBy = user?.username; settlement.requestedAt = new Date().toISOString();
   if (await getSetting('claims.settlement_maker_checker', true)) {
     await transition(row, 'pending-approval', user, { note: `Settlement of ${amount} submitted for approval`, action: 'Settlement Submitted', sets: { settlement: JSON.stringify(settlement), settlement_requested_by: user?.id ?? null } });
+    // decided by the Claims role (write:claims and role claims): each claims user but the requester
     const approvers = (await usersWithRole('claims')).map((u) => u.id).filter((u) => u !== user?.id);
-    for (const a of approvers) {
-      await notify({ userId: a, type: 'approval', title: `Settlement approval: ${row.claim_number}`, message: `Settlement of ${await formatMoney(amount)} on claim ${row.claim_number} awaits approval`, link: `/agent/claimdetail/${row.id}`, entity: 'claim', entityId: row.id });
-    }
+    await notifyApprovers({ users: approvers, document: 'Claim settlement', number: row.claim_number, by: user?.username || 'system',
+      detail: `${await formatMoney(amount)}${settlement.settlementType ? `, ${settlement.settlementType}` : ''}`, link: settlementLink(row), entity: 'claim', entityId: row.id });
     return { from, claim: await getClaim(row.id), pendingApproval: true };
   }
   await transition(row, 'settled', user, { note: 'Settled', action: 'Claim Settled', sets: { settlement: JSON.stringify(settlement), approved_amount: amount, settled_amount: amount, settled_at: await settledAt(settlement) } });
@@ -553,8 +556,11 @@ export async function approveSettlement(id, { decision = 'approve', approvedAmou
   const from = row.status;
   if (from !== 'pending-approval') throw conflict('Claim has no settlement awaiting approval');
   if (row.settlement_requested_by && row.settlement_requested_by === user?.id) throw forbidden('Maker-checker: the settlement must be approved by a different user');
+  const tell = (approved, status, reason = null) => notifyDecision({ userId: row.settlement_requested_by, decidedBy: user?.id, document: 'Claim settlement', number: row.claim_number,
+    approved, status, by: user?.username, reason, link: `/agent/claimdetail/${row.id}`, entity: 'claim', entityId: row.id });
   if (decision === 'return' || decision === 'reject') {
     await transition(row, 'in-review', user, { note: note || 'Settlement returned for review', action: 'Settlement Returned' });
+    await tell(false, 'returned', note || null);
     return { from, claim: await getClaim(row.id) };
   }
   const amount = toNum(approvedAmount) ?? row.settlement?.settlementAmount;
@@ -566,6 +572,7 @@ export async function approveSettlement(id, { decision = 'approve', approvedAmou
     await transition(row, 'settled', user, { note: 'Settlement released', action: 'Claim Settled', sets: { settled_amount: settledAmount, settled_at: await settledAt(settlement) } });
     await postBrokerSettlement(row.id, user);
   }
+  await tell(true, 'approved');
   return { from, claim: await getClaim(row.id) };
 }
 

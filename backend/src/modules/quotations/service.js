@@ -7,6 +7,7 @@ import { getSetting } from '../../lib/settings.js';
 import { formatMoney } from '../../lib/money.js';
 import { queueEmail, emailSendingStatus } from '../../lib/mailer.js';
 import { notify } from '../notifications/service.js';
+import { notifyDecision } from '../notifications/approvals.js';
 import { lobOf, renderTemplate, emailTemplate, usersWithRoles, num, round2 } from '../documents/common.js';
 import { quoteStatusIn, quoteStatusOut } from '../documents/statuses.js';
 import { mapColumns } from '../documents/tabular.js';
@@ -149,7 +150,8 @@ export async function changeStatus(id, label, user) {
   await query(`UPDATE quotes SET status = $2, updated_by = $3, updated_at = now()${stamps[target] || ''} WHERE id = $1`, [q.id, target, user.id]);
   if (to === 'Approved') {
     const owner = q.created_by;
-    if (owner) await notify({ userId: owner, type: 'info', title: 'Quotation approved', message: `Quotation ${q.quote_number} was approved and can be converted to a policy`, link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
+    await notifyDecision({ userId: owner, decidedBy: user.id, document: 'Quotation', number: q.quote_number, approved: true, by: user.username,
+      message: `Quotation ${q.quote_number} was approved by ${user.username} and can be converted to a policy`, link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
   }
   return { before: q, after: await getQuoteRow(q.id) };
 }

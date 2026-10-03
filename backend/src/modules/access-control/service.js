@@ -33,7 +33,7 @@ export async function updateTransactionType(db, code, { name, description, activ
 
 const LIMIT_SELECT = `SELECT l.id, l.transaction_type AS "transactionType", t.name AS "transactionName", t.measure, l.role_code AS "roleCode", r.name AS "roleName",
     l.user_id AS "userId", u.username, u.display_name AS "userName", l.max_amount AS "maxAmount", l.currency, l.remarks, l.status, l.replaces_id AS "replacesId",
-    l.effective_from AS "effectiveFrom", l.effective_to AS "effectiveTo", rq.display_name AS "requestedBy", l.requested_at AS "requestedAt",
+    l.effective_from AS "effectiveFrom", l.effective_to AS "effectiveTo", rq.display_name AS "requestedBy", l.requested_by AS "requestedById", l.requested_at AS "requestedAt",
     dc.display_name AS "decidedBy", l.decided_at AS "decidedAt", l.decision_note AS "decisionNote"
   FROM authority_limits l JOIN authority_transaction_types t ON t.code = l.transaction_type
   LEFT JOIN roles r ON r.code = l.role_code LEFT JOIN users u ON u.id = l.user_id

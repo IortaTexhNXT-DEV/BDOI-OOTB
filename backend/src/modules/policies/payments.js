@@ -26,7 +26,7 @@ export const captureRow = (x) => ({
   amount: Number(x.amount), paymentMode: x.payment_mode, paymentModeLabel: MODE_LABELS[x.payment_mode] || x.payment_mode, referenceNo: x.reference_no,
   paymentDate: isoDate(x.paid_on), proofKey: x.proof_key, proofFileName: x.proof_file_name, remarks: x.remarks, status: x.status,
   receiptId: x.receipt_id, receiptNumber: x.receipt_number || null, clientName: x.client_name || null, clientCode: x.client_code || null,
-  submittedBy: x.submitted_by_name || x.submitted_by, confirmedBy: x.confirmed_by_name || x.confirmed_by, confirmedAt: x.confirmed_at,
+  submittedBy: x.submitted_by_name || x.submitted_by, submittedById: x.submitted_by, confirmedBy: x.confirmed_by_name || x.confirmed_by, confirmedAt: x.confirmed_at,
   rejectedAt: x.rejected_at, rejectReason: x.reject_reason, createdAt: x.created_at,
 });
 

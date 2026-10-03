@@ -4,6 +4,7 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
 import { accountingFlow } from './flow.js';
 
@@ -15,6 +16,14 @@ const ad = moduleRouter('Account Determination', '/account-determination');
 const read = [requireAuth, requirePermission('read:journal-vouchers', 'read:masters', 'read:settings')];
 const write = [requireAuth, requirePermission('write:settings', 'write:masters', 'write:posting-rules')];
 const approve = [requireAuth, requirePermission('approve:posting-rules')];
+// Configuration Approvals (Master > Finance): a change waiting for approval goes to approve:posting-rules, the decision to the requester.
+const APPROVALS = '/master/finance/configuration-approvals';
+const changeLabel = (c) => `${c.kindLabel}: ${c.target}${c.kind === 'posting-rule-version' && c.payload?.version ? ` version ${c.payload.version}` : ''}`;
+async function askApproval(r, user) {
+  if (!r.change) return;
+  await notifyApprovers({ audience: 'approve:posting-rules', document: 'Configuration change', number: String(r.change.id), by: user.username,
+    message: `${user.username} requested ${changeLabel(r.change)}${r.change.changeNote ? ` (${r.change.changeNote})` : ''}`, link: APPROVALS, entity: 'accounting_config_change', entityId: r.change.id });
+}
 const pendingNote = (r, applied) => (r.change ? `${applied}; it takes effect once approved (request ${r.change.id})` : applied);
 const S = 'Master > Finance > Posting Rules';
 const A = 'Master > Finance > Account Determination';
@@ -65,6 +74,9 @@ for (const action of ['approve', 'reject']) {
     handler: async (req, res) => {
       const r = await withTransaction((db) => svc.decideChange(db, req.params.changeId, action, req.body?.remarks, req.user));
       await audit(req, { entity: 'accounting_config_change', entityId: r.id, action, after: r });
+      await notifyDecision({ userId: r.requestedById, decidedBy: req.user.id, document: 'Configuration change', number: String(r.id), approved: action === 'approve', by: req.user.username,
+        reason: action === 'reject' ? r.decisionRemarks : null, message: action === 'approve' ? `${changeLabel(r)} approved by ${req.user.username} and in effect` : null,
+        link: APPROVALS, entity: 'accounting_config_change', entityId: r.id });
       ok(res, r, `Change ${r.id} ${r.status}`);
     },
   });
@@ -101,6 +113,7 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.createVersion(db, req.params.eventCode, req.body, req.user));
     await audit(req, { entity: 'posting_rule', entityId: r.after.id, action: 'create-version', before: r.before, after: r.after });
+    await askApproval(r, req.user);
     created(res, { ...r.after, change: r.change }, pendingNote(r, `Version ${r.after.version} of ${r.after.eventCode} saved`));
   },
 });
@@ -110,6 +123,7 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.setActive(db, req.params.id, req.body.active, req.user));
     await audit(req, { entity: 'posting_rule', entityId: r.after.id, action: req.body.active ? 'activate' : 'deactivate', before: r.before, after: r.after });
+    await askApproval(r, req.user);
     ok(res, { ...r.after, change: r.change }, pendingNote(r, `Version ${r.after.version} ${req.body.active ? 'activated' : 'deactivated'}`));
   },
 });
@@ -137,6 +151,7 @@ ad.define({
   handler: async (req, res) => {
     const r = await svc.setRoleAccount(pool, req.params.role, req.body.glCode, req.user);
     await audit(req, { entity: 'account_role', entityId: req.params.role, action: 'update', before: r.before, after: r.after });
+    await askApproval(r, req.user);
     ok(res, { ...r.after, change: r.change }, r.change ? pendingNote(r, `${req.params.role} to post to ${r.change.payload.glCode}`) : `${req.params.role} now posts to ${r.after.glCode}`);
   },
 });
@@ -146,6 +161,7 @@ ad.define({
   handler: async (req, res) => {
     const r = await svc.setMap(pool, req.params.name, req.body.map, req.user);
     await audit(req, { entity: 'account_map', entityId: req.params.name, action: 'update', before: r.before, after: r.after });
+    await askApproval(r, req.user);
     ok(res, r.change ? { ...r.after, change: r.change } : r.after, pendingNote(r, 'Account map saved'));
   },
 });
@@ -163,6 +179,7 @@ ad.define({
   handler: async (req, res) => {
     const r = await svc.setCommissionTaxes(pool, req.body, req.user);
     await audit(req, { entity: 'account_map', entityId: 'commission-taxes', action: 'update', before: r.before, after: r.after });
+    await askApproval(r, req.user);
     ok(res, { ...r.after, change: r.change }, pendingNote(r, 'Commission tax set-up saved'));
   },
 });

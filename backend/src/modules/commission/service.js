@@ -9,6 +9,8 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { reverseJournal } from '../accounting/lib/ledger.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, round2, num } from '../accounting/lib/http.js';
+import { formatMoney } from '../../lib/money.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cycleLabel = (d) => { const x = new Date(d); return `${MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
@@ -208,7 +210,40 @@ export async function onPolicyPremiumCollected(db, policyId, receiptNo) {
   if (!existing) await accrueForPolicy(db, policyId, null);
   if (receiptNo) await db.query('UPDATE commissions SET receipt_no = COALESCE(receipt_no, $2) WHERE policy_id = $1', [policyId, receiptNo]);
   if (await getSetting('commission.auto_eligible_on_full_payment', true)) {
-    await db.query('UPDATE commissions SET status = \'Eligible\', eligible_at = now(), eligible_by = NULL, updated_at = now() WHERE policy_id = $1 AND status = \'Accrued\'', [policyId]);
+    const moved = await db.query('UPDATE commissions SET status = \'Eligible\', eligible_at = now(), eligible_by = NULL, updated_at = now() WHERE policy_id = $1 AND status = \'Accrued\' RETURNING referrer_id, policy_number', [policyId]);
+    // inside the receipt's transaction: a notification that cannot be created is only logged
+    for (const referrerId of new Set(moved.rows.map((r) => r.referrer_id).filter(Boolean))) {
+      await askPayoutApproval(db, referrerId, { by: 'system', why: `Premium of ${moved.rows[0].policy_number} fully collected` }).catch(() => {});
+    }
+  }
+}
+
+// ---------- approval notifications (lines are approved with write:commission on the referrer account) ----------
+
+const accountLink = (referrerId) => `/commission/referrer-accounts/${referrerId}`;
+
+/** Eligible lines of a referrer awaiting approval, to everyone holding write:commission. `why` says what made them eligible. */
+export async function askPayoutApproval(db, referrerId, { by, why = null }) {
+  const r = (await db.query(`SELECT f.name, count(c.id)::int AS n, COALESCE(sum(c.amount), 0) AS amount FROM commission_referrers f
+    LEFT JOIN commissions c ON c.referrer_id = f.id AND c.status = 'Eligible' WHERE f.id = $1 GROUP BY f.name`, [referrerId])).rows[0];
+  if (!r?.n) return;
+  await notifyApprovers({ audience: 'write:commission', document: 'Commission payout', number: r.name, by,
+    message: `${why || `${by} marked lines eligible`}: ${r.n} line(s) of ${r.name} awaiting approval (${await formatMoney(r.amount)})`,
+    link: accountLink(referrerId), entity: 'commission_referrer', entityId: referrerId });
+}
+
+/** Users who made the Eligible lines eligible (all of the referrer's, or one line), told when they are approved. */
+export async function eligibleMakers(db, referrerId, lineId = null) {
+  return (await db.query(`SELECT DISTINCT eligible_by FROM commissions WHERE referrer_id = $1 AND status = 'Eligible' AND eligible_by IS NOT NULL AND ($2::text IS NULL OR id = $2)`,
+    [referrerId, lineId])).rows.map((r) => r.eligible_by);
+}
+
+export async function tellPayoutApproved(db, referrerId, makers, user) {
+  if (!makers.length) return;
+  const ref = (await db.query('SELECT name FROM commission_referrers WHERE id = $1', [referrerId])).rows[0];
+  for (const userId of makers) {
+    await notifyDecision({ userId, decidedBy: user.id, document: 'Commission payout', number: ref?.name || referrerId, approved: true, by: user.username,
+      link: accountLink(referrerId), entity: 'commission_referrer', entityId: referrerId });
   }
 }
 

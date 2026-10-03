@@ -22,6 +22,8 @@ import * as st from './statements.js';
 import * as mt from './matching.js';
 import { cancelStaleCheque, postBankAdjustment, staleCheques, typeRow } from './adjustments.js';
 import * as rc from './reconcile.js';
+import { formatMoney } from '../../lib/money.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 
 const { router, define } = moduleRouter('Bank Reconciliation', '/bank-reconciliation');
 const read = [requireAuth, requirePermission('read:bank-reconciliation')];
@@ -436,6 +438,11 @@ define({
       return postBankAdjustment(db, account, l, req.body, req.user);
     });
     await audit(req, { entity: 'bank_statement_line', entityId: req.params.id, action: `adjustment:${req.body.typeCode}`, after: r });
+    if (r.status === 'for-approval' && r.journal) {
+      // the adjustment journal is approved like any journal voucher (write:journal-vouchers), from the voucher or the bank line
+      await notifyApprovers({ audience: 'write:journal-vouchers', document: 'Journal voucher', number: r.journal.jv_number, by: req.user.username,
+        detail: `bank adjustment: ${r.typeName}, ${await formatMoney(r.amount)}`, link: `/accounts/journalvoucher/detailsjournalvocture/${r.journal.id}`, entity: 'journal_voucher', entityId: r.journal.id });
+    }
     created(res, r, r.message || `Adjustment ${r.journal?.jv_number || ''} posted`.trim());
   },
 });
@@ -450,9 +457,11 @@ define({
       const jv = await approveJournal(db, l.adjustment_jv_id, req.user);
       const account = await linkedAccount(db, l.bank_account_id);
       const am = await mt.autoMatch(db, account, req.user);
-      return { journal: { jvNumber: jv.jv_number, status: jv.status }, matched: am.byRule.ADJUSTMENT || 0 };
+      return { journal: { jvNumber: jv.jv_number, status: jv.status }, matched: am.byRule.ADJUSTMENT || 0, maker: jv.created_by, journalId: jv.id };
     });
     await audit(req, { entity: 'bank_statement_line', entityId: req.params.id, action: 'adjustment-approve', after: r });
+    await notifyDecision({ userId: r.maker, decidedBy: req.user.id, document: 'Journal voucher', number: r.journal.jvNumber, approved: true, by: req.user.username,
+      message: `Bank adjustment approved and posted by ${req.user.username}`, link: `/accounts/journalvoucher/detailsjournalvocture/${r.journalId}`, entity: 'journal_voucher', entityId: r.journalId });
     ok(res, r, `Journal ${r.journal.jvNumber} posted`);
   },
 });
@@ -509,6 +518,23 @@ define({
   response: { success: true, data: { recNumber: 'BRC-2026-00001', statement: { bankBalance: 162500, depositsInTransit: 5000, outstandingCheques: 17500, adjustedBankBalance: 150000, bookBalance: 150250, unbookedDebits: 250, adjustedBookBalance: 150000, difference: 0 } } },
   handler: async (req, res) => ok(res, await tx((db) => rc.getRec(db, req.params.id))),
 });
+// Approval notifications: a prepared reconciliation goes to approve:bank-reconciliation; approving it, or reopening it
+// (sending it back), is reported to the preparer.
+const recLink = (r) => `/accounts/bank-reconciliation/reconciliations/${r.id}`;
+async function notifyRec(action, out, req) {
+  const r = out.after || out;
+  const number = r.recNumber;
+  const base = { document: 'Bank reconciliation', number, link: recLink(r), entity: 'bank_reconciliation', entityId: r.id };
+  if (action === 'prepare') {
+    await notifyApprovers({ ...base, audience: APPROVE, by: req.user.username, detail: `${r.bankAccount}, period ${r.period}, bank balance ${await formatMoney(r.bankBalance)}` });
+  } else if (action === 'approve') {
+    await notifyDecision({ ...base, userId: r.preparedBy, decidedBy: req.user.id, approved: true, by: req.user.username });
+  } else if (action === 'reopen' && out.before) {
+    const wasPrepared = out.before.status === 'prepared';
+    await notifyDecision({ ...base, userId: out.before.prepared_by, decidedBy: req.user.id, approved: false, status: wasPrepared ? 'rejected' : 'reopened', by: req.user.username,
+      reason: req.body.remarks || null });
+  }
+}
 const transition = (action, fn, perms) => ({
   method: 'POST', path: `/reconciliations/:id/${action}`, screen: `${S} > Reconciliation statement`,
   middleware: [...perms, validate(z.object({ remarks: z.string().max(1000).optional() }))],
@@ -516,6 +542,7 @@ const transition = (action, fn, perms) => ({
     const out = await tx((db) => fn(db, req.params.id, req.user, req.body));
     const r = out.after || out;
     await audit(req, { entity: 'bank_reconciliation', entityId: r.recNumber, action, before: out.before ? rc.recRow(out.before) : null, after: { status: r.status, remarks: req.body.remarks || null, difference: r.difference } });
+    await notifyRec(action, out, req);
     ok(res, r, `Reconciliation ${r.recNumber} ${r.status}`);
   },
 });

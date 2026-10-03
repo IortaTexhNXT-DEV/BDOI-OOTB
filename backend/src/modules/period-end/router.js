@@ -13,6 +13,7 @@ import { ok, created } from '../../lib/respond.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { APPROVE } from './posting.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as fiscal from './fiscal.js';
 import * as close from './close.js';
 import * as ye from './yearend.js';
@@ -185,11 +186,23 @@ define({
   method: 'GET', path: '/close-runs/:id', summary: 'A month-end close run: steps, checklist results, generated journals, approvals and period history', screen: `${S} > Month-End Close > Run`, middleware: read,
   response: { success: true, data: runExample }, handler: async (req, res) => ok(res, await close.getRun(pool, req.params.id)),
 });
+// Approval notifications: a close submitted for approval goes to approve:period-end, the decision to the submitter.
+async function notifyClose(action, r, req) {
+  const base = { document: 'Month-end close', number: r.runNumber, link: `/accounts/period-end/close/${r.id}`, entity: 'period_close_run', entityId: r.id };
+  const target = r.targetStatus === 'soft_closed' ? 'soft close' : 'close';
+  if (action === 'submit' && r.status === 'pending-approval') {
+    await notifyApprovers({ ...base, audience: APPROVE, by: req.user.username, message: `${req.user.username} submitted ${r.runNumber}: ${target} of period ${r.period}` });
+  } else if (action === 'approve' || action === 'reject') {
+    await notifyDecision({ ...base, userId: r.submittedBy, decidedBy: req.user.id, approved: action === 'approve', by: req.user.username, reason: action === 'reject' ? req.body.reason : null,
+      message: action === 'approve' ? `Period ${r.period} ${r.status === 'soft-closed' ? 'soft-closed' : 'closed'}; approved by ${req.user.username}` : null });
+  }
+}
 const runAction = (path, summary, schema, fn, action, mw = write) => define({
   method: 'POST', path, summary, screen: `${S} > Month-End Close > Run`, middleware: [...mw, validate(schema)], request: {}, response: { success: true, data: runExample },
   handler: async (req, res) => {
     const r = await tx((db) => fn(db, req));
     await audit(req, { entity: 'period_close_run', entityId: r.id, action, after: { runNumber: r.runNumber, status: r.status, period: r.period, ...req.body } });
+    await notifyClose(action, r, req);
     ok(res, r);
   },
 });
@@ -305,6 +318,9 @@ define({
     const enabled = await getSetting('accounting.adjustment_period_enabled', true);
     const jv = await tx((db) => ye.createAdjustment(db, req.body, req.user, enabled));
     await audit(req, { entity: 'journal', entityId: jv.id, action: 'create-adjustment', after: { jvNumber: jv.jv_number, period: jv.period } });
+    // posted by a second user from the journal (Accounts > Journal Voucher, or the accounting queue): write:journal-vouchers
+    await notifyApprovers({ audience: 'write:journal-vouchers', document: 'Journal voucher', number: jv.jv_number, by: req.user.username,
+      detail: `year-end adjustment, period ${jv.period}`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id });
     created(res, { id: jv.id, jvNumber: jv.jv_number, period: jv.period, date: fiscal.iso(jv.jv_date), status: jv.status });
   },
 });

@@ -7,6 +7,8 @@ import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
+import { formatMoney } from '../../lib/money.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { isoDate, num, pageParams, sendList, sendNoData } from '../accounting/lib/http.js';
 import { storeFile } from '../accounting/lib/files.js';
 import { vouchersPdf } from '../documents/finance.js';
@@ -20,6 +22,15 @@ const write = [requireAuth, requirePermission('write:disbursements')];
 const SCREEN = 'Accounts > Disbursement (Payment Voucher)';
 const upload = importUpload();
 const { PAYEE_TYPES } = svc;
+
+// Approval notifications: payment vouchers and cheques are approved with write:disbursements (cheque approval, agent payout approval).
+const voucherLink = (id) => (id ? `/accounts/paymentvoucher/detailview/${id}` : '/accounts/paymentvoucher');
+const payee = (d) => d.payeeName || d.insurerName || d.referrerName || d.customerCode || d.payeeType;
+const askVoucherApproval = async (d, user) => notifyApprovers({ audience: 'write:disbursements', document: 'Payment voucher', number: d.voucherNumber, by: user.username,
+  detail: `${payee(d)}, ${await formatMoney(d.amount, d.instrumentCurrency || undefined)}`, link: voucherLink(d.id), entity: 'disbursement', entityId: d.id });
+const voucherDecision = (d, user, approved, status = null, reason = null) => notifyDecision({ userId: d.createdBy, decidedBy: user.id, document: 'Payment voucher', number: d.voucherNumber,
+  approved, status, by: user.username, reason, link: voucherLink(d.id), entity: 'disbursement', entityId: d.id });
+const chequeNumber = (c) => c.instrumentNo || c.checkbookId;
 const example = { disbursementId: 'pv_1', voucherNumber: 'PV-2026-00001', transactionNumber: 'DT-2026-00001', voucherDate: '2026-09-28', payeeType: 'Insurer', payeeName: 'Malayan Insurance Co., Inc.', customerCode: 'CL-2026-00001', insurerName: 'Malayan Insurance Co., Inc.', policyNumber: 'POL-2026-00001', amount: 12500, status: 'draft' };
 
 const createSchema = z.object({
@@ -99,8 +110,13 @@ define({
   response: { success: true, data: checkbookExample },
   handler: async (req, res) => {
     const c = await withTransaction((db) => svc.createCheckbook(db, req.body, req.user));
-    await audit(req, { entity: 'checkbook', entityId: c.id, action: 'create', after: svc.checkbookRow(c) });
-    created(res, svc.checkbookRow(c), 'Checkbook created');
+    const row = svc.checkbookRow(c);
+    await audit(req, { entity: 'checkbook', entityId: c.id, action: 'create', after: row });
+    if (row.status === 'Pending') {
+      await notifyApprovers({ audience: 'write:disbursements', document: 'Cheque', number: chequeNumber(row), by: req.user.username,
+        detail: `${row.customerName || row.customerCode || 'payee'}, ${await formatMoney(row.totaleAmount)}`, link: voucherLink(row.disbursementId), entity: 'checkbook', entityId: row.id });
+    }
+    created(res, row, 'Checkbook created');
   },
 });
 define({
@@ -110,9 +126,22 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.updateCheckbook(db, req.params.id, req.body, req.user));
     await audit(req, { entity: 'checkbook', entityId: req.params.id, action: req.body.status ? `status:${req.body.status}` : 'update', before: r.before, after: r.after });
+    await notifyChequeDecision(r, req);
     ok(res, r.after, 'Checkbook updated');
   },
 });
+
+/** A Pending cheque approved or cancelled: its maker, and the maker of its voucher when someone else, are told. */
+async function notifyChequeDecision({ before, after }, req) {
+  if (before.status !== 'Pending' || !['Approved', 'Cancelled'].includes(after.status)) return;
+  const approved = after.status === 'Approved';
+  const link = voucherLink(after.disbursementId);
+  await notifyDecision({ userId: after.createdBy, decidedBy: req.user.id, document: 'Cheque', number: chequeNumber(after), approved, status: approved ? 'approved' : 'cancelled',
+    by: req.user.username, reason: req.body.reason || req.body.remarks || null, link, entity: 'checkbook', entityId: after.id });
+  if (!approved || !after.disbursementId) return;
+  const d = await svc.getDisbursementRaw(pool, after.disbursementId).then(svc.disbursementRow).catch(() => null);
+  if (d && d.createdBy !== after.createdBy) await voucherDecision(d, req.user, true);
+}
 
 const invoiceExample = { invoiceListId: 'il_1', invoiceNumber: 'IL-2026-00001', customerCode: 'CL-2026-00001', payables: 12500, outstanding: 0, fcAmount: 0, lcAmount: 12500, excess: 0, balAmount: 0, vat: 1339.29, wht: 0, totalAmount: 12500, bankCode: 'BDO', isInvoicePaid: true, status: 'open', checkbooks: [] };
 define({
@@ -156,6 +185,7 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.bulkAgentDisburse(db, req.body, req.user));
     await audit(req, { entity: 'disbursement', entityId: null, action: 'bulk-agent-disburse', after: r });
+    for (const v of r.vouchers) await askVoucherApproval({ id: v.disbursementId, voucherNumber: v.voucherNumber, payeeName: v.referrerName, amount: v.amount }, req.user);
     ok(res, r, `${r.vouchers.length} voucher(s) created`);
   },
 });
@@ -181,6 +211,11 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.updateDisbursement(db, req.params.id, req.body, req.user));
     await audit(req, { entity: 'disbursement', entityId: r.after.id, action: 'update', before: r.before, after: r.after });
+    if (r.after.status !== r.before.status) {
+      // submitted for approval; sent back to draft or cancelled while awaiting approval: rejected
+      if (r.after.status === 'for-approval') await askVoucherApproval(r.after, req.user);
+      else if (r.before.status === 'for-approval') await voucherDecision(r.after, req.user, false, r.after.status === 'cancelled' ? 'cancelled' : 'rejected', req.body.reason || null);
+    }
     ok(res, r.after, 'Disbursement updated');
   },
 });
@@ -191,6 +226,8 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.approveAgentPayout(db, req.params.id, req.body.lineIds, req.user));
     await audit(req, { entity: 'disbursement', entityId: r.disbursementId, action: 'approve-agent-payout', after: r });
+    const d = await svc.getDisbursementRaw(pool, r.disbursementId).then(svc.disbursementRow).catch(() => null);
+    if (d) await voucherDecision(d, req.user, true);
     ok(res, r, `Approved: voucher ${r.voucherNumber}`);
   },
 });

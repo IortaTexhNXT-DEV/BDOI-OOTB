@@ -9,6 +9,7 @@ import { pageParams, sendList } from './lib/http.js';
 import { toCsv } from './lib/files.js';
 import { cancelJournal, postJournal, resolveJournalId, reverseJournal } from './lib/ledger.js';
 import * as svc from './service.js';
+import { notifyDecision } from '../notifications/approvals.js';
 import { isCoInsured, policyParticipants } from './lib/coinsurance.js';
 import { today } from '../../lib/dates.js';
 import { getSetting } from '../../lib/settings.js';
@@ -114,11 +115,15 @@ define({
         const jv = await withTransaction(async (db) => postJournal(db, await resolveJournalId(db, t), req.user));
         posted.push(jv.id);
         await audit(req, { entity: 'journal', entityId: jv.id, action: 'post' });
+        await tellMaker(jv, req.user);
       } catch (e) { errors.push({ transactionId: String(t), error: e.message }); }
     }
     ok(res, { posted, errors }, `${posted.length} transaction(s) posted`);
   },
 });
+/** A journal that needed a second user's approval was posted: its maker is told. */
+const tellMaker = (jv, user) => (jv?.requires_approval ? notifyDecision({ userId: jv.created_by, decidedBy: user.id, document: 'Journal voucher', number: jv.jv_number, approved: true,
+  by: user.username, message: `Approved and posted by ${user.username}`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id }) : null);
 const TX = { post: ['Post a pending journal (maker-checker for vouchers that require approval)', postJournal, 'Posted'],
   reverse: ['Reverse a posted journal with a mirror journal', (db, id, user) => reverseJournal(db, id, user), 'Reversed'],
   cancel: ['Cancel an unposted journal', cancelJournal, 'Cancelled'] };
@@ -133,6 +138,7 @@ for (const [action, [summary, fn, label]] of Object.entries(TX)) {
         return { id, out };
       });
       await audit(req, { entity: 'journal', entityId: r.id, action, after: { result: r.out.id, status: r.out.status } });
+      if (action === 'post') await tellMaker(r.out, req.user);
       ok(res, { transactionId: r.id, journalId: r.id, status: label, ...(action === 'reverse' ? { reversalJournalId: r.out.id, reversalNumber: r.out.jv_number } : {}) }, `Transaction ${label.toLowerCase()} successfully`);
     },
   });

@@ -12,7 +12,7 @@ import { assertRowLimit } from '../../lib/uploadLimits.js';
 import { readXlsx } from '../documents/xlsx.js';
 import { fileSize, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
-import { createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
+import { askApproval, createRemittance, eligiblePolicies, executeAutomated, findInsurer, getRemittance, openApproval, postItemJournal, statusLabels } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { companyName } from '../../lib/letterhead.js';
 import { VISIBLE_TO_USER } from '../notifications/service.js';
@@ -149,6 +149,7 @@ export async function submitSettlement(id, b, user) {
     await c.query('DELETE FROM remittance_approvals WHERE entity = \'item\' AND entity_id = $1 AND status = \'Pending\'', [x.id]);
     await openApproval(c, { entity: 'item', entityId: x.id, referenceNo: x.reference_no, transactionType: 'Settlement', amount: Number(x.amount), description: `Settlement to ${d.insurerName} (${d.policies.length} policies)`, initiatorId: user.id });
   });
+  await askApproval({ transactionType: 'Settlement', referenceNo: x.reference_no, amount: Number(x.amount), description: d.insurerName, user, entityId: x.id });
   return itemOut(await getItem('settlement', x.id));
 }
 
@@ -180,6 +181,7 @@ export async function createAdjustment(b, user) {
     }
     return itemId;
   });
+  if (needsApproval) await askApproval({ transactionType: 'Adjustment', referenceNo: ref, amount, description: `${type.data.name}: ${b.reason}`, user, entityId: id });
   return itemOut(await getItem('adjustment', id));
 }
 
@@ -222,6 +224,7 @@ export async function createTransfer(b, user) {
     await openApproval(c, { entity: 'item', entityId: itemId, referenceNo: ref, transactionType: 'Electronic Transfer', amount, description: `${method.label} to ${b.beneficiary}`, initiatorId: user.id });
     return itemId;
   });
+  await askApproval({ transactionType: 'Electronic transfer', referenceNo: ref, amount, description: `${method.label} to ${b.beneficiary}`, user, entityId: id });
   return transferOut(await getItem('transfer', id));
 }
 

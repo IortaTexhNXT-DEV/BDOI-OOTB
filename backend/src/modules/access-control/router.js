@@ -12,6 +12,8 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { sendTable } from '../documents/tabular.js';
+import { formatMoney } from '../../lib/money.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
 
 const { router, define } = moduleRouter('Access Control', '/access-control');
@@ -21,6 +23,12 @@ const approve = [requireAuth, requirePermission('approve:access-control')];
 const S = 'Master > User Management';
 const date = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const format = (q) => (String(q.format || '').toLowerCase() === 'csv' ? 'csv' : 'xlsx');
+
+// Approval notifications: a proposed limit goes to approve:access-control (the decision route), the decision to the proposer.
+const AUTHORITY = '/master/generals/usermanagement/authority-matrix';
+const limitNumber = (l) => `#${l.id}`;
+const limitText = async (l) => `${l.transactionName || l.transactionType} for ${l.roleName || l.roleCode || l.userName || l.username}: `
+  + `${l.unlimited ? 'no limit' : l.measure === 'percent' ? `${l.maxAmount}%` : await formatMoney(l.maxAmount)}`;
 
 // ---------- matrices ----------
 define({
@@ -75,6 +83,8 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.proposeLimit(db, req.body, req.user));
     await audit(req, { entity: 'authority_limit', entityId: String(r.id), action: 'propose', after: r });
+    await notifyApprovers({ audience: 'approve:access-control', document: 'Authority limit', number: limitNumber(r), by: req.user.username,
+      message: `${req.user.username} proposed ${await limitText(r)}${r.remarks ? ` (${r.remarks})` : ''}`, link: AUTHORITY, entity: 'authority_limit', entityId: r.id });
     created(res, r, 'Limit proposed; it applies once another administrator approves it');
   },
 });
@@ -85,6 +95,10 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.decideLimit(db, req.params.id, req.body, req.user));
     await audit(req, { entity: 'authority_limit', entityId: req.params.id, action: req.body.decision, after: r });
+    const approved = req.body.decision === 'approve';
+    await notifyDecision({ userId: r.requestedById, decidedBy: req.user.id, document: 'Authority limit', number: limitNumber(r), approved, by: req.user.username,
+      reason: approved ? null : req.body.note || null, message: approved ? `${await limitText(r)}, approved by ${req.user.username} and in effect` : null,
+      link: AUTHORITY, entity: 'authority_limit', entityId: r.id });
     ok(res, r, req.body.decision === 'approve' ? 'Limit approved and in effect' : 'Limit rejected');
   },
 });
@@ -189,6 +203,10 @@ define({
   handler: async (req, res) => {
     const r = await withTransaction((db) => svc.startReview(db, req.body, req.user));
     await audit(req, { entity: 'access_review', entityId: String(r.id), action: 'start', after: { name: r.name, users: r.items.length } });
+    // the users are kept or revoked with write:access-control (not by the person reviewed)
+    await notifyApprovers({ audience: 'write:access-control', document: 'Access review', number: r.name, by: req.user.username, title: `Access review ${r.name} awaiting decisions`,
+      message: `${req.user.username} started ${r.name}: ${r.items.length} user(s) to keep or revoke by ${r.dueDate instanceof Date ? r.dueDate.toISOString().slice(0, 10) : r.dueDate}`,
+      link: '/master/generals/usermanagement/access-reviews', entity: 'access_review', entityId: r.id });
     created(res, r, `Access review started for ${r.items.length} user(s)`);
   },
 });

@@ -5,7 +5,7 @@ import { validate, z } from '../../lib/validate.js';
 import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
-import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { pageParams, sendList } from '../accounting/lib/http.js';
 import * as svc from './service.js';
 
@@ -22,9 +22,11 @@ const entrySchema = z.object({
 const entryExample = [{ mainAccount: '4401003', subAccount: '4401003001', entryType: 'Debit', currencyCode: 'PHP', foreignAmount: 25000, remarks: 'Statutory audit FY2026', branchCode: 'PHP', departmentCode: 'FI' },
   { mainAccount: '2206001', entryType: 'Credit', currencyCode: 'PHP', foreignAmount: 25000, remarks: 'Accrued audit fee' }];
 
-async function notifyApprovers(jv, req) {
+const jvLink = (jv) => `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`;
+async function askApproval(jv, req) {
   if (jv.status !== 'for-approval') return;
-  await notify({ audience: 'write:journal-vouchers', type: 'approval', title: `Journal voucher ${jv.jv_number} awaiting approval`, message: `${req.user.username} submitted ${jv.jv_number} (${await formatMoney(jv.total_debit)})`, link: `/accounts/journalvoucher/detailsjournalvocture/${jv.id}`, entity: 'journal_voucher', entityId: jv.id });
+  await notifyApprovers({ audience: 'write:journal-vouchers', document: 'Journal voucher', number: jv.jv_number, by: req.user.username, detail: await formatMoney(jv.total_debit),
+    link: jvLink(jv), entity: 'journal_voucher', entityId: jv.id });
 }
 
 define({
@@ -52,7 +54,7 @@ define({
   handler: async (req, res) => {
     const jv = await withTransaction((db) => svc.createManual(db, req.body, req.user));
     await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'create', after: req.body });
-    await notifyApprovers(jv, req);
+    await askApproval(jv, req);
     created(res, { ...svc.headerRow(jv), transactionNumber: jv.jv_number }, `Transaction Number ${jv.jv_number} is created`);
   },
 });
@@ -63,7 +65,7 @@ define({
   handler: async (req, res) => {
     const jv = await withTransaction((db) => svc.createReversal(db, req.body, req.user));
     await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'create-reversal', after: req.body });
-    await notifyApprovers(jv, req);
+    await askApproval(jv, req);
     created(res, svc.headerRow(jv), `Transaction Number ${jv.jv_number} is created`);
   },
 });
@@ -74,7 +76,7 @@ define({
   handler: async (req, res) => {
     const jv = await withTransaction((db) => svc.createCorrection(db, req.body, req.user));
     await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'create-correction', after: req.body });
-    await notifyApprovers(jv, req);
+    await askApproval(jv, req);
     created(res, svc.headerRow(jv), `Transaction Number ${jv.jv_number} is created`);
   },
 });
@@ -88,7 +90,8 @@ define({
   handler: async (req, res) => {
     const jv = await withTransaction((db) => svc.approve(db, req.params.id, req.user));
     await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'approve', after: { status: jv.status } });
-    if (jv.created_by) await notify({ userId: jv.created_by, type: 'info', title: `Journal voucher ${jv.jv_number} approved`, message: `Approved and posted by ${req.user.username}`, entity: 'journal_voucher', entityId: jv.id });
+    await notifyDecision({ userId: jv.created_by, decidedBy: req.user.id, document: 'Journal voucher', number: jv.jv_number, approved: true, by: req.user.username,
+      message: `Approved and posted by ${req.user.username}`, link: jvLink(jv), entity: 'journal_voucher', entityId: jv.id });
     ok(res, svc.headerRow(jv), `Journal voucher ${jv.jv_number} approved and posted`);
   },
 });
@@ -98,7 +101,8 @@ define({
   handler: async (req, res) => {
     const jv = await withTransaction((db) => svc.reject(db, req.params.id, req.body.reason, req.user));
     await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'reject', after: { reason: req.body.reason } });
-    if (jv.created_by) await notify({ userId: jv.created_by, type: 'alert', title: `Journal voucher ${jv.jv_number} rejected`, message: req.body.reason, entity: 'journal_voucher', entityId: jv.id });
+    await notifyDecision({ userId: jv.created_by, decidedBy: req.user.id, document: 'Journal voucher', number: jv.jv_number, approved: false, by: req.user.username, reason: req.body.reason,
+      link: jvLink(jv), entity: 'journal_voucher', entityId: jv.id });
     ok(res, svc.headerRow(jv), `Journal voucher ${jv.jv_number} rejected`);
   },
 });

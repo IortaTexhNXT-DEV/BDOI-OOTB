@@ -7,7 +7,7 @@ import { many, one, query, withTransaction } from '../../db/pool.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
-import { notify } from '../notifications/service.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { assertChecker, isoDate, lastMonths, params, round2, saveFile, toCsv, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -185,7 +185,7 @@ export async function createTreaty(b, user) {
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$17,$17) RETURNING id`,
   [b.name, rs.map((x) => x.name).join(', '), lowest, b.type, c.capacity, c.share, from, to, status, number, b.lineOfBusiness, JSON.stringify(b.reinsurers.map(String)), JSON.stringify(c.terms),
     b.currency || (await getSetting('currency.default', 'PHP')), c.retention, c.commission, user.id]);
-  if (approval) await notify({ audience: 'write:reinsurance', type: 'approval', title: 'Treaty awaiting approval', message: `${number} ${b.name} needs approval`, link: '/master/reinsurance/treaty', entity: 'treaty', entityId: r.id });
+  if (approval) await askTreatyApproval({ id: r.id, number, name: b.name }, user);
   return getTreaty(r.id);
 }
 
@@ -208,8 +208,13 @@ export async function updateTreaty(id, b, user) {
       rejection_reason = NULL, updated_at = now() WHERE id = $1`,
   [before.id, b.name || before.name, rs.map((x) => x.name).join(', '), b.type || before.treaty_type, c.capacity ?? before.capacity, c.share ?? before.share, from, to, status,
     b.treatyNumber || before.treaty_number, b.lineOfBusiness || before.line_of_business, JSON.stringify(reinsurers), JSON.stringify(c.terms), c.retention ?? before.retention, c.commission ?? before.commission_rate, user.id]);
+  if (status === 'Pending Approval' && before.status !== 'Pending Approval') await askTreatyApproval({ id: before.id, number: b.treatyNumber || before.treaty_number, name: b.name || before.name }, user);
   return { before: await treatyOut(before), after: await getTreaty(before.id) };
 }
+
+/** A treaty created or changed while reinsurance.treaty_requires_approval: to write:reinsurance (Treaty Master approves). */
+const askTreatyApproval = (t, user) => notifyApprovers({ audience: 'write:reinsurance', document: 'Treaty', number: t.number, by: user.username, detail: t.name,
+  link: '/master/reinsurance/treaty', entity: 'treaty', entityId: t.id });
 
 export async function decideTreaty(id, action, b, user) {
   const t = await treatyRow(id);
@@ -222,7 +227,8 @@ export async function decideTreaty(id, action, b, user) {
     if (!b.reason) throw badRequest('Validation failed', [{ path: 'reason', message: 'A reason is required to reject' }]);
     await query('UPDATE reinsurance_treaties SET status = \'Rejected\', rejection_reason = $3, updated_by = $2, updated_at = now() WHERE id = $1', [t.id, user.id, b.reason]);
   }
-  await notify({ userId: t.submitted_by || t.created_by, type: 'info', title: `Treaty ${action === 'approve' ? 'approved' : 'rejected'}`, message: `${t.treaty_number} ${t.name}`, link: '/reinsurance/treaties', entity: 'treaty', entityId: t.id });
+  await notifyDecision({ userId: t.submitted_by || t.created_by, decidedBy: user.id, document: 'Treaty', number: t.treaty_number, approved: action === 'approve', by: user.username,
+    reason: action === 'approve' ? null : b.reason, link: `/reinsurance/treaty/${t.id}`, entity: 'treaty', entityId: t.id });
   return { before: await treatyOut(t), after: await getTreaty(t.id) };
 }
 

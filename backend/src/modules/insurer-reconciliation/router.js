@@ -18,6 +18,8 @@ import { buildPdf, sendPdf } from '../documents/pdf.js';
 import * as st from './statements.js';
 import * as mt from './matching.js';
 import * as rc from './reconcile.js';
+import { formatMoney } from '../../lib/money.js';
+import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 
 const { router, define } = moduleRouter('Insurer Reconciliation', '/insurer-reconciliation');
 const read = [requireAuth, requirePermission('read:remittance')];
@@ -28,6 +30,8 @@ const writeMaster = [requireAuth, requirePermission('write:remittance', 'write:m
 const S = 'Accounts > Insurer Reconciliation';
 const F = 'Master > Finance > Insurer Statement Formats';
 const tx = (fn) => withTransaction(fn);
+const statementLink = (st) => `/accounts/insurer-reconciliation/statements/${st.id}`;
+const statementPeriod = (st) => [st.periodFrom, st.periodTo].filter(Boolean).map((d) => (d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10))).join(' to ');
 
 const formatExample = { code: 'MALAYAN-SOA', name: 'Malayan statement of account', insurerId: 1, fileType: 'xlsx', skipRows: 2, hasHeader: true,
   columns: { policyNo: 'policy no', insured: 'assured', date: 'date', grossPremium: 'gross premium', commission: 'commission', taxes: 'taxes', amountPaid: 'amount received' }, dateFormat: 'MM/DD/YYYY' };
@@ -150,6 +154,9 @@ define({
   handler: async (req, res) => {
     const r = await tx((db) => rc.submit(db, req.params.id, req.user));
     await audit(req, { entity: 'insurer_statement', entityId: r.after.id, action: 'submit', before: r.before, after: { status: r.after.status } });
+    const st = r.after;
+    await notifyApprovers({ audience: 'approve:insurer-reconciliation', document: 'Insurer reconciliation', number: st.statementNumber, by: req.user.username,
+      detail: [st.insurerName, statementPeriod(st), `paid ${await formatMoney(st.totals.amountPaid)}`].filter(Boolean).join(', '), link: statementLink(st), entity: 'insurer_statement', entityId: st.id });
     ok(res, r.after, `${r.after.statementNumber} submitted for approval`);
   },
 });
@@ -163,6 +170,8 @@ for (const action of ['approve', 'reject']) {
     handler: async (req, res) => {
       const r = await tx((db) => rc.decide(db, req.params.id, action, req.body?.remarks, req.user));
       await audit(req, { entity: 'insurer_statement', entityId: r.after.id, action, before: r.before, after: { status: r.after.status, remarks: req.body?.remarks || null, journals: r.journals } });
+      await notifyDecision({ userId: r.submittedBy, decidedBy: req.user.id, document: 'Insurer reconciliation', number: r.after.statementNumber, approved: action === 'approve',
+        by: req.user.username, reason: action === 'reject' ? req.body?.remarks : null, link: statementLink(r.after), entity: 'insurer_statement', entityId: r.after.id });
       ok(res, r.after, `${r.after.statementNumber} ${action === 'approve' ? 'approved' : 'rejected'}`);
     },
   });
