@@ -513,6 +513,12 @@ $text-strong: #1f2937;
     white-space: nowrap;
     color: $color-text-muted;
     font-variant-numeric: tabular-nums;
+
+    // a screen may mark the figure by its state: the text colour changes, nothing is filled
+    &.success { color: $color-success; }
+    &.warning { color: $color-warning; }
+    &.danger { color: $color-danger; }
+    &.info { color: $color-text-muted; }
   }
 }
 
