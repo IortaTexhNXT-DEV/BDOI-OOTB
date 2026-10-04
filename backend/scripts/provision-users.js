@@ -6,6 +6,9 @@
  *   DATABASE_URL=postgres://... CONFIRM_PROVISION=yes node scripts/provision-users.js /secure/path/users.csv
  *
  * Dry run (lists what would change) unless CONFIRM_PROVISION=yes. Never commit the CSV.
+ *
+ * On a hosted environment without database access from outside (Railway), run it from a one-off service of the
+ * project: the CSV content in a variable, written to a file by the start command, the variable removed afterwards.
  */
 import fs from 'node:fs';
 import { withTransaction, pool } from '../src/db/pool.js';
