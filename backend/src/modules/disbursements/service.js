@@ -345,6 +345,10 @@ export async function approveAgentPayout(db, id, lineIds, user) {
   if (d.payee_type !== AGENT) throw badRequest('Voucher is not an Agent/Referrer payout');
   if (['paid', 'cancelled'].includes(d.status)) throw conflict(`Voucher ${d.voucher_number} is ${d.status}`);
   await assertChecker(user, d.created_by, 'payment voucher');
+  // the payee must still be payable when the payment is approved: bank account, licence in force (compliance.referrer_licence_check)
+  const { assertPayable } = await import('../commission/service.js');
+  const referrer = (await db.query('SELECT * FROM commission_referrers WHERE id = $1', [d.referrer_id])).rows[0];
+  if (referrer) await assertPayable(referrer);
   const lines = (await db.query('SELECT * FROM commissions WHERE id = ANY($1) AND referrer_id = $2 FOR UPDATE', [lineIds, d.referrer_id])).rows;
   if (lines.length !== lineIds.length) throw badRequest('Some commission lines do not belong to this referrer');
   const r = await payLines(db, { lines, disbursement: d, user });

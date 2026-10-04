@@ -17,6 +17,7 @@ import { GO_LIVE_PREFIX, OPENING_BALANCE_COLUMNS, importOpeningBalances, zeroBal
 import { seriesShape, sequenceOf } from './numbering.js';
 import { MIGRATION_SOURCE, amountValue, beforeCutover, cell, dateValue, fail, isDate, keyText, numberCell } from './common.js';
 import { regionOf } from '../../lib/address.js';
+import { revealPii } from '../../lib/pii.js';
 
 /** Refuse a legacy number that the numbering series of the same kind would issue again to a new record. */
 async function assertNoSeriesClash(code, number, column) {
@@ -63,7 +64,7 @@ const clientsSheet = () => ({
   async exportRows() {
     const rows = await many('SELECT * FROM clients WHERE source = $1 ORDER BY client_code', [MIGRATION_SOURCE]);
     return rows.map((c) => ({ clientCode: c.client_code, clientType: c.client_type, firstName: cell(c.first_name), lastName: cell(c.last_name), companyName: cell(c.company_name),
-      email: cell(c.email), phone: cell(c.phone), tin: cell(c.tin), birthDate: cell(c.birth_date), gender: cell(c.gender), address: cell(c.address), barangay: cell(c.barangay),
+      email: cell(c.email), phone: cell(c.phone), tin: cell(revealPii(c.tin)), birthDate: cell(c.birth_date), gender: cell(c.gender), address: cell(c.address), barangay: cell(c.barangay),
       city: cell(c.city), province: cell(c.state), region: cell(c.region), country: cell(c.country), postalCode: cell(c.postal_code) }));
   },
   check(ctx, v) {

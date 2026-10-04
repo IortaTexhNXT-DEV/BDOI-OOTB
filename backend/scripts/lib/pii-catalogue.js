@@ -228,6 +228,23 @@ export const CATALOGUE = {
   'data_subject_requests.description': 'freeText',
   'data_subject_requests.outcome': 'freeText',
   'data_subject_requests.response_notes': 'freeText',
+  // compliance registers (migrations 0270, 0272, 0273): licence holders, directors and officers, complainants, incidents
+  'compliance_licences.holder_name': 'partyName',
+  'compliance_licences.licence_number': 'idNumber',
+  'compliance_licences.remarks': 'freeText',
+  'compliance_fit_proper.person_name': 'personName',
+  'compliance_fit_proper.declarations': 'json',
+  'compliance_fit_proper.review_notes': 'freeText',
+  'compliance_fit_proper.remarks': 'freeText',
+  'complaints.complainant_name': 'partyName',
+  'complaints.complainant_contact': 'contact',
+  'complaints.description': 'freeText',
+  'complaints.resolution': 'freeText',
+  'complaints.escalation_reason': 'freeText',
+  'personal_data_breaches.description': 'freeText',
+  'personal_data_breaches.reported_by': 'personName',
+  'personal_data_breaches.assessment_notes': 'freeText',
+  'personal_data_breaches.closure_notes': 'freeText',
   'data_subject_requests.actions': 'json',
   'audit_log.before_data': 'json',
   'audit_log.after_data': 'json',
@@ -369,6 +386,12 @@ export const ALLOW_LIST = {
   'signatories.*': 'signatory master: name and signature catalogued',
   'remittance_approvals.description': 'description of the approval step (swept)',
   'petty_cash_requests.requester_user_id': 'reference',
+  // blind indexes of the encrypted identifiers (migration 0277): keyed hashes, recomputed by the encryption trigger when the
+  // identifier is masked
+  'clients.tin_bidx': 'blind index (keyed hash) of the encrypted TIN, recomputed when the TIN is masked',
+  'leads.tax_number_bidx': 'blind index (keyed hash) of the encrypted TIN, recomputed when the TIN is masked',
+  'commission_referrers.tin_bidx': 'blind index (keyed hash) of the encrypted TIN, recomputed when the TIN is masked',
+  'commission_referrers.bank_account_no_bidx': 'blind index (keyed hash) of the encrypted bank account number, recomputed when it is masked',
 };
 
 /**
@@ -411,7 +434,7 @@ const PARTY_KEYS = set(`fullname displayname insuredname assuredname clientname 
 const PHONE_KEYS = set('phone mobile telephone landline fax contactnumber contactno mobileno phoneno telno phonenumber mobilenumber faxnumber cellphone cellno');
 const TIN_KEYS = set('tin tinno tinnumber taxnumber taxid taxidentificationnumber payeetin payortin');
 const DOB_KEYS = set('birthdate dateofbirth dob birthday');
-const ID_KEYS = set(`idnumber idno passport passportno passportnumber licenseno licensenumber licencenumber licenceno driverslicense driverslicenseno
+const ID_KEYS = set(`idnumber idno idcardnumber idcardno governmentidno umidnumber philsysnumber passport passportno passportnumber licenseno licensenumber licencenumber licenceno driverslicense driverslicenseno
   driverslicensenumber mvfilenumber mvfileno sss sssno sssnumber gsis gsisno philhealth philhealthno pagibig pagibigno umid umidno governmentid
   governmentidnumber nationalid philsys philsysno crno policeclearance`);
 const BANK_KEYS = set('accountnumber accountno bankaccount bankaccountno bankaccountnumber iban cardnumber');

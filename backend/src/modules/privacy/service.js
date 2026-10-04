@@ -9,6 +9,7 @@ import { getSetting } from '../../lib/settings.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { addDays, isoDate, today } from '../../lib/dates.js';
 import { companyName } from '../../lib/letterhead.js';
+import { revealInPlace } from '../../lib/pii.js';
 
 export const PARTY_TYPES = ['client', 'lead'];
 export const PURPOSES = ['processing', 'marketing', 'sharing'];
@@ -314,11 +315,12 @@ export async function exportParty(party) {
   const consents = (await consentsOf(party)).history;
   const requests = (await many(`${REQUEST_SELECT} WHERE r.party_type = $1 AND r.party_id = $2 ORDER BY r.received_on DESC`, [party.type, party.id]))
     .map((r) => ({ requestNumber: r.request_number, requestType: r.request_type, receivedOn: iso(r.received_on), status: r.status, closedOn: iso(r.closed_on) }));
-  return {
+  // identifiers encrypted at rest are given to the data subject in clear
+  return revealInPlace({
     generatedAt: new Date().toISOString(), controller: await companyName(),
     party: { type: party.type, id: party.id, code: party.code, name: party.name },
     personalData: personal, leads, consents, policies, claims, receipts, quotations, dataSubjectRequests: requests,
-  };
+  });
 }
 
 /** The export as workbook sheets for lib/xlsx.js. */

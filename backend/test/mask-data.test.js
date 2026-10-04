@@ -13,6 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { setup } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
+import { isPiiCipher, revealPii } from '../src/lib/pii.js';
 import { sendQueuedEmails, queueEmail } from '../src/lib/mailer.js';
 import {
   ALLOW_LIST, CATALOGUE, PERSONAL_NAME_RE, RULES, TABLE_ACTIONS, allowReason, catalogueEntry, jsonKeyRule,
@@ -119,7 +120,7 @@ beforeAll(async () => {
     idCardUrl: `/api/s3/object/${KEY}`, remarks: 'Referred by Zuhaybar',
   })]);
   await query(`UPDATE claims SET driver = $2, third_party = $3, description = 'Hit by Brontavia Yllescas at the Zuhaybar gate', loss_address = '99 Tunay na Daan, Makati' WHERE id = $1`, [ids.claim,
-    JSON.stringify({ driverName: 'Xandrelle Quizonwerth', licenseNumber: 'N01-23-456789' }),
+    JSON.stringify({ driverName: 'Xandrelle Quizonwerth', licenseNumber: 'N02-19-654321' }),
     JSON.stringify({ thirdPartyName: 'Brontavia Yllescas', thirdPartyContactNumber: '+639189876543' })]);
   await query("UPDATE journal_vouchers SET description = 'Premium of Xandrelle Quizonwerth, Zentrovia Trading Corp. (TIN 123-456-789-000)' WHERE id = $1", [ids.jv]);
   await query("INSERT INTO notifications(title, message) VALUES ('Policy issued', 'Policy issued to Xandrelle Quizonwerth (xandrelle.q@realmail.ph)')");
@@ -141,7 +142,7 @@ beforeAll(async () => {
   await query("INSERT INTO password_resets(user_id, code_hash, expires_at) SELECT id, 'x', now() + interval '1 hour' FROM users WHERE username = 'staffina.d'");
 
   originals = ['Xandrelle', 'Quizonwerth', 'xandrelle.q@realmail.ph', '9171234567', '917 123 4567', '123-456-789', 'Zentrovia', 'ops@zentrovia.ph',
-    '765 4321', 'Brontavia', 'Yllescas', '9189876543', 'Totoong', 'ZXA 9123', 'MHFZZ1234567B9012', '2NRX987654', 'N01-23-456789', 'P7654321Q',
+    '765 4321', 'Brontavia', 'Yllescas', '9189876543', 'Totoong', 'ZXA 9123', 'MHFZZ1234567B9012', '2NRX987654', 'N02-19-654321', 'P7654321Q',
     '203.0.113.7', '1985-06-15', 'Zuhaybar', 'Tunay na Daan', 'Xandrelle_Quizonwerth', '9175550000', '1990-01-20'];
 });
 afterAll(async () => {
@@ -316,6 +317,9 @@ describe('masking a copy', () => {
 
   it('is deterministic: the same original gives the same masked value in every table', async () => {
     const client = (await query('SELECT * FROM clients WHERE id = $1', [ids.client])).rows[0];
+    // the TIN is stored encrypted (migration 0277): the masked value is read in clear
+    expect(isPiiCipher(client.tin)).toBe(true);
+    client.tin = revealPii(client.tin);
     const lead = (await query('SELECT * FROM leads WHERE id = $1', [ids.lead])).rows[0];
     const policy = (await query('SELECT * FROM policies WHERE id = $1', [ids.policy])).rows[0];
     const claim = (await query('SELECT * FROM claims WHERE id = $1', [ids.claim])).rows[0];

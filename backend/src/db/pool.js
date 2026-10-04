@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import pg from 'pg';
 import { config } from '../config.js';
+import { sessionOptions } from '../lib/pii.js';
 
 const { Pool } = pg;
 // NUMERIC -> number, BIGINT -> number, DATE -> ISO date string
@@ -8,7 +9,9 @@ pg.types.setTypeParser(1700, (v) => (v === null ? null : Number(v)));
 pg.types.setTypeParser(20, (v) => (v === null ? null : Number(v)));
 pg.types.setTypeParser(1082, (v) => v);
 
-export const pool = new Pool({ connectionString: config.databaseUrl, max: 10 });
+// Every session starts with the keys of the personal identifier encryption (lib/pii.js, migration 0277) as session
+// settings in the start-up packet: the database encrypts TIN, government ID and bank account numbers on write with them.
+export const pool = new Pool({ connectionString: config.databaseUrl, max: 10, options: sessionOptions() });
 
 /**
  * Ambient transaction (runInTransaction): while one is active in the current async context, query / one / many and

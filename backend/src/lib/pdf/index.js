@@ -18,6 +18,8 @@ import { currentUser } from '../requestContext.js';
 import { PdfWriter, PAGE_SIZES } from './writer.js';
 import { DocRenderer } from './layout.js';
 import { DEFAULT_FORMAT, formatDateTime } from './format.js';
+import { revealInPlace } from '../pii.js';
+import { protectExportRows } from '../piiPolicy.js';
 import { prepareTable, allocateWidths } from './table.js';
 
 export { toWinAnsi, textWidth, wrapText } from './fonts.js';
@@ -28,6 +30,8 @@ export function buildPdfBatch(specs, { title } = {}) {
   const list = specs.filter(Boolean);
   const first = list[0] || {};
   const writer = new PdfWriter({ title: title || [first.title, first.number].filter(Boolean).join(' '), author: first.letterhead?.name || '', subject: first.title || '' });
+  // personal identifiers encrypted at rest are printed in full on documents (lib/pii.js)
+  for (const spec of list) revealInPlace(spec);
   for (const spec of list.length ? list : [{ title: 'Document' }]) new DocRenderer(writer, spec, spec.render || {}).render();
   return writer.toBuffer();
 }
@@ -110,7 +114,8 @@ export function fitReport(table, { pageSize = 'A4', format } = {}) {
  *   totals?: object, pageSize?: string, sections?: object[]}} report
  */
 export function buildReportPdf({ title, params = '', columns, rows, totals = null, pageSize = 'A4', sections = [], ...ctx }) {
-  const table = { columns, rows, totals: totals && Object.keys(totals).length ? totals : null };
+  // a listing follows the masking of the user who runs it (lib/piiPolicy.js)
+  const table = { columns, rows: protectExportRows(columns || [], rows || []), totals: totals && Object.keys(totals).length ? totals : null };
   const fit = fitReport(table, { pageSize, format: ctx.format });
   return buildPdf({ ...ctx, title, params, orientation: 'landscape', pageSize: fit.pageSize,
     sections: [{ table: { ...table, prepared: fit.prepared, fontSize: fit.fontSize } }, ...sections] });

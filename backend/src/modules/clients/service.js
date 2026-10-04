@@ -45,7 +45,7 @@ export async function listClients(q, pg) {
   const params = [];
   const add = (sql, v) => { params.push(v); where.push(sql.replaceAll('?', `$${params.length}`)); };
   const search = q.search || q.query || q.q;
-  if (search) add("(c.display_name ILIKE '%' || ? || '%' OR c.client_code ILIKE '%' || ? || '%' OR c.email ILIKE '%' || ? || '%' OR c.phone ILIKE '%' || ? || '%')", search);
+  if (search) add("(c.display_name ILIKE '%' || ? || '%' OR c.client_code ILIKE '%' || ? || '%' OR c.email ILIKE '%' || ? || '%' OR c.phone ILIKE '%' || ? || '%' OR c.tin_bidx = pii_blind_index(?::text))", search);
   if (q.leadCategory || q.category) add('c.lead_category = ?', q.leadCategory || q.category);
   if (q.status) add('c.status = ?', q.status);
   // individual / corporate by the client type (a company may still carry the Retail lead category of its prospect)

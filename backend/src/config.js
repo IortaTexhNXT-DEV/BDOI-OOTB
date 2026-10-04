@@ -3,6 +3,7 @@ import 'dotenv/config';
 /** Development-only fallbacks. In production (NODE_ENV=production) the server refuses to start with them. */
 export const DEV_JWT_SECRET = 'dev-only-secret-change-me';
 export const DEV_DATA_ENCRYPTION_KEY = 'dev-only-data-key-change-me';
+export const DEV_PII_ENCRYPTION_KEY = 'dev-only-personal-data-key-change-me';
 
 const MB = 1024 * 1024;
 
@@ -26,6 +27,12 @@ export function buildConfig(source = process.env) {
     refreshTtl: num('JWT_REFRESH_TTL_SECONDS', 2592000),
     /** Key for data encrypted at rest (TOTP secrets) and for hashing reset codes. */
     dataEncryptionKey: env('DATA_ENCRYPTION_KEY', DEV_DATA_ENCRYPTION_KEY),
+    /**
+     * Field-level encryption of personal identifiers (TIN, government ID and bank account numbers; lib/pii.js). The
+     * previous key is set only while a key rotation runs (npm run pii:rotate), so values encrypted with it stay readable.
+     */
+    piiEncryptionKey: env('PII_ENCRYPTION_KEY', DEV_PII_ENCRYPTION_KEY),
+    piiEncryptionKeyPrevious: env('PII_ENCRYPTION_KEY_PREVIOUS', ''),
     corsOrigins: env('CORS_ORIGINS', '*').split(',').map((s) => s.trim()).filter(Boolean),
     uploadDir: env('UPLOAD_DIR', './uploads'),
     publicBaseUrl: env('PUBLIC_BASE_URL', 'http://localhost:8000').replace(/\/+$/, ''),
@@ -64,6 +71,11 @@ export function productionConfigProblems(cfg = config, source = process.env) {
   else if (dataKey === DEV_DATA_ENCRYPTION_KEY || /change[-_ ]?me/i.test(dataKey)) problems.push('DATA_ENCRYPTION_KEY is a placeholder value');
   else if (Buffer.byteLength(dataKey) < 32) problems.push('DATA_ENCRYPTION_KEY must be at least 32 characters');
   else if (dataKey === secret) problems.push('DATA_ENCRYPTION_KEY must differ from JWT_SECRET');
+  const piiKey = source.PII_ENCRYPTION_KEY;
+  if (!piiKey) problems.push('PII_ENCRYPTION_KEY is not set');
+  else if (piiKey === DEV_PII_ENCRYPTION_KEY || /change[-_ ]?me/i.test(piiKey)) problems.push('PII_ENCRYPTION_KEY is a placeholder value');
+  else if (Buffer.byteLength(piiKey) < 32) problems.push('PII_ENCRYPTION_KEY must be at least 32 characters');
+  else if (piiKey === secret || piiKey === dataKey) problems.push('PII_ENCRYPTION_KEY must differ from JWT_SECRET and DATA_ENCRYPTION_KEY');
   if (!source.CORS_ORIGINS || cfg.corsOrigins.includes('*') || !cfg.corsOrigins.length) problems.push('CORS_ORIGINS must list the web application origin(s); "*" is not allowed');
   if (!source.PUBLIC_BASE_URL) problems.push('PUBLIC_BASE_URL is not set');
   else if (isLocalUrl(cfg.publicBaseUrl)) problems.push('PUBLIC_BASE_URL must be the public address of the API, not localhost');

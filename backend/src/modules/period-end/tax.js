@@ -14,6 +14,7 @@ import { round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { legalIdentity } from '../../lib/letterhead.js';
 import { addMonths, iso, monthEnd } from './fiscal.js';
+import { revealPii } from '../../lib/pii.js';
 
 export const TAX_TYPES = ['VAT', 'EWT', 'FWT', 'DST', 'LGT', 'PT', 'FST', 'OTHER'];
 
@@ -76,7 +77,7 @@ async function withholdingLines(db, direction, from, to) {
       FROM disbursements d LEFT JOIN commission_referrers cr ON cr.id = d.referrer_id LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id
       LEFT JOIN clients cl ON cl.id = d.client_id
       WHERE d.wht_amount > 0 AND d.status IN ('approved','paid') AND d.voucher_date BETWEEN $1 AND $2 ORDER BY d.voucher_date, d.voucher_number`, [from, to])).rows;
-    return rows.map((r) => ({ key: `${r.payee_type}:${r.pid}`, name: r.payee_name, tin: r.tin || '', address: r.address || '', date: iso(r.voucher_date),
+    return rows.map((r) => ({ key: `${r.payee_type}:${r.pid}`, name: r.payee_name, tin: revealPii(r.tin) || '', address: r.address || '', date: iso(r.voucher_date),
       atc: map[r.referrer_type] || map[r.payee_type] || '', income: round2(Number(r.gross_amount) || Number(r.amount) + Number(r.wht_amount)), tax: round2(r.wht_amount), reference: r.voucher_number }));
   }
   const atc = (await getSetting('bir.sawt_default_atc')) || '';
@@ -89,7 +90,7 @@ async function withholdingLines(db, direction, from, to) {
   return [
     ...dn.map((r) => ({ key: `Insurer:${r.insurer_id}`, name: r.name, tin: r.tin || '', address: r.address || '', date: iso(r.received_date), atc,
       income: round2(Number(r.ewt_rate) > 0 ? Number(r.ewt_amount) / Number(r.ewt_rate) : r.commission), tax: round2(r.ewt_amount), reference: r.form_2307_no || r.collection_number })),
-    ...rc.map((r) => ({ key: `Client:${r.client_id || r.name}`, name: r.name, tin: r.tin || '', address: r.address || '', date: iso(r.received_date), atc,
+    ...rc.map((r) => ({ key: `Client:${r.client_id || r.name}`, name: r.name, tin: revealPii(r.tin) || '', address: r.address || '', date: iso(r.received_date), atc,
       income: round2(r.net_premium), tax: round2(r.ewt), reference: r.receipt_number })),
   ];
 }

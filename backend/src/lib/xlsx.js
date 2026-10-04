@@ -4,6 +4,7 @@
  * (text, number, money, integer, date, wrap).
  */
 import { createZip } from './zip.js';
+import { protectExportRows } from './piiPolicy.js';
 
 const MAX_CELL = 32767;
 // Style indexes in styles.xml cellXfs
@@ -157,7 +158,8 @@ const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 export function writeXlsx({ sheets, creator = 'BrokerVerse', title = '' }) {
   const sst = new SharedStrings();
   const used = new Set();
-  const named = sheets.map((s) => ({ ...s, name: safeSheetName(s.name, used) }));
+  // personal identifiers: decrypted, and masked for a user without view:pii (lib/piiPolicy.js)
+  const named = sheets.map((s) => ({ ...s, rows: protectExportRows(s.columns || [], s.rows || []), name: safeSheetName(s.name, used) }));
   const sheetFiles = named.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: sheetXml(s, sst) }));
   const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
   const definedNames = named.map((s, i) => (s.autoFilter === false || !s.columns.length ? ''

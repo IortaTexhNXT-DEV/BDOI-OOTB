@@ -1,3 +1,5 @@
+import { protectExportRows } from './piiPolicy.js';
+
 /** RFC 4180 CSV with a UTF-8 BOM (so Excel detects the encoding) and formula-injection guarding. */
 const FORMULA_START = /^[=+\-@\t\r]/;
 
@@ -12,6 +14,6 @@ export function csvCell(v) {
 /** columns: [{key, label}]; rows: objects (by key) or arrays. */
 export function toCsv(columns, rows, { bom = true } = {}) {
   const lines = [columns.map((c) => csvCell(c.label ?? c.header ?? c.key)).join(',')];
-  for (const r of rows) lines.push((Array.isArray(r) ? r : columns.map((c) => r[c.key])).map(csvCell).join(','));
+  for (const r of protectExportRows(columns, rows)) lines.push((Array.isArray(r) ? r : columns.map((c) => r[c.key])).map(csvCell).join(','));
   return (bom ? '﻿' : '') + lines.join('\r\n') + '\r\n';
 }

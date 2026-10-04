@@ -88,6 +88,10 @@ export { bankAutoMatch } from '../modules/bank-reconciliation/jobs.js';
 // Data privacy: remind the privacy team (read:privacy) of overdue data subject requests (daily, disabled by default)
 export { privacyRequestsDue } from '../modules/privacy/jobs.js';
 
+// Compliance: licence, fit and proper and insurer authority reminders (daily), complaint deadlines (daily), the NPC
+// notification deadline of personal data breaches (hourly)
+export { complianceReminders, complaintsDeadlines, privacyBreachDeadlines } from '../modules/ic-compliance/jobs.js';
+
 // Housekeeping: purge operational rows past the retention periods in System Settings, Housekeeping tab (daily)
 export { housekeeping } from './housekeeping.js';
 

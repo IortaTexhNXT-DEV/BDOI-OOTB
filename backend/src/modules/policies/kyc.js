@@ -10,6 +10,7 @@
 import { getSetting } from '../../lib/settings.js';
 import { badRequest } from '../../lib/errors.js';
 import { query } from '../../db/pool.js';
+import { revealPii } from '../../lib/pii.js';
 
 export const KYC_DEFAULT_REQUIRED = {
   MOTOR: ['idType', 'idNumber', 'idImage', 'chassisNumber', 'motorNumber', 'plateOrMvFile'],
@@ -37,7 +38,8 @@ export function kycValue(sources, item) {
   if (!def?.keys) return null;
   let found = null;
   for (const s of sources.filter(Boolean)) {
-    for (const k of def.keys) if (filled(s[k])) { found = String(s[k]).trim(); break; }
+    // an ID number is stored encrypted (migration 0277): the value is compared and proposed in clear
+    for (const k of def.keys) if (filled(s[k])) { found = String(revealPii(s[k])).trim(); break; }
   }
   return found;
 }

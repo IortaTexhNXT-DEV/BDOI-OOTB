@@ -36,6 +36,7 @@
  * DATABASE_URL selects the copy. Stop the API instances of the copy first.
  */
 import crypto from 'node:crypto';
+import { isPiiCipher, revealPii } from '../src/lib/pii.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -138,6 +139,8 @@ export function applyRule(m, rule, v, opt = {}) {
 
 function jsonValue(m, rule, x, opt) {
   if (x == null || typeof x === 'boolean') return x;
+  // identifiers encrypted at rest (migration 0277) are masked in clear; the database encrypts the masked value again
+  if (isPiiCipher(x)) x = revealPii(x);
   if (typeof x === 'number') {
     if (!rule || !NUMERIC_RULES.has(rule)) return x;
     const r = applyRule(m, rule, String(x), opt);
@@ -207,6 +210,7 @@ function planColumns(table, cols) {
 }
 
 function maskValue(m, p, v, matchesWhere) {
+  if (isPiiCipher(v)) v = revealPii(v);
   if (p.entry && matchesWhere) {
     const opt = { party: p.entry.party, bareName: p.entry.bareName, names: p.names, nullable: p.nullable };
     return applyRule(m, p.entry.rule, v, opt);
@@ -505,6 +509,8 @@ const redact = (s) => (s.length <= 4 ? '****' : `${s.slice(0, 3)}${'*'.repeat(Ma
  * example.test (staff addresses kept without --mask-staff are listed apart), mobile numbers outside the masked network
  * code and TINs outside the masked prefix. Returns { findings: [{ table, column, kind, count, examples }], kept, clean }.
  */
+const PII_TOKEN_RE = /pii:1:[0-9a-f]{8}:[A-Za-z0-9+/=]+:[A-Za-z0-9+/=]+/g;
+
 export async function verifyMasked(client, { keptEmails = null, inTransaction = false } = {}) {
   if (!inTransaction) {
     await client.query('BEGIN READ ONLY');
@@ -521,7 +527,8 @@ export async function verifyMasked(client, { keptEmails = null, inTransaction = 
   const columns = await tableColumns(client);
   const findings = [];
   const kept = [];
-  const prefilter = '@|9[0-9]{2}[ .()-]{0,2}[0-9]{3}[ .-]?[0-9]{4}|[0-9]{3}[- ][0-9]{3}[- ][0-9]{3}';
+  // encrypted identifiers (pii:1:) are checked in clear
+  const prefilter = '@|9[0-9]{2}[ .()-]{0,2}[0-9]{3}[ .-]?[0-9]{4}|[0-9]{3}[- ][0-9]{3}[- ][0-9]{3}|pii:1:';
   for (const [table, cols] of columns) {
     if (SKIP_TABLES.has(table)) continue;
     for (const c of cols) {
@@ -529,7 +536,8 @@ export async function verifyMasked(client, { keptEmails = null, inTransaction = 
       const counts = {};
       const keptCount = { n: 0 };
       await forEachBatch(client, `SELECT ${ident(c.name)}::text AS v FROM ${ident(table)} WHERE ${ident(c.name)}::text ~ $1`, [prefilter], async (rows) => {
-        for (const { v } of rows) {
+        for (const { v: stored } of rows) {
+          const v = stored.replace(PII_TOKEN_RE, (t) => revealPii(t));
           const add = (kind, s) => { (counts[kind] ||= { count: 0, examples: [] }).count += 1; if (counts[kind].examples.length < 3) counts[kind].examples.push(redact(s)); };
           for (const e of v.match(EMAIL_RE) || []) {
             const k = norm(e);

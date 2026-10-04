@@ -52,6 +52,8 @@ export const TRANSACTION_TABLES = [
   'access_review_items', 'access_reviews', 'agent_events',
   // data privacy: consents and data subject requests belong to the clients and leads that go
   'data_subject_requests', 'privacy_consents',
+  // compliance: complaints (they belong to the clients, policies and claims that go) and the breach register of a test run
+  'complaints', 'complaint_reminders', 'personal_data_breaches', 'personal_data_breach_reminders',
 ];
 
 /**
@@ -100,6 +102,9 @@ export const MASTER_CONFIG_TABLES = [
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
   // reports and scheduled jobs
   'report_definitions', 'report_schedules', 'scheduled_jobs',
+  // Insurance Commission compliance: licences of the firm, its officers and referrers, fit and proper records, the
+  // reminders already sent for them, and the mapping of the ledger to the IC annual statement
+  'compliance_licences', 'compliance_licence_reminders', 'compliance_fit_proper', 'ic_statement_lines',
 ];
 
 /**
