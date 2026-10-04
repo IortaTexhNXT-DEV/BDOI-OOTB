@@ -35,6 +35,13 @@ export async function migrate({ reset = false, log = console.log, lockTimeoutMs 
     locked = true;
     await client.query('RESET lock_timeout');
     if (reset) {
+      // Tables are dropped in batches, each in its own transaction: one DROP SCHEMA CASCADE over several hundred
+      // tables (and their indexes, sequences and triggers) needs more locks than a default server allows
+      // (max_locks_per_transaction 64: "out of shared memory").
+      const tables = (await client.query("SELECT tablename FROM pg_tables WHERE schemaname = 'public'")).rows.map((r) => r.tablename);
+      for (let i = 0; i < tables.length; i += 40) {
+        await client.query(`DROP TABLE IF EXISTS ${tables.slice(i, i + 40).map((t) => `public."${t.replace(/"/g, '""')}"`).join(', ')} CASCADE`);
+      }
       await client.query('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
       log('schema reset');
     }
