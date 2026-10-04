@@ -195,6 +195,13 @@ describe('configuration kit', () => {
     expect(partial.body.data.temporaryPasswords.map((p) => p.username)).toEqual(['wb.ae1']);
     expect(partial.headers['cache-control']).toBe('no-store');
     expect(await count("SELECT count(*)::int AS n FROM insurance_companies WHERE code = 'WBINS'")).toBe(1);
+    // the row skipped by the partial load keeps its error: the loaded batch still lists it and its errors workbook downloads
+    const loadedDetail = await api('get', `/data-load/batches/${batchA.id}`);
+    expect(loadedDetail.body.data.batch.status).toBe('loaded');
+    expect(loadedDetail.body.data.errors).toEqual([expect.objectContaining({ sheet: 'users', row: 3, column: 'Roles' })]);
+    const afterLoad = await bin(api('get', `/data-load/batches/${batchA.id}/errors`));
+    expect(afterLoad.status).toBe(200);
+    expect(readWorkbook(afterLoad.body).find((s) => s.name === 'Users').rows[2][0]).toBe('wb.ae2');
     // fix the role in the errors workbook and upload it again
     const roles = users.rows[0].indexOf('Roles *');
     const fixed = users.rows[2].slice(0, users.rows[0].indexOf('Errors'));
@@ -267,6 +274,13 @@ describe('configuration kit', () => {
     ] }));
     expect(r.body.data.errors.map((e) => [e.row, e.column])).toEqual([[2, 'Setting Key'], [3, 'Value'], [4, 'Setting Key']]);
     expect(r.body.data.errors[2].message).toMatch(/Premium Taxes/);
+  });
+
+  it('refuses a commission rate on a line of business that is not in the Line of Business master', async () => {
+    const rate = { Insurer: 'WBINS', Product: 'MOTOR', 'Policy Type': 'renewal', Rate: '0.15', 'Effective From': '2026-02-01', Active: 'Yes' };
+    const r = await upload('configuration', book('configuration', { 'Commission Rates': [{ ...rate, 'Line of Business': 'MOTR' }, { ...rate, 'Line of Business': 'motor' }] }));
+    expect(r.body.data.errors).toEqual([expect.objectContaining({ sheetName: 'Commission Rates', row: 2, column: 'Line of Business', message: expect.stringMatching(/MOTR is not in the Line of Business master/) })]);
+    expect(r.body.data.batch.sheets.find((s) => s.sheet === 'commission-rates')).toMatchObject({ errors: 1, valid: 1 });
   });
 });
 
@@ -434,5 +448,28 @@ describe('migration kit', () => {
     const loadedBatch = r.body.data.find((b) => b.id === loaded.id);
     expect(loadedBatch).toMatchObject({ kit: 'migration', status: 'loaded', createdBy: 'BrokerVerse Administrator', loadedBy: 'BrokerVerse Administrator', rowsRead: 10 });
     expect(loadedBatch.loadedCounts.policies.created).toBe(2);
+  });
+
+  it('renews a migrated policy into a new term that is new business, not flagged as migrated', async () => {
+    const now = await today();
+    const old = await one("SELECT id FROM policies WHERE policy_number = 'OLD-FI-0002'");
+    await query('UPDATE policies SET expiry_date = $2 WHERE id = $1', [old.id, addDays(now, 25)]);
+    const u = await api('post', '/users').send({ username: 'wb.checker', password: 'Welcome@123', displayName: 'WB Checker', email: 'wb.checker@example.ph', roles: ['processing'], mustChangePassword: false });
+    expect(u.status).toBe(201);
+    const checker = await loginAs(app, 'wb.checker', 'Welcome@123');
+    const rn = await api('post', `/renewals/policies/${old.id}`);
+    expect(rn.status, JSON.stringify(rn.body)).toBe(201);
+    await api('post', `/renewals/${rn.body.data.id}/quote`);
+    await api('post', `/renewals/${rn.body.data.id}/submit`).send({});
+    expect((await request(app).post(`/api/renewals/${rn.body.data.id}/approve`).set('Authorization', `Bearer ${checker}`).send({ decision: 'approve' })).status).toBe(200);
+    const done = await api('post', `/renewals/${rn.body.data.id}/complete`).send({});
+    expect(done.status, JSON.stringify(done.body)).toBe(200);
+    const term = await one('SELECT doc, load_batch_id, renewed_from FROM policies WHERE id = $1', [done.body.data.newPolicy.id]);
+    expect(term.renewed_from).toBe(old.id);
+    expect(term.doc.source).toBeUndefined();
+    expect(term.doc.loadBatchId).toBeUndefined();
+    expect(term.load_batch_id).toBeNull();
+    const list = await api('get', '/policies?source=go-live-migration&pageSize=50');
+    expect(list.body.data.map((p) => p.policyNumber).sort()).toEqual(['OLD-FI-0002', 'OLD-MC-0001']);
   });
 });

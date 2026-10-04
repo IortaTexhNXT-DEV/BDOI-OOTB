@@ -523,6 +523,10 @@ export async function completeRenewal(id, user, input = {}) {
     const net = takesQuote ? round2(quoted.netPremium)
       : Number(old.premium_total) > 0 && Number(old.net_premium) > 0 ? round2((Number(old.net_premium) / Number(old.premium_total)) * premium) : premium;
     const policyNumber = input.policyNumber || await nextDocumentNumber('policy', { db, unique: { table: 'policies', column: 'policy_number' } });
+    // how the expiring term came in (go-live migration, bulk upload) is not carried: the renewal term is new business
+    const doc = { ...(old.doc || {}) };
+    delete doc.source;
+    delete doc.loadBatchId;
     // the renewal term keeps the expiring policy's billing mode (broker billed or direct bill), product, line, insured and
     // risk details, and is issued today (or on the issue date given)
     const np = await db.query(`INSERT INTO policies(policy_number, client_id, lead_id, product_id, policy_type_id, insurance_company_id, owner_user_id, status,
@@ -531,7 +535,7 @@ export async function completeRenewal(id, user, input = {}) {
       VALUES ($1,$2,$3,$4,$5,$6,$7,'active',$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,
         COALESCE((SELECT billing_mode FROM policies WHERE id = $21), 'broker')) RETURNING id, policy_number`, [
       policyNumber, r.policy_client_id, old.lead_id, r.product_id, r.policy_type_id, r.insurance_company_id, r.policy_owner, inception, expiry, issuedOn, r.sum_insured, net, premium,
-      commission, r.currency, old.product_type, old.lob, old.insured_name, JSON.stringify(old.doc || {}),
+      commission, r.currency, old.product_type, old.lob, old.insured_name, JSON.stringify(doc),
       JSON.stringify({ ...(r.policy_details || {}), businessType: 'Renewal', renewal: { renewalId: r.id, renewalNumber: r.renewal_number, previousPolicyId: r.policy_id, previousPolicyNumber: r.policy_number }, coverageDetails: r.coverage_details || undefined }),
       r.policy_id, user?.username ?? null]);
     const newPolicy = np.rows[0];

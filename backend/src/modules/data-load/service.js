@@ -334,7 +334,9 @@ export async function loadBatch(id, user, { validRowsOnly = false } = {}) {
     clearSettingsCache();
     clearLetterheadCache();
   }
-  await saveResults(batch.id, outcome.results, (r) => (r.status === 'valid' ? 'loaded' : r.status));
+  // rows skipped by "load valid rows only" keep their status and errors: the errors workbook of the batch still lists
+  // them, to be fixed and uploaded again
+  await saveResults(batch.id, new Map([...outcome.results].filter(([id]) => !skip.has(id))), (r) => (r.status === 'valid' ? 'loaded' : r.status));
   const counts = Object.fromEntries(outcome.sheets.map((s) => [s.sheet, { created: s.created, updated: s.updated, unchanged: s.unchanged, proposed: s.proposed, skipped: s.skipped }]));
   await query('UPDATE data_load_batches SET loaded_counts = $2, sheets = $3, reconciliation = COALESCE($4, reconciliation) WHERE id = $1',
     [batch.id, JSON.stringify(counts), JSON.stringify(outcome.sheets), outcome.reconciliation ? JSON.stringify(outcome.reconciliation) : null]);
