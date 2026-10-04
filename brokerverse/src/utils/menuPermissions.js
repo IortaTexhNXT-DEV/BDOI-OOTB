@@ -131,6 +131,7 @@ export const roleMenuPermissions = {
   // inherits Accounting (the server returns both roles), so it needs no entry of its own.
   accounting: {
     dashboard: ["Executive Dashboard"],
+    home: true,
     operations: ["My Work", "Payments"],
     accounts: [
       "Receipts",
@@ -262,7 +263,7 @@ export const filterMenuForRoles = (menuList, roles) => {
     .filter(Boolean);
 };
 
-/** First screen the roles may open (landing page for roles without a dashboard); entries marked `landing: false` (Home) only when nothing else is open. */
+/** First screen the roles may open after sign-in (Home, the first entry, for every delivered role); an entry marked `landing: false` only when nothing else is open. */
 export const firstAllowedPath = (menuList, roles) => {
   const walk = (items, skip) => {
     for (const item of items || []) {

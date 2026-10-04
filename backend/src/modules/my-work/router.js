@@ -1,8 +1,9 @@
 /**
  * Operations > My Work (/my-work): the open items waiting on the signed-in user, their team and everyone (summary,
  * paged list, per-member breakdown, agenda), reassignment where the owning module supports it (claims handler, data
- * subject request assignee, tasks), and the work diary (tasks). Every signed-in user has a My Work; each category is
- * shown only with the permission to read its records (sources.js), so no permission of its own is needed.
+ * subject request assignee, tasks), the work diary (tasks) and the Home figures (figures.js: role preset, role, branch and
+ * the role's figures). Every signed-in user has a My Work; each category is shown only with the permission to read its
+ * records (sources.js), so no permission of its own is needed.
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { hasPermission } from '../../lib/auth.js';
@@ -15,6 +16,7 @@ import { assertVisible, scopeOf } from '../../lib/scope.js';
 import { notify } from '../notifications/service.js';
 import * as svc from './service.js';
 import * as tasks from './tasks.js';
+import { figures } from './figures.js';
 import { assignableUsers, manages } from './team.js';
 
 const { router, define } = moduleRouter('My Work', '/my-work');
@@ -43,6 +45,14 @@ define({
     categories: [{ code: 'quotes', label: 'Quotations', icon: 'pi pi-file-edit', count: 4, overdue: 1, dueToday: 0, dueSoon: 2, high: 1, nextDue: '2026-10-06' }],
     team: { size: 2, isManager: true } } },
   handler: async (req, res) => ok(res, await svc.summary(req.user, await withRecordScope(req, listQuery(req)))),
+});
+
+define({
+  method: 'GET', path: '/figures', summary: 'Home: the role preset of the signed-in user, their role, branch and company for the page subtitle, and the two or three figures of the role (sales: quotes this month, conversion, renewals due; claims: open claims, average days open; accounting: overdue receivables, collections this month; compliance: deadlines, EDD reviews; administrator: active users, failed jobs)',
+  screen: `${S} (Home)`,
+  response: { success: true, data: { asOf: '2026-10-04', preset: 'sales', roleCode: 'sales', roleName: 'Sales & Marketing (Account Executive)', firstName: 'Maria', branch: 'Makati', company: 'BrokerVerse',
+    figures: [{ key: 'quotesMonth', label: 'Quotes this month', value: 12, format: 'count' }, { key: 'conversion', label: 'Conversion (90 days)', value: 38, format: 'percent' }, { key: 'renewals30', label: 'Renewals due in 30 days', value: 7, format: 'count' }] } },
+  handler: async (req, res) => ok(res, await figures(req.user, { recordScope: await scopeOf(req) })),
 });
 
 define({

@@ -31,6 +31,14 @@ export const CATEGORIES = [
   { code: 'claims', label: 'Claims', icon: 'pi pi-shield', permission: 'read:claims' },
   { code: 'approvals', label: 'Approvals', icon: 'pi pi-check-square', permission: null },
   { code: 'documents', label: 'Missing documents', icon: 'pi pi-id-card', permission: 'read:policies' },
+  // the work of the compliance officer, the accounting manager and the system administrator (Home presets)
+  { code: 'edd', label: 'EDD reviews', icon: 'pi pi-user-edit', permission: 'read:aml' },
+  { code: 'compliance', label: 'Compliance deadlines', icon: 'pi pi-calendar-times', permission: 'read:compliance' },
+  { code: 'breaches', label: 'Breach register', icon: 'pi pi-exclamation-triangle', permission: 'read:privacy' },
+  { code: 'bankrec', label: 'Bank reconciliations', icon: 'pi pi-building', permission: 'read:bank-reconciliation' },
+  { code: 'periodClose', label: 'Period close', icon: 'pi pi-lock', permission: 'read:period-end' },
+  { code: 'access', label: 'Users and access', icon: 'pi pi-users', permission: 'read:users' },
+  { code: 'systems', label: 'System health', icon: 'pi pi-server', permission: 'write:schedules' },
   { code: 'tasks', label: 'Tasks', icon: 'pi pi-calendar', permission: null },
 ];
 export const CATEGORY_CODES = CATEGORIES.map((c) => c.code);
@@ -71,6 +79,11 @@ export async function buildContext(user, { scope = null, today, db }) {
 const notMine = (ctx, col) => `(${col} IS NULL OR NOT (${col} = ANY(${ctx.ME}::text[])))`;
 const rec = (ctx, entity, alias) => scopeSql(ctx.scope, entity, alias, ctx.params);
 const localDate = (ctx, ts) => `((${ts}) AT TIME ZONE ${ctx.P(ctx.tz)}::text)::date`;
+const exists = async (ctx, table) => (await ctx.db.query('SELECT to_regclass($1) IS NOT NULL AS ok', [table])).rows[0].ok;
+/** A whole number setting with a floor of 1 (the window or the due days of a source). */
+const daysSetting = async (key, fallback) => Math.max(1, Number(await getSetting(key, fallback)) || fallback);
+/** Last day of the month after a YYYY-MM period plus a number of days: the due date of the work that closes the period. */
+const afterPeriod = (period, days) => `((to_date(${period}, 'YYYY-MM') + interval '1 month')::date + ${days}::int - 1)`;
 
 /** Approval limit of the user for an Authority Matrix transaction type: SQL condition on `amountExpr`. */
 async function withinAuthority(ctx, type, amountExpr) {
@@ -357,6 +370,145 @@ async function documents(ctx) {
     WHERE p.status IN ('active', 'issued') AND ${rec(ctx, 'policy', 'p')}) x WHERE x.missing <> ''`;
 }
 
+// ------------------------------------------------------------------------- sources of the compliance officer, the
+// accounting manager and the system administrator. Their records are not part of anyone's book: a user limited to
+// their own book (lib/scope.js) gets nothing from them.
+
+/** EDD reviews of High-risk clients: in preparation (owned by whoever opened them) or awaiting the compliance officer's decision. */
+async function edd(ctx) {
+  const reviewDays = await daysSetting('aml.edd_review_days', 30);
+  const decide = ctx.can('approve:aml');
+  return `SELECT ${select({
+    category: "'edd'", kind: "CASE e.status WHEN 'open' THEN 'EDD review in preparation' ELSE 'EDD review awaiting decision' END",
+    id: 'e.id', ref: 'e.review_number', title: "COALESCE(e.reason, 'Enhanced due diligence')", client_name: CLIENT('c'),
+    due_date: `CASE e.status WHEN 'open' THEN ${localDate(ctx, 'e.created_at')} + ${ctx.P(reviewDays)}::int
+      ELSE ${localDate(ctx, 'COALESCE(e.submitted_at, e.updated_at)')} + ${ctx.P(ctx.slaDays)}::int END`,
+    status: 'e.status', priority: "CASE e.status WHEN 'submitted' THEN 'high' ELSE 'normal' END",
+    next_action: "CASE e.status WHEN 'open' THEN 'Record the findings and submit the review' ELSE 'Approve or reject the EDD review' END",
+    owner_id: `CASE e.status WHEN 'open' THEN ${userOf('e.created_by')} END`,
+    queue: decide ? `(e.status = 'submitted' AND ${notMine(ctx, 'e.submitted_by')})` : 'false',
+    link: "'/compliance/aml/edd'", created_at: 'e.created_at',
+  })} FROM aml_edd_reviews e JOIN clients c ON c.id = e.client_id WHERE e.status IN ('open', 'submitted') AND ${rec(ctx, 'client', 'c')}`;
+}
+
+/** Compliance deadlines: licences expiring or expired, fit and proper reviews due, insurers whose IC certificate of authority runs out. */
+async function compliance(ctx) {
+  if (ctx.scope) return null;
+  const licenceDays = await daysSetting('compliance.licence_expiring_days', 90);
+  const authorityDays = await daysSetting('compliance.insurer_authority_expiring_days', 60);
+  const queue = ctx.can('write:compliance') ? 'true' : 'false';
+  const base = { category: "'compliance'", queue };
+  const licences = `SELECT ${select({
+    ...base, kind: `CASE WHEN l.expiry_date < ${ctx.T}::date THEN 'Licence expired' ELSE 'Licence expiring' END`, id: 'l.id', ref: 'COALESCE(l.licence_number, l.licence_type)',
+    title: 'l.licence_type', client_name: 'l.holder_name', due_date: 'l.expiry_date', status: 'l.renewal_status',
+    priority: `CASE WHEN l.expiry_date <= ${ctx.T}::date + 15 THEN 'high' ELSE 'normal' END`,
+    next_action: `CASE l.renewal_status WHEN 'in-progress' THEN 'Complete the licence renewal' WHEN 'filed' THEN 'Record the renewed licence'
+      ELSE 'File the licence renewal with the ' || l.issuing_authority END`,
+    link: "'/compliance/licences'", created_at: 'l.created_at',
+  })} FROM compliance_licences l WHERE l.status = 'active' AND l.expiry_date IS NOT NULL AND l.renewal_status <> 'renewed'
+    AND l.expiry_date <= ${ctx.T}::date + ${ctx.P(licenceDays)}::int`;
+  const fitProper = `SELECT ${select({
+    ...base, kind: "'Fit and proper review'", id: 'f.id', ref: 'f.person_name', title: "f.position || ' (' || replace(f.role_category, '-', ' ') || ')'", client_name: 'f.person_name',
+    due_date: 'f.next_review_on', status: 'f.review_outcome', next_action: "'Review the fit and proper declaration'", link: "'/compliance/fit-and-proper'", created_at: 'f.created_at',
+  })} FROM compliance_fit_proper f WHERE f.status = 'active' AND f.next_review_on IS NOT NULL AND f.next_review_on <= ${ctx.T}::date + ${ctx.P(licenceDays)}::int`;
+  const validUntil = "CASE WHEN (ic.attrs->>'icCertificateValidUntil') ~ '^\\d{4}-\\d{2}-\\d{2}' THEN substr(ic.attrs->>'icCertificateValidUntil', 1, 10)::date END";
+  const insurers = `SELECT ${select({
+    ...base, kind: `CASE WHEN x.valid_until < ${ctx.T}::date THEN 'Insurer certificate of authority expired' ELSE 'Insurer certificate of authority expiring' END`,
+    id: "'ic-' || x.id", ref: 'x.code', title: "'Certificate ' || COALESCE(x.attrs->>'icCertificateNumber', '')", client_name: 'x.name', due_date: 'x.valid_until', status: 'x.status',
+    priority: `CASE WHEN x.valid_until <= ${ctx.T}::date + 15 THEN 'high' ELSE 'normal' END`,
+    next_action: "'Obtain the insurer''s renewed certificate of authority and update the insurer master'", link: "'/compliance/insurer-authority'", created_at: 'x.created_at',
+  })} FROM (SELECT ic.id, ic.code, ic.name, ic.status, ic.attrs, ic.created_at, ${validUntil} AS valid_until FROM insurance_companies ic WHERE ic.status = 'active') x
+    WHERE x.valid_until IS NOT NULL AND x.valid_until <= ${ctx.T}::date + ${ctx.P(authorityDays)}::int`;
+  return [licences, fitProper, insurers].join(' UNION ALL ');
+}
+
+/** Personal data breaches and security incidents not yet closed: the data protection officer's, or the privacy team's queue. */
+function breaches(ctx) {
+  if (ctx.scope) return null;
+  return `SELECT ${select({
+    category: "'breaches'", kind: "CASE b.incident_type WHEN 'security-incident' THEN 'Security incident' ELSE 'Personal data breach' END",
+    id: 'b.id', ref: 'b.breach_number', title: 'b.title', due_date: `CASE WHEN b.npc_notified_at IS NULL AND b.status IN ('open', 'assessed') THEN ${localDate(ctx, 'b.npc_due_at')} END`,
+    status: 'b.status', priority: "CASE b.status WHEN 'open' THEN 'urgent' WHEN 'assessed' THEN 'high' ELSE 'normal' END",
+    next_action: `CASE b.status WHEN 'open' THEN 'Assess the breach: is it notifiable to the NPC?'
+      WHEN 'assessed' THEN CASE WHEN b.notifiable AND b.npc_notified_at IS NULL THEN 'Notify the NPC and the data subjects within 72 hours' ELSE 'Complete the remediation and close the record' END
+      ELSE 'Close the breach record' END`,
+    owner_id: 'b.dpo_user_id', queue: ctx.can('write:privacy') ? 'b.dpo_user_id IS NULL' : 'false', link: "'/compliance/breaches'", created_at: 'b.created_at',
+  })} FROM personal_data_breaches b WHERE b.status <> 'closed'`;
+}
+
+/** Bank reconciliations still being worked (a prepared one waits in Approvals for the accounting manager). */
+async function bankrec(ctx) {
+  if (ctx.scope) return null;
+  const dueDays = await daysSetting('myWork.reconciliation_due_days', 10);
+  const open = 'COALESCE(br.unmatched_bank_lines, 0) + COALESCE(br.unmatched_book_lines, 0)';
+  return `SELECT ${select({
+    category: "'bankrec'", kind: `CASE WHEN ${open} > 0 THEN 'Reconciliation with unmatched lines' ELSE 'Reconciliation in progress' END`,
+    id: 'br.id', ref: 'br.rec_number', title: "br.bank_account_code || ' - ' || br.period", due_date: afterPeriod('br.period', ctx.P(dueDays)), status: 'br.status',
+    next_action: `CASE WHEN ${open} > 0 THEN 'Match ' || COALESCE(br.unmatched_bank_lines, 0) || ' bank and ' || COALESCE(br.unmatched_book_lines, 0) || ' book lines, then prepare the statement'
+      ELSE 'Prepare the reconciliation statement for approval' END`,
+    owner_id: userOf('br.created_by'), link: "'/accounts/bank-reconciliation/reconciliations/' || br.id", amount: 'br.difference', created_at: 'br.created_at',
+  })} FROM bank_reconciliations br WHERE br.status = 'draft'`;
+}
+
+/** Month-end close: the manual checklist items to sign off and the checks that failed on the runs not yet submitted. */
+async function periodClose(ctx) {
+  if (ctx.scope || !(await exists(ctx, 'period_close_run_checks'))) return null;
+  const dueDays = await daysSetting('myWork.period_close_due_days', 5);
+  return `SELECT ${select({
+    category: "'periodClose'", kind: "CASE WHEN rc.status = 'failed' THEN 'Close check failed' ELSE 'Close checklist item' END", id: "'pcc-' || rc.id", ref: 'pr.run_number',
+    title: "'Close of period ' || pr.period", due_date: afterPeriod('pr.period', ctx.P(dueDays)), status: 'pr.status',
+    priority: "CASE WHEN rc.severity = 'blocking' THEN 'high' ELSE 'normal' END",
+    next_action: "CASE WHEN rc.status = 'failed' THEN 'Resolve: ' || rc.label || COALESCE(' (' || rc.message || ')', '') ELSE 'Sign off: ' || rc.label END",
+    owner_id: userOf('COALESCE(pr.prepared_by, pr.created_by)'), queue: ctx.can('write:period-end') ? 'true' : 'false',
+    link: "'/accounts/period-end/close/' || pr.id", amount: 'rc.amount', created_at: 'pr.created_at',
+  })} FROM period_close_run_checks rc JOIN period_close_runs pr ON pr.id = rc.run_id
+  WHERE pr.status IN ('draft', 'in-progress', 'blocked', 'ready') AND (rc.status = 'failed' OR (rc.status = 'pending' AND rc.item_type = 'manual'))`;
+}
+
+/** User administration: access reviews still open and users who have not signed in since their account was created. */
+async function access(ctx) {
+  if (ctx.scope) return null;
+  const out = [];
+  if (ctx.can('read:access-control') && await exists(ctx, 'access_reviews')) {
+    out.push(`SELECT ${select({
+      category: "'access'", kind: "'Access review'", id: "'ar-' || ar.id", ref: "'AR-' || ar.id", title: 'ar.name', due_date: 'ar.due_date', status: 'ar.status',
+      next_action: "'Decide ' || p.pending || ' of ' || p.total || ' users (keep or revoke)'", queue: ctx.can('write:access-control') ? 'true' : 'false',
+      link: "'/master/generals/usermanagement/access-reviews'", created_at: 'ar.created_at',
+    })} FROM access_reviews ar LEFT JOIN LATERAL (SELECT count(*)::int AS total, count(*) FILTER (WHERE i.decision = 'pending')::int AS pending
+      FROM access_review_items i WHERE i.review_id = ar.id) p ON true WHERE ar.status = 'open'`);
+  }
+  const firstDays = await daysSetting('myWork.first_sign_in_days', 7);
+  out.push(`SELECT ${select({
+    category: "'access'", kind: "'User awaiting first sign-in'", id: 'u.id', ref: 'u.username', title: "COALESCE(u.designation, u.department, 'User')", client_name: 'u.display_name',
+    due_date: `${localDate(ctx, 'u.created_at')} + ${ctx.P(firstDays)}::int`, status: 'u.status', next_action: "'Confirm the user received their access and can sign in'",
+    queue: ctx.can('write:users') ? 'true' : 'false', link: "'/master/generals/usermanagement/user/view/' || u.id", created_at: 'u.created_at',
+  })} FROM users u WHERE u.status = 'active' AND u.last_login_at IS NULL AND COALESCE(u.created_by, '') <> 'seed'`);
+  return out.join(' UNION ALL ');
+}
+
+/** System health: scheduled jobs whose last run failed, integration messages that failed on the way out or in. */
+async function systems(ctx) {
+  if (ctx.scope) return null;
+  const out = [`SELECT ${select({
+    category: "'systems'", kind: "'Failed scheduled job'", id: "'job-' || j.id", ref: 'j.code', title: 'j.name', due_date: localDate(ctx, 'j.last_run_at'), status: 'j.last_status',
+    priority: "'high'", next_action: "'Check the last run and run the job again'", queue: 'true', link: "'/master/configuration/schedules'", created_at: 'j.last_run_at',
+  })} FROM scheduled_jobs j WHERE j.enabled AND j.last_status = 'failed'`];
+  if (ctx.can('read:integrations') && await exists(ctx, 'integration_outbox')) {
+    const queue = ctx.can('write:integrations') ? 'true' : 'false';
+    out.push(`SELECT ${select({
+      category: "'systems'", kind: "'Failed integration message'", id: "'io-' || o.id", ref: 'COALESCE(o.reference, o.message_type)', title: "ic.name || ' - ' || o.message_type",
+      due_date: localDate(ctx, 'o.updated_at'), status: 'o.status', priority: "'high'",
+      next_action: "'Resend or cancel the message' || COALESCE(': ' || left(o.last_error, 80), '')", queue, link: "'/master/configuration/integrations'", created_at: 'o.created_at',
+    })} FROM integration_outbox o JOIN integration_connectors ic ON ic.code = o.connector_code WHERE o.status = 'failed'`);
+    out.push(`SELECT ${select({
+      category: "'systems'", kind: "'Failed inbound message'", id: "'ii-' || i.id", ref: 'COALESCE(i.external_ref, i.message_type)', title: "COALESCE(ic.name || ' - ', '') || i.message_type",
+      due_date: localDate(ctx, 'i.received_at'), status: 'i.status', priority: "'high'",
+      next_action: "'Check the inbound message and process it again' || COALESCE(': ' || left(i.last_error, 80), '')", queue, link: "'/master/configuration/integrations'", created_at: 'i.received_at',
+    })} FROM integration_inbox i LEFT JOIN integration_connectors ic ON ic.code = i.connector_code WHERE i.status = 'failed'`);
+  }
+  return out.join(' UNION ALL ');
+}
+
 /** Client and number of the record a task is about (tasks/RELATED), for the Client column of the list. */
 const TASK_RECORD = {
   client: ['(SELECT x.display_name FROM clients x WHERE x.id = t.entity_id)', '(SELECT x.client_code FROM clients x WHERE x.id = t.entity_id)'],
@@ -381,7 +533,7 @@ function tasks() {
   })} FROM work_tasks t WHERE t.status = 'open'`;
 }
 
-const BUILDERS = { quotes, rfq, placements, renewals, receivables, collections, endorsements, claims, approvals, documents, tasks };
+const BUILDERS = { quotes, rfq, placements, renewals, receivables, collections, endorsements, claims, approvals, documents, edd, compliance, breaches, bankrec, periodClose, access, systems, tasks };
 
 /** The categories the user may see (approvals and tasks: everyone; the rest by permission). */
 export const visibleCategories = (user) => CATEGORIES.filter((c) => !c.permission || hasPermission(user, c.permission));

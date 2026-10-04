@@ -65,12 +65,16 @@ CategoryRail.propTypes = {
   categories: PropTypes.array.isRequired, value: PropTypes.string, onChange: PropTypes.func.isRequired, loading: PropTypes.bool, totalLabel: PropTypes.string, header: PropTypes.node,
 };
 
-/** My Items: what waits on the signed-in user (or, with "Everyone", on anybody within their permissions). */
-const MyItems = ({ state, patch, summary, loading, today, soonDays, reloadKey }) => {
+/** My Items: what waits on the signed-in user (a manager: on their team; or, with "Everyone", on anybody within their permissions). */
+const MyItems = ({ state, patch, summary, loading, today, soonDays, reloadKey, isManager = false }) => {
   const { t } = useTranslation();
   const filters = useMemo(() => ({ scope: state.scope, category: state.category, due: state.due, priority: state.priority, search: state.search, sort: state.sort }),
     [state.scope, state.category, state.due, state.priority, state.search, state.sort]);
-  const scopeOptions = [{ label: t("myWork.scope.me", "Mine"), value: "me" }, { label: t("myWork.scope.all", "Everyone"), value: "all" }];
+  const scopeOptions = [
+    { label: t("myWork.scope.me", "Mine"), value: "me" },
+    ...(isManager ? [{ label: t("myWork.scope.team", "My team"), value: "team" }] : []),
+    { label: t("myWork.scope.all", "Everyone"), value: "all" },
+  ];
   return (
     <div className="mw-split">
       <CategoryRail categories={summary?.categories || []} value={state.category} onChange={(category) => patch({ category })} loading={loading}
@@ -91,6 +95,7 @@ MyItems.propTypes = {
   today: PropTypes.string.isRequired,
   soonDays: PropTypes.number,
   reloadKey: PropTypes.number,
+  isManager: PropTypes.bool,
 };
 
 export default MyItems;

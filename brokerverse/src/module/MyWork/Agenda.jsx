@@ -16,12 +16,16 @@ const weekdayOf = (iso) => {
   return new Date(y, m - 1, d).getDay();
 };
 
-/** Calendar: the day or week agenda of the user's open tasks and of the items falling due, overdue in red. */
-const Agenda = ({ state, patch, today, reloadKey, onEditTask, onNewTask }) => {
+/**
+ * Calendar: the day or week agenda of the user's open tasks and of the items falling due, overdue in red. `categories`
+ * (the role preset) limits the items to the categories that matter for the role; null shows every category.
+ */
+const Agenda = ({ state, patch, today, reloadKey, onEditTask, onNewTask, categories = null }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const anchor = state.date || today;
   const days = useMemo(() => agendaDays(anchor, state.view), [anchor, state.view]);
+  const category = categories && categories.length ? categories.join(",") : undefined;
   const [data, setData] = useState(null);
   const [late, setLate] = useState([]);
 
@@ -34,9 +38,9 @@ const Agenda = ({ state, patch, today, reloadKey, onEditTask, onNewTask }) => {
     const withLate = from <= today;
     Promise.all([
       myWorkService.tasks({ scope: "mine", status: "open", from, to, page: 1, pageSize: 500 }),
-      myWorkService.agenda({ from, to, scope: "me" }),
+      myWorkService.agenda({ from, to, scope: "me", category }),
       withLate ? myWorkService.tasks({ scope: "mine", status: "open", due: "overdue", page: 1, pageSize: 50 }) : Promise.resolve({ rows: [] }),
-      withLate ? myWorkService.items({ scope: "me", due: "overdue", page: 1, pageSize: 50 }) : Promise.resolve({ rows: [] }),
+      withLate ? myWorkService.items({ scope: "me", due: "overdue", category, page: 1, pageSize: 50 }) : Promise.resolve({ rows: [] }),
     ]).then(([tasks, agenda, lateTasks, lateItems]) => {
       if (!alive) return;
       setData(groupAgenda(tasks.rows, agenda.items, days));
@@ -45,7 +49,7 @@ const Agenda = ({ state, patch, today, reloadKey, onEditTask, onNewTask }) => {
       if (alive) { setData(groupAgenda([], [], days)); setLate([]); notifyError(errorMessage(e, t("myWork.loadFailed", "My Work could not be loaded"))); }
     });
     return () => { alive = false; };
-  }, [days, reloadKey, today, t]);
+  }, [days, reloadKey, today, t, category]);
 
   const step = state.view === "day" ? 1 : 7;
   const views = [{ label: t("myWork.calendar.day", "Day"), value: "day" }, { label: t("myWork.calendar.week", "Week"), value: "week" }];
@@ -121,6 +125,7 @@ Agenda.propTypes = {
   reloadKey: PropTypes.number,
   onEditTask: PropTypes.func.isRequired,
   onNewTask: PropTypes.func.isRequired,
+  categories: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default Agenda;

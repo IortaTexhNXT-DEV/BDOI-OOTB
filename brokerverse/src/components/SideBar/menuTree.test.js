@@ -9,7 +9,9 @@ describe("active menu entry", () => {
     expect(matchLength({ includes: ["/"] }, "/agent/policy")).toBe(0);
   });
   it("takes the most specific entry", () => {
-    expect(findActiveTrail(menuList, "/")).toEqual(["Dashboard", "Executive Dashboard"]);
+    // "/" is Home (My Work with the role preset), the landing page after sign-in
+    expect(findActiveTrail(menuList, "/")).toEqual(["Home"]);
+    expect(findActiveTrail(menuList, "/executive/dashboard")).toEqual(["Dashboard", "Executive Dashboard"]);
     expect(findActiveTrail(menuList, "/agent/policydetailedview/123")).toEqual(["Operations", "Clients"]);
     expect(findActiveTrail(menuList, "/agent/policy")).toEqual(["Operations", "Policy"]);
     expect(findActiveTrail(menuList, "/renewal/queue")).toEqual(["Operations", "Renewals", "Renewal Queue"]);

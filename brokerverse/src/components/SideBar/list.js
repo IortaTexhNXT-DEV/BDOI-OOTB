@@ -8,14 +8,14 @@
  */
 export const menuList = [
   {
-    // the working home page of a user (open items, upcoming events): a top-level entry, not part of Operations
+    // the landing page of every role after sign-in: My Work with the role preset (module/MyWork); a top-level entry,
+    // not part of Operations. "/" and the former Open Items addresses lead here.
     name: "Home",
     icon: "pi pi-home",
-    // not taken as the landing page of a role that also has a dashboard (firstAllowedPath)
-    landing: false,
     path: "/agent/home",
     // the notifications page and the user's own profile are open to every signed-in role (not part of Home)
     includes: [
+      "/",
       "/agent/home",
       "/agent/openitems",
       "/agent/openitems/upcomingevents",
@@ -30,7 +30,7 @@ export const menuList = [
         id: 1,
         name: "Executive Dashboard",
         path: "/executive/dashboard",
-        includes: ["/executive/dashboard", "/"],
+        includes: ["/executive/dashboard"],
         permissions: ["read:executive-dashboard"],
       },
       {
@@ -51,7 +51,7 @@ export const menuList = [
         id: 4,
         name: "Sales Dashboard",
         path: "/sales/dashboard",
-        includes: ["/sales/dashboard", "/agent/home"],
+        includes: ["/sales/dashboard"],
         permissions: ["read:agent-dashboard"],
       },
     ],
