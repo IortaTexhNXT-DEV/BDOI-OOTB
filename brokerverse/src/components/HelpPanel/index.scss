@@ -1,0 +1,146 @@
+// Help panel: a side sheet on the right (components/HelpPanel).
+.p-sidebar.bv-help {
+  width: 420px;
+  max-width: 100vw;
+  font-family: var(--font-body, "Nunito", Arial, sans-serif);
+  color: var(--color-text, #4b4b4b);
+
+  .p-sidebar-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border, #e4e4e4);
+  }
+
+  .p-sidebar-content {
+    padding: 0 20px 24px;
+  }
+
+  .bv-help__title {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--color-heading, #2e2e2e);
+    margin-right: auto;
+  }
+
+  .bv-help__section {
+    padding: 18px 0;
+    border-bottom: 1px solid var(--color-border, #e4e4e4);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .bv-help__section-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--brand-navy, #004ea8);
+
+    i {
+      font-size: 14px;
+    }
+  }
+
+  .bv-help__screen {
+    margin: 0 0 4px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-heading, #2e2e2e);
+  }
+
+  .bv-help__muted {
+    margin: 0 0 12px;
+    font-size: 13.5px;
+    color: var(--color-text-muted, #656565);
+  }
+
+  .bv-help__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .bv-help__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    font-size: 14px;
+    text-decoration: none;
+  }
+
+  .bv-help__link,
+  .bv-help__inline-link,
+  .bv-help__inline-link .p-button-label {
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--brand-blue, #0072d8);
+  }
+
+  .p-button.bv-help__inline-link {
+    padding: 0;
+    vertical-align: baseline;
+  }
+
+  dl {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 6px 12px;
+    margin: 0;
+    font-size: 14px;
+
+    dt {
+      color: var(--color-text-muted, #656565);
+    }
+
+    dd {
+      margin: 0;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      color: var(--color-heading, #2e2e2e);
+    }
+
+    a {
+      color: var(--brand-blue, #0072d8);
+    }
+  }
+
+  .bv-help__keys {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+
+    td {
+      padding: 5px 0;
+      vertical-align: middle;
+    }
+
+    td:first-child {
+      width: 132px;
+      white-space: nowrap;
+    }
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 24px;
+    padding: 1px 6px;
+    border: 1px solid var(--color-border, #e4e4e4);
+    border-bottom-width: 2px;
+    border-radius: 4px;
+    background: var(--color-bg, #f6f6f6);
+    font: 600 12px/1.6 var(--font-body, "Nunito", Arial, sans-serif);
+    text-align: center;
+    color: var(--color-heading, #2e2e2e);
+  }
+
+  .bv-help__vendor {
+    margin: 12px 0 0;
+  }
+}

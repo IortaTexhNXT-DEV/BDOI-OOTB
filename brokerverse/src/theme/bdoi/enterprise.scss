@@ -38,38 +38,6 @@ $text-strong: #1f2937;
   }
 }
 
-// Sidebar: every level lines up on the same left edge and uses the same type scale; nested groups
-// (Petty Cash, Remittance, Incentive, Renewals...) no longer sit on a different indent from their siblings.
-.sidebar__overall__container {
-  .submunusidebar__container {
-    margin-left: 18px !important;
-    padding-left: 8px !important;
-
-    li > div,
-    .divcontent__sidebar_overall,
-    .divcontent__sidebardeactive__overall {
-      padding-left: 8px !important;
-      margin-left: 0 !important;
-      min-height: 32px;
-      border-radius: $radius-sm;
-    }
-
-    .singleitemname__container,
-    .singleitemname__container__active,
-    .itemname__container {
-      font-size: 14px !important;
-      font-weight: 600;
-      padding-left: 0 !important;
-      margin-left: 0 !important;
-    }
-  }
-
-  .itemname__container {
-    font-size: 15px !important;
-    font-weight: 700;
-  }
-}
-
 // ---------------------------------------------------------------- page structure
 
 #{$shell} {
@@ -787,6 +755,8 @@ small.p-error {
 // Most reads answer in well under half a second. A loading mask, skeleton or spinner that appears for 100 ms and
 // vanishes reads as a flicker, so every loading indicator stays transparent for its first 400 ms and only then fades
 // in; a quick load never shows one. Button spinners are left alone (they confirm the click at once).
+// Skeletons take the place of content that is about to appear, so they come in sooner (150 ms); the page structure
+// around them (title, breadcrumb, filters, column headings) is drawn at once.
 @keyframes bv-reveal {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -794,10 +764,13 @@ small.p-error {
 
 .p-datatable-loading-overlay,
 .p-progress-spinner,
-.p-skeleton,
 .p-progressbar-indeterminate,
 .bv-delayed-loading {
   animation: bv-reveal 150ms ease-out 400ms both !important;
+}
+
+.p-skeleton {
+  animation: bv-reveal 150ms ease-out 150ms both !important;
 }
 
 .pi-spinner.pi-spin:not(.p-button-icon):not(.p-button-loading-icon) {
@@ -978,21 +951,66 @@ small.p-error {
   min-height: calc(#{$row-height} * 6);
 }
 
-// First load of a table: until its first rows arrive it shows neither its column headings (whose widths change with
-// the data), nor a "No records" line, nor the paginator (pushed down by the rows) - the table appears once, complete.
-// (utility/tableNumericAlign.js marks such a table "bv-awaiting" for at most 1.5 s.)
-#{$shell} .p-datatable:has(.p-datatable-loading-overlay):has(tr.p-datatable-emptymessage),
-#{$shell} .p-datatable.bv-awaiting {
-  > .p-datatable-wrapper > table > thead,
-  tr.p-datatable-emptymessage > td,
+// First load of a table (components/DataTable): headings and filters are drawn at once and the body holds skeleton
+// rows of the final row height, lined up with the columns; the paginator keeps its place without a "0 of 0" count.
+.p-datatable.bv-table-is-loading,
+#{$shell} .p-datatable.bv-table-is-loading {
   > .p-paginator {
     visibility: hidden;
   }
+
+  .p-datatable-tbody > tr.p-datatable-emptymessage {
+    background: transparent !important;
+
+    > td {
+      padding: 0 !important;
+      border: 0 !important;
+    }
+  }
 }
 
-// a paged list waiting for its first page holds the height of the page, so what is under it does not move
-#{$shell} .p-datatable.bv-awaiting:has(> .p-paginator) > .p-datatable-wrapper {
-  min-height: 70vh;
+.bv-table-skeleton {
+  // no width of its own: the column headings decide the width of the table, the skeleton follows them
+  width: 0;
+  min-width: 100%;
+  overflow: hidden;
+
+  .bv-table-skeleton__row {
+    display: grid;
+    align-items: center;
+    height: $row-height;
+    border-bottom: 1px solid $color-border;
+
+    &:nth-child(even) {
+      background: #f5faff;
+    }
+  }
+
+  .bv-table-skeleton__cell {
+    padding: 0 $cell-pad-x;
+    min-width: 0;
+  }
+}
+
+// Skeleton blocks of the final size for figures, cards and detail pages (components/Skeletons).
+.bv-skeleton-block {
+  display: block;
+}
+
+.bv-chart-skeleton {
+  width: 100%;
+}
+
+.bv-page-skeleton {
+  padding: 4px 0;
+
+  .bv-page-skeleton__card {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
 }
 
 // A status banner that appears with the data has a slot of fixed height from the start.

@@ -6,7 +6,6 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Button } from "primereact/button";
@@ -14,6 +13,7 @@ import accountingService from "../../../services/accountingService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import logger from "../../../utility/logger";
+import { FieldsSkeleton } from "../../../components/Skeletons";
 
 // Cell components for DataTable
 const DebitCreditCell = ({ debitCredit }) => {
@@ -256,10 +256,7 @@ const PremiumAccountingEntries = () => {
   if (loading) {
     return (
       <div className="premium-accounting-entries">
-        <div className="loading-container">
-          <ProgressSpinner />
-          <p>{t("accounting.loadingPolicyEntries")}</p>
-        </div>
+        <FieldsSkeleton rows={4} columns={4} />
       </div>
     );
   }

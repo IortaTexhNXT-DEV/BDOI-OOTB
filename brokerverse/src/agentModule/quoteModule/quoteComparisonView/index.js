@@ -4,11 +4,11 @@ import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { ProgressSpinner } from "primereact/progressspinner";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { useNavigate, useLocation } from "react-router-dom";
 import quotationService from "../../../services/quotationService";
 import { vehicleColourLabel } from "../../../utility/quoteOptions";
+import { FieldsSkeleton } from "../../../components/Skeletons";
 
 const QuoteDetailView = () => {
   const { t } = useTranslation();
@@ -79,10 +79,7 @@ const QuoteDetailView = () => {
     return (
       <div className="overall__quotecomparision__view__container">
         <div className="header_title">{t("agent.quoteComparison")}</div>
-        <div className="loading-container">
-          <ProgressSpinner />
-          <p className="mt-3">{t("agent.loadingComparisonData")}</p>
-        </div>
+        <FieldsSkeleton rows={5} columns={3} />
       </div>
     );
   }

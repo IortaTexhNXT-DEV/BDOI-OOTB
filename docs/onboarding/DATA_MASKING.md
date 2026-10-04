@@ -138,7 +138,7 @@ Safety guards:
 - dry run by default; one transaction; the run is recorded in the audit trail (entity `database`, action `mask`: target,
   previous environment, options, counts per column; never the salt).
 
-The marker `system.environment` (migration 0247) is `production` on a database whose go-live lock is already on and
+The marker `system.environment` (migration 0249) is `production` on a database whose go-live lock is already on and
 `dev` otherwise. **At go-live the System Administrator sets it to `production` in Production** (Master > Configuration,
 group System), so that a restored copy always arrives marked production and must be re-marked consciously (step 2).
 

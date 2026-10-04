@@ -16,6 +16,7 @@ import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { currentUser, displayNameOf, roleLineOf } from "../../../utility/userIdentity";
 import profileService, { PROFILE_UPDATED_EVENT } from "../../../services/profileService";
 import logger from "../../../utility/logger";
+import { openHelp } from "../../../components/HelpPanel/helpEvents";
 
 export const PROFILE_PATH = "/account/profile";
 /** Notifications listed in the bell panel (the full list is on the Notifications page). */
@@ -118,7 +119,7 @@ const AgentNavBar = () => {
         menuItem(t("header.profile"), "pi-user", () => navigate(PROFILE_PATH)),
         menuItem(t("security.changePassword"), "pi-key", () => setSecurityDialog("password")),
         menuItem(t("security.twoFactor"), "pi-shield", () => setSecurityDialog("2fa")),
-        menuItem(t("header.help"), "pi-question-circle"),
+        menuItem(t("header.help"), "pi-question-circle", openHelp),
       ],
     },
     { separator: true },

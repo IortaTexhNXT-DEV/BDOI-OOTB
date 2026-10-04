@@ -21,6 +21,7 @@ import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+import { DetailPageSkeleton } from "../../../components/Skeletons";
 
 function SpecificVoucher() {
   const { t } = useTranslation();
@@ -356,7 +357,7 @@ function SpecificVoucher() {
   if (loading) {
     return (
       <div className="overall__specific__container">
-        <div className="loading-message">{t("paymentVoucher.loadingDisbursementDetails")}</div>
+        <DetailPageSkeleton />
       </div>
     );
   }

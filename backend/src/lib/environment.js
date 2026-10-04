@@ -1,5 +1,5 @@
 /**
- * Environment marker (setting system.environment, migration 0247): which environment this database serves.
+ * Environment marker (setting system.environment, migration 0249): which environment this database serves.
  *
  *   dev, sit, uat, preprod, training   non-production copies and project environments
  *   production                        the live book of the broker

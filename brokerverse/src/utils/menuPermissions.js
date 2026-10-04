@@ -4,14 +4,14 @@
  * Deny by default: a role that is not listed here sees no menu and cannot open a menu route.
  * `all: true` grants every menu. Each other entry maps a top-level menu name (lower case) to the
  * second-level items the role may open (case-insensitive; a nested group such as "Renewals" or
- * "Petty Cash" grants all of its children).
+ * "Petty Cash" grants all of its children; "Group > Item" grants one item of a group or of a Master
+ * section such as "Finance"), or to `true` for the whole menu (a top-level entry such as Home).
  *
  * The server enforces the same personas through permissions on every endpoint; this file only
  * decides what the user sees and which screens the router lets them open.
  */
 
 const OPERATIONS_ALL = [
-  "Home",
   "Sales & Marketing",
   "Clients",
   "Policy",
@@ -43,6 +43,7 @@ export const roleMenuPermissions = {
   sales: {
     dashboard: ["Executive Dashboard", "Sales Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
+    home: true,
     operations: OPERATIONS_ALL,
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports"],
@@ -62,6 +63,7 @@ export const roleMenuPermissions = {
       "Risk Mapping",
       "Product Analytics",
     ],
+    home: true,
     operations: OPERATIONS_PROCESSING,
     reinsurance: [
       "Treaty Dashboard",
@@ -76,6 +78,7 @@ export const roleMenuPermissions = {
   operations: {
     dashboard: ["Executive Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
+    home: true,
     operations: OPERATIONS_ALL,
     reports: ["All Reports", "Operational Reports"],
     // data subject requests and the consent register (read:privacy / write:privacy)
@@ -83,7 +86,8 @@ export const roleMenuPermissions = {
   },
   claims: {
     dashboard: ["Claims Dashboard"],
-    operations: ["Home", "Clients", "Policy", "Claims"],
+    home: true,
+    operations: ["Clients", "Policy", "Claims"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports"],
   },
@@ -194,6 +198,7 @@ export const filterMenuForRoles = (menuList, roles) => {
       if (!menu.submenu) {
         return list.some((r) => hasMenuAccess(r, menu.name)) ? menu : null;
       }
+      if (list.some((r) => roleMenuPermissions[r]?.[norm(menu.name)] === true)) return menu;
       const paths = list.flatMap((r) => grantsFor(r, menu.name));
       const submenu = menu.submenu
         .map((item) => {
@@ -206,17 +211,19 @@ export const filterMenuForRoles = (menuList, roles) => {
     .filter(Boolean);
 };
 
-/** First screen the roles may open (landing page for roles without a dashboard). */
+/** First screen the roles may open (landing page for roles without a dashboard); entries marked `landing: false` (Home) only when nothing else is open. */
 export const firstAllowedPath = (menuList, roles) => {
-  const walk = (items) => {
+  const walk = (items, skip) => {
     for (const item of items || []) {
+      if (skip && item.landing === false) continue;
       if (item.path && !item.submenu) return item.path;
-      const inner = walk(item.submenu);
+      const inner = walk(item.submenu, skip);
       if (inner) return inner;
     }
     return null;
   };
-  return walk(filterMenuForRoles(menuList, roles));
+  const allowed = filterMenuForRoles(menuList, roles);
+  return walk(allowed, true) || walk(allowed, false);
 };
 
 /** Backwards-compatible single-role filter. */

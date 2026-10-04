@@ -6,7 +6,6 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
@@ -17,6 +16,7 @@ import accountingService from "../../../services/accountingService";
 import { calendarDateFormat, formatDate } from "../../../utility/dateFormat";
 import "./index.scss";
 import logger from "../../../utility/logger";
+import { FieldsSkeleton } from "../../../components/Skeletons";
 
 const EntryTypeBadge = ({ entryType, t }) => {
   const getEntryTypeConfig = (type) => {
@@ -466,10 +466,7 @@ const AllClientsAccountingView = () => {
 
       {/* Loading State */}
       {loading && (
-        <div className="loading-container">
-          <ProgressSpinner />
-          <p>{t("accounting.loadingAccounting")}</p>
-        </div>
+        <FieldsSkeleton rows={4} columns={4} />
       )}
 
       {/* Clients List */}

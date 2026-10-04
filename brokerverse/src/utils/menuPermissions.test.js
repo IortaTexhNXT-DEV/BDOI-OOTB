@@ -1,4 +1,4 @@
-import { isPathAllowed, filterMenuForRoles } from "./menuPermissions";
+import { isPathAllowed, filterMenuForRoles, firstAllowedPath } from "./menuPermissions";
 import { menuList } from "../components/SideBar/list";
 
 const menu = [
@@ -132,5 +132,46 @@ describe("Sales & Marketing menu", () => {
     }
     expect(isPathAllowed("/placement/broker-slips/bs_1", menuList, ["processing"])).toBe(true);
     expect(isPathAllowed("/agent/leadlisting", menuList, ["claims"])).toBe(false);
+  });
+});
+
+describe("menu structure", () => {
+  const depth = (items) => Math.max(0, ...(items || []).map((i) => 1 + depth(i.submenu)));
+  const all = (items) => (items || []).flatMap((i) => [i, ...all(i.submenu)]);
+
+  it("is at most three levels deep, with icons on the top level only", () => {
+    expect(depth(menuList)).toBeLessThanOrEqual(3);
+    for (const top of menuList) {
+      expect(typeof top.icon).toBe("string");
+      for (const inner of all(top.submenu)) expect(inner.icon).toBeUndefined();
+    }
+  });
+  it("Master holds sections of screens, no deeper groups", () => {
+    const master = menuList.find((m) => m.name === "Master");
+    for (const section of master.submenu) {
+      expect(section.section).toBe(true);
+      for (const screen of section.submenu) expect(screen.submenu).toBeUndefined();
+    }
+  });
+  it("Home is a top-level entry for the roles that work from it, not inside Operations", () => {
+    expect(menuList.find((m) => m.name === "Operations").submenu.map((i) => i.name)).not.toContain("Home");
+    for (const role of ["sales", "processing", "operations", "claims"]) {
+      expect(filterMenuForRoles(menuList, [role]).map((m) => m.name)).toContain("Home");
+      expect(isPathAllowed("/agent/home", menuList, [role])).toBe(true);
+    }
+    expect(filterMenuForRoles(menuList, ["accounting"]).map((m) => m.name)).not.toContain("Home");
+    expect(isPathAllowed("/agent/home", menuList, ["accounting"])).toBe(false);
+  });
+  it("a role with a dashboard still lands on it, not on Home", () => {
+    expect(firstAllowedPath(menuList, ["claims"])).toBe("/claims/dashboard");
+    const homeOnly = [{ name: "Home", path: "/agent/home", landing: false, includes: ["/agent/home"] }];
+    expect(firstAllowedPath(homeOnly, ["claims"])).toBe("/agent/home");
+  });
+  it("the Master sections keep the grants of Accounting and Operations", () => {
+    for (const p of ["/master/finance/taxation", "/master/finance/posting-rules"]) {
+      expect(isPathAllowed(p, menuList, ["accounting"])).toBe(true);
+    }
+    expect(isPathAllowed("/master/data-privacy/requests", menuList, ["operations"])).toBe(true);
+    expect(isPathAllowed("/master/generals/usermanagement/user", menuList, ["operations"])).toBe(false);
   });
 });

@@ -18,6 +18,8 @@ const call = async (path, options = {}) => {
 };
 
 const adminService = {
+  // version, commit and environment of the API (Help > About)
+  getVersion: () => call("/version"),
   getSettings: (group) => call(`/settings${group ? `?group=${encodeURIComponent(group)}` : ""}`).then((r) => r.data || []),
   saveSettings: (settings) => call("/settings", { method: "PUT", body: JSON.stringify({ settings }) }).then((r) => r.data || []),
   getSchedules: () => call("/schedules").then((r) => r.data || []),

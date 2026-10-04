@@ -6,6 +6,7 @@ import InputTextField from "../../../component/inputText";
 import { useSelector, useDispatch } from "react-redux";
 import { getpolicyDetailedMiddleware } from "../store/policyDetailedMiddleware";
 import { formatDate } from "../../../../utility/dateFormat";
+import { FieldsSkeleton } from "../../../../components/Skeletons";
 
 const PolicyDetailedViewCard = ({ policyId }) => {
   const { t } = useTranslation();
@@ -46,8 +47,8 @@ const PolicyDetailedViewCard = ({ policyId }) => {
     return (
       <div className="policy__detail__view__card__container mt-4">
         <Card>
-          <div className="text-center p-4">
-            <p>{t("agent.loadingPolicyDetails")}</p>
+          <div className="p-4">
+            <FieldsSkeleton rows={4} columns={3} />
           </div>
         </Card>
       </div>

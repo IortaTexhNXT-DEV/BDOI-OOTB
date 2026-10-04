@@ -10,6 +10,7 @@ import "./style.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
 import logger from "../../../utility/logger";
+import { DetailPageSkeleton } from "../../../components/Skeletons";
 
 const CHART_COLORS = ["#7c3aed", "#3b82f6", "#22c55e", "#f59e0b"];
 
@@ -126,7 +127,7 @@ const CommissionDashboard = () => {
   if (loading && !data) {
     return (
       <div className="commission-dashboard-page">
-        <p className="loading-msg">Loading dashboard…</p>
+        <DetailPageSkeleton />
       </div>
     );
   }

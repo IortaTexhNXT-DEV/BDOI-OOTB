@@ -136,7 +136,7 @@ After 30 minutes without activity BrokerVerse signs you out (`limits.session_idl
 |---|---|
 | Logo and name | The logo and application name set on Master > System Settings. |
 | **Search menu...** | Type part of a screen name, for example quot. The list shows each matching screen of your menu with its path; select one to open it. |
-| Sidebar menu | The menus of your role, in business order: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, Master, Product Configurator. Select a menu to open its items. |
+| Sidebar menu | The menus of your role, in business order: Home, Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, Master, Product Configurator. Select a menu to open its items; the menu you used last stays open. Master lists its screens under headings (Organization, Insurance, Location, Employees, Users and Access, Finance, System, Data Privacy, Go-Live and Data). A shortened name shows in full when you point at it. Press **/** to jump to **Search menu...**. |
 | Notification bell | The red badge shows the number of unread notifications, up to 99; above that it shows 99+. Select the bell to see the latest. |
 | Your initials | The initials of your display name in a circle. Select them for the account menu. |
 | Work area | The screen you opened, with its title and the breadcrumb (for example Operations • Prospects). |
@@ -154,7 +154,7 @@ Select your initials at the top right. The menu shows your initials, your displa
 | **Profile** | Opens My Profile (see My Profile and account security). |
 | **Change password** | Opens the **Change password** dialog. |
 | **Two-step verification** | Opens the **Two-step verification** dialog: see whether it is on, turn it on or off. |
-| **Help** | Has no action in the delivered system. |
+| **Help** | Opens the Help panel on the right: **Help for this screen** (the section of this manual for the screen you are on), **Download user manual (PDF)**, the support desk's e-mail, telephone and hours, **Raise a support ticket**, the keyboard shortcuts and **About BrokerVerse** (version, environment, build date). **F1**, or **?** outside a text box, opens it from any screen. |
 | **Sign out** | Ends your session and returns to the sign-in page. |
 
 ![The account menu under your initials](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-profile.png)
@@ -182,7 +182,7 @@ Select your initials, then **Profile**. **My Profile** (breadcrumb Home • My A
 
 ![My Profile: the account summary](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-my-profile.png)
 
-The account summary at the top shows your initials, display name, status (**Active**), **User ID**, and **Role**, **Branch**, **Designation**, **Reporting to**, **E-mail address** and **Last sign-in**. The System Administrator maintains these on Master > Generals > User Management > User; you cannot change them here. The buttons **Change password** and **Two-step verification** open the same dialogs as the account menu.
+The account summary at the top shows your initials, display name, status (**Active**), **User ID**, and **Role**, **Branch**, **Designation**, **Reporting to**, **E-mail address** and **Last sign-in**. The System Administrator maintains these on Master > Users and Access > User; you cannot change them here. The buttons **Change password** and **Two-step verification** open the same dialogs as the account menu.
 
 **Personal and contact details** shows your details in three groups:
 
@@ -232,7 +232,7 @@ Any user can turn on two-step verification. The System Administrator can make it
 
 ![Set up two-step verification: QR code and setup key](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-2fa-enrol.png)
 
-From then on the sign-in page asks for the code after the password. To turn it off, open **Two-step verification** again, select **Turn off**, type a current code from the app and confirm with **Turn off**. A role that requires it cannot turn it off: the dialog says **Your role requires two-step verification, so it cannot be turned off.** If you lose your phone, the System Administrator turns it off for your user (Master > Generals > User Management > User, account actions) and you set it up again.
+From then on the sign-in page asks for the code after the password. To turn it off, open **Two-step verification** again, select **Turn off**, type a current code from the app and confirm with **Turn off**. A role that requires it cannot turn it off: the dialog says **Your role requires two-step verification, so it cannot be turned off.** If you lose your phone, the System Administrator turns it off for your user (Master > Users and Access > User, account actions) and you set it up again.
 
 ## Roles and menus
 
@@ -301,7 +301,7 @@ Maker-checker means that the user who enters a transaction cannot approve it. Br
 | Posting rule and account determination changes | Accounting Manager or System Administrator | Another of them, on Configuration Approvals | built in |
 | Reinsurance treaty | Creator | Another user | `reinsurance.treaty_requires_approval` |
 
-On top of maker-checker, the **Authority Matrix** (Master > Generals > User Management) can set the largest amount each role may approve per transaction type, and **Segregation of Duties** rules stop conflicting roles being given to the same person. `access.authority_enforced` and `access.sod_enforced` are on in the delivered set-up.
+On top of maker-checker, the **Authority Matrix** (Master > Users and Access) can set the largest amount each role may approve per transaction type, and **Segregation of Duties** rules stop conflicting roles being given to the same person. `access.authority_enforced` and `access.sod_enforced` are on in the delivered set-up.
 
 ## Where the audit trail is
 
@@ -314,7 +314,7 @@ BrokerVerse records every create, change, approval, report run and sign-in with 
 | Claim audit trail (icon on the claims list) | Every status change of the claim with user and time. | Claims |
 | History of a period, reconciliation, close run or posting rule | Each status change with user, time and remarks. | Accounting, Accounting Manager |
 | **Prepared by**, **Submitted by**, **Approved by** on approval screens | The maker and the checker of the record. | Users of the screen |
-| Master > Generals > User Management > User, **Sign-in history** | Every sign-in attempt of a user with result, method, IP address and browser. | System Administrator |
+| Master > Users and Access > User, **Sign-in history** | Every sign-in attempt of a user with result, method, IP address and browser. | System Administrator |
 
 # The business process end to end
 
@@ -402,21 +402,21 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 | Menu | Items |
 |---|---|
 | Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Go-Live Data Load, Data Privacy (Data Subject Requests, Consent Register) |
-| Master > Generals | Organization (Company, Branch); Insurance Management (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle); Location (Country, Province, City / Municipality); Employee Management (Hierarchy, Designation); User Management (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
+| Master | Organization (Company, Branch); Insurance (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Reinsurance Treaty); Location (Country, Province, City / Municipality); Employees (Hierarchy, Designation); Users and Access (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
 | Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Remittance Master, Incentive Programs, Reinsurance Treaty |
 
 ## Daily and periodic tasks
 
 | When | Task | Screen |
 |---|---|---|
-| Daily | Unlock users and reset passwords on request | Master > Generals > User Management > User |
+| Daily | Unlock users and reset passwords on request | Master > Users and Access > User |
 | Daily | Check the e-mail outbox for failed messages | Master > E-mail Outbox |
 | Daily | Check that the schedules ran (Last status) | Master > Schedules |
-| On request | Add a user, change a role, deactivate a leaver | User Management > User |
-| On request | Add or change insurers, products, covers, banks and other masters | Master > Generals, Master > Finance |
+| On request | Add a user, change a role, deactivate a leaver | Users and Access > User |
+| On request | Add or change insurers, products, covers, banks and other masters | Master > Insurance, Master > Finance |
 | On request | Change a business setting agreed with the process owner | Master > Configuration |
-| Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | User Management > User Access Matrix |
-| Quarterly | Run an access review | User Management > Access Reviews |
+| Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | Users and Access > User Access Matrix |
+| Quarterly | Run an access review | Users and Access > Access Reviews |
 | Before go-live | Company and letterhead, official receipt numbering to match the Authority to Print, security settings, e-mail settings | Company, Document Numbering, Configuration |
 | Before go-live | Load the configuration and migration workbooks, reconcile, set the go-live lock | Master > Go-Live Data Load (chapter Go-Live Data Load) |
 
@@ -424,9 +424,9 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 
 ### Add a user
 
-![Master > Generals > User Management > User > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-user-add.png)
+![Master > Users and Access > User > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-user-add.png)
 
-1. Choose Master > Generals > User Management > User and select **Add**.
+1. Choose Master > Users and Access > User and select **Add**.
 2. Enter **Username** (the user ID used to sign in), **E-mail** and **Display Name**. All three are required. The e-mail is where Forgot password? sends its code.
 3. Leave **Password** empty: the system then generates a temporary password ("Leave empty for a temporary password").
 4. Choose the **Branch**, the **Designation** and **Reporting to** (the user's manager), if your organisation uses them.
@@ -454,25 +454,25 @@ The eye opens the user, the pencil edits the display name, e-mail and roles (a r
 
 **Role** lists the seven roles. **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end), which roles hold it. A role that builds on another (the Accounting Manager on Accounting) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
 
-![Master > Generals > User Management > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
+![Master > Users and Access > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
 
 ### User Access Matrix
 
 The matrix lists every user with roles, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. The cards at the top count **Active users**, **Dormant (90+ days)**, **Segregation-of-duties conflicts** and **Active without two-step verification**; select a card to filter the list. **Export to Excel** downloads the matrix for an access review; **Sign out everywhere** ends every session of a user.
 
-![Master > Generals > User Management > User Access Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-access-matrix.png)
+![Master > Users and Access > User Access Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-access-matrix.png)
 
 ### Authority Matrix
 
 The Authority Matrix holds the approval limits per role and transaction type: amounts in PHP, discounts in percent of premium (for example a quotation discount of 10% for Sales & Marketing, policy issuance up to PHP 1,000,000.00). A role with **Not set** is not restricted by the matrix for that transaction type. **Limit for one person** sets a personal limit for one user. A change applies once a second administrator approves it.
 
-![Master > Generals > User Management > Authority Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-authority.png)
+![Master > Users and Access > Authority Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-authority.png)
 
 ### Delegations
 
 A delegation lets another user approve for an approver who is away.
 
-1. Choose User Management > Delegations and select **New delegation**.
+1. Choose Users and Access > Delegations and select **New delegation**.
 2. Choose **Approver away** and **Covered by**, the **Transactions** covered (**All transactions** or a type), **From** and **To** dates and the **Reason**.
 3. Select **Save**.
 
@@ -482,7 +482,7 @@ A delegation lets another user approve for an approver who is away.
 
 Each rule names two roles that one person should not hold together, what happens when they are assigned (**When assigned**: **Block** refuses the combination, **Warn** allows it with a warning), the reason and the status. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager: the person who places business should not approve its payments), all three Block; and SOD-SALES-ACCT (Sales & Marketing and Accounting) and SOD-SALES-CLM (Sales & Marketing and Claims), both Warn. **New rule** adds a rule; **Switch off** disables one.
 
-![Master > Generals > User Management > Segregation of Duties](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-sod.png)
+![Master > Users and Access > Segregation of Duties](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-sod.png)
 
 ### Access Reviews
 
@@ -490,24 +490,24 @@ Confirm at least every quarter that each active user still needs his or her acce
 
 ## Company, branches and the letterhead
 
-![Master > Generals > Organization > Company > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-company-add.png)
+![Master > Organization > Company > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-company-add.png)
 
 Every printed document and report PDF (quotation, request for quotation, placement slip, policy schedule, billing statement, official receipt, payment voucher, debit note, claim letters, BIR forms) carries the letterhead of the company marked as letterhead company.
 
-1. Choose Master > Generals > Organization > Company. Select **Add**, or the pencil on the delivered company to edit it into your own.
+1. Choose Master > Organization > Company. Select **Add**, or the pencil on the delivered company to edit it into your own.
 2. Enter **Company Code**, **Company Name**, **License Number** (Insurance Commission licence), **Email ID**, **TIN (BIR forms)**, **RDO Code**, **Logo (printed on documents)** (a link, or **Upload**), **Website link**, **Description**, the registered address (letterhead and BIR forms: **Address Line 1** to **3**, **ZIP Code**, **City / Municipality**, **Province**, **Country**), **Phone Number** and **Fax** (+63 numbers).
 3. Tick **Letterhead company - used on documents and reports** for the company whose letterhead the documents use. Only one company holds it.
 4. Select **Save**, then print any statement or report as PDF to check the letterhead.
 
-The application name and logo of the sign-in page and the sidebar come from Master > System Settings, not from the Company master. Branches are kept on Master > Generals > Organization > Branch in the same way.
+The application name and logo of the sign-in page and the sidebar come from Master > System Settings, not from the Company master. Branches are kept on Master > Organization > Branch in the same way.
 
 ## Insurers and the other masters
 
 ### Insurance companies
 
-![Master > Generals > Insurance Management > Insurance Company > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-insurer-add.png)
+![Master > Insurance > Insurance Company > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-insurer-add.png)
 
-1. Choose Master > Generals > Insurance Management > Insurance Company and select **Add**.
+1. Choose Master > Insurance > Insurance Company and select **Add**.
 2. Enter **Insurance Company Code**, **Insurance Company Name**, **Insurance Company Description**, the address (**Address Line 1** to **3**, **City / Municipality**, **Province**, **Country**), **Phone Number**, **Email ID** and **TIN**.
 3. Under **Credit terms**, enter **Premium payment warranty (days)** (days the client has to pay: the due date of the premium bill), **Remittance terms (days)** (days after collection within which the broker remits to the insurer) and **Default billing mode** (broker billed or direct bill). Leave them empty to use the system defaults (`collections.default_credit_days`, `remittance.default_due_days`, `direct_bill.default_billing_mode`).
 4. Select **Save**.
@@ -524,7 +524,7 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Signatories | Authorised signatories of quotations and documents. |
 | Vehicle | Vehicle brands, models, variants and seating; **Upload** loads them from a template. |
 | Country, Province, City / Municipality | The Philippine address lists of the PSGC: 18 regions (shown with their provinces), 82 provinces plus Metro Manila, 1,642 cities and municipalities with class and ZIP code; barangays are picked on the address forms. The City / Municipality list is filtered by province. |
-| Hierarchy, Designation | The staff structure. A staff member's branch, designation and reporting line are kept on the user (Master > Generals > User Management > User). |
+| Hierarchy, Designation | The staff structure. A staff member's branch, designation and reporting line are kept on the user (Master > Users and Access > User). |
 | Transaction Code, Currency, Exchange Rate | Accounting transaction codes, currencies and rates. |
 | Bank | Banks and the broker's bank accounts, each linked to its GL cash account and statement format. |
 | Account Category, Main Account, Sub Account | The chart of accounts. |
@@ -568,7 +568,7 @@ The group **Go-live** (area Company & Branding) holds the cutover date `golive.c
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
-**System Settings** (Master > System Settings) holds the branding, localisation and theme: **Application name** (shown on the sign-in page, the sidebar and the browser tab), **Application logo (screen)** with **Upload Logo** or **Add Company Logo**, **Favicon** with **Upload Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. Printed documents use the logo of the letterhead company in Master > Generals > Organization > Company. **Save** applies them to every user, including the sign-in page.
+**System Settings** (Master > System Settings) holds the branding, localisation and theme: **Application name** (shown on the sign-in page, the sidebar and the browser tab), **Application logo (screen)** with **Upload Logo** or **Add Company Logo**, **Favicon** with **Upload Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. Printed documents use the logo of the letterhead company in Master > Organization > Company. **Save** applies them to every user, including the sign-in page.
 
 ![Master > System Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-system-settings.png)
 
@@ -678,7 +678,7 @@ The result shows the batch number, the file name and the status, the cards **Row
 | **New** | Records that the load will create. |
 | **Changed** | Existing records that the load will update. |
 | **Unchanged** | Rows equal to the record in BrokerVerse; they are not written. |
-| **For approval** | Authority limits, which another System Administrator approves on Master > Generals > User Management > Authority Matrix. |
+| **For approval** | Authority limits, which another System Administrator approves on Master > Users and Access > Authority Matrix. |
 | **Skipped** | Rows in error left out by a load with **Load valid rows only**. |
 
 Under the sheets, **Errors** lists each error with **Sheet**, **Row** (the row number in Excel), **Column** and **Message**.
@@ -1025,7 +1025,7 @@ The Processing Team reads prospects but does not create them, and has no Quick Q
 | When | Task | Screen |
 |---|---|---|
 | Daily | Work the submissions and open tasks | Processing Dashboard |
-| Daily | Send requests for quotation; record offers and declines | Request for Quotation (Broker Slip) |
+| Daily | Send requests for quotation; record offers and declines | Requests for Quotation (Broker Slips) |
 | Daily | Compare offers and prepare Quotation Slips or Placement Slips | Request for Quotation > Compare offers |
 | Daily | Send placement slips, record confirmations, issue policies | Placement Slips |
 | Daily | Complete endorsements with the insurer's document | Policy > endorsement |
@@ -1262,7 +1262,7 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 
 ## Home and Open Items
 
-**Home** (Operations > Home), titled Dashboard, shows **Create Quote**, the counts of prospects, clients and policies sold with **See More**, the commission chart, upcoming events from the activity monitor, and earned commission, collected premium, receivables and gross premium of the user's own book.
+**Home** (the first item of the menu), titled Dashboard, shows **Create Quote**, the counts of prospects, clients and policies sold with **See More**, the commission chart, upcoming events from the activity monitor, and earned commission, collected premium, receivables and gross premium of the user's own book.
 
 **Open Items** (Operations > Open Items) is the daily worklist. Four boxes show a count and the first records: **Expiring Policy**, **Quote Pending**, **Pending Payments** and **Renewal Request**. Select **See More** to open the full list of a box, and a record to open it.
 
@@ -1659,7 +1659,7 @@ For broker-billed policies Accounting remits the collected premium, net of the b
 
 1. **Automated Processing**: the **Scheduled Remittances** list shows each insurer's remittance schedule, policies and estimated amount (Below minimum when there is nothing to remit). Tick the insurers that are ready, select **Validate**, then **Process Selected**. Draft remittances (REM-YYYY-NNNNN) are created. The due date follows the insurer's remittance terms, else `remittance.default_due_days` (30 days).
 2. **Tracking**: find the remittance (filters **Remittance No**, **Insurer**, **Date Range**, **Status**) and process it; it goes for approval.
-3. **Approval Workflow**: another user approves it within his or her limit for Remittance approval in Master > Generals > User Management > Authority Matrix. The delivered limits let an Accounting user approve up to PHP 1,000,000.00 and an Accounting Manager without limit; a larger remittance waits for the Accounting Manager. Cover during leave is given in User Management > Delegations. The initiator cannot approve.
+3. **Approval Workflow**: another user approves it within his or her limit for Remittance approval in Master > Users and Access > Authority Matrix. The delivered limits let an Accounting user approve up to PHP 1,000,000.00 and an Accounting Manager without limit; a larger remittance waits for the Accounting Manager. Cover during leave is given in Users and Access > Delegations. The initiator cannot approve.
 4. **Settlement**: choose the **Insurer code**, select **Add policies** (or **Import**), then **Calculate**: premium - commission - tax ± adjustments = **NET SETTLEMENT**. Select **Submit for approval** (or **Save draft**).
 5. The checker approves the settlement (SET-). The system raises the insurer payment voucher in Disbursement for the net amount.
 6. Approve and pay the voucher in Disbursement. The voucher becomes Paid and the remittance **Completed**.
@@ -2047,7 +2047,7 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Prospects | Record and follow prospects (LD-). | Category, names, date of birth (age 18 to 100), gender, e-mail, Philippine mobile number, address with 4-digit ZIP code; statuses New, Contacted, Qualified, QuoteGenerated, Converted, Lost; **Bulk Upload** (.xlsx or .csv, up to 10 MB). | Sales & Marketing |
 | Quick Quote | Quote package products on the spot. | **Start quote** for products with a wizard; **Request quotation** for the others. | Sales & Marketing |
 | Compare Insurers | Compare insurers' premiums for a package product. | Product, sum insured, location of the risk, inception date; rates from Insurer Rate Tables. | Sales & Marketing |
-| Request for Quotation (Broker Slip) | Present a risk to several insurers (BS-) and record offers (OFR-). | Customer, product, insured, period, response due, risk details, covers, insurers to approach (required); statuses Draft, Submitted, Responses in, Closed, Cancelled. | Processing Team |
+| Requests for Quotation (Broker Slips) | Present a risk to several insurers (BS-) and record offers (OFR-). | Customer, product, insured, period, response due, risk details, covers, insurers to approach (required); statuses Draft, Submitted, Responses in, Closed, Cancelled. | Processing Team |
 | Quotations | Price cover for the client (QT-). | Server re-pricing; validity 30 days; statuses Draft, Pending Customer, Customer Accepted, Approved, Rejected, Dropped, Expired, Converted to Policy; customer response Accepted, Declined, Revise. | Sales & Marketing |
 | Placement Slips | Firm order to the insurers (PS-). | Participants with shares totalling exactly 100% and one lead; statuses Draft, Sent to insurer, Bound, Declined, Policy issued, Cancelled; **New direct placement**, **Record Issued Policy**. | Processing Team |
 
@@ -2166,19 +2166,19 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Data Privacy > Data Subject Requests | Requests of data subjects (DSR-) with due dates; **Log request**, **Export personal data**, **Anonymise**, **Close**. |
 | Data Privacy > Consent Register | Consents given, refused and withdrawn by clients and prospects. |
 
-### Generals
+### Organization, Insurance, Location, Employees, Users and Access
 
 | Screen | Purpose and main fields |
 |---|---|
 | Organization > Company | The broker company: code, name, licence number, e-mail, TIN, logo, website, address, phone, fax; letterhead company. |
 | Organization > Branch | Branches and departments. |
-| Insurance Management > Insurance Company | Insurers: code, name, address, phone, e-mail, TIN; credit terms (premium payment warranty, remittance terms, default billing mode); **Upload**. |
-| Insurance Management > Line of Business, Product, Cover | Lines, products (with their line) and covers. |
-| Insurance Management > Signatories | Authorised signatories of quotations and documents. |
-| Insurance Management > Vehicle | Vehicle brands, models, variants, seating; **Upload**. |
+| Insurance > Insurance Company | Insurers: code, name, address, phone, e-mail, TIN; credit terms (premium payment warranty, remittance terms, default billing mode); **Upload**. |
+| Insurance > Line of Business, Product, Cover | Lines, products (with their line) and covers. |
+| Insurance > Signatories | Authorised signatories of quotations and documents. |
+| Insurance > Vehicle | Vehicle brands, models, variants, seating; **Upload**. |
 | Location > Country, Province, City / Municipality | Address lists; **Upload**. |
-| Employee Management > Hierarchy, Designation | Staff structure; branch, designation and reporting line are set on the user. |
-| User Management > User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews | Users and access controls (System Administrator chapter). |
+| Employees > Hierarchy, Designation | Staff structure; branch, designation and reporting line are set on the user. |
+| Users and Access > User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews | Users and access controls (System Administrator chapter). |
 
 ### Finance
 

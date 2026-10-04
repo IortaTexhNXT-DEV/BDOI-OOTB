@@ -12,6 +12,7 @@ import NewSideBar from "../../components/SideBar/NewSideBar";
 import { menuList } from "../../components/SideBar/list";
 import { firstAllowedPath, getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
 import ErrorBoundary from "../../components/ErrorBoundary";
+import HelpPanel from "../../components/HelpPanel";
 import { loadIdleMinutes, startIdleTimer } from "../../utility/idleTimeout";
 import { logout } from "../../utility/logout";
 
@@ -158,6 +159,9 @@ const ProtectedLayout = () => {
         />
         <NewSideBar onNavigate={handleSidebarNavigation} />
       </div>
+
+      {/* Help panel: avatar menu > Help, F1 or ? */}
+      <HelpPanel />
 
       {idleWarning && (
         <div className="bv-idle-warning" role="alert">

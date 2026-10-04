@@ -43,7 +43,7 @@ const ProductMatserDetailsAction = ({ action }) => {
   }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
-      label: "Insurance Management",
+      label: "Insurance",
       url: "/master/generals/insurancemanagement/insurancecompany",
     },
     {

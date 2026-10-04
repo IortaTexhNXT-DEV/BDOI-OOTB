@@ -24,7 +24,7 @@ def run(pg, rec):
     admin = token_for('BrokerVerse', os.environ['ADMIN_PASSWORD'])
 
     # 2. users through the UI
-    menu(pg, 'Master', 'Generals', 'User Management', 'User')
+    menu(pg, 'Master', 'User')
     rec.step(pg, 'BrokerVerse', 'Master > User Management > User', 'open the user list', [('list shows users', pg.locator('tbody tr').count() > 0)])
     pg.goto(BASE + '/master/generals/usermanagement/user/add'); settle(pg)
     save = pg.get_by_role('button', name='Save')

@@ -29,7 +29,7 @@ export const PageHeader = ({ title, intro, actions }) => {
   return (
     <>
       <BreadCrumb
-        model={[{ label: k("userManagement", "User Management") }, { label: title }]}
+        model={[{ label: k("userManagement", "Users and Access") }, { label: title }]}
         home={{ label: k("master", "Master") }}
         className="admin__breadcrumb"
       />
