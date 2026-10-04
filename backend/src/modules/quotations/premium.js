@@ -14,6 +14,7 @@ import { num, round2, lobOf } from '../documents/common.js';
 import { motorFixedCovers } from './motorTariff.js';
 import { resolveCommissionRate } from '../commission-rates/resolve.js';
 import { quotationCharges } from '../premium-charges/service.js';
+import { evaluate, adjustNet } from '../product-configurator/underwriting.js';
 
 const RATE_COVERS = [
   // [premium field, sum-insured field, rate field, default-rate key]
@@ -71,7 +72,7 @@ async function commissionRate(v, insurerId, lob) {
  * Full breakdown for a quotation document (numbers rounded to 2 decimals). `keep` holds motor fixed covers to carry
  * over unchanged (an endorsement keeps the CTPL and APPA premiums the policy was issued with).
  */
-export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}) {
+export async function premiumBreakdown(v, { insurerId = null, keep = null, underwriting = true } = {}) {
   const lob = lobOf(v.lob, v.productType, v.insurancePolicyType);
   const { premiums: covers, amounts } = await coverPremiums(v);
   let motor = {};
@@ -93,6 +94,11 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
   if (!net) net = num(v.netPremium);
   // premium agreed with the insurer (a broker slip offer or a placement slip) replaces the computed cover premiums
   if (num(v.agreedNetPremium) > 0) net = num(v.agreedNetPremium);
+  // Product Configurator: acceptance rules and rating factors of the governing template. Rating factors and loadings
+  // adjust a premium the broker computed; an agreed insurer premium or an endorsement's kept premium is taken as it is.
+  const uw = underwriting && !keep ? await evaluate(v, { insurerId, productId: v.productId || null, lob }) : null;
+  const adj = uw && !(num(v.agreedNetPremium) > 0) ? adjustNet(round2(net), uw) : { net, ratingAdjustment: 0, loadingAmount: 0 };
+  net = adj.net;
   const ncdPct = num(v.ncdPercent);
   const ncd = ncdPct ? round2((net * ncdPct) / 100) : num(v.NCD);
   net = round2(net - (ncdPct ? ncd : 0));
@@ -115,6 +121,9 @@ export async function premiumBreakdown(v, { insurerId = null, keep = null } = {}
     lob, ...covers, ...(lob === 'MOTOR' ? { vehicleType: motor.vehicleType, ctplCoverageRate: motor.ctplCoverageRate, ctplTermYears: motor.ctplTermYears ?? null, appaSeats: motor.appaSeats ?? null,
       APPAtotalCoverage: amounts.APPAtotalCoverage, APPARate: motor.APPARate ?? null } : {}), netPremium: net, ...tax, accountPremiumOthers: others, discount, NCD: ncd, grossPremium: gross,
     totalSumInsured: sumInsured, taxRates: rates, commissionRate: cRate, commissionAmount: round2(net * cRate), charges,
+    ratingAdjustment: adj.ratingAdjustment, underwritingLoading: adj.loadingAmount,
+    underwriting: uw ? { templateCode: uw.templateCode, templateName: uw.templateName, decision: uw.decision, results: uw.results, referredRules: uw.referredRules,
+      declinedRules: uw.declinedRules, loadingPercent: uw.loadingPercent, factors: uw.factors } : null,
     currency: await baseCurrency(),
   };
 }

@@ -51,6 +51,7 @@ const transformReduxToComponentFormat = (currentQuoteCreation) => {
     installmentType: currentQuoteCreation.policyDetails?.installmentType,
     vehicleBrand: currentQuoteCreation.policyDetails?.vehicleBrand,
     modelYear: currentQuoteCreation.policyDetails?.modelYear,
+    vehicleUse: currentQuoteCreation.policyDetails?.vehicleUse || undefined,
     vehicleModel: currentQuoteCreation.policyDetails?.vehicleModel,
     modelVariant: currentQuoteCreation.policyDetails?.modelVariant,
     vehicleColor: currentQuoteCreation.policyDetails?.vehicleColor,
@@ -516,6 +517,8 @@ const OrderSummary = ({ action, flow }) => {
           totalSumInsured:
             quotationData.TotalSumInsured || quotationData.totalSumInsured,
           vehicleType: quotationData.vehicleType || quotationData.VehicleType,
+          // tested by the product's acceptance rules (e.g. a PUV is declined)
+          vehicleUse: quotationData.vehicleUse || undefined,
 
           // Accessories
           aircon: quotationData.Aircon || quotationData.aircon,

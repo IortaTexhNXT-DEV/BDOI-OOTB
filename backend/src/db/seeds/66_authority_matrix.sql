@@ -16,6 +16,7 @@ FROM (VALUES
  ('commission_payout', 'accounting', 500000), ('commission_payout', 'accounting-manager', NULL),
  ('petty_cash', 'accounting', 10000), ('petty_cash', 'accounting-manager', 50000),
  ('remittance', 'accounting', 1000000), ('remittance', 'accounting-manager', NULL),
+ ('underwriting_referral', 'processing', 10000000), ('underwriting_referral', 'operations', 3000000),
  ('remittance_settlement', 'accounting', 1000000), ('remittance_settlement', 'accounting-manager', NULL)
 ) AS v(type, role, amount)
 WHERE EXISTS (SELECT 1 FROM roles r WHERE r.code = v.role)

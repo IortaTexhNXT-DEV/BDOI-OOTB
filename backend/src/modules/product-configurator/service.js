@@ -10,6 +10,8 @@ import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
 import { isoDate, lastMonths, params, round2, toNumber } from '../masters/helpers.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { ruleErrors, RISK_FIELDS, governingTemplate } from './underwriting.js';
+import { layoutErrors, placeholders, PRINT_AS } from '../documents/productDocuments.js';
 
 // ---------------- templates ----------------
 
@@ -41,7 +43,15 @@ export async function listTemplates(qs, pg) {
   const total = (await one(`SELECT count(*)::int AS n FROM product_templates t WHERE ${where}`, p.values)).n;
   const rows = await many(`SELECT t.*, ${COUNT_SQL} FROM product_templates t WHERE ${where} ORDER BY t.updated_at DESC, t.id DESC
                            LIMIT ${p.add(pg.limit)} OFFSET ${p.add(pg.offset)}`, p.values);
-  return { total, rows: rows.map(templateOut) };
+  const out = rows.map(templateOut);
+  // whether the template is the one the business flow applies (rules, factors, market, documents) for its product / line
+  for (const t of out) {
+    const g = t.status === 'Active' ? await governingTemplate({ productId: t.productId, lob: t.lineOfBusiness }) : null;
+    t.governsFlow = Boolean(g && g.id === t.id);
+  }
+  const products = await many('SELECT id, code, name FROM products WHERE id = ANY($1)', [out.map((t) => t.productId).filter(Boolean)]);
+  for (const t of out) { const pr = products.find((x) => x.id === t.productId); t.productCode = pr?.code || null; t.productName = pr?.name || null; }
+  return { total, rows: out };
 }
 
 export async function getTemplateRow({ id, templateCode }) {
@@ -297,7 +307,7 @@ export async function calculatePremium(id, body) {
 export const KINDS = {
   coverages: { code: 'coverageCode', name: 'coverageName', required: ['coverageCode', 'coverageName', 'type'], numbers: ['deductible', 'waitingPeriod'], label: 'Coverage' },
   'rating-factors': { code: 'factorCode', name: 'factorName', required: ['factorCode', 'factorName', 'type'], numbers: [], label: 'Rating factor' },
-  'underwriting-rules': { code: 'ruleCode', name: 'ruleName', required: ['ruleCode', 'ruleName', 'type', 'condition', 'action'], numbers: [], label: 'Underwriting rule' },
+  'underwriting-rules': { code: 'ruleCode', name: 'ruleName', required: ['ruleCode', 'ruleName', 'type', 'action'], numbers: ['loadingPercent'], label: 'Underwriting rule' },
   documents: { code: 'documentCode', name: 'documentName', required: ['documentCode', 'documentName', 'type'], numbers: [], label: 'Document template' },
   workflows: { code: 'workflowCode', name: 'workflowName', required: ['workflowCode', 'workflowName', 'type'], numbers: [], label: 'Approval workflow', global: true },
   'market-mappings': { code: 'productCode', name: 'insurerName', required: ['insurerName', 'productCode'], numbers: ['commissionRate', 'overrideRate', 'profitShare', 'targetPremium', 'ytdPremium'], label: 'Market mapping' },
@@ -316,7 +326,9 @@ function componentValues(kind, body, partial) {
   const errors = [];
   const data = {};
   for (const [k, v] of Object.entries(body)) {
-    if (['id', 'productId', 'templateId', 'templateCode', 'status', 'createdAt', 'updatedAt', 'createdBy'].includes(k)) continue;
+    // identity, workflow and the read-only fields the lists add (template / product names, production, layout flag)
+    if (['id', 'productId', 'templateId', 'templateCode', 'status', 'createdAt', 'updatedAt', 'createdBy', 'templateName', 'lineOfBusiness', 'templateStatus',
+      'productMasterCode', 'productMasterName', 'hasLayout', 'ytdPremium', 'ytdPolicies', 'targetAchievedPercent', 'authorityRoleName'].includes(k)) continue;
     data[k] = v;
   }
   if (!partial) for (const f of def.required) if (data[f] === undefined || data[f] === null || String(data[f]).trim() === '') errors.push({ path: f, message: `${f} is required` });
@@ -329,6 +341,35 @@ function componentValues(kind, body, partial) {
   if (body.status !== undefined && !['Active', 'Inactive', 'Draft'].includes(body.status)) errors.push({ path: 'status', message: 'status must be Active, Inactive or Draft' });
   if (errors.length) throw badRequest('Validation failed', errors);
   return data;
+}
+
+/** Cover premium fields of the quotation a coverage can be tied to (its terms are printed when the cover is quoted). */
+export const QUOTE_FIELDS = ['lossAndDamageCoveragePremium', 'actsOfNaturePremium', 'roadsideAssistancePremium', 'personalAccidentCoverPremium',
+  'bodilyInjuryCoveragePremium', 'propertyDamageCoveragePremium', 'APPAcoveragePremium', 'ctplCoveragePremium'];
+
+/** Checks that need the database or the whole record (after a partial update is merged); may normalise data. */
+async function kindChecks(kind, data) {
+  const errors = [];
+  if (kind === 'underwriting-rules') errors.push(...await ruleErrors(data));
+  if (kind === 'documents') {
+    if (data.printAs && !PRINT_AS.includes(data.printAs)) errors.push({ path: 'printAs', message: `printAs must be one of ${PRINT_AS.join(', ')}` });
+    if (data.format && data.format !== 'PDF') errors.push({ path: 'format', message: 'Generated documents are PDF files' });
+    if (data.layout !== undefined && data.layout !== null && data.layout !== '') {
+      errors.push(...layoutErrors(data.layout, data.layoutFileName || null));
+      const p = placeholders(data.layout);
+      data.variables = [...p.fields, ...p.blocks.map((b) => `#${b}`)];
+    } else { data.layout = null; data.layoutFileName = null; }
+  }
+  if (kind === 'coverages' && data.quoteField && !QUOTE_FIELDS.includes(data.quoteField)) errors.push({ path: 'quoteField', message: `quoteField must be one of ${QUOTE_FIELDS.join(', ')}` });
+  if (kind === 'rating-factors' && data.field && !RISK_FIELDS[data.field]) errors.push({ path: 'field', message: `field must be one of ${Object.keys(RISK_FIELDS).join(', ')}` });
+  if (kind === 'market-mappings' && data.insurerName) {
+    const ic = await one('SELECT id, name FROM insurance_companies WHERE (lower(name) = lower($1) OR lower(code) = lower($1)) AND status = \'active\'', [String(data.insurerName)]);
+    if (!ic) errors.push({ path: 'insurerName', message: `Insurer ${data.insurerName} is not an active insurance company` });
+    else { data.insurerName = ic.name; data.insurerId = ic.id; }
+    if (data.validFrom && data.validTo && String(data.validTo) < String(data.validFrom)) errors.push({ path: 'validTo', message: 'Valid to must be after valid from' });
+  }
+  if (kind === 'market-mappings') delete data.ytdPremium;
+  if (errors.length) throw badRequest('Validation failed', errors);
 }
 
 async function resolveTemplateId(body, def) {
@@ -347,12 +388,54 @@ export async function listComponents(kind, qs, pg) {
   if (tid) conds.push(`(c.template_id = ${p.add(Number(tid))}${KINDS[kind].global ? ' OR c.template_id IS NULL' : ''})`);
   if (qs.templateCode) conds.push(`t.template_code = ${p.add(qs.templateCode)}`);
   if (qs.status) conds.push(`c.status = ${p.add(qs.status)}`);
-  if (qs.search) conds.push(`c.data::text ILIKE ${p.add(`%${qs.search}%`)}`);
+  if (qs.lineOfBusiness) conds.push(`upper(t.line_of_business) = upper(${p.add(qs.lineOfBusiness)})`);
+  if (qs.type) conds.push(`c.data->>'type' = ${p.add(qs.type)}`);
+  // insurer: rules for every insurer plus the insurer's own (allInsurers=false: only the insurer's own)
+  if (qs.insurerId) {
+    const own = `(c.data->>'insurerId' = ${p.add(String(qs.insurerId))} OR lower(c.data->>'insurerName') = (SELECT lower(name) FROM insurance_companies WHERE id::text = $${p.values.length}))`;
+    conds.push(String(qs.allInsurers) === 'false' ? own : `(${own} OR COALESCE(c.data->>'insurerId', '') = '' AND COALESCE(c.data->>'insurerName', '') = '' OR c.kind <> 'underwriting-rules')`);
+  }
+  if (qs.search) conds.push(`(c.data::text ILIKE ${p.add(`%${qs.search}%`)} OR t.name ILIKE $${p.values.length} OR t.template_code ILIKE $${p.values.length})`);
   const where = conds.join(' AND ');
-  const base = 'FROM product_components c LEFT JOIN product_templates t ON t.id = c.template_id';
+  const base = 'FROM product_components c LEFT JOIN product_templates t ON t.id = c.template_id LEFT JOIN products pr ON pr.id = t.product_id';
   const total = (await one(`SELECT count(*)::int AS n ${base} WHERE ${where}`, p.values)).n;
-  const rows = await many(`SELECT c.*, t.template_code ${base} WHERE ${where} ORDER BY c.template_id NULLS FIRST, c.sort_order, c.id LIMIT ${p.add(pg.limit)} OFFSET ${p.add(pg.offset)}`, p.values);
-  return { total, rows: rows.map((r) => componentOut(r)) };
+  const rows = await many(`SELECT c.*, t.template_code, t.name AS template_name, t.line_of_business, t.status AS template_status, pr.code AS product_code, pr.name AS product_name
+    ${base} WHERE ${where} ORDER BY t.name NULLS FIRST, c.sort_order, c.id LIMIT ${p.add(pg.limit)} OFFSET ${p.add(pg.offset)}`, p.values);
+  const out = rows.map((r) => ({ ...componentOut(r), templateName: r.template_name || null, lineOfBusiness: r.line_of_business || null, templateStatus: r.template_status || null,
+    productMasterCode: r.product_code || null, productMasterName: r.product_name || null }));
+  if (kind === 'market-mappings') await withProduction(out);
+  if (kind === 'documents') for (const d of out) { d.hasLayout = Boolean(d.layout); delete d.layout; }
+  return { total, rows: out };
+}
+
+/**
+ * Production of each market mapping this calendar year, from the policies issued: gross premium of the insurer on the
+ * template's product (ytdPremium) and the share of the target achieved.
+ */
+async function withProduction(mappings) {
+  const year = String(await today()).slice(0, 4);
+  for (const m of mappings) {
+    const t = await one('SELECT product_id FROM product_templates WHERE id = $1', [m.productId]);
+    const r = t?.product_id ? await one(`SELECT COALESCE(sum(p.premium_total), 0) AS premium, count(*)::int AS n FROM policies p JOIN insurance_companies ic ON ic.id = p.insurance_company_id
+      WHERE p.product_id = $1 AND lower(ic.name) = lower($2) AND p.status <> 'cancelled' AND to_char(COALESCE(p.issued_date, p.inception_date), 'YYYY') = $3`, [t.product_id, m.insurerName, year]).catch(() => null) : null;
+    m.ytdPremium = round2(r?.premium || 0);
+    m.ytdPolicies = r?.n || 0;
+    m.targetAchievedPercent = m.targetPremium ? round2((m.ytdPremium / Number(m.targetPremium)) * 100) : null;
+  }
+}
+
+/** Change history of a component (audit trail): who changed what and when. */
+export async function componentHistory(kind, id) {
+  if (!/^\d+$/.test(String(id)) || !(await one('SELECT 1 FROM product_components WHERE id = $1 AND kind = $2', [Number(id), kind]))) throw notFound(`${KINDS[kind].label} not found`);
+  const rows = await many(`SELECT a.id, a.action, a.at, a.username, a.before_data, a.after_data FROM audit_log a WHERE a.entity = $1 AND a.entity_id = $2 ORDER BY a.at DESC, a.id DESC LIMIT 200`,
+    [`product_${kind}`, String(id)]);
+  return rows.map((r) => {
+    const before = r.before_data || {};
+    const after = r.after_data || {};
+    const changed = [...new Set([...Object.keys(before), ...Object.keys(after)])]
+      .filter((k) => !['updatedAt', 'createdAt', 'createdBy', 'layout'].includes(k) && JSON.stringify(before[k] ?? null) !== JSON.stringify(after[k] ?? null));
+    return { id: r.id, action: r.action, at: r.at, user: r.username, changes: changed.map((k) => ({ field: k, from: before[k] ?? null, to: after[k] ?? null })) };
+  });
 }
 
 export async function getComponent(kind, id) {
@@ -370,6 +453,7 @@ const dupGuard = (def) => (e) => {
 export async function createComponent(kind, body, user) {
   const def = KINDS[kind];
   const data = componentValues(kind, body, false);
+  await kindChecks(kind, data);
   const templateId = await resolveTemplateId(body, def);
   const r = await one(`INSERT INTO product_components(template_id, kind, code, name, data, status, sort_order, created_by, updated_by)
                        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$8) RETURNING id`,
@@ -384,6 +468,7 @@ export async function updateComponent(kind, id, body, user) {
   const row = await one('SELECT data FROM product_components WHERE id = $1', [Number(id)]);
   const merged = { ...row.data, ...data };
   for (const f of def.required) if (merged[f] === undefined || merged[f] === null || String(merged[f]).trim() === '') throw badRequest('Validation failed', [{ path: f, message: `${f} is required` }]);
+  await kindChecks(kind, merged);
   await query(`UPDATE product_components SET data = $2, code = $3, name = $4, status = COALESCE($5, status), updated_by = $6, updated_at = now() WHERE id = $1`,
     [Number(id), JSON.stringify(merged), merged[def.code] ?? null, merged[def.name] ?? null, body.status || null, user.username]).catch(dupGuard(def));
   return { before, after: await getComponent(kind, id) };
@@ -556,4 +641,29 @@ export async function deactivateSection(id, sectionId, user) {
   if (!s) throw notFound('Risk section not found');
   await query('UPDATE product_risk_sections SET is_active = false, updated_by = $3, updated_at = now() WHERE id = $1 AND mapping_id = $2', [sectionId, id, user.username]);
   return { before: sectionOut(s), after: await getRiskMapping(id) };
+}
+
+/** Change history of a product template (audit trail). */
+export async function templateHistory(id) {
+  const t = await getTemplateRow({ id });
+  return auditHistory('product_template', t.id);
+}
+
+/** Change history of a risk mapping (audit trail). */
+export async function riskMappingHistory(id) {
+  const m = await getRiskMapping(id, true);
+  return auditHistory('risk_mapping', m.id);
+}
+
+async function auditHistory(entity, id) {
+  const rows = await many(`SELECT a.id, a.action, a.at, a.username, a.before_data, a.after_data FROM audit_log a WHERE a.entity = $1 AND a.entity_id = $2
+    ORDER BY a.at DESC, a.id DESC LIMIT 200`, [entity, String(id)]);
+  return rows.map((r) => {
+    const before = r.before_data || {};
+    const after = r.after_data || {};
+    const changed = Array.isArray(before) || Array.isArray(after) ? [{ field: 'insurers', from: before, to: after }]
+      : [...new Set([...Object.keys(before), ...Object.keys(after)])].filter((k) => !['updatedAt', 'createdAt', '_count', 'configuration', 'sections'].includes(k) && JSON.stringify(before[k] ?? null) !== JSON.stringify(after[k] ?? null))
+        .map((k) => ({ field: k, from: before[k] ?? null, to: after[k] ?? null }));
+    return { id: r.id, action: r.action, at: r.at, user: r.username, changes: changed };
+  });
 }

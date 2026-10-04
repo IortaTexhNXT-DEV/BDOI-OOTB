@@ -37,6 +37,7 @@ import {
   IAR_SECTION_CATALOG,
   IAR_SECTION_SUGGESTIONS,
   buildPremiumSectionsFromRisks,
+  iarCatalogFromMappings,
   makeId,
   recalculateIarPremiumDetails,
 } from "./iarConstants";
@@ -46,6 +47,7 @@ import logger from "../../../utility/logger";
 import { notifyWarn } from "../../../utility/dialogs";
 import CustomerResponseActions from "../../quoteModule/customerResponse/CustomerResponseActions";
 import RequestForQuotationButton from "../../../module/Placement/RequestForQuotationButton";
+import productConfiguratorService from "../../../services/productConfiguratorService";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -448,13 +450,31 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     onSubmit: () => {},
   });
 
+  // the sections offered come from Product Configurator > Risk Mapping (IAR risk sections), else the built-in catalog
+  const [sectionCatalog, setSectionCatalog] = useState(() => iarCatalogFromMappings([]).sections);
+  useEffect(() => {
+    let alive = true;
+    productConfiguratorService
+      .getRiskMappings({ definitionType: "RISK_SECTIONS", status: "Active" })
+      .then((rows) => {
+        if (!alive) return;
+        const { sections } = iarCatalogFromMappings(rows);
+        setSectionCatalog(sections);
+        if (!sections.some((x) => x.sectionCode === selectedSectionCode)) setSelectedSectionCode(sections[0]?.sectionCode);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const sectionOptions = useMemo(
     () =>
-      IAR_SECTION_CATALOG.map((s) => ({
+      sectionCatalog.map((s) => ({
         label: s.sectionLabel,
         value: s.sectionCode,
       })),
-    []
+    [sectionCatalog]
   );
 
   const calculatedPremium = useMemo(
@@ -463,7 +483,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   );
 
   const addSection = () => {
-    const catalog = IAR_SECTION_CATALOG.find(
+    const catalog = sectionCatalog.find(
       (s) => s.sectionCode === selectedSectionCode
     );
     if (!catalog) return;
@@ -501,7 +521,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       recalculateIarPremiumDetails({
         ...prev,
         vatPercent: vatPercentConfigured,
-        sections: buildPremiumSectionsFromRisks(iarSections),
+        sections: buildPremiumSectionsFromRisks(iarSections, sectionCatalog),
       })
     );
     setStep(3);

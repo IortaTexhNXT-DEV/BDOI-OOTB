@@ -1,210 +1,100 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import productConfiguratorService from "../../../services/productConfiguratorService";
+import { statusLabel } from "../../../utils/statusSeverity";
+import { ConfiguratorPage, HistoryDialog, RowActions, StatusTag, STATUS_OPTIONS, pagingFor } from "../shared/ConfiguratorPage";
 import "./RiskMapping.scss";
 
+/**
+ * Product Configurator > Risk Mapping: how each product line describes its risk. The IAR risk sections are used by the
+ * IAR prospect and quotation screens (sections offered and their default rates); the other definitions are kept for
+ * reference and are not read by the quote screens yet.
+ */
 const RiskMappingList = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const toast = useRef(null);
   const [rows, setRows] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState(null);
   const [definitionType, setDefinitionType] = useState(null);
-
-  const statusOptions = [
-    { label: t("productRiskMapping.active", "Active"), value: "Active" },
-    { label: t("productRiskMapping.inactive", "Inactive"), value: "Inactive" },
-    { label: t("productRiskMapping.draft", "Draft"), value: "Draft" },
-  ];
+  const [history, setHistory] = useState(null);
 
   const definitionOptions = [
-    {
-      label: t("productRiskMapping.defVehicle", "Vehicle details"),
-      value: "VEHICLE_DETAILS",
-    },
-    {
-      label: t("productRiskMapping.defProperty", "Property risk fields"),
-      value: "PROPERTY_RISK_FIELDS",
-    },
-    {
-      label: t("productRiskMapping.defTravel", "Travel risk fields"),
-      value: "TRAVEL_RISK_FIELDS",
-    },
-    {
-      label: t("productRiskMapping.defLiability", "Liability cover fields"),
-      value: "LIABILITY_FIELDS",
-    },
-    {
-      label: t("productRiskMapping.defHealth", "Health cover fields"),
-      value: "HEALTH_COVER_FIELDS",
-    },
-    {
-      label: t("productRiskMapping.defLife", "Life cover fields"),
-      value: "LIFE_COVER_FIELDS",
-    },
-    {
-      label: t("productRiskMapping.defRiskSections", "Risk sections"),
-      value: "RISK_SECTIONS",
-    },
-  ];
+    ["VEHICLE_DETAILS", "defVehicle"], ["PROPERTY_RISK_FIELDS", "defProperty"], ["TRAVEL_RISK_FIELDS", "defTravel"], ["LIABILITY_FIELDS", "defLiability"],
+    ["HEALTH_COVER_FIELDS", "defHealth"], ["LIFE_COVER_FIELDS", "defLife"], ["RISK_SECTIONS", "defRiskSections"],
+  ].map(([value, key]) => ({ value, label: t(`productRiskMapping.${key}`) }));
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await productConfiguratorService.getRiskMappings({
-        search: search || undefined,
-        status: status || undefined,
-        definitionType: definitionType || undefined,
-      });
+      const data = await productConfiguratorService.getRiskMappings({ search: search.trim() || undefined, status: status || undefined, definitionType: definitionType || undefined });
       setRows(Array.isArray(data) ? data : []);
     } catch (error) {
-      toast.current?.show({
-        severity: "error",
-        summary: t("productRiskMapping.error", "Error"),
-        detail:
-          error.message ||
-          t("productRiskMapping.failedLoad", "Failed to load risk mappings"),
-      });
+      toast.current?.show({ severity: "error", summary: t("productRiskMapping.error"), detail: error.message || t("productRiskMapping.failedLoad") });
     } finally {
       setLoading(false);
     }
-  };
+  }, [search, status, definitionType, t]);
 
   useEffect(() => {
-    loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    const timer = setTimeout(loadData, 250);
+    return () => clearTimeout(timer);
+  }, [loadData]);
 
-  const statusBody = (row) => {
-    const severity = row.status === "Active" ? "success" : "warning";
-    return <Tag value={row.status} severity={severity} />;
-  };
+  const usedBy = (row) => (row.definitionType === "RISK_SECTIONS" && String(row.lobCode).toUpperCase() === "IAR"
+    ? <Tag value={t("productRiskMapping.usedByIar")} severity="success" />
+    : <span className="pc-muted">{t("productRiskMapping.referenceOnly")}</span>);
 
-  const definitionBody = (row) => {
-    if (row.definitionType === "RISK_SECTIONS") {
-      return (
-        <Button
-          label={row.definitionLabel || t("productRiskMapping.defRiskSections", "Risk sections")}
-          className="p-button-link p-0"
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/product-configurator/risk-mapping/${row.id}`);
-          }}
-        />
-      );
+  const toggle = async (row) => {
+    try {
+      await productConfiguratorService.updateRiskMapping(row.id, { status: row.status === "Active" ? "Inactive" : "Active" });
+      toast.current?.show({ severity: "success", summary: t("productRiskMapping.success"), detail: t("productRiskMapping.updated") });
+      loadData();
+    } catch (error) {
+      toast.current?.show({ severity: "error", summary: t("productRiskMapping.error"), detail: error.message });
     }
-    return row.definitionLabel || "—";
   };
-
-  const sectionsBody = (row) =>
-    row.definitionType === "RISK_SECTIONS" ? row.sectionCount ?? 0 : "—";
-
-  const actionBody = (row) => (
-    <Button
-      icon="pi pi-arrow-right"
-      className="p-button-rounded p-button-text p-button-primary"
-      onClick={() => navigate(`/product-configurator/risk-mapping/${row.id}`)} aria-label="Open" tooltip="Open" tooltipOptions={{ position: "top" }} />
-  );
 
   return (
-    <div className="risk-mapping-list p-3">
+    <ConfiguratorPage screen="riskMapping" usage={t("productRiskMapping.usage")}>
       <Toast ref={toast} />
-      <Card title={t("productRiskMapping.cardTitle", "Risk Mapping")}>
-        <p className="text-color-secondary mb-3">
-          {t(
-            "productRiskMapping.subtitle",
-            "Product definitions. Industrial All Risks (IAR) is defined by risk sections instead of vehicle details — one policy, many independent sections."
-          )}
-        </p>
-        <div className="mb-3 flex flex-wrap gap-2 justify-content-between align-items-center">
-          <span className="p-input-icon-left" style={{ minWidth: 280, flex: 1 }}>
-            <i className="pi pi-search" />
-            <InputText
-              className="w-full"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t(
-                "productRiskMapping.searchPlaceholder",
-                "Search product code, name, line of business..."
-              )}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") loadData();
-              }}
+      <div className="pc-filters" role="search">
+        <span className="p-input-icon-left pc-filters__search">
+          <i className="pi pi-search" aria-hidden="true" />
+          <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("productRiskMapping.searchPlaceholder")} aria-label={t("productConfigurator.filters.search")} />
+        </span>
+        <Dropdown value={definitionType} options={definitionOptions} onChange={(e) => setDefinitionType(e.value)} placeholder={t("productRiskMapping.filterDefinition")} showClear className="pc-filters__field" aria-label={t("productRiskMapping.filterDefinition")} />
+        <Dropdown value={status} options={STATUS_OPTIONS.map((x) => ({ label: statusLabel(x), value: x }))} onChange={(e) => setStatus(e.value)} placeholder={t("productConfigurator.filters.status")} showClear className="pc-filters__field" aria-label={t("productConfigurator.filters.status")} />
+      </div>
+      <DataTable value={rows} loading={loading} dataKey="id" {...pagingFor(rows.length)} emptyMessage={t("productRiskMapping.noRows")} size="small">
+        <Column header={t("productRiskMapping.product")} body={(r) => <div className="pc-cell-stack"><span>{r.productCode} · {r.productName}</span><small className="pc-muted">{r.lineOfBusiness || r.lobCode}</small></div>} />
+        <Column header={t("productRiskMapping.definition")} body={(r) => r.definitionLabel || definitionOptions.find((o) => o.value === r.definitionType)?.label || r.definitionType} />
+        <Column header={t("productRiskMapping.riskSections")} body={(r) => (r.definitionType === "RISK_SECTIONS" ? r.sectionCount ?? 0 : "—")} />
+        <Column header={t("productRiskMapping.usedBy")} body={usedBy} />
+        <Column field="status" header={t("productRiskMapping.status")} body={(r) => <StatusTag status={r.status} />} />
+        <Column
+          header={t("productConfigurator.actions.title")}
+          body={(r) => (
+            <RowActions
+              row={r}
+              onView={(row) => navigate(`/product-configurator/risk-mapping/${row.id}`)}
+              onToggle={toggle}
+              onHistory={(row) => setHistory({ ...row, label: row.productCode })}
             />
-          </span>
-          <Dropdown
-            value={status}
-            options={statusOptions}
-            onChange={(e) => setStatus(e.value)}
-            placeholder={t("productRiskMapping.filterStatus", "Status")}
-            showClear
-            style={{ minWidth: 140 }}
-          />
-          <Dropdown
-            value={definitionType}
-            options={definitionOptions}
-            onChange={(e) => setDefinitionType(e.value)}
-            placeholder={t("productRiskMapping.filterDefinition", "Definition")}
-            showClear
-            style={{ minWidth: 180 }}
-          />
-          <Button
-            icon="pi pi-search"
-            label={t("productRiskMapping.search", "Search")}
-            onClick={loadData}
-          />
-        </div>
-        <DataTable
-          value={rows}
-          loading={loading}
-          paginator
-          rows={20}
-          emptyMessage={t("productRiskMapping.noRows", "No products found")}
-          onRowClick={(e) =>
-            navigate(`/product-configurator/risk-mapping/${e.data.id}`)
-          }
-          rowClassName={() => "cursor-pointer"}
-        >
-          <Column
-            field="productCode"
-            header={t("productRiskMapping.productCode", "Product Code")}
-          />
-          <Column
-            field="productName"
-            header={t("productRiskMapping.product", "Product")}
-          />
-          <Column
-            field="lineOfBusiness"
-            header={t("productRiskMapping.lob", "Line of Business")}
-          />
-          <Column
-            header={t("productRiskMapping.definition", "Definition")}
-            body={definitionBody}
-          />
-          <Column
-            header={t("productRiskMapping.riskSections", "Risk Sections")}
-            body={sectionsBody}
-          />
-          <Column
-            field="status"
-            header={t("productRiskMapping.status", "Status")}
-            body={statusBody}
-          />
-          <Column body={actionBody} style={{ width: 70 }} />
-        </DataTable>
-      </Card>
-    </div>
+          )}
+        />
+      </DataTable>
+      <HistoryDialog kind="risk-mapping" row={history} onHide={() => setHistory(null)} />
+    </ConfiguratorPage>
   );
 };
 

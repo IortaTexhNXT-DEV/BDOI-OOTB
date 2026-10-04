@@ -58,7 +58,7 @@ export function premiumLines(x) {
   return { rows: itemised ? [...rows, ['Gross premium', gross]] : [['Gross premium', gross]], gross, itemised };
 }
 
-const premiumTable = (x, currency) => ({
+export const premiumTable = (x, currency) => ({
   heading: `Premium (${currency || 'PHP'})`,
   table: { columns: ['Item', { label: 'Amount', type: 'money' }], widths: [375, 140], rows: premiumLines(x).rows, totalRow: true },
 });
@@ -115,7 +115,7 @@ export function riskSection(x, f) {
 const coversTable = (covers, currency) => ({ heading: `Covers (${currency || 'PHP'})`, table: { columns: ['Cover', { label: 'Sum insured / limit', type: 'money' }, { label: 'Deductible', wrap: true }],
   rows: covers.map((c) => [val(c.cover || c.name), present(c.sumInsured) ? money(c.sumInsured) : '', val(c.deductible)]) } });
 
-function coverageSection(x, f) {
+export function coverageSection(x, f) {
   const line = lineOf(x);
   if (line === 'PROPERTY') {
     const si = x.fireRiskDetails?.sumInsured || x.iarRiskDetails?.sumInsured || x.sumInsuredBreakdown || {};
@@ -160,7 +160,16 @@ function offersSection(offers, currency, f) {
 }
 
 /** Quotation Slip: the quotation presented to the client (with the market comparison when it came from a broker slip). */
+/** Quotation Slip: the uploaded layout of the product's quotation-slip document template, else the standard layout. */
 export async function quoteDoc(q) {
+  const { productDocumentSpec } = await import('./productDocuments.js');
+  return (await productDocumentSpec('quote', q, { printAs: 'quotation-slip' })) || standardQuoteDoc(q);
+}
+
+/** Cover terms (deductibles, exclusions) of the product's coverages, for the standard layouts. */
+const coverTerms = async (x) => (await import('./productDocuments.js')).coverTermsSection(x);
+
+export async function standardQuoteDoc(q) {
   const line = lineOf(q);
   const h = await header(line === 'MOTOR' ? 'Motor Insurance Quotation Slip' : `${q.productType || 'Insurance'} Quotation Slip`, q.quotationNumber);
   const f = formatters(h);
@@ -169,7 +178,7 @@ export async function quoteDoc(q) {
   return { ...h, meta: kv([['Date', f.date(q.createdAt)], ['Valid until', f.date(q.validUntil)], ['Customer', customerOf(q.lead || {})], ['Status', q.quotationStatus],
     ['Product', q.productType], ['Policy type', await policyTypeLabel(q.insurancePolicyType)], ['Insurer', q.insuranceCompanyName], ['Currency', q.currency],
     ['Broker slip', q.brokerSlipNumber]]),
-  sections: [riskSection(q, f), coverageSection(q, f), premiumTable(q, q.currency), ...security, ...market,
+  sections: [riskSection(q, f), coverageSection(q, f), premiumTable(q, q.currency), await coverTerms(q), ...security, ...market,
     { heading: 'Remarks', text: q.remarks || 'This quotation is subject to the insurer\'s terms, conditions and final underwriting approval.' },
     { signatures: [signatureBlock(`For ${brokerName(h) || 'the broker'}`, await signatoryFor(q.authorizedSignature))], perRow: 2 }] };
 }
@@ -229,7 +238,13 @@ export async function printablePolicy(p, row = {}) {
   return { ...p, productLine: row.product_line || p.productLine, productName: row.product_name || p.productName, policyTypeName: pt?.name || p.policyTypeName || null };
 }
 
+/** Policy schedule: the uploaded layout of the product's policy-schedule document template, else the standard layout. */
 export async function policyScheduleDoc(p) {
+  const { productDocumentSpec } = await import('./productDocuments.js');
+  return (await productDocumentSpec('policy', p, { printAs: 'policy-schedule' })) || standardPolicyScheduleDoc(p);
+}
+
+export async function standardPolicyScheduleDoc(p) {
   const q = p.quotation || {};
   const x = { ...q, ...p, ...policyPremium(p, q) };
   const h = await header('Policy Schedule', p.policyNumber);
@@ -238,7 +253,7 @@ export async function policyScheduleDoc(p) {
     ['Date issued', f.date(p.issuedDate)], ['Product', p.productName || p.productType], ['Policy type', p.policyTypeName || await policyTypeLabel(p.insurancePolicyType)],
     ['Sum insured', num(p.sumInsured) ? f.ccy(p.sumInsured, p.currency) : ''],
     ['Bill no.', p.billNumber], ['Payment status', p.paymentStatus ? humanize(p.paymentStatus) : ''], ['Quotation', q.quotationNumber], ['Currency', p.currency]]),
-  sections: [riskSection(x, f), coverageSection(x, f), premiumTable(x, p.currency),
+  sections: [riskSection(x, f), coverageSection(x, f), premiumTable(x, p.currency), await coverTerms(x),
     { heading: 'Declaration', text: 'Subject to the terms, conditions, clauses and warranties of the policy wording of the insurer.' }] };
 }
 

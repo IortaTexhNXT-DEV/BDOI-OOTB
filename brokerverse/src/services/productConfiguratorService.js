@@ -281,10 +281,46 @@ const saveComponent = (kind, record) => {
   return id ? updateComponent(kind, id, payload) : createComponent(kind, payload);
 };
 
+const getComponentHistory = (kind, id) => call("GET", `${kind}/${id}/history`);
+const getTemplateHistory = (id) => call("GET", `products/${id}/history`);
+const getRiskMappingHistory = (id) => call("GET", `risk-mappings/${id}/history`);
+const getUnderwritingOptions = () => call("GET", "underwriting/options");
+const evaluateRisk = (payload) => call("POST", "underwriting/evaluate", payload);
+const getMarket = (params) => call("GET", `market?${new URLSearchParams(params).toString()}`);
+const getMergeFields = () => call("GET", "document-merge-fields");
+
+/** GET a file of the configurator with the session's token; returns the Blob (throws with the API's message). */
+const fetchFile = async (path) => {
+  const response = await fetch(`${BASE_URL}/product-configurator/${path}`, { headers: { ...authService.getAuthHeader() } });
+  if (!response.ok) {
+    const json = await response.json().catch(() => null);
+    throw new Error(json?.message || `Could not open the document (${response.status})`);
+  }
+  return response.blob();
+};
+/** Open a document template's preview (sample data) as a PDF in a new tab. */
+const previewDocument = async (id) => {
+  const url = URL.createObjectURL(await fetchFile(`documents/${id}/preview`));
+  window.open(url, "_blank", "noopener,noreferrer");
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+};
+/** Download a document template's layout (the uploaded file, else the default layout) as a text file. */
+const downloadLayout = async (id, fileName) => {
+  const url = URL.createObjectURL(await fetchFile(`documents/${id}/layout`));
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 60000);
+};
+
 const retireProductTemplate = (id, reason) => call("POST", `products/${id}/retire`, { reason });
 const reactivateProductTemplate = (id) => call("POST", `products/${id}/reactivate`, {});
 const createProductVersion = (id, payload = {}) => call("POST", `products/${id}/versions`, payload);
 const getProductAnalytics = () => call("GET", "analytics");
+const getDashboard = () => call("GET", "dashboard");
 
 const productConfiguratorService = {
   listComponents,
@@ -292,10 +328,20 @@ const productConfiguratorService = {
   updateComponent,
   deleteComponent,
   saveComponent,
+  getComponentHistory,
+  getTemplateHistory,
+  getRiskMappingHistory,
+  getUnderwritingOptions,
+  evaluateRisk,
+  getMarket,
+  getMergeFields,
+  previewDocument,
+  downloadLayout,
   retireProductTemplate,
   reactivateProductTemplate,
   createProductVersion,
   getProductAnalytics,
+  getDashboard,
   getProductTemplates,
   createProductTemplate,
   updateProductTemplate,

@@ -17,6 +17,7 @@ import { insurerId } from '../policies/service.js';
 import { quotationCharges } from '../premium-charges/service.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
 import { createLead } from '../leads/service.js';
+import { assertOnMarket, evaluate, assertNotDeclined } from '../product-configurator/underwriting.js';
 
 export const SLIP_STATUSES = ['draft', 'submitted', 'responses-in', 'closed', 'cancelled'];
 const OPEN = ['draft', 'submitted', 'responses-in'];
@@ -110,10 +111,26 @@ async function resolveInsurers(db, list) {
   return ids;
 }
 
+/**
+ * Approach insurers with the slip. An insurer must be on the product's insurer market (Product Configurator > Market
+ * Mapping) and its acceptance rules must not decline the risk (rules for every insurer and the insurer's own).
+ */
 async function addOffers(db, slipId, insurerIds, userId) {
+  const slip = (await db.query('SELECT product_id, lob, product_type, risk_details, doc, sum_insured FROM broker_slips WHERE id = $1', [slipId])).rows[0];
+  const fresh = [];
   for (const ic of insurerIds) {
-    const exists = (await db.query('SELECT 1 FROM insurer_offers WHERE broker_slip_id = $1 AND insurance_company_id = $2', [slipId, ic])).rows[0];
-    if (exists) continue;
+    if (!(await db.query('SELECT 1 FROM insurer_offers WHERE broker_slip_id = $1 AND insurance_company_id = $2', [slipId, ic])).rows[0]) fresh.push(ic);
+  }
+  await assertOnMarket({ productId: slip.product_id, lob: slip.lob }, fresh, db);
+  const risk = { ...(slip.doc || {}), riskDetails: slip.risk_details || {}, totalSumInsured: Number(slip.sum_insured) || undefined, productId: slip.product_id };
+  for (const ic of fresh) {
+    const uw = await evaluate(risk, { insurerId: ic, productId: slip.product_id, lob: slip.lob }, db);
+    if (uw?.decision === 'declined') {
+      const name = (await db.query('SELECT name FROM insurance_companies WHERE id = $1', [ic])).rows[0]?.name || `Insurer ${ic}`;
+      assertNotDeclined(uw, `The risk (for ${name})`);
+    }
+  }
+  for (const ic of fresh) {
     const number = await nextDocumentNumber('insurer_offer', { db, unique: { table: 'insurer_offers', column: 'offer_number' } });
     await db.query('INSERT INTO insurer_offers(offer_number, broker_slip_id, insurance_company_id, created_by) VALUES ($1,$2,$3,$4)', [number, slipId, ic, userId]);
   }

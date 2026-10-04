@@ -34,6 +34,7 @@ import useMotorTariff, { findVehicleClass } from "../utils/useMotorTariff";
 import { notifyError } from "../../../utility/dialogs";
 import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
 import CustomerResponseActions from "../customerResponse/CustomerResponseActions";
+import UnderwritingReferralPanel from "../underwritingReferral/UnderwritingReferralPanel";
 import logger from "../../../utility/logger";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
@@ -1222,6 +1223,7 @@ const QuoteDetailView = ({ action }) => {
           </TabPanel>
         </TabView>
       </Card>
+      {activeTab === 0 && <UnderwritingReferralPanel quotation={quotationData} onDecided={loadQuotation} />}
       {activeTab === 0 && (
         <div className="button_component">
           <Button

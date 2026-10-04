@@ -86,6 +86,22 @@ async function ensureInsurers(ctx) {
   for (const ins of Object.values(ctx.insurers)) ins.terms = dataOf(await s.get(`/commission-rates/credit-terms/${ins.id}`));
 }
 
+/**
+ * The scenario's insurers on the insurer market of every active product template (Product Configurator > Market
+ * Mapping): a Request for Quotation approaches, and Compare Insurers compares, only insurers on the product's market.
+ */
+async function ensureMarket(ctx) {
+  const s = ctx.as.sysadmin;
+  const names = Object.values(ctx.insurers).map((i) => i.name);
+  const templates = listOf(await s.get('/product-configurator/products', { status: 'Active', pageSize: 200 }));
+  for (const t of templates) {
+    const panel = t.insurers || [];
+    if (names.every((n) => panel.includes(n))) continue;
+    await s.put(`/product-configurator/products/${t.id}/insurers`, { insurers: [...new Set([...panel, ...names])] });
+    ctx.log.count('Product markets extended');
+  }
+}
+
 async function ensureProducts(ctx) {
   const rows = listOf(await ctx.as.sysadmin.get('/masters/product', { perPage: 100 }));
   for (const p of rows) ctx.products[p.productCode] = { id: p.id, code: p.productCode, name: p.productName, line: p.lineofBusiness, businessType: p.businessType };
@@ -212,6 +228,7 @@ export async function setup(ctx) {
   for (const p of PERSONAS) await log.step(`Persona ${p[1]} (${p[3].join(', ')})`, () => ensurePersona(ctx, p), { critical: true });
   await log.step('Products master', () => ensureProducts(ctx), { critical: true });
   await log.step('Insurers with credit terms', () => ensureInsurers(ctx), { critical: true });
+  await log.step('Insurers on the product markets', () => ensureMarket(ctx), { critical: true });
   await log.step('Commission rate matrix', () => ensureCommissionRates(ctx));
   await log.step('Bank accounts linked to the ledger', () => ensureBankAccounts(ctx), { critical: true });
   await log.step('Insurer statement formats', () => ensureInsurerFormats(ctx));

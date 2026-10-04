@@ -409,5 +409,12 @@ export async function policyDocuments(policyRow, baseUrl) {
     { type: 'billing-statement', fileName: `billing-statement-${policyRow.policy_number}.pdf`, url: `${baseUrl}/api/billing-statement/policy/${policyRow.id}/generate` },
     ...(lob !== 'MOTOR' ? [{ type: 'insurance-placing-slip', fileName: `placing-slip-${policyRow.policy_number}.pdf`, url: `${baseUrl}/api/policies/${policyRow.id}/documents/insurance-placing-slip-fire` }] : []),
   ];
+  // the other policy documents of the product template (Product Configurator > Document Manager), e.g. the CTPL certificate
+  const { productDocuments } = await import('../documents/productDocuments.js');
+  const { documents } = await productDocuments({ productId: policyRow.product_id, lob });
+  for (const d of documents.filter((x) => x.printAs && !['policy-schedule', 'quotation-slip'].includes(x.printAs) && /issu/i.test(x.stage || 'Policy Issuance'))) {
+    generated.push({ type: d.printAs, documentCode: d.documentCode, title: d.documentName, fileName: `${d.documentCode}-${policyRow.policy_number}.pdf`,
+      url: `${baseUrl}/api/document-templates/product-document/${d.id}/policy/${policyRow.id}` });
+  }
   return { files: files.map((f) => ({ ...f, downloadUrl: publicUrl(f.key) })), generated };
 }

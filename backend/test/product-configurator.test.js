@@ -78,7 +78,7 @@ describe('components, analytics and dashboard', () => {
   it('CRUD for every component kind used by the mock-only screens', async () => {
     for (const [kind, body] of Object.entries({
       'rating-factors': { factorCode: 'TST_F', factorName: 'Test factor', type: 'Multiplicative', rules: [{ condition: 'x', factor: 1.1 }] },
-      'underwriting-rules': { ruleCode: 'TST_R', ruleName: 'Test rule', type: 'Acceptance', condition: 'SI < 1M', action: 'Auto-Accept' },
+      'underwriting-rules': { ruleCode: 'TST_R', ruleName: 'Test rule', type: 'Acceptance', condition: 'Sum insured < 1000000', field: 'sumInsured', operator: '<', value: 1000000, action: 'Auto-Accept', authorityRole: 'processing' },
       documents: { documentCode: 'TST_D', documentName: 'Schedule', type: 'Policy Document', format: 'PDF' },
       taxes: { taxCode: 'PT', taxName: 'Premium tax', rate: 2, basis: 'Premium' },
       'acceptance-limits': { limitCode: 'L1', limitName: 'Limit', maxSumInsured: 5000000 },
