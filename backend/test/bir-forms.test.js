@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { setupFinance } from './accounting.fixtures.js';
 import { pool, query } from '../src/db/pool.js';
-import { clearSettingsCache } from '../src/lib/settings.js';
+import { clearSettingsCache, getSetting } from '../src/lib/settings.js';
 import { alphalist1604EDat, qapDat, sawtDat, slspPurchasesDat, slspSalesDat, txt, DAT_LAYOUT } from '../src/modules/bir/dat.js';
 import { buildPayload, canonical, signPayload } from '../src/modules/bir/eis.js';
 import { splitTin } from '../src/modules/bir/common.js';
@@ -309,6 +309,29 @@ describe('EIS connector (13.12)', () => {
     expect(ls).toMatchObject({ status: 'failed', mode: 'live', provider: 'http' });
     expect(ls.last_error).toMatch(/BIR_EIS_CLIENT_ID/);
     await setSetting('eis.mode', 'test');
+    await setSetting('eis.enabled', false);
+  });
+
+  it('retries a submission left in sending longer than eis.sending_stale_minutes (server stopped during the call)', async () => {
+    await setSetting('eis.enabled', true);
+    expect(await getSetting('eis.sending_stale_minutes')).toBe(15);
+    const stuck = (await maker('post', '/bir/invoices').send({ buyer: { buyerName: 'Walk-in customer' }, lines: [{ description: 'Fee', amount: 60 }] })).body.data;
+    const fresh = (await maker('post', '/bir/invoices').send({ buyer: { buyerName: 'Walk-in customer' }, lines: [{ description: 'Fee', amount: 65 }] })).body.data;
+    // a crash 20 minutes ago left one row in sending; another call is in flight right now
+    await query("UPDATE eis_submissions SET status = 'sending', attempts = 1, updated_at = now() - interval '20 minutes' WHERE invoice_id = $1", [stuck.id]);
+    await query("UPDATE eis_submissions SET status = 'sending', attempts = 1, updated_at = now() - interval '1 minute' WHERE invoice_id = $1", [fresh.id]);
+    const run = (await maker('post', '/bir/eis/process')).body.data;
+    expect(run).toMatchObject({ released: 1, sent: 1, accepted: 1 });
+    const s = (await query('SELECT status, attempts, eis_reference, last_error FROM eis_submissions WHERE invoice_id = $1', [stuck.id])).rows[0];
+    expect(s).toMatchObject({ status: 'accepted', attempts: 2, last_error: null });
+    expect(s.eis_reference).toMatch(/^TEST-/);
+    expect((await query('SELECT status FROM eis_submissions WHERE invoice_id = $1', [fresh.id])).rows[0].status).toBe('sending');
+    // a stale row that has used up its attempts is released as failed and waits for Retry
+    await query("UPDATE eis_submissions SET status = 'sending', attempts = 5, updated_at = now() - interval '20 minutes' WHERE invoice_id = $1", [fresh.id]);
+    expect((await maker('post', '/bir/eis/process')).body.data).toMatchObject({ released: 1, sent: 0 });
+    const f = (await query('SELECT status, last_error FROM eis_submissions WHERE invoice_id = $1', [fresh.id])).rows[0];
+    expect(f.status).toBe('failed');
+    expect(f.last_error).toMatch(/interrupted/);
     await setSetting('eis.enabled', false);
   });
 });

@@ -24,6 +24,21 @@ export const RULES = [
   { key: 'housekeeping.password_resets_days', days: 7, table: 'password_resets', where: '(used_at IS NOT NULL OR expires_at < now()) AND COALESCE(used_at, expires_at) < $1' },
   { key: 'housekeeping.notifications_read_days', days: 180, table: 'notifications', where: 'is_read AND COALESCE(read_at, created_at) < $1' },
   { key: 'housekeeping.job_queue_done_days', days: 30, table: 'job_queue', where: "status = 'completed' AND COALESCE(finished_at, created_at) < $1" },
+  // integration framework: only messages that are finished (sent, failed for good, cancelled, skipped); a queued, processing
+  // or retrying message is never deleted. Attempts go with their message (ON DELETE CASCADE) and, when their own period is
+  // shorter, on their own once the message is finished.
+  { key: 'housekeeping.integration_outbox_days', days: 180, table: 'integration_outbox', where: "status IN ('sent', 'failed', 'cancelled', 'skipped') AND COALESCE(sent_at, updated_at, created_at) < $1" },
+  { key: 'housekeeping.integration_attempts_days', days: 180, table: 'integration_attempts', where: "at < $1 AND EXISTS (SELECT 1 FROM integration_outbox o WHERE o.id = integration_attempts.outbox_id AND o.status IN ('sent', 'failed', 'cancelled', 'skipped'))" },
+  { key: 'housekeeping.integration_inbox_days', days: 180, table: 'integration_inbox', where: "status IN ('processed', 'ignored', 'failed') AND COALESCE(processed_at, received_at) < $1" },
+  // BIR EIS: the acknowledgement of each e-invoice is tax evidence, kept 10 years by default (BIR record keeping); a queued or
+  // sending submission is never deleted
+  { key: 'housekeeping.eis_submissions_days', days: 3653, table: 'eis_submissions', where: "status IN ('accepted', 'rejected', 'failed', 'manual') AND COALESCE(accepted_at, submitted_at, updated_at) < $1" },
+  // AML screening provider calls: finished requests only (the screening itself stays in aml_screenings); 5 years by default
+  // (AMLA record keeping)
+  { key: 'housekeeping.aml_provider_requests_days', days: 1827, table: 'aml_provider_requests', where: "status IN ('succeeded', 'failed', 'abandoned') AND updated_at < $1" },
+  // go-live workbench: the rows of a batch that was loaded or failed validation; the batch row (counts, sheets, result) stays.
+  // The rows of a validated batch are kept: it can still be loaded
+  { key: 'housekeeping.data_load_rows_days', days: 365, table: 'data_load_rows', where: "batch_id IN (SELECT id FROM data_load_batches b WHERE b.status IN ('loaded', 'failed') AND COALESCE(b.loaded_at, b.validated_at, b.created_at) < $1)" },
 ];
 
 const tableExists = async (t) => (await query('SELECT to_regclass($1) AS t', [`public.${t}`])).rows[0].t !== null;

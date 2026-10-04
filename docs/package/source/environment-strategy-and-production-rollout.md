@@ -378,7 +378,7 @@ These items are entered on their screen in each environment, or applied by a scr
 | Payment gateway credentials | Master > Finance > Payment Gateways; secret store | Secrets set per environment in the secret store; sandbox outside Production |
 | Application name, logo, colours, display currency, language | Master > System Settings | On screen |
 | Company logo and letterhead images | Master > Generals > Organization > Company | Uploaded on screen |
-| Scheduled jobs | Master > Configuration > Schedules | On screen; switched on at go-live |
+| Scheduled jobs | Master > Schedules | On screen; switched on at go-live |
 | Fiscal years and accounting periods | Accounts > Period End > Period Management | On screen; periods before the cutover date closed |
 | Remittance masters, reinsurance treaties and reinsurers, incentive programmes | Master > Finance > Remittance Master; Reinsurance; Incentive | On screen |
 | Referrers and agents with their commission accounts | Commission > Agents/Referrer Accounts | On screen |

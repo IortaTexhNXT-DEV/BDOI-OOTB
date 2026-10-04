@@ -109,6 +109,54 @@ describe('housekeeping', () => {
     await setSetting('housekeeping.audit_log_days', 0);
   });
 
+  it('purges finished integration, EIS, AML provider and go-live workbook rows past their retention and keeps pending ones', async () => {
+    const old = daysAgo(181);
+    // integration outbox: sent and failed long ago go, a queued message of the same age and a recent sent one stay
+    const ob = async (status, at, ref) => (await one(`INSERT INTO integration_outbox(connector_code, message_type, reference, status, created_at, updated_at, sent_at)
+      VALUES ('SMS_GENERIC', 'sms.send', $3, $1::text, $2::timestamptz, $2::timestamptz, CASE WHEN $1::text = 'sent' THEN $2::timestamptz END) RETURNING id`, [status, at, ref])).id;
+    const sentOld = await ob('sent', old, 'hk-sent-old'); await ob('failed', old, 'hk-failed-old');
+    const queuedOld = await ob('queued', old, 'hk-queued-old'); await ob('sent', new Date(), 'hk-sent-new');
+    await query('INSERT INTO integration_attempts(outbox_id, attempt, mode, ok, at) VALUES ($1, 1, \'test\', true, $3), ($2, 1, \'test\', false, $3)', [sentOld, queuedOld, old]);
+    await query(`INSERT INTO integration_inbox(message_type, status, received_at, processed_at, external_ref) VALUES ('bank.status_file', 'processed', $1, $1, 'hk-processed'),
+      ('bank.status_file', 'failed', $1, NULL, 'hk-failed'), ('bank.status_file', 'received', $1, NULL, 'hk-received'), ('bank.status_file', 'processed', now(), now(), 'hk-processed-new')`, [old]);
+    // EIS: an acknowledgement older than 10 years goes, a queued submission of that age and a recent acknowledgement stay
+    const eisOld = daysAgo(3654);
+    for (const n of ['1', '2', '3']) await query("INSERT INTO sales_invoices(id, invoice_number, invoice_date, buyer_name) VALUES ($1, $2, current_date, 'HK')", [`hk-inv-${n}`, `HK-000${n}`]);
+    await query(`INSERT INTO eis_submissions(id, invoice_id, invoice_number, payload, payload_hash, status, accepted_at, submitted_at, created_at, updated_at) VALUES
+      ('hk-eis-accepted', 'hk-inv-1', 'HK-0001', '{}', 'h', 'accepted', $1, $1, $1, $1), ('hk-eis-queued', 'hk-inv-2', 'HK-0002', '{}', 'h', 'queued', NULL, NULL, $1, $1),
+      ('hk-eis-recent', 'hk-inv-3', 'HK-0003', '{}', 'h', 'accepted', now(), now(), now(), now())`, [eisOld]);
+    // AML provider requests: finished ones older than 5 years go, a pending one stays
+    const amlOld = daysAgo(1828);
+    await query(`INSERT INTO aml_provider_requests(provider, party_name, status, created_at, updated_at) VALUES ('fake', 'hk-done', 'succeeded', $1, $1), ('fake', 'hk-pending', 'pending', $1, $1),
+      ('fake', 'hk-done-new', 'failed', now(), now())`, [amlOld]);
+    // go-live workbook rows: rows of a batch loaded a year ago go, rows of a validated (not yet loaded) batch of the same age stay
+    const dlOld = daysAgo(366);
+    const batch = async (status, at) => (await one(`INSERT INTO data_load_batches(kit, status, created_at, validated_at, loaded_at)
+      VALUES ('configuration', $1::text, $2::timestamptz, $2::timestamptz, CASE WHEN $1::text = 'loaded' THEN $2::timestamptz END) RETURNING id`, [status, at])).id;
+    const loadedOld = await batch('loaded', dlOld); const validatedOld = await batch('validated', dlOld); const loadedNew = await batch('loaded', new Date());
+    for (const b of [loadedOld, validatedOld, loadedNew]) await query("INSERT INTO data_load_rows(batch_id, sheet, row_number, data, status) VALUES ($1, 'hk', 1, '{}', 'loaded')", [b]);
+
+    const out = await housekeeping();
+    expect(out.deleted).toMatchObject({ integration_outbox: 2, integration_attempts: 0, integration_inbox: 2, eis_submissions: 1, aml_provider_requests: 1, data_load_rows: 1 });
+    const left = async (sql, p = []) => (await query(sql, p)).rows.map((r) => r.k).sort();
+    expect(await left("SELECT reference AS k FROM integration_outbox WHERE reference LIKE 'hk-%'")).toEqual(['hk-queued-old', 'hk-sent-new']);
+    expect(await left('SELECT outbox_id::text AS k FROM integration_attempts WHERE outbox_id IN ($1, $2)', [sentOld, queuedOld])).toEqual([String(queuedOld)]); // the sent message's attempt went with it
+    expect(await left("SELECT external_ref AS k FROM integration_inbox WHERE external_ref LIKE 'hk-%'")).toEqual(['hk-processed-new', 'hk-received']);
+    expect(await left("SELECT id AS k FROM eis_submissions WHERE id LIKE 'hk-%'")).toEqual(['hk-eis-queued', 'hk-eis-recent']);
+    expect(await left("SELECT party_name AS k FROM aml_provider_requests WHERE party_name LIKE 'hk-%'")).toEqual(['hk-done-new', 'hk-pending']);
+    expect(await left("SELECT batch_id::text AS k FROM data_load_rows WHERE sheet = 'hk'")).toEqual([String(validatedOld), String(loadedNew)].sort());
+    // the settings exist with their defaults; 0 keeps a table forever
+    expect(await getSetting('housekeeping.integration_outbox_days')).toBe(180);
+    expect(await getSetting('housekeeping.eis_submissions_days')).toBe(3653);
+    expect(await getSetting('housekeeping.aml_provider_requests_days')).toBe(1827);
+    expect(await getSetting('housekeeping.data_load_rows_days')).toBe(365);
+    await setSetting('housekeeping.integration_outbox_days', 0);
+    await ob('sent', old, 'hk-keep-forever');
+    expect((await housekeeping()).kept).toContain('integration_outbox');
+    expect(await left("SELECT reference AS k FROM integration_outbox WHERE reference = 'hk-keep-forever'")).toEqual(['hk-keep-forever']);
+    await setSetting('housekeeping.integration_outbox_days', 180);
+  });
+
   it('runs through the scheduler under the job advisory lock', async () => {
     const r = await ctx.api('post', '/schedules/housekeeping/run');
     expect(r.status).toBe(200);

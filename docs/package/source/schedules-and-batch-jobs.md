@@ -77,7 +77,7 @@ Thirty-five jobs are registered (thirty-two in the current build and three with 
 | E-mail outbox (`email-outbox`) | Every 5 minutes | On | `emailOutbox` | `notification.email_enabled`, `notification.from_address`, `SMTP_URL` | jobs.json |
 | My Work reminders (`my-work-reminders`) | Every 15 minutes | On | `myWorkReminders` | `myWork.auto_tasks`, `myWork.overdue_task_alert` | jobs.json, 0253 |
 | Screening provider retry (`aml-provider-retry`) | Every 15 minutes | Off | `amlProviderRetry` | `aml.screening_provider` (provider, maxAttempts 5) | 0263 |
-| EIS outbox (`eis-outbox`) | Every 15 minutes | Off | `eisOutbox` | `eis.enabled` (off), `eis.mode`, `eis.max_attempts` (5), `eis.retry_minutes` (15) | 0283 |
+| EIS outbox (`eis-outbox`) | Every 15 minutes | Off | `eisOutbox` | `eis.enabled` (off), `eis.mode`, `eis.max_attempts` (5), `eis.retry_minutes` (15), `eis.sending_stale_minutes` (15) | 0283, 0330 |
 | Scheduled campaigns (`campaign-dispatch`) | Every 15 minutes | Off | `campaignDispatch` | the campaigns scheduled on Operations > Sales & Marketing > Campaigns; `campaigns.max_recipients` (5,000) | 0307 |
 | Breach notification deadlines (`privacy-breach-deadlines`) | Hourly at :15 | On | `privacyBreachDeadlines` | `privacy.breach_reminder_hours` (48, 24, 6), `privacy.breach_notify_hours` (72) | 0273 (compliance package) |
 | Policy expiry (`policy-expiry`) | Daily 00:15 | On | `policyExpiry` | none | jobs.json |
@@ -87,7 +87,7 @@ Thirty-five jobs are registered (thirty-two in the current build and three with 
 | Dormant accounts (`dormant-users`) | Daily 01:45 | On | `dormantUsers` | `access.dormant_days` (90) | jobs.json |
 | Period auto soft-close (`period-auto-soft-close`) | Daily 02:00 | Off | `periodAutoSoftClose` | job parameter `graceDays` (5) | 0135 |
 | BI extract (`bi-extract`) | Daily 02:00 | Off | `biExtract` | `bi.extract_datasets`, `bi.extract_folder`, `bi.extract_keep_runs` (30) | 0308 |
-| Housekeeping (`housekeeping`) | Daily 02:45 | On | `housekeeping` | `housekeeping.*` | jobs.json |
+| Housekeeping (`housekeeping`) | Daily 02:45 | On | `housekeeping` | `housekeeping.*` (job runs, e-mails, sign-ins, sessions, reset codes, notifications, queue, integration outbox, attempts and inbox, EIS submissions, AML provider requests, go-live workbook rows, audit trail) | jobs.json |
 | Daily reports (`daily-reports`) | Daily 05:00 | On | `dailyReports` | job parameter `reports` | jobs.json |
 | Renewal pipeline (`renewal-pipeline`) | Daily 05:30 | On | `renewalPipeline` | `renewals.pipeline_days` (90), `renewals.grace_period_days` (30) | jobs.json |
 | Bank reconciliation auto-match (`bank-auto-match`) | Daily 05:45 | Off | `bankAutoMatch` | `bank_reconciliation.date_window_days`, `bank_reconciliation.group_max_lines`, match rules | 0116 |
@@ -204,13 +204,19 @@ Deletes, in batches of 5,000 rows, data past its retention period. Every period 
 | Password reset codes | `housekeeping.password_resets_days` | 7 | used or expired codes |
 | Read notifications | `housekeeping.notifications_read_days` | 180 | read notifications only |
 | Background queue | `housekeeping.job_queue_done_days` | 30 | completed queue jobs |
+| Integration outbox | `housekeeping.integration_outbox_days` | 180 | `integration_outbox` messages that are sent, failed, cancelled or skipped (SMS, CTPL, insurer requests, bank files); queued, processing and retrying messages are never deleted |
+| Integration attempts | `housekeeping.integration_attempts_days` | 180 | `integration_attempts` of finished messages (an attempt also goes with its message) |
+| Integration inbox | `housekeeping.integration_inbox_days` | 180 | `integration_inbox` messages processed, ignored or failed; received messages not yet processed are kept |
+| EIS submissions | `housekeeping.eis_submissions_days` | 3,653 (10 years) | `eis_submissions` accepted, rejected, failed or uploaded manually; queued and sending submissions are kept. The acknowledgement is tax evidence: do not go below the BIR record-keeping period |
+| AML provider requests | `housekeeping.aml_provider_requests_days` | 1,827 (5 years) | `aml_provider_requests` succeeded, failed or abandoned; the screenings themselves (`aml_screenings`) are not purged. AMLA record keeping |
+| Go-live workbook rows | `housekeeping.data_load_rows_days` | 365 | `data_load_rows` of batches loaded or failed; the batch history stays and the rows of a validated workbook not yet loaded are kept |
 | Audit trail | `housekeeping.audit_log_days` | 0 (keep) | never below 2,557 days (7 years, BIR and Insurance Commission record keeping) |
 
-Output: rows deleted per table and the tables kept forever. Safe to rerun.
+Output: rows deleted per table and the tables kept forever. Safe to rerun. A row that is still pending (a queued or retrying message, a received inbound message, a queued e-invoice, a pending screening request, a validated workbook) is never deleted, whatever the period.
 
 ## Dormant accounts
 
-Deactivates every active user (except the built-in administrator `BrokerVerse`) who has not signed in, or since creation, for `access.dormant_days` (90) days, and ends their sessions. Output: number and user names. A deactivated user is reactivated on Master > Generals > User Management > User. Setting the days to 0 disables the job's effect. Safe to rerun.
+Deactivates every active user (except the built-in administrator `BrokerVerse`) who has not signed in, or since creation, for `access.dormant_days` (90) days, and ends their sessions. Output: number and user names. A deactivated user is reactivated on Master > Users and Access > User. Setting the days to 0 disables the job's effect. Safe to rerun.
 
 ## Month-end close reminder (off)
 
@@ -336,7 +342,7 @@ Sends again the requests to the commercial screening provider (`aml.screening_pr
 | Reads | Submissions queued or failed with fewer than `eis.max_attempts` (5) attempts whose next attempt time has come, at most 50 per run. |
 | Writes | Accepted (with the EIS reference), rejected (final: cancel and reissue the invoice) or failed with the error and the next attempt after `eis.retry_minutes` (15), doubled at each attempt. |
 | On demand | Accounts > Tax > E-Invoicing (EIS): Send now, Retry, Queue earlier invoices, Export payloads and Uploaded manually (fallback). |
-| Restart safety | A submission is set to sending before the call. A crash during the call leaves it in sending, which the job does not pick up again: support checks with the EIS whether it arrived, then uses Retry or Uploaded manually. |
+| Restart safety | A submission is set to sending before the call. A crash during the call leaves it in sending; a submission in sending longer than `eis.sending_stale_minutes` (15) counts as a failed attempt and the next run sends it again (within `eis.max_attempts`; the EIS rejects a duplicate of an invoice it already holds). A submission that used up its attempts stays failed for Retry or Uploaded manually. |
 
 ## Compliance reminders (compliance package)
 
@@ -386,7 +392,7 @@ A failed run is recorded with status failed and the error text, and the job's La
 | Recurring journals, accrual reversal, bank auto-match | Yes | Nothing (one journal per occurrence; reversed entries skipped; matched lines skipped) |
 | Collection reminders | Yes | Nothing within the repeat window |
 | E-mail outbox, renewal notice queue, integration outbox | Yes | At most the one message being sent at the moment of a crash |
-| EIS outbox | Yes | Nothing; a submission left in sending after a crash needs Retry by support |
+| EIS outbox | Yes | Nothing; a submission left in sending after a crash is sent again after `eis.sending_stale_minutes` |
 | Daily reports, scheduled reports, BI extract | Yes | Another file; a scheduled report e-mails its recipients again; the BI extract overwrites the files of the day |
 | My Work reminders, cover note expiry, missing claim documents, SMS renewal notices, SMS payment reminders, campaigns, prospects not worked in time | Yes | Nothing (reminded, queued or sent records are detected) |
 | AML transaction monitoring, KYC refresh due, screening provider retry | Yes | Nothing, except the KYC summary notification |
@@ -404,7 +410,7 @@ Use this table when a job shows Last status failed, when its Next run is blank, 
 | `email-outbox` | E-mails stay Queued | `notification.email_enabled`, `SMTP_URL`, Last error | Fix SMTP, then Retry; see the E-mail outbox section | System Administrator |
 | `my-work-reminders` | No task reminders; follow-up tasks missing | `myWork.auto_tasks`, `myWork.overdue_task_alert`; the task's reminder time | Run now; correct the setting | Operations |
 | `aml-provider-retry` | Failed provider requests on the AML Dashboard | `aml.screening_provider` (provider, endpoint, API key variable set on the server); Provider tab call log | Fix the provider settings, then Retry on the request; screen manually the parties of abandoned requests | Compliance officer |
-| `eis-outbox` | Failed or rejected count grows; submissions stuck in sending | `eis.enabled`, `eis.mode`, credential variables; Last error | Failed: fix and Retry. Rejected: cancel and reissue the invoice. Stuck in sending: confirm with the EIS, then Retry or Uploaded manually. EIS down: Export payloads and upload manually | Accounting Manager |
+| `eis-outbox` | Failed or rejected count grows; submissions in sending | `eis.enabled`, `eis.mode`, credential variables; Last error | Failed: fix and Retry. Rejected: cancel and reissue the invoice. In sending longer than `eis.sending_stale_minutes`: the next run retries it by itself; once the attempts are used up, Retry or Uploaded manually. EIS down: Export payloads and upload manually | Accounting Manager |
 | `campaign-dispatch` | Scheduled campaign still Scheduled after its time | Job enabled; campaign status; segment consent results | Run now, or Send now on the campaign | Marketing |
 | `privacy-breach-deadlines` | No reminders on an open breach | Job enabled; breach status (already notified?); `privacy.breach_*` settings | Run now. Never leave this job off: the NPC 72-hour deadline runs in hours | DPO |
 | `policy-expiry`, `quote-expiry` | Expired policies or quotations still active | Business date, `general.timezone` | Run now (both catch up) | Operations |
@@ -632,6 +638,5 @@ The jobs delivered switched on (including AML transaction monitoring, KYC refres
 | 5 | Quotation expiry counts from the creation date, not from Valid Until. | Decide which rule the broker wants. |
 | 6 | Report schedules have no screen (API only). | See the Reports Book. |
 | 7 | Missed runs during downtime are not caught up by the scheduler. | After an outage, use Run now for the daily jobs of the missed day; for AML transaction monitoring use Run monitoring with the missed dates. |
-| 8 | Housekeeping does not purge `integration_outbox`, `integration_attempts` or `eis_submissions`; they grow without limit. | Add retention settings for them; meanwhile watch their size in the monthly service review. |
-| 9 | An EIS submission left in sending after a crash is not picked up again by the job. | Support checks the EIS and uses Retry or Uploaded manually (Support runbook by job). |
-| 10 | The user manual names the EIS job's screen as Master > Configuration > Schedules; the screen is Master > Schedules. | Correct the manual at its next update. |
+
+Closed since the first issue of this document: housekeeping now purges the integration outbox, attempts and inbox, the EIS submissions, the AML provider requests and the go-live workbook rows (settings `housekeeping.*`); an EIS submission left in sending is retried after `eis.sending_stale_minutes`; the user manual names the Schedules screen as Master > Schedules.
