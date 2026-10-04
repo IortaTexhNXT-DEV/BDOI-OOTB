@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .container__statement {
   padding: 0;
   background: #f8f9fa;
@@ -47,7 +48,7 @@
         color: #0072d8;
 
         &:hover {
-          background: #0072d8;
+          background: $brand-blue;
           border-color: #0072d8;
           color: white;
         }
@@ -94,8 +95,6 @@
     }
 
     .statement-header {
-      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-      color: white;
 
       .p-card-body {
         padding: 2rem;
@@ -158,7 +157,6 @@
           transition: transform 0.2s ease, box-shadow 0.2s ease;
 
           &:hover {
-            transform: translateY(-2px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
           }
 
@@ -267,7 +265,7 @@
           }
 
           .p-badge {
-            background: #0072d8;
+            background: $brand-blue;
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
           }
@@ -339,7 +337,7 @@
           padding: 1.5rem;
           background: #f8f9fa;
           border-radius: 8px;
-          border-left: 4px solid #0072d8;
+          border: 1px solid $color-border;
           margin-bottom: 1rem;
 
           &:last-child {

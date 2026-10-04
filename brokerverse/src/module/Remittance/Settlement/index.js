@@ -16,13 +16,33 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { Tag } from "primereact/tag";
-import { Checkbox } from "primereact/checkbox";
 import { Timeline } from "primereact/timeline";
-import { Badge } from "primereact/badge";
-import mockRemittanceService from "../../../services/mockRemittanceService";
-import { settlementParameterData, commonData, mockCrudOperations } from "../../../services/mockData/remittanceMockData";
+import remittanceService from "../../../services/remittanceService";
+import { calendarDateFormat, formatDate, formatDateTime, isoDate, loadInsurerOptions, loadMasterOptions, loadSettings, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
+
+const initialSettlement = () => ({
+  id: null,
+  settlementNo: "-",
+  settlementDate: new Date(),
+  settlementType: "Regular",
+  status: "Draft",
+  insurerCode: null,
+  insurerName: "",
+  settlementPeriod: [new Date(new Date().getFullYear(), new Date().getMonth(), 1), new Date()],
+  previousBalance: 0,
+  creditNotes: 0,
+  debitNotes: 0,
+  otherAdjustments: 0,
+  remarks: "",
+  paymentMethod: null,
+  bankAccount: null,
+  referenceNo: "",
+  paymentDate: new Date()
+});
+const EDITABLE = ["Draft", "Rejected"];
+const isCheque = (method) => /check|cheque/i.test(method || "");
 
 const SettlementProcessing = () => {
   const { t } = useTranslation();
@@ -32,57 +52,47 @@ const SettlementProcessing = () => {
   const [selectedPolicies, setSelectedPolicies] = useState([]);
   const [addPolicyDialog, setAddPolicyDialog] = useState(false);
   const [availablePolicies, setAvailablePolicies] = useState([]);
+  const [insurerCredits, setInsurerCredits] = useState(null);
   const [approvalDialog, setApprovalDialog] = useState(false);
   const [approvalResult, setApprovalResult] = useState(null);
   const [workflowHistory, setWorkflowHistory] = useState([]);
-  const [validationErrors, setValidationErrors] = useState([]);
+  const [insurers, setInsurers] = useState([]);
+  const [paymentMethods, setPaymentMethods] = useState([]);
+  const [bankAccounts, setBankAccounts] = useState([]);
+  const [policies, setPolicies] = useState([]);
   const toast = useRef(null);
 
-  const [settlementData, setSettlementData] = useState({
-    settlementNo: "SET-2025-00001",
-    settlementDate: new Date(),
-    settlementType: "Regular",
-    status: "Draft",
-    insurerCode: null,
-    insurerName: "",
-    settlementPeriod: [new Date(), new Date()],
-    previousBalance: 0,
-    creditNotes: 0,
-    debitNotes: 0,
-    otherAdjustments: 0,
-    remarks: "",
-    paymentMethod: null,
-    bankAccount: null,
-    referenceNo: "",
-    paymentDate: new Date()
-  });
+  const [settlementData, setSettlementData] = useState(initialSettlement);
+  const editable = EDITABLE.includes(settlementData.status);
 
-  // Load data from mock data service
-  const [parameters, setParameters] = useState(settlementParameterData.parameters);
-  const [pendingSettlements, setPendingSettlements] = useState(settlementParameterData.pendingSettlements);
-
-  const [policies, setPolicies] = useState([
-    { id: 1, policyNo: "POL-2025-001", insuredName: "John Doe", product: "Auto", premium: 5000, commissionRate: 10, commission: 500, tax: 50, netAmount: 4450, selected: false },
-    { id: 2, policyNo: "POL-2025-002", insuredName: "Jane Smith", product: "Health", premium: 3500, commissionRate: 12, commission: 420, tax: 42, netAmount: 3038, selected: false },
-    { id: 3, policyNo: "POL-2025-003", insuredName: "Bob Johnson", product: "Life", premium: 8000, commissionRate: 15, commission: 1200, tax: 120, netAmount: 6680, selected: false }
-  ]);
-
-  // Initialize workflow history
   useEffect(() => {
-    setWorkflowHistory([
-      { action: 'Created', by: 'System', at: new Date(), status: 'Draft', notes: 'Settlement initiated' }
-    ]);
-    loadAvailablePolicies();
+    loadInsurerOptions().then(setInsurers).catch((e) => showError(toast, e));
+    loadMasterOptions("bank-account").then((rows) => setBankAccounts(rows.map((r) => ({ label: `${r.label} - ${r.value}`, value: r.value })))).catch((e) => showError(toast, e));
+    loadSettings()
+      .then((s) => setPaymentMethods(Object.keys(s["accounting.cash_account_by_payment_mode"] || {}).map((m) => ({
+        label: m.replace(/[-_]/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
+        value: m
+      }))))
+      .catch((e) => showError(toast, e));
   }, []);
 
-  const loadAvailablePolicies = async () => {
-    // Simulate loading available policies
-    const mockAvailable = [
-      { id: 4, policyNo: "POL-2025-004", insuredName: "Alice Williams", product: "Home", premium: 4500, commissionRate: 8, commission: 360, tax: 36, netAmount: 4104 },
-      { id: 5, policyNo: "POL-2025-005", insuredName: "Charlie Brown", product: "Travel", premium: 1200, commissionRate: 5, commission: 60, tax: 6, netAmount: 1134 },
-      { id: 6, policyNo: "POL-2025-006", insuredName: "Diana Prince", product: "Life", premium: 10000, commissionRate: 15, commission: 1500, tax: 150, netAmount: 8350 }
-    ];
-    setAvailablePolicies(mockAvailable);
+  const loadAvailablePolicies = async (insurerCode) => {
+    if (!insurerCode) return;
+    try {
+      setAvailablePolicies(await remittanceService.settlementPolicies(insurerCode));
+      setInsurerCredits(await remittanceService.insurerCredits(insurerCode).catch(() => null));
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
+  const loadWorkflow = async (settlementNo) => {
+    try {
+      const audit = await remittanceService.auditTrail(settlementNo);
+      setWorkflowHistory([...audit].reverse().map((a) => ({ action: a.actionType, by: a.changedBy, at: String(a.changeDate).replace(" ", "T"), status: a.newValue || "", notes: a.reason })));
+    } catch (e) {
+      showError(toast, e);
+    }
   };
 
   const settlementTypes = [
@@ -90,22 +100,6 @@ const SettlementProcessing = () => {
     { label: "Provisional", value: "Provisional" },
     { label: "Final", value: "Final" },
     { label: "Adjustment", value: "Adjustment" }
-  ];
-
-  const insurers = commonData.insurers.map(insurer => ({
-    label: insurer.name,
-    value: insurer.code
-  }));
-
-  const paymentMethods = commonData.paymentMethods.map(method => ({
-    label: method,
-    value: method.toLowerCase().replace(/\s+/g, '_')
-  }));
-
-  const bankAccounts = [
-    { label: "Main Operating Account - *1234", value: "ACC001" },
-    { label: "Settlement Account - *5678", value: "ACC002" },
-    { label: "Premium Collection Account - *9012", value: "ACC003" }
   ];
 
   const items = [
@@ -117,10 +111,10 @@ const SettlementProcessing = () => {
   const home = { icon: <SvgDot />, url: "#" };
 
   const calculateSummary = () => {
-    const totalPremium = policies.reduce((acc, p) => acc + p.premium, 0);
-    const totalCommission = policies.reduce((acc, p) => acc + p.commission, 0);
-    const totalTax = policies.reduce((acc, p) => acc + p.tax, 0);
-    const totalAdjustments = settlementData.previousBalance + settlementData.creditNotes - settlementData.debitNotes + settlementData.otherAdjustments;
+    const totalPremium = policies.reduce((acc, p) => acc + Number(p.premium || 0), 0);
+    const totalCommission = policies.reduce((acc, p) => acc + Number(p.commission || 0), 0);
+    const totalTax = policies.reduce((acc, p) => acc + Number(p.tax || 0), 0);
+    const totalAdjustments = Number(settlementData.previousBalance || 0) + Number(settlementData.creditNotes || 0) - Number(settlementData.debitNotes || 0) + Number(settlementData.otherAdjustments || 0);
     const netSettlement = totalPremium - totalCommission - totalTax + totalAdjustments;
 
     return {
@@ -132,20 +126,22 @@ const SettlementProcessing = () => {
     };
   };
 
-  const validateSettlement = () => {
+  const validateSettlement = (forSubmit) => {
     const errors = [];
     if (!settlementData.insurerCode) errors.push(t("remittance.pleaseSelectInsurer"));
-    if (!settlementData.settlementPeriod[0] || !settlementData.settlementPeriod[1]) {
+    if (!settlementData.settlementPeriod?.[0] || !settlementData.settlementPeriod?.[1]) {
       errors.push(t("remittance.pleaseSelectSettlementPeriod"));
     }
     if (policies.length === 0) errors.push(t("remittance.pleaseAddPolicy"));
-    if (activeIndex === 2) { // Payment tab
+    if (forSubmit) {
       if (!settlementData.paymentMethod) errors.push(t("remittance.pleaseSelectPaymentMethod"));
-      if (settlementData.paymentMethod !== 'check' && !settlementData.bankAccount) {
+      if (!isCheque(settlementData.paymentMethod) && !settlementData.bankAccount) {
         errors.push(t("remittance.pleaseSelectBankAccount"));
       }
     }
-    setValidationErrors(errors);
+    if (errors.length) {
+      toast.current.show({ severity: 'error', summary: t("remittance.validationFailed"), detail: errors[0], life: 3000 });
+    }
     return errors.length === 0;
   };
 
@@ -156,56 +152,54 @@ const SettlementProcessing = () => {
     }));
   };
 
+  const payload = () => ({
+    insurerCode: settlementData.insurerCode,
+    settlementType: settlementData.settlementType,
+    settlementDate: isoDate(settlementData.settlementDate),
+    settlementPeriod: (settlementData.settlementPeriod || []).map(isoDate),
+    lineIds: policies.map((p) => p.id),
+    previousBalance: settlementData.previousBalance || 0,
+    creditNotes: settlementData.creditNotes || 0,
+    debitNotes: settlementData.debitNotes || 0,
+    otherAdjustments: settlementData.otherAdjustments || 0,
+    remarks: settlementData.remarks,
+    paymentMethod: settlementData.paymentMethod,
+    bankAccount: isCheque(settlementData.paymentMethod) ? null : settlementData.bankAccount,
+    referenceNo: settlementData.referenceNo,
+    paymentDate: isoDate(settlementData.paymentDate)
+  });
+
+  const applySaved = (saved) => {
+    setSettlementData((prev) => ({ ...prev, id: saved.id, settlementNo: saved.settlementNo || saved.referenceNo, status: saved.status }));
+    loadWorkflow(saved.settlementNo || saved.referenceNo);
+  };
+
+  const saveDraft = async () => {
+    if (settlementData.id) return remittanceService.updateSettlement(settlementData.id, payload());
+    return remittanceService.createSettlement(payload());
+  };
+
   const handleSaveDraft = async () => {
+    if (!validateSettlement(false)) return;
     setLoading(true);
     try {
-      const settlementRecord = {
-        ...settlementData,
-        policies,
-        summary: calculateSummary(),
-        parameters: parameters[0], // Use first parameter as template
-        status: 'Draft'
-      };
-
-      const result = await mockCrudOperations.create('settlement_draft', settlementRecord);
-
+      const saved = await saveDraft();
+      applySaved(saved);
       toast.current.show({
         severity: 'success',
         summary: t("remittance.draftSaved"),
-        detail: t("remittance.draftSavedDetail", { id: result.id }),
+        detail: t("remittance.draftSavedDetail", { id: saved.settlementNo || saved.referenceNo }),
         life: 3000
       });
-
-      // Add to workflow history
-      setWorkflowHistory(prev => [...prev, {
-        action: 'Saved',
-        by: 'Current User',
-        at: new Date(),
-        status: 'Draft',
-        notes: 'Draft saved successfully'
-      }]);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("remittance.saveFailed"),
-        detail: error.message || t("remittance.failedToSaveDraft"),
-        life: 3000
-      });
+      showError(toast, error, t("remittance.saveFailed"));
     } finally {
       setLoading(false);
     }
   };
 
   const handleSubmitApproval = () => {
-    if (!validateSettlement()) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("remittance.validationFailed"),
-        detail: validationErrors[0],
-        life: 3000
-      });
-      return;
-    }
+    if (!validateSettlement(true)) return;
 
     const summary = calculateSummary();
     confirmDialog({
@@ -227,128 +221,71 @@ const SettlementProcessing = () => {
   const submitForApproval = async () => {
     setLoading(true);
     try {
-      const summary = calculateSummary();
-      const settlementRecord = {
-        ...settlementData,
-        policies,
-        summary,
-        submittedAt: new Date().toISOString(),
-        status: 'Pending Approval'
-      };
-
-      // Create settlement record for approval
-      const result = await mockCrudOperations.create('settlement_approval', settlementRecord);
-
-      // Mock approval result based on settlement parameters
-      const approvalParams = parameters.find(p =>
-        summary.netSettlement >= p.approvalLevels[0].minAmount &&
-        summary.netSettlement <= p.approvalLevels[0].maxAmount
-      ) || parameters[0];
-
-      const mockApprovalResult = {
-        approvalId: `APV-${result.id}`,
-        approver: approvalParams.approvalLevels[0].approver,
-        expectedApprovalDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // Tomorrow
-      };
-
-      setApprovalResult(mockApprovalResult);
-      setSettlementData(prev => ({ ...prev, status: 'Pending Approval' }));
-
-      // Add to workflow history
-      setWorkflowHistory(prev => [...prev, {
-        action: 'Submitted',
-        by: 'Current User',
-        at: new Date(),
-        status: 'Pending Approval',
-        notes: `Submitted to ${mockApprovalResult.approver} for approval`
-      }]);
-
+      const draft = await saveDraft();
+      const saved = await remittanceService.submitSettlement(draft.id, { paymentMethod: settlementData.paymentMethod, bankAccount: settlementData.bankAccount });
+      applySaved(saved);
+      const approvals = await remittanceService.listApprovals({ transactionType: "Settlement" });
+      const approval = approvals.find((a) => a.entityId === saved.id) || {};
+      setApprovalResult({
+        approvalId: approval.id,
+        approver: approval.requiredLevels ? `Level ${approval.currentLevel} of ${approval.requiredLevels}` : "-",
+        expectedApprovalDate: new Date(Date.now() + Number(approval.slaHours || 0) * 3600000).toISOString()
+      });
       toast.current.show({
         severity: 'success',
         summary: t("remittance.submittedSuccessfully"),
-        detail: t("remittance.submittedToApprover", { approver: mockApprovalResult.approver }),
+        detail: `${saved.settlementNo || saved.referenceNo}: ${saved.status}`,
         life: 3000
       });
-
       setApprovalDialog(true);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("remittance.submissionFailed"),
-        detail: error.message || t("remittance.failedToSubmitApproval"),
-        life: 3000
-      });
+      showError(toast, error, t("remittance.submissionFailed"));
     } finally {
       setLoading(false);
     }
   };
 
   const handlePrint = () => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Print Preview',
-      detail: 'Opening print preview...',
-      life: 2000
-    });
-    // In real app, would open print dialog
     window.print();
   };
 
   const handleCalculate = async () => {
+    if (!policies.length) return;
     setLoading(true);
     try {
-      const result = await mockRemittanceService.calculateSettlement(
-        policies,
-        {
+      const result = await remittanceService.calculateSettlement({
+        lineIds: policies.map((p) => p.id),
+        adjustments: {
           previousBalance: settlementData.previousBalance,
           creditNotes: settlementData.creditNotes,
           debitNotes: settlementData.debitNotes,
           otherAdjustments: settlementData.otherAdjustments
         }
-      );
-
-      toast.current.show({
-        severity: 'success',
-        summary: 'Calculation Complete',
-        detail: `Net Settlement: ${formatCurrency(result.netAmount)}`,
-        life: 3000
       });
-
-      // Update policies with recalculated values
-      const updatedPolicies = policies.map(p => ({
-        ...p,
-        netAmount: p.premium - p.commission - p.tax
-      }));
-      setPolicies(updatedPolicies);
+      showSuccess(toast, `Net Settlement: ${formatCurrency(result.netAmount)}`, 'Calculation Complete');
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Calculation Failed',
-        detail: error.message,
-        life: 3000
-      });
+      showError(toast, error, 'Calculation Failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddPolicies = () => {
+    if (!settlementData.insurerCode) {
+      toast.current.show({ severity: 'warn', summary: t("remittance.validationFailed"), detail: t("remittance.pleaseSelectInsurer"), life: 3000 });
+      return;
+    }
     setAddPolicyDialog(true);
   };
 
+  const unselectedPolicies = availablePolicies.filter((p) => !policies.some((x) => x.id === p.id));
+
   const handleImport = () => {
     confirmDialog({
-      message: 'Import policies from Excel file?',
+      message: `Add all ${unselectedPolicies.length} available policies for ${settlementData.insurerName || "the insurer"}?`,
       header: 'Import Policies',
       icon: 'pi pi-upload',
-      accept: () => {
-        toast.current.show({
-          severity: 'info',
-          summary: 'Import Started',
-          detail: 'Select file to import policies',
-          life: 3000
-        });
-      }
+      accept: () => setPolicies((prev) => [...prev, ...unselectedPolicies])
     });
   };
 
@@ -370,8 +307,7 @@ const SettlementProcessing = () => {
   };
 
   const confirmAddPolicies = () => {
-    const selected = availablePolicies.filter(p => selectedPolicies.includes(p.id));
-    if (selected.length === 0) {
+    if (selectedPolicies.length === 0) {
       toast.current.show({
         severity: 'warn',
         summary: 'No Selection',
@@ -381,16 +317,25 @@ const SettlementProcessing = () => {
       return;
     }
 
-    setPolicies(prev => [...prev, ...selected]);
+    setPolicies(prev => [...prev, ...selectedPolicies]);
     setAddPolicyDialog(false);
     setSelectedPolicies([]);
 
     toast.current.show({
       severity: 'success',
       summary: 'Policies Added',
-      detail: `Added ${selected.length} policies to settlement`,
+      detail: `Added ${selectedPolicies.length} policies to settlement`,
       life: 3000
     });
+  };
+
+  const handleCancel = () => {
+    setSettlementData(initialSettlement());
+    setPolicies([]);
+    setAvailablePolicies([]);
+    setWorkflowHistory([]);
+    setApprovalResult(null);
+    setActiveIndex(0);
   };
 
   const amountBodyTemplate = (rowData, field) => {
@@ -407,8 +352,7 @@ const SettlementProcessing = () => {
         icon="pi pi-trash"
         className="p-button-danger p-button-text p-button-sm"
         onClick={() => handleDeletePolicy(rowData)}
-        disabled={settlementData.status !== 'Draft'}
-      />
+        disabled={!editable} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
     );
   };
 
@@ -446,7 +390,7 @@ const SettlementProcessing = () => {
                 <Calendar
                   value={settlementData.settlementDate}
                   onChange={(e) => handleInputChange("settlementDate", e.value)}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                 />
               </div>
               <div className="info-item">
@@ -474,6 +418,17 @@ const SettlementProcessing = () => {
               <TabPanel header={t("remittance.settlementDetails")}>
                 <div className="tab-content">
                   <div className="section-title">{t("remittance.insurerInformation")}</div>
+                  {insurerCredits?.openBalance > 0 && (
+                    <div className="p-3 mb-3 border-round surface-100">
+                      <b>{t("followUps.refundsDueFromInsurer", "Refunds due from this insurer")}: {formatCurrency(insurerCredits.openBalance)}</b>
+                      <div className="text-sm mt-1">{t("followUps.refundsNettedNote", "Return premium on premium already remitted. It is deducted from the next premium remittance voucher to the insurer.")}</div>
+                      <ul className="mt-2 mb-0">
+                        {insurerCredits.items.map((c) => (
+                          <li key={c.id}>{c.policyNumber} · {c.reference} · {formatCurrency(c.balance)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                   <div className="form-grid">
                     <div className="form-field">
                       <label htmlFor="insurerCode" className="required">{t("remittance.insurerCode")}</label>
@@ -481,14 +436,14 @@ const SettlementProcessing = () => {
                         id="insurerCode"
                         value={settlementData.insurerCode}
                         onChange={(e) => {
-                          handleInputChange("insurerCode", e.value);
-                          // Simulate loading insurer details
                           const insurer = insurers.find(i => i.value === e.value);
-                          if (insurer) {
-                            handleInputChange("insurerName", insurer.label);
-                          }
+                          setSettlementData((prev) => ({ ...prev, insurerCode: e.value, insurerName: insurer?.label || "" }));
+                          setPolicies([]);
+                          loadAvailablePolicies(e.value);
                         }}
                         options={insurers}
+                        filter
+                        disabled={!editable}
                         placeholder={t("remittance.selectInsurer")}
                         className="full-width"
                       />
@@ -510,7 +465,7 @@ const SettlementProcessing = () => {
                         value={settlementData.settlementPeriod}
                         onChange={(e) => handleInputChange("settlementPeriod", e.value)}
                         selectionMode="range"
-                        dateFormat="mm/dd/yy"
+                        dateFormat={calendarDateFormat()}
                         placeholder={t("remittance.selectPeriod")}
                         className="full-width"
                       />
@@ -524,14 +479,14 @@ const SettlementProcessing = () => {
                       icon="pi pi-plus"
                       className="p-button-sm"
                       onClick={handleAddPolicies}
-                      disabled={settlementData.status !== 'Draft'}
+                      disabled={!editable}
                     />
                     <Button
                       label="Import"
                       icon="pi pi-upload"
                       className="p-button-sm p-button-secondary"
                       onClick={handleImport}
-                      disabled={settlementData.status !== 'Draft'}
+                      disabled={!editable || unselectedPolicies.length === 0}
                     />
                     <Button
                       label={t("remittance.calculate")}
@@ -650,7 +605,7 @@ const SettlementProcessing = () => {
                         options={bankAccounts}
                         placeholder="Select bank account"
                         className="full-width"
-                        disabled={settlementData.paymentMethod === 'check'}
+                        disabled={isCheque(settlementData.paymentMethod)}
                       />
                     </div>
 
@@ -669,7 +624,7 @@ const SettlementProcessing = () => {
                       <Calendar
                         value={settlementData.paymentDate}
                         onChange={(e) => handleInputChange("paymentDate", e.value)}
-                        dateFormat="mm/dd/yy"
+                        dateFormat={calendarDateFormat()}
                         className="full-width"
                       />
                     </div>
@@ -686,13 +641,13 @@ const SettlementProcessing = () => {
                       <div className="workflow-content">
                         <div className="workflow-header">
                           <strong>{item.action}</strong>
-                          <Tag value={item.status} severity={
+                          {item.status && <Tag value={item.status} severity={
                             item.status === 'Approved' ? 'success' :
                             item.status === 'Pending Approval' ? 'warning' :
                             item.status === 'Draft' ? 'info' : 'secondary'
-                          } />
+                          } />}
                         </div>
-                        <small>{new Date(item.at).toLocaleString()}</small>
+                        <small>{formatDateTime(item.at)}</small>
                         {item.notes && <p className="workflow-notes">{item.notes}</p>}
                       </div>
                     )}
@@ -716,7 +671,7 @@ const SettlementProcessing = () => {
                         </div>
                         <div className="status-item">
                           <label>Expected Approval:</label>
-                          <span>{new Date(approvalResult.expectedApprovalDate).toLocaleDateString()}</span>
+                          <span>{formatDate(approvalResult.expectedApprovalDate)}</span>
                         </div>
                       </>
                     )}
@@ -767,12 +722,13 @@ const SettlementProcessing = () => {
               icon="pi pi-save"
               className="p-button-secondary"
               onClick={handleSaveDraft}
+              disabled={!editable || loading}
             />
             <Button
               label={t("remittance.submitForApproval")}
               icon="pi pi-send"
               onClick={handleSubmitApproval}
-              disabled={settlementData.status !== 'Draft'}
+              disabled={!editable || loading}
             />
             <Button
               label={t("remittance.print")}
@@ -788,14 +744,7 @@ const SettlementProcessing = () => {
                   message: 'Cancel settlement processing? Any unsaved changes will be lost.',
                   header: 'Confirm Cancel',
                   icon: 'pi pi-exclamation-triangle',
-                  accept: () => {
-                    toast.current.show({
-                      severity: 'info',
-                      summary: 'Cancelled',
-                      detail: 'Settlement processing cancelled',
-                      life: 2000
-                    });
-                  }
+                  accept: handleCancel
                 });
               }}
             />
@@ -810,7 +759,7 @@ const SettlementProcessing = () => {
             footer={addPolicyDialogFooter}
           >
             <DataTable
-              value={availablePolicies}
+              value={unselectedPolicies}
               selection={selectedPolicies}
               onSelectionChange={(e) => setSelectedPolicies(e.value)}
               dataKey="id"
@@ -850,7 +799,7 @@ const SettlementProcessing = () => {
                   </div>
                   <div className="detail-item">
                     <label>Expected Date:</label>
-                    <span>{new Date(approvalResult.expectedApprovalDate).toLocaleDateString()}</span>
+                    <span>{formatDate(approvalResult.expectedApprovalDate)}</span>
                   </div>
                 </div>
                 <p className="info-message">

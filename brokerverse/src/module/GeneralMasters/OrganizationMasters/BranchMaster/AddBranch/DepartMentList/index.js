@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Card } from "primereact/card";
+import { useState, useEffect, useRef } from "react";
+import { Toast } from "primereact/toast";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
 import { Button } from "primereact/button";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "../../../ComapanyMaster/mock";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
@@ -13,6 +12,7 @@ import InputField from "../../../../../../components/InputField";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
+  getDepartmentListMiddleware,
   getDepatmentEditData,
   getDepatmentView,
   postAddDepartment,
@@ -20,10 +20,10 @@ import {
 } from "../../store/branchMiddleware";
 import SvgIconeye from "../../../../../../assets/icons/SvgIconeye";
 import SvgEditicons from "../../../../../../assets/icons/SvgEditicons";
+import { statusLabel } from "../../../../../../utils/statusSeverity";
 
-const DepartMentList = ({ action }) => {
-  console.log(action, "action");
-  const { departmentList, loading, depatmentView, getDepartmentPatch } =
+const DepartMentList = ({ action, branchCode }) => {
+  const { departmentList, depatmentView, getDepartmentPatch } =
     useSelector(({ organizationBranchMainReducers }) => {
       return {
         loading: organizationBranchMainReducers?.loading,
@@ -32,11 +32,11 @@ const DepartMentList = ({ action }) => {
         getDepartmentPatch: organizationBranchMainReducers?.getDepartmentPatch,
       };
     });
-  console.log(departmentList, "departmentList");
+  const toastRef = useRef(null);
   const [visible, setVisible] = useState(false);
   const [visibleView, setVisibleView] = useState(false);
   const [visibleedit, setVisibleEdit] = useState(false);
-  const isEmpty = Productdata.length === 0;
+  const isEmpty = !departmentList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -52,10 +52,9 @@ const DepartMentList = ({ action }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -104,26 +103,31 @@ const DepartMentList = ({ action }) => {
     alignItem: "center",
   };
   const dispatch = useDispatch();
+  const loadDepartments = () => {
+    if (branchCode) dispatch(getDepartmentListMiddleware({ BranchCode: branchCode }));
+  };
+  useEffect(loadDepartments, [dispatch, branchCode]); // eslint-disable-line react-hooks/exhaustive-deps
   const initialValues = {
     DepartmentCode: "",
     DepartmentName: "",
     Description: "",
   };
-  const handleSubmit = (value) => {
-    if (value) {
-      dispatch(postPatchDepatmentEdit(value));
+  const handleSubmit = async (values) => {
+    const thunk = values?.id ? postPatchDepatmentEdit : postAddDepartment;
+    try {
+      await dispatch(thunk({ ...values, BranchCode: branchCode })).unwrap();
       setVisible(false);
       setVisibleEdit(false);
-    } else {
-      dispatch(postAddDepartment(formik.values));
-      setVisible(false);
+      loadDepartments();
+    } catch (error) {
+      toastRef.current?.show({ severity: "error", detail: error });
     }
   };
   const customValidation = (values) => {
     const errors = {};
 
     if (!values.DepartmentCode) {
-      errors.DepartmentCode = "This field Code is required";
+      errors.DepartmentCode = "This field is required";
     }
     if (!values.DepartmentName) {
       errors.DepartmentName = "This field is required";
@@ -139,7 +143,6 @@ const DepartMentList = ({ action }) => {
     onSubmit: handleSubmit,
   });
 
-  const [epartmentCodeDataOption, setDepartmentCodeDataOption] = useState([]);
 
   const setFormikValues = () => {
     const DepartmentCodeData = getDepartmentPatch?.DepartmentCode;
@@ -148,12 +151,7 @@ const DepartMentList = ({ action }) => {
       DepartmentCode: DepartmentCodeData,
       DepartmentName: getDepartmentPatch?.DepartmentName,
       Description: getDepartmentPatch?.Description,
-      Status: getDepartmentPatch?.Status,
     };
-    console.log(updatedValues.id, "updatedValues");
-    // if(DepartmentCodeData){
-    //   setDepartmentCodeDataOption([{label:DepartmentCodeData,value:DepartmentCodeData}])
-    // }
 
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -164,6 +162,7 @@ const DepartMentList = ({ action }) => {
 
   return (
     <div className="overall_list">
+      <Toast ref={toastRef} />
       <div className="cardlist_container">
         <div className="subhead_list">
           <label className="head_lable">Department List</label>
@@ -174,7 +173,10 @@ const DepartMentList = ({ action }) => {
             <Button
               label="Add"
               icon={<SvgAdd />}
-              onClick={() => setVisible(true)}
+              onClick={() => {
+                formik.resetForm();
+                setVisible(true);
+              }}
             />
           )}
         </div>
@@ -183,9 +185,8 @@ const DepartMentList = ({ action }) => {
           value={departmentList}
           tableStyle={{ minWidth: "50rem", marginTop: "1rem" }}
           paginator
-          rows={5}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           scrollable={true}
@@ -200,13 +201,13 @@ const DepartMentList = ({ action }) => {
           ></Column>
           <Column
             field="DepartmentName"
-            body={(rowData) => rowData.DepartmentName?.toUpperCase()}
+            body={(rowData) => rowData.DepartmentName}
             header="Department Name"
             headerStyle={headerStyle}
           ></Column>
           <Column
-            field="Status"
-            body={(rowData) => rowData.Status?.toUpperCase()}
+            field="status"
+            body={(rowData) => statusLabel(rowData.status)}
             header="Status"
             headerStyle={headerStyle}
           ></Column>
@@ -248,7 +249,7 @@ const DepartMentList = ({ action }) => {
               />
               {formik.touched.DepartmentCode &&
                 formik.errors.DepartmentCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.DepartmentCode}
                   </div>
                 )}
@@ -265,7 +266,7 @@ const DepartMentList = ({ action }) => {
               />
               {formik.touched.DepartmentName &&
                 formik.errors.DepartmentName && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.DepartmentName}
                   </div>
                 )}
@@ -283,7 +284,7 @@ const DepartMentList = ({ action }) => {
                 onChange={formik.handleChange("Description")}
               />
               {formik.touched.Description && formik.errors.Description && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Description}
                 </div>
               )}

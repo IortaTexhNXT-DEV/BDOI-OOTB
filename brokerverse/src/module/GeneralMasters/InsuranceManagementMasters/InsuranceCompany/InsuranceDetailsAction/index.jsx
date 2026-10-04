@@ -1,63 +1,43 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import { MultiSelect } from "primereact/multiselect";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { Button } from "primereact/button";
-import { SelectButton } from "primereact/selectbutton";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
-import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import {
   patchInsuranceCompanyMiddleWare,
   postInsuranceCompanyMiddleWare,
+  getInsuranceViewMiddleWare,
+  getInsurancePatchData as loadInsurancePatchData,
 } from "../store/insuranceCompanyMiddleware";
 import { useSelector, useDispatch } from "react-redux";
-import countriesData from "./data";
-import { act } from "react-dom/test-utils";
+import useMasterOptions from "../../../common/useMasterOptions";
+import { AuditTimeline } from "../../../../../components/AuditTrail";
 
 const InsuranceDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [dropdownData, setdropdown] = useState({});
   const {
-    InsuranceCompanyList,
     getInsuranceView,
-    loading,
     getInsurancePatchData,
   } = useSelector(({ insuranceCompanyReducers }) => {
     return {
       loading: insuranceCompanyReducers?.loading,
       InsuranceCompanyList: insuranceCompanyReducers?.InsuranceCompanyList,
-      getInsuranceView: insuranceCompanyReducers?.getInsuranceView,
-      getInsurancePatchData: insuranceCompanyReducers?.getInsurancePatchData,
+      getInsuranceView: insuranceCompanyReducers?.InsuranceMasterView || {},
+      getInsurancePatchData: insuranceCompanyReducers?.InsuranceMasterPatchData,
     };
   });
-  console.log(getInsuranceView, "find getInsuranceView");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
-
-  // useEffect(() => {
-  //   if (action === "edit" || action === "view") {
-  //     if (id != null) {
-  //       const filteredInsuranceCompanyList = InsuranceCompanyList.filter(
-  //         (data) => data.id === parseInt(id)
-  //       );
-  //       setFormikValues(filteredInsuranceCompanyList);
-  //       setdropdown(filteredInsuranceCompanyList)
-  //     }
-  //   }
-  // }, [action]);
 
   const items = [
     {
@@ -74,11 +54,7 @@ const InsuranceDetailsAction = ({ action }) => {
   ];
   const home = { label: t("generalMasters.master") };
 
-  const City = countriesData.city.map((city) => ({
-    label: action === "add" ? city : getInsuranceView?.city,
-    value: action === "add" ? city : getInsuranceView?.city,
-  }));
-  console.log(dropdownData, "find main");
+  const City = useMasterOptions("city");
 
   // const City=action === "add"? countriesData.city.map(city => ({
   //   label:city,
@@ -87,15 +63,9 @@ const InsuranceDetailsAction = ({ action }) => {
   // })):{ label:dropdownData[0].city,
   //   value:  dropdownData[0].city}
 
-  const State = countriesData.state.map((state) => ({
-    label: action === "add" ? state : getInsuranceView.state,
-    value: action === "add" ? state : getInsuranceView.state,
-  }));
+  const State = useMasterOptions("state");
 
-  const Country = countriesData.countries.map((country) => ({
-    label: action === "add" ? country : getInsuranceView.country,
-    value: action === "add" ? country : getInsuranceView.country,
-  }));
+  const Country = useMasterOptions("country");
 
   const customValidation = (values) => {
     const errors = {};
@@ -125,42 +95,41 @@ const InsuranceDetailsAction = ({ action }) => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
       errors.email = "Invalid email address";
     }
+    // credit terms: optional whole numbers of days (empty = the configured default)
+    ["premiumWarrantyDays", "remittanceTermsDays"].forEach((key) => {
+      const v = values[key];
+      if (v !== "" && v !== null && v !== undefined && !/^\d{1,4}$/.test(String(v).trim())) {
+        errors[key] = t("numberingMasters.creditTerms.daysInvalid");
+      }
+    });
+    // TIN (printed on commission debit notes and the withholding tax returns): 9 to 14 digits, dashes allowed
+    if (values.tin && !/^\d{3}-?\d{3}-?\d{3}(-?\d{3,5})?$/.test(String(values.tin).trim())) {
+      errors.tin = t("generalMasters.tinInvalid", "Enter the TIN as 000-000-000 or 000-000-000-00000");
+    }
     if (!values.phoneNumber) {
       errors.phoneNumber = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.phoneNumber)) {
-      errors.phoneNumber = "Invalid phone number (10 digits)";
+    } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.phoneNumber)) {
+      errors.phoneNumber = "Invalid phone number";
     }
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceCompanyList?.length + 1,
-      };
-      dispatch(postInsuranceCompanyMiddleWare(valueWithId));
-
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/insurancecompany");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      console.log(values, "find edit values");
-      dispatch(patchInsuranceCompanyMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/insurancecompany");
-    } else {
-      navigation("/master/generals/insurancemanagement/insurancecompany");
+      return;
+    }
+    const thunk = action === "add" ? postInsuranceCompanyMiddleWare : patchInsuranceCompanyMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/insurancecompany");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
   };
-  const [cityDataOption, setCityDataOption] = useState([]);
-  const [stateDataOption, setStateDataOption] = useState([]);
-  const [countryDataOption, setCountryDataOption] = useState([]);
   const setFormikValues = () => {
     const cityData = getInsurancePatchData?.city;
     const stateData = getInsurancePatchData?.state;
@@ -180,23 +149,21 @@ const InsuranceDetailsAction = ({ action }) => {
       country: countryData,
       email: getInsurancePatchData?.email,
       phoneNumber: getInsurancePatchData?.phoneNumber,
-      modifiedBy: getInsurancePatchData?.modifiedby,
+      tin: getInsurancePatchData?.tin || "",
+      premiumWarrantyDays: getInsurancePatchData?.premiumWarrantyDays ?? "",
+      remittanceTermsDays: getInsurancePatchData?.remittanceTermsDays ?? "",
+      defaultBillingMode: getInsurancePatchData?.defaultBillingMode ?? "",
+      modifiedBy: getInsurancePatchData?.modifiedBy,
       modifiedOn: getInsurancePatchData?.modifiedOn,
     };
-    if (cityData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCityDataOption([{ label: cityData, value: cityData }]);
-    }
-    if (stateData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setStateDataOption([{ label: stateData, value: stateData }]);
-    }
-    if (countryData) {
-      formik.setValues({ ...formik.values, ...updatedValues });
-      setCountryDataOption([{ label: countryData, value: countryData }]);
-    }
     formik.setValues({ ...formik.values, ...updatedValues });
   };
+  // load the record by the id in the address, so a refreshed or shared link works too
+  useEffect(() => {
+    if (id && action === "view") dispatch(getInsuranceViewMiddleWare(id));
+    if (id && action === "edit") dispatch(loadInsurancePatchData(id));
+  }, [id, action]);
+
   useEffect(() => {
     if (action === "view" || action === "edit") {
       setFormikValues();
@@ -217,6 +184,10 @@ const InsuranceDetailsAction = ({ action }) => {
       country: "",
       email: "",
       phoneNumber: "",
+      tin: "",
+      premiumWarrantyDays: "",
+      remittanceTermsDays: "",
+      defaultBillingMode: "",
       modifiedBy: "",
       modifiedOn: "",
     },
@@ -230,8 +201,7 @@ const InsuranceDetailsAction = ({ action }) => {
       <div className="grid m-0 top-container">
         <CustomToast
           ref={toastRef}
-          message="Insurance Company Code CC1234 
-          is added"
+          message={`Insurance Company Code ${formik.values.insuranceCompanyCode} is added`}
         />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
@@ -266,22 +236,20 @@ const InsuranceDetailsAction = ({ action }) => {
               className="input__label__corrections"
               placeholder="Enter"
               label={t("generalMasters.insuranceCompanyCode")}
-              // value={formik.values.insuranceCompanyCode}
               value={
                 action == "add"
                   ? formik.values.insuranceCompanyCode
                   : action == "edit"
                     ? formik.values.insuranceCompanyCode
-                    : getInsuranceView.insuranceCompanyCode
+                    : getInsuranceView?.insuranceCompanyCode
               }
-              // value={formik.values.insuranceCompanyCode}
               onChange={(e) =>
                 formik.setFieldValue("insuranceCompanyCode", e.target.value)
               }
             />
             {formik.touched.insuranceCompanyCode &&
               formik.errors.insuranceCompanyCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.insuranceCompanyCode}
                 </div>
               )}
@@ -298,7 +266,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.insuranceCompanyName
                   : action == "edit"
                   ? formik.values.insuranceCompanyName
-                  : getInsuranceView.insuranceCompanyName
+                  : getInsuranceView?.insuranceCompanyName
               }
               
               onChange={(e) =>
@@ -307,7 +275,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.insuranceCompanyName &&
               formik.errors.insuranceCompanyName && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.insuranceCompanyName}
                 </div>
               )}
@@ -324,7 +292,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.insuranceCompanyDescription
                   : action == "edit"
                   ? formik.values.insuranceCompanyDescription
-                  : getInsuranceView.insuranceCompanyDescription
+                  : getInsuranceView?.insuranceCompanyDescription
               }
              
               onChange={(e) =>
@@ -336,7 +304,7 @@ const InsuranceDetailsAction = ({ action }) => {
             />
             {formik.touched.insuranceCompanyDescription &&
               formik.errors.insuranceCompanyDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.insuranceCompanyDescription}
                 </div>
               )}
@@ -353,7 +321,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.addressLine1
                   : action == "edit"
                   ? formik.values.addressLine1
-                  : getInsuranceView.addressLine1
+                  : getInsuranceView?.addressLine1
               }
               
               onChange={(e) =>
@@ -361,7 +329,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.addressLine1 && formik.errors.addressLine1 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine1}
               </div>
             )}
@@ -378,7 +346,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.addressLine2
                   : action == "edit"
                   ? formik.values.addressLine2
-                  : getInsuranceView.addressLine2
+                  : getInsuranceView?.addressLine2
               }
              
               onChange={(e) =>
@@ -386,7 +354,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.addressLine2 && formik.errors.addressLine2 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine2}
               </div>
             )}
@@ -403,7 +371,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.addressLine3
                   : action == "edit"
                   ? formik.values.addressLine3
-                  : getInsuranceView.addressLine3
+                  : getInsuranceView?.addressLine3
               }
               
               onChange={(e) =>
@@ -411,7 +379,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.addressLine3 && formik.errors.addressLine3 && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.addressLine3}
               </div>
             )}
@@ -430,21 +398,15 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.city
                   : action == "edit"
                   ? formik.values.city
-                  : getInsuranceView.city
+                  : getInsuranceView?.city
               }
              
               onChange={(e) => formik.setFieldValue("city", e.value)}
-              options={
-                action == "add"
-                  ? City
-                  : action == "edit"
-                  ? cityDataOption
-                  : City
-              }
+              options={City}
             />
             {formik.touched.city && formik.errors.city && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.city}
@@ -466,22 +428,15 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.state
                   : action == "edit"
                   ? formik.values.state
-                  : getInsuranceView.state
+                  : getInsuranceView?.state
               }
              
               onChange={(e) => formik.setFieldValue("state", e.value)}
-              // options={State}
-              options={
-                action == "add"
-                  ? State
-                  : action == "edit"
-                  ? stateDataOption
-                  : State
-              }
+              options={State}
             />
             {formik.touched.state && formik.errors.state && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.state}
@@ -502,22 +457,15 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.country
                   : action == "edit"
                   ? formik.values.country
-                  : getInsuranceView.country
+                  : getInsuranceView?.country
               }
               
               onChange={(e) => formik.setFieldValue("country", e.value)}
-              // options={Country}
-              options={
-                action == "add"
-                  ? Country
-                  : action == "edit"
-                  ? countryDataOption
-                  : Country
-              }
+              options={Country}
             />
             {formik.touched.country && formik.errors.country && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.country}
@@ -536,7 +484,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.phoneNumber
                   : action == "edit"
                   ? formik.values.phoneNumber
-                  : getInsuranceView.phoneNumber
+                  : getInsuranceView?.phoneNumber
               }
               
               onChange={(e) =>
@@ -544,7 +492,7 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.phoneNumber && formik.errors.phoneNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.phoneNumber}
               </div>
             )}
@@ -561,17 +509,73 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.email
                   : action == "edit"
                   ? formik.values.email
-                  : getInsuranceView.email
+                  : getInsuranceView?.email
               }
              
               onChange={(e) => formik.setFieldValue("email", e.target.value)}
             />
             {formik.touched.email && formik.errors.email && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.email}
               </div>
             )}
           </div>
+          <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+            <InputField
+              disabled={action === "view"}
+              classNames="input__field__corrections"
+              className="input__label__corrections"
+              placeholder="000-000-000-00000"
+              label={t("generalMasters.tin", "TIN")}
+              value={(action === "view" ? getInsuranceView?.tin : formik.values.tin) || ""}
+              onChange={(e) => formik.setFieldValue("tin", e.target.value)}
+            />
+            {formik.touched.tin && formik.errors.tin && (
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.tin}</div>
+            )}
+          </div>
+          <div className="col-12 p-0 pl-2 pt-3">
+            <div className="insurance__credit__terms__title">{t("numberingMasters.creditTerms.title")}</div>
+            <div className="insurance__credit__terms__hint">{t("numberingMasters.creditTerms.hint")}</div>
+          </div>
+          {[
+            ["premiumWarrantyDays", "numberingMasters.creditTerms.premiumWarrantyDays"],
+            ["remittanceTermsDays", "numberingMasters.creditTerms.remittanceTermsDays"],
+          ].map(([key, label]) => (
+            <div className="col-12 md:col-3 lg:col-3 xl:col-3 " key={key}>
+              <InputField
+                disabled={action === "view"}
+                classNames="input__field__corrections"
+                className="input__label__corrections"
+                placeholder={t("numberingMasters.creditTerms.useDefault")}
+                label={t(label)}
+                value={(action === "add" || action === "edit" ? formik.values[key] : getInsuranceView?.[key]) ?? ""}
+                onChange={(e) => formik.setFieldValue(key, e.target.value)}
+              />
+              {formik.errors[key] && (
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors[key]}</div>
+              )}
+            </div>
+          ))}
+          <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
+            <DropDowns
+              disabled={action === "view"}
+              className="input__field__corrections"
+              dropdownIcon={<SvgDropdown color={"#000"} />}
+              placeholder={t("numberingMasters.creditTerms.useDefault")}
+              classNames="select__label__corrections"
+              optionLabel="label"
+              label={t("numberingMasters.creditTerms.defaultBillingMode")}
+              value={(action === "add" || action === "edit" ? formik.values.defaultBillingMode : getInsuranceView?.defaultBillingMode) || ""}
+              onChange={(e) => formik.setFieldValue("defaultBillingMode", e.value)}
+              options={[
+                { label: t("numberingMasters.creditTerms.useDefault"), value: "" },
+                { label: t("numberingMasters.creditTerms.broker"), value: "broker" },
+                { label: t("numberingMasters.creditTerms.direct"), value: "direct" },
+              ]}
+            />
+          </div>
+          {action !== "add" && (<>
           <div className="col-12 md:col-3 lg:col-3 xl:col-3 ">
             <InputField
               disabled={true}
@@ -583,7 +587,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.modifiedBy
                   : action == "edit"
                   ? formik.values.modifiedBy
-                  : getInsuranceView.modifiedBy
+                  : getInsuranceView?.modifiedBy
               }
              
               onChange={(e) =>
@@ -602,7 +606,7 @@ const InsuranceDetailsAction = ({ action }) => {
                   ? formik.values.modifiedOn
                   : action == "edit"
                   ? formik.values.modifiedOn
-                  : getInsuranceView.modifiedOn
+                  : getInsuranceView?.modifiedOn
               }
             
               onChange={(e) =>
@@ -610,13 +614,19 @@ const InsuranceDetailsAction = ({ action }) => {
               }
             />
           </div>
+          </>)}
         </div>
       </div>
+      {action === "view" && id ? (
+        <section className="master-history">
+          <h3 className="master-history__title">{t("generalMasters.history", { defaultValue: "History" })}</h3>
+          <AuditTimeline entity="master:insurance-company" recordId={id} limit={10} />
+        </section>
+      ) : null}
       <div className="flex justify-content-end mt-5">
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -625,7 +635,6 @@ const InsuranceDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

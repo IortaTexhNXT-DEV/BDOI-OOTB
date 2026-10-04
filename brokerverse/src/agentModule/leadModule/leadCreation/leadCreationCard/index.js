@@ -1,13 +1,12 @@
-import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { RadioButton } from "primereact/radiobutton";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
 import { Button } from "primereact/button";
 import DatepickerField from "../../../component/datePicker";
 import CustomToast from "../../../../components/Toast";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patchLeadEditMiddleWare,
@@ -15,9 +14,10 @@ import {
   getLeadByIdMiddleware,
 } from "../../Store/leadMiddleware";
 import { useFormik } from "formik";
-import addressService from "../../../../services/addressService";
-import { isThailand } from "../../../../utility/addressHelpers";
+import PhAddressFields from "../../../component/PhAddressFields";
 import { patchClientEditMiddleWare } from "../../../quoteModule/clientListing/store/clientsMiddleware";
+import { isValidMobile, mobileHint, normalizeMobile } from "../../../../utility/phoneFormat";
+import { birthDateError, birthDateRange, useAgeLimits } from "../../../../utility/birthDate";
 
 const initialValue = {
   CompanyName: "",
@@ -29,13 +29,12 @@ const initialValue = {
   ContactNumber: "",
   HouseNo: "",
   Barangay: "",
-  Country: "",
+  Country: "Philippines",
   Province: "",
   City: "",
   ZIPCode: "",
-  RoadThanon: "",
-  SoiAlley: "",
-  MooVillage: "",
+  Street: "",
+  Region: "",
   DateofBirth: "",
   category: "Retail",
   gender: "Male",
@@ -45,6 +44,8 @@ const initialValue = {
 
 const LeadCreationCard = ({ flow, action }) => {
   const { t } = useTranslation();
+  // Configured age range for the date of birth (System Settings leads.min_age_years / leads.max_age_years)
+  const ageLimits = useAgeLimits();
   const { leadId } = useParams();
   const { leadtabledata, currentLeadDetails } = useSelector(
     ({ leadReducers }) => {
@@ -54,11 +55,11 @@ const LeadCreationCard = ({ flow, action }) => {
       };
     }
   );
-  // const [ingredient, setIngredient] = useState("");
   const [show, setShow] = useState(false);
   const toastRef = useRef(null);
   const toastErrorRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   // Fetch lead data when in edit mode
@@ -133,8 +134,6 @@ const LeadCreationCard = ({ flow, action }) => {
       try {
         const result = await dispatch(postCreateleadMiddleware(valueWithId));
 
-        console.log(result, "result");
-
         if (result.type.endsWith("/fulfilled")) {
           // Success case - use the leadId from the API response
           const createdLeadId = result.payload?.leadId || result.payload?.id;
@@ -152,7 +151,7 @@ const LeadCreationCard = ({ flow, action }) => {
               );
             } else {
               showErrorToast(
-                "Lead created but ID not found. Please try creating quote from lead listing."
+                "Prospect created but its ID was not returned. Create the quote from the Prospects list."
               );
               setTimeout(() => {
                 navigate("/agent/leadlisting");
@@ -167,7 +166,6 @@ const LeadCreationCard = ({ flow, action }) => {
           showErrorToast(errorMsg);
         }
       } catch (error) {
-        console.error("Unexpected error:", error);
         const errorMsg =
           error?.response?.data?.error ||
           error?.message ||
@@ -199,7 +197,6 @@ const LeadCreationCard = ({ flow, action }) => {
             }, 2000);
           } else if (result.type.endsWith("/rejected")) {
             // Error case
-            console.error("Lead update failed:", result.payload);
             const errorMsg = extractErrorMessage(
               result,
               "Failed to update lead. Please try again."
@@ -207,7 +204,6 @@ const LeadCreationCard = ({ flow, action }) => {
             showErrorToast(errorMsg);
           }
         } catch (error) {
-          console.error("Unexpected error:", error);
           const errorMsg =
             error?.response?.data?.error ||
             error?.message ||
@@ -236,21 +232,15 @@ const LeadCreationCard = ({ flow, action }) => {
     if (!values.LastName) {
       errors.LastName = "This field is required";
     }
-    // if (!values.EmailID) {
-    //   errors.EmailID = "This field is required";
-    // }
     if (!values.EmailID) {
       errors.EmailID = "Email is required";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.EmailID)) {
       errors.EmailID = "Invalid email address";
     }
-    // if (!values.ContactNumber) {
-    //   errors.ContactNumber = "This field is required";
-    // }
     if (!values.ContactNumber) {
       errors.ContactNumber = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.ContactNumber)) {
-      errors.ContactNumber = "Invalid phone number (10 digits)";
+    } else if (!isValidMobile(values.ContactNumber)) {
+      errors.ContactNumber = `Invalid mobile number (e.g. ${mobileHint()})`;
     }
     if (!values.HouseNo) {
       errors.HouseNo = "This field is required";
@@ -273,6 +263,9 @@ const LeadCreationCard = ({ flow, action }) => {
     }
     if (!values.DateofBirth) {
       errors.DateofBirth = "This field is required";
+    } else {
+      const dobError = birthDateError(values.DateofBirth, ageLimits);
+      if (dobError) errors.DateofBirth = dobError;
     }
     if (!values.category) {
       errors.category = "This field is required";
@@ -283,20 +276,6 @@ const LeadCreationCard = ({ flow, action }) => {
     return errors;
   };
 
-  const [countryList, setCountryList] = useState([]);
-  const [provinceList, setProvinceList] = useState([]);
-  const [cityList, setCityList] = useState([]);
-  const [districtList, setDistrictList] = useState([]);
-  const [postalLookupLoading, setPostalLookupLoading] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCountries();
-      if (!cancelled && res.success && res.data) setCountryList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, []);
 
   // Transform API data to form values (must be before formik)
   const getFormValues = () => {
@@ -320,9 +299,8 @@ const LeadCreationCard = ({ flow, action }) => {
         Province: currentLeadDetails.province || "",
         City: currentLeadDetails.city || "",
         ZIPCode: currentLeadDetails.zipCode || "",
-        RoadThanon: currentLeadDetails.roadThanon || "",
-        SoiAlley: currentLeadDetails.soiAlley || "",
-        MooVillage: currentLeadDetails.mooVillage || "",
+        Street: currentLeadDetails.street || currentLeadDetails.roadThanon || "",
+        Region: currentLeadDetails.region || "",
         DateofBirth: currentLeadDetails.DOB
           ? new Date(currentLeadDetails.DOB)
           : "",
@@ -341,6 +319,32 @@ const LeadCreationCard = ({ flow, action }) => {
 
       return values;
     }
+    // a prospect for an existing customer starts from the client's details and stays linked to the client
+    const client = location.state?.existingClient;
+    if (action !== "edit" && client) {
+      return {
+        ...initialValue,
+        clientId: client.clientId || client.id,
+        CompanyName: client.companyName || "",
+        TaxNumber: client.taxNumber || "",
+        FirstName: client.firstName || "",
+        LastName: client.lastName || "",
+        PreferredName: client.preferredName || "",
+        EmailID: client.emailId || client.email || "",
+        ContactNumber: client.contactNumber || client.phone || "",
+        HouseNo: client.houseNo || "",
+        Barangay: client.barangay || "",
+        Country: client.country || initialValue.Country || "",
+        Province: client.province || "",
+        City: client.city || "",
+        ZIPCode: client.zipCode || "",
+        Street: client.street || client.roadThanon || "",
+        Region: client.region || "",
+        DateofBirth: client.DOB ? new Date(client.DOB) : "",
+        category: client.leadCategory || initialValue.category || "Retail",
+        gender: client.gender || initialValue.gender || "Male",
+      };
+    }
     return initialValue;
   };
 
@@ -349,113 +353,10 @@ const LeadCreationCard = ({ flow, action }) => {
     enableReinitialize: true, // This allows formik to reinitialize when values change
     validate: customValidation,
     onSubmit: (values) => {
-      handleclick(values);
+      handleclick({ ...values, ContactNumber: normalizeMobile(values.ContactNumber) });
     },
   });
 
-  const selectedCountryId = countryList.find(
-    (c) => (c.name || c.code) === formik.values.Country || c.id === formik.values.Country
-  )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) => (p.name || p.code) === formik.values.Province || p.id === formik.values.Province
-  )?.id;
-  const selectedCityId = cityList.find(
-    (c) => (c.name || c.code) === formik.values.City || c.id === formik.values.City
-  )?.id;
-
-  useEffect(() => {
-    if (!selectedCountryId) {
-      setProvinceList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getProvincesByCountry(selectedCountryId);
-      if (!cancelled && res.success && res.data) setProvinceList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, [selectedCountryId]);
-
-  useEffect(() => {
-    if (!selectedProvinceId) {
-      setCityList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCitiesByProvince(selectedProvinceId);
-      if (!cancelled && res.success && res.data) setCityList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, [selectedProvinceId]);
-
-  useEffect(() => {
-    if (!selectedCityId || !isThailand(formik.values.Country)) {
-      setDistrictList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getDistrictsByCity(selectedCityId);
-      if (!cancelled && res.success && res.data) setDistrictList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, [selectedCityId, formik.values.Country]);
-
-  const handlePostalCodeLookup = useCallback(async () => {
-    const country = formik.values.Country;
-    const zip = formik.values.ZIPCode?.trim();
-    if (!isThailand(country) || !zip) return;
-    setPostalLookupLoading(true);
-    try {
-      const countryCode =
-        (typeof country === "object" && country?.code) ||
-        countryList.find((c) => (c.name || c.code) === country)?.code ||
-        "TH";
-      const res = await addressService.getPostalCodeLookup(countryCode || "TH", zip);
-      if (res.success && res.data && res.data.length > 0) {
-        const first = res.data[0];
-        formik.setFieldValue("Province", first.province ?? first.Province ?? "");
-        formik.setFieldValue("City", first.city ?? first.City ?? "");
-        formik.setFieldValue("Barangay", first.district ?? first.District ?? "");
-      }
-    } finally {
-      setPostalLookupLoading(false);
-    }
-  }, [formik.values.Country, formik.values.ZIPCode, countryList]);
-
-  const countryOptions = useMemo(
-    () =>
-      countryList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [countryList]
-  );
-  const availableProvinces = useMemo(
-    () =>
-      provinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [provinceList]
-  );
-  const availableCities = useMemo(
-    () =>
-      cityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [cityList]
-  );
-  const availableDistricts = useMemo(
-    () =>
-      districtList.map((d) => ({
-        label: d.name || d.code || String(d.id),
-        value: d.name || d.code || String(d.id),
-      })),
-    [districtList]
-  );
 
   return (
     <div className="card_overall_container mt-4">
@@ -463,8 +364,8 @@ const LeadCreationCard = ({ flow, action }) => {
         ref={toastRef}
         message={
           action === "edit"
-            ? "Lead Updated Successfully"
-            : "Lead Created Successfully"
+            ? "Prospect updated"
+            : "Prospect created"
         }
       />
       <CustomToast
@@ -497,7 +398,7 @@ const LeadCreationCard = ({ flow, action }) => {
                   }}
                   checked={formik.values.category === "Retail"}
                 />
-                <label htmlFor="ingredient1" className="labeltxt_container">
+                <label htmlFor="individual" className="labeltxt_container">
                   {t("leadCreation.individual")}
                 </label>
               </div>
@@ -512,7 +413,7 @@ const LeadCreationCard = ({ flow, action }) => {
                   }}
                   checked={formik.values.category === "Corporate"}
                 />
-                <label htmlFor="ingredient2" className="labeltxt_container">
+                <label htmlFor="company" className="labeltxt_container">
                   {t("leadCreation.company")}
                 </label>
               </div>
@@ -540,7 +441,7 @@ const LeadCreationCard = ({ flow, action }) => {
                 onChange={formik.handleChange("CompanyName")}
               />
               {formik.touched.CompanyName && formik.errors.CompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.CompanyName}
                 </div>
               )}
@@ -552,7 +453,7 @@ const LeadCreationCard = ({ flow, action }) => {
                 onChange={formik.handleChange("TaxNumber")}
               />
               {formik.touched.TaxNumber && formik.errors.TaxNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.TaxNumber}
                 </div>
               )}
@@ -568,7 +469,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("FirstName")}
             />
             {formik.touched.FirstName && formik.errors.FirstName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.FirstName}
               </div>
             )}
@@ -580,7 +481,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("LastName")}
             />
             {formik.touched.LastName && formik.errors.LastName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.LastName}
               </div>
             )}
@@ -595,24 +496,23 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("PreferredName")}
             />
             {formik.touched.PreferredName && formik.errors.PreferredName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PreferredName}
               </div>
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6">
-            {/* <InputTextField label="Date of Birth" />  */}
             <DatepickerField
               label={t("leadCreation.dateOfBirth")}
               value={formik.values.DateofBirth}
+              {...birthDateRange(ageLimits)}
               onChange={(date) => {
-                console.log(date, "date");
                 return formik.setFieldValue("DateofBirth", date.target.value);
               }}
             />
 
             {formik.touched.DateofBirth && formik.errors.DateofBirth && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.DateofBirth}
               </div>
             )}
@@ -629,7 +529,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={() => formik.setFieldValue("gender", "Male")}
               checked={formik.values.gender === "Male"}
             />
-            <label htmlFor="ingredient1" className="labeltxt_container">
+            <label htmlFor="male" className="labeltxt_container">
               {t("leadCreation.male")}
             </label>
           </div>
@@ -641,7 +541,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={() => formik.setFieldValue("gender", "Female")}
               checked={formik.values.gender === "Female"}
             />
-            <label htmlFor="ingredient2" className="labeltxt_container">
+            <label htmlFor="female" className="labeltxt_container">
               {t("leadCreation.female")}
             </label>
           </div>
@@ -655,7 +555,7 @@ const LeadCreationCard = ({ flow, action }) => {
               onChange={formik.handleChange("EmailID")}
             />
             {formik.touched.EmailID && formik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.EmailID}
               </div>
             )}
@@ -665,161 +565,23 @@ const LeadCreationCard = ({ flow, action }) => {
               label={t("leadCreation.contactNumber")}
               value={formik.values.ContactNumber}
               onChange={formik.handleChange("ContactNumber")}
+              inputMode="tel"
+              hint={mobileHint()}
             />
             {formik.touched.ContactNumber && formik.errors.ContactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ContactNumber}
               </div>
             )}
           </div>
         </div>
-        {/* Address: Country, then Postal Code/ZIP, then Province, City, Barangay, House No, then Thailand fields */}
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={t("leadCreation.country")}
-              value={formik.values.Country}
-              options={countryOptions}
-              onChange={(e) => {
-                formik.setFieldValue("Country", e.value);
-                formik.setFieldValue("Province", "");
-                formik.setFieldValue("City", "");
-                formik.setFieldValue("Barangay", "");
-                formik.setFieldValue("ZIPCode", "");
-              }}
-            />
-            {formik.touched.Country && formik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.Country}
-              </div>
-            )}
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={isThailand(formik.values.Country) ? t("leadCreation.postalCode") : t("leadCreation.zipCode")}
-              value={formik.values.ZIPCode}
-              onChange={formik.handleChange("ZIPCode")}
-              onBlur={handlePostalCodeLookup}
-            />
-            {postalLookupLoading && (
-              <div style={{ fontSize: 12, color: "#666" }} className="mt-1">{t("leadCreation.lookupInProgress")}</div>
-            )}
-            {formik.touched.ZIPCode && formik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.ZIPCode}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={isThailand(formik.values.Country) ? t("leadCreation.provinceChangwat") : t("leadCreation.province")}
-              value={formik.values.Province}
-              options={availableProvinces}
-              onChange={(e) => {
-                formik.setFieldValue("Province", e.value);
-                formik.setFieldValue("City", "");
-                formik.setFieldValue("Barangay", "");
-              }}
-              disabled={!formik.values.Country}
-            />
-            {formik.touched.Province && formik.errors.Province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.Province}
-              </div>
-            )}
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={isThailand(formik.values.Country) ? t("leadCreation.districtAmphoe") : t("leadCreation.city")}
-              value={formik.values.City}
-              options={availableCities}
-              onChange={(e) => {
-                formik.setFieldValue("City", e.value);
-                formik.setFieldValue("Barangay", "");
-              }}
-              disabled={!formik.values.Province}
-            />
-            {formik.touched.City && formik.errors.City && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.City}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            {isThailand(formik.values.Country) && districtList.length > 0 ? (
-              <DropdownField
-                label={t("leadCreation.subDistrictTambon")}
-                value={formik.values.Barangay}
-                options={availableDistricts}
-                onChange={(e) => formik.setFieldValue("Barangay", e.value)}
-                disabled={!formik.values.City}
-              />
-            ) : (
-              <InputTextField
-                label={isThailand(formik.values.Country) ? t("leadCreation.subDistrictTambon") : t("leadCreation.barangaySubd")}
-                value={formik.values.Barangay}
-                onChange={formik.handleChange("Barangay")}
-              />
-            )}
-            {formik.touched.Barangay && formik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.Barangay}
-              </div>
-            )}
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("leadCreation.houseNoStreet")}
-              value={formik.values.HouseNo}
-              onChange={formik.handleChange("HouseNo")}
-            />
-            {formik.touched.HouseNo && formik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.HouseNo}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {isThailand(formik.values.Country) && (
-          <div className="grid mt-2">
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.roadThanon")}
-                value={formik.values.RoadThanon}
-                onChange={formik.handleChange("RoadThanon")}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.soiAlley")}
-                value={formik.values.SoiAlley}
-                onChange={formik.handleChange("SoiAlley")}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.mooVillage")}
-                value={formik.values.MooVillage}
-                onChange={formik.handleChange("MooVillage")}
-              />
-            </div>
-          </div>
-        )}
+        {/* Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+        <PhAddressFields
+          formik={formik}
+          required={{ houseNo: true, barangay: true, city: true, province: true, zipCode: true, country: true }}
+        />
 
         <div className="save_continue_conatiner">
-          {/* <Button
-            label={t("leadCreation.saveLead")}
-            onClick={handleSaveLead}
-            text
-            className="btn_lable_container"
-          /> */}
           <div className="btn_lable_save_container flex justify-content-end mt-2">
             <Button
               onClick={() => {

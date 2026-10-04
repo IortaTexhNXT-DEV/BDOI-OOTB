@@ -4,31 +4,14 @@
 
 // Base responsive modal styles
 .p-dialog {
-  // Mobile-first responsive sizing
+  // each dialog keeps the width its screen gives it; it never runs past the viewport
+  max-width: calc(100vw - 2rem);
+
   @include mobile-sm {
-    width: 95vw !important;
-    max-width: 95vw !important;
-    margin: 1rem !important;
-    max-height: 90vh !important;
-  }
-
-  @include tablet-sm {
-    width: 90vw !important;
-    max-width: 90vw !important;
-    margin: 1.5rem !important;
-    max-height: 85vh !important;
-  }
-
-  @include tablet-md {
-    width: 80vw !important;
-    max-width: 80vw !important;
-    margin: 2rem !important;
-  }
-
-  // Desktop sizing (default)
-  @media (min-width: 1025px) {
-    width: auto !important;
-    max-width: 90vw !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin: 0 !important;
+    max-height: 100vh !important;
   }
 
   // Dialog header responsive

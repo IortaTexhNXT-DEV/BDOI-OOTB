@@ -1,13 +1,19 @@
 import i18n from "../i18n";
+import runtimeConfig from "../config/runtimeConfig";
 import { setDisplayCurrency } from "./currencyConverter";
 import { DEFAULT_SYSTEM_SETTINGS } from "./systemCurrencies";
 import { setActiveDefaultCurrency } from "./currencyOptions";
+import { setDateFormat } from "./dateFormat";
+import { setPhoneConfig } from "./phoneFormat";
+import { setQuoteOptions } from "./quoteOptions";
 
 /**
  * Apply CSS theme variables from system settings.
  */
 export function applyThemeColors(primaryColor, secondaryColor) {
   const root = document.documentElement;
+  // the broker theme (Theme and Branding, src/theme/runtime/themeEngine.js) owns the colours once it is loaded
+  if (root.hasAttribute("data-bv-theme")) return;
   const primary = primaryColor || DEFAULT_SYSTEM_SETTINGS.primaryColor;
   const secondary = secondaryColor || DEFAULT_SYSTEM_SETTINGS.secondaryColor;
   root.style.setProperty("--bv-primary", primary);
@@ -30,11 +36,13 @@ export function applyFavicon(faviconUrl) {
 }
 
 /**
- * Set document title from app title (login / generic pages).
+ * Set document title from the application name (login / generic pages).
  * Authenticated pages may append more in App.js.
  */
 export function applyAppTitle(appTitle, { authenticated, userName } = {}) {
-  const base = appTitle || DEFAULT_SYSTEM_SETTINGS.appTitle;
+  const name = appTitle || DEFAULT_SYSTEM_SETTINGS.systemName;
+  // non-production environments put their name first in the browser tab, e.g. "[UAT] BrokerVerse - Login"
+  const base = runtimeConfig.showEnvironmentBanner ? `[${runtimeConfig.environmentName}] ${name}` : name;
   if (authenticated) {
     document.title = `${base} - Dashboard | ${userName || "User"}`;
   } else {
@@ -61,9 +69,12 @@ export function applySystemSettings(settings = {}, options = {}) {
   const merged = { ...DEFAULT_SYSTEM_SETTINGS, ...settings };
   setDisplayCurrency(merged.displayCurrency);
   setActiveDefaultCurrency(merged.displayCurrency);
+  setDateFormat(merged.dateFormat);
+  setPhoneConfig(merged);
+  setQuoteOptions(merged);
   applyThemeColors(merged.primaryColor, merged.secondaryColor);
   applyFavicon(merged.faviconUrl);
-  applyAppTitle(merged.appTitle, options);
+  applyAppTitle(merged.systemName, options);
   applyDefaultLanguage(merged.defaultLanguage);
   return merged;
 }

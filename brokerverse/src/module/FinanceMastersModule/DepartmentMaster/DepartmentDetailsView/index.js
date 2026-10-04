@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -10,7 +10,6 @@ import DropDowns from "../../../../components/DropDowns";
 import { Card } from "primereact/card";
 import SuccessIcon from "../../../../assets/icons/SuccessIcon";
 import SvgEdit from "../../../../assets/icons/SvgEdit";
-import NavBar from "../../../../components/NavBar";
 
 function DepartmentDetailsView() {
   const { t } = useTranslation();

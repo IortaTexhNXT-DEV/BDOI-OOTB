@@ -1,0 +1,25 @@
+// High availability: failure domains and recovery paths (document 07). Recommended target, to be confirmed by DevOps.
+digraph G {
+  graph [rankdir=TB, fontname="Nunito", fontsize=11, nodesep=0.5, ranksep=0.5, pad=0.2, newrank=true];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10];
+  edge  [color="#5B6776", fontname="Nunito", fontsize=9, arrowsize=0.6];
+  cf [label="CloudFront + S3 (regional, stored across AZs)\nthe SPA keeps loading if one AZ fails"];
+  alb [label="ALB across AZ a and AZ b\nroutes only to targets answering GET /api/health = 200"];
+  subgraph cluster_a { label="Availability Zone a"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    a1 [label="API task a1"]; rp [label="RDS primary", shape=cylinder]; ea [label="EFS mount target a", shape=folder]; }
+  subgraph cluster_b { label="Availability Zone b"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    b1 [label="API task b1"]; rs [label="RDS standby\n(synchronous replica)", shape=cylinder]; eb [label="EFS mount target b", shape=folder]; }
+  ecs [label="ECS service: replaces failed tasks (liveness /api/health/live),\nkeeps at least 2 tasks, rolling deployments", shape=note, fillcolor="#FFFFFF"];
+  bk [label="Backups: RDS automated backups + PITR, snapshots copied\nto a second region, AWS Backup for EFS", shape=note, fillcolor="#FFF8E1", color="#E0B23A"];
+  cf -> alb [label=" /api/*"];
+  alb -> a1; alb -> b1;
+  { rank=same; a1; b1; }
+  { rank=same; rp; rs; }
+  { rank=same; ea; eb; }
+  a1 -> rp; b1 -> rp [constraint=false, style=dashed, label="writes go to the primary"];
+  rp -> rs [label="sync replication\nfailover 1-2 min", dir=both, style=dashed];
+  rp -> ea [style=invis]; rs -> eb [style=invis];
+  a1 -> ea [constraint=false]; b1 -> eb [constraint=false];
+  ea -> eb [label=" EFS regional storage", dir=both, style=dashed];
+  ea -> ecs [style=invis]; eb -> bk [style=invis];
+}

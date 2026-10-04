@@ -5,10 +5,15 @@ import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import brandingService from "../../../services/brandingService";
 import InputTextField from "../../component/inputText";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 import endorsementService from "../../../services/endorsementService";
 import s3Service from "../../../services/s3Service";
+import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
+import { notifyError } from "../../../utility/dialogs";
+import { FieldsSkeleton } from "../../../components/Skeletons";
 
 const EndorsementDetailedView = ({ action }) => {
   const { t } = useTranslation();
@@ -31,6 +36,11 @@ const EndorsementDetailedView = ({ action }) => {
     endorsementTypeIds.includes(5) ||
     endorsementData?.isCancelPolicy === true;
 
+  // Payment is due only for additional premium. No change: nothing to pay. A return premium (negative change on
+  // a non-cancellation endorsement) is refunded by finance through a client refund payment voucher, not collected here.
+  const premiumDelta = Number(endorsementData?.premiumDelta ?? endorsementData?.summary?.premiumDelta ?? 0) || 0;
+  const paymentDue = !isCancelled && premiumDelta > 0;
+
   // Fetch endorsement data if not in state
   useEffect(() => {
     if (!endorsementData && endorsementId) {
@@ -43,11 +53,10 @@ const EndorsementDetailedView = ({ action }) => {
           if (response.success) {
             setEndorsementData(response.data);
           } else {
-            alert(t("endorsement.failedToLoadEndorsement") + " " + (response.error || ""));
+            notifyError(t("endorsement.failedToLoadEndorsement") + " " + (response.error || ""));
           }
         } catch (error) {
-          console.error("Error fetching endorsement:", error);
-          alert(t("endorsement.errorLoadingEndorsement"));
+          notifyError(t("endorsement.errorLoadingEndorsement"));
         } finally {
           setLoading(false);
         }
@@ -73,7 +82,7 @@ const EndorsementDetailedView = ({ action }) => {
         clientNumber: state?.clientNumber,
         clientName: state?.clientName,
         endorsementData,
-        fromEndorsementDetail: true, // Flag for auto-payment flow
+        fromEndorsementDetail: true,
       },
     });
   };
@@ -84,7 +93,7 @@ const EndorsementDetailedView = ({ action }) => {
         endorsementData?.documentKey || endorsementData?.documentUrl;
 
       if (!documentUrl) {
-        alert(t("endorsement.documentNotAvailable"));
+        notifyError(t("endorsement.documentNotAvailable"));
         return;
       }
 
@@ -96,52 +105,35 @@ const EndorsementDetailedView = ({ action }) => {
         documentUrl.includes("s3.") ||
         documentUrl.includes("amazonaws.com")
       ) {
-        console.log("Fetching presigned URL for S3 document:", documentUrl);
-
         // Get presigned URL using the batch endpoint
         const urlMap = await s3Service.getPresignedDownloadUrls([documentUrl]);
 
         if (urlMap.success && urlMap.data[documentUrl]) {
           downloadUrl = urlMap.data[documentUrl];
-          console.log("Presigned URL obtained successfully");
         } else {
-          console.error("Failed to get presigned URL:", urlMap);
           throw new Error(urlMap.error || "Failed to generate download URL");
         }
       }
 
-      console.log("Opening document in new tab:", downloadUrl);
-
       // Open in new tab
-      window.open(downloadUrl, "_blank");
+      window.open(downloadUrl, "_blank", "noopener,noreferrer");
     } catch (error) {
-      console.error("Error opening document:", error);
-      alert(t("endorsement.errorLoadingDocument"));
+      notifyError(t("endorsement.errorLoadingDocument"));
     } finally {
       setDocumentLoading(false);
     }
   };
 
-  // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-        year: "numeric",
-      });
-    } catch {
-      return dateString;
-    }
-  };
+  // Dates in the configured display format (System Settings general.date_format)
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
 
   if (loading) {
     return (
       <div className="detailed__endorsement__container m-0">
         <Card className="mt-4">
-          <div className="p-4 text-center">{t("endorsement.loadingEndorsementDetails")}</div>
+          <div className="p-4">
+            <FieldsSkeleton rows={4} columns={3} />
+          </div>
         </Card>
       </div>
     );
@@ -157,8 +149,11 @@ const EndorsementDetailedView = ({ action }) => {
         >
           <SvgLeftArrow />
           <div className="detailed__endorsement__container__back__btn__title">
-            {state?.clientName || t("endorsement.client")} / {t("endorsement.clientIdColon")}{" "}
-            {state?.clientNumber || endorsementId}
+            {state?.clientName || endorsementData?.clientName || t("endorsement.client")}
+            {/* the client code (CL-...), never the internal endorsement id */}
+            {(state?.clientNumber || endorsementData?.clientCode) && (
+              <> / {t("endorsement.clientIdColon")} {state?.clientNumber || endorsementData?.clientCode}</>
+            )}
           </div>
         </div>
       </div>
@@ -226,6 +221,27 @@ const EndorsementDetailedView = ({ action }) => {
             </div>
           </div>
 
+          {!isCancelled && (
+            <div className="grid mt-2">
+              <div className="col-12 md:col-6 lg:col-6">
+                <InputTextField
+                  label={t("endorsement.premiumChange")}
+                  value={`${premiumDelta > 0 ? "+" : ""}${formatCurrency(premiumDelta)}`}
+                  disabled={true}
+                />
+              </div>
+              <div className="col-12 md:col-6 lg:col-6 flex align-items-center">
+                <small data-testid="endorsement-premium-note">
+                  {premiumDelta > 0
+                    ? t("endorsement.additionalPremiumDue")
+                    : premiumDelta < 0
+                      ? t("endorsement.returnPremiumNote", { amount: formatCurrency(Math.abs(premiumDelta)) })
+                      : t("endorsement.noPremiumChange")}
+                </small>
+              </div>
+            </div>
+          )}
+
           <div className="detailed__endorsement__card__sub__title mt-2 mb-2">
             {t("endorsement.document")}
           </div>
@@ -255,6 +271,8 @@ const EndorsementDetailedView = ({ action }) => {
           <div className="grid m-0 mt-3">
             <div className="col-12 md:col-12 lg:col-12 p-0 back__complete__btn__container ">
               <div className="complete__btn__container">
+                <Button className="p-button-outlined mr-2" icon="pi pi-print" label={t("endorsement.print", "Print endorsement")}
+                  onClick={() => brandingService.printEndorsement(endorsementId).catch(() => {})} />
                 {isCancelled ? (
                   <Button
                     className="complete__btn"
@@ -264,7 +282,7 @@ const EndorsementDetailedView = ({ action }) => {
                   >
                     {t("endorsement.refundInitiate")}
                   </Button>
-                ) : (
+                ) : paymentDue ? (
                   <Button
                     className="complete__btn"
                     onClick={() => {
@@ -272,6 +290,10 @@ const EndorsementDetailedView = ({ action }) => {
                     }}
                   >
                     {t("endorsement.proceedToPayment")}
+                  </Button>
+                ) : (
+                  <Button className="complete__btn" onClick={handleCommonAction}>
+                    {t("endorsement.done")}
                   </Button>
                 )}
               </div>

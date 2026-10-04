@@ -143,8 +143,6 @@ const initialState = {
   ],
   endorsementSearchListData: [],
 };
-// console.log(endorsementSearchListData,"find endorsementSearchListData")
-let nextId = 2;
 const endorsementTabelDataReducers = createSlice({
   name: "endorsementTabelData",
   initialState,

@@ -1,0 +1,462 @@
+.admin__page {
+  padding: 16px 24px 32px;
+
+  h2 {
+    margin: 0 0 4px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--text-color-secondary, #5f6b7a);
+  }
+}
+
+.admin__breadcrumb {
+  margin-bottom: 12px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+
+.admin__header {
+  > .p-button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.admin__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px 24px;
+
+  &--single {
+    grid-template-columns: 1fr;
+  }
+}
+
+.admin__field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  // lists of records (languages, currencies, thresholds) edited as a small table
+  .admin__records {
+    max-height: 18rem;
+    overflow: auto;
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th {
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 4px 6px;
+    }
+
+    td {
+      padding: 2px 6px;
+    }
+
+    .p-inputtext {
+      width: 100%;
+      min-width: 6rem;
+    }
+  }
+
+  // structured settings (lists of objects, maps) shown as indented JSON
+  .admin__json {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.85rem;
+    white-space: pre;
+  }
+
+  label {
+    font-weight: 600;
+  }
+
+  small {
+    color: var(--text-color-secondary, #5f6b7a);
+  }
+
+  &--inline {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .p-inputtext,
+  .p-inputnumber,
+  .p-inputtextarea {
+    width: 100%;
+  }
+}
+
+.admin__color {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin__swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--surface-border, #d0d7e2);
+}
+
+.admin__actions {
+  display: flex;
+  gap: 4px;
+}
+
+.admin__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+// many settings groups: the tab strip scrolls instead of running past the right edge
+.admin__tabs {
+  max-width: 100%;
+
+  .p-tabview-nav-content {
+    max-width: 100%;
+  }
+}
+
+// Master > Document Numbering and Master > Finance > Commission Rate Matrix
+.dn__page {
+  .admin__header p {
+    max-width: 880px;
+  }
+}
+
+.dn__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.dn__stat {
+  display: flex;
+  flex-direction: column;
+  min-width: 130px;
+  padding: 10px 16px;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--surface-card, #fff);
+
+  .dn__stat-value {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--primary-color, #0072d8);
+  }
+
+  .dn__stat-label {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary, #5f6b7a);
+    letter-spacing: 0.04em;
+  }
+}
+
+.dn__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  .dn__search {
+    flex: 1 1 260px;
+    max-width: 380px;
+
+    .p-inputtext {
+      width: 100%;
+    }
+  }
+
+  .dn__filter {
+    min-width: 180px;
+  }
+}
+
+.dn__table {
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 8px;
+  overflow: hidden;
+
+  .p-datatable-thead > tr > th {
+    font-size: 0.8rem;
+    letter-spacing: 0.03em;
+    color: var(--text-color-secondary, #5f6b7a);
+    background: var(--surface-50, #f8fafc);
+  }
+
+  .dn__right {
+    text-align: right;
+  }
+}
+
+.dn__name {
+  display: flex;
+  flex-direction: column;
+
+  .dn__name-title {
+    font-weight: 600;
+  }
+
+  .dn__inactive {
+    margin-left: 6px;
+    font-size: 0.7rem;
+    padding: 1px 6px;
+  }
+
+  .dn__name-code {
+    font-size: 0.8rem;
+    color: var(--text-color-secondary, #5f6b7a);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+}
+
+.dn__pattern,
+.dn__number {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.dn__number {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--primary-50, #e8f2fd);
+  color: var(--primary-800, #004ea8);
+  font-weight: 600;
+
+  &--muted {
+    background: var(--surface-100, #f1f5f9);
+    color: var(--text-color-secondary, #5f6b7a);
+  }
+}
+
+.dn__muted {
+  color: var(--text-color-secondary, #5f6b7a);
+}
+
+.dn__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.dn__pattern-field {
+  .dn__pattern-input {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+}
+
+.dn__tokens {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+
+  .dn__token {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+  }
+}
+
+.dn__preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px dashed var(--primary-200, #9cc8f3);
+  background: var(--surface-50, #f8fafc);
+
+  &--invalid {
+    border-color: var(--red-300, #f0a3a3);
+    background: var(--red-50, #fff5f5);
+  }
+
+  .dn__preview-label {
+    font-weight: 600;
+  }
+}
+
+.dn__errors {
+  margin: 0;
+  padding-left: 18px;
+  color: var(--red-700, #b42318);
+}
+
+.dn__error {
+  color: var(--red-700, #b42318);
+}
+
+.dn__help {
+  margin: 0;
+  color: var(--text-color-secondary, #5f6b7a);
+}
+
+.cr__layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.cr__test-fields {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px 16px;
+  align-items: end;
+
+  .cr__test-run {
+    height: 2.75rem;
+  }
+}
+
+.cr__test {
+  padding: 16px;
+  border: 1px solid var(--surface-border, #e2e8f0);
+  border-radius: 8px;
+  background: var(--surface-card, #fff);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+
+  .p-dropdown,
+  .p-inputtext {
+    width: 100%;
+  }
+
+  .cr__result {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 8px;
+    background: var(--primary-50, #e8f2fd);
+
+    .cr__result-rate {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--primary-800, #004ea8);
+    }
+  }
+}
+
+.cr__note {
+  font-size: 0.85rem;
+  color: var(--text-color-secondary, #5f6b7a);
+  margin: 0 0 12px;
+}
+
+.admin__note {
+  margin: 0 0 12px;
+  font-size: 0.9rem;
+
+  .pi {
+    color: var(--primary-color, #0072d8);
+    margin-right: 4px;
+  }
+}
+
+// ---------------------------------------------------------------- Master > Audit Trail
+.audit-log {
+  &__actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  &__filters {
+    .audit-log__range {
+      width: 15rem;
+    }
+
+    .audit-log__ref {
+      width: 12rem;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  // a cell of two lines: the value, then a muted second line (role, record type, time)
+  &__user .bv-audit-user,
+  &__user .bv-audit-user__name {
+    display: block;
+  }
+
+  &__user .bv-audit-user__role {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+    color: #656565;
+
+    &::before {
+      content: none;
+    }
+  }
+
+  &__event {
+    font-weight: 600;
+    color: #2e2e2e;
+
+    .bv-cell-sub {
+      font-weight: 400;
+    }
+  }
+
+  &__more {
+    color: #656565;
+    white-space: nowrap;
+  }
+
+  &__source {
+    font-size: 13px;
+    color: #656565;
+  }
+
+  &__expansion {
+    padding: 4px 8px 8px 3.5rem;
+
+    .bv-audit-changes {
+      margin-top: 0;
+    }
+  }
+
+  &__table .p-datatable-tbody > tr > td {
+    vertical-align: top;
+  }
+
+  &__table .p-row-toggler {
+    color: #0072d8;
+  }
+}

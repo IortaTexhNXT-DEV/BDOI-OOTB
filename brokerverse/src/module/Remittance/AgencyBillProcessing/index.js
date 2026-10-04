@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { TabView, TabPanel } from "primereact/tabview";
@@ -12,62 +12,176 @@ import { Checkbox } from "primereact/checkbox";
 import { InputNumber } from "primereact/inputnumber";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Tag } from "primereact/tag";
+import { Toast } from "primereact/toast";
+import remittanceService from "../../../services/remittanceService";
+import { calendarDateFormat, dateBody, isoDate, isoMonth, loadMasterOptions, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+
+const emptyAdjustment = { agencyCode: null, adjustmentType: null, amount: null, reason: "" };
+const sum = (rows, field) => rows.reduce((s, r) => s + Number(r[field] || 0), 0);
 
 const AgencyBillProcessing = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode } = useFormatCurrency();
+  const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedAgencies, setSelectedAgencies] = useState([]);
   const [billPeriod, setBillPeriod] = useState(new Date());
   const [billRunDate, setBillRunDate] = useState(new Date());
   const [billType, setBillType] = useState("Regular");
+  const [agencyType, setAgencyType] = useState("All");
+  const [agencies, setAgencies] = useState([]);
+  const [agencyBills, setAgencyBills] = useState([]);
+  const [adjustments, setAdjustments] = useState([]);
+  const [adjustmentTypes, setAdjustmentTypes] = useState([]);
+  const [newAdjustment, setNewAdjustment] = useState(emptyAdjustment);
+  const [sendToAgencies, setSendToAgencies] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const agencies = [
-    { id: 1, agencyCode: "AG001", agencyName: "Premier Insurance Agency", agencyType: "Direct", policyCount: 125, grossPremium: 250000, commission: 31250, previousBalance: 5000, totalDue: 223750 },
-    { id: 2, agencyCode: "AG002", agencyName: "Global Brokers Ltd", agencyType: "Broker", policyCount: 87, grossPremium: 180000, commission: 27000, previousBalance: -2000, totalDue: 155000 },
-    { id: 3, agencyCode: "AG003", agencyName: "Corporate Solutions", agencyType: "Corporate", policyCount: 156, grossPremium: 420000, commission: 42000, previousBalance: 0, totalDue: 378000 },
-    { id: 4, agencyCode: "AG004", agencyName: "ABC Bank Insurance", agencyType: "Bancassurance", policyCount: 234, grossPremium: 560000, commission: 47600, previousBalance: 12000, totalDue: 524400 }
-  ];
+  const loadAgencies = async () => {
+    setLoading(true);
+    try {
+      setAgencies(await remittanceService.agencies(isoMonth(billPeriod)));
+      setSelectedAgencies([]);
+    } catch (e) {
+      showError(toast, e);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  const agencyBills = [
-    { agencyCode: "AG001", agencyName: "Premier Insurance Agency", billNumber: "BIL202509001", billDate: "2025-09-26", dueDate: "2025-10-26", billAmount: 223750, status: "Draft" },
-    { agencyCode: "AG002", agencyName: "Global Brokers Ltd", billNumber: "BIL202509002", billDate: "2025-09-26", dueDate: "2025-11-10", billAmount: 155000, status: "Draft" },
-    { agencyCode: "AG003", agencyName: "Corporate Solutions", billNumber: "BIL202509003", billDate: "2025-09-26", dueDate: "2025-11-25", billAmount: 378000, status: "Draft" }
-  ];
+  const loadBills = async () => {
+    try {
+      setAgencyBills(await remittanceService.listAgencyBills({ perPage: 200 }));
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
 
-  const adjustments = [
-    { agencyName: "Premier Insurance Agency", type: "Credit Note", amount: -5000, reason: "Policy cancellation refund" },
-    { agencyName: "Global Brokers Ltd", type: "Additional Charge", amount: 2500, reason: "Late payment charge" }
-  ];
+  const loadAdjustments = async () => {
+    try {
+      setAdjustments(await remittanceService.listAdjustments({ perPage: 200 }));
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
 
-  const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'Draft': return 'warning';
-        case 'Generated': return 'success';
-        case 'Sent': return 'info';
-        default: return null;
-      }
-    };
-    return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
+  useEffect(() => {
+    loadAgencies();
+    loadBills();
+    loadAdjustments();
+    loadMasterOptions("remittance-adjustment-type")
+      .then((rows) => setAdjustmentTypes(rows.map((r) => ({ label: r.label, value: r.label }))))
+      .catch((e) => showError(toast, e));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const visibleAgencies = agencyType === "All" ? agencies : agencies.filter((a) => a.agencyType === agencyType);
+  const agencyTypeOptions = [{ label: "All", value: "All" }, ...[...new Set(agencies.map((a) => a.agencyType))].map((v) => ({ label: v, value: v }))];
+  const agencyNames = new Set(agencies.map((a) => a.agencyName));
+  const agencyAdjustments = adjustments.filter((a) => agencyNames.has(a.clientName));
+  const selectedNames = new Set(selectedAgencies.map((a) => a.agencyName));
+  const selectedAdjustmentTotal = sum(agencyAdjustments.filter((a) => selectedNames.has(a.clientName)), "adjustmentAmount");
+  const totals = {
+    premium: sum(selectedAgencies, "grossPremium"),
+    commission: sum(selectedAgencies, "commission"),
+    previousBalance: sum(selectedAgencies, "previousBalance"),
+  };
+  const netPayable = totals.premium - totals.commission + totals.previousBalance + selectedAdjustmentTotal;
+
+  const statusBodyTemplate = (rowData) => <Tag value={rowData.status} severity={statusSeverity(rowData.statusCode || rowData.status)} />;
+
+  const validate = () => {
+    if (!selectedAgencies.length) {
+      toast.current.show({ severity: "warn", summary: t("remittance.validationFailed"), detail: t("remittance.selectAgencies"), life: 3000 });
+      return false;
+    }
+    if (!billPeriod || !billRunDate) {
+      toast.current.show({ severity: "warn", summary: t("remittance.validationFailed"), detail: t("remittance.billPeriod"), life: 3000 });
+      return false;
+    }
+    return true;
+  };
+
+  const handleValidate = () => {
+    if (validate()) showSuccess(toast, `${selectedAgencies.length} agencies ready for billing`, t("remittance.validationSuccessful"));
+  };
+
+  const generateBills = async ({ submit }) => {
+    if (!validate()) return;
+    setLoading(true);
+    try {
+      const result = await remittanceService.generateAgencyBills({
+        billPeriod: isoMonth(billPeriod),
+        billRunDate: isoDate(billRunDate),
+        agencyCodes: selectedAgencies.map((a) => a.agencyCode),
+        billType,
+      });
+      const bills = result.agencyBills || [];
+      if (sendToAgencies) await Promise.all(bills.map((b) => remittanceService.sendBill(b.id, { deliveryMethod: ["email"] })));
+      if (submit) await remittanceService.processRemittances(bills.map((b) => b.id));
+      const skipped = (result.skipped || []).map((s) => `${s.agencyCode}: ${s.reason}`).join("; ");
+      showSuccess(toast, `${bills.length} bill(s) ${submit ? "submitted for approval" : "saved as draft"}${skipped ? `. Skipped ${skipped}` : ""}`);
+      await Promise.all([loadBills(), loadAgencies()]);
+      setActiveIndex(1);
+    } catch (e) {
+      showError(toast, e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSendBill = async (bill) => {
+    try {
+      const out = await remittanceService.sendBill(bill.id, { deliveryMethod: ["email"] });
+      showSuccess(toast, `${bill.billNumber} sent${out.emailedTo ? ` to ${out.emailedTo}` : ""}`);
+      loadBills();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
+  const handleAddAdjustment = async () => {
+    const agency = agencies.find((a) => a.agencyCode === newAdjustment.agencyCode);
+    try {
+      await remittanceService.createAdjustment({
+        adjustmentType: newAdjustment.adjustmentType,
+        adjustmentAmount: newAdjustment.amount,
+        reason: newAdjustment.reason,
+        description: agency ? `Agency bill adjustment - ${agency.agencyName}` : "",
+        clientName: agency?.agencyName,
+        effectiveDate: isoDate(billRunDate),
+      });
+      showSuccess(toast, t("remittance.addAdjustment"));
+      setNewAdjustment(emptyAdjustment);
+      loadAdjustments();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
+  const handleCancel = () => {
+    setSelectedAgencies([]);
+    setNewAdjustment(emptyAdjustment);
+    setActiveIndex(0);
   };
 
   return (
     <div className="agency-bill-processing">
+      <Toast ref={toast} />
       <h2>{t("remittance.agencyBillProcessing")}</h2>
 
       <div className="header-section">
-        <div className="p-fluid p-formgrid p-grid">
-          <div className="p-field p-col-12 p-md-3">
+        <div className="p-fluid formgrid grid">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.billPeriod")}</label>
             <Calendar value={billPeriod} onChange={(e) => setBillPeriod(e.value)} view="month" dateFormat="mm/yy" />
           </div>
-          <div className="p-field p-col-12 p-md-3">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.billRunDate")}</label>
-            <Calendar value={billRunDate} onChange={(e) => setBillRunDate(e.value)} dateFormat="yy-mm-dd" />
+            <Calendar value={billRunDate} onChange={(e) => setBillRunDate(e.value)} dateFormat={calendarDateFormat()} />
           </div>
-          <div className="p-field p-col-12 p-md-3">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.billType")}</label>
             <Dropdown value={billType} options={[
               { label: t("remittance.regular"), value: "Regular" },
@@ -75,7 +189,7 @@ const AgencyBillProcessing = () => {
               { label: t("remittance.adjustment"), value: "Adjustment" }
             ]} onChange={(e) => setBillType(e.value)} />
           </div>
-          <div className="p-field p-col-12 p-md-3">
+          <div className="p-field field col-12 md:col-3">
             <label>{t("remittance.status")}</label>
             <Tag value="Draft" severity="warning" style={{ marginTop: '1.5rem' }} />
           </div>
@@ -86,25 +200,14 @@ const AgencyBillProcessing = () => {
         <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
           <TabPanel header={t("remittance.selectAgencies")}>
             <div className="filter-section mb-3">
-              <Dropdown placeholder={t("remittance.agencyType")} options={[
-                { label: "All", value: "All" },
-                { label: "Direct", value: "Direct" },
-                { label: "Broker", value: "Broker" },
-                { label: "Corporate", value: "Corporate" },
-                { label: "Bancassurance", value: "Bancassurance" }
-              ]} className="mr-2" />
-              <Dropdown placeholder={t("remittance.region")} options={[
-                { label: "All Regions", value: "All" },
-                { label: "North", value: "North" },
-                { label: "South", value: "South" },
-                { label: "East", value: "East" },
-                { label: "West", value: "West" }
-              ]} className="mr-2" />
-              <Button label={t("remittance.loadAgencies")} icon="pi pi-refresh" />
+              <Dropdown placeholder={t("remittance.agencyType")} value={agencyType} options={agencyTypeOptions}
+                onChange={(e) => setAgencyType(e.value)} className="mr-2" />
+              <Button label={t("remittance.loadAgencies")} icon="pi pi-refresh" onClick={loadAgencies} loading={loading} />
             </div>
 
             <DataTable
-              value={agencies}
+              value={visibleAgencies}
+              loading={loading}
               selection={selectedAgencies}
               onSelectionChange={(e) => setSelectedAgencies(e.value)}
               dataKey="id"
@@ -135,9 +238,9 @@ const AgencyBillProcessing = () => {
               </Card>
               <Card className="summary-card">
                 <div className="card-content">
-                  <i className="pi pi-dollar" />
+                  <i className="pi pi-wallet" />
                   <div>
-                    <div className="value">{formatCurrency(1410000)}</div>
+                    <div className="value">{formatCurrency(totals.premium)}</div>
                     <div className="label">{t("remittance.totalPremium")}</div>
                   </div>
                 </div>
@@ -146,7 +249,7 @@ const AgencyBillProcessing = () => {
                 <div className="card-content">
                   <i className="pi pi-percentage" />
                   <div>
-                    <div className="value">{formatCurrency(147850)}</div>
+                    <div className="value">{formatCurrency(totals.commission)}</div>
                     <div className="label">{t("remittance.totalCommission")}</div>
                   </div>
                 </div>
@@ -155,7 +258,7 @@ const AgencyBillProcessing = () => {
                 <div className="card-content">
                   <i className="pi pi-calculator" />
                   <div>
-                    <div className="value">{formatCurrency(1280650)}</div>
+                    <div className="value">{formatCurrency(netPayable)}</div>
                     <div className="label">{t("remittance.netPayable")}</div>
                   </div>
                 </div>
@@ -166,15 +269,16 @@ const AgencyBillProcessing = () => {
               <Column field="agencyCode" header={t("remittance.agencyCode")} />
               <Column field="agencyName" header={t("remittance.agencyName")} />
               <Column field="billNumber" header={t("remittance.billNumber")} />
-              <Column field="billDate" header={t("remittance.billDate")} />
-              <Column field="dueDate" header={t("remittance.dueDate")} />
+              <Column field="billDate" body={dateBody("billDate")} header={t("remittance.billDate")} />
+              <Column field="dueDate" body={dateBody("dueDate")} header={t("remittance.dueDate")} />
               <Column field="billAmount" header={t("remittance.billAmount")} body={(data) => formatCurrency(data.billAmount)} />
               <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
-              <Column header={t("remittance.actions")} body={() => (
+              <Column header={t("remittance.actions")} body={(rowData) => (
                 <div className="action-buttons">
-                  <Button icon="pi pi-eye" className="p-button-rounded p-button-text" tooltip={t("remittance.view")} />
-                  <Button icon="pi pi-pencil" className="p-button-rounded p-button-text" tooltip={t("remittance.edit")} />
-                  <Button icon="pi pi-print" className="p-button-rounded p-button-text" tooltip={t("remittance.print")} />
+                  <Button icon="pi pi-send" className="p-button-rounded p-button-text" tooltip={t("remittance.sendToAgencies")}
+                    onClick={() => handleSendBill(rowData)} disabled={["rejected", "cancelled"].includes(rowData.statusCode)} aria-label={t("remittance.sendToAgencies")}
+                    />
+                  <Button icon="pi pi-print" className="p-button-rounded p-button-text" tooltip={t("remittance.print")} onClick={() => window.print()} aria-label={t("remittance.print")} />
                 </div>
               )} />
             </DataTable>
@@ -183,38 +287,39 @@ const AgencyBillProcessing = () => {
           <TabPanel header={t("remittance.remittanceAdjustments")}>
             <div className="adjustment-form mb-4">
               <h4>{t("remittance.addAdjustment")}</h4>
-              <div className="p-fluid p-formgrid p-grid">
-                <div className="p-field p-col-12 p-md-6">
+              <div className="p-fluid formgrid grid">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.agencyName")}</label>
-                  <Dropdown placeholder={t("remittance.selectAgency")} options={selectedAgencies.map(a => ({ label: a.agencyName, value: a.agencyCode }))} />
+                  <Dropdown placeholder={t("remittance.selectAgency")} value={newAdjustment.agencyCode}
+                    options={selectedAgencies.map(a => ({ label: a.agencyName, value: a.agencyCode }))}
+                    onChange={(e) => setNewAdjustment({ ...newAdjustment, agencyCode: e.value })} />
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.adjustmentType")}</label>
-                  <Dropdown placeholder={t("remittance.selectType")} options={[
-                    { label: "Credit Note", value: "Credit Note" },
-                    { label: "Debit Note", value: "Debit Note" },
-                    { label: "Refund", value: "Refund" },
-                    { label: "Additional Charge", value: "Additional Charge" }
-                  ]} />
+                  <Dropdown placeholder={t("remittance.selectType")} value={newAdjustment.adjustmentType} options={adjustmentTypes}
+                    onChange={(e) => setNewAdjustment({ ...newAdjustment, adjustmentType: e.value })} />
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.amount")}</label>
-                  <InputNumber mode="currency" currency={currencyCode} />
+                  <InputNumber mode="currency" currency={currencyCode} value={newAdjustment.amount}
+                    onValueChange={(e) => setNewAdjustment({ ...newAdjustment, amount: e.value })} />
                 </div>
-                <div className="p-field p-col-12 p-md-6">
+                <div className="p-field field col-12 md:col-6">
                   <label>{t("remittance.reason")}</label>
-                  <InputTextarea rows={2} />
+                  <InputTextarea rows={2} value={newAdjustment.reason}
+                    onChange={(e) => setNewAdjustment({ ...newAdjustment, reason: e.target.value })} />
                 </div>
               </div>
-              <Button label={t("remittance.addAdjustmentButton")} icon="pi pi-plus" className="p-button-secondary" />
+              <Button label={t("remittance.addAdjustmentButton")} icon="pi pi-plus" className="p-button-secondary" onClick={handleAddAdjustment}
+                disabled={!newAdjustment.agencyCode || !newAdjustment.adjustmentType || !newAdjustment.amount || !newAdjustment.reason} />
             </div>
 
-            <DataTable value={adjustments} stripedRows>
-              <Column field="agencyName" header={t("remittance.agency")} />
-              <Column field="type" header={t("remittance.type")} />
-              <Column field="amount" header={t("remittance.amount")} body={(data) => formatCurrency(Math.abs(data.amount))} />
+            <DataTable value={agencyAdjustments} stripedRows>
+              <Column field="clientName" header={t("remittance.agency")} />
+              <Column field="adjustmentType" header={t("remittance.type")} />
+              <Column field="adjustmentAmount" header={t("remittance.amount")} body={(data) => formatCurrency(data.adjustmentAmount)} />
               <Column field="reason" header={t("remittance.reason")} />
-              <Column header="" body={() => <Button icon="pi pi-trash" className="p-button-rounded p-button-danger p-button-text" />} style={{ width: '60px' }} />
+              <Column field="status" header={t("remittance.status")} body={statusBodyTemplate} />
             </DataTable>
           </TabPanel>
 
@@ -225,27 +330,23 @@ const AgencyBillProcessing = () => {
                   <tbody>
                     <tr>
                       <td>{t("remittance.totalGrossPremium")}</td>
-                      <td className="text-right">{formatCurrency(1410000)}</td>
+                      <td className="text-right">{formatCurrency(totals.premium)}</td>
                     </tr>
                     <tr>
                       <td>{t("remittance.totalCommissionEarned")}</td>
-                      <td className="text-right">-{formatCurrency(147850)}</td>
-                    </tr>
-                    <tr>
-                      <td>{t("remittance.serviceTax")}</td>
-                      <td className="text-right">-{formatCurrency(26613)}</td>
+                      <td className="text-right">-{formatCurrency(totals.commission)}</td>
                     </tr>
                     <tr>
                       <td>{t("remittance.previousBalance")}</td>
-                      <td className="text-right">{formatCurrency(15000)}</td>
+                      <td className="text-right">{formatCurrency(totals.previousBalance)}</td>
                     </tr>
                     <tr>
                       <td>{t("remittance.adjustments")}</td>
-                      <td className="text-right">-{formatCurrency(2500)}</td>
+                      <td className="text-right">{formatCurrency(selectedAdjustmentTotal)}</td>
                     </tr>
                     <tr className="total-row">
                       <td><strong>{t("remittance.netAmountPayable")}</strong></td>
-                      <td className="text-right"><strong>{formatCurrency(1248037)}</strong></td>
+                      <td className="text-right"><strong>{formatCurrency(netPayable)}</strong></td>
                     </tr>
                   </tbody>
                 </table>
@@ -253,26 +354,26 @@ const AgencyBillProcessing = () => {
 
               <div className="processing-options mt-4">
                 <h4>{t("remittance.processingOptions")}</h4>
-                <div className="p-fluid p-formgrid p-grid">
-                  <div className="p-field p-col-12 p-md-6">
+                <div className="p-fluid formgrid grid">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
                       <Checkbox checked={true} />
                       <label>{t("remittance.generateBills")}</label>
                     </div>
                   </div>
-                  <div className="p-field p-col-12 p-md-6">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
-                      <Checkbox checked={false} />
+                      <Checkbox checked={sendToAgencies} onChange={(e) => setSendToAgencies(e.checked)} />
                       <label>{t("remittance.sendToAgencies")}</label>
                     </div>
                   </div>
-                  <div className="p-field p-col-12 p-md-6">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
                       <Checkbox checked={true} />
                       <label>{t("remittance.createGLEntries")}</label>
                     </div>
                   </div>
-                  <div className="p-field p-col-12 p-md-6">
+                  <div className="p-field field col-12 md:col-6">
                     <div className="checkbox-wrapper">
                       <Checkbox checked={false} />
                       <label>{t("remittance.postToAccounts")}</label>
@@ -285,10 +386,10 @@ const AgencyBillProcessing = () => {
         </TabView>
 
         <div className="action-bar mt-4">
-          <Button label={t("remittance.saveDraft")} className="p-button-secondary mr-2" />
-          <Button label={t("remittance.validate")} icon="pi pi-check" className="p-button-secondary mr-2" />
-          <Button label={t("remittance.processBills")} icon="pi pi-forward" className="p-button-primary mr-2" />
-          <Button label={t("common.cancel")} className="p-button-text" />
+          <Button label={t("remittance.saveDraft")} className="p-button-secondary mr-2" onClick={() => generateBills({ submit: false })} disabled={loading} />
+          <Button label={t("remittance.validate")} icon="pi pi-check" className="p-button-secondary mr-2" onClick={handleValidate} />
+          <Button label={t("remittance.processBills")} icon="pi pi-forward" className="p-button-primary mr-2" onClick={() => generateBills({ submit: true })} loading={loading} />
+          <Button label={t("common.cancel")} className="p-button-text" onClick={handleCancel} />
         </div>
       </Card>
     </div>

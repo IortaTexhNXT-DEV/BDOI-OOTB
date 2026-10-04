@@ -97,7 +97,7 @@
             color: #495057;
 
             &.difference {
-              color: #dc3545;
+              color: var(--color-danger);
               font-weight: 600;
             }
           }

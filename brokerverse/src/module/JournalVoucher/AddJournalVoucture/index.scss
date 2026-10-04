@@ -44,7 +44,7 @@
         height: 40px;
         // width: 110px;
         padding: 0 20px;
-        border-radius: 30px;
+        border-radius: 6px;
         color: #fff;
 
     }
@@ -86,7 +86,7 @@
 
         .svg__add__data__JV {
             border: 1px solid blue;
-            border-radius: 30px;
+            border-radius: 6px;
             height: 30px;
 
         }
@@ -108,7 +108,7 @@
             height: 45px;
             // width: 140px;
             padding: 0 18px;
-            border-radius: 30px;
+            border-radius: 6px;
             color: #fff;
             font-family: "Nunito", Arial, sans-serif;
             cursor: pointer;
@@ -210,7 +210,7 @@
             // width: 140px;
             padding: 0 30px;
             background-color: #0072d8;
-            border-radius: 30px;
+            border-radius: 6px;
             font-size: 18px;
             font-family: 500;
             color: #fff;
@@ -221,7 +221,7 @@
             // width: 140px;
             padding: 0 40px;
             background-color: #0072d8;
-            border-radius: 30px;
+            border-radius: 6px;
             font-size: 18px;
             font-family: 500;
             color: #fff;
@@ -303,7 +303,7 @@
 
     .formik__errror__JV {
         font-size: 10px !important;
-        color: red !important;
+        color: var(--color-danger) !important;
     }
 
     // .modal-header {

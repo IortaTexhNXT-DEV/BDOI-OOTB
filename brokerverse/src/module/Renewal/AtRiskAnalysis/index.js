@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,24 +11,22 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import { ProgressBar } from "primereact/progressbar";
 import { Badge } from "primereact/badge";
-import { Chip } from "primereact/chip";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
-import { Knob } from "primereact/knob";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { progressValue } from "../../../utility/numberFormat";
 
 const AtRiskAnalysis = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [riskFilter, setRiskFilter] = useState("All");
   const [agentFilter, setAgentFilter] = useState("All");
@@ -38,7 +35,7 @@ const AtRiskAnalysis = () => {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [actionPlanVisible, setActionPlanVisible] = useState(false);
   const [escalateVisible, setEscalateVisible] = useState(false);
-  const [riskPolicies, setRiskPolicies] = useState(renewalMockData.atRiskPolicies);
+  const [riskPolicies, setRiskPolicies] = useState([]);
   const [filteredPolicies, setFilteredPolicies] = useState([]);
   const [dashboardData, setDashboardData] = useState({
     totalAtRisk: 0,
@@ -65,9 +62,7 @@ const AtRiskAnalysis = () => {
 
   const agentFilterOptions = [
     { label: t("renewal.allAgents"), value: "All" },
-    { label: "Juan Dela Cruz", value: "Juan Dela Cruz" },
-    { label: "Ana Reyes", value: "Ana Reyes" },
-    { label: "Carlos Mendoza", value: "Carlos Mendoza" }
+    ...[...new Set(riskPolicies.map(p => p.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
   ];
 
   const priorityOptions = [
@@ -92,61 +87,36 @@ const AtRiskAnalysis = () => {
     applyFilters();
   }, [search, riskFilter, agentFilter, riskPolicies]);
 
+  /** At-risk rows with the plan / escalation recorded on the renewal timeline. */
+  const withTimelineFlags = (rows, negotiations) => rows.map(row => {
+    const timeline = negotiations.find(n => n.id === row.id)?.timeline || [];
+    const plan = [...timeline].reverse().find(item => item.type === 'Action Plan');
+    return {
+      ...row,
+      assignedAgent: row.actionPlan?.assignedTo,
+      actionPlan: plan ? { ...row.actionPlan, ...plan.details, status: 'Active' } : row.actionPlan,
+      escalated: timeline.some(item => item.type === 'Escalation')
+    };
+  });
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Get at-risk policies from renewal queue
-      const atRiskFromQueue = renewalMockData.renewalQueue
-        .filter(policy => policy.retentionRisk === 'High' || policy.retentionRisk === 'Critical')
-        .map(policy => ({
-          policyNumber: policy.policyNumber,
-          insuredName: policy.insuredName,
-          product: policy.product,
-          currentPremium: policy.currentPremium,
-          daysToExpiry: policy.daysToExpiry,
-          assignedAgent: policy.assignedAgent,
-          riskScore: policy.retentionRisk === 'Critical' ? 92 : 78,
-          riskCategory: policy.retentionRisk,
-          riskFactors: [
-            { factor: "Payment History", score: 20, details: "Late payments recorded" },
-            { factor: "Claims Ratio", score: 15, details: policy.claimsHistory?.hasClaimsLastYear ? "Recent claims filed" : "No recent claims" },
-            { factor: "Market Competition", score: 25, details: "Competitor activity detected" },
-            { factor: "Customer Engagement", score: 10, details: "Low interaction frequency" }
-          ],
-          recommendedActions: [
-            "Schedule retention meeting",
-            "Prepare competitive analysis",
-            "Review pricing options",
-            "Assess loyalty incentives"
-          ],
-          actionPlan: {
-            priority: policy.retentionRisk === 'Critical' ? 'Critical' : 'High',
-            assignedTo: policy.assignedAgent,
-            deadline: new Date(Date.now() + (policy.retentionRisk === 'Critical' ? 3 : 7)*24*60*60*1000),
-            status: 'Pending'
-          }
-        }));
-
-      const combinedData = [...renewalMockData.atRiskPolicies, ...atRiskFromQueue];
+      const [rows, negotiations] = await Promise.all([
+        renewalsWorkspaceService.getAtRisk(),
+        renewalsWorkspaceService.getNegotiations()
+      ]);
+      const combinedData = withTimelineFlags(rows, negotiations);
       setRiskPolicies(combinedData);
       calculateDashboard(combinedData);
-
-      setTimeout(() => {
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.atRiskDataLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
     } catch (error) {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToLoadAtRiskData"),
+        detail: error?.message || t("renewal.failedToLoadAtRiskData"),
         life: 3000
       });
+    } finally {
       setLoading(false);
     }
   };
@@ -198,9 +168,15 @@ const AtRiskAnalysis = () => {
     });
   };
 
-  const handleViewDetails = (rowData) => {
+  const handleViewDetails = async (rowData) => {
     setSelectedPolicy(rowData);
     setDetailsVisible(true);
+    try {
+      const renewal = await renewalsWorkspaceService.getRenewal(rowData.id);
+      setSelectedPolicy({ ...rowData, activities: renewal.activities || [] });
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: t("common.error"), detail: error?.message, life: 3000 });
+    }
   };
 
   const handleCreateActionPlan = (rowData) => {
@@ -224,23 +200,17 @@ const AtRiskAnalysis = () => {
   const handleSaveActionPlan = async () => {
     setLoading(true);
     try {
-      // Update the policy with action plan
-      const updatedPolicies = riskPolicies.map(p =>
-        p.policyNumber === selectedPolicy.policyNumber
-          ? {
-              ...p,
-              actionPlan: {
-                ...actionPlan,
-                status: 'Active',
-                createdDate: new Date().toISOString(),
-                createdBy: 'Current User'
-              }
-            }
-          : p
-      );
-
-      setRiskPolicies(updatedPolicies);
+      const deadline = toIsoDate(actionPlan.deadline);
+      await renewalsWorkspaceService.addActivity(selectedPolicy.id, {
+        type: 'Action Plan',
+        description: actionPlan.notes || actionPlan.specialOffer || `Retention action plan (${actionPlan.priority})`,
+        outcome: actionPlan.specialOffer || undefined,
+        nextAction: actionPlan.assignedTo ? `Assigned to ${actionPlan.assignedTo}` : undefined,
+        followUpDate: deadline,
+        details: { ...actionPlan, deadline }
+      });
       setActionPlanVisible(false);
+      loadInitialData();
 
       toast.current.show({
         severity: 'success',
@@ -252,7 +222,7 @@ const AtRiskAnalysis = () => {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToCreateActionPlan"),
+        detail: error?.message || t("renewal.failedToCreateActionPlan"),
         life: 3000
       });
     } finally {
@@ -260,22 +230,24 @@ const AtRiskAnalysis = () => {
     }
   };
 
-  const handleEscalateConfirm = () => {
+  const handleEscalateConfirm = async () => {
     setEscalateVisible(false);
-    toast.current.show({
-      severity: 'success',
-      summary: t("renewal.policyEscalated"),
-      detail: t("renewal.policyEscalatedToSenior", { policy: selectedPolicy.policyNumber }),
-      life: 3000
-    });
-
-    // Update policy status
-    const updatedPolicies = riskPolicies.map(p =>
-      p.policyNumber === selectedPolicy.policyNumber
-        ? { ...p, escalated: true, escalatedDate: new Date().toISOString() }
-        : p
-    );
-    setRiskPolicies(updatedPolicies);
+    try {
+      await renewalsWorkspaceService.addActivity(selectedPolicy.id, {
+        type: 'Escalation',
+        description: `Escalated to senior management (risk score ${selectedPolicy.riskScore})`,
+        details: { riskScore: selectedPolicy.riskScore, riskCategory: selectedPolicy.riskCategory }
+      });
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.policyEscalated"),
+        detail: t("renewal.policyEscalatedToSenior", { policy: selectedPolicy.policyNumber }),
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      toast.current.show({ severity: 'error', summary: t("common.error"), detail: error?.message, life: 3000 });
+    }
   };
 
   const riskScoreBodyTemplate = (rowData) => {
@@ -288,9 +260,9 @@ const AtRiskAnalysis = () => {
     };
 
     return (
-      <div className="risk-score-cell">
-        <ProgressBar value={score} className={`risk-progress ${getSeverity(score)}`} />
-        <span className={`score-value ${getSeverity(score)}`}>{score}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(score)} showValue={false} />
+        <span className={`bv-meter__value ${getSeverity(score)}`}>{`${score} of 100`}</span>
       </div>
     );
   };
@@ -326,7 +298,9 @@ const AtRiskAnalysis = () => {
     return (
       <div className="days-cell">
         <i className={`pi ${icon} ${severity}`}></i>
-        <span className={severity}>{days} days</span>
+        <span className={severity}>
+          {days < 0 ? t("renewalPolicy.expiredAgo", { count: -days }) : t("renewalPolicy.expiresIn", { count: days })}
+        </span>
       </div>
     );
   };
@@ -352,21 +326,21 @@ const AtRiskAnalysis = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleViewDetails(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         <Button
           icon="pi pi-cog"
           className="p-button-text"
           onClick={() => handleCreateActionPlan(rowData)}
           tooltip={t("renewal.createActionPlan")}
-          disabled={rowData.actionPlan && rowData.actionPlan.status === 'Active'}
+          disabled={rowData.actionPlan && rowData.actionPlan.status === 'Active'} aria-label={t("renewal.createActionPlan")}
         />
         <Button
           icon="pi pi-arrow-up"
           className="p-button-text"
           onClick={() => handleEscalate(rowData)}
           tooltip="Escalate"
-          disabled={rowData.escalated}
+          disabled={rowData.escalated} aria-label="Escalate"
         />
       </div>
     );
@@ -454,18 +428,13 @@ const AtRiskAnalysis = () => {
         <div className="dashboard-cards">
           <Card className="dashboard-card danger">
             <div className="card-content">
-              <div className="card-visual">
-                <Knob
-                  value={dashboardData.avgRiskScore}
-                  size={80}
-                  readOnly
-                  valueColor="#EF4444"
-                  rangeColor="#FEE2E2"
-                />
-              </div>
               <div className="card-info">
                 <span className="card-value">{dashboardData.avgRiskScore}</span>
                 <span className="card-label">{t("renewal.averageRiskScore")}</span>
+                <div className="bv-meter">
+                  <ProgressBar value={progressValue(dashboardData.avgRiskScore)} showValue={false} />
+                  <span className="bv-meter__value">{`${dashboardData.avgRiskScore ?? 0} of 100`}</span>
+                </div>
               </div>
             </div>
           </Card>
@@ -511,7 +480,7 @@ const AtRiskAnalysis = () => {
                   icon="pi pi-refresh"
                   className="p-button-text"
                   onClick={loadInitialData}
-                  tooltip="Refresh"
+                  tooltip="Refresh" aria-label="Refresh"
                 />
                 <Button
                   icon="pi pi-file-excel"
@@ -524,17 +493,17 @@ const AtRiskAnalysis = () => {
                       life: 3000
                     });
                   }}
-                  tooltip="Export to Excel"
+                  tooltip="Export to Excel" aria-label="Export to Excel"
                 />
               </div>
             </div>
 
             <DataTable
-              value={filteredPolicies.length > 0 ? filteredPolicies : riskPolicies}
+              value={filteredPolicies}
               className="risk-table"
               stripedRows
               paginator
-              rows={10}
+              rows={20}
               loading={loading}
               emptyMessage="No at-risk policies found"
               sortMode="multiple"
@@ -616,35 +585,36 @@ const AtRiskAnalysis = () => {
                 <div className="risk-factors">
                   <div className="risk-overview">
                     <div className="risk-score-display">
-                      <Knob
-                        value={selectedPolicy.riskScore}
-                        size={120}
-                        readOnly
-                        valueColor="#EF4444"
-                        rangeColor="#FEE2E2"
-                      />
+                      <div className="bv-meter">
+                        <ProgressBar value={progressValue(selectedPolicy.riskScore)} showValue={false} />
+                        <span className="bv-meter__value">{`${selectedPolicy.riskScore} of 100`}</span>
+                      </div>
                       <div className="score-info">
-                        <span className="score-label">Risk Score</span>
-                        <span className="score-category">{selectedPolicy.riskCategory} Risk</span>
+                        <span className="score-label">{t("renewal.riskScore")}: {selectedPolicy.riskScore}</span>
+                        <span className="score-category">{t("renewal.riskBand", { band: selectedPolicy.riskCategory })}</span>
                       </div>
                     </div>
 
                     <div className="policy-summary">
                       <div className="summary-item">
-                        <label>Policy:</label>
+                        <label>{t("renewal.policyNumberLabel")}</label>
                         <span>{selectedPolicy.policyNumber}</span>
                       </div>
                       <div className="summary-item">
-                        <label>Insured:</label>
+                        <label>{t("renewal.insuredNameLabel")}</label>
                         <span>{selectedPolicy.insuredName}</span>
                       </div>
                       <div className="summary-item">
-                        <label>Premium:</label>
+                        <label>{t("renewal.currentPremium")}</label>
                         <span>{formatCurrency(selectedPolicy.currentPremium)}</span>
                       </div>
                       <div className="summary-item">
-                        <label>Expires In:</label>
-                        <span>{selectedPolicy.daysToExpiry} days</span>
+                        <label>{selectedPolicy.daysToExpiry < 0 ? t("renewal.expired") : t("renewal.expiresIn")}</label>
+                        <span>
+                          {selectedPolicy.daysToExpiry < 0
+                            ? t("renewalPolicy.expiredAgo", { count: -selectedPolicy.daysToExpiry })
+                            : t("renewalPolicy.expiresIn", { count: selectedPolicy.daysToExpiry })}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -658,7 +628,10 @@ const AtRiskAnalysis = () => {
                           <Badge value={`${factor.score} pts`} severity="warning" />
                         </div>
                         <div className="factor-details">{factor.details}</div>
-                        <ProgressBar value={(factor.score / 30) * 100} className="factor-progress" />
+                        <div className="bv-meter">
+                          <ProgressBar value={progressValue((factor.score / 30) * 100)} showValue={false} />
+                          <span className="bv-meter__value">{`${factor.score} of 30`}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -691,7 +664,7 @@ const AtRiskAnalysis = () => {
                         </div>
                         <div className="plan-item">
                           <label>Deadline:</label>
-                          <span>{new Date(selectedPolicy.actionPlan.deadline).toLocaleDateString()}</span>
+                          <span>{formatAppDate(selectedPolicy.actionPlan.deadline)}</span>
                         </div>
                         <div className="plan-item">
                           <label>Status:</label>
@@ -705,29 +678,15 @@ const AtRiskAnalysis = () => {
 
               <TabPanel header="Communication History">
                 <div className="communication-history">
-                  <div className="history-item">
-                    <div className="history-header">
-                      <strong>Initial Contact</strong>
-                      <small>2025-01-20</small>
+                  {(selectedPolicy.activities || []).map(item => (
+                    <div className="history-item" key={item.id}>
+                      <div className="history-header">
+                        <strong>{item.type}{item.method ? ` (${item.method})` : ''}</strong>
+                        <small>{formatAppDate(item.date)}</small>
+                      </div>
+                      <p>{item.description}{item.outcome ? ` - ${item.outcome}` : ''}</p>
                     </div>
-                    <p>Sent renewal notice via email. No response received.</p>
-                  </div>
-
-                  <div className="history-item">
-                    <div className="history-header">
-                      <strong>Follow-up Call</strong>
-                      <small>2025-01-25</small>
-                    </div>
-                    <p>Phone call made. Customer expressed concerns about premium increase.</p>
-                  </div>
-
-                  <div className="history-item">
-                    <div className="history-header">
-                      <strong>Competitor Quote Received</strong>
-                      <small>2025-01-26</small>
-                    </div>
-                    <p>Customer informed us of competitive quote 20% lower than current premium.</p>
-                  </div>
+                  ))}
                 </div>
               </TabPanel>
             </TabView>
@@ -775,7 +734,7 @@ const AtRiskAnalysis = () => {
                     <InputText
                       value={actionPlan.assignedTo}
                       onChange={(e) => setActionPlan({...actionPlan, assignedTo: e.target.value})}
-                      placeholder="Agent name"
+                      placeholder="Sales person"
                     />
                   </div>
 
@@ -784,7 +743,7 @@ const AtRiskAnalysis = () => {
                     <Calendar
                       value={actionPlan.deadline}
                       onChange={(e) => setActionPlan({...actionPlan, deadline: e.value})}
-                      dateFormat="mm/dd/yy"
+                      dateFormat={calendarDateFormat()}
                       minDate={new Date()}
                     />
                   </div>

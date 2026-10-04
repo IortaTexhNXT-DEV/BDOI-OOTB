@@ -1,5 +1,5 @@
 import { Card } from "primereact/card";
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
@@ -12,11 +12,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { postClaimDetailsData } from "../store/claimDetailsMiddleWare";
 import { mapToApiLob } from "../store/claimDetailsMiddleWare";
 import { isFireLob } from "../../../endorsementModule/constants/endorsementCategories";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
 import InputNumberField from "../../../component/inputNumberField";
-import addressService from "../../../../services/addressService";
-import { isThailand } from "../../../../utility/addressHelpers";
+import PhAddressFields from "../../../component/PhAddressFields";
+import { FieldsSkeleton } from "../../../../components/Skeletons";
 
 const ClaimDetailsCard = ({
   leadRefId,
@@ -25,7 +25,6 @@ const ClaimDetailsCard = ({
   initialLob,
 }) => {
   const { t } = useTranslation();
-  const [checked, setChecked] = useState(false);
   const location = useLocation();
 
   // Fire incident/cause-of-loss options (translated)
@@ -35,6 +34,15 @@ const ClaimDetailsCard = ({
     { label: t("claimDetails.typhoon"), value: "Typhoon" },
     { label: t("claimDetails.earthquake"), value: "Earthquake" },
     { label: t("claimDetails.lightning"), value: "Lightning" },
+    { label: t("claimDetails.other"), value: "Other" },
+  ];
+  const MOTOR_INCIDENT_TYPES = [
+    { label: "Collision", value: "Collision" },
+    { label: "Theft / Carnapping", value: "Theft" },
+    { label: "Fire", value: "Fire" },
+    { label: "Flood / Typhoon (Acts of Nature)", value: "Acts of Nature" },
+    { label: "Third-party liability", value: "Third-party liability" },
+    { label: "Glass / windshield damage", value: "Glass damage" },
     { label: t("claimDetails.other"), value: "Other" },
   ];
   const [lastUpdatedData, setLastUpdatedData] = useState(null);
@@ -48,6 +56,10 @@ const ClaimDetailsCard = ({
         loading: claimDetailsMainReducers?.loading,
       };
     }
+  );
+  // "Same as Policy Holder": restored when coming back from the mail step
+  const [checked, setChecked] = useState(
+    claimThirdParty?.isPolicyHolderTheDriver === true
   );
 
   const isFire = isFireLob(
@@ -99,11 +111,21 @@ const ClaimDetailsCard = ({
       claimThirdParty?.insuranceCompanyClaimNumber || "",
   };
 
-  console.log("=== FORM INITIAL VALUES ===");
-  console.log("Form Initial Value:", formInitialValue);
-  console.log("=== END FORM INITIAL VALUES ===");
-
   const dispatch = useDispatch();
+
+  // Policy holder name and address (house/street, barangay, country, province, city, ZIP) copied to the driver
+  const holderToDriver = (values) => ({
+    driverName: values.PolicyHolderName || "",
+    driverHouseNo: values.HouseNo || "",
+    driverBarangay: values.Barangay || "",
+    driverCountry: values.CountryName || "",
+    driverProvince: values.Province || "",
+    driverCity: values.CityName || "",
+    driverZipCode: values.ZipCode || "",
+    driverRoadThanon: values.RoadThanon || "",
+    driverSoiAlley: values.SoiAlley || "",
+    driverMooVillage: values.MooVillage || "",
+  });
 
   const handleSubmit = async (values) => {
     const lob = mapToApiLob(
@@ -111,8 +133,11 @@ const ClaimDetailsCard = ({
         claimDetailsViewData?.productType ||
         initialLob
     );
+    const holderAsDriver = !isFire && checked;
     const payload = {
       ...values,
+      ...(holderAsDriver ? holderToDriver(values) : {}),
+      isPolicyHolderTheDriver: holderAsDriver,
       leadRefId,
       quoteRefId,
       policyRefId,
@@ -136,6 +161,18 @@ const ClaimDetailsCard = ({
     ) {
       errors.driverName = t("claimDetails.driversNameRequired");
     }
+    // date of loss and cause are required for every line; the server checks the policy period
+    if (!values.dateOfIncident) {
+      errors.dateOfIncident = t("claimDetails.dateOfIncidentRequired", "Date of loss is required");
+    } else if (new Date(values.dateOfIncident) > new Date()) {
+      errors.dateOfIncident = t("claimDetails.dateOfIncidentFuture", "Date of loss cannot be in the future");
+    }
+    if (!values.typeOfIncident) {
+      errors.typeOfIncident = t("claimDetails.typeOfIncidentRequired", "Select the cause of loss");
+    }
+    if (values.estimatedClaimAmount != null && Number(values.estimatedClaimAmount) < 0) {
+      errors.estimatedClaimAmount = t("claimDetails.estimateNegative", "Estimate cannot be negative");
+    }
     return errors;
   };
 
@@ -146,298 +183,8 @@ const ClaimDetailsCard = ({
     onSubmit: handleSubmit,
   });
 
-  const [countryList, setCountryList] = useState([]);
-  const [provinceList, setProvinceList] = useState([]);
-  const [cityList, setCityList] = useState([]);
-  const [districtList, setDistrictList] = useState([]);
-  const [driverProvinceList, setDriverProvinceList] = useState([]);
-  const [driverCityList, setDriverCityList] = useState([]);
-  const [driverDistrictList, setDriverDistrictList] = useState([]);
-  const [postalLookupLoading, setPostalLookupLoading] = useState(false);
-  const [driverPostalLookupLoading, setDriverPostalLookupLoading] =
-    useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCountries();
-      if (!cancelled && res.success && res.data) {
-        setCountryList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const selectedCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.CountryName ||
-      c.id === formik.values.CountryName
-  )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) =>
-      (p.name || p.code) === formik.values.Province ||
-      p.id === formik.values.Province
-  )?.id;
-  const selectedCityId = cityList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.CityName ||
-      c.id === formik.values.CityName
-  )?.id;
-
-  const selectedDriverCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.driverCountry ||
-      c.id === formik.values.driverCountry
-  )?.id;
-  const selectedDriverProvinceId = driverProvinceList.find(
-    (p) =>
-      (p.name || p.code) === formik.values.driverProvince ||
-      p.id === formik.values.driverProvince
-  )?.id;
-  const selectedDriverCityId = driverCityList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.driverCity ||
-      c.id === formik.values.driverCity
-  )?.id;
-
-  useEffect(() => {
-    if (!selectedCountryId) {
-      setProvinceList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getProvincesByCountry(selectedCountryId);
-      if (!cancelled && res.success && res.data) {
-        setProvinceList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCountryId]);
-
-  useEffect(() => {
-    if (!selectedProvinceId) {
-      setCityList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCitiesByProvince(selectedProvinceId);
-      if (!cancelled && res.success && res.data) {
-        setCityList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedProvinceId]);
-
-  useEffect(() => {
-    if (!selectedCityId || !isThailand(formik.values.CountryName)) {
-      setDistrictList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getDistrictsByCity(selectedCityId);
-      if (!cancelled && res.success && res.data) {
-        setDistrictList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCityId, formik.values.CountryName]);
-
-  useEffect(() => {
-    if (!selectedDriverCountryId) {
-      setDriverProvinceList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getProvincesByCountry(
-        selectedDriverCountryId
-      );
-      if (!cancelled && res.success && res.data) {
-        setDriverProvinceList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedDriverCountryId]);
-
-  useEffect(() => {
-    if (!selectedDriverProvinceId) {
-      setDriverCityList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCitiesByProvince(
-        selectedDriverProvinceId
-      );
-      if (!cancelled && res.success && res.data) {
-        setDriverCityList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedDriverProvinceId]);
-
-  useEffect(() => {
-    if (!selectedDriverCityId || !isThailand(formik.values.driverCountry)) {
-      setDriverDistrictList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getDistrictsByCity(selectedDriverCityId);
-      if (!cancelled && res.success && res.data) {
-        setDriverDistrictList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedDriverCityId, formik.values.driverCountry]);
-
-  const handlePostalCodeLookup = useCallback(async () => {
-    const country = formik.values.CountryName;
-    const zip = formik.values.ZipCode?.trim();
-    if (!isThailand(country) || !zip) return;
-    setPostalLookupLoading(true);
-    try {
-      const countryCode =
-        countryList.find((c) => (c.name || c.code) === country)?.code || "TH";
-      const res = await addressService.getPostalCodeLookup(
-        countryCode || "TH",
-        zip
-      );
-      if (res.success && res.data && res.data.length > 0) {
-        const first = res.data[0];
-        formik.setFieldValue(
-          "Province",
-          first.province ?? first.Province ?? ""
-        );
-        formik.setFieldValue("CityName", first.city ?? first.City ?? "");
-        formik.setFieldValue(
-          "Barangay",
-          first.district ?? first.District ?? ""
-        );
-      }
-    } finally {
-      setPostalLookupLoading(false);
-    }
-  }, [formik, countryList]);
-
-  const handleDriverPostalCodeLookup = useCallback(async () => {
-    const country = formik.values.driverCountry;
-    const zip = formik.values.driverZipCode?.trim();
-    if (!isThailand(country) || !zip) return;
-    setDriverPostalLookupLoading(true);
-    try {
-      const countryCode =
-        countryList.find((c) => (c.name || c.code) === country)?.code || "TH";
-      const res = await addressService.getPostalCodeLookup(
-        countryCode || "TH",
-        zip
-      );
-      if (res.success && res.data && res.data.length > 0) {
-        const first = res.data[0];
-        formik.setFieldValue(
-          "driverProvince",
-          first.province ?? first.Province ?? ""
-        );
-        formik.setFieldValue("driverCity", first.city ?? first.City ?? "");
-        formik.setFieldValue(
-          "driverBarangay",
-          first.district ?? first.District ?? ""
-        );
-      }
-    } finally {
-      setDriverPostalLookupLoading(false);
-    }
-  }, [formik, countryList]);
-
-  const countryOptions = useMemo(
-    () =>
-      countryList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [countryList]
-  );
-  const availableProvinces = useMemo(
-    () =>
-      provinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [provinceList]
-  );
-  const availableCities = useMemo(
-    () =>
-      cityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [cityList]
-  );
-  const availableDistricts = useMemo(
-    () =>
-      districtList.map((d) => ({
-        label: d.name || d.code || String(d.id),
-        value: d.name || d.code || String(d.id),
-      })),
-    [districtList]
-  );
-  const availableDriverProvinces = useMemo(
-    () =>
-      driverProvinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [driverProvinceList]
-  );
-  const availableDriverCities = useMemo(
-    () =>
-      driverCityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [driverCityList]
-  );
-  const availableDriverDistricts = useMemo(
-    () =>
-      driverDistrictList.map((d) => ({
-        label: d.name || d.code || String(d.id),
-        value: d.name || d.code || String(d.id),
-      })),
-    [driverDistrictList]
-  );
-
   // Update form when Redux data changes
   useEffect(() => {
-    console.log("=== FORM UPDATE USEEFFECT TRIGGERED ===");
-    console.log("Claim Details View Data:", claimDetailsViewData);
-    console.log("Claim Third Party Data:", claimThirdParty);
-    console.log("Data keys:", Object.keys(claimDetailsViewData || {}));
-    console.log("Third Party Data keys:", Object.keys(claimThirdParty || {}));
-    console.log("Data length:", Object.keys(claimDetailsViewData || {}).length);
-    console.log(
-      "Third Party Data length:",
-      Object.keys(claimThirdParty || {}).length
-    );
-    console.log("Last Updated Data:", lastUpdatedData);
-    console.log("Current Formik Values:", formik.values);
-
     // Check if we have either claim details or third party data
     const hasClaimDetails =
       claimDetailsViewData && Object.keys(claimDetailsViewData).length > 0;
@@ -451,15 +198,8 @@ const ClaimDetailsCard = ({
         claimThirdParty,
       });
       if (lastUpdatedData === dataString) {
-        console.log("Data hasn't changed, skipping form update");
         return;
       }
-
-      console.log("=== UPDATING FORM WITH REDUX DATA ===");
-      console.log("Claim Details View Data:", claimDetailsViewData);
-      console.log("Claim Third Party Data:", claimThirdParty);
-      console.log("Last Updated Data:", lastUpdatedData);
-      console.log("Current Formik Values (before update):", formik.values);
 
       // Check if user has already entered data (scenario 3: coming back from mail screen)
       const hasUserData =
@@ -473,7 +213,7 @@ const ClaimDetailsCard = ({
           formik.values.addressOfIncident.trim() !== "") ||
         (formik.values.typeOfIncident && formik.values.typeOfIncident !== "");
 
-      // Always hydrate address/Thailand fields from API snapshot when form is missing them
+      // Always hydrate the address fields from API snapshot when form is missing them
       const needsAddressHydration =
         (claimDetailsViewData?.CountryName &&
           !formik.values.CountryName) ||
@@ -494,7 +234,6 @@ const ClaimDetailsCard = ({
 
       // If user has already entered data, don't override it — unless address snapshot still needs hydration
       if (hasUserData && !needsAddressHydration) {
-        console.log("User has entered data, preserving existing form values");
         setLastUpdatedData(dataString);
         return;
       }
@@ -577,7 +316,6 @@ const ClaimDetailsCard = ({
       }
 
       // Only update form with API data if user hasn't entered anything (scenarios 1 & 2: new claim or edit)
-      console.log("No user data found, updating form with API data");
 
       const updatedValues = {
         InsuranceCompanyName: claimDetailsViewData?.InsuranceCompanyName || "",
@@ -660,42 +398,19 @@ const ClaimDetailsCard = ({
           claimThirdParty?.insuranceCompanyClaimNumber || "",
       };
 
-      console.log("Updated Form Values:", updatedValues);
       formik.setValues(updatedValues);
       setLastUpdatedData(dataString);
-
-      console.log("=== FORM VALUES AFTER UPDATE ===");
-      console.log("Formik values after setValues:", formik.values);
-      console.log("=== END FORM VALUES AFTER UPDATE ===");
-
-      console.log("=== END UPDATING FORM WITH REDUX DATA ===");
-    } else {
-      console.log("No data to update form with");
     }
-  }, [claimDetailsViewData, claimThirdParty, lastUpdatedData, checked]); // Added claimThirdParty to dependencies
+  }, [claimDetailsViewData, claimThirdParty, lastUpdatedData, checked]);
 
-  console.log("=== FORMIK STATE ===");
-  console.log("Formik Values:", formik.values);
-  console.log("Formik Touched:", formik.touched);
-  console.log("Formik Errors:", formik.errors);
-  console.log("=== END FORMIK STATE ===");
   const handleCheckboxChange = (e) => {
     setChecked(e.checked);
 
     if (e.checked) {
-      // Copy current policyholder form values to driver
+      // Copy current policyholder name and address to the driver
       formik.setValues({
         ...formik.values,
-        driverName: formik.values.PolicyHolderName || "",
-        driverHouseNo: formik.values.HouseNo || "",
-        driverBarangay: formik.values.Barangay || "",
-        driverCountry: formik.values.CountryName || "",
-        driverProvince: formik.values.Province || "",
-        driverCity: formik.values.CityName || "",
-        driverZipCode: formik.values.ZipCode || "",
-        driverRoadThanon: formik.values.RoadThanon || "",
-        driverSoiAlley: formik.values.SoiAlley || "",
-        driverMooVillage: formik.values.MooVillage || "",
+        ...holderToDriver(formik.values),
       });
     } else {
       formik.setValues({
@@ -722,8 +437,8 @@ const ClaimDetailsCard = ({
           <div className="claim__details__card__container__title">
             {t("claimDetails.claimRequest")}
           </div>
-          <div className="text-center p-4">
-            <div>{t("claimDetails.loadingPolicyAndLead")}</div>
+          <div className="p-4">
+            <FieldsSkeleton rows={3} columns={3} />
           </div>
         </Card>
       </div>
@@ -759,142 +474,14 @@ const ClaimDetailsCard = ({
               label={t("claimDetails.policyHolderName")}
               value={formik.values.PolicyHolderName}
               onChange={(e) => {
-                console.log("Policy Holder Name changed:", e.target.value);
                 formik.handleChange("PolicyHolderName")(e);
               }}
             />
           </div>
         </div>
 
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={t("claimDetails.country")}
-              value={formik.values.CountryName}
-              options={countryOptions}
-              onChange={(e) => {
-                formik.setFieldValue("CountryName", e.value);
-                formik.setFieldValue("Province", "");
-                formik.setFieldValue("CityName", "");
-                formik.setFieldValue("Barangay", "");
-                formik.setFieldValue("RoadThanon", "");
-                formik.setFieldValue("SoiAlley", "");
-                formik.setFieldValue("MooVillage", "");
-              }}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={
-                isThailand(formik.values.CountryName)
-                  ? t("leadCreation.postalCode")
-                  : t("claimDetails.zipCode")
-              }
-              value={formik.values.ZipCode}
-              onChange={formik.handleChange("ZipCode")}
-              onBlur={handlePostalCodeLookup}
-            />
-            {postalLookupLoading && (
-              <div style={{ fontSize: 12, color: "#666" }} className="mt-1">
-                {t("leadCreation.lookupInProgress")}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={
-                isThailand(formik.values.CountryName)
-                  ? t("leadCreation.provinceChangwat")
-                  : t("claimDetails.province")
-              }
-              value={formik.values.Province}
-              options={availableProvinces}
-              onChange={(e) => {
-                formik.setFieldValue("Province", e.value);
-                formik.setFieldValue("CityName", "");
-                formik.setFieldValue("Barangay", "");
-              }}
-              disabled={!formik.values.CountryName}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={
-                isThailand(formik.values.CountryName)
-                  ? t("leadCreation.districtAmphoe")
-                  : t("claimDetails.city")
-              }
-              value={formik.values.CityName}
-              options={availableCities}
-              onChange={(e) => {
-                formik.setFieldValue("CityName", e.value);
-                formik.setFieldValue("Barangay", "");
-              }}
-              disabled={!formik.values.Province}
-            />
-          </div>
-        </div>
-
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            {isThailand(formik.values.CountryName) &&
-            districtList.length > 0 ? (
-              <DropdownField
-                label={t("leadCreation.subDistrictTambon")}
-                value={formik.values.Barangay}
-                options={availableDistricts}
-                onChange={(e) => formik.setFieldValue("Barangay", e.value)}
-                disabled={!formik.values.CityName}
-              />
-            ) : (
-              <InputTextField
-                label={
-                  isThailand(formik.values.CountryName)
-                    ? t("leadCreation.subDistrictTambon")
-                    : t("claimDetails.barangaySubd")
-                }
-                value={formik.values.Barangay}
-                onChange={formik.handleChange("Barangay")}
-              />
-            )}
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("claimDetails.houseNoUnitStreet")}
-              value={formik.values.HouseNo}
-              onChange={formik.handleChange("HouseNo")}
-            />
-          </div>
-        </div>
-
-        {isThailand(formik.values.CountryName) && (
-          <div className="grid mt-2">
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.roadThanon")}
-                value={formik.values.RoadThanon}
-                onChange={formik.handleChange("RoadThanon")}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.soiAlley")}
-                value={formik.values.SoiAlley}
-                onChange={formik.handleChange("SoiAlley")}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.mooVillage")}
-                value={formik.values.MooVillage}
-                onChange={formik.handleChange("MooVillage")}
-              />
-            </div>
-          </div>
-        )}
+        {/* Policy holder's Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+        <PhAddressFields formik={formik} names={{ country: "CountryName", region: "Region", province: "Province", city: "CityName", barangay: "Barangay", houseNo: "HouseNo", street: "RoadThanon", zipCode: "ZipCode" }} />
 
         {claimDetailsViewData?.isCoInsurance && (
           <div className="co-insurance-info-section mt-4">
@@ -934,7 +521,7 @@ const ClaimDetailsCard = ({
           </div>
         )}
 
-        {isFire && (
+        {(
           <>
             <div className="claim__details__card__sub__title mt-4 ml-2">
               {t("claimDetails.incidentDetails")}
@@ -947,8 +534,12 @@ const ClaimDetailsCard = ({
                   onChange={(e) =>
                     formik.setFieldValue("dateOfIncident", e.value)
                   }
-                  dateFormat="yy-mm-dd"
+                  dateFormat="dd/mm/yy"
+                  maxDate={new Date()}
                 />
+                {formik.touched.dateOfIncident && formik.errors.dateOfIncident && (
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.dateOfIncident}</div>
+                )}
               </div>
               <div className="col-12 md:col-6 lg:col-6">
                 <InputTextField
@@ -998,11 +589,14 @@ const ClaimDetailsCard = ({
                   onChange={(e) =>
                     formik.setFieldValue("typeOfIncident", e.value)
                   }
-                  options={FIRE_INCIDENT_TYPES}
+                  options={isFire ? FIRE_INCIDENT_TYPES : MOTOR_INCIDENT_TYPES}
                   optionLabel="label"
                   optionValue="value"
                   placeholder={t("claimDetails.select")}
                 />
+                {formik.touched.typeOfIncident && formik.errors.typeOfIncident && (
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>{formik.errors.typeOfIncident}</div>
+                )}
               </div>
             </div>
             <div className="grid mt-2">
@@ -1049,149 +643,19 @@ const ClaimDetailsCard = ({
                   label={t("claimDetails.driversNameLabel")}
               value={formik.values.driverName}
               onChange={(e) => {
-                console.log("Driver's name changed:", e.target.value);
                 formik.handleChange("driverName")(e);
               }}
             />
             {formik.touched.driverName && formik.errors.driverName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.driverName}
               </div>
             )}
           </div>
         </div>
 
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={t("claimDetails.country")}
-              value={formik.values.driverCountry}
-              options={countryOptions}
-              onChange={(e) => {
-                formik.setFieldValue("driverCountry", e.value);
-                formik.setFieldValue("driverProvince", "");
-                formik.setFieldValue("driverCity", "");
-                formik.setFieldValue("driverBarangay", "");
-                formik.setFieldValue("driverRoadThanon", "");
-                formik.setFieldValue("driverSoiAlley", "");
-                formik.setFieldValue("driverMooVillage", "");
-              }}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={
-                isThailand(formik.values.driverCountry)
-                  ? t("leadCreation.postalCode")
-                  : t("claimDetails.zipCode")
-              }
-              value={formik.values.driverZipCode}
-              onChange={formik.handleChange("driverZipCode")}
-              onBlur={handleDriverPostalCodeLookup}
-            />
-            {driverPostalLookupLoading && (
-              <div style={{ fontSize: 12, color: "#666" }} className="mt-1">
-                {t("leadCreation.lookupInProgress")}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={
-                isThailand(formik.values.driverCountry)
-                  ? t("leadCreation.provinceChangwat")
-                  : t("claimDetails.province")
-              }
-              value={formik.values.driverProvince}
-              options={availableDriverProvinces}
-              onChange={(e) => {
-                formik.setFieldValue("driverProvince", e.value);
-                formik.setFieldValue("driverCity", "");
-                formik.setFieldValue("driverBarangay", "");
-              }}
-              disabled={!formik.values.driverCountry}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <DropdownField
-              label={
-                isThailand(formik.values.driverCountry)
-                  ? t("leadCreation.districtAmphoe")
-                  : t("claimDetails.city")
-              }
-              value={formik.values.driverCity}
-              options={availableDriverCities}
-              onChange={(e) => {
-                formik.setFieldValue("driverCity", e.value);
-                formik.setFieldValue("driverBarangay", "");
-              }}
-              disabled={!formik.values.driverProvince}
-            />
-          </div>
-        </div>
-
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            {isThailand(formik.values.driverCountry) &&
-            driverDistrictList.length > 0 ? (
-              <DropdownField
-                label={t("leadCreation.subDistrictTambon")}
-                value={formik.values.driverBarangay}
-                options={availableDriverDistricts}
-                onChange={(e) =>
-                  formik.setFieldValue("driverBarangay", e.value)
-                }
-                disabled={!formik.values.driverCity}
-              />
-            ) : (
-              <InputTextField
-                label={
-                  isThailand(formik.values.driverCountry)
-                    ? t("leadCreation.subDistrictTambon")
-                    : t("claimDetails.barangaySubd")
-                }
-                value={formik.values.driverBarangay}
-                onChange={formik.handleChange("driverBarangay")}
-              />
-            )}
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("claimDetails.houseNoUnitStreet")}
-              value={formik.values.driverHouseNo}
-              onChange={formik.handleChange("driverHouseNo")}
-            />
-          </div>
-        </div>
-
-        {isThailand(formik.values.driverCountry) && (
-          <div className="grid mt-2">
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.roadThanon")}
-                value={formik.values.driverRoadThanon}
-                onChange={formik.handleChange("driverRoadThanon")}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.soiAlley")}
-                value={formik.values.driverSoiAlley}
-                onChange={formik.handleChange("driverSoiAlley")}
-              />
-            </div>
-            <div className="col-12 md:col-6 lg:col-6">
-              <InputTextField
-                label={t("leadCreation.mooVillage")}
-                value={formik.values.driverMooVillage}
-                onChange={formik.handleChange("driverMooVillage")}
-              />
-            </div>
-          </div>
-        )}
+        {/* Driver's Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+        <PhAddressFields formik={formik} names={{ country: "driverCountry", region: "driverRegion", province: "driverProvince", city: "driverCity", barangay: "driverBarangay", houseNo: "driverHouseNo", street: "driverRoadThanon", zipCode: "driverZipCode" }} />
           </>
         )}
 
@@ -1207,7 +671,7 @@ const ClaimDetailsCard = ({
                 onChange={formik.handleChange("name")}
               />
               {formik.touched.name && formik.errors.name && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.name}
                 </div>
               )}
@@ -1219,7 +683,7 @@ const ClaimDetailsCard = ({
                 onChange={formik.handleChange("contactNumber")}
               />
               {formik.touched.contactNumber && formik.errors.contactNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.contactNumber}
                 </div>
               )}
@@ -1235,7 +699,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("plateNumber")}
                 />
                 {formik.touched.plateNumber && formik.errors.plateNumber && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.plateNumber}
                   </div>
                 )}
@@ -1247,7 +711,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("unit")}
                 />
                 {formik.touched.unit && formik.errors.unit && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.unit}
                   </div>
                 )}
@@ -1264,7 +728,7 @@ const ClaimDetailsCard = ({
                   onChange={formik.handleChange("shop")}
                 />
                 {formik.touched.shop && formik.errors.shop && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.shop}
                   </div>
                 )}
@@ -1278,7 +742,7 @@ const ClaimDetailsCard = ({
               />
               {formik.touched.InsuranceCompanyN &&
                 formik.errors.InsuranceCompanyN && (
-                  <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                     {formik.errors.InsuranceCompanyN}
                   </div>
                 )}

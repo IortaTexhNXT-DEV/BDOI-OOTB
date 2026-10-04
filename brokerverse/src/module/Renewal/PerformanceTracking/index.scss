@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__performance__tracking__master {
@@ -148,12 +149,6 @@
             background: $default-background-grey;
             border-radius: 8px;
 
-            .kpi-visual {
-              .p-knob {
-                margin: 0;
-              }
-            }
-
             .kpi-details {
               flex: 1;
 
@@ -161,7 +156,6 @@
                 display: block;
                 font-size: 14px;
                 color: $grey;
-                text-transform: uppercase;
                 font-weight: 600;
                 margin-bottom: 8px;
               }
@@ -327,31 +321,13 @@
                       display: flex;
                       justify-content: center;
                       align-items: center;
-                      width: 40px;
-                      height: 40px;
+                      width: 32px;
+                      height: 32px;
                       border-radius: 50%;
                       font-weight: 700;
-
-                      &.gold {
-                        background: linear-gradient(135deg, #FFD700, #FFA500);
-                        color: white;
-                      }
-
-                      &.silver {
-                        background: linear-gradient(135deg, #C0C0C0, #A0A0A0);
-                        color: white;
-                      }
-
-                      &.bronze {
-                        background: linear-gradient(135deg, #CD7F32, #B87333);
-                        color: white;
-                      }
-
-                      &.default {
-                        background: $default-background-grey;
-                        color: $grey;
-                        font-size: 12px;
-                      }
+                      font-size: 12px;
+                      background: $default-background-grey;
+                      color: $dark-grey;
 
                       .rank-icon {
                         font-size: 16px;
@@ -403,11 +379,11 @@
                         }
 
                         &.warning .p-progressbar-value {
-                          background: #F59E0B;
+                          background: $color-warning;
                         }
 
                         &.danger .p-progressbar-value {
-                          background: $dark-red;
+                          background: $color-danger;
                         }
                       }
 
@@ -423,11 +399,11 @@
                         }
 
                         &.warning {
-                          color: #F59E0B;
+                          color: $color-warning;
                         }
 
                         &.danger {
-                          color: $dark-red;
+                          color: $color-danger;
                         }
                       }
                     }
@@ -474,13 +450,13 @@
                       }
 
                       &.p-tag-warning {
-                        background: lighten(#F59E0B, 40%);
-                        color: darken(#F59E0B, 20%);
+                        background: $color-warning-050;
+                        color: $color-warning;
                       }
 
                       &.p-tag-danger {
-                        background: lighten($dark-red, 40%);
-                        color: $dark-red;
+                        background: $color-danger-050;
+                        color: $color-danger;
                       }
                     }
                   }
@@ -537,11 +513,11 @@
                     }
 
                     &.warning .p-progressbar-value {
-                      background: #F59E0B;
+                      background: $color-warning;
                     }
 
                     &.danger .p-progressbar-value {
-                      background: $dark-red;
+                      background: $color-danger;
                     }
                   }
 
@@ -592,7 +568,6 @@
                 .metric-label {
                   font-size: 12px;
                   color: $grey;
-                  text-transform: uppercase;
                   font-weight: 600;
                   margin-bottom: 8px;
                 }
@@ -614,7 +589,7 @@
                   }
 
                   &.warning {
-                    color: #F59E0B;
+                    color: $color-warning;
                   }
                 }
               }
@@ -661,20 +636,16 @@
             gap: 16px;
             padding: 20px;
             border-radius: 8px;
-            border-left: 4px solid;
+            border: 1px solid $color-border;
+            border-left: 3px solid $color-border;
 
             .insight-icon {
               display: flex;
-              align-items: center;
-              justify-content: center;
-              width: 40px;
-              height: 40px;
-              border-radius: 50%;
+              align-items: flex-start;
               flex-shrink: 0;
 
               .pi {
                 font-size: 18px;
-                color: white;
               }
             }
 
@@ -696,39 +667,31 @@
               }
             }
 
-            &.positive {
-              background: lighten($green, 45%);
-              border-left-color: $green;
+            &.positive,
+            &.success {
+              background: $color-success-050;
+              border-left-color: $color-success;
 
-              .insight-icon {
-                background: $green;
+              .insight-icon .pi {
+                color: $color-success;
               }
             }
 
             &.warning {
-              background: lighten(#F59E0B, 45%);
-              border-left-color: #F59E0B;
+              background: $color-warning-050;
+              border-left-color: $color-warning;
 
-              .insight-icon {
-                background: #F59E0B;
+              .insight-icon .pi {
+                color: $color-warning;
               }
             }
 
             &.info {
-              background: lighten($primary-blue, 45%);
-              border-left-color: $primary-blue;
+              background: $brand-blue-050;
+              border-left-color: $brand-blue;
 
-              .insight-icon {
-                background: $primary-blue;
-              }
-            }
-
-            &.success {
-              background: lighten($green, 45%);
-              border-left-color: $green;
-
-              .insight-icon {
-                background: $green;
+              .insight-icon .pi {
+                color: $brand-blue;
               }
             }
           }
@@ -737,3 +700,4 @@
     }
   }
 }
+@import "../renewalPages";

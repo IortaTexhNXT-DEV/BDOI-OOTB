@@ -10,7 +10,13 @@ import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
+import ImportDialog from "../../../components/ImportDialog";
+import { hasPermission } from "../../../utils/canOpen";
+
+const OPEN_ITEMS_UPLOAD = [{ label: "Open items", templatePath: "/receipts/opening-items/template", uploadPath: "/receipts/opening-items/import" }];
 
 const CollectionsList = () => {
   const { t } = useTranslation();
@@ -20,7 +26,7 @@ const CollectionsList = () => {
   const [totalRecords, setTotalRecords] = useState(0);
   const [lazyState, setLazyState] = useState({
     first: 0,
-    rows: 10,
+    rows: 20,
     page: 1,
     sortField: null,
     sortOrder: null,
@@ -34,6 +40,7 @@ const CollectionsList = () => {
   const toast = useRef(null);
   const navigate = useNavigate();
   const [sendingReminders, setSendingReminders] = useState(false);
+  const [showOpenItems, setShowOpenItems] = useState(false);
 
   const statusOptions = [
     { label: t("collectionsList.allStatus"), value: "" },
@@ -83,7 +90,7 @@ const CollectionsList = () => {
         setTotalRecords(result.pagination.total);
       }
     } catch (error) {
-      console.error("Load collections error:", error);
+      logger.error("Load collections error:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -105,12 +112,6 @@ const CollectionsList = () => {
   };
 
   const onSort = (event) => {
-    console.log("Sort event:", event);
-    console.log("Current lazyState sortField:", lazyState.sortField);
-    console.log("Current lazyState sortOrder:", lazyState.sortOrder);
-    console.log("New sortField:", event.sortField);
-    console.log("New sortOrder:", event.sortOrder);
-
     // If clicking the same field, toggle the sort order
     let newSortOrder = event.sortOrder;
     if (lazyState.sortField === event.sortField) {
@@ -122,8 +123,6 @@ const CollectionsList = () => {
         newSortOrder = 1; // Start with ascending
       }
     }
-
-    console.log("Final sortOrder:", newSortOrder);
 
     setLazyState({
       ...lazyState,
@@ -145,11 +144,7 @@ const CollectionsList = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    return formatAppDate(dateString);
   };
 
   // Column templates
@@ -244,7 +239,7 @@ const CollectionsList = () => {
         });
       }
     } catch (error) {
-      console.error("Send reminders error:", error);
+      logger.error("Send reminders error:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -263,14 +258,19 @@ const CollectionsList = () => {
 
       <div className="reminder-button-section">
         <Button
-          label={t("collectionsList.manualTriggerReminder")}
+          label={t("collectionsList.sendPaymentRemindersNow")}
           icon="pi pi-send"
           className="p-button-info p-button-rounded"
           onClick={handleSendDueDateReminders}
           loading={sendingReminders}
           tooltipOptions={{ position: "top" }}
         />
+        {hasPermission("write:receipts") && (
+          <Button label="Import open items" icon="pi pi-upload" className="p-button-outlined p-button-rounded ml-2" onClick={() => setShowOpenItems(true)} />
+        )}
       </div>
+      <ImportDialog visible={showOpenItems} onHide={() => setShowOpenItems(false)} title="Import open items (go-live)" targets={OPEN_ITEMS_UPLOAD} goLiveDate onDone={() => loadCollections()}
+        note="Unpaid premium bills of the old system, loaded against policies already in BrokerVerse. No journal is posted: the GL opening balance carries them. Rows already loaded for the same go-live date are skipped." />
 
       <Card>
         <div className="filter-section">
@@ -377,12 +377,6 @@ const CollectionsList = () => {
               body={statusBodyTemplate}
               style={{ minWidth: "120px" }}
             />
-            {/* <Column
-            field="overdueLevel"
-            header={t("tables.level")}
-            body={overdueLevelBodyTemplate}
-            style={{ minWidth: "90px" }}
-          /> */}
             <Column
               field="daysPastDue"
               header={t("tables.daysOverdue")}

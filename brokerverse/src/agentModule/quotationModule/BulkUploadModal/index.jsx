@@ -8,6 +8,7 @@ import { ProgressBar } from "primereact/progressbar";
 import quotationService from "../../../services/quotationService";
 import SvgUpload from "../../../assets/agentIcon/SvgUpload";
 import "./index.scss";
+import { downloadBulkUploadTemplate, isSupportedUploadFile } from "../../component/bulkUploadTemplate";
 
 const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
   const { t } = useTranslation();
@@ -21,12 +22,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     const file = e.files[0];
     if (file) {
       // Validate file type
-      const validTypes = [
-        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-        'application/vnd.ms-excel'
-      ];
-      
-      if (!validTypes.includes(file.type) && !file.name.endsWith('.xlsx')) {
+      if (!isSupportedUploadFile(file)) {
         toast.current.show({
           severity: 'error',
           summary: t('bulkUploadQuotations.invalidFile'),
@@ -70,15 +66,11 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     try {
       const result = await quotationService.bulkUploadQuotations(selectedFile);
 
-      console.log('Bulk upload result:', result);
-
       if (result.success) {
         const apiResponse = result.data;
-        console.log('Upload data (API response):', apiResponse);
         
         // Handle the API response structure
         const data = apiResponse.data || apiResponse;
-        console.log('Nested data:', data);
         
         // Store the upload result to show processing status
         setUploadResult(data);
@@ -136,12 +128,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
     onHide();
   };
 
-
-  const handleDownloadTemplate = () => {
-    const templateUrl = 'https://salesverse-inxt-public-documents-20250531.s3.ap-southeast-1.amazonaws.com/sample-xl/Quotations-Bulk-Upload.xlsx';
-    window.open(templateUrl, '_blank');
-  };
-
+  const handleDownloadTemplate = () => downloadBulkUploadTemplate("quotations");
 
   return (
     <Dialog
@@ -180,7 +167,7 @@ const BulkUploadModal = ({ visible, onHide, onUploadSuccess }) => {
                 ref={fileUploadRef}
                 mode="basic"
                 name="file"
-                accept=".xlsx"
+                accept=".xlsx,.csv"
                 maxFileSize={10485760}
                 customUpload
                 auto={false}

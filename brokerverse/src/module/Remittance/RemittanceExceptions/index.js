@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { DataTable } from "primereact/datatable";
@@ -9,25 +9,121 @@ import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
 import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
-import { FileUpload } from "primereact/fileupload";
+import { Toast } from "primereact/toast";
+import remittanceService from "../../../services/remittanceService";
+import authService from "../../../services/authService";
+import { dateBody, downloadCsv, formatDateTime, isoDate, showError, showSuccess } from "../shared";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
+
+const emptyResolution = { resolutionType: "", resolutionAmount: 0, resolutionNotes: "" };
+const SEVERITIES = ["Critical", "High", "Medium", "Low"];
+const STATUSES = ["Open", "In Progress", "Escalated", "Resolved"];
+const allOption = (values) => [{ label: "All", value: "All" }, ...values.map((v) => ({ label: v, value: v }))];
+
+/** Due date from the exception SLA ("24 hours", "2 days") counted from creation. */
+const dueBy = (row) => {
+  const match = /(\d+)\s*(hour|day)/i.exec(String(row.sla || ""));
+  if (!match || !row.createdAt) return "-";
+  const hours = Number(match[1]) * (/day/i.test(match[2]) ? 24 : 1);
+  return formatDateTime(new Date(new Date(row.createdAt).getTime() + hours * 3600000));
+};
 
 const RemittanceExceptions = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode } = useFormatCurrency();
+  const toast = useRef(null);
+  const currentUser = authService.getUser()?.username || localStorage.getItem("USERNAME") || "";
   const [selectedException, setSelectedException] = useState(null);
-  const [resolutionData, setResolutionData] = useState({
-    resolutionType: "",
-    resolutionAmount: 0,
-    resolutionNotes: ""
-  });
+  const [resolutionData, setResolutionData] = useState(emptyResolution);
+  const [exceptions, setExceptions] = useState([]);
+  const [filters, setFilters] = useState({ type: "All", severity: "All", status: "All" });
+  const [loading, setLoading] = useState(false);
 
-  const exceptions = [
-    { id: 1, severity: "Critical", exceptionId: "EXC001", type: "Amount Mismatch", remittanceNo: "REM20250926001", amount: 25000, age: 2, assignedTo: "John Smith", status: "New" },
-    { id: 2, severity: "High", exceptionId: "EXC002", type: "Missing Document", remittanceNo: "REM20250926002", amount: 15000, age: 5, assignedTo: "Sarah Johnson", status: "In Progress" },
-    { id: 3, severity: "Medium", exceptionId: "EXC003", type: "Duplicate Entry", remittanceNo: "REM20250925003", amount: 8500, age: 1, assignedTo: "", status: "New" },
-    { id: 4, severity: "Low", exceptionId: "EXC004", type: "Date Discrepancy", remittanceNo: "REM20250925004", amount: 3200, age: 3, assignedTo: "Mike Wilson", status: "Resolved" }
-  ];
+  const loadExceptions = async () => {
+    setLoading(true);
+    try {
+      const rows = await remittanceService.listExceptions({ perPage: 500 });
+      setExceptions(rows || []);
+      setSelectedException((sel) => (sel ? (rows || []).find((r) => r.id === sel.id) || null : null));
+    } catch (e) {
+      showError(toast, e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadExceptions();
+  }, []);
+
+  const visible = exceptions.filter((e) =>
+    (filters.type === "All" || e.type === filters.type)
+    && (filters.severity === "All" || e.severity === filters.severity)
+    && (filters.status === "All" || e.status === filters.status));
+  const today = isoDate(new Date());
+  const unresolved = exceptions.filter((e) => e.status !== "Resolved");
+  const summary = {
+    total: exceptions.length,
+    unresolved: unresolved.length,
+    processing: exceptions.filter((e) => e.status === "In Progress").length,
+    resolvedToday: exceptions.filter((e) => e.status === "Resolved" && String(e.resolvedAt || e.lastModified || "").startsWith(today)).length,
+    atRisk: unresolved.reduce((s, e) => s + Number(e.amount || 0), 0)
+  };
+
+  const run = async (action, message) => {
+    try {
+      await action();
+      showSuccess(toast, message);
+      setResolutionData(emptyResolution);
+      await loadExceptions();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
+  const startException = (row, assignee = currentUser) => run(() => remittanceService.assignException(row.id, assignee), `${row.exceptionId} assigned to ${assignee}`);
+
+  const resolveException = async (row, resolution) => {
+    const text = resolution || await promptText(t("remittance.resolutionNotes"), "");
+    if (!text) return;
+    run(() => remittanceService.resolveException(row.id, text), `${row.exceptionId} resolved`);
+  };
+
+  const escalateException = async (row, reason) => {
+    const text = reason || await promptText(t("remittance.escalate"), "");
+    if (!text) return;
+    run(() => remittanceService.escalateException(row.id, text), `${row.exceptionId} escalated`);
+  };
+
+  const resolutionText = () => [resolutionData.resolutionType, resolutionData.resolutionAmount ? formatCurrency(resolutionData.resolutionAmount) : null, resolutionData.resolutionNotes]
+    .filter(Boolean).join(" - ");
+
+  const handleBulkAssign = async () => {
+    const assignee = await promptText(t("remittance.delegateTo"), currentUser);
+    if (assignee && selectedException) startException(selectedException, assignee);
+  };
+
+  // the report is a CSV of the listed exceptions; say so when there is nothing to put in it
+  const exportRows = (rows, name) => {
+    if (!rows?.length) {
+      toast.current?.show({ severity: "info", summary: t("remittance.createReport"), detail: "There are no exceptions to include in the report.", life: 4000 });
+      return;
+    }
+    exportCsv(rows, name);
+    toast.current?.show({ severity: "success", summary: t("remittance.createReport"), detail: `${rows.length} exception(s) exported to ${name}_${today}.csv`, life: 3000 });
+  };
+  const exportCsv = (rows, name) => downloadCsv(`${name}_${today}.csv`, rows, [
+    { field: "exceptionId", header: "ID" },
+    { field: "severity", header: "Severity" },
+    { field: "type", header: "Type" },
+    { field: "remittanceNo", header: "Reference No" },
+    { field: "amount", header: "Amount" },
+    { field: "age", header: "Age (days)" },
+    { field: "assignedTo", header: "Assigned To" },
+    { field: "status", header: "Status" },
+    { field: "description", header: "Description" }
+  ]);
 
   const severityBodyTemplate = (rowData) => {
     const getSeverity = (severity) => {
@@ -47,7 +143,7 @@ const RemittanceExceptions = () => {
       switch (status) {
         case 'Resolved': return 'success';
         case 'In Progress': return 'warning';
-        case 'New': return 'danger';
+        case 'Open': return 'danger';
         case 'Escalated': return 'info';
         default: return null;
       }
@@ -58,50 +154,51 @@ const RemittanceExceptions = () => {
   const actionsBodyTemplate = (rowData) => {
     return (
       <div className="action-buttons">
-        <Button icon="pi pi-play" className="p-button-rounded p-button-text" tooltip={t("remittance.start")} disabled={rowData.status !== 'New'} />
-        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.resolve")} disabled={rowData.status !== 'In Progress'} />
-        <Button icon="pi pi-arrow-up" className="p-button-rounded p-button-warning p-button-text" tooltip={t("remittance.escalate")} />
+        <Button icon="pi pi-play" className="p-button-rounded p-button-text" tooltip={t("remittance.start")} disabled={rowData.status !== 'Open'} onClick={() => startException(rowData)} aria-label={t("remittance.start")} />
+        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.resolve")} disabled={!['In Progress', 'Escalated'].includes(rowData.status)} onClick={() => resolveException(rowData)} aria-label={t("remittance.resolve")} />
+        <Button icon="pi pi-arrow-up" className="p-button-rounded p-button-warning p-button-text" tooltip={t("remittance.escalate")} disabled={['Resolved', 'Escalated'].includes(rowData.status)} onClick={() => escalateException(rowData)} aria-label={t("remittance.escalate")} />
       </div>
     );
   };
 
   return (
     <div className="remittance-exceptions">
+      <Toast ref={toast} />
       <h2>{t("remittance.remittanceExceptions")}</h2>
 
       <div className="summary-bar">
         <div className="summary-item">
           <i className="pi pi-exclamation-triangle" />
           <div>
-            <div className="value">15</div>
+            <div className="value">{summary.total}</div>
             <div className="label">{t("remittance.totalExceptions")}</div>
           </div>
         </div>
         <div className="summary-item red">
           <i className="pi pi-clock" />
           <div>
-            <div className="value">8</div>
+            <div className="value">{summary.unresolved}</div>
             <div className="label">{t("remittance.unresolved")}</div>
           </div>
         </div>
         <div className="summary-item orange">
           <i className="pi pi-spin pi-spinner" />
           <div>
-            <div className="value">4</div>
+            <div className="value">{summary.processing}</div>
             <div className="label">{t("remittance.processing")}</div>
           </div>
         </div>
         <div className="summary-item green">
           <i className="pi pi-check-circle" />
           <div>
-            <div className="value">3</div>
+            <div className="value">{summary.resolvedToday}</div>
             <div className="label">{t("remittance.resolvedToday")}</div>
           </div>
         </div>
         <div className="summary-item highlight">
-          <i className="pi pi-dollar" />
+          <i className="pi pi-wallet" />
           <div>
-            <div className="value">{formatCurrency(51700)}</div>
+            <div className="value">{formatCurrency(summary.atRisk)}</div>
             <div className="label">{t("remittance.totalValueAtRisk")}</div>
           </div>
         </div>
@@ -110,31 +207,18 @@ const RemittanceExceptions = () => {
       <div className="split-view">
         <Card title={t("remittance.exceptionList")} className="left-panel">
           <div className="filter-section mb-3">
-            <Dropdown placeholder={t("remittance.exceptionType")} options={[
-              { label: "All", value: "All" },
-              { label: "Amount Mismatch", value: "Amount Mismatch" },
-              { label: "Missing Document", value: "Missing Document" },
-              { label: "Duplicate Entry", value: "Duplicate Entry" },
-              { label: "Date Discrepancy", value: "Date Discrepancy" }
-            ]} className="mr-2" />
-            <Dropdown placeholder={t("remittance.severity")} options={[
-              { label: "All", value: "All" },
-              { label: "Critical", value: "Critical" },
-              { label: "High", value: "High" },
-              { label: "Medium", value: "Medium" },
-              { label: "Low", value: "Low" }
-            ]} className="mr-2" />
-            <Dropdown placeholder={t("remittance.status")} options={[
-              { label: "All", value: "All" },
-              { label: "New", value: "New" },
-              { label: "In Progress", value: "In Progress" },
-              { label: "Resolved", value: "Resolved" },
-              { label: "Escalated", value: "Escalated" }
-            ]} />
+            <Dropdown placeholder={t("remittance.exceptionType")} value={filters.type}
+              options={allOption([...new Set(exceptions.map((e) => e.type).filter(Boolean))])}
+              onChange={(e) => setFilters({ ...filters, type: e.value })} className="mr-2" />
+            <Dropdown placeholder={t("remittance.severity")} value={filters.severity} options={allOption(SEVERITIES)}
+              onChange={(e) => setFilters({ ...filters, severity: e.value })} className="mr-2" />
+            <Dropdown placeholder={t("remittance.status")} value={filters.status} options={allOption(STATUSES)}
+              onChange={(e) => setFilters({ ...filters, status: e.value })} />
           </div>
 
           <DataTable
-            value={exceptions}
+            value={visible}
+            loading={loading}
             selection={selectedException}
             onSelectionChange={(e) => setSelectedException(e.value)}
             selectionMode="single"
@@ -168,15 +252,15 @@ const RemittanceExceptions = () => {
                 </div>
                 <div className="detail-item">
                   <label>{t("remittance.severity")}:</label>
-                  <Tag value={selectedException.severity} severity={selectedException.severity.toLowerCase()} />
+                  {severityBodyTemplate(selectedException)}
                 </div>
                 <div className="detail-item">
                   <label>{t("remittance.created")}:</label>
-                  <span>2025-09-24 10:30</span>
+                  <span>{dateBody("createdDate")(selectedException)}</span>
                 </div>
                 <div className="detail-item">
                   <label>{t("remittance.dueBy")}:</label>
-                  <span className="highlight">2025-09-28 10:30</span>
+                  <span className="highlight">{dueBy(selectedException)}</span>
                 </div>
               </div>
 
@@ -192,18 +276,18 @@ const RemittanceExceptions = () => {
                 </div>
                 <div className="detail-item">
                   <label>{t("remittance.actualAmount")}:</label>
-                  <span>{formatCurrency(selectedException.amount * 0.95)}</span>
+                  <span>{selectedException.difference == null ? "-" : formatCurrency(Number(selectedException.amount) - Number(selectedException.difference))}</span>
                 </div>
                 <div className="detail-item">
                   <label>{t("remittance.difference")}:</label>
-                  <span className="highlight">{formatCurrency(selectedException.amount * 0.05)}</span>
+                  <span className="highlight">{selectedException.difference == null ? "-" : formatCurrency(selectedException.difference)}</span>
                 </div>
               </div>
 
               <div className="detail-section">
                 <h4>{t("remittance.resolution")}</h4>
                 <div className="p-fluid">
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittance.resolutionType")} *</label>
                     <Dropdown
                       value={resolutionData.resolutionType}
@@ -218,7 +302,7 @@ const RemittanceExceptions = () => {
                       placeholder={t("remittance.selectResolutionType")}
                     />
                   </div>
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittance.resolutionAmount")} *</label>
                     <InputNumber
                       value={resolutionData.resolutionAmount}
@@ -227,7 +311,7 @@ const RemittanceExceptions = () => {
                       currency={currencyCode}
                     />
                   </div>
-                  <div className="p-field">
+                  <div className="p-field field">
                     <label>{t("remittance.resolutionNotes")} *</label>
                     <InputTextarea
                       value={resolutionData.resolutionNotes}
@@ -235,16 +319,17 @@ const RemittanceExceptions = () => {
                       rows={3}
                     />
                   </div>
-                  <div className="p-field">
-                    <label>{t("remittance.attachments")}</label>
-                    <FileUpload mode="basic" multiple accept=".pdf,.jpg,.png,.doc" />
-                  </div>
                 </div>
 
                 <div className="action-buttons mt-3">
-                  <Button label={t("remittance.saveProgress")} className="p-button-secondary mr-2" />
-                  <Button label={t("remittance.resolveException")} className="p-button-success mr-2" />
-                  <Button label={t("remittance.escalate")} className="p-button-warning" />
+                  <Button label={t("remittance.saveProgress")} className="p-button-secondary mr-2"
+                    disabled={selectedException.status !== 'Open'} onClick={() => startException(selectedException)} />
+                  <Button label={t("remittance.resolveException")} className="p-button-success mr-2"
+                    disabled={selectedException.status === 'Resolved' || !resolutionData.resolutionType || !resolutionData.resolutionNotes}
+                    onClick={() => resolveException(selectedException, resolutionText())} />
+                  <Button label={t("remittance.escalate")} className="p-button-warning"
+                    disabled={['Resolved', 'Escalated'].includes(selectedException.status)}
+                    onClick={() => escalateException(selectedException, resolutionData.resolutionNotes)} />
                 </div>
               </div>
             </div>
@@ -257,9 +342,9 @@ const RemittanceExceptions = () => {
       </div>
 
       <div className="action-bar">
-        <Button label={t("remittance.exportExceptions")} icon="pi pi-download" className="p-button-secondary mr-2" />
-        <Button label={t("remittance.bulkAssign")} icon="pi pi-users" className="p-button-secondary mr-2" disabled={!selectedException} />
-        <Button label={t("remittance.createReport")} icon="pi pi-file" className="p-button-primary" />
+        <Button label={t("remittance.exportExceptions")} icon="pi pi-download" className="p-button-secondary mr-2" onClick={() => exportRows(visible, "remittance_exceptions")} />
+        <Button label={t("remittance.bulkAssign")} icon="pi pi-users" className="p-button-secondary mr-2" disabled={!selectedException || selectedException.status === 'Resolved'} onClick={handleBulkAssign} />
+        <Button label={t("remittance.createReport")} icon="pi pi-file" className="p-button-primary" onClick={() => exportRows(exceptions, "remittance_exception_report")} />
       </div>
     </div>
   );

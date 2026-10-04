@@ -1,0 +1,236 @@
+name: CI
+
+# Build once, test, and keep the release artefacts. Every pull request and every push runs the checks; the
+# artefacts named by commit SHA (web-<sha>, backend-<sha>) are what deploy.yml promotes, unchanged, through
+# dev -> sit -> uat -> preprod -> production. See deploy/RELEASE_PIPELINE.md.
+#
+# Automatic deployments (only when the target GitHub Environment is configured, otherwise skipped with a notice):
+#   push to brokerverse-platform   -> dev
+#   tag vX.Y.Z-rc.N                -> uat        (required reviewers on the environment)
+#   tag vX.Y.Z                     -> production (required reviewers; tags only)
+# SIT, Pre-Prod, re-deploys and promotions of an earlier build: Actions > Deploy > Run workflow.
+
+on:
+  pull_request:
+  push:
+    branches:
+      - "**"
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  # superseded runs of a branch or pull request are cancelled; tag and integration-branch runs always finish
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.ref != 'refs/heads/brokerverse-platform' && !startsWith(github.ref, 'refs/tags/')) }}
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  backend:
+    name: Backend lint and tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: brokerverse
+          POSTGRES_PASSWORD: brokerverse
+          POSTGRES_DB: brokerverse_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U brokerverse -d brokerverse_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test (full suite against PostgreSQL 16)
+        run: npm test
+        env:
+          TEST_DATABASE_URL: postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse_test
+
+  frontend:
+    name: Front-end lint, tests and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: brokerverse
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: brokerverse/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Test
+        run: npx craco test --watchAll=false
+        env:
+          CI: true
+
+      # One build for every environment: no API address or environment name is baked in. Each environment's
+      # web server publishes /env-config.js (scripts/env-config.sh) and proxies /api to its backend.
+      - name: Build (environment-neutral)
+        run: npm run build
+        env:
+          NODE_ENV: production
+          CI: false
+          GENERATE_SOURCEMAP: false
+          INLINE_RUNTIME_CHUNK: false
+          REACT_APP_BASE_URL: ""
+
+      - name: Check the build output
+        run: |
+          set -euo pipefail
+          # an unbuilt index.html still holds %PUBLIC_URL% and loads no script: never publish it
+          if grep -q "%PUBLIC_URL%" build/index.html || ! grep -q "/static/js/" build/index.html; then
+            echo "::error::build/index.html is not a production build"; exit 1
+          fi
+          grep -q '/env-config.js' build/index.html || { echo "::error::index.html does not load /env-config.js"; exit 1; }
+          # the bundle must not carry an environment's address
+          if grep -lE "inxtuniverse\.com|localhost:[0-9]+/api" build/static/js/*.js; then
+            echo "::error::an API address is baked into the bundle"; exit 1
+          fi
+          printf '{"commit":"%s","ref":"%s","buildTime":"%s"}\n' "$GITHUB_SHA" "$GITHUB_REF_NAME" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > build/build-info.json
+
+      - name: Keep the front-end artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-${{ github.sha }}
+          path: brokerverse/build/
+          if-no-files-found: error
+          # pull requests: short; branch and tag builds are promoted later, so they are kept 90 days
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 90 }}
+
+  backend-artefact:
+    name: Backend release artefact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Package backend-${{ github.sha }}
+        run: bash deploy/package-backend.sh "$GITHUB_SHA" "dist/backend-$GITHUB_SHA.tar.gz" "$GITHUB_REF_NAME"
+
+      - name: Keep the backend artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-${{ github.sha }}
+          path: dist/backend-${{ github.sha }}.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: ${{ github.event_name == 'pull_request' && 7 || 90 }}
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Production dependencies only (what runs in the browser and on the server). High and critical findings
+      # fail the check; the full report, development tools included, is printed for review.
+      - name: Backend (production dependencies)
+        working-directory: backend
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm audit || true
+
+      - name: Front end (production dependencies)
+        working-directory: brokerverse
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm audit --audit-level=none | tail -n 5 || true
+
+  # ---- automatic deployments of the artefacts built above (deploy.yml) ----
+
+  deploy-dev:
+    name: Deploy to dev
+    needs: [backend, frontend, backend-artefact, audit]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/brokerverse-platform'
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: dev
+      same_run: true
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+
+  deploy-uat:
+    name: Deploy release candidate to UAT
+    needs: [backend, frontend, backend-artefact, audit]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && contains(github.ref_name, '-rc.')
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: uat
+      same_run: true
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      id-token: write
+
+  deploy-production:
+    name: Deploy release to production
+    needs: [backend, frontend, backend-artefact, audit]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && !contains(github.ref_name, '-')
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: production
+      same_run: true
+    secrets: inherit
+    permissions:
+      contents: read
+      actions: read
+      id-token: write

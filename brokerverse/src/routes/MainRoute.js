@@ -1,74 +1,45 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 import ProtectedLayout from "./ProtectedRoute";
+import NotFound from "../components/NotFound";
 import CorrectionJV from "../module/CorrectionJV";
 import PolicyReceipts from "../module/Receipts/PolicyReceipts";
 import PolicyReceiptsView from "../module/Receipts/PolicyReceiptsView";
 import AddPolicyReceipts1 from "../module/Receipts/AddPolicyReceipts1";
-// import AddPolicyReceipts1 from "../src/module/Receipts/AddReceipts/AddPolicyReceipts1";
 import AddPolicyEdit from "../module/Receipts/AddPolicyReceiptEdit";
-import Receipts from "../module/Receipts";
 import Reversalsjv from "../module/Reversals/index";
 import Journalvoucher from "../module/JournalVoucher/index";
 import OpenEntryMatching from "../module/accounts/openEntryMatching/OpenEntryMatching";
 import OpenEntryUnmatching from "../module/accounts/openEntryUnmatching/OpenEntryUnmatching";
 import SpecificVoucher from "../module/PaymentVoucher/SpecificVoucher";
-import Payallvoucher from "../module/PaymentVoucher/PayAll";
 import Paymentvoucher from "../module/PaymentVoucher/index";
 import CreateVoucher from "../module/PaymentVoucher/CreateVoucher/index";
 import Detailview from "../module/PaymentVoucher/DetailView/index";
 import BulkDisburse from "../module/PaymentVoucher/BulkDisburse";
-import AddPolicyReceipts from "../module/Receipts/AddPolicyReceipts";
-// import AccountCategoryMaster from "../module/FinanceMastersModule/AccountCategoryMaster";
-import BankAccountMaster from "../module/FinanceMastersModule/BankAccountMaster";
-import BankChequeMaster from "../module/FinanceMastersModule/BankChequeMaster";
 import BranchMasterInitial from "../module/FinanceMastersModule/BranchMaster/BranchMasterInitial";
-// import BranchMaster from "../module/FinanceMastersModule/BranchMaster/BranchAdding";
 import BranchAdding from "../module/FinanceMastersModule/BranchMaster/BranchAdding";
 import BranchDetailsView from "../module/FinanceMastersModule/BranchMaster/BranchDetailsView";
 import CompanyMaster from "../module/FinanceMastersModule/CompanyMaster";
 import CurrencyMaster from "../module/FinanceMastersModule/CurrencyMaster";
 import ExchangeRateMaster from "../module/FinanceMastersModule/ExchangeRateMaster";
-import MainAccountMaster from "../module/FinanceMastersModule/MainAccountMaster";
-import PettyCashMaster from "../module/FinanceMastersModule/PettyCashMaster";
+// Main / Sub Account masters are the GL chart of accounts
+import ChartOfAccounts from "../module/FinanceMastersModule/ChartOfAccounts";
 import PaymentDetails from "../module/Receipts/PaymentDetails";
-import SubAccountMaster from "../module/FinanceMastersModule/SubAccountMaster";
-import TaxationMaster from "../module/FinanceMastersModule/TaxationMaster";
 import TransactionCodeMaster from "../module/FinanceMastersModule/TransactionCodeMaster";
 import DepartmentMasterInitial from "../module/FinanceMastersModule/DepartmentMaster/DepartmentMasterInitial";
 import DepartmentAdding from "../module/FinanceMastersModule/DepartmentMaster/DepartmentAdding";
 import DepartmentDetailsView from "../module/FinanceMastersModule/DepartmentMaster/DepartmentDetailsView";
 import AccountCategoryMaster from "../module/FinanceMastersModule/AccountCategoryMaster";
-// import SubAdd from "../module/FinanceMastersModule/SubAccountMaster/SubAdd";
-// import SaveAndEdit from "../module/FinanceMastersModule/SubAccountMaster/SaveAndEdit";
-import CategoryMasterInitial from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryMasterInitial";
-import CategoryAdding from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryAdding";
-import CategoryDetailsView from "../module/FinanceMastersModule/AccountCategoryMaster/CategoryDetailsView";
-import SubAccountDetails from "../module/FinanceMastersModule/SubAccountMaster/SubAccountDetails";
-import SaveAndEdit from "../module/FinanceMastersModule/SubAccountMaster/SubAccountEdit";
 import AddCurrency from "../module/FinanceMastersModule/CurrencyMaster/AddCurrency";
-import SaveAndEditCurrency from "../module/FinanceMastersModule/CurrencyMaster/ViewCurrency";
-import AddTaxation from "../module/FinanceMastersModule/TaxationMaster/AddTaxation";
-import TaxationDetails from "../module/FinanceMastersModule/TaxationMaster/TaxationDetails";
-import TaxationEdit from "../module/FinanceMastersModule/TaxationMaster/TaxationEdit";
 import AddExchange from "../module/FinanceMastersModule/ExchangeRateMaster/AddExchange";
 import SaveAndEditExchange from "../module/FinanceMastersModule/ExchangeRateMaster/SaveAndEditExchange";
 
-// import AddCompany from "../module/FinanceMastersModule/CompanyMaster/AddCompany";
-
-import AddBankAccount from "../module/FinanceMastersModule/BankAccountMaster/AddBankAccount";
-import BankAccountdetails from "../module/FinanceMastersModule/BankAccountMaster/BankAccountdetails";
-import AddBankCheque from "../module/FinanceMastersModule/BankChequeMaster/AddBankCheque";
-import BankChequeDetails from "../module/FinanceMastersModule/BankChequeMaster/BankChequeDetails";
-import AddPettyCash from "../module/FinanceMastersModule/PettyCashMaster/AddPettyCash";
-import PettyCashdetails from "../module/FinanceMastersModule/PettyCashMaster/PettyCashdetails";
 import AddJournalVoucture from "../module/JournalVoucher/AddJournalVoucture";
 import DetailsJournalVocture from "../module/JournalVoucher/DetailsJournalVocture";
 
 import Bankdetailselection from "../module/PaymentVoucher/Bankdetailselection";
 import Initiate from "../module/PettyCashManagement/Initiate";
 import Disbursement from "../module/PettyCashManagement/Disbursement";
-import SubAccountEdit from "../module/FinanceMastersModule/SubAccountMaster/SubAccountEdit";
 import Request from "../module/PettyCashManagement/Request";
 import PettyCashReceipts from "../module/PettyCashManagement/Receipts";
 import PettyCashReplenish from "../module/PettyCashManagement/Replenish";
@@ -90,14 +61,6 @@ import TransactionCodeMasterView from "../module/FinanceMastersModule/Transactio
 import TransactionCodeDetails from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeDetails";
 import ViewCurrency from "../module/FinanceMastersModule/CurrencyMaster/ViewCurrency";
 import EditCurrency from "../module/FinanceMastersModule/CurrencyMaster/EditCurrency";
-import AddMainAccount from "../module/FinanceMastersModule/MainAccountMaster/AddMainAccount";
-import EditMainAccount from "../module/FinanceMastersModule/MainAccountMaster/EditMainAccount";
-import ViewMainAccount from "../module/FinanceMastersModule/MainAccountMaster/ViewMainAccount";
-import Commission from "../module/GeneralMasters/Commission";
-import AddCommission from "../module/GeneralMasters/Commission/AddCommission";
-import EditCommission from "../module/GeneralMasters/Commission/EditCommission";
-import ViewCommission from "../module/GeneralMasters/Commission/ViewCommission";
-import EditPettyCash from "../module/FinanceMastersModule/PettyCashMaster/EditPettyCash";
 import TransactioncodeEdit from "../module/FinanceMastersModule/TransactionCodeMaster/TransactionCodeMasterEdit/index";
 import ViewExchange from "../module/FinanceMastersModule/ExchangeRateMaster/ViewExchange";
 import BankMaster from "../module/FinanceMastersModule/BankMaster";
@@ -107,7 +70,14 @@ import AddAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountD
 import ViewAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/ViewAccountData";
 import EditAccountDetail from "../module/FinanceMastersModule/BankMaster/AccountDataView/EditAccountData";
 import SystemSettingsPage from "../module/SystemSettings";
-import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster";
+import ThemeBrandingPage from "../module/ThemeBranding";
+import ConfigurationPage from "../module/Administration/Configuration";
+import SchedulesPage from "../module/Administration/Schedules";
+import DocumentNumberingPage from "../module/Administration/DocumentNumbering";
+import CommissionRateMatrix from "../module/FinanceMastersModule/CommissionRateMatrix";
+import AuditTrailPage from "../module/Administration/AuditTrail";
+import EmailOutboxPage from "../module/Administration/EmailOutbox";
+import CompanyMasters from "../module/GeneralMasters/OrganizationMasters/CompanyMaster";
 import BranchMasters from "../module/GeneralMasters/OrganizationMasters/BranchMaster";
 import InsuranceCompany from "../module/GeneralMasters/InsuranceManagementMasters/InsuranceCompany";
 import LineOfBusiness from "../module/GeneralMasters/InsuranceManagementMasters/LineOfBusiness";
@@ -129,8 +99,6 @@ import VehicleDetailsAction from "../module/GeneralMasters/InsuranceManagementMa
 
 import Designation from "../module/GeneralMasters/EmployeeManagementMasters/Designation/DesignationMaster";
 import AddDesignation from "../module/GeneralMasters/EmployeeManagementMasters/Designation/AddDesignation";
-import Employee from "../module/GeneralMasters/EmployeeManagementMasters/Employee/EmployeeMaster";
-import AddEmployee from "../module/GeneralMasters/EmployeeManagementMasters/Employee/AddEmployee";
 import User from "../module/GeneralMasters/UserManagementMasters/User/UserMaster";
 import AddUser from "../module/GeneralMasters/UserManagementMasters/User/AddUser";
 import Role from "../module/GeneralMasters/UserManagementMasters/Role/RoleMaster";
@@ -142,18 +110,17 @@ import ClaimSettlement from "../agentModule/claimsModule/claimSettlement";
 import ClaimDetail from "../agentModule/claimModule/claimDetail";
 import ClaimAuditTrail from "../agentModule/claimModule/claimAuditTrail";
 
-import AddCompany from "../module/GeneralMasters/OrganizationMasters/ComapanyMaster/AddCompany";
+import AddCompany from "../module/GeneralMasters/OrganizationMasters/CompanyMaster/AddCompany";
 import AddBranch from "../module/GeneralMasters/OrganizationMasters/BranchMaster/AddBranch";
 import AddCountry from "../module/GeneralMasters/LocationMasters/CountryMaster/AddCountry/index";
 import AddCity from "../module/GeneralMasters/LocationMasters/CityMaster/AddCity";
 import AddState from "../module/GeneralMasters/LocationMasters/StateMaster/AddState";
-import Dashboard from "../agentModule/dashBoardModule/home";
-import AgentViewProfile from "../agentModule/dashBoardModule/agentViewProfile";
-import AgentEditProfile from "../agentModule/dashBoardModule/agentEditProfile";
+import MyProfile from "../module/MyProfile";
 import Notification from "../agentModule/dashBoardModule/notification";
 import LeadCreation from "../agentModule/leadModule/leadCreation";
 import LeadListing from "../agentModule/leadModule/leadListing";
 import CoverageDeatails from "../agentModule/quoteModule/coverageDetails";
+import RenewalCoverageStep from "../agentModule/quoteModule/renewalTerm";
 import PolicyDetails from "../agentModule/quoteModule/policyDetails";
 import Accessories from "../agentModule/quoteModule/accessories";
 import OrderSummary from "../agentModule/quoteModule/orderSummary";
@@ -164,7 +131,7 @@ import CustomerInfo from "../agentModule/quoteModule/customerInfo";
 import CustomerInfoFire from "../agentModule/quoteModule/customerInfo/CustomerInfoFire";
 import QuoteComparisonView from "../agentModule/quoteModule/quoteComparisonView";
 import UploadVehiclePhotos from "../agentModule/quoteModule/uploadVehiclePhotos";
-import CoverageDetailedVew from "../agentModule/quoteModule/coverageDetailedVew";
+import CoverageDetailedVew from "../agentModule/quoteModule/coverageDetailedView";
 import PolicyApproval from "../agentModule/quoteModule/policyApproval";
 import UploadPolicy from "../agentModule/quoteModule/uploadPolicy";
 import PolicyDetailedView from "../agentModule/quoteModule/policyDetailedView";
@@ -195,24 +162,17 @@ import Policy from "../agentModule/policyModule";
 import PolicyDetailView from "../agentModule/policyModule/PolicyDetailView";
 import ExpiredPoliciesPage from "../agentModule/policyModule/ExpiredPoliciesPage";
 import Quotation from "../agentModule/quotationModule";
-import OpenItems from "../agentModule/openItems/openItems";
-import UpcomingEvents from "../agentModule/openItems/upcomingEvents";
-import ExpiringPolicy from "../agentModule/openItems/expiringPolicy";
-import RenewalRequest from "../agentModule/openItems/renewalRequest";
-import QuotePending from "../agentModule/openItems/quotePending";
-import AgenSideBar from "../components/AgentSideBar";
-import EditCommissionPopup from "../module/GeneralMasters/Commission/EditCommission/EditCommissionPopup";
 import ClaimRejected from "../agentModule/claimsModule/claimRejected";
 import ClaimDocumentUpload from "../agentModule/claimsModule/claimDocumentUpload";
 import LeadEdit from "../agentModule/leadModule/leadEdit";
 import LeadDetail from "../agentModule/leadModule/leadDetail";
 import ViewEndorsement from "../agentModule/endorsementModule/viewUploadEndorsement";
 import EndorsementRejected from "../agentModule/endorsementModule/EndorsementRejected";
-import LoginScreen from "../module/AuthModule/Login/index";
 import Production from "../module/Reports/OperationalReports/Production";
 // Dashboard Imports
 import ExecutiveDashboard from "../module/ExecutiveDashboard";
 import ClaimsDashboard from "../module/ClaimsModule/ClaimsDashboard";
+import SalesDashboard from "../module/SalesDashboard";
 import UnderwritingDashboard from "../module/UnderwritingModule/UnderwritingDashboard";
 import SoaPremiumReceivable from "../module/Reports/FinancialReports/SoaPremiumReceivable";
 import Claims from "../module/Reports/OperationalReports/Claims";
@@ -223,7 +183,55 @@ import Collectionreport from "../module/Reports/FinancialReports/CollectionRepor
 import Payables from "../module/Reports/FinancialReports/Payables";
 import Journal from "../module/Reports/FinancialReports/Journal";
 import TrailBalance from "../module/Reports/FinancialReports/TrailBalance";
-// import OperationalReports from "../module/Reports/OperationalReports";
+import ReportCatalogue, { ReportRunner } from "../module/Reports/ReportCatalogue";
+// Period-end processing and BIR tax
+import PeriodManagement from "../module/PeriodEnd/PeriodManagement";
+import MonthEndClose from "../module/PeriodEnd/MonthEndClose";
+import MonthEndCloseRun from "../module/PeriodEnd/MonthEndCloseRun";
+import YearEndClose from "../module/PeriodEnd/YearEndClose";
+import RecurringJournals from "../module/PeriodEnd/RecurringJournals";
+import FinancialStatements from "../module/PeriodEnd/FinancialStatements";
+import CloseChecklist from "../module/PeriodEnd/CloseChecklist";
+import TaxCodes from "../module/PeriodEnd/TaxCodes";
+import Bir2307 from "../module/PeriodEnd/Bir2307";
+import PeriodEndReportPage from "../module/PeriodEnd/ReportPage";
+// BIR forms, invoicing and tax; overriding commission from insurers
+import WithholdingReturns from "../module/BirTax/WithholdingReturns";
+import { Alphalist1604E, PercentageTax } from "../module/BirTax/SingleReturn";
+import BirDatFiles from "../module/BirTax/DatFiles";
+import SalesInvoices from "../module/BirTax/SalesInvoices";
+import EisOutbox from "../module/BirTax/EisOutbox";
+import CasPack from "../module/BirTax/CasPack";
+import OverrideAgreements from "../module/BirTax/OverrideAgreements";
+import OverrideComputations from "../module/BirTax/OverrideComputations";
+import BankRecWorkspace from "../module/BankReconciliation/Workspace";
+import BankReconciliations from "../module/BankReconciliation/Reconciliations";
+import BankReconciliationRun from "../module/BankReconciliation/ReconciliationRun";
+import BankStatementFormats from "../module/BankReconciliation/StatementFormats";
+import BankTransactionTypes from "../module/BankReconciliation/TransactionTypes";
+import BankRecReportPage from "../module/BankReconciliation/ReportPage";
+import InsurerStatements from "../module/InsurerReconciliation/Statements";
+import InsurerStatementWorkspace from "../module/InsurerReconciliation/Workspace";
+import InsurerStatementFormats from "../module/InsurerReconciliation/Formats";
+import InstalmentPlans from "../module/CreditControl/InstalmentPlans";
+import WarrantyMonitor from "../module/CreditControl/WarrantyMonitor";
+import CreditLimits from "../module/CreditControl/CreditLimits";
+import RemittanceAgeing from "../module/CreditControl/RemittanceAgeing";
+// operations and accounting: cover notes, cancellation, post-dated cheques, claims, payables, fixed assets
+import CoverNotes from "../module/OpsAccounting/CoverNotes";
+import PolicyCancellation from "../module/OpsAccounting/PolicyCancellation";
+import PostDatedCheques from "../module/OpsAccounting/PostDatedCheques";
+import ClaimsSettlements from "../module/OpsAccounting/ClaimsSettlements";
+import ClaimDocuments from "../module/OpsAccounting/ClaimDocuments";
+import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
+import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
+import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
+import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
+import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+// sales activities, asset disposal and the BIR 2307 of suppliers
+import SalesActivities from "../module/SalesActivities/SalesActivities";
+import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
+import { SalesActivityOutcomes, SalesActivityTypes } from "../module/OpsAccounting/Masters";
 
 // Collections Module
 import CollectionsList from "../agentModule/collectionsModule/CollectionsList";
@@ -235,24 +243,18 @@ import RemittanceMaster from "../module/FinanceMastersModule/RemittanceMaster";
 import AutomatedRemittanceMaster from "../module/FinanceMastersModule/RemittanceMaster/AutomatedRemittance";
 import StatementTemplateMaster from "../module/FinanceMastersModule/RemittanceMaster/StatementTemplate";
 import SettlementParameterMaster from "../module/FinanceMastersModule/RemittanceMaster/SettlementParameter";
-import ReconciliationMaster from "../module/FinanceMastersModule/RemittanceMaster/ReconciliationMaster";
 import BulkProcessingMaster from "../module/FinanceMastersModule/RemittanceMaster/BulkProcessingMaster";
-import ScheduleMaster from "../module/FinanceMastersModule/RemittanceMaster/ScheduleMaster";
-import ElectronicTransferMaster from "../module/FinanceMastersModule/RemittanceMaster/ElectronicTransferMaster";
-import ApprovalWorkflowMaster from "../module/FinanceMastersModule/RemittanceMaster/ApprovalWorkflowMaster";
 import ExceptionMaster from "../module/FinanceMastersModule/RemittanceMaster/ExceptionMaster";
-import ReportTemplateMaster from "../module/FinanceMastersModule/RemittanceMaster/ReportTemplateMaster";
 import AgencyBillMaster from "../module/FinanceMastersModule/RemittanceMaster/AgencyBillMaster";
-import PremiumAccountSetup from "../module/FinanceMastersModule/PremiumAccountSetup";
-import MiscellaneousAccountSetup from "../module/FinanceMastersModule/MiscellaneousAccountSetup";
-import CustomerAccountSetup from "../module/FinanceMastersModule/CustomerAccountSetup";
-import RIClaimsAccountSetup from "../module/FinanceMastersModule/RIClaimsAccountSetup";
+import AccountDetermination from "../module/FinanceMastersModule/AccountDetermination";
+import PostingRules from "../module/FinanceMastersModule/PostingRules";
+import ConfigurationApprovals from "../module/FinanceMastersModule/ConfigurationApprovals";
+import AccountingFlow from "../module/FinanceMastersModule/AccountingFlow";
+import CoInsuranceRegister from "../module/Reports/FinancialReports/CoInsuranceRegister";
+import DueToInsurers from "../module/Reports/FinancialReports/DueToInsurers";
 // K13-K17 Remittance Masters
-import DirectBillMaster from "../module/FinanceMastersModule/RemittanceMaster/DirectBillMaster";
 import AdjustmentMaster from "../module/FinanceMastersModule/RemittanceMaster/AdjustmentMaster";
 import NotificationMaster from "../module/FinanceMastersModule/RemittanceMaster/NotificationMaster";
-import HistoryConfiguration from "../module/FinanceMastersModule/RemittanceMaster/HistoryConfiguration";
-import AnalyticsConfiguration from "../module/FinanceMastersModule/RemittanceMaster/AnalyticsConfiguration";
 
 // Incentive Module
 import IncentiveProgramMaster from "../module/FinanceMastersModule/IncentiveMaster/IncentiveProgramMaster";
@@ -282,15 +284,63 @@ import SchedulingDashboard from "../module/Remittance/Scheduling";
 import ElectronicTransfer from "../module/Remittance/ElectronicTransfer";
 import RemittanceApproval from "../module/Remittance/RemittanceApproval";
 import RemittanceExceptions from "../module/Remittance/RemittanceExceptions";
-import RemittanceReports from "../module/Remittance/RemittanceReports";
 import AgencyBillProcessing from "../module/Remittance/AgencyBillProcessing";
 // K13-K17 Remittance Transactions
 import DirectBillProcessing from "../module/Remittance/DirectBillProcessing";
+// Placement journey: Broker Slip -> Quotation Slip -> Placement Slip -> Policy
+import BrokerSlipList from "../module/Placement/BrokerSlipList";
+import BrokerSlipCreate from "../module/Placement/BrokerSlipCreate";
+import QuickQuote from "../module/Sales/QuickQuote";
+import UserAccessMatrix from "../module/AccessControl/UserAccessMatrix";
+import RolePermissions from "../module/AccessControl/RolePermissions";
+import AuthorityMatrix from "../module/AccessControl/AuthorityMatrix";
+import Delegations from "../module/AccessControl/Delegations";
+import SodRules from "../module/AccessControl/SodRules";
+import AccessReviews from "../module/AccessControl/AccessReviews";
+import DataSubjectRequests from "../module/DataPrivacy/DataSubjectRequests";
+import ConsentRegister from "../module/DataPrivacy/ConsentRegister";
+// AML/CFT: Compliance menu and client onboarding before the first policy
+import AmlDashboard from "../module/Compliance/AmlDashboard";
+import ClientDueDiligence from "../module/Compliance/ClientDueDiligence";
+import ClientAmlProfile from "../module/Compliance/ClientAmlProfile";
+import EddReviews from "../module/Compliance/EddReviews";
+import KycRefresh from "../module/Compliance/KycRefresh";
+import ScreeningHits from "../module/Compliance/ScreeningHits";
+import ScreeningLists from "../module/Compliance/ScreeningLists";
+import TransactionAlerts from "../module/Compliance/TransactionAlerts";
+import AmlCases from "../module/Compliance/AmlCases";
+import AmlReports from "../module/Compliance/AmlReports";
+import AmlSettings from "../module/Compliance/AmlSettings";
+import ClientOnboarding from "../agentModule/quoteModule/clientOnboarding";
+import LicenceRegister from "../module/Compliance/LicenceRegister";
+import FitAndProper from "../module/Compliance/FitAndProper";
+import InsurerAuthority from "../module/Compliance/InsurerAuthority";
+import Complaints from "../module/Compliance/Complaints";
+import IcAnnualStatement from "../module/Compliance/IcAnnualStatement";
+import IcProductionReport from "../module/Compliance/IcProductionReport";
+import BreachRegister from "../module/Compliance/BreachRegister";
+import GoLiveDataLoad from "../module/GoLiveDataLoad";
+import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
+import BundleProducts from "../module/PackagedProducts/BundleProducts";
+import InsurerRateTables from "../module/PackagedProducts/InsurerRateTables";
+import LguTaxRates from "../module/PackagedProducts/LguTaxRates";
+import PaymentGateways from "../module/PackagedProducts/PaymentGateways";
+import BrokerSlipDetail from "../module/Placement/BrokerSlipDetail";
+import PlacementList from "../module/Placement/PlacementList";
+import PlacementDetail from "../module/Placement/PlacementDetail";
+import DirectPlacementForm from "../module/Placement/DirectPlacementForm";
 import RemittanceAdjustments from "../module/Remittance/RemittanceAdjustments";
 import RemittanceNotifications from "../module/Remittance/RemittanceNotifications";
 import RemittanceHistory from "../module/Remittance/RemittanceHistory";
 import RemittanceAnalytics from "../module/Remittance/RemittanceAnalytics";
 import PolicyRenewalWaiting from "../agentModule/renewalModule/WaitingScreen/PolicyRenewalWaiting";
+// Integrations: monitor, message templates, insurer integration, CTPL authentication, bank payment files
+import IntegrationsMonitor from "../module/Integrations/IntegrationsMonitor";
+import MessageTemplates from "../module/Integrations/MessageTemplates";
+import InsurerIntegration from "../module/Integrations/InsurerIntegration";
+import CtplAuthentication from "../module/Integrations/CtplAuthentication";
+import BankFileLayouts from "../module/Integrations/BankFileLayouts";
+import BankPaymentFiles from "../module/Integrations/BankPaymentFiles";
 
 // Commission Module Imports
 import CommissionDashboard from "../module/Commission/CommissionDashboard";
@@ -314,7 +364,6 @@ import {
   CoverageBuilder,
   RatingEngine,
   UnderwritingRules,
-  ApprovalWorkflows,
   MarketMapping,
   DocumentManager,
   ProductAnalytics,
@@ -324,10 +373,8 @@ import {
   RiskMappingDetail,
 } from "../module/ProductConfigurator/RiskMapping";
 
-import OpenItemsListData from "../agentModule/openItems/OpenItemsListData";
+import MyWork from "../module/MyWork";
 import { Navigate } from "react-router-dom";
-import { useEffect } from "react";
-import Cookies from "js-cookie";
 import EditRequestForm from "../module/PettyCashManagement/Request/EditRequest";
 import ClaimModule from "../agentModule/claimModule";
 import PolicyModule from "../agentModule/policyModule";
@@ -350,14 +397,30 @@ import PCpolicyDetails from "../agentModule/EmployeeFlow/PCpolicydetails";
 import EndorsementSummary from "../agentModule/endorsementModule/personalDetails/endorsementSummary/EndorsementSummary";
 import BatchRenewalModal from "../agentModule/policyModule/BatchRenewal";
 import PaymentConfirmationEmployeeBenefit from "../agentModule/endorsementModule/paymentConfirmationEmployee";
-import ProductRecommendation from "../agentModule/quoteModule/productRecommandation";
+import ProductRecommendation from "../agentModule/quoteModule/productRecommendation";
+// Distribution, motor programmes and products
+import LeadAssignment from "../module/Distribution/LeadAssignment";
+import DistributionChannels from "../module/Distribution/DistributionChannels";
+import DealerProgrammes from "../module/Distribution/DealerProgrammes";
+import FleetSchedules from "../module/Distribution/FleetSchedules";
+import OpenCovers from "../module/Distribution/OpenCovers";
+import FacultativePlacements from "../module/Distribution/FacultativePlacements";
+import ComparisonReports from "../module/Distribution/ComparisonReports";
+import Campaigns from "../module/Distribution/Campaigns";
+import ReportBuilder from "../module/Distribution/ReportBuilder";
+
+// The former addresses of My Work (Home, Operations > My Work, Open Items) lead to /my-work, keeping the query string
+// that links in notifications carry (?tab=tasks&task=...).
+const ToMyWork = () => {
+  const { search } = useLocation();
+  return <Navigate to={`/my-work${search}`} replace />;
+};
 
 const Maincomponent = () => {
   return (
     <div className="parent__main__container">
-      {/* <AuthRoute /> */}
       <Routes>
-        {/* <Route path="/login" element={<LoginScreen />} /> */}
+        {/* sign-in: agentModule/authModule/Login (App.js route /login) */}
         <Route element={<ProtectedLayout />}>
           <Route
             path="/accounts/correctionsjv/correctionsjvdetails"
@@ -366,19 +429,15 @@ const Maincomponent = () => {
 
           {/* Receipts */}
 
-          {/* <Route path="/accounts/receipts" element={<Receipts />} /> */}
-
           <Route
             path="/accounts/receipts/addpolicyreceipts"
-            element={<AddPolicyReceipts />}
+            element={<Navigate to="/accounts/receipts/addreceipts" replace />}
           />
 
           <Route
             path="/accounts/receipts/policyreceiptsview"
             element={<PolicyReceiptsView />}
           />
-
-          {/* <Route path="/accounts/receipts/addreceipt" element={<AddPolicyReceipts1 />} /> */}
 
           <Route path="/accounts/receipts" element={<PolicyReceipts />} />
           <Route
@@ -423,7 +482,6 @@ const Maincomponent = () => {
             element={<Bankdetailselection />}
           />
 
-          {/* <Route path="/payallvoucher" element={<Payallvoucher />} /> */}
           <Route
             path="accounts/paymentvoucher/SpecificVoucher"
             element={<SpecificVoucher />}
@@ -487,14 +545,6 @@ const Maincomponent = () => {
             path="accounts/pettycash/addrequest/add/:id"
             element={<RequestForm action="add" />}
           />
-          {/* <Route
-              path="/accounts/pettycash/addrequest/view/:id"
-              element={<RequestForm action="view" />}
-            /> */}
-          {/* <Route
-              path="/accounts/pettycash/addrequest/edit/:id"
-              element={<RequestForm action="edit" />}
-            /> */}
           <Route
             path="accounts/pettycash/addrequesttable"
             element={<AddRequestTable />}
@@ -548,15 +598,7 @@ const Maincomponent = () => {
             path="accounts/pettycash/replenishtdetailview"
             element={<ReplenishtDetailView />}
           />
-          {/* <Route
-              path="/pettycashmanagement"
-              element={<Pettycashmanagement />}
-            /> */}
           {/* Finacel Master Route*/}
-          {/* <Route
-              path="master/finance/accountcate"
-              element={<AccountCategoryMaster />}
-            /> */}
 
           {/* General Master */}
 
@@ -713,7 +755,6 @@ const Maincomponent = () => {
 
           {/* Location */}
 
-          {/* {Country} */}
           <Route
             path="master/generals/location/country"
             element={<Country />}
@@ -731,7 +772,6 @@ const Maincomponent = () => {
             element={<AddCountry action="add" />}
           />
 
-          {/* {State} */}
           <Route path="master/generals/location/state" element={<State />} />
 
           <Route
@@ -747,7 +787,6 @@ const Maincomponent = () => {
             element={<AddState action="add" />}
           />
 
-          {/* {City} */}
           <Route path="master/generals/location/city" element={<City />} />
 
           <Route
@@ -809,26 +848,6 @@ const Maincomponent = () => {
             path="master/generals/employeemanagement/adddesignation"
             element={<AddDesignation />}
           />
-          <Route
-            path="master/generals/employeemanagement/employee"
-            element={<Employee />}
-          />
-          <Route
-            path="master/generals/employeemanagement/employee/add/:id"
-            element={<AddEmployee action="add" />}
-          />
-          <Route
-            path="master/generals/employeemanagement/employee/edit/:id"
-            element={<AddEmployee action="edit" />}
-          />
-          <Route
-            path="master/generals/employeemanagement/employee/view/:id"
-            element={<AddEmployee action="view" />}
-          />
-          <Route
-            path="master/generals/employeemanagement/addemployee"
-            element={<AddEmployee />}
-          />
 
           {/* User Management */}
           <Route
@@ -871,10 +890,6 @@ const Maincomponent = () => {
             path="master/generals/usermanagement/role/view/:id"
             element={<AddRole action="view" />}
           />
-          {/* <Route
-              path="master/generals/usermanagement/addrole"
-              element={<AddRole />}
-            /> */}
 
           {/* Branch Master Module */}
           <Route
@@ -913,67 +928,24 @@ const Maincomponent = () => {
             element={<AccountCategoryMaster />}
           />
 
-          <Route
-            path="master/finance/bankaccount"
-            element={<BankAccountMaster />}
-          />
-          <Route
-            path="master/finance/bankcheque"
-            element={<BankChequeMaster />}
-          />
 
-          {/* bankacountmaster */}
-          <Route
-            path="master/finance/bankaccount"
-            element={<BankAccountMaster />}
-          />
-          <Route
-            path="master/finance/bankaccount/addbankaccount"
-            element={<AddBankAccount />}
-          />
-          <Route
-            path="master/finance/bankaccount/bankaccountdetails"
-            element={<BankAccountdetails />}
-          />
 
-          {/* bankchequemaster */}
-          <Route
-            path="master/finance/bankcheque"
-            element={<BankChequeMaster />}
-          />
-          <Route
-            path="master/finance/bankcheque/addbankcheque"
-            element={<AddBankCheque />}
-          />
-          <Route
-            path="master/finance/bankcheque/bankchequedetails"
-            element={<BankChequeDetails />}
-          />
 
           {/* pettycash */}
-          <Route
-            path="master/finance/pettycash"
-            element={<PettyCashMaster />}
-          />
-          <Route
-            path="master/finance/pettycash/addpettycash"
-            element={<AddPettyCash />}
-          />
-          <Route
-            path="master/finance/pettycash/pettycashdetail/:id"
-            element={<PettyCashdetails />}
-          />
 
-          <Route
-            path="master/finance/pettycash/editpettycash/:id"
-            element={<EditPettyCash />}
-          />
 
           <Route />
           <Route
             path="master/configuration/system-settings"
             element={<SystemSettingsPage />}
           />
+          <Route path="master/configuration/theme-branding" element={<ThemeBrandingPage />} />
+          <Route path="master/configuration/settings" element={<ConfigurationPage />} />
+          <Route path="master/configuration/schedules" element={<SchedulesPage />} />
+          <Route path="master/configuration/document-numbering" element={<DocumentNumberingPage />} />
+          <Route path="master/finance/commission-rate-matrix" element={<CommissionRateMatrix />} />
+          <Route path="master/configuration/audit-trail" element={<AuditTrailPage />} />
+          <Route path="master/configuration/email-outbox" element={<EmailOutboxPage />} />
           <Route path="master/finance/company" element={<CompanyMaster />} />
           <Route path="master/finance/currency" element={<CurrencyMaster />} />
 
@@ -1023,38 +995,31 @@ const Maincomponent = () => {
 
           <Route
             path="master/finance/mainaccount"
-            element={<MainAccountMaster />}
+            element={<ChartOfAccounts />}
           />
           <Route
             path="master/finance/mainaccount/addmainaccount"
-            element={<AddMainAccount />}
+            element={<ChartOfAccounts />}
           />
           <Route
             path="master/finance/mainaccount/editmainaccount"
-            element={<EditMainAccount />}
+            element={<ChartOfAccounts />}
           />
           <Route
             path="master/finance/mainaccount/viewmainaccount"
-            element={<ViewMainAccount />}
+            element={<ChartOfAccounts />}
           />
 
           <Route
             path="master/finance/subaccount"
-            element={<SubAccountMaster />}
+            element={<ChartOfAccounts level="sub" />}
           />
-          <Route path="master/finance/taxation" element={<TaxationMaster />} />
-          <Route
-            path="master/finance/taxation/addtaxation"
-            element={<AddTaxation />}
-          />
-          <Route
-            path="master/finance/taxation/taxationedit"
-            element={<TaxationEdit />}
-          />
-          <Route
-            path="master/finance/taxation/taxationdetails"
-            element={<TaxationDetails />}
-          />
+          {/* Taxation: the tax codes master (VAT, EWT / FWT with BIR ATC, DST, LGT) */}
+          <Route path="master/finance/taxation" element={<TaxCodes />} />
+          <Route path="master/finance/close-checklist" element={<CloseChecklist />} />
+          <Route path="master/finance/bank-statement-formats" element={<BankStatementFormats />} />
+          <Route path="master/finance/insurer-statement-formats" element={<InsurerStatementFormats />} />
+          <Route path="master/finance/bank-transaction-types" element={<BankTransactionTypes />} />
 
           {/* Transactioncode */}
 
@@ -1076,29 +1041,34 @@ const Maincomponent = () => {
             element={<TransactioncodeEdit />}
           />
 
-          {/* Premium Account Setup Route */}
+          {/* Account Determination (the GL account of every account role the posting rules use); the former
+              Premium / Miscellaneous / Customer / RI-Claims account setup screens open its sections */}
+          <Route
+            path="master/finance/account-determination"
+            element={<AccountDetermination />}
+          />
           <Route
             path="master/finance/premium-account-setup"
-            element={<PremiumAccountSetup />}
+            element={<AccountDetermination section="premium" />}
           />
-
-          {/* Miscellaneous Account Setup Route */}
           <Route
             path="master/finance/miscellaneous-account-setup"
-            element={<MiscellaneousAccountSetup />}
+            element={<AccountDetermination section="miscellaneous" />}
           />
-
-          {/* Customer Account Setup Route */}
           <Route
             path="master/finance/customer-account-setup"
-            element={<CustomerAccountSetup />}
+            element={<AccountDetermination section="customer" />}
           />
-
-          {/* RI-Claims Account Setup Route */}
           <Route
             path="master/finance/ri-claim-account-setup"
-            element={<RIClaimsAccountSetup />}
+            element={<AccountDetermination section="ri-claims" />}
           />
+          <Route
+            path="master/finance/posting-rules"
+            element={<PostingRules />}
+          />
+          <Route path="master/finance/configuration-approvals" element={<ConfigurationApprovals />} />
+          <Route path="master/finance/accounting-flow" element={<AccountingFlow />} />
 
           {/* Remittance Master Routes */}
           <Route
@@ -1118,40 +1088,16 @@ const Maincomponent = () => {
             element={<SettlementParameterMaster />}
           />
           <Route
-            path="master/finance/remittance/reconciliationmaster/:mode"
-            element={<ReconciliationMaster />}
-          />
-          <Route
             path="master/finance/remittance/bulkprocessingmaster/:mode"
             element={<BulkProcessingMaster />}
-          />
-          <Route
-            path="master/finance/remittance/schedulemaster/:mode"
-            element={<ScheduleMaster />}
-          />
-          <Route
-            path="master/finance/remittance/electronictransfermaster/:mode"
-            element={<ElectronicTransferMaster />}
-          />
-          <Route
-            path="master/finance/remittance/approvalworkflowmaster/:mode"
-            element={<ApprovalWorkflowMaster />}
           />
           <Route
             path="master/finance/remittance/exceptionmaster/:mode"
             element={<ExceptionMaster />}
           />
           <Route
-            path="master/finance/remittance/reporttemplatemaster/:mode"
-            element={<ReportTemplateMaster />}
-          />
-          <Route
             path="master/finance/remittance/agencybillmaster/:mode"
             element={<AgencyBillMaster />}
-          />
-          <Route
-            path="master/finance/remittance/directbillmaster/:mode"
-            element={<DirectBillMaster />}
           />
           <Route
             path="master/finance/remittance/adjustmentmaster/:mode"
@@ -1160,14 +1106,6 @@ const Maincomponent = () => {
           <Route
             path="master/finance/remittance/notificationmaster/:mode"
             element={<NotificationMaster />}
-          />
-          <Route
-            path="master/finance/remittance/historyconfiguration/:mode"
-            element={<HistoryConfiguration />}
-          />
-          <Route
-            path="master/finance/remittance/analyticsconfiguration/:mode"
-            element={<AnalyticsConfiguration />}
           />
 
           {/* Remittance Transaction Routes */}
@@ -1212,10 +1150,6 @@ const Maincomponent = () => {
             element={<RemittanceExceptions />}
           />
           <Route
-            path="finance/remittance/reports"
-            element={<RemittanceReports />}
-          />
-          <Route
             path="finance/remittance/agencybill"
             element={<AgencyBillProcessing />}
           />
@@ -1223,6 +1157,57 @@ const Maincomponent = () => {
             path="finance/remittance/directbill"
             element={<DirectBillProcessing />}
           />
+          {/* Placement journey */}
+          <Route path="/sales/quick-quote" element={<QuickQuote />} />
+          <Route path="/master/generals/usermanagement/access-matrix" element={<UserAccessMatrix />} />
+          <Route path="/master/generals/usermanagement/role-permissions" element={<RolePermissions />} />
+          <Route path="/master/generals/usermanagement/authority-matrix" element={<AuthorityMatrix />} />
+          <Route path="/master/generals/usermanagement/delegations" element={<Delegations />} />
+          <Route path="/master/generals/usermanagement/segregation-of-duties" element={<SodRules />} />
+          <Route path="/master/generals/usermanagement/access-reviews" element={<AccessReviews />} />
+          <Route path="/master/data-privacy/requests" element={<DataSubjectRequests />} />
+          <Route path="/master/data-privacy/consents" element={<ConsentRegister />} />
+          {/* AML/CFT: Compliance menu and client onboarding */}
+          <Route path="/compliance/aml/dashboard" element={<AmlDashboard />} />
+          <Route path="/compliance/aml/clients" element={<ClientDueDiligence />} />
+          <Route path="/compliance/aml/clients/:id" element={<ClientAmlProfile />} />
+          <Route path="/compliance/aml/edd" element={<EddReviews />} />
+          <Route path="/compliance/aml/kyc-refresh" element={<KycRefresh />} />
+          <Route path="/compliance/aml/hits" element={<ScreeningHits />} />
+          <Route path="/compliance/aml/lists" element={<ScreeningLists />} />
+          <Route path="/compliance/aml/alerts" element={<TransactionAlerts />} />
+          <Route path="/compliance/aml/cases" element={<AmlCases />} />
+          <Route path="/compliance/aml/reports" element={<AmlReports />} />
+          <Route path="/compliance/aml/settings" element={<AmlSettings />} />
+          <Route path="/agent/client-onboarding" element={<ClientOnboarding />} />
+          <Route path="/agent/client-onboarding/:id" element={<ClientOnboarding />} />
+          <Route path="/compliance/licences" element={<LicenceRegister />} />
+          <Route path="/compliance/fit-and-proper" element={<FitAndProper />} />
+          <Route path="/compliance/insurer-authority" element={<InsurerAuthority />} />
+          <Route path="/compliance/complaints" element={<Complaints />} />
+          <Route path="/compliance/ic-annual-statement" element={<IcAnnualStatement />} />
+          <Route path="/compliance/ic-production-report" element={<IcProductionReport />} />
+          <Route path="/compliance/breaches" element={<BreachRegister />} />
+          <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
+          <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
+          <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
+          <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />
+          <Route path="/master/finance/premium-taxes" element={<LguTaxRates />} />
+          <Route path="/master/finance/payment-gateways" element={<PaymentGateways />} />
+          {/* Integrations */}
+          <Route path="/master/configuration/integrations" element={<IntegrationsMonitor />} />
+          <Route path="/master/configuration/message-templates" element={<MessageTemplates />} />
+          <Route path="/master/configuration/insurer-integration" element={<InsurerIntegration />} />
+          <Route path="/operations/ctpl-authentication" element={<CtplAuthentication />} />
+          <Route path="/master/finance/bank-file-layouts" element={<BankFileLayouts />} />
+          <Route path="/accounts/bank-payment-files" element={<BankPaymentFiles />} />
+          <Route path="/placement/broker-slips" element={<BrokerSlipList />} />
+          <Route path="/placement/broker-slips/new" element={<BrokerSlipCreate />} />
+          <Route path="/placement/broker-slips/:id" element={<BrokerSlipDetail />} />
+          <Route path="/placement/placement-slips" element={<PlacementList />} />
+          <Route path="/placement/placement-slips/new" element={<DirectPlacementForm mode="placement" />} />
+          <Route path="/placement/placement-slips/:id" element={<PlacementDetail />} />
+          <Route path="/placement/record-issued-policy" element={<DirectPlacementForm mode="record" />} />
           <Route
             path="finance/remittance/adjustments"
             element={<RemittanceAdjustments />}
@@ -1341,10 +1326,6 @@ const Maincomponent = () => {
             element={<DocumentManager />}
           />
           <Route
-            path="product-configurator/workflows"
-            element={<ApprovalWorkflows />}
-          />
-          <Route
             path="product-configurator/market-mapping"
             element={<MarketMapping />}
           />
@@ -1363,11 +1344,11 @@ const Maincomponent = () => {
 
           <Route
             path="master/finance/subaccount/subaccountdetails"
-            element={<SubAccountDetails />}
+            element={<ChartOfAccounts level="sub" />}
           />
           <Route
             path="master/finance/subaccount/subaccountedit"
-            element={<SubAccountEdit />}
+            element={<ChartOfAccounts level="sub" />}
           />
           <Route
             path="master/finance/currency/addcurrency"
@@ -1381,40 +1362,26 @@ const Maincomponent = () => {
             path="master/finance/currency/viewcurrency"
             element={<ViewCurrency />}
           />
-          <Route path="master/generals/commission" element={<Commission />} />
-          <Route
-            path="master/generals/commission/addcommission"
-            element={<AddCommission />}
-          />
-          <Route
-            path="master/generals/commission/editcommission"
-            element={<EditCommission />}
-          />
-          <Route
-            path="master/generals/commission/editcommissionpopup"
-            element={<EditCommissionPopup />}
-          />
-          <Route
-            path="master/generals/commission/viewcommission/:id"
-            element={<ViewCommission />}
-          />
 
-          {/* <Route path="/login" element={<Login />} />
-            <Route path="/forgotpassword" element={<ForgotPassword />} /> */}
           {/* // Dashboard Routes */}
-          <Route path="/" element={<ExecutiveDashboard />} />
+          {/* after sign-in: My Work with the role preset */}
+          <Route path="/" element={<ToMyWork />} />
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           <Route path="/claims/dashboard" element={<ClaimsDashboard />} />
+          <Route path="/sales/dashboard" element={<SalesDashboard />} />
           <Route
-            path="/underwriting/dashboard"
+            path="/processing/dashboard"
             element={<UnderwritingDashboard />}
           />
+          <Route path="/underwriting/dashboard" element={<Navigate to="/processing/dashboard" replace />} />
 
-          {/* // Agent Dashboard, Notification & agent profile */}
-          <Route path="/agent/home" element={<Dashboard />} />
+          {/* My Work: the first screen of every role after sign-in */}
+          <Route path="/my-work" element={<MyWork />} />
+          <Route path="/agent/home" element={<ToMyWork />} />
           <Route path="/agent/notification" element={<Notification />} />
-          <Route path="/agent/viewprofile" element={<AgentViewProfile />} />
-          <Route path="/agent/editprofile" element={<AgentEditProfile />} />
+          <Route path="/account/profile" element={<MyProfile />} />
+          <Route path="/agent/viewprofile" element={<Navigate to="/account/profile" replace />} />
+          <Route path="/agent/editprofile" element={<Navigate to="/account/profile" replace />} />
           {/* // Lead Creation, edit lead & Lead listing */}
           <Route
             path="/agent/createlead"
@@ -1430,10 +1397,6 @@ const Maincomponent = () => {
             path="/agent/clientedit"
             element={<LeadCreation flow="client" action="edit" />}
           />
-          {/* <Route
-            path="/agent/leadcreate"
-            element={<LeadEdit flow="create" action="create"/>}
-          /> */}
           {/* // Quote Creation, Policy conversion & Client listing */}
           <Route
             path="/agent/createquote/policydetails/createquote/:id"
@@ -1471,9 +1434,7 @@ const Maincomponent = () => {
           />
           <Route
             path="/agent/renewalquote/coveragedetails/coveragedetail/:id"
-            element={
-              <CoverageDeatails action="coveragedetail" flow="renewal" />
-            }
+            element={<RenewalCoverageStep />}
           />
           <Route
             path="/agent/renewalquote/accessories/accessorirsdetails/:id"
@@ -1525,10 +1486,6 @@ const Maincomponent = () => {
             element={<EndorsementSummary action="view" />}
           />
 
-          {/* <Route
-            path="/agent/createquote/ordersummaryquote"
-            element={<OrderSummaryQuote />}
-          /> */}
           <Route
             path="/agent/quotedetailview/:id"
             element={<QuoteDetailView action="view" />}
@@ -1758,22 +1715,72 @@ const Maincomponent = () => {
             path="/agent/payments/detail/:id"
             element={<PaymentDetails />}
           />
-          {/* // Open items */}
-          <Route path="/agent/openitems" element={<OpenItems />} />
-          <Route
-            path="/agent/openitems/upcomingevents"
-            element={<UpcomingEvents />}
-          />
-          <Route
-            path="/agent/openitems/expiringpolicy"
-            element={<ExpiringPolicy />}
-          />
-          <Route
-            path="/agent/openitems/quotepending"
-            element={<QuotePending />}
-          />
+          {/* the former Open Items and Upcoming Events pages: My Work */}
+          <Route path="/agent/openitems" element={<ToMyWork />} />
+          <Route path="/agent/openitems/upcomingevents" element={<ToMyWork />} />
+          <Route path="/agent/openitems/expiringpolicy" element={<ToMyWork />} />
+          <Route path="/agent/openitems/quotepending" element={<ToMyWork />} />
 
           {/* //Reports */}
+
+          {/* every catalogue report (Reports > All Reports) */}
+          <Route path="/reports/catalogue" element={<ReportCatalogue />} />
+          <Route path="/reports/run/:code" element={<ReportRunner />} />
+          <Route path="/reports/financialreports/pe/:code" element={<PeriodEndReportPage area="financial" />} />
+          {/* Period-end processing */}
+          <Route path="/accounts/period-end/periods" element={<PeriodManagement />} />
+          <Route path="/accounts/period-end/close" element={<MonthEndClose />} />
+          <Route path="/accounts/period-end/close/:id" element={<MonthEndCloseRun />} />
+          <Route path="/accounts/period-end/year-end" element={<YearEndClose />} />
+          <Route path="/accounts/period-end/recurring" element={<RecurringJournals />} />
+          <Route path="/accounts/period-end/statements" element={<FinancialStatements />} />
+          <Route path="/accounts/tax/2307" element={<Bir2307 />} />
+          <Route path="/accounts/tax/reports/:code" element={<PeriodEndReportPage area="tax" />} />
+          {/* BIR forms, invoicing and tax */}
+          <Route path="/accounts/tax/withholding-returns" element={<WithholdingReturns />} />
+          <Route path="/accounts/tax/alphalist-1604e" element={<Alphalist1604E />} />
+          <Route path="/accounts/tax/percentage-tax" element={<PercentageTax />} />
+          <Route path="/accounts/tax/dat-files" element={<BirDatFiles />} />
+          <Route path="/accounts/tax/sales-invoices" element={<SalesInvoices />} />
+          <Route path="/accounts/tax/eis" element={<EisOutbox />} />
+          <Route path="/accounts/tax/cas" element={<CasPack />} />
+          {/* Overriding commission from insurers */}
+          <Route path="/commission/insurer-overrides/agreements" element={<OverrideAgreements />} />
+          <Route path="/commission/insurer-overrides/computations" element={<OverrideComputations />} />
+          {/* Bank reconciliation */}
+          <Route path="/accounts/bank-reconciliation" element={<BankRecWorkspace />} />
+          <Route path="/accounts/bank-reconciliation/reconciliations" element={<BankReconciliations />} />
+          <Route path="/accounts/bank-reconciliation/reconciliations/:id" element={<BankReconciliationRun />} />
+          <Route path="/accounts/bank-reconciliation/reports/:code" element={<BankRecReportPage />} />
+          <Route path="/accounts/insurer-reconciliation/statements" element={<InsurerStatements />} />
+          <Route path="/accounts/insurer-reconciliation/statements/:id" element={<InsurerStatementWorkspace />} />
+          <Route path="/accounts/credit-control/instalments" element={<InstalmentPlans />} />
+          <Route path="/accounts/credit-control/warranty" element={<WarrantyMonitor />} />
+          <Route path="/accounts/credit-control/limits" element={<CreditLimits />} />
+          <Route path="/accounts/credit-control/remittance-ageing" element={<RemittanceAgeing />} />
+          <Route path="/operations/cover-notes" element={<CoverNotes />} />
+          <Route path="/operations/policy-cancellation" element={<PolicyCancellation />} />
+          <Route path="/operations/claim-documents" element={<ClaimDocuments />} />
+          <Route path="/operations/motor-claim-repairs" element={<MotorClaimRepairs />} />
+          <Route path="/accounts/post-dated-cheques" element={<PostDatedCheques />} />
+          <Route path="/accounts/claims-settlements" element={<ClaimsSettlements />} />
+          <Route path="/accounts/payables/invoices" element={<SupplierInvoices />} />
+          <Route path="/accounts/payables/payments" element={<SupplierPayments />} />
+          <Route path="/accounts/payables/ageing" element={<ApAgeing />} />
+          <Route path="/accounts/payables/suppliers" element={<Suppliers />} />
+          <Route path="/accounts/fixed-assets/register" element={<AssetRegister />} />
+          <Route path="/accounts/fixed-assets/depreciation" element={<DepreciationRun />} />
+          {/* sales activities, asset disposal and the BIR 2307 of suppliers */}
+          <Route path="/accounts/fixed-assets/disposals" element={<AssetDisposals />} />
+          <Route path="/accounts/payables/2307" element={<Bir2307 payeeType="Supplier" />} />
+          <Route path="/sales/activities" element={<SalesActivities />} />
+          <Route path="/master/organization/sales-activity-types" element={<SalesActivityTypes />} />
+          <Route path="/master/organization/sales-activity-outcomes" element={<SalesActivityOutcomes />} />
+          <Route path="/master/insurance/short-period-rates" element={<ShortPeriodRates />} />
+          <Route path="/master/insurance/cancellation-reasons" element={<CancellationReasons />} />
+          <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
+          <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
+          <Route path="/master/finance/asset-classes" element={<AssetClasses />} />
 
           {/* OperationalReports */}
           <Route
@@ -1822,31 +1829,19 @@ const Maincomponent = () => {
             element={<TrailBalance />}
           />
           <Route
-            path="/reports/financialreports/payables"
-            element={<Payables />}
+            path="/reports/financialreports/coinsuranceregister"
+            element={<CoInsuranceRegister />}
           />
           <Route
-            path="/reports/financialreports/journal"
-            element={<Journal />}
+            path="/reports/financialreports/duetoinsurers"
+            element={<DueToInsurers />}
           />
-          <Route
-            path="/reports/financialreports/trailbalance"
-            element={<TrailBalance />}
-          />
-          <Route
-            path="/agent/openitemslistdata"
-            element={<OpenItemsListData />}
-          />
+          <Route path="/operations/my-work" element={<ToMyWork />} />
+          {/* Operations > Open Items became My Work: the old addresses lead there */}
+          <Route path="/agent/openitemslistdata" element={<ToMyWork />} />
 
-          <Route
-            path="/agent/openitems/renewalrequest"
-            element={<RenewalRequest />}
-          />
+          <Route path="/agent/openitems/renewalrequest" element={<ToMyWork />} />
           {/* //Reports */}
-          {/* <Route
-              path="/reports/operationalreports"
-              element={<OperationalReports />}
-            /> */}
 
           {/* // Payments */}
           <Route path="/agent/payments" element={<Payments />} />
@@ -1854,16 +1849,10 @@ const Maincomponent = () => {
             path="/agent/payments/detail/:id"
             element={<PaymentDetails />}
           />
-          {/* // Open items */}
-          <Route path="/agent/openitems" element={<OpenItems />} />
-          <Route
-            path="/agent/openitems/upcomingevents"
-            element={<UpcomingEvents />}
-          />
-          <Route
-            path="/agent/openitems/expiringpolicy"
-            element={<ExpiringPolicy />}
-          />
+          {/* the former Open Items and Upcoming Events pages: My Work */}
+          <Route path="/agent/openitems" element={<ToMyWork />} />
+          <Route path="/agent/openitems/upcomingevents" element={<ToMyWork />} />
+          <Route path="/agent/openitems/expiringpolicy" element={<ToMyWork />} />
           {/* Renewal */}
           <Route
             path="/agent/renewal/waiting/:id"
@@ -1923,11 +1912,22 @@ const Maincomponent = () => {
             element={<AgingReport />}
           />
 
-          {/* //Reports */}
-          {/* <Route
-              path="/reports/operationalreports"
-              element={<OperationalReports />}
-            /> */}
+          {/* Distribution, motor programmes and products */}
+          <Route path="/sales/lead-assignment" element={<LeadAssignment />} />
+          <Route path="/sales/dealer-programmes" element={<DealerProgrammes />} />
+          <Route path="/sales/comparison-reports" element={<ComparisonReports />} />
+          <Route path="/sales/campaigns" element={<Campaigns />} />
+          <Route path="/master/insurance/channels" element={<DistributionChannels />} />
+          <Route path="/operations/fleet-schedules" element={<FleetSchedules />} />
+          <Route path="/operations/fleet-schedules/:id" element={<FleetSchedules />} />
+          <Route path="/operations/open-covers" element={<OpenCovers />} />
+          <Route path="/operations/open-covers/:id" element={<OpenCovers />} />
+          <Route path="/reinsurance/facultative" element={<FacultativePlacements />} />
+          <Route path="/reinsurance/facultative/:id" element={<FacultativePlacements />} />
+          <Route path="/reports/builder" element={<ReportBuilder />} />
+
+          {/* Any other address inside the application */}
+          <Route path="*" element={<NotFound />} />
         </Route>
       </Routes>
     </div>

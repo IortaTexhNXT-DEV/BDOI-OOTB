@@ -1,0 +1,51 @@
+.chart-of-accounts {
+  padding: 1rem;
+
+  .main__account__title {
+    color: #111927;
+    font-size: 30px;
+    font-weight: 600;
+    font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .breadCrums__view__reversal {
+    border: none;
+    padding: 1px 0;
+  }
+
+  .main__btn__action {
+    color: #fff;
+    background-color: #0072d8;
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-family: "Nunito", Arial, sans-serif;
+    font-weight: 500;
+    font-size: 18px;
+  }
+
+  .coa-table {
+    .p-rowgroup-header td {
+      background: #f1f5fb;
+    }
+
+    .type-header {
+      font-weight: 700;
+      color: #0072d8;
+
+      .type-count {
+        color: #6c757d;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+.coa-dialog {
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #555;
+    font-weight: 500;
+    font-size: 0.9rem;
+  }
+}

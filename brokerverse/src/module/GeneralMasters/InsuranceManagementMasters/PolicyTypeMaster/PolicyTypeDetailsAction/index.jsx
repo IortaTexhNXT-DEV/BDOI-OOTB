@@ -1,54 +1,36 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
-import DropDowns from "../../../../../components/DropDowns";
-import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import { MultiSelect } from "primereact/multiselect";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { Button } from "primereact/button";
-import { SelectButton } from "primereact/selectbutton";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
-import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   patchInsurancePolicyTypeMiddleWare,
   postInsurancePolicyTypeMiddleWare,
 } from "../store/insurancePolicyTypeMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const PolicyTypeDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { InsurancePolicyType, loading } = useSelector(
-    ({ insurancePolicyTypeReducers }) => {
-      return {
-        loading: insurancePolicyTypeReducers?.loading,
-        InsurancePolicyType: insurancePolicyTypeReducers?.InsurancePolicyType,
-      };
-    }
-  );
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsurancePolicyType.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("policy-type", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -82,34 +64,23 @@ const PolicyTypeDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsurancePolicyType?.length + 1,
-      };
-      dispatch(postInsurancePolicyTypeMiddleWare(valueWithId));
-
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/policytype");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsurancePolicyTypeMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/policytype");
-    } else {
-      navigation("/master/generals/insurancemanagement/policytype");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsurancePolicyTypeMiddleWare : patchInsurancePolicyTypeMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/policytype");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find setFormikValues");
     const policyTypeCode = data[0]?.policytypeCode;
     const policyTypeName = data[0]?.policyTypeName;
     const policyTypeDescription = data[0]?.policyTypeDescription;
@@ -118,12 +89,12 @@ const PolicyTypeDetailsAction = ({ action }) => {
     const Product = data[0]?.product;
 
     const updatedValues = {
-      policyTypeCode: `${policyTypeCode}`,
-      policyTypeName: `${policyTypeName}`,
-      policyTypeDescription: `${policyTypeDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
-      Product: `${Product}`,
+      policyTypeCode: policyTypeCode ?? "",
+      policyTypeName: policyTypeName ?? "",
+      policyTypeDescription: policyTypeDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
+      Product: Product ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -147,7 +118,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
       <div className="grid m-0 top-container">
         <CustomToast
           ref={toastRef}
-          message="Policy type Code CC1234 is added"
+          message={`Policy Type Code ${formik.values.policyTypeCode || ""} is added`}
         />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
@@ -188,7 +159,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.policyTypeCode && formik.errors.policyTypeCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.policyTypeCode}
               </div>
             )}
@@ -206,7 +177,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.policyTypeName && formik.errors.policyTypeName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.policyTypeName}
               </div>
             )}
@@ -225,7 +196,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
             />
             {formik.touched.policyTypeDescription &&
               formik.errors.policyTypeDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.policyTypeDescription}
                 </div>
               )}
@@ -241,7 +212,7 @@ const PolicyTypeDetailsAction = ({ action }) => {
               onChange={(e) => formik.setFieldValue("Product", e.target.value)}
             />
             {formik.touched.Product && formik.errors.Product && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.Product}
               </div>
             )}
@@ -276,7 +247,6 @@ const PolicyTypeDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             {t("generalMasters.save")}
@@ -285,7 +255,6 @@ const PolicyTypeDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

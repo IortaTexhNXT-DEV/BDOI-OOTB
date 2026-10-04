@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from "react";
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 
@@ -9,9 +9,42 @@ import { initializeGlobalToast } from "../../utility/toastUtils";
 
 import AgentNavBar from "../../agentModule/component/navBar";
 import NewSideBar from "../../components/SideBar/NewSideBar";
+import { menuList } from "../../components/SideBar/list";
+import { firstAllowedPath, getUserRoles, isPathAllowed } from "../../utils/menuPermissions";
+import ErrorBoundary from "../../components/ErrorBoundary";
+import HelpPanel from "../../components/HelpPanel";
+import { loadIdleMinutes, startIdleTimer } from "../../utility/idleTimeout";
+import { logout } from "../../utility/logout";
+
+const NotAuthorised = () => (
+  <div className="protected__layout__not-authorised" role="alert">
+    <h2>Not authorised</h2>
+    <p>Your role does not give access to this screen. Choose a screen from the menu.</p>
+  </div>
+);
 
 const ProtectedLayout = () => {
   const toastRef = useRef(null);
+  const location = useLocation();
+  const [idleWarning, setIdleWarning] = useState(false);
+
+  // Sign out after the configured idle time, with a one-minute warning.
+  useEffect(() => {
+    let stop = () => {};
+    let cancelled = false;
+    loadIdleMinutes().then((minutes) => {
+      if (cancelled) return;
+      stop = startIdleTimer(minutes, {
+        onWarn: () => setIdleWarning(true),
+        onActive: () => setIdleWarning(false),
+        onTimeout: () => logout().catch(() => (window.location.href = "/login")),
+      });
+    });
+    return () => {
+      cancelled = true;
+      stop();
+    };
+  }, []);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
@@ -31,7 +64,6 @@ const ProtectedLayout = () => {
   // Handle mobile/tablet sidebar toggle with debouncing
   const toggleSidebar = () => {
     setSidebarOpen((prevState) => {
-      console.log("Toggling sidebar from", prevState, "to", !prevState);
       return !prevState;
     });
   };
@@ -69,15 +101,8 @@ const ProtectedLayout = () => {
     };
   }, []);
 
-  // Add debug logging for sidebar state changes
-  useEffect(() => {
-    console.log("Sidebar state changed:", sidebarOpen);
-    console.log("Window width:", window.innerWidth);
-  }, [sidebarOpen]);
-
   const Auth = () => {
     const user = isAuthenticated();
-    console.log(user, "user");
 
     return !!user;
   };
@@ -96,7 +121,7 @@ const ProtectedLayout = () => {
           e.stopPropagation();
           toggleSidebar();
         }}
-        aria-label="Toggle navigation"
+        aria-label="Toggle navigation" tooltip="Toggle navigation" tooltipOptions={{ position: "top" }}
       />
 
       {/* Mobile/Tablet Overlay */}
@@ -130,17 +155,36 @@ const ProtectedLayout = () => {
             e.stopPropagation();
             closeSidebar();
           }}
-          aria-label="Close sidebar"
+          aria-label="Close sidebar" tooltip="Close sidebar" tooltipOptions={{ position: "top" }}
         />
         <NewSideBar onNavigate={handleSidebarNavigation} />
       </div>
+
+      {/* Help panel: avatar menu > Help, F1 or ? */}
+      <HelpPanel />
+
+      {idleWarning && (
+        <div className="bv-idle-warning" role="alert">
+          You will be signed out in one minute because of inactivity. Move the mouse or press a key to stay signed in.
+        </div>
+      )}
 
       <div className="protected__layout__content__space">
         <div className="main__content">
           <div className="protected__layout__header">
             <AgentNavBar />
           </div>
-          {Auth() ? <Outlet /> : <Navigate to="/login" replace />}
+          {!Auth() ? (
+            <Navigate to="/login" replace />
+          ) : location.pathname === "/" && !isPathAllowed("/", menuList, getUserRoles()) && firstAllowedPath(menuList, getUserRoles()) ? (
+            <Navigate to={firstAllowedPath(menuList, getUserRoles())} replace />
+          ) : isPathAllowed(location.pathname, menuList, getUserRoles()) ? (
+            <ErrorBoundary resetKey={location.pathname}>
+              <Outlet />
+            </ErrorBoundary>
+          ) : (
+            <NotAuthorised />
+          )}
         </div>
       </div>
     </div>

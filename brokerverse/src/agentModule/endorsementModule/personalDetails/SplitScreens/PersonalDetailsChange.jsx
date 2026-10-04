@@ -1,15 +1,9 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
 import { useFormik } from "formik";
-import addressService from "../../../../services/addressService";
-import {
-  addFallbackOption,
-  isThailand,
-  normalizeCountryName,
-  toAddressOptions,
-} from "../../../../utility/addressHelpers";
+import PhAddressFields from "../../../component/PhAddressFields";
+import { normalizeCountryName } from "../../../../utility/addressHelpers";
 
 const initialValue = {
   CompanyName: "",
@@ -25,6 +19,8 @@ const initialValue = {
   Province: "",
   City: "",
   ZIPCode: "",
+  Region: "",
+  Street: "",
   DateofBirth: "",
 };
 
@@ -43,6 +39,8 @@ const mapPersonalDetailsToInitialValues = (details) => ({
   Province: details?.Province ?? "",
   City: details?.City ?? "",
   ZIPCode: details?.ZIPCode ?? "",
+  Region: details?.Region ?? "",
+  Street: details?.Street ?? "",
   DateofBirth: details?.DateofBirth ?? "",
 });
 
@@ -51,6 +49,7 @@ const PersonalDetailsChange = ({
   disabled,
   shouldSubmit,
   onSectionSubmitted,
+  onSectionInvalid,
   personalDetails,
 }) => {
   const { t } = useTranslation();
@@ -59,124 +58,40 @@ const PersonalDetailsChange = ({
     [personalDetails]
   );
 
-  const [countryList, setCountryList] = useState([]);
-  const [provinceList, setProvinceList] = useState([]);
-  const [cityList, setCityList] = useState([]);
-  const [districtList, setDistrictList] = useState([]);
 
   const formik = useFormik({
     initialValues: formikInitialValues,
     enableReinitialize: true,
+    validate: (v) => {
+      const e = {};
+      const need = (k) => { if (!String(v[k] ?? "").trim()) e[k] = t("common.required", "Required"); };
+      ["LastName", "ContactNumber", "HouseNo", "Country", "Province", "City"].forEach(need);
+      if (!v.CompanyName) need("FirstName");
+      const digits = String(v.ContactNumber || "").replace(/\D/g, "");
+      if (v.ContactNumber && !(digits.length >= 10 && digits.length <= 12)) e.ContactNumber = t("endorsement.invalidContact", "Enter a valid mobile number");
+      if (v.ZIPCode && !/^\d{4}$/.test(String(v.ZIPCode).trim())) e.ZIPCode = t("endorsement.invalidZip", "ZIP code is 4 digits");
+      return e;
+    },
     onSubmit: (values) => {
       onSectionSubmitted?.(index, values);
     },
   });
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCountries();
-      if (!cancelled && res.success && res.data) {
-        setCountryList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const selectedCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.Country ||
-      c.id === formik.values.Country
-  )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) =>
-      (p.name || p.code) === formik.values.Province ||
-      p.id === formik.values.Province
-  )?.id;
-  const selectedCityId = cityList.find(
-    (c) =>
-      (c.name || c.code) === formik.values.City || c.id === formik.values.City
-  )?.id;
-
-  useEffect(() => {
-    if (!selectedCountryId) {
-      setProvinceList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getProvincesByCountry(selectedCountryId);
-      if (!cancelled && res.success && res.data) {
-        setProvinceList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCountryId]);
-
-  useEffect(() => {
-    if (!selectedProvinceId) {
-      setCityList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCitiesByProvince(selectedProvinceId);
-      if (!cancelled && res.success && res.data) {
-        setCityList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedProvinceId]);
-
-  useEffect(() => {
-    if (!selectedCityId || !isThailand(formik.values.Country)) {
-      setDistrictList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getDistrictsByCity(selectedCityId);
-      if (!cancelled && res.success && res.data) {
-        setDistrictList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCityId, formik.values.Country]);
-
-  const countryOptions = useMemo(
-    () =>
-      addFallbackOption(formik.values.Country, toAddressOptions(countryList)),
-    [countryList, formik.values.Country]
-  );
-  const provinceOptions = useMemo(
-    () =>
-      addFallbackOption(formik.values.Province, toAddressOptions(provinceList)),
-    [provinceList, formik.values.Province]
-  );
-  const cityOptions = useMemo(
-    () => addFallbackOption(formik.values.City, toAddressOptions(cityList)),
-    [cityList, formik.values.City]
-  );
-  const districtOptions = useMemo(
-    () => toAddressOptions(districtList),
-    [districtList]
-  );
-
+  // Submit once per request; an invalid section shows its errors and hands control back to the page
   useEffect(() => {
     if (!shouldSubmit) {
       return;
     }
-
-    formik.submitForm();
-  }, [formik, shouldSubmit]);
+    formik.validateForm().then((errors) => {
+      if (Object.keys(errors).length) {
+        formik.setTouched(Object.fromEntries(Object.keys(errors).map((k) => [k, true])), false);
+        onSectionInvalid?.(index);
+        return;
+      }
+      formik.submitForm();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldSubmit]);
 
   return (
     <div>
@@ -220,104 +135,13 @@ const PersonalDetailsChange = ({
             error={formik.touched.ContactNumber && formik.errors.ContactNumber}
           />
         </div>
-        <div className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <InputTextField
-            disabled={disabled}
-            label={t("endorsement.houseNoStreet")}
-            value={formik.values.HouseNo}
-            onChange={formik.handleChange("HouseNo")}
-            error={formik.touched.HouseNo && formik.errors.HouseNo}
-          />
-        </div>
-        <div className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          {isThailand(formik.values.Country) && districtOptions.length > 0 ? (
-            <DropdownField
-              label={t("leadCreation.subDistrictTambon")}
-              disabled={disabled || !formik.values.City}
-              value={formik.values.Barangay}
-              options={districtOptions}
-              onChange={(e) => formik.setFieldValue("Barangay", e.value)}
-              error={formik.touched.Barangay && formik.errors.Barangay}
-            />
-          ) : (
-            <InputTextField
-              disabled={disabled}
-              label={
-                isThailand(formik.values.Country)
-                  ? t("leadCreation.subDistrictTambon")
-                  : t("endorsement.barangaySubd")
-              }
-              value={formik.values.Barangay}
-              onChange={formik.handleChange("Barangay")}
-              error={formik.touched.Barangay && formik.errors.Barangay}
-            />
-          )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <DropdownField
-            label={t("endorsement.country")}
-            disabled={disabled}
-            value={formik.values.Country}
-            options={countryOptions}
-            onChange={(e) => {
-              formik.setFieldValue("Country", e.value);
-              formik.setFieldValue("Province", "");
-              formik.setFieldValue("City", "");
-              formik.setFieldValue("Barangay", "");
-              formik.setFieldValue("ZIPCode", "");
-            }}
-            error={formik.touched.Country && formik.errors.Country}
-          />
-        </div>
-        <div className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <DropdownField
-            label={
-              isThailand(formik.values.Country)
-                ? t("leadCreation.provinceChangwat")
-                : t("endorsement.province")
-            }
-            disabled={disabled || !formik.values.Country}
-            value={formik.values.Province}
-            options={provinceOptions}
-            onChange={(e) => {
-              formik.setFieldValue("Province", e.value);
-              formik.setFieldValue("City", "");
-              formik.setFieldValue("Barangay", "");
-            }}
-            error={formik.touched.Province && formik.errors.Province}
-          />
-        </div>
-        <div className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <DropdownField
-            label={
-              isThailand(formik.values.Country)
-                ? t("leadCreation.districtAmphoe")
-                : t("endorsement.city")
-            }
-            disabled={disabled || !formik.values.Province}
-            value={formik.values.City}
-            options={cityOptions}
-            onChange={(e) => {
-              formik.setFieldValue("City", e.value);
-              formik.setFieldValue("Barangay", "");
-            }}
-            error={formik.touched.City && formik.errors.City}
-          />
-        </div>
-        <div className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
-          <InputTextField
-            label={
-              isThailand(formik.values.Country)
-                ? t("leadCreation.postalCode")
-                : t("endorsement.zipCode")
-            }
-            disabled={disabled}
-            value={formik.values.ZIPCode}
-            onChange={formik.handleChange("ZIPCode")}
-            error={formik.touched.ZIPCode && formik.errors.ZIPCode}
-          />
-        </div>
       </div>
+      {/* Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+      <PhAddressFields
+        formik={formik}
+        disabled={disabled}
+        required={{ houseNo: true, country: true, province: true, city: true }}
+      />
     </div>
   );
 };

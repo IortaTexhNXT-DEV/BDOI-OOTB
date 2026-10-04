@@ -2,13 +2,16 @@ import axios from "axios";
 import { BASE_URL } from "./constant";
 import { getAccessToken } from "./tokenManager";
 import { logout } from "./logout";
+import { refreshAccessToken } from "./sessionRefresh";
+import logger from "./logger";
+import { revealHeaders } from "./piiReveal";
+import { showComplianceWarnings } from "./toastUtils";
 
 const request = axios.create({
     baseURL: BASE_URL,
 });
 
 // Alter defaults after instance has been created
-// instance.defaults.headers.common["Authorization"] = AUTH_TOKEN;
 
 // set token on request headers
 request.interceptors.request.use((config) => {
@@ -19,10 +22,10 @@ request.interceptors.request.use((config) => {
             ...config,
             headers: {
                 ...config.headers,
+                ...revealHeaders(),
                 Authorization: `Bearer ${token}`,
             },
         };
-
     }
     else {
         return {
@@ -36,14 +39,29 @@ request.interceptors.request.use((config) => {
 
 // handle 401 and logout
 request.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // a compliance control set to warn (insurer authority, referrer licence) let the action through
+        if (Array.isArray(response?.data?.complianceWarnings) && response.data.complianceWarnings.length) {
+            showComplianceWarnings(response.data.complianceWarnings);
+        }
+        return response;
+    },
     async (err) => {
+        const original = err.config;
+        if (err.response?.status === 401 && original && !original.__bvRetried) {
+            const token = await refreshAccessToken();
+            if (token) {
+                original.__bvRetried = true;
+                original.headers = { ...original.headers, Authorization: `Bearer ${token}` };
+                return request(original);
+            }
+        }
         if (err.response?.status === 401) {
             // Call logout API and clear data
             try {
                 await logout();
             } catch (logoutError) {
-                console.error("Logout on 401 failed:", logoutError);
+                logger.error("Logout on 401 failed:", logoutError);
                 // Force redirect even if logout fails
                 window.location.href = "/login";
             }

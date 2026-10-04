@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
  
 .overall__detailview__container{
     // background-color: green;
@@ -86,7 +87,7 @@ margin-left: 10px;
 .submit_button{
     // width: 170px;
     height: 48px;
-    border-radius: 30px;
+    border-radius: 6px;
     background: #0072d8;
     font-size: 18px;
     font-weight: 500;
@@ -204,7 +205,7 @@ margin:10px 0px
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: #2563eb;
+    background: $brand-blue;
     color: #fff;
     font-size: 12px;
     font-weight: 600;
@@ -284,7 +285,6 @@ margin:10px 0px
     text-align: left;
     font-size: 11px;
     letter-spacing: 0.04em;
-    text-transform: uppercase;
     color: #98a2b3;
     font-weight: 600;
     padding: 10px 12px;

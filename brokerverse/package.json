@@ -1,58 +1,68 @@
 {
-  "name": "finance_module",
+  "name": "brokerverse-frontend",
   "version": "0.1.0",
   "private": true,
+  "description": "BrokerVerse insurance broking platform: React front end",
+  "author": "iorta TechNXT",
   "dependencies": {
-    "@craco/craco": "^7.1.0",
     "@fontsource/nunito": "^5.3.0",
     "@fullcalendar/core": "^6.1.11",
     "@fullcalendar/daygrid": "^6.1.10",
     "@fullcalendar/react": "^6.1.10",
     "@reduxjs/toolkit": "^2.0.1",
-    "@testing-library/dom": "^8.20.1",
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.6.2",
-    "caniuse-lite": "^1.0.30001683",
-    "chart.js": "^4.4.1",
-    "flatted": "^3.2.9",
+    "axios": "^1.20.0",
+    "chart.js": "^4.5.1",
     "formik": "^2.4.5",
     "history": "^5.3.0",
     "i18next": "^25.8.13",
     "i18next-browser-languagedetector": "^8.2.1",
-    "js-cookie": "^3.0.5",
+    "js-cookie": "^3.0.8",
     "moment": "^2.29.4",
     "primeflex": "^3.3.1",
     "primeicons": "^6.0.1",
     "primereact": "^10.3.1",
+    "qrcode": "^1.5.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^16.5.4",
     "react-pro-sidebar": "^1.1.0-alpha.1",
     "react-redux": "^9.0.4",
-    "react-router-dom": "^6.20.1",
-    "react-scripts": "5.0.1",
-    "redux-logger": "^3.0.6",
-    "sass": "^1.69.5",
-    "web-vitals": "^2.1.4"
+    "react-router": "^6.30.6",
+    "react-router-dom": "^6.30.6",
+    "redux-logger": "^3.0.6"
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
+    "@craco/craco": "^7.1.0",
+    "@testing-library/dom": "^8.20.1",
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "react-scripts": "5.0.1",
+    "sass": "^1.69.5",
+    "web-vitals": "^2.1.4"
   },
   "scripts": {
     "start": "craco start",
     "build": "craco build",
-    "test": "react-scripts test",
+    "test": "craco test",
+    "lint": "eslint --ext .js,.jsx src",
+    "serve": "node scripts/serve-build.js",
     "eject": "react-scripts eject",
     "theme:bdoi": "node scripts/build-bdoi-theme.js",
-    "theme:palette": "node scripts/apply-bdoi-palette.js"
+    "theme:palette": "node scripts/apply-bdoi-palette.js",
+    "check:api": "node scripts/check-api-calls.js",
+    "check:i18n": "node scripts/check-translations.js",
+    "help:build": "node scripts/build-help.js"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "no-console": "warn"
+    }
   },
   "browserslist": {
     "production": [
@@ -64,6 +74,11 @@
       "last 1 chrome version",
       "last 1 firefox version",
       "last 1 safari version"
+    ]
+  },
+  "jest": {
+    "transformIgnorePatterns": [
+      "node_modules/(?!(@fullcalendar|preact)/)"
     ]
   }
 }

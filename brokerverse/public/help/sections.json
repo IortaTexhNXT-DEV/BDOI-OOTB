@@ -1,0 +1,1789 @@
+{
+ "title": "BrokerVerse User Manual",
+ "version": "1.2.3",
+ "date": "04 October 2026",
+ "sections": [
+  {
+   "id": "about-this-manual",
+   "title": "About this manual",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "purpose",
+   "title": "Purpose",
+   "level": 2,
+   "chapter": "About this manual"
+  },
+  {
+   "id": "how-the-manual-is-organised",
+   "title": "How the manual is organised",
+   "level": 2,
+   "chapter": "About this manual"
+  },
+  {
+   "id": "conventions",
+   "title": "Conventions",
+   "level": 2,
+   "chapter": "About this manual"
+  },
+  {
+   "id": "getting-started",
+   "title": "Getting started",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "signing-in",
+   "title": "Signing in",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "password-rules",
+   "title": "Password rules",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "change-your-password-at-sign-in",
+   "title": "Change your password at sign-in",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "forgotten-password",
+   "title": "Forgotten password",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "failed-sign-ins-and-locked-accounts",
+   "title": "Failed sign-ins and locked accounts",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "two-step-verification-at-sign-in",
+   "title": "Two-step verification at sign-in",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "automatic-sign-out",
+   "title": "Automatic sign-out",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "the-screen-layout",
+   "title": "The screen layout",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "the-account-menu",
+   "title": "The account menu",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "notifications",
+   "title": "Notifications",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "my-profile-and-account-security",
+   "title": "My Profile and account security",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "my-profile",
+   "title": "My Profile",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "change-password",
+   "title": "Change password",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "set-up-two-step-verification",
+   "title": "Set up two-step verification",
+   "level": 3,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "roles-and-menus",
+   "title": "Roles and menus",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "working-with-lists",
+   "title": "Working with lists",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "working-with-forms",
+   "title": "Working with forms",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "statuses-approvals-and-maker-checker",
+   "title": "Statuses, approvals and maker-checker",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "where-the-audit-trail-is",
+   "title": "Where the audit trail is",
+   "level": 2,
+   "chapter": "Getting started"
+  },
+  {
+   "id": "the-business-process-end-to-end",
+   "title": "The business process end to end",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "the-broking-cycle",
+   "title": "The broking cycle",
+   "level": 2,
+   "chapter": "The business process end to end"
+  },
+  {
+   "id": "who-does-each-step-and-where",
+   "title": "Who does each step and where",
+   "level": 2,
+   "chapter": "The business process end to end"
+  },
+  {
+   "id": "the-placement-journey-by-line",
+   "title": "The placement journey by line",
+   "level": 2,
+   "chapter": "The business process end to end"
+  },
+  {
+   "id": "what-the-system-posts",
+   "title": "What the system posts",
+   "level": 2,
+   "chapter": "The business process end to end"
+  },
+  {
+   "id": "system-administrator",
+   "title": "System Administrator",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "system-administrator-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "system-administrator-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "system-administrator-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "users",
+   "title": "Users",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "add-a-user",
+   "title": "Add a user",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "account-actions",
+   "title": "Account actions",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "roles-and-role-permissions",
+   "title": "Roles and role permissions",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "user-access-matrix",
+   "title": "User Access Matrix",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "authority-matrix",
+   "title": "Authority Matrix",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "delegations",
+   "title": "Delegations",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "segregation-of-duties",
+   "title": "Segregation of Duties",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "access-reviews",
+   "title": "Access Reviews",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "company-branches-and-the-letterhead",
+   "title": "Company, branches and the letterhead",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "insurers-and-the-other-masters",
+   "title": "Insurers and the other masters",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "insurance-companies",
+   "title": "Insurance companies",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "masters-that-work-the-same-way",
+   "title": "Masters that work the same way",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "operational-masters",
+   "title": "Operational masters",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "uploads",
+   "title": "Uploads",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "document-numbering",
+   "title": "Document Numbering",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "configuration",
+   "title": "Configuration",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "theme-and-branding",
+   "title": "Theme and Branding",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "theme-presets-layout-and-colours",
+   "title": "Theme: presets, layout and colours",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "contrast-check",
+   "title": "Contrast check",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "sign-in-page",
+   "title": "Sign-in page",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "documents-and-reports",
+   "title": "Documents and reports",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "e-mail",
+   "title": "E-mail",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "name-and-images",
+   "title": "Name and images",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "document-signatures",
+   "title": "Document signatures",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "brand-packs",
+   "title": "Brand packs",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "system-administrator-schedules",
+   "title": "Schedules",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "e-mail-outbox",
+   "title": "E-mail Outbox",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "integrations",
+   "title": "Integrations",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "connectors",
+   "title": "Connectors",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "outbox-and-inbox",
+   "title": "Outbox and inbox",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "go-live-with-a-provider",
+   "title": "Go live with a provider",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "sms-and-message-templates",
+   "title": "SMS and message templates",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "insurer-integration",
+   "title": "Insurer integration",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "audit-trail",
+   "title": "Audit Trail",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "data-privacy",
+   "title": "Data privacy",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "finance-set-up-shared-with-the-accounting-manager",
+   "title": "Finance set-up shared with the Accounting Manager",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "reinsurance-treaties-and-incentive-programmes",
+   "title": "Reinsurance treaties and incentive programmes",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "system-administrator-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "go-live-data-load",
+   "title": "Go-Live Data Load",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "the-two-workbooks",
+   "title": "The two workbooks",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "download-the-template",
+   "title": "Download the template",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "upload-and-validate",
+   "title": "Upload and validate",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "correct-the-errors",
+   "title": "Correct the errors",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "load",
+   "title": "Load",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "history",
+   "title": "History",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "migration-rules-and-reconciliation",
+   "title": "Migration rules and reconciliation",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "go-live-lock",
+   "title": "Go-live lock",
+   "level": 2,
+   "chapter": "Go-Live Data Load"
+  },
+  {
+   "id": "sales-and-marketing-account-executive",
+   "title": "Sales & Marketing (Account Executive)",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "sales-and-marketing-account-executive-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "sales-and-marketing-account-executive-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "sales-and-marketing-account-executive-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "sales-dashboard",
+   "title": "Sales Dashboard",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "prospects",
+   "title": "Prospects",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "create-a-prospect",
+   "title": "Create a prospect",
+   "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "view-edit-or-delete-a-prospect",
+   "title": "View, edit or delete a prospect",
+   "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "upload-many-prospects",
+   "title": "Upload many prospects",
+   "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "quick-quote-and-compare-insurers",
+   "title": "Quick Quote and Compare Insurers",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "create-a-motor-quotation",
+   "title": "Create a motor quotation",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "covers-and-risk-details-of-the-product",
+   "title": "Covers and risk details of the product",
+   "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "quotations",
+   "title": "Quotations",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "send-the-quotation-and-record-the-customer-s-response",
+   "title": "Send the quotation and record the customer's response",
+   "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "from-the-accepted-quotation-to-the-policy",
+   "title": "From the accepted quotation to the policy",
+   "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "sales-activities",
+   "title": "Sales activities",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "request-a-quotation-from-the-market",
+   "title": "Request a quotation from the market",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "sales-and-marketing-account-executive-record-the-client-s-payment",
+   "title": "Record the client's payment",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "policies",
+   "title": "Policies",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "renewals-open-items-payments-and-clients",
+   "title": "Renewals, open items, payments and clients",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "commission-and-reports",
+   "title": "Commission and reports",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "sales-and-marketing-account-executive-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "processing-team",
+   "title": "Processing Team",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "processing-team-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "processing-team-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "processing-team-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "processing-dashboard",
+   "title": "Processing Dashboard",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "requests-for-quotation-broker-slips",
+   "title": "Requests for quotation (broker slips)",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "create-a-request-for-quotation",
+   "title": "Create a request for quotation",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "record-the-insurers-answers",
+   "title": "Record the insurers' answers",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "compare-the-offers-and-choose-the-security",
+   "title": "Compare the offers and choose the security",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "quotation-slips",
+   "title": "Quotation Slips",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "placement-slips",
+   "title": "Placement Slips",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "create-a-direct-placement",
+   "title": "Create a direct placement",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "send-the-firm-order-and-record-confirmations",
+   "title": "Send the firm order and record confirmations",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "issue-the-policy",
+   "title": "Issue the policy",
+   "level": 3,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "record-issued-policy",
+   "title": "Record Issued Policy",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "co-insured-policies-and-premium-accounting-entries",
+   "title": "Co-insured policies and premium accounting entries",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "complete-an-endorsement",
+   "title": "Complete an endorsement",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "approve-renewal-terms",
+   "title": "Approve renewal terms",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "processing-team-product-configurator",
+   "title": "Product Configurator",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "processing-team-reinsurance",
+   "title": "Reinsurance",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "processing-team-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "Processing Team"
+  },
+  {
+   "id": "operations-client-servicing",
+   "title": "Operations (client servicing)",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "operations-client-servicing-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "operations-client-servicing-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "operations-client-servicing-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "operations-client-servicing-home",
+   "title": "Home",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "my-work",
+   "title": "My Work",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "clients",
+   "title": "Clients",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "onboard-a-client-before-the-first-policy",
+   "title": "Onboard a client before the first policy",
+   "level": 3,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "raise-an-endorsement-request",
+   "title": "Raise an endorsement request",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "cover-notes-binders",
+   "title": "Cover notes (binders)",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "cancel-a-policy-computed-return-premium",
+   "title": "Cancel a policy: computed return premium",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "operations-client-servicing-record-the-client-s-payment",
+   "title": "Record the client's payment",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "payments",
+   "title": "Payments",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "ctpl-authentication",
+   "title": "CTPL authentication",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "operations-client-servicing-renewals",
+   "title": "Renewals",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "renew-a-policy",
+   "title": "Renew a policy",
+   "level": 3,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "renewal-queue-and-at-risk-policies",
+   "title": "Renewal Queue and At-Risk Policies",
+   "level": 3,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "negotiations",
+   "title": "Negotiations",
+   "level": 3,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "renewal-batch-lapse-management-and-the-analytics",
+   "title": "Renewal Batch, Lapse Management and the analytics",
+   "level": 3,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "operations-client-servicing-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "claims",
+   "title": "Claims",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "claims-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "claims-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "claims-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "claims-dashboard",
+   "title": "Claims Dashboard",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "the-claims-list",
+   "title": "The claims list",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "register-a-claim",
+   "title": "Register a claim",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "adjuster-report",
+   "title": "Adjuster report",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "assessment-and-settlement-maker",
+   "title": "Assessment and settlement (maker)",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "approve-a-settlement-checker",
+   "title": "Approve a settlement (checker)",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "claim-details-documents-and-audit-trail",
+   "title": "Claim details, documents and audit trail",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "claim-document-checklist",
+   "title": "Claim document checklist",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "motor-claim-repairs-and-letters-of-authority",
+   "title": "Motor claim repairs and letters of authority",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "reinsurance-recoveries",
+   "title": "Reinsurance recoveries",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "claims-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "accounting",
+   "title": "Accounting",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "accounting-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "accounting-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "accounting-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "verify-payments-and-post-official-receipts",
+   "title": "Verify payments and post official receipts",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "post-a-receipt",
+   "title": "Post a receipt",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "collections",
+   "title": "Collections",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "import-open-items-at-go-live",
+   "title": "Import open items at go-live",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "credit-control",
+   "title": "Credit control",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "separate-instalment-invoices",
+   "title": "Separate instalment invoices",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "post-dated-cheques",
+   "title": "Post-dated cheques",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "claims-settlements-paid-through-the-broker",
+   "title": "Claims settlements paid through the broker",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "disbursement-payment-vouchers-and-cheques",
+   "title": "Disbursement: payment vouchers and cheques",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bank-payment-files",
+   "title": "Bank payment files",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bank-file-layouts-and-payee-bank-accounts",
+   "title": "Bank file layouts and payee bank accounts",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "remittance-to-insurers",
+   "title": "Remittance to insurers",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "direct-bill-commission-debit-notes",
+   "title": "Direct bill: commission debit notes",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "commission-to-agents-and-referrers",
+   "title": "Commission to agents and referrers",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "overriding-profit-and-contingent-commission-from-insurers",
+   "title": "Overriding, profit and contingent commission from insurers",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "journal-vouchers",
+   "title": "Journal vouchers",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "open-entry-matching-and-write-offs",
+   "title": "Open entry matching and write-offs",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "accounting-query-and-all-clients-accounting",
+   "title": "Accounting Query and All Clients Accounting",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "petty-cash",
+   "title": "Petty cash",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bank-reconciliation",
+   "title": "Bank reconciliation",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "import-a-bank-statement",
+   "title": "Import a bank statement",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "match-and-post-bank-items",
+   "title": "Match and post bank items",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "prepare-the-reconciliation",
+   "title": "Prepare the reconciliation",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "insurer-statement-reconciliation",
+   "title": "Insurer statement reconciliation",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "tax-bir-forms-and-returns",
+   "title": "Tax: BIR forms and returns",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "withholding-returns-0619-e-1601-eq-and-their-filing-records",
+   "title": "Withholding returns: 0619-E, 1601-EQ and their filing records",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "annual-information-return-1604-e-and-alphalist-of-payees",
+   "title": "Annual information return 1604-E and alphalist of payees",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "percentage-tax-2551q-non-vat-broker-or-agent",
+   "title": "Percentage tax 2551Q (non-VAT broker or agent)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bir-dat-files",
+   "title": "BIR DAT files",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "sales-invoices-eopt-act",
+   "title": "Sales invoices (EOPT Act)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "e-invoicing-eis",
+   "title": "E-invoicing (EIS)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "cas-books-and-documents",
+   "title": "CAS books and documents",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "period-end",
+   "title": "Period end",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "run-the-month-end-close-preparer",
+   "title": "Run the month-end close (preparer)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "recurring-journals",
+   "title": "Recurring journals",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "year-end-close-preparer",
+   "title": "Year-end close (preparer)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "accounts-payable",
+   "title": "Accounts payable",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bir-form-2307-for-suppliers",
+   "title": "BIR Form 2307 for suppliers",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "fixed-assets-and-depreciation",
+   "title": "Fixed assets and depreciation",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "asset-disposal",
+   "title": "Asset disposal",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "incentives",
+   "title": "Incentives",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "finance-masters-kept-by-accounting",
+   "title": "Finance masters kept by Accounting",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "accounting-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "accounting-manager",
+   "title": "Accounting Manager",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "accounting-manager-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "accounting-manager-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "accounting-manager-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "approve-the-month-end-close",
+   "title": "Approve the month-end close",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "period-control",
+   "title": "Period control",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "approve-a-bank-reconciliation",
+   "title": "Approve a bank reconciliation",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "approve-an-insurer-statement-reconciliation",
+   "title": "Approve an insurer statement reconciliation",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "credit-control-decisions",
+   "title": "Credit control decisions",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "year-end-close",
+   "title": "Year-end close",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "posting-configuration-configuration-approvals-posting-rules-account-determination",
+   "title": "Posting configuration: Configuration Approvals, Posting Rules, Account Determination",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "commission-rate-matrix",
+   "title": "Commission Rate Matrix",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "approve-supplier-invoices",
+   "title": "Approve supplier invoices",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "approvals-summary",
+   "title": "Approvals summary",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "compliance-officer",
+   "title": "Compliance Officer",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "compliance-officer-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "compliance-officer-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "compliance-officer-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "aml-dashboard",
+   "title": "AML dashboard",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "client-due-diligence-and-risk-rating",
+   "title": "Client due diligence and risk rating",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "enhanced-due-diligence-edd-reviews",
+   "title": "Enhanced due diligence (EDD) reviews",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "kyc-refresh",
+   "title": "KYC refresh",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "screening-hits",
+   "title": "Screening hits",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "screening-lists-and-the-screening-provider",
+   "title": "Screening lists and the screening provider",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "transaction-alerts",
+   "title": "Transaction alerts",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "aml-cases",
+   "title": "AML cases",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "amlc-reports",
+   "title": "AMLC reports",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "aml-settings",
+   "title": "AML settings",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "compliance-officer-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "insurance-commission-registers-complaints-and-the-breach-register",
+   "title": "Insurance Commission registers, complaints and the breach register",
+   "level": 2,
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "distribution-programmes-and-products",
+   "title": "Distribution, programmes and products",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "lead-assignment",
+   "title": "Lead Assignment",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "team-view",
+   "title": "Team view",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "assignment-rules",
+   "title": "Assignment rules",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "reassignment-queue-and-bulk-reassignment",
+   "title": "Reassignment queue and bulk reassignment",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "distribution-channels",
+   "title": "Distribution Channels",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "dealer-programmes",
+   "title": "Dealer Programmes",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "set-up-a-programme",
+   "title": "Set up a programme",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "upload-the-dealer-s-sales",
+   "title": "Upload the dealer's sales",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "bank-endorsement-letter",
+   "title": "Bank endorsement letter",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "fleet-schedules",
+   "title": "Fleet Schedules",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "marine-open-covers",
+   "title": "Marine Open Covers",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "set-up-the-open-cover",
+   "title": "Set up the open cover",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "certificates-and-shipments",
+   "title": "Certificates and shipments",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "declarations-billing-and-remittance",
+   "title": "Declarations, billing and remittance",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "facultative-placements",
+   "title": "Facultative Placements",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "comparison-reports",
+   "title": "Comparison Reports",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "campaigns",
+   "title": "Campaigns",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "segments",
+   "title": "Segments",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "templates",
+   "title": "Templates",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "send-a-campaign-and-read-the-results",
+   "title": "Send a campaign and read the results",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "report-builder",
+   "title": "Report Builder",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "bi-extract",
+   "title": "BI extract",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "compliance",
+   "title": "Compliance",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "licence-register",
+   "title": "Licence register",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "fit-and-proper-records",
+   "title": "Fit and proper records",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "insurer-authority",
+   "title": "Insurer authority",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "complaints-register",
+   "title": "Complaints register",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "ic-annual-statement",
+   "title": "IC annual statement",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "ic-production-report",
+   "title": "IC production report",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "personal-data-breach-register",
+   "title": "Personal data breach register",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "module-reference",
+   "title": "Module reference",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "dashboard",
+   "title": "Dashboard",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "operations",
+   "title": "Operations",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "module-reference-home",
+   "title": "Home",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "sales-and-marketing",
+   "title": "Sales & Marketing",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "clients-policy-and-claims",
+   "title": "Clients, Policy and Claims",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "module-reference-renewals",
+   "title": "Renewals",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "my-work-payments-ctpl-authentication-cover-notes-and-policy-cancellation",
+   "title": "My Work, Payments, CTPL Authentication, Cover Notes and Policy Cancellation",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "accounts",
+   "title": "Accounts",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "remittance",
+   "title": "Remittance",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "commission",
+   "title": "Commission",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "module-reference-reinsurance",
+   "title": "Reinsurance",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "module-reference-compliance",
+   "title": "Compliance",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "module-reference-reports",
+   "title": "Reports",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "master",
+   "title": "Master",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "configuration-screens",
+   "title": "Configuration screens",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "organization-insurance-location-employees-users-and-access",
+   "title": "Organization, Insurance, Location, Employees, Users and Access",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "finance",
+   "title": "Finance",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "incentive-and-reinsurance-masters",
+   "title": "Incentive and reinsurance masters",
+   "level": 3,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "module-reference-product-configurator",
+   "title": "Product Configurator",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "number-series",
+   "title": "Number series",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "reports-dashboards-schedules-and-notifications",
+   "title": "Reports, dashboards, schedules and notifications",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "reports-dashboards-schedules-and-notifications-reports",
+   "title": "Reports",
+   "level": 2,
+   "chapter": "Reports, dashboards, schedules and notifications"
+  },
+  {
+   "id": "dashboards",
+   "title": "Dashboards",
+   "level": 2,
+   "chapter": "Reports, dashboards, schedules and notifications"
+  },
+  {
+   "id": "reports-dashboards-schedules-and-notifications-schedules",
+   "title": "Schedules",
+   "level": 2,
+   "chapter": "Reports, dashboards, schedules and notifications"
+  },
+  {
+   "id": "notifications-and-e-mails",
+   "title": "Notifications and e-mails",
+   "level": 2,
+   "chapter": "Reports, dashboards, schedules and notifications"
+  },
+  {
+   "id": "troubleshooting-faq-and-glossary",
+   "title": "Troubleshooting, FAQ and glossary",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "common-messages-and-what-to-do",
+   "title": "Common messages and what to do",
+   "level": 2,
+   "chapter": "Troubleshooting, FAQ and glossary"
+  },
+  {
+   "id": "frequently-asked-questions",
+   "title": "Frequently asked questions",
+   "level": 2,
+   "chapter": "Troubleshooting, FAQ and glossary"
+  },
+  {
+   "id": "glossary",
+   "title": "Glossary",
+   "level": 2,
+   "chapter": "Troubleshooting, FAQ and glossary"
+  }
+ ]
+}

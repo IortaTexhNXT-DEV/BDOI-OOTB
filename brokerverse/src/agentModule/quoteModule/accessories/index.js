@@ -1,3 +1,4 @@
+import StepErrors from "../../../components/StepErrors";
 import React, { useEffect, useMemo, useRef } from "react";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
@@ -11,16 +12,15 @@ import { useFormik } from "formik";
 import InputTextField from "../../component/inputText";
 import { postaccessoriesMiddleware } from "./store/accessoriesMiddleware";
 import { setQuoteAccessories } from "../Store/quotationReducer";
-import {
-  getPolicyRenewalCoverageMiddleware,
-  submitRenewalCoverageMiddleware,
-} from "../coverageDetails/store/coverageDetailsMiddleware";
-import { getpolicyDetailedMiddleware } from "../policyDetailedView/store/policyDetailedMiddleware";
-import policyService from "../../../services/policyService";
+import policyRenewalService from "../../../services/policyRenewalService";
 import leadService from "../../../services/leadService";
+import { notifyError } from "../../../utility/dialogs";
+import logger from "../../../utility/logger";
 
 const Accessories = ({ action, flow }) => {
   const { t } = useTranslation();
+  // why the renewal step could not be saved, shown on the step
+  const [stepError, setStepError] = React.useState(null);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { id: policyId } = useParams();
@@ -28,15 +28,13 @@ const Accessories = ({ action, flow }) => {
   const { id: leadRefId } = useParams();
 
   // Redux selectors
-  const { currentQuoteCreation, policydetailedlist, renewalAccessoriesList } = useSelector(
-    ({ quotationReducers, policyDetailedViewMainReducers, coverageDetailsReducer }) => ({
-      currentQuoteCreation: quotationReducers?.currentQuoteCreation,
-      policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
-      renewalAccessoriesList: coverageDetailsReducer?.renewalAccessoriesList || [],
-    })
-  );
-  
-  const isEditMode = currentQuoteCreation?.isEditMode || false;
+  const { currentQuoteCreation } = useSelector(({ quotationReducers }) => ({
+    currentQuoteCreation: quotationReducers?.currentQuoteCreation,
+  }));
+
+  // The renewal flow never reuses a quote that is being created or edited elsewhere.
+  const isEditMode =
+    flow !== "renewal" && (currentQuoteCreation?.isEditMode || false);
   const existingAccessories = currentQuoteCreation?.accessories;
   
   // State for lead/client data
@@ -83,6 +81,21 @@ const Accessories = ({ action, flow }) => {
       towing: values.Towing,
       repairLimit: values.RepairLimit,
     };
+
+    if (flow === "renewal") {
+      // Accessories and limits of the renewal are saved on the policy's open renewal.
+      return policyRenewalService
+        .saveRenewalWizard(policyId, { accessories: accessoriesData })
+        .then((response) => {
+          if (!response.success) {
+            setStepError({ message: response.error, errors: response.errors });
+            return;
+          }
+          navigate(`/agent/renewalquote/ordersummary/${policyId}`, {
+            state: { ...state, policyId, policyData: state?.policyData },
+          });
+        });
+    }
     
     // Save to Redux state
     dispatch(setQuoteAccessories(accessoriesData));
@@ -96,11 +109,7 @@ const Accessories = ({ action, flow }) => {
     const idParam = isEditMode ? currentQuoteCreation.quotationId : leadRefId;
     
     // Navigate to order summary
-    if (flow === "renewal") {
-      navigate(`/agent/renewalquote/ordersummary/${policyId}`, { 
-        state: { ...state, policyId, policyData: state?.policyData } 
-      });
-    } else if (action === "accessoriescreate") {
+    if (action === "accessoriescreate") {
       const basePath = isEditFlow ? '/agent/editquote' : '/agent/createquote';
       navigate(`${basePath}/ordersummary/${idParam}`, { 
         state: { ...state } 
@@ -114,6 +123,10 @@ const Accessories = ({ action, flow }) => {
     }
   };
   const handleBackNavigation = () => {
+    if (flow === "renewal" && policyId) {
+      navigate(`/agent/renewalquote/coveragedetails/coveragedetail/${policyId}`, { state: { policyId } });
+      return;
+    }
     customHistory.back();
   };
 
@@ -130,17 +143,15 @@ const Accessories = ({ action, flow }) => {
   useEffect(() => {
     const fetchLeadData = async () => {
       if (flow !== "renewal" && leadRefId) {
-        console.log("Fetching lead data for leadRefId:", leadRefId);
         try {
           const response = await leadService.getLeadById(leadRefId);
           if (response.success) {
-            console.log("Lead data fetched successfully:", response.data);
             setLeadData(response.data);
           } else {
-            console.error("Failed to fetch lead data:", response.error);
+            logger.error("Failed to fetch lead data:", response.error);
           }
         } catch (error) {
-          console.error("Error fetching lead data:", error);
+          logger.error("Error fetching lead data:", error);
         }
       }
     };
@@ -148,67 +159,37 @@ const Accessories = ({ action, flow }) => {
     fetchLeadData();
   }, [flow, leadRefId]);
 
-  // Fetch policy accessories for renewal and pre-populate
+  // Renewal: prefill from this renewal's saved accessories, else the expiring policy's own
+  // quotation / policy data; fields the policy never had stay blank.
   useEffect(() => {
-    const fetchPolicyAccessoriesForRenewal = async () => {
-      // Only fetch if this is a renewal flow and we have a policyId
+    const fetchRenewalAccessories = async () => {
       if (flow !== "renewal" || !policyId || hasInitialized.current) {
         return;
       }
-
-      console.log("=== FETCHING POLICY ACCESSORIES FOR RENEWAL ===");
-      console.log("Policy ID:", policyId);
-
-      try {
-        // Fetch the policy details
-        const response = await policyService.getPolicyDetails(policyId);
-        
-        if (!response.success || !response.data) {
-          console.error("Failed to fetch policy data:", response.error);
-          return;
-        }
-
-        const policyData = response.data;
-        console.log("Policy data fetched for accessories:", policyData);
-
-        // Extract client data from policy
-        if (policyData.lead) {
-          console.log("Setting client data from policy:", policyData.lead);
-          setClientData(policyData.lead);
-        }
-
-        // Policy data has accessories at root level (flat structure)
-        // Pre-populate the form with policy accessories data
-        formik.setValues({
-          Aircon: policyData.aircon || "",
-          Stereo: policyData.stereo || "",
-          Magwheels: policyData.magWheels || "",
-          Others: policyData.others || "",
-          Deductible: policyData.deductible || "",
-          Towing: policyData.towing || "",
-          RepairLimit: policyData.repairLimit || "",
-        });
-        hasInitialized.current = true;
-        console.log("Form pre-populated with policy accessories from flat structure");
-      } catch (error) {
-        console.error("Error fetching policy accessories for renewal:", error);
+      const response = await policyRenewalService.getRenewalPrefill(policyId);
+      if (!response.success || !response.data) {
+        logger.error("Failed to load renewal prefill:", response.error);
+        return;
       }
-    };
-
-    fetchPolicyAccessoriesForRenewal();
-  }, [flow, policyId]);
-
-  // Only update form values once when renewal data is loaded (legacy support)
-  useEffect(() => {
-    if (flow === "renewal" && renewalAccessoriesList.length > 0 && !hasInitialized.current) {
+      const prefill = response.data;
+      setClientData({ name: prefill.clientName, code: prefill.clientCode });
+      const a = prefill.accessories || {};
+      const text = (v) => (v === undefined || v === null ? "" : String(v));
       formik.setValues({
-        ...initialValue,
-        ...renewalAccessoriesList[0].accessories,
-        ...renewalAccessoriesList[0].policyLimits,
+        Aircon: text(a.aircon),
+        Stereo: text(a.stereo),
+        Magwheels: text(a.magWheels),
+        Others: text(a.others),
+        Deductible: text(a.deductible),
+        Towing: text(a.towing),
+        RepairLimit: text(a.repairLimit),
       });
       hasInitialized.current = true;
-    }
-  }, [renewalAccessoriesList, flow]);
+    };
+
+    fetchRenewalAccessories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flow, policyId]);
 
   const handleLeadNavigation = () => {
     navigate(-1);
@@ -218,11 +199,11 @@ const Accessories = ({ action, flow }) => {
     if (flow === "renewal") {
       if (clientData) {
         const parts = [];
-        if (clientData.firstName || clientData.lastName) {
-          parts.push(`${clientData.firstName || ""} ${clientData.lastName || ""}`.trim());
+        if (clientData.name) {
+          parts.push(clientData.name);
         }
-        if (clientData.generatedLeadId) {
-          parts.push(`Client ID : ${clientData.generatedLeadId}`);
+        if (clientData.code) {
+          parts.push(`Client ID : ${clientData.code}`);
         }
         return parts.join(" / ") || "Client";
       }
@@ -236,7 +217,7 @@ const Accessories = ({ action, flow }) => {
         if (leadData.generatedLeadId) {
           parts.push(`Lead ID : ${leadData.generatedLeadId}`);
         }
-        return parts.join(" / ") || "Lead";
+        return parts.join(" / ") || "Prospect";
       }
       return leadRefId ? `${t("agent.leadIdLabel")} ${leadRefId}` : t("agent.loadingLeadData");
     }
@@ -271,7 +252,7 @@ const Accessories = ({ action, flow }) => {
               />
 
               {formik.touched.aircon && formik.errors.aircon && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.aircon}
                 </div>
               )}
@@ -283,7 +264,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Stereo")}
               />
               {formik.touched.stereo && formik.errors.stereo && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.stereo}
                 </div>
               )}
@@ -298,7 +279,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Magwheels")}
               />
               {formik.touched.magWheels && formik.errors.magWheels && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.magWheels}
                 </div>
               )}
@@ -310,7 +291,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Others")}
               />
               {formik.touched.others && formik.errors.others && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.others}
                 </div>
               )}
@@ -325,7 +306,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Deductible")}
               />
               {formik.touched.deductible && formik.errors.deductible && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.deductible}
                 </div>
               )}
@@ -337,7 +318,7 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("Towing")}
               />
               {formik.touched.towing && formik.errors.towing && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.towing}
                 </div>
               )}
@@ -351,13 +332,14 @@ const Accessories = ({ action, flow }) => {
                 onChange={formik.handleChange("RepairLimit")}
               />
               {formik.touched.repairLimit && formik.errors.repairLimit && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.repairLimit}
                 </div>
               )}
             </div>
           </div>
           <div class="grid mt-2">
+            {flow === "renewal" && stepError && <div className="col-12"><StepErrors error={stepError} /></div>}
             <div className="back__button__container col-12 md:col-12 lg:col-12">
               <div className="back__text__container">
                 <Button

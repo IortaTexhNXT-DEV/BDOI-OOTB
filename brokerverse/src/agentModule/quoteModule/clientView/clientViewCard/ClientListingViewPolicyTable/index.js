@@ -19,6 +19,10 @@ import { setPolicyHolderData } from "../../../../claimsModule/claimDetails/store
 import {
   getCategoriesForLob,
 } from "../../../../endorsementModule/constants/endorsementCategories";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import { notifyWarn } from "../../../../../utility/dialogs";
+import { useFormatCurrency } from "../../../../../hooks/useFormatCurrency";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const normalizePolicyRecord = (policy) => {
   if (!policy) {
@@ -58,6 +62,7 @@ const normalizePolicyRecord = (policy) => {
 
 const LeadListingAllTable = ({ action, clientId }) => {
   const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const [policies, setPolicies] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filteredPolicies, setFilteredPolicies] = useState([]);
@@ -65,10 +70,10 @@ const LeadListingAllTable = ({ action, clientId }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [displayDialog, setDisplayDialog] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectionMode, setSelectionMode] = useState("multiple");
-  const [navAction, setNavAction] = useState(null);
+  const [selectionMode] = useState("multiple");
+  const [, setNavAction] = useState(null);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
 
   const [disableOption, setdisableOption] = useState(false);
@@ -104,7 +109,6 @@ const LeadListingAllTable = ({ action, clientId }) => {
       setFilteredPolicies([]);
     } finally {
       setLoading(false);
-      console.log("=== POLICY FETCH COMPLETE ===");
     }
   };
 
@@ -144,8 +148,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
     const policyId = policy?.policyId || policy?.id;
 
     if (!policyId) {
-      console.error("No policy ID found for endorsement navigation");
-      alert("Policy ID not found. Please try again.");
+      notifyWarn("Policy ID not found. Please try again.");
       return;
     }
 
@@ -187,8 +190,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
       const policy = normalizePolicyRecord(selectedPolicy);
       const policyId = policy?.policyId || policy?.id;
       if (!policyId) {
-        console.error("No policy ID found for navigation");
-        alert("Policy ID not found. Please try again.");
+        notifyWarn("Policy ID not found. Please try again.");
         return;
       }
 
@@ -255,7 +257,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
       const policy = normalizePolicyRecord(selectedPolicy);
       const policyId = policy?.policyId || policy?.id;
       if (!policyId) {
-        alert("Policy ID not found. Please try again.");
+        notifyWarn("Policy ID not found. Please try again.");
         return;
       }
 
@@ -276,21 +278,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
   };
 
   // Format date for display
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      const date = new Date(dateString);
-      return date
-        .toLocaleDateString("en-US", {
-          day: "2-digit",
-          month: "short",
-          year: "numeric",
-        })
-        .toUpperCase();
-    } catch (error) {
-      return dateString;
-    }
-  };
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: "N/A" });
   const onCategoryChange = (e) => {
     let _selectedCategories = [...selectedCategories];
 
@@ -308,10 +296,9 @@ const LeadListingAllTable = ({ action, clientId }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -371,8 +358,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
         <Button
           icon={<SvgDot />}
           className="view__btn"
-          onClick={(event) => handleMenuToggle(event, menu, rowData)}
-        />
+          onClick={(event) => handleMenuToggle(event, menu, rowData)} aria-label="More actions" tooltip="More actions" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -380,7 +366,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
     const normalized = normalizePolicyRecord(rowData);
     const productType =
       normalized?.quotation?.productType || "MOTOR COMPREHENSIVE";
-    return <div className="category__text">{productType.toUpperCase()}</div>;
+    return <div className="category__text">{productType}</div>;
   };
 
   const renderPolicyNumber = (rowData) => {
@@ -400,7 +386,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
 
   const renderGrossPremium = (rowData) => {
     return (
-      <div className="category__text">{rowData.grossPremium || "0.00"}</div>
+      <div className="category__text">{formatCurrency(Number(rowData.grossPremium) || 0)}</div>
     );
   };
 
@@ -425,7 +411,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
             : "company__status__type__red"
         }
       >
-        {paymentStatus.toUpperCase()}
+        {statusLabel(paymentStatus)}
       </div>
     );
   };
@@ -483,10 +469,10 @@ const LeadListingAllTable = ({ action, clientId }) => {
         <DataTable
           value={filteredPolicies}
           paginator
-          rows={5}
+          rows={20}
           selectionMode={selectionMode}
           selection={selectedProducts}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           className="corrections__table__main"
@@ -579,7 +565,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
             );
           })}
           <div className="mt-5">
-            <Button label={t("endorsement.proceed")} onClick={handleDialogButtonClick} />
+            <Button label={t("endorsement.proceed")} onClick={handleDialogButtonClick} disabled={!handleTypes().length} />
           </div>
         </div>
       </Dialog>

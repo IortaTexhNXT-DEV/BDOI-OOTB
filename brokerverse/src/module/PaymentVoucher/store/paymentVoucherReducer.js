@@ -290,7 +290,6 @@ const paymentVoucherReducer = createSlice({
       postpaymentVocherCreateDataMiddleware.rejected,
       (state, action) => {
         state.loading = false;
-        state.paymentVocherList = state.paymentVocherList;
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -330,7 +329,6 @@ const paymentVoucherReducer = createSlice({
       patchpaymentVocherInvoiceListMiddleware.fulfilled,
       (state, action) => {
         state.loading = false;
-        console.log(action.payload, "find reducer edit data");
         state.invoiceList = state.invoiceList?.map((item) => {
           if (item.id === action.payload?.id) {
             return {

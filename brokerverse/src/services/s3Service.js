@@ -1,6 +1,22 @@
 import authService from './authService';
 import { BASE_URL } from '../utility/constant';
 
+const OBJECT_PATH = "/api/s3/object/";
+
+/**
+ * Stored-file URL as this browser reaches the API. The server signs file URLs with its configured public address
+ * (PUBLIC_BASE_URL), which need not be the address the browser uses (another host name, a proxy, a local run), so the
+ * image never loaded; the object path and signature are kept and the API address of this front end (BASE_URL) is used.
+ * @param {string} url signed or plain object URL (or any other URL, returned unchanged)
+ * @returns {string}
+ */
+export const browserFileUrl = (url) => {
+  if (typeof url !== "string") return url;
+  const at = url.indexOf(OBJECT_PATH);
+  if (at < 0) return url;
+  return `${BASE_URL}/s3/object/${url.slice(at + OBJECT_PATH.length)}`;
+};
+
 /**
  * S3 Service - Handles file uploads/downloads to AWS S3
  */
@@ -18,6 +34,8 @@ class S3Service {
    */
   async uploadFile(file, folder = 'uploads', onProgress = null) {
     try {
+      // XMLHttpRequest is not covered by the 401 retry of fetch: renew a nearly expired access token first
+      await authService.freshAccessToken();
       const formData = new FormData();
       formData.append('file', file);
       formData.append('folder', folder);
@@ -40,7 +58,6 @@ class S3Service {
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const response = JSON.parse(xhr.responseText);
-              console.log('File uploaded successfully:', response);
               const url = response.data?.url || response.url;
               const key = response.data?.key || response.key;
               resolve({
@@ -85,7 +102,6 @@ class S3Service {
       });
 
     } catch (error) {
-      console.error('Upload file error:', error);
       return {
         success: false,
         error: error.message || 'Failed to upload file'
@@ -102,6 +118,7 @@ class S3Service {
    */
   async uploadMultipleFiles(files, folder = 'uploads', onProgress = null) {
     try {
+      await authService.freshAccessToken();
       const formData = new FormData();
       files.forEach(file => {
         formData.append('files', file);
@@ -126,7 +143,6 @@ class S3Service {
           if (xhr.status >= 200 && xhr.status < 300) {
             try {
               const response = JSON.parse(xhr.responseText);
-              console.log('Files uploaded successfully:', response);
               resolve({
                 success: true,
                 files: response.files,
@@ -168,7 +184,6 @@ class S3Service {
       });
 
     } catch (error) {
-      console.error('Upload multiple files error:', error);
       return {
         success: false,
         error: error.message || 'Failed to upload files'
@@ -185,8 +200,6 @@ class S3Service {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log('Deleting file from S3:', key);
 
       const response = await fetch(`${this.baseURL}/file/${encodeURIComponent(key)}`, {
         method: 'DELETE',
@@ -205,14 +218,12 @@ class S3Service {
       }
 
       const data = await response.json();
-      console.log('File deleted successfully:', data);
 
       return {
         success: true,
         data: data
       };
     } catch (error) {
-      console.error('Delete file error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to delete file')
@@ -232,8 +243,6 @@ class S3Service {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log('Generating presigned upload URL:', fileName);
-
       const response = await fetch(`${this.baseURL}/presigned-upload-url`, {
         method: 'POST',
         headers: {
@@ -252,7 +261,6 @@ class S3Service {
       }
 
       const data = await response.json();
-      console.log('Presigned URL generated:', data);
 
       return {
         success: true,
@@ -261,7 +269,6 @@ class S3Service {
         data: data
       };
     } catch (error) {
-      console.error('Generate presigned upload URL error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to generate presigned URL')
@@ -280,8 +287,6 @@ class S3Service {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log('Generating presigned download URL:', key);
-
       const response = await fetch(`${this.baseURL}/presigned-download-url/${encodeURIComponent(key)}?expiresIn=${expiresIn}`, {
         method: 'GET',
         headers: {
@@ -299,15 +304,13 @@ class S3Service {
       }
 
       const data = await response.json();
-      console.log('Presigned download URL generated:', data);
 
       return {
         success: true,
-        url: data.url,
+        url: browserFileUrl(data.url),
         data: data
       };
     } catch (error) {
-      console.error('Generate presigned download URL error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to generate presigned URL')
@@ -324,8 +327,6 @@ class S3Service {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log('Getting public URL:', key);
 
       const response = await fetch(`${this.baseURL}/file/${encodeURIComponent(key)}/public-url`, {
         method: 'GET',
@@ -344,15 +345,13 @@ class S3Service {
       }
 
       const data = await response.json();
-      console.log('Public URL retrieved:', data);
 
       return {
         success: true,
-        url: data.url,
+        url: browserFileUrl(data.url),
         data: data
       };
     } catch (error) {
-      console.error('Get public URL error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to get public URL')
@@ -394,7 +393,6 @@ class S3Service {
         data: data
       };
     } catch (error) {
-      console.error('File exists check error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to check file existence')
@@ -419,8 +417,6 @@ class S3Service {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 15000);
 
-      console.log('Fetching presigned URLs for', urls.length, 'vehicle photos...');
-
       const response = await fetch(`${this.baseURL}/presigned-download-urls`, {
         method: 'POST',
         headers: {
@@ -439,14 +435,13 @@ class S3Service {
       }
 
       const data = await response.json();
-      console.log('Presigned URLs fetched successfully');
 
       return {
         success: true,
-        data: data.data // URL mapping object
+        // URL mapping object (original URL or key -> signed URL this browser can open)
+        data: Object.fromEntries(Object.entries(data.data || {}).map(([k, v]) => [k, browserFileUrl(v)]))
       };
     } catch (error) {
-      console.error('Get presigned download URLs error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to get presigned URLs')

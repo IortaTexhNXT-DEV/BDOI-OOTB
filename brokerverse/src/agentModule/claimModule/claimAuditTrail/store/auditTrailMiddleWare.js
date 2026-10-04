@@ -7,6 +7,7 @@ import {
   GET_CLAIM_DETAILS_SUCCESS,
   GET_CLAIM_DETAILS_FAILURE,
 } from "./auditTrailActionTypes";
+import logger from "../../../../utility/logger";
 
 // Get audit trail for a specific claim
 export const getClaimAuditTrail = (claimId, sortOrder = "desc") => {
@@ -17,7 +18,6 @@ export const getClaimAuditTrail = (claimId, sortOrder = "desc") => {
       const result = await claimsService.getClaimAuditTrail(claimId, sortOrder);
 
       if (result.success) {
-        console.log("Audit trail data received:", result.data);
         // Handle nested response structure: backend returns { success: true, data: [...], total, sort }
         // Frontend service wraps it: { success: true, data: { success: true, data: [...], total, sort } }
         // Extract the array from result.data.data or fallback to result.data if it's already an array
@@ -37,7 +37,7 @@ export const getClaimAuditTrail = (claimId, sortOrder = "desc") => {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error("Error fetching audit trail:", error);
+      logger.error("Error fetching audit trail:", error);
       dispatch({
         type: GET_AUDIT_TRAIL_FAILURE,
         payload: error.message,
@@ -55,7 +55,6 @@ export const getClaimDetails = (claimId) => {
       const result = await claimsService.getClaimDetails(claimId);
 
       if (result.success) {
-        console.log("Claim details received:", result.data);
         dispatch({
           type: GET_CLAIM_DETAILS_SUCCESS,
           payload: result.data.data || result.data || {},
@@ -64,7 +63,7 @@ export const getClaimDetails = (claimId) => {
         throw new Error(result.error);
       }
     } catch (error) {
-      console.error("Error fetching claim details:", error);
+      logger.error("Error fetching claim details:", error);
       dispatch({
         type: GET_CLAIM_DETAILS_FAILURE,
         payload: error.message,

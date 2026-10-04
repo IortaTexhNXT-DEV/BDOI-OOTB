@@ -1,5 +1,3 @@
-import { Toast } from "primereact/toast";
-import { createRef } from "react";
 
 // Global toast reference
 let globalToastRef = null;
@@ -25,13 +23,10 @@ export const showLogoutSuccessMessage = () => {
       className: 'logout-success'
     });
   } else {
-    // Fallback: create a temporary toast if global ref is not available
-    const tempToast = createRef();
     const tempToastElement = document.createElement('div');
     document.body.appendChild(tempToastElement);
     
     // This is a fallback - in practice, the global toast should be used
-    console.log('Logout successful - redirecting to login...');
   }
 };
 
@@ -92,5 +87,16 @@ export const showWarningMessage = (message, summary = 'Warning') => {
       life: 3000,
       icon: 'pi pi-exclamation-triangle'
     });
+  }
+};
+
+/**
+ * Warnings of compliance controls set to warn (an insurer without a certificate of authority in force, a referrer
+ * without a licence): the action went through and was recorded in the audit trail.
+ */
+export const showComplianceWarnings = (warnings) => {
+  if (!globalToastRef || !globalToastRef.current) return;
+  for (const text of warnings) {
+    globalToastRef.current.show({ severity: 'warn', summary: 'Compliance warning', detail: text, life: 10000 });
   }
 };

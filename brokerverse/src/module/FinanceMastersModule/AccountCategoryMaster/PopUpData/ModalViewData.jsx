@@ -1,11 +1,6 @@
-import React, { useState } from "react";
 import { Dialog } from "primereact/dialog";
 import "./index.scss";
-import { useFormik } from "formik";
-import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
-import { Button } from "primereact/button";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { useSelector } from "react-redux";
 
 const ModalViewData = ({
@@ -15,7 +10,7 @@ const ModalViewData = ({
   handleSave,
   handleEdit,
 }) => {
-  const { AccountCategoryDetailView, loading } = useSelector(
+  const { AccountCategoryDetailView } = useSelector(
     ({ accountCategoryReducer }) => {
       return {
         loading: accountCategoryReducer?.loading,
@@ -43,7 +38,7 @@ const ModalViewData = ({
               className="input__label__corrections"
               label="Account Category Code"
               placeholder="enter"
-              value={AccountCategoryDetailView?.accountCategoryCode}
+              value={AccountCategoryDetailView?.categoryCode}
             />
           </div>
           <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
@@ -53,7 +48,7 @@ const ModalViewData = ({
               className="input__label__corrections"
               label="Account Category Name"
               placeholder="enter"
-              value={AccountCategoryDetailView?.accountCategoryName}
+              value={AccountCategoryDetailView?.categoryName}
             />
           </div>
           <div className="col-12 md:col-12 lg:col-8 xl:col-8 ">
@@ -63,7 +58,7 @@ const ModalViewData = ({
               className="input__label__corrections"
               label="Description"
               placeholder="enter"
-              value="Account Category description"
+              value={AccountCategoryDetailView?.description}
             />
           </div>
 

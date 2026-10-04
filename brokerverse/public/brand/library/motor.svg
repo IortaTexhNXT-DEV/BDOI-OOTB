@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 900" preserveAspectRatio="xMidYMid slice">
+  <!-- BrokerVerse sign-in library: motor. Original line art, drawn in white over the theme's colour gradient. -->
+  <defs>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.10"/>
+    </linearGradient>
+    <pattern id="dots" width="32" height="32" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.4" fill="#ffffff" fill-opacity="0.10"/>
+    </pattern>
+  </defs>
+  <rect width="960" height="900" fill="url(#dots)"/>
+  <rect y="520" width="960" height="380" fill="url(#fade)"/>
+  <!-- city skyline -->
+  <g fill="#ffffff" fill-opacity="0.07">
+    <rect x="40" y="330" width="90" height="250"/>
+    <rect x="140" y="270" width="70" height="310"/>
+    <rect x="220" y="360" width="110" height="220"/>
+    <rect x="345" y="230" width="80" height="350"/>
+    <rect x="440" y="300" width="120" height="280"/>
+    <rect x="575" y="250" width="70" height="330"/>
+    <rect x="660" y="340" width="100" height="240"/>
+    <rect x="775" y="280" width="80" height="300"/>
+    <rect x="865" y="370" width="80" height="210"/>
+  </g>
+  <g fill="#ffffff" fill-opacity="0.12">
+    <rect x="360" y="260" width="12" height="14"/><rect x="384" y="260" width="12" height="14"/><rect x="360" y="290" width="12" height="14"/>
+    <rect x="384" y="320" width="12" height="14"/><rect x="590" y="280" width="12" height="14"/><rect x="614" y="310" width="12" height="14"/>
+    <rect x="160" y="300" width="12" height="14"/><rect x="184" y="330" width="12" height="14"/><rect x="795" y="310" width="12" height="14"/>
+  </g>
+  <!-- road with perspective -->
+  <path d="M0 580 H960" stroke="#ffffff" stroke-opacity="0.35" stroke-width="2"/>
+  <path d="M380 580 L120 900 M580 580 L840 900" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2" fill="none"/>
+  <path d="M480 600 V640 M480 670 V720 M480 755 V820 M480 860 V900" stroke="#ffffff" stroke-opacity="0.45" stroke-width="6" stroke-linecap="round"/>
+  <!-- car, side view -->
+  <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.9" transform="translate(250 430)">
+    <path d="M20 120 H40 Q50 70 110 64 L170 30 Q200 14 250 14 H330 Q370 14 400 40 L440 66 Q490 72 500 100 L506 120 H470"/>
+    <path d="M150 120 H360"/>
+    <path d="M180 64 L216 34 H300 L320 64 Z" stroke-opacity="0.7"/>
+    <path d="M330 34 L370 64" stroke-opacity="0.7"/>
+    <circle cx="95" cy="122" r="34"/>
+    <circle cx="95" cy="122" r="12" stroke-opacity="0.6"/>
+    <circle cx="415" cy="122" r="34"/>
+    <circle cx="415" cy="122" r="12" stroke-opacity="0.6"/>
+    <path d="M470 84 H496" stroke-opacity="0.6"/>
+  </g>
+  <!-- protection shield -->
+  <g transform="translate(700 120)" fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity="0.55" stroke-linejoin="round">
+    <path d="M60 0 L120 22 V70 Q120 124 60 150 Q0 124 0 70 V22 Z"/>
+    <path d="M34 74 L54 96 L90 52" stroke-linecap="round"/>
+  </g>
+</svg>

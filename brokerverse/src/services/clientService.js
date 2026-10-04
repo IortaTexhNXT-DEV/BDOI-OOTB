@@ -16,14 +16,34 @@ class ClientService {
    * @param {Number} pageSize - Items per page (default: 10)
    * @returns {Promise<Object>} API response with data, page, pageSize, total
    */
-  async getClients(page = 1, pageSize = 10) {
+  /**
+   * Clients matching a name, client code, mobile number or e-mail (first 10), for picking an existing customer.
+   * @param {string} term - Text to search for
+   * @returns {Promise<{success: boolean, data?: Object[], error?: string}>}
+   */
+  async searchClients(term) {
+    try {
+      const response = await fetch(`${this.baseURL}/clients?search=${encodeURIComponent(term)}&page=1&pageSize=10`, {
+        headers: { 'Content-Type': 'application/json', ...authService.getAuthHeader() },
+      });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body.message || 'Failed to search clients');
+      const list = body.data?.clients || body.clients || [];
+      return { success: true, data: list.map((c) => ({ ...c, displayName: c.displayName || c.fullName || [c.firstName, c.lastName].filter(Boolean).join(' ') || c.companyName })) };
+    } catch (error) {
+      return { success: false, error: error.message };
+    }
+  }
+
+  async getClients(page = 1, pageSize = 10, filters = {}) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+      // server-side search (name, client code, e-mail, phone) and client type (individual / corporate)
+      Object.entries(filters || {}).forEach(([k, v]) => { if (v !== undefined && v !== null && v !== "") query.append(k, v); });
 
-      console.log(`Fetching clients: page=${page}, pageSize=${pageSize}`);
-
-      const response = await fetch(`${this.baseURL}/clients?page=${page}&pageSize=${pageSize}`, {
+      const response = await fetch(`${this.baseURL}/clients?${query.toString()}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -40,14 +60,12 @@ class ClientService {
       }
 
       const data = await response.json();
-      console.log('Clients fetched successfully:', data);
       
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error('Fetch clients error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to fetch clients'),
@@ -63,8 +81,6 @@ class ClientService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log('Fetching customer codes for dropdown');
 
       const response = await fetch(`${this.baseURL}/customers/codes`, {
         method: 'GET',
@@ -83,14 +99,12 @@ class ClientService {
       }
 
       const data = await response.json();
-      console.log('Customer codes fetched successfully:', data);
       
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error('Fetch customer codes error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to fetch customer codes'),
@@ -107,8 +121,6 @@ class ClientService {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
-
-      console.log(`Fetching client with ID: ${clientId}`);
 
       const response = await fetch(`${this.baseURL}/clients/${clientId}`, {
         method: 'GET',
@@ -127,14 +139,12 @@ class ClientService {
       }
 
       const data = await response.json();
-      console.log('Client fetched successfully:', data);
       
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error('Fetch client error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to fetch client'),
@@ -143,7 +153,7 @@ class ClientService {
   }
 
   /**
-   * Create client (with Thailand address fields: roadThanon, soiAlley, mooVillage)
+   * Create client (Philippine address: houseNo, street, barangay, city, province, region, zipCode)
    * @param {Object} clientData - Client data
    * @returns {Promise<Object>} API response with clientId
    */
@@ -172,7 +182,6 @@ class ClientService {
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error('Create client error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to create client'),
@@ -181,7 +190,7 @@ class ClientService {
   }
 
   /**
-   * Update client (supports Thailand address fields: roadThanon, soiAlley, mooVillage)
+   * Update client (Philippine address: houseNo, street, barangay, city, province, region, zipCode)
    * @param {String} clientId - Client ID
    * @param {Object} clientData - Updated client data
    * @returns {Promise<Object>} API response
@@ -211,7 +220,6 @@ class ClientService {
       const data = await response.json();
       return { success: true, data };
     } catch (error) {
-      console.error('Update client error:', error);
       return {
         success: false,
         error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to update client'),

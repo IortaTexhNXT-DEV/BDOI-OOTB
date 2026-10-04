@@ -1,32 +1,26 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../../../components/InputField";
-import SubmitButton from "../../../../../components/SubmitButton";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import DropDowns from "../../../../../components/DropDowns";
 import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
-import { useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../../../components/NavBar";
+import { useNavigate } from "react-router-dom";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../../../components/DatePicker";
-import { Calendar } from "primereact/calendar";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { useFormik } from "formik";
-import { Toast } from "primereact/toast";
 import CustomToast from "../../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
-import { FileUpload } from "primereact/fileupload";
 import DepartMentList from "./DepartMentList";
 import { useDispatch, useSelector } from "react-redux";
 import {
   patchBranchEditMiddleware,
   postAddBranchMiddleware,
 } from "../store/branchMiddleware";
-import countriesData from "./data";
+import useMasterOptions from "../../../common/useMasterOptions";
+import { phoneCountryCode } from "../../../../../utility/phoneFormat";
 
 const initialValues = {
   BranchCode: "",
@@ -46,8 +40,7 @@ const initialValues = {
 
 function AddBranch({ action }) {
   const { t } = useTranslation();
-  console.log(action,"actionaction");
-  const { organizationBranchView, loading, getBranchPatch } = useSelector(
+  const { organizationBranchView, getBranchPatch } = useSelector(
     ({ organizationBranchMainReducers }) => {
       return {
         loading: organizationBranchMainReducers?.loading,
@@ -57,19 +50,8 @@ function AddBranch({ action }) {
       };
     }
   );
-  console.log(organizationBranchView, "organizationBranchView");
   const toastRef = useRef(null);
-  const [date, setDate] = useState(null);
   const Navigate = useNavigate();
-  const { id } = useParams();
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] =
-    useState(null);
 
   const home = { label: t("generalMasters.master") };
   const items = [
@@ -78,98 +60,36 @@ function AddBranch({ action }) {
       label: action === "add" ? t("generalMasters.addBranch") : action === "edit" ? t("generalMasters.editBranch") : t("generalMasters.branchDetails"),
     },
   ];
-  const currencyCode = [
-    {
-      label:
-        action === "add"
-          ? "ARIANS INSURANCE BROKERS INC"
-          : organizationBranchView.CompanyName,
-      value: action === "add" ? "NY" : organizationBranchView.CompanyName,
-    },
-  ];
-
-  // const City = [
-  //   {
-  //     label: action === "add" ? "" : organizationBranchView.City,
-  //     value: action === "add" ? "NY" : organizationBranchView.City,
-  //   },
-  // ];
-  // const State = [
-  //   {
-  //     label: action === "add" ? "" : organizationBranchView.State,
-  //     value: action === "add" ? "NY" : organizationBranchView.State,
-  //   },
-  // ];
-  // const Country = [
-  //   {
-  //     label: action === "add" ? "" : organizationBranchView.Country,
-  //     value: action === "add" ? "NY" : organizationBranchView.Country,
-  //   },
-  // ];
-  // const City = [
-  //   {
-  //     label: action === "add" ? "ARIANS INSURANCE BROKERS INC" : organizationBranchView.CompanyName,
-  //     value: action === "add" ? "ARIANS INSURANCE BROKERS INC" : organizationBranchView.CompanyName,
-  //   },
-  //   {
-  //     label: action === "add" ? "ARIANS gh BROKERS INC" : organizationBranchView.CompanyName,
-  //     value: action === "add" ? "ARIANS gh BROKERS INC" : organizationBranchView.CompanyName,
-  //   },
-  //   // Add more options as needed
-  // ];
-
-  // const City=countriesData.city.map((val)=>({
-  //   label:val
-  // }))
-
-
-  const City = countriesData.city.map(city => ({
-
-    label: action === "add" ? city : organizationBranchView.City,
-    value: action === "add" ? city : organizationBranchView.City,
-  }));
-  console.log(City, "CitCityy");
-
-  const State = countriesData.state.map((state) => ({
-    label: action === "add" ? state : organizationBranchView.State,
-    value: action === "add" ? state : organizationBranchView.State,
-  }));
-
-  const Country = countriesData.countries.map((country) => ({
-    label: action === "add" ? country : organizationBranchView.Country,
-    value: action === "add" ? country : organizationBranchView.Country,
-  }));
+  const companyOptions = useMasterOptions("company");
+  const City = useMasterOptions("city");
+  const State = useMasterOptions("state");
+  const Country = useMasterOptions("country");
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
 
   const dispatch = useDispatch();
 
-  const handleSubmit = (value) => {
-    console.log("find", action);
-    // Handle form submission
-    if (action == "add") {
-      dispatch(postAddBranchMiddleware(formik.values));
-      toastRef.current.showToast();
-      // {
+  const saveAndReturn = async (thunk, values, message) => {
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(message ? { detail: message } : undefined);
       setTimeout(() => {
         Navigate("/master/generals/organization/branchmaster");
       }, 3000);
-    } else if (action == "edit") {
-      dispatch(patchBranchEditMiddleware(value));
-      toastRef.current.showToast();
-      // {
-      setTimeout(() => {
-        Navigate("/master/generals/organization/branchmaster");
-      }, 3000);
-    } else {
-      // alert("ji");
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
     }
+  };
+
+  const handleSubmit = (values) => {
+    if (action === "add") saveAndReturn(postAddBranchMiddleware, values);
+    if (action === "edit") saveAndReturn(patchBranchEditMiddleware, values, t("financeMasters.saveSuccessfully"));
   };
   const customValidation = (values) => {
     const errors = {};
 
     if (!values.BranchCode) {
-      errors.BranchCode = "This field Code is required";
+      errors.BranchCode = "This field is required";
     }
     if (!values.BranchName) {
       errors.BranchName = "This field is required";
@@ -207,10 +127,6 @@ function AddBranch({ action }) {
     onSubmit: handleSubmit,
   });
   // };
-  const [companyNameOptionData, setCompanyNameOptionData] = useState([]);
-  const [cityDataOption, setCityDataOption] = useState([]);
-  const [stateDataOption, setStateDataOption] = useState([]);
-  const [countryDataOption, setCountryDataOption] = useState([]);
   const setFormikValues = () => {
     const companyNameData = getBranchPatch?.CompanyName;
     const cityData = getBranchPatch?.City;
@@ -234,36 +150,17 @@ function AddBranch({ action }) {
         Fax: getBranchPatch?.Fax,
       };
 
-      if (companyNameData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setCompanyNameOptionData([
-          { label: companyNameData, value: companyNameData },
-        ]);
-      }
-      if (cityData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setCityDataOption([{ label: cityData, value: cityData }]);
-      }
-      if (stateData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setStateDataOption([{ label: stateData, value: stateData }]);
-      }
-      if (countryData) {
-        formik.setValues({ ...formik.values, ...updatedValues });
-        setCountryDataOption([{ label: countryData, value: countryData }]);
-      }
       formik.setValues({ ...formik.values, ...updatedValues });
     }
   };
 
-  console.log(formik.values.id, "idd");
   useEffect(() => {
     setFormikValues();
   }, [getBranchPatch]);
 
   return (
     <div className="overall__addbranch__container">
-      <CustomToast ref={toastRef} message="Branch code BC1234 added" />
+      <CustomToast ref={toastRef} message={`Branch code ${formik.values.BranchCode} added`} />
       <div>
         <span onClick={() => Navigate(-1)}>
           <SvgBackicon />
@@ -301,7 +198,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.BranchCode && formik.errors.BranchCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.BranchCode}
               </div>
             )}
@@ -311,7 +208,6 @@ function AddBranch({ action }) {
               classNames="field__container"
               label={t("generalMasters.branchName")}
               placeholder={t("generalMasters.enter")}
-              //   value={formik.values.CurrencyDescription}
               value={
                 action == "add"
                   ? formik.values.BranchName
@@ -323,7 +219,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.BranchName && formik.errors.BranchName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.BranchName}
               </div>
             )}
@@ -340,20 +236,14 @@ function AddBranch({ action }) {
                   : organizationBranchView.CompanyName
               }
               onChange={(e) => formik.setFieldValue("CompanyName", e.value)}
-              options={
-                action == "add"
-                  ? currencyCode
-                  : action == "edit"
-                  ? companyNameOptionData
-                  : currencyCode
-              }
+              options={companyOptions}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
               disabled={action === "view" ? true : false}
             />
             {formik.touched.CompanyName && formik.errors.CompanyName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.CompanyName}
               </div>
             )}
@@ -363,7 +253,6 @@ function AddBranch({ action }) {
               classNames="field__container"
               label={t("generalMasters.emailIdBranch")}
               placeholder={t("generalMasters.enter")}
-              //   value={formik.values.CurrencyDescription}
               value={
                 action == "add"
                   ? formik.values.EmailID
@@ -375,7 +264,7 @@ function AddBranch({ action }) {
               disabled={action === "view" ? true : false}
             />
             {formik.touched.EmailID && formik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.EmailID}
               </div>
             )}
@@ -389,7 +278,6 @@ function AddBranch({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   action == "add"
                     ? formik.values.Description
@@ -401,7 +289,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.Description && formik.errors.Description && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Description}
                 </div>
               )}
@@ -424,7 +312,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.AddressLine1 && formik.errors.AddressLine1 && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AddressLine1}
                 </div>
               )}
@@ -447,7 +335,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.AddressLine2 && formik.errors.AddressLine2 && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AddressLine2}
                 </div>
               )}
@@ -473,7 +361,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.AddressLine3 && formik.errors.AddressLine3 && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AddressLine3}
                 </div>
               )}
@@ -491,20 +379,14 @@ function AddBranch({ action }) {
                   : organizationBranchView.City
               }
               onChange={(e) => formik.setFieldValue("City", e.value)}
-              options={
-                action == "add"
-                  ? City
-                  : action == "edit"
-                  ? cityDataOption
-                  : City
-              }
+              options={City}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
               disabled={action === "view" ? true : false}
             />
             {formik.touched.City && formik.errors.City && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.City}
               </div>
             )}
@@ -521,20 +403,14 @@ function AddBranch({ action }) {
                   : organizationBranchView.State
               }
               onChange={(e) => formik.setFieldValue("State", e.value)}
-              options={
-                action == "add"
-                  ? State
-                  : action == "edit"
-                  ? stateDataOption
-                  : State
-              }
+              options={State}
               optionLabel="label"
               placeholder={t("generalMasters.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
               disabled={action === "view" ? true : false}
             />
             {formik.touched.State && formik.errors.State && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.State}
               </div>
             )}
@@ -552,19 +428,13 @@ function AddBranch({ action }) {
                   : organizationBranchView.Country
               }
               onChange={(e) => formik.setFieldValue("Country", e.value)}
-              options={
-                action == "add"
-                  ? Country
-                  : action == "edit"
-                  ? countryDataOption
-                  : Country
-              }
+              options={Country}
               placeholder={t("generalMasters.select")}
               dropdownIcon={<SvgDropdown color={"#000"} />}
               disabled={action === "view" ? true : false}
             />
             {formik.touched.Country && formik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.Country}
               </div>
             )}
@@ -576,7 +446,7 @@ function AddBranch({ action }) {
             <label className="label_text">Phone Number</label>
             <div className="p-inputgroup flex-1">
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText
@@ -592,7 +462,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.PhoneNumber && formik.errors.PhoneNumber && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.PhoneNumber}
                 </div>
               )}
@@ -618,7 +488,7 @@ function AddBranch({ action }) {
                 disabled={action === "view" ? true : false}
               />
               {formik.touched.Fax && formik.errors.Fax && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Fax}
                 </div>
               )}
@@ -627,14 +497,16 @@ function AddBranch({ action }) {
         </div>
       </Card>
 
-      {action != "add" && <DepartMentList action={action} />}
+      {action !== "add" && <DepartMentList
+          action={action}
+          branchCode={action === "view" ? organizationBranchView?.BranchCode : formik.values.BranchCode}
+        />}
 
       <div className="next_container">
         {action === "add" && (
           <Button
             className="submit_button p-0"
             label={t("generalMasters.save")}
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           />
         )}
@@ -644,7 +516,6 @@ function AddBranch({ action }) {
           <Button
             className="submit_button p-0"
             label={t("generalMasters.update")}
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           />
         )}

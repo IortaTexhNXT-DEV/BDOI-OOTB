@@ -1,56 +1,40 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import './index.scss';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import InputField from '../../../../../components/InputField';
-import SubmitButton from '../../../../../components/SubmitButton'
 import SvgDot from '../../../../../assets/icons/SvgDot';
 import DropDowns from '../../../../../components/DropDowns';
 import SvgDropdown from '../../../../../assets/icons/SvgDropdown';
 import { Button } from 'primereact/button';
-import { useNavigate, useParams } from 'react-router-dom';
-import NavBar from '../../../../../components/NavBar';
+import { useNavigate } from 'react-router-dom';
 import SvgBackicon from '../../../../../assets/icons/SvgBackicon';
 import { Card } from "primereact/card";
-import DatePicker from '../../../../../components/DatePicker';
-import { Calendar } from 'primereact/calendar';
-import LabelWrapper from '../../../../../components/LabelWrapper';
 import { useFormik } from "formik";
-import { Toast } from 'primereact/toast';
 import CustomToast from "../../../../../components/Toast";
-import { InputText } from "primereact/inputtext";
 import { useDispatch, useSelector } from 'react-redux';
-import countriesData from "./data";
+import useMasterOptions from "../../../common/useMasterOptions";
 import { patchStateEditMiddleware, postAddStateMiddleware } from '../store/stateMiddleware';
-
 
 const initialValues = {
   StateCode: "",
   StateName: "",
   Description: "",
-  Country: "",
+  Region: "",
+  Country: "Philippines",
+  Level: "",
+  PsgcCode: "",
   Modifiedby: "",
   ModifiedOn: ""
-
 }
 
 function AddState({ action }) {
   const { t } = useTranslation();
   const toastRef = useRef(null);
   const dispatch = useDispatch();
-  const { id } = useParams();
-  const [country, setCountry] = useState([]);
   const Navigate = useNavigate()
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] = useState(null);
 
-
-  const { stateTableList, loading, getStateListById } = useSelector(
+  const { getStateListById } = useSelector(
     ({ stateReducers }) => {
       return {
         loading: stateReducers?.loading,
@@ -59,12 +43,8 @@ function AddState({ action }) {
       };
     }
   );
-  console.log(getStateListById?.Country, "getStateListById");
-  const Country = countriesData.countries.map(country => ({
-    label: action === "add" ? country : getStateListById?.Country,
-    value: action === "add" ? country : getStateListById?.Country,
-  }));
-
+  const Country = useMasterOptions("country");
+  const Region = useMasterOptions("region");
 
   const home = { label: t("generalMasters.master") };
   const items = [
@@ -75,14 +55,16 @@ function AddState({ action }) {
   ];
 
   const setFormikValues = () => {
-    // const getCorrectionJVEdit = correctionJVList.find((item) => item.id === EditID);
     const Country = getStateListById?.Country
     const updatedValues = {
       id: getStateListById?.id,
       StateCode: getStateListById?.StateCode,
       StateName: getStateListById?.StateName,
       Description:getStateListById?.Description,
+      Region: getStateListById?.Region || "",
       Country: Country,
+      Level: getStateListById?.Level || "",
+      PsgcCode: getStateListById?.PsgcCode || "",
       Modifiedby: getStateListById?.Modifiedby,
       ModifiedOn: getStateListById?.ModifiedOn
     };
@@ -90,21 +72,17 @@ function AddState({ action }) {
       if (Country) {
         formik.setValues({ ...formik.values, ...updatedValues });
         formik.setFieldValue("Country", Country);
-        setCountry([{ label: Country, value: Country }]);
       }
     } else {
       if (Country) {
         formik.setValues({ ...formik.values, ...updatedValues });
-        setCountry([{ label: Country, value: Country }]);
       }
     }
   };
-  console.log(action, "action");
 
   useEffect(() => {
     if (action === "view" || action === "edit") {
       setFormikValues()
-      console.log(formik.values.CountryName, " formik.values.CountryName");
     }
   }, [getStateListById])
 
@@ -112,34 +90,24 @@ function AddState({ action }) {
   minDate.setDate(minDate.getDate() + 1);
 
   // const handleSubmit=(value)=>{
-
-  //     Navigate("/master/finance/exchangerate")
   // }
 
-  // const toastRef = useRef(null);
-
-
-  const handleSubmitAdd = (values) => {
-    const valueWithId = {
-      ...values,
-      id: stateTableList?.length + 1,
-    };
-    dispatch(postAddStateMiddleware(valueWithId));
-
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      Navigate("/master/generals/location/state");
-    }, 3000);
+  const saveAndReturn = async (thunk, values, message) => {
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(message ? { detail: message } : undefined);
+      setTimeout(() => {
+        Navigate("/master/generals/location/state");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
 
-  const handleSubmitEdit = (values) => {
-    dispatch(patchStateEditMiddleware(values));
-    console.log("Handle Edit Submission", values);
-    setTimeout(() => {
-      Navigate("/master/generals/location/state");
-    }, 1000);
-  };
+  const handleSubmitAdd = (values) => saveAndReturn(postAddStateMiddleware, values);
+
+  const handleSubmitEdit = (values) =>
+    saveAndReturn(patchStateEditMiddleware, values, t("financeMasters.saveSuccessfully"));
 
   const handleSubmit = (values) => {
     if (action === "add") {
@@ -155,23 +123,13 @@ function AddState({ action }) {
     const errors = {};
 
     if (!values.StateCode) {
-      errors.StateCode = "This field Code is required";
+      errors.StateCode = "This field is required";
     }
     if (!values.StateName) {
       errors.StateName = "This field is required";
     }
-    if (!values.Description) {
-      errors.Description = "This field is required";
-    }
     if (!values.Country) {
       errors.Country = "This field is required";
-    }
-    // if (!values.Modifiedby) {
-    //   errors.Modifiedby = "This field is required";
-    // }
-
-    if (!values.ModifiedOn) {
-      errors.ModifiedOn = "This field is required";
     }
 
     return errors;
@@ -183,7 +141,6 @@ function AddState({ action }) {
     onSubmit: (values) => {
       //   // Handle form submission
       handleSubmit(values);
-
     },
     //  onSubmit:handleSubmit
   });
@@ -191,21 +148,16 @@ function AddState({ action }) {
   return (
     <div className='overall__addstate__container'>
 
-
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
-      <CustomToast ref={toastRef} message="State added" />
+      <CustomToast ref={toastRef} message={t("generalMasters.provinceAdded")} />
       <div>
         <span onClick={() => Navigate(-1)}>
           <SvgBackicon /></span>
         <label className='label_header'>
           {action === "add"
-            ? "Add State"
+            ? t("generalMasters.addState")
             : action === "edit"
-              ? "Edit State"
-              : "Details State"}
+              ? t("generalMasters.editState")
+              : t("generalMasters.detailsState")}
         </label>
       </div>
       <BreadCrumb
@@ -213,10 +165,6 @@ function AddState({ action }) {
         home={home}
         className='breadcrumbs_container'
         separatorIcon={<SvgDot color={"#000"} />} />
-
-
-
-
 
       <Card>
 
@@ -227,10 +175,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.stateCode")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.StateCode
-
                 }
                 onChange={formik.handleChange("StateCode")}
                 disabled={action === "add"
@@ -241,7 +187,7 @@ function AddState({ action }) {
               />
               {formik.touched.StateCode &&
                 formik.errors.StateCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.StateCode}
                   </div>
                 )}
@@ -254,10 +200,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.stateName")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.StateName
-
                 }
                 onChange={formik.handleChange("StateName")}
                 disabled={action === "add"
@@ -268,7 +212,7 @@ function AddState({ action }) {
               />
               {formik.touched.StateName &&
                 formik.errors.StateName && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.StateName}
                   </div>
                 )}
@@ -281,10 +225,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.description")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.Description
-
                 }
                 onChange={formik.handleChange("Description")}
                 disabled={action === "add"
@@ -295,7 +237,7 @@ function AddState({ action }) {
               />
               {formik.touched.Description &&
                 formik.errors.Description && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.Description}
                   </div>
                 )}
@@ -311,13 +253,11 @@ function AddState({ action }) {
               <DropDowns
                 className="dropdown__container"
                 label={t("generalMasters.country")}
-                // value={departmentcode}
-                // onChange={(e) => setDepartmentCode(e.value)}
                 value={formik.values.Country}
                 onChange={(e) =>
                   formik.setFieldValue("Country", e.value)
                 }
-                options={action === "add" ? Country : action === "edit" ? country : Country}
+                options={Country}
                 optionLabel="label"
                 placeholder={t("generalMasters.select")}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
@@ -329,23 +269,51 @@ function AddState({ action }) {
               />
               {formik.touched.Country &&
                 formik.errors.Country && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.Country}
                   </div>
                 )}
             </div>
 
           </div>
+          <div class="col-3 md:col-3 lg-col-3">
+            <div>
+              <DropDowns
+                className="dropdown__container"
+                label={t("generalMasters.region")}
+                value={formik.values.Region}
+                onChange={(e) => formik.setFieldValue("Region", e.value)}
+                options={Region}
+                optionLabel="label"
+                placeholder={t("generalMasters.select")}
+                dropdownIcon={<SvgDropdown color={"#000"} />}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
+          <div class="sm-col-12 col-12 md:col-3 lg-col-3">
+            <div>
+              <InputField
+                classNames="field__container"
+                label={t("generalMasters.psgcCode")}
+                placeholder={t("generalMasters.enter")}
+                value={formik.values.PsgcCode}
+                onChange={formik.handleChange("PsgcCode")}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
                 classNames="field__container"
                 label={t("generalMasters.modifiedBy")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.Modifiedby
-
                 }
                 onChange={formik.handleChange("Modifiedby")}
                 disabled={action === "add"
@@ -356,7 +324,7 @@ function AddState({ action }) {
               />
               {formik.touched.Modifiedby &&
                 formik.errors.Modifiedby && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.Modifiedby}
                   </div>
                 )}
@@ -369,10 +337,8 @@ function AddState({ action }) {
                 classNames="field__container"
                 label={t("generalMasters.modifiedOn")}
                 placeholder={t("generalMasters.enter")}
-                //   value={formik.values.CurrencyDescription}
                 value={
                   formik.values.ModifiedOn
-
                 }
                 onChange={formik.handleChange("ModifiedOn")}
                 disabled={action === "add"
@@ -383,7 +349,7 @@ function AddState({ action }) {
               />
               {formik.touched.ModifiedOn &&
                 formik.errors.ModifiedOn && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.ModifiedOn}
                   </div>
                 )}
@@ -392,31 +358,22 @@ function AddState({ action }) {
           </div>
         </div>
 
-
-
-
       </Card>
-
 
       <div className="next_container">
         {action === "add" && (
-          <Button className="submit_button p-0" label={t("generalMasters.save")} disabled={!formik.isValid}
+          <Button className="submit_button p-0" label={t("generalMasters.save")}
             onClick={() => { formik.handleSubmit(); }}
           />
         )}
       </div>
       <div className="next_container">
         {action === "edit" && (
-          <Button className="submit_button p-0" label={t("generalMasters.update")} disabled={!formik.isValid}
+          <Button className="submit_button p-0" label={t("generalMasters.update")}
             onClick={() => { formik.handleSubmit(); }}
           />
         )}
       </div>
-
-
-
-
-
 
     </div>
   );

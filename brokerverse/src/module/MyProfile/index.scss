@@ -1,0 +1,376 @@
+@import "../../theme/bdoi/tokens";
+
+// My Profile: page header, a summary card (identity and access, read-only) and a details card (view / edit).
+.myprofile {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 1200px;
+  padding-bottom: 32px;
+
+  .myprofile__header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .myprofile__breadcrumb {
+    margin-bottom: 0;
+
+    .p-menuitem-link {
+      cursor: default;
+    }
+
+    li:first-child .p-menuitem-link {
+      cursor: pointer;
+    }
+  }
+
+  .myprofile__card {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+    padding: 24px;
+
+    @media (max-width: 640px) {
+      padding: 16px;
+    }
+  }
+
+  .myprofile__load-error {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    color: $color-danger;
+  }
+
+  // ------------------------------------------------------------ summary
+  .myprofile__summary-main {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    @media (max-width: 760px) {
+      flex-wrap: wrap;
+    }
+  }
+
+  .myprofile__identity {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .myprofile__name-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+  }
+
+  h2.myprofile__name {
+    margin: 0;
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 800;
+    color: $color-heading;
+    overflow-wrap: anywhere;
+  }
+
+  .myprofile__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #f2f4f7;
+    color: $color-text-muted;
+
+    &::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+    }
+
+    &.is-active {
+      background: $color-success-050;
+      color: $color-success;
+    }
+
+    &.is-locked {
+      background: $color-danger-050;
+      color: $color-danger;
+    }
+  }
+
+  .myprofile__userid {
+    margin-top: 2px;
+    font-size: 14px;
+    color: $color-text-muted;
+
+    strong {
+      color: $color-heading;
+      font-weight: 700;
+    }
+  }
+
+  .myprofile__sep {
+    margin: 0 10px;
+    color: $color-border-strong;
+  }
+
+  .myprofile__summary-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-left: auto;
+
+    @media (max-width: 760px) {
+      margin-left: 0;
+      width: 100%;
+
+      .p-button {
+        flex: 1 1 auto;
+        justify-content: center;
+      }
+    }
+  }
+
+  .myprofile__facts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px 24px;
+    margin: 20px 0 0;
+    padding: 20px 0 0;
+    border-top: 1px solid $color-border;
+
+    @media (max-width: 1024px) {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    @media (max-width: 560px) {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+    }
+  }
+
+  .myprofile__fact {
+    min-width: 0;
+
+    dt {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: $color-text-muted;
+      margin-bottom: 4px;
+    }
+
+    dd {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 600;
+      color: $color-heading;
+      overflow-wrap: anywhere;
+
+      &.is-empty {
+        color: $color-placeholder;
+        font-weight: 400;
+      }
+    }
+  }
+
+  .myprofile__note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0 0;
+    font-size: 13px;
+    color: $color-text-muted;
+
+    .pi {
+      color: $brand-blue;
+    }
+  }
+
+  // ------------------------------------------------------------ details
+  .myprofile__card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid $color-border;
+
+    @media (max-width: 560px) {
+      flex-direction: column;
+
+      .p-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+
+  h2.myprofile__card-title {
+    margin: 0;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 800;
+    color: $color-heading;
+  }
+
+  .myprofile__card-sub {
+    margin: 2px 0 0;
+    font-size: 13px;
+    color: $color-text-muted;
+  }
+
+  h3.myprofile__section {
+    margin: 24px 0 12px;
+    font-size: 13px;
+    line-height: 20px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    color: $brand-navy;
+  }
+
+  .myprofile__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px 24px;
+
+    @media (max-width: 760px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .myprofile__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+
+    &.is-full {
+      grid-column: 1 / -1;
+    }
+  }
+
+  label.myprofile__label {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  .myprofile__required {
+    color: $color-danger;
+  }
+
+  // View mode: the value sits where the input will be, at the same height, so switching modes does not move anything
+  .myprofile__value {
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-radius: $radius-sm;
+    background: #f7f8fa;
+    border: 1px solid transparent;
+    font-size: 14px;
+    color: $color-heading;
+    overflow-wrap: anywhere;
+
+    &.is-empty {
+      color: $color-placeholder;
+    }
+  }
+
+  .p-inputtext,
+  .p-dropdown,
+  .p-calendar {
+    width: 100%;
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  // one control height for text, drop-down and date fields
+  .p-inputtext:not(.p-dropdown-label) {
+    height: 40px;
+  }
+
+  .p-dropdown {
+    height: 40px;
+    align-items: center;
+
+    .p-dropdown-label {
+      display: flex;
+      align-items: center;
+      height: 38px;
+      min-height: 0;
+      padding: 0 12px;
+      border: 0;
+    }
+  }
+
+  .p-autocomplete {
+    width: 100%;
+    height: 40px;
+
+    .p-autocomplete-input {
+      flex: 1 1 auto;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .p-autocomplete-dropdown {
+      width: 40px;
+      height: 40px;
+      background: $color-surface;
+      border: 1px solid $brand-field-blue;
+      border-left: 0;
+      color: $color-text-muted;
+      border-radius: 0 $radius-sm $radius-sm 0;
+    }
+  }
+
+  .p-calendar {
+    height: 40px;
+
+    .p-datepicker-trigger {
+      height: 40px;
+    }
+  }
+
+  .myprofile__hint {
+    font-size: 12px;
+    color: $color-text-muted;
+  }
+
+  .myprofile__error {
+    font-size: 12px;
+    color: $color-danger;
+  }
+
+  .myprofile__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid $color-border;
+
+    @media (max-width: 560px) {
+      flex-direction: column-reverse;
+
+      .p-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

@@ -1,3 +1,4 @@
+@import "../../theme/bdoi/tokens";
 @import "../../Color.scss";
 
 .policy__table__container {
@@ -33,7 +34,7 @@
   }
 
   .policy__header {
-    color: red;
+    color: var(--color-danger);
 
     font-family: "Nunito", Arial, sans-serif;
     font-size: 16px;
@@ -96,8 +97,8 @@
   }
 
   .company__status__type__green {
-    background-color: #fef2e1;
-    color: #c1622a;
+    background-color: $color-warning-050;
+    color: $color-warning;
     text-align: center;
     border-radius: 25px;
     padding: 8px 12px;
@@ -113,8 +114,8 @@
   }
 
   .company__status__type__red {
-    background-color: #d9edf3;
-    color: #167594;
+    background-color: $brand-blue-050;
+    color: $brand-navy;
     text-align: center;
     border-radius: 25px;
     padding: 8px 12px;
@@ -147,8 +148,8 @@
   }
 
   .company__status__type__blue {
-    background-color: #e2f6f0;
-    color: #11845f;
+    background-color: $color-success-050;
+    color: $color-success;
     text-align: center;
     border-radius: 25px;
     padding: 8px 12px;
@@ -491,4 +492,27 @@
 
 .filter-container-bg {
   background-color: $main-background;
+}
+
+// Renewal Policy: filter bar above the list
+.renewal-policy__filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 16px;
+
+  > span {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 13px;
+  }
+
+  .renewal-policy__search {
+    flex: 1 1 16rem;
+
+    input {
+      width: 100%;
+    }
+  }
 }

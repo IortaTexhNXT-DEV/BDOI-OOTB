@@ -1,33 +1,31 @@
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
 import SvgDot from "../../../assets/icons/SvgDot";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SUPPORTED_CURRENCIES_NAME_CODE } from "../../../utility/currencyOptions";
-import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Card } from "primereact/card";
-import DatePicker from "../../../components/DatePicker";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { useFormik } from "formik";
 import { Toast } from "primereact/toast";
 
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   postpaymentVocherCreateDataMiddleware,
   paymentVocherMiddleware,
 } from "../store/paymentVocherMiddleware";
-import { InsuranceCompanyOptions } from "../../../agentModule/quoteModule/policyDetails/mock";
+import mastersService from "../../../services/mastersService";
 import clientService from "../../../services/clientService";
 import policyService from "../../../services/policyService";
 import CommissionService from "../../../services/commissionService";
+import { calendarDateFormat } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
 
 const initialValues = {
   VoucherDate: new Date(),
@@ -46,14 +44,12 @@ const initialValues = {
   Remarks: "",
 };
 
-const mockInsurerOptions = InsuranceCompanyOptions.map((item) => ({
-  name: item.label,
-  code: item.value,
-}));
+/** Master options as { name, code } for the dropdowns of this form. */
+const toNameCode = (option) => ({ name: option.label, code: option.code });
 
-const getInsurerOptionsForPolicy = (selectedPolicy) => {
+const getInsurerOptionsForPolicy = (selectedPolicy, allInsurers) => {
   if (!selectedPolicy) {
-    return mockInsurerOptions;
+    return allInsurers;
   }
 
   const names = [];
@@ -97,7 +93,7 @@ function Createvoucher() {
   const [clientsData, setClientsData] = useState([]);
   const [clientsLoading, setClientsLoading] = useState(false);
   const [policyOptions, setPolicyOptions] = useState([]);
-  const [policiesLoading, setPoliciesLoading] = useState(false);
+  const [, setPoliciesLoading] = useState(false);
   const [policyFilterValue, setPolicyFilterValue] = useState("");
   const [referrerOptions, setReferrerOptions] = useState([]);
   const [referrersLoading, setReferrersLoading] = useState(false);
@@ -128,7 +124,7 @@ function Createvoucher() {
           }))
         );
       } catch (error) {
-        console.error("Error fetching referrers:", error);
+        logger.error("Error fetching referrers:", error);
         setReferrerOptions([]);
       } finally {
         setReferrersLoading(false);
@@ -146,10 +142,10 @@ function Createvoucher() {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }
@@ -197,7 +193,7 @@ function Createvoucher() {
       }
     } catch (error) {
       if (requestId !== policyFilterRequestIdRef.current) return;
-      console.error("Error fetching policies:", error);
+      logger.error("Error fetching policies:", error);
       setPolicyOptions([]);
     } finally {
       if (requestId === policyFilterRequestIdRef.current) {
@@ -216,16 +212,22 @@ function Createvoucher() {
     };
   }, []);
 
-  const DepartmentCode = [
-    { name: "FIN", code: "FI" },
-    { name: "MKT", code: "MK" },
-    { name: "IT", code: "IT" },
-    { name: "SLS", code: "SL" },
-  ];
-  const BranchCode = [
-    { name: "PHP001", code: "PHP" },
-    { name: "PHP002", code: "PHP2" },
-  ];
+  const [masterOptions, setMasterOptions] = useState({
+    departments: [],
+    branches: [],
+    insurers: [],
+    currencies: [],
+  });
+  useEffect(() => {
+    const load = (type) =>
+      mastersService.options(type).then((rows) => rows.map(toNameCode)).catch(() => []);
+    Promise.all(["department", "branch", "insurance-company", "currency"].map(load)).then(
+      ([departments, branches, insurers, currencies]) =>
+        setMasterOptions({ departments, branches, insurers, currencies })
+    );
+  }, []);
+  const DepartmentCode = masterOptions.departments;
+  const BranchCode = masterOptions.branches;
   const PayeeType = [
     { name: "Customer", code: "Customer" },
     { name: "Insurer", code: "Insurer" },
@@ -254,7 +256,7 @@ function Createvoucher() {
       { name: "REMT", code: "REMT" },
     ],
   };
-  const SelectInstrumentCurrency = SUPPORTED_CURRENCIES_NAME_CODE;
+  const SelectInstrumentCurrency = masterOptions.currencies;
   const navigate = useNavigate();
   const home = { label: t("paymentVoucher.accounts") };
   const items = [
@@ -270,14 +272,6 @@ function Createvoucher() {
 
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
-  const { paymentVocherList, loading } = useSelector(
-    ({ paymentVoucherReducers }) => {
-      return {
-        loading: paymentVoucherReducers?.loading,
-        paymentVocherList: paymentVoucherReducers?.paymentVocherList,
-      };
-    }
-  );
 
   // Transform clients data to dropdown options for Customer Code
   const getCustomerCodeOptions = () => {
@@ -391,7 +385,7 @@ function Createvoucher() {
         state: { disbursementData },
       });
     } catch (error) {
-      console.error("Error creating disbursement:", error);
+      logger.error("Error creating disbursement:", error);
       toast.current?.show({
         severity: "error",
         summary: t("common.error"),
@@ -413,7 +407,7 @@ function Createvoucher() {
     const isAgentPayee = payeeCode === "Agent/Referrer";
 
     if (!values.DepartmentCode) {
-      errors.DepartmentCode = t("paymentVoucher.thisFieldCodeRequired");
+      errors.DepartmentCode = t("paymentVoucher.thisFieldRequired");
     }
     if (!values.BranchCode) {
       errors.BranchCode = t("paymentVoucher.thisFieldRequired");
@@ -427,8 +421,9 @@ function Createvoucher() {
     if (isAgentPayee && !values.AgentReferrer) {
       errors.AgentReferrer = t("paymentVoucher.thisFieldRequired");
     }
+    // Agent commission payouts are not tied to one customer, so the customer is optional there.
     if (!isInsurerPayee) {
-      if (!values.CustomerCode) {
+      if (!isAgentPayee && !values.CustomerCode) {
         errors.CustomerCode = t("paymentVoucher.thisFieldRequired");
       }
       if (!values.CustomerName && values.CustomerCode) {
@@ -515,8 +510,12 @@ function Createvoucher() {
       formik.values.Criteria?.name === "Payall");
 
   const insurerOptions = useMemo(
-    () => getInsurerOptionsForPolicy(formik.values.PolicyNumber || null),
-    [formik.values.PolicyNumber]
+    () =>
+      getInsurerOptionsForPolicy(
+        formik.values.PolicyNumber || null,
+        masterOptions.insurers
+      ),
+    [formik.values.PolicyNumber, masterOptions.insurers]
   );
 
   const handlePolicyNumberChange = (e) => {
@@ -555,7 +554,7 @@ function Createvoucher() {
               onChange={(e) => {
                 formik.setFieldValue("VoucherDate", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               disabled={true}
             />
           </div>
@@ -577,7 +576,7 @@ function Createvoucher() {
               />
               {formik.touched.DepartmentCode &&
                 formik.errors.DepartmentCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.DepartmentCode}
                   </div>
                 )}
@@ -596,7 +595,7 @@ function Createvoucher() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.BranchCode && formik.errors.BranchCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.BranchCode}
                 </div>
               )}
@@ -615,7 +614,7 @@ function Createvoucher() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.PayeeType && formik.errors.PayeeType && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.PayeeType}
                 </div>
               )}
@@ -634,7 +633,7 @@ function Createvoucher() {
                 dropdownIcon={<SvgDropdown color={"#000"} />}
               />
               {formik.touched.Criteria && formik.errors.Criteria && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Criteria}
                 </div>
               )}
@@ -658,7 +657,7 @@ function Createvoucher() {
                 disabled={referrersLoading}
               />
               {formik.touched.AgentReferrer && formik.errors.AgentReferrer && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.AgentReferrer}
                 </div>
               )}
@@ -669,7 +668,7 @@ function Createvoucher() {
               <div className="col-3 md:col-3 lg-col-3">
                 <DropDowns
                   className="dropdown__container"
-                  label={t("paymentVoucher.customerCode")}
+                  label={isAgentPayee ? `${t("paymentVoucher.customerCode")} (Optional)` : t("paymentVoucher.customerCode")}
                   value={formik.values.CustomerCode}
                   onChange={handleCustomerCodeChange}
                   options={getCustomerCodeOptions()}
@@ -679,7 +678,7 @@ function Createvoucher() {
                   disabled={clientsLoading}
                 />
                 {formik.touched.CustomerCode && formik.errors.CustomerCode && (
-                  <div style={{ fontSize: 12, color: "red" }}>
+                  <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                     {formik.errors.CustomerCode}
                   </div>
                 )}
@@ -687,7 +686,7 @@ function Createvoucher() {
               <div className="col-3 md:col-3 lg-col-3">
                 <DropDowns
                   className="dropdown__container"
-                  label={t("paymentVoucher.customerName")}
+                  label={isAgentPayee ? `${t("paymentVoucher.customerName")} (Optional)` : t("paymentVoucher.customerName")}
                   value={formik.values.CustomerName}
                   onChange={formik.handleChange("CustomerName")}
                   options={getCustomerNames(formik.values.CustomerCode)}
@@ -698,7 +697,7 @@ function Createvoucher() {
                 />
                 {formik.touched.CustomerName &&
                   formik.errors.CustomerName && (
-                    <div style={{ fontSize: 12, color: "red" }}>
+                    <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                       {formik.errors.CustomerName}
                     </div>
                   )}
@@ -747,7 +746,7 @@ function Createvoucher() {
             />
             {formik.touched.Transactioncode &&
               formik.errors.Transactioncode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.Transactioncode}
                 </div>
               )}
@@ -780,7 +779,7 @@ function Createvoucher() {
             />
             {formik.touched.SelectInstrumentCurrency &&
               formik.errors.SelectInstrumentCurrency && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.SelectInstrumentCurrency}
                 </div>
               )}

@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../styles/responsive.scss";
 
 .claims-dashboard {
@@ -59,6 +60,11 @@
         gap: 1rem;
         align-items: center;
 
+        // both dates of the range visible (DD/MM/YYYY - DD/MM/YYYY)
+        .p-calendar {
+          min-width: 15.5rem;
+        }
+
         @include tablet-md {
           display: none;
         }
@@ -92,12 +98,12 @@
   .kpi-row {
     margin-bottom: 1.5rem;
 
+    // KPI cards wrap instead of running past the right edge
     .kpi-scroll-container {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
-      overflow-x: auto;
       padding-bottom: 0.5rem;
-      scroll-behavior: smooth;
 
       @include tablet-sm {
         gap: 0.75rem;
@@ -128,15 +134,16 @@
     }
 
     .kpi-card {
-      min-width: 250px;
-      flex-shrink: 0;
+      min-width: 0;
+      // the figures are cut with an ellipsis inside the card, never past its edge
+      overflow: hidden;
 
-      @include tablet-sm {
-        min-width: 220px;
-      }
-
-      @include mobile-sm {
-        min-width: 200px;
+      .p-card-body,
+      .p-card-content,
+      .kpi-content {
+        min-width: 0;
+        max-width: 100%;
+        box-sizing: border-box;
       }
 
       .p-card-content {
@@ -157,26 +164,28 @@
         }
 
         .kpi-icon {
-          font-size: 2.5rem;
-
-          @include tablet-sm {
-            font-size: 2rem;
-          }
+          font-size: 18px;
+          color: $color-text-muted;
 
           @include mobile-sm {
-            font-size: 1.75rem;
+            font-size: 16px;
           }
         }
 
         .kpi-details {
           display: flex;
           flex-direction: column;
-          flex: 1;
+          flex: 1 1 0;
+          min-width: 0;
 
           .kpi-label {
             font-size: 0.875rem;
             color: #6c757d;
             margin-bottom: 0.25rem;
+            // the card keeps one height whether or not its figure has arrived
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
 
             @include mobile-sm {
               font-size: 0.8rem;
@@ -187,6 +196,12 @@
             font-size: 1.75rem;
             font-weight: 600;
             color: #2c3e50;
+            // one line whatever the figure (a long province name is cut, its full text in the tooltip)
+            display: block;
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
 
             @include tablet-sm {
               font-size: 1.5rem;
@@ -211,16 +226,18 @@
     }
   }
 
+  // minmax(0, 1fr): the wide claims table scrolls inside its card instead of widening the page
   .dashboard-content {
     display: grid;
-    grid-template-columns: 1fr 400px;
+    grid-template-columns: minmax(0, 1fr) 360px;
     gap: 1.5rem;
 
-    @media (max-width: 1400px) {
-      grid-template-columns: 1fr;
+    @media (max-width: 1500px) {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .content-left {
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 1.5rem;
@@ -355,9 +372,6 @@
             height: 8px;
             background: #e9ecef;
 
-            .p-progressbar-value {
-              background: linear-gradient(90deg, #0066cc 0%, #4285f4 100%);
-            }
           }
         }
       }
@@ -379,24 +393,5 @@
     padding: 0.25rem 0.5rem;
     font-weight: 600;
 
-    &.p-tag-success {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    &.p-tag-info {
-      background: #d1ecf1;
-      color: #0c5460;
-    }
-
-    &.p-tag-warning {
-      background: #fff3cd;
-      color: #856404;
-    }
-
-    &.p-tag-danger {
-      background: #f8d7da;
-      color: #721c24;
-    }
   }
 }

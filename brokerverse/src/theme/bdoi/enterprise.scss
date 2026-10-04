@@ -1,0 +1,1359 @@
+// Enterprise layer: one consistent standard for the shell, page headers, cards, tables, forms,
+// buttons and dialogs on every screen. Loaded last (from bdoi.scss).
+//
+// Why it is needed: ~70 rules in individual screen stylesheets are unscoped (for example a
+// ".p-datatable .p-datatable-tbody > tr > td { font-style: italic; text-align: center; padding: 2rem }"
+// written for one empty-state table), so they restyled every table and dialog in the app depending
+// on which screens had been opened. The selectors below are anchored on the application shell so they
+// out-rank those leaks; screen-specific layouts are left alone.
+@import "./tokens";
+
+$shell: ".protected__layout__container .main__content";
+$row-height: var(--bv-row-height, 44px); // density of the theme (comfortable 44px / compact 36px)
+$cell-pad-y: var(--bv-cell-pad-y, 10px);
+$cell-pad-x: 14px;
+$page-gutter: 24px;
+$text-strong: #1f2937;
+
+// ---------------------------------------------------------------- shell
+
+.protected__layout__container {
+  .protected__layout__content__space .main__content {
+    padding: 0 $page-gutter $page-gutter;
+    scroll-padding-top: $header-height + 16px;
+  }
+
+  // Top bar spans the full content width and stays pinned while the page scrolls.
+  .protected__layout__header {
+    margin: 0 (-$page-gutter) 20px;
+
+    .Agentnavbar__container {
+      min-height: 64px;
+      padding: 8px $page-gutter !important;
+      margin: 0 !important;
+      width: auto !important;
+      border-radius: 0 !important;
+      box-shadow: 0 1px 0 $color-border;
+    }
+  }
+}
+
+// ---------------------------------------------------------------- page structure
+
+#{$shell} {
+  color: $color-text;
+
+  h1,
+  h2,
+  .page-title,
+  .label_header {
+    color: $color-heading;
+  }
+
+  // Page titles: one size everywhere (.label_header is the title of the master add / edit / view screens; without
+  // it here the generic 13px form label rule below shrank those titles to field-label size).
+  h1,
+  .page-title,
+  .label_header {
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 800;
+    margin: 0 0 4px;
+  }
+
+  h2 {
+    font-size: 20px;
+    line-height: 28px;
+    font-weight: 800;
+  }
+
+  h3 {
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 700;
+  }
+
+  .p-breadcrumb {
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin-bottom: 16px;
+    font-size: 13px;
+
+    .p-menuitem-text {
+      color: $color-text-muted;
+    }
+
+    li:last-child .p-menuitem-text {
+      color: $brand-navy;
+      font-weight: 600;
+    }
+  }
+
+  // Cards: white surface, hairline border, soft shadow, one radius, one padding.
+  .p-card {
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    box-shadow: $shadow-sm;
+
+    .p-card-body {
+      padding: 20px 24px;
+    }
+
+    .p-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: $color-heading;
+    }
+  }
+}
+
+// ---------------------------------------------------------------- tables
+
+#{$shell} .p-datatable {
+  font-size: 14px;
+  border-radius: $radius-md;
+
+  .p-datatable-wrapper {
+    overflow-x: auto;
+    border-radius: $radius-md $radius-md 0 0;
+  }
+
+  .p-datatable-thead > tr > th {
+    height: $row-height;
+    padding: $cell-pad-y $cell-pad-x !important;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    text-align: left !important;
+    white-space: nowrap;
+    vertical-align: middle;
+
+    .p-column-header-content {
+      justify-content: flex-start;
+    }
+  }
+
+  .p-datatable-tbody > tr {
+    height: $row-height;
+    background: $color-surface;
+
+    &:nth-child(even) {
+      background: #f5faff;
+    }
+
+    &:hover {
+      background: $brand-blue-050;
+    }
+
+    > td {
+      padding: $cell-pad-y $cell-pad-x !important;
+      font-style: normal !important;
+      color: $text-strong !important;
+      text-align: left !important;
+      vertical-align: middle;
+      line-height: 20px;
+      border-width: 0 0 1px;
+      border-color: $color-border;
+    }
+
+    // Numeric columns (marked by utility/tableNumericAlign.js): right-aligned, fixed-width digits.
+    > td.bv-num {
+      text-align: right !important;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    // "No records" row keeps its centred, muted look.
+    &.p-datatable-emptymessage > td {
+      text-align: center !important;
+      color: $color-text-muted !important;
+      padding: 32px $cell-pad-x !important;
+    }
+  }
+
+  .p-datatable-thead > tr > th.bv-num {
+    text-align: right !important;
+
+    .p-column-header-content {
+      justify-content: flex-end;
+    }
+  }
+
+  // Action icon cells stay compact.
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only {
+    width: 32px;
+    height: 32px;
+  }
+
+  // One colour for row actions: view, edit, e-mail, schedule, history, download, approve... in the brand blue,
+  // neutral grey when disabled, red only for the destructive ones (delete, cancel, reject: severity "danger").
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only:is(.p-button-text, .p-button-outlined, .p-button-link):not(.p-button-danger) {
+    color: $brand-blue !important;
+    border-color: transparent;
+    background: transparent;
+
+    &:enabled:hover {
+      background: $brand-blue-050 !important;
+      color: $brand-blue-600 !important;
+    }
+  }
+
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only.p-button-danger:is(.p-button-text, .p-button-outlined) {
+    color: $color-danger !important;
+    background: transparent;
+
+    &:enabled:hover {
+      background: $color-danger-050 !important;
+    }
+  }
+
+  .p-datatable-tbody > tr > td .p-button.p-button-icon-only:disabled {
+    color: $color-placeholder !important;
+    opacity: 0.6;
+  }
+
+  // Avatars in a list row use one neutral tint instead of a colour per row.
+  .p-datatable-tbody > tr > td .p-avatar {
+    background-color: $brand-blue-050 !important;
+    color: $brand-navy !important;
+  }
+
+  // The action column sits at the right edge with a fixed width; its buttons stay on one line.
+  :is(.p-datatable-thead > tr > th, .p-datatable-tbody > tr > td).bv-actions {
+    width: 1%;
+    white-space: nowrap;
+    text-align: right !important;
+
+    .p-column-header-content {
+      justify-content: flex-end;
+    }
+  }
+
+  // Dates and document numbers (marked by utility/tableNumericAlign.js) never wrap.
+  .p-datatable-tbody > tr > td.bv-code {
+    white-space: nowrap;
+  }
+
+  .p-datatable-tbody > tr > td.bv-date {
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .p-paginator {
+    border: 0;
+    border-top: 1px solid $color-border;
+    padding: 8px 12px;
+    justify-content: flex-end;
+    font-size: 13px;
+  }
+}
+
+// Plain HTML tables inside screens follow the same rhythm.
+#{$shell} table:not(.p-datatable-table) {
+  border-collapse: collapse;
+
+  td {
+    padding: $cell-pad-y $cell-pad-x;
+    font-style: normal;
+    color: $text-strong;
+  }
+}
+
+// ---------------------------------------------------------------- forms and buttons
+
+#{$shell} {
+  label,
+  .p-float-label label {
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  .p-inputtext,
+  .p-dropdown,
+  .p-multiselect,
+  .p-calendar,
+  .p-inputnumber {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  .p-dropdown .p-dropdown-label,
+  .p-multiselect .p-multiselect-label {
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .p-inputtext:enabled:focus,
+  .p-dropdown:not(.p-disabled).p-focus,
+  .p-multiselect:not(.p-disabled).p-focus {
+    border-color: $brand-blue;
+    box-shadow: $focus-ring;
+  }
+
+  // Buttons: one height, one radius (no pill / square mix), consistent icon spacing. The segments of a SelectButton
+  // are styled as one joined control further down, so they are left out here (the forced radius broke their corners).
+  .p-button:not(.p-button-icon-only):not(.p-button-link):not(.p-selectbutton > .p-button) {
+    min-height: 40px;
+    padding: 8px 18px;
+    border-radius: $radius-sm !important;
+    font-size: 14px;
+    font-weight: 700;
+    gap: 8px;
+
+    .p-button-icon-left {
+      margin-right: 0;
+    }
+  }
+
+  .p-button.p-button-sm:not(.p-button-icon-only) {
+    min-height: 32px;
+    padding: 4px 12px;
+    font-size: 13px;
+  }
+
+  .p-tag,
+  .p-badge {
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 10px;
+  }
+}
+
+// ---------------------------------------------------------------- number spinners
+// The up / down buttons of an InputNumber with showButtons are part of the field: surface background, the input's
+// border, a muted icon, the same total height as the input. The stock theme gave each of them the look and size of
+// a filled primary button, so a year field read as two large coloured blocks. Global: the field may sit in a dialog.
+
+.p-inputnumber .p-inputnumber-button.p-button {
+  flex: 1 1 0;
+  width: 2.25rem;
+  min-height: 0;
+  height: auto;
+  padding: 0;
+  background: $color-surface !important;
+  border: 1px solid $brand-field-blue !important;
+  color: $color-text-muted !important;
+  box-shadow: none !important;
+
+  .p-button-icon {
+    font-size: 11px;
+  }
+
+  &:enabled:hover {
+    background: $brand-blue-050 !important;
+    color: $brand-blue !important;
+  }
+
+  &:disabled {
+    color: $color-placeholder !important;
+  }
+}
+
+.p-inputnumber-buttons-stacked {
+  align-items: stretch;
+
+  .p-inputnumber-button-group {
+    align-self: stretch;
+  }
+
+  .p-inputnumber-button-up.p-button {
+    border-left: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 0 $radius-sm 0 0 !important;
+  }
+
+  .p-inputnumber-button-down.p-button {
+    border-left: 0 !important;
+    border-radius: 0 0 $radius-sm 0 !important;
+  }
+}
+
+.p-inputnumber-buttons-horizontal {
+  align-items: stretch;
+
+  .p-inputnumber-button.p-button {
+    flex: 0 0 auto;
+    width: 2.5rem;
+  }
+
+  .p-inputnumber-button-down.p-button {
+    border-right: 0 !important;
+    border-radius: $radius-sm 0 0 $radius-sm !important;
+  }
+
+  .p-inputnumber-button-up.p-button {
+    border-left: 0 !important;
+    border-radius: 0 $radius-sm $radius-sm 0 !important;
+  }
+}
+
+// ---------------------------------------------------------------- select buttons (one choice out of a few)
+// A SelectButton is a joined row of segments at the height of an input: the chosen segment is filled in the brand
+// colour with white text, the others are white with the input border and dark text. Without these rules the theme's
+// filled-button colour applied to every segment and nothing showed which one was selected. Global: may sit in a dialog.
+
+.p-selectbutton {
+  display: inline-flex;
+
+  .p-button {
+    min-height: 40px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    background: $color-surface;
+    border: 1px solid $brand-field-blue;
+    color: $color-heading;
+    box-shadow: none;
+    border-radius: 0;
+
+    &:not(:first-child) {
+      border-left-width: 0;
+    }
+
+    &:first-child {
+      border-radius: $radius-sm 0 0 $radius-sm;
+    }
+
+    &:last-child {
+      border-radius: 0 $radius-sm $radius-sm 0;
+    }
+
+    .p-button-label {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
+    &:not(.p-disabled):not(.p-highlight):hover {
+      background: $brand-blue-050;
+      border-color: $brand-field-blue;
+      color: $brand-navy;
+    }
+
+    &.p-highlight,
+    &.p-highlight:hover {
+      background: $brand-blue;
+      border-color: $brand-blue;
+      color: var(--bv-primary-text, #ffffff);
+    }
+
+    &.p-highlight:hover {
+      background: $brand-blue-600;
+      border-color: $brand-blue-600;
+    }
+
+    &:focus-visible {
+      z-index: 1;
+      box-shadow: $focus-ring;
+    }
+  }
+}
+
+[data-bv-density="compact"] .p-selectbutton .p-button {
+  min-height: 34px;
+  padding: 5px 14px;
+}
+
+// ---------------------------------------------------------------- progress meters
+// A progress bar carries its figure outside the bar (components/ProgressMeter): a 6px rounded track with the value as
+// small muted text on the right. A label inside the bar is clipped at low values ("7.6" cut off in a short block), so
+// it is hidden wherever a bar sits in a table.
+
+.p-datatable .p-progressbar {
+  height: 6px;
+  border-radius: 3px;
+  background: $color-border;
+
+  .p-progressbar-label {
+    display: none;
+  }
+}
+
+.bv-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 6rem;
+
+  .p-progressbar {
+    flex: 1 1 auto;
+    height: 6px;
+    border-radius: 3px;
+    background: $color-border;
+
+    .p-progressbar-value {
+      background: $brand-blue;
+      border-radius: 3px;
+    }
+
+    .p-progressbar-label {
+      display: none;
+    }
+  }
+
+  // warning above 80, danger above 100 (components/ProgressMeter sets the modifier)
+  &.bv-meter--warning .p-progressbar .p-progressbar-value {
+    background: $brand-gold-600;
+  }
+
+  &.bv-meter--danger .p-progressbar .p-progressbar-value {
+    background: $color-danger;
+  }
+
+  &.bv-meter--success .p-progressbar .p-progressbar-value {
+    background: $color-success;
+  }
+
+  .bv-meter__value {
+    flex: 0 0 auto;
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    color: $color-text-muted;
+    font-variant-numeric: tabular-nums;
+
+    // a screen may mark the figure by its state: the text colour changes, nothing is filled
+    &.success { color: $color-success; }
+    &.warning { color: $color-warning; }
+    &.danger { color: $color-danger; }
+    &.info { color: $color-text-muted; }
+  }
+}
+
+// ---------------------------------------------------------------- dialogs, toasts
+
+.p-dialog {
+  border-radius: $radius-md;
+  box-shadow: 0 16px 48px rgba(17, 24, 39, 0.18);
+
+  .p-dialog-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid $color-border;
+    border-radius: $radius-md $radius-md 0 0;
+
+    .p-dialog-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: $color-heading;
+    }
+  }
+
+  .p-dialog-content {
+    padding: 20px 24px;
+  }
+
+  .p-dialog-footer {
+    padding: 14px 24px;
+    border-top: 1px solid $color-border;
+    border-radius: 0 0 $radius-md $radius-md;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+
+    button {
+      margin: 0;
+    }
+  }
+}
+
+// Add / edit forms open as a side panel: a dialog with Save / Cancel in its footer slides in from the right at full
+// height, at least 36rem wide (wider when the screen asks for it), with the header and footer fixed and the form
+// scrolling between them. Confirmation questions and read-only viewers keep the centred dialog.
+.p-dialog-mask:has(> .p-dialog:not(.p-confirm-dialog):not(.bv-centered) > .p-dialog-footer) {
+  justify-content: flex-end !important;
+  align-items: stretch !important;
+  padding: 0 !important;
+  background-color: rgba(17, 24, 39, 0.32) !important;
+}
+
+.p-dialog:not(.p-confirm-dialog):not(.bv-centered):has(> .p-dialog-footer) {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  min-width: min(36rem, 100vw) !important;
+  max-width: min(72rem, 100vw) !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: -8px 0 32px rgba(17, 24, 39, 0.16);
+  display: flex;
+  flex-direction: column;
+
+  .p-dialog-header {
+    flex: 0 0 auto;
+    border-radius: 0;
+    padding: 16px 24px;
+    background: $color-surface;
+
+    .p-dialog-title {
+      font-size: 17px;
+      font-weight: 700;
+    }
+  }
+
+  .p-dialog-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 20px 24px !important;
+    border-radius: 0;
+  }
+
+  .p-dialog-footer {
+    flex: 0 0 auto;
+    border-radius: 0;
+    background: #fafbfc;
+  }
+
+  // labels above fields and every field the full width of the panel
+  .p-dialog-content > label,
+  .p-dialog-content .field > label,
+  .p-dialog-content > div > label {
+    display: block;
+    margin: 14px 0 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: $color-text;
+  }
+
+  .p-dialog-content > label:first-child,
+  .p-dialog-content > div:first-child > label:first-child {
+    margin-top: 0;
+  }
+
+  .p-dialog-content :is(.p-inputtext, .p-dropdown, .p-multiselect, .p-calendar, .p-inputnumber, .p-autocomplete, .p-chips):not(.p-paginator *) {
+    width: 100%;
+  }
+}
+
+// date fields: the calendar button is part of the field, not a separate coloured block
+.p-calendar.p-calendar-w-btn {
+  align-items: stretch;
+
+  .p-inputtext {
+    height: auto !important;
+    border-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+
+  .p-datepicker-trigger {
+    width: 2.75rem;
+    height: auto !important;
+    background: $color-surface !important;
+    border: 1px solid $brand-field-blue !important;
+    border-left: 0 !important;
+    color: $color-text-muted !important;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+
+    &:hover {
+      background: $brand-blue-050 !important;
+      color: $brand-blue !important;
+    }
+  }
+}
+
+// tooltips read as one line or a short paragraph, never a narrow column of words
+.p-tooltip {
+  max-width: 22rem;
+
+  .p-tooltip-text {
+    min-width: 8rem;
+    font-size: 12px;
+    line-height: 1.4;
+    padding: 6px 10px;
+  }
+}
+
+// Dialog forms. Dialogs are rendered outside the page container (a portal on <body>), so form rules nested
+// under a screen's stylesheet never reach them and label + input ended up side by side at random widths.
+// Labels above fields, full-width inputs, a two-column grid that folds to one column on narrow screens.
+.p-dialog .p-dialog-content {
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 16px;
+
+    @media (max-width: 640px) {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+    min-width: 0;
+
+    > label {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 600;
+      color: $color-text;
+    }
+
+    > .p-inputtext,
+    > .p-dropdown,
+    > .p-multiselect,
+    > .p-calendar,
+    > .p-inputnumber,
+    > .p-inputtextarea,
+    > .p-chips,
+    > .p-autocomplete {
+      width: 100%;
+    }
+
+    .p-inputnumber-input,
+    .p-calendar > .p-inputtext {
+      width: 100%;
+    }
+  }
+
+  .benefits-selection {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 16px;
+    padding: 10px 12px;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+
+    .benefit-checkbox {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      label {
+        margin: 0;
+        font-weight: 400;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------- messages
+// Toasts, message boxes and field errors share one quiet style: white or lightly tinted surface, dark text,
+// a thin coloured rule on the left and a small icon. Colour marks the kind of message; it does not fill the box.
+// Information boxes take a neutral grey tint with the rule in the theme's primary colour, so the box matches any
+// brand (a blue tint under a green brand's rule was the defect). Success, warning and error keep their semantic rule
+// colour over a very light tint of the same hue; none of the tints is pink or saturated (tokens.scss).
+
+@mixin bv-message($accent, $tint) {
+  background: $tint !important;
+  border: 1px solid $color-border !important;
+  border-left: 3px solid $accent !important;
+  color: $color-heading !important;
+
+  .p-toast-message-icon,
+  .p-message-icon,
+  .p-inline-message-icon {
+    color: $accent !important;
+  }
+
+  .p-toast-icon-close,
+  .p-message-close {
+    color: $color-text-muted !important;
+  }
+}
+
+.p-toast {
+  width: 24rem;
+
+  .p-toast-message {
+    border-radius: $radius-sm;
+    box-shadow: $shadow-md;
+    margin-bottom: 8px;
+    @include bv-message($brand-blue, $color-surface);
+
+    &.p-toast-message-success {
+      @include bv-message($color-success, $color-surface);
+    }
+
+    &.p-toast-message-warn {
+      @include bv-message($color-warning, $color-surface);
+    }
+
+    &.p-toast-message-error {
+      @include bv-message($color-danger, $color-surface);
+    }
+
+    .p-toast-message-content {
+      align-items: flex-start;
+      gap: 10px;
+      padding: 12px 14px;
+    }
+
+    .p-toast-message-icon {
+      width: 18px !important;
+      height: 18px !important;
+      font-size: 18px !important;
+      margin-top: 1px;
+    }
+
+    .p-toast-message-text {
+      margin: 0;
+    }
+
+    .p-toast-summary {
+      font-size: 14px;
+      font-weight: 600;
+      color: $color-heading !important;
+    }
+
+    .p-toast-detail {
+      margin: 2px 0 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: $color-text !important;
+    }
+
+    .p-toast-icon-close {
+      width: 24px;
+      height: 24px;
+      color: $color-text-muted !important;
+    }
+  }
+}
+
+.p-message,
+.p-inline-message {
+  border-radius: $radius-sm;
+  font-size: 13px;
+  @include bv-message($brand-blue, $color-surface-muted);
+
+  &.p-message-success,
+  &.p-inline-message-success {
+    @include bv-message($color-success, $color-success-050);
+  }
+
+  &.p-message-warn,
+  &.p-inline-message-warn {
+    @include bv-message($color-warning, $color-warning-050);
+  }
+
+  &.p-message-error,
+  &.p-inline-message-error {
+    @include bv-message($color-danger, $color-danger-050);
+  }
+}
+
+// compact message box: one line of text with a 16px icon, not a banner
+.p-message {
+  .p-message-wrapper {
+    padding: 10px 14px;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .p-message-icon {
+    font-size: 16px;
+    margin: 1px 0 0;
+
+    &.p-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .p-message-text {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  .p-message-close {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+}
+
+.p-inline-message {
+  padding: 6px 10px;
+
+  .p-inline-message-icon {
+    font-size: 14px;
+  }
+}
+
+// The alert of the sign-in and security screens (outside the application shell, agentModule/authModule/security)
+// is the same quiet error box: warm grey tint, red rule, dark text.
+.bv-security__alert {
+  border-radius: $radius-sm;
+  font-size: 13px;
+  @include bv-message($color-danger, $color-danger-050);
+}
+
+// Hint, note and information boxes drawn by screens with their own class names follow the information box.
+.bv-hint,
+.bv-note,
+.bv-info-box {
+  padding: 10px 14px;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  line-height: 1.45;
+  @include bv-message($brand-blue, $color-surface-muted);
+}
+
+// validation text under a field, and the border of an invalid field
+.p-error,
+small.p-error {
+  color: $color-danger !important;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.p-invalid.p-component,
+.p-invalid .p-inputtext,
+.p-inputtext.p-invalid {
+  border-color: $color-danger !important;
+}
+
+// ---------------------------------------------------------------- status tags
+// Status tags are small and tinted with dark text: they mark a state without shouting.
+
+@mixin bv-tag($fg, $bg) {
+  background: $bg;
+  color: $fg;
+}
+
+.p-tag {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  white-space: nowrap;
+  @include bv-tag($brand-navy, $brand-blue-050);
+
+  &.p-tag-success {
+    @include bv-tag($color-success, $color-success-050);
+  }
+
+  &.p-tag-info {
+    @include bv-tag($brand-navy, $brand-blue-050);
+  }
+
+  &.p-tag-warning {
+    @include bv-tag($color-warning, $color-warning-050);
+  }
+
+  &.p-tag-danger {
+    @include bv-tag($color-danger, $color-danger-050);
+  }
+
+  &.p-tag-secondary,
+  &.p-tag-contrast {
+    @include bv-tag($color-text, #f1f2f4);
+  }
+
+  .p-tag-icon {
+    font-size: 11px;
+  }
+}
+
+// cells that must stay on one line (numbers, dates, codes)
+.p-datatable .bv-nowrap {
+  white-space: nowrap;
+}
+
+// ---------------------------------------------------------------- label / value rows in dialogs
+// Dialogs render outside the page, so screen stylesheets nested under the page do not reach them; detail rows
+// ("Policy number" and its value) are laid out here for every dialog.
+
+.p-dialog {
+  :is(.detail-item, .summary-item, .plan-item, .info-item) {
+    display: grid;
+    grid-template-columns: minmax(9rem, 40%) minmax(0, 1fr);
+    align-items: baseline;
+    gap: 12px;
+    padding: 6px 0;
+    border-bottom: 1px solid $color-border;
+    font-size: 14px;
+
+    > label,
+    > strong:first-child {
+      margin: 0;
+      font-weight: 600;
+      color: $color-text-muted;
+    }
+
+    > span,
+    > div {
+      color: $color-heading;
+      overflow-wrap: anywhere;
+    }
+  }
+
+  .score-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+}
+
+// ---------------------------------------------------------------- accessibility
+
+// "Add" controls of the master and voucher lists are real buttons (keyboard and screen reader accessible); the
+// browser's button chrome is removed at zero specificity so each screen's own add-control styling still applies.
+:where(button.bv-add-button) {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid $brand-blue;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+
+// ---------------------------------------------------------------- delayed loading indicators
+// Most reads answer in well under half a second. A loading mask, skeleton or spinner that appears for 100 ms and
+// vanishes reads as a flicker, so every loading indicator stays transparent for its first 400 ms and only then fades
+// in; a quick load never shows one. Button spinners are left alone (they confirm the click at once).
+// Skeletons take the place of content that is about to appear, so they come in sooner (150 ms); the page structure
+// around them (title, breadcrumb, filters, column headings) is drawn at once.
+@keyframes bv-reveal {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.p-datatable-loading-overlay,
+.p-progress-spinner,
+.p-progressbar-indeterminate,
+.bv-delayed-loading {
+  animation: bv-reveal 150ms ease-out 400ms both !important;
+}
+
+.p-skeleton {
+  animation: bv-reveal 150ms ease-out 150ms both !important;
+}
+
+.pi-spinner.pi-spin:not(.p-button-icon):not(.p-button-loading-icon) {
+  animation: bv-reveal 150ms ease-out 400ms both, fa-spin 2s linear 400ms infinite !important;
+}
+
+// ---------------------------------------------------------------- table loading
+
+// A table that is refreshing keeps its rows visible under a light veil with a thin progress line on top,
+// instead of the dark full-table mask of the stock theme (shown only after the 400 ms delay above).
+.p-datatable .p-datatable-loading-overlay {
+  background-color: rgba(255, 255, 255, 0.55) !important;
+  align-items: flex-start;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--primary-color, #0072d8) 50%, transparent 100%);
+    background-size: 50% 100%;
+    background-repeat: no-repeat;
+    animation: bv-table-progress 1.1s linear infinite;
+  }
+
+  .p-datatable-loading-icon {
+    display: none;
+  }
+}
+
+@keyframes bv-table-progress {
+  from { background-position: -50% 0; }
+  to { background-position: 150% 0; }
+}
+
+// ---------------------------------------------------------------- stable layout while data loads
+
+// A paginated list keeps the height of a few rows while it is empty or loading, so the rows arriving do not push the
+// paginator and everything under it down the page.
+.main__content .p-datatable:has(> .p-paginator-bottom) > .p-datatable-wrapper {
+  min-height: 24rem;
+}
+
+// Space held for a status banner that appears once its data has loaded (the height of a one-line Message).
+.bv-banner-placeholder {
+  min-height: 3.1rem;
+  margin-bottom: 1rem;
+}
+
+// A row of status tags shown once the data has loaded keeps its line from the start.
+.bv-tag-row {
+  min-height: 1.75rem;
+}
+
+// Dashboard charts and tiles hold their size before their figures arrive.
+.main__content {
+  .chart-card,
+  .revenue-card {
+    min-height: 20rem;
+  }
+
+  .kpi-value {
+    display: inline-block;
+    min-height: 2.5rem;
+  }
+}
+
+// ---------------------------------------------------------------- print (vouchers, receipts, reports)
+
+@media print {
+  .protected__layout__sidebar__container,
+  .protected__layout__header,
+  .mobile-nav-toggle,
+  .p-paginator {
+    display: none !important;
+  }
+
+  .protected__layout__container .main__content {
+    padding: 0 !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+}
+
+// ---------------------------------------------------------------- typography: one scale on every screen
+// Older screens set their own page-title sizes (28 to 34px) and 16px table text; the newer screens use 24px titles,
+// 14px cells and 13px headers. These rules bring the older screens onto the same scale.
+#{$shell} {
+  :is(.leadlisting__overal__container__title, .main__account__title, .pettycash__title, .posting-rules__title, .page__title,
+    .open_item_title, .payment__heading, .correction__title__reversal, .label_header, .remittance__master__title,
+    .Transaction__Code__Master__title, [class^="add__icon__title"], .header-section > h2) {
+    font-family: $font-heading !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+    color: $color-text !important;
+    letter-spacing: 0;
+  }
+
+  .p-datatable .p-datatable-tbody > tr > td {
+    font-size: 14px !important;
+  }
+
+  .p-datatable .p-datatable-thead > tr > th {
+    font-size: 13px !important;
+    font-weight: 700 !important;
+  }
+
+  // the label carries the button's size (PrimeReact sets 1rem on it)
+  .p-button .p-button-label {
+    font-size: inherit;
+    font-weight: inherit;
+  }
+}
+
+// ---------------------------------------------------------------- list toolbars
+// Search box and filters above a list: one line, the search taking the free width up to a sensible maximum.
+#{$shell} {
+  .bv-list-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+
+    .bv-list-search {
+      flex: 1 1 18rem;
+      max-width: 32rem;
+
+      input {
+        width: 100%;
+      }
+    }
+
+    .bv-list-filter {
+      width: 12rem;
+    }
+  }
+
+  .nowrap {
+    white-space: nowrap;
+  }
+
+  // a secondary line under a cell value (a note, a reference): muted, smaller, on its own line
+  .bv-cell-sub {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+    color: $color-text-muted;
+  }
+
+  // breadcrumbs read as words, never in capitals
+  .p-breadcrumb,
+  .p-breadcrumb .p-menuitem-text {
+    text-transform: none !important;
+  }
+
+  .p-breadcrumb a.p-menuitem-link[href]:not([href="#"]) .p-menuitem-text,
+  .p-breadcrumb .p-menuitem-link.bv-crumb-link .p-menuitem-text {
+    color: $brand-blue;
+    cursor: pointer;
+  }
+}
+
+// A status cell: the status chip(s) on the first line, notes as muted secondary lines under it.
+#{$shell} .cc-status-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+// A summary table above another list holds the height of five rows before its rows arrive.
+#{$shell} .p-datatable.bv-hold-rows-5 > .p-datatable-wrapper {
+  min-height: calc(#{$row-height} * 6);
+}
+
+// First load of a table (components/DataTable): headings and filters are drawn at once and the body holds skeleton
+// rows of the final row height, lined up with the columns; the paginator keeps its place without a "0 of 0" count.
+.p-datatable.bv-table-is-loading,
+#{$shell} .p-datatable.bv-table-is-loading {
+  > .p-paginator {
+    visibility: hidden;
+  }
+
+  .p-datatable-tbody > tr.p-datatable-emptymessage {
+    background: transparent !important;
+
+    > td {
+      padding: 0 !important;
+      border: 0 !important;
+    }
+  }
+}
+
+.bv-table-skeleton {
+  // no width of its own: the column headings decide the width of the table, the skeleton follows them
+  width: 0;
+  min-width: 100%;
+  overflow: hidden;
+
+  .bv-table-skeleton__row {
+    display: grid;
+    align-items: center;
+    height: $row-height;
+    border-bottom: 1px solid $color-border;
+
+    &:nth-child(even) {
+      background: #f5faff;
+    }
+  }
+
+  .bv-table-skeleton__cell {
+    padding: 0 $cell-pad-x;
+    min-width: 0;
+  }
+}
+
+// Skeleton blocks of the final size for figures, cards and detail pages (components/Skeletons).
+.bv-skeleton-block {
+  display: block;
+}
+
+.bv-chart-skeleton {
+  width: 100%;
+}
+
+.bv-page-skeleton {
+  padding: 4px 0;
+
+  .bv-page-skeleton__card {
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: $radius-md;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+  }
+}
+
+// A status banner that appears with the data has a slot of fixed height from the start.
+#{$shell} .bv-banner-slot {
+  min-height: 4.5rem;
+  margin-bottom: 0.75rem;
+
+  .p-message {
+    margin: 0 !important;
+  }
+}
+
+// Lists whose actions column is frozen at the right: the rows scroll under it inside the card on a narrow window.
+#{$shell} .p-datatable {
+  .p-datatable-tbody > tr > td.p-frozen-column {
+    background: inherit;
+  }
+
+  :is(td, th).p-frozen-column.bv-actions {
+    box-shadow: inset 1px 0 0 $color-border;
+  }
+}
+
+// e-mail addresses and other long unbroken values may break anywhere instead of widening the column
+#{$shell} .bv-break {
+  overflow-wrap: anywhere;
+}
+
+// a TabView used as a tab bar over one shared list (no panel content)
+.bv-tabbar .p-tabview-panels {
+  display: none;
+}
+
+// Every list keeps its row actions in view: when a wide table scrolls inside its card, the actions column (marked
+// "bv-actions", by the screen or by utility/tableNumericAlign.js) stays pinned at the right edge.
+#{$shell} .p-datatable > .p-datatable-wrapper > table {
+  > thead > tr > th.bv-actions,
+  > tbody > tr > td.bv-actions {
+    position: sticky;
+    right: 0;
+    z-index: 1;
+    box-shadow: inset 1px 0 0 $color-border;
+  }
+
+  > tbody > tr > td.bv-actions {
+    background: inherit;
+  }
+}
+
+// ---------------------------------------------------------------- outlined actions on screens with their own button classes
+// An action bar has one filled (primary) button; the others are outlined. Many older screens colour their header and
+// footer buttons through their own class names (add__btn, upload__btn, bulk_button_container...), which filled an
+// outlined button as well. Inside the content area an outlined button without a severity is drawn the same way on
+// every screen: white surface, the brand colour for the border and the text, a light brand tint on hover. Icon-only
+// buttons keep the row-action rules above.
+#{$shell} .p-button.p-button-outlined:not(.p-button-icon-only):not(.p-button-secondary):not(.p-button-success):not(.p-button-info):not(.p-button-warning):not(.p-button-help):not(.p-button-danger):not(.p-button-contrast) {
+  background: $color-surface;
+  border: 1px solid $brand-blue;
+  color: $brand-blue;
+  box-shadow: none;
+
+  .p-button-label,
+  .addtext {
+    color: inherit;
+  }
+
+  &:enabled:hover {
+    background: $brand-blue-050;
+    border-color: $brand-blue;
+    color: $brand-blue-600;
+  }
+}
+
+// ---------------------------------------------------------------- tab rows
+// A tab row hides its scrollbar, so tabs past the right edge could not be seen on a narrow screen. A tab row that is
+// not marked scrollable wraps to a second line instead; a scrollable one shows its arrows.
+.p-tabview:not(.p-tabview-scrollable) .p-tabview-nav {
+  flex-wrap: wrap;
+}

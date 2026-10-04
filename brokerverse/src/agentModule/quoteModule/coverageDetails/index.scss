@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .coverage__container {
   .p-card {
     background: #ffffff;
@@ -114,8 +115,8 @@
       background-color: #e8f4f8 !important;
       font-weight: 600 !important;
       font-size: 16px !important;
-      color: #1976d2 !important;
-      border: 2px solid #1976d2 !important;
+      color: $brand-blue !important;
+      border: 2px solid $brand-blue !important;
     }
   }
   
@@ -153,7 +154,7 @@
         color: #212529;
         
         &.negative {
-          color: #dc3545;
+          color: var(--color-danger);
         }
       }
       

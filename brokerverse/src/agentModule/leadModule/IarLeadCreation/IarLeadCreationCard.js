@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isValidMobile, mobileHint, normalizeMobile } from "../../../utility/phoneFormat";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,7 +13,6 @@ import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -20,8 +20,7 @@ import SvgCountPlusIcon from "../../../assets/icons/SvgCountPlusIcon";
 import SvgCountMinusIcon from "../../../assets/icons/SvgCountMinusIcon";
 import leadService from "../../../services/leadService";
 import quotationService from "../../../services/quotationService";
-import addressService from "../../../services/addressService";
-import { isThailand } from "../../../utility/addressHelpers";
+import PhAddressFields from "../../component/PhAddressFields";
 import { getLeadByIdMiddleware } from "../Store/leadMiddleware";
 import CommissionReferralSection, {
   defaultCommissionDetails,
@@ -35,11 +34,18 @@ import {
   IAR_PRODUCT_CODE,
   IAR_SECTION_CATALOG,
   IAR_SECTION_SUGGESTIONS,
-  IAR_VAT_PERCENT,
   buildPremiumSectionsFromRisks,
+  iarCatalogFromMappings,
   makeId,
   recalculateIarPremiumDetails,
 } from "./iarConstants";
+import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
+import useTaxRates from "../../quoteModule/utils/useTaxRates";
+import logger from "../../../utility/logger";
+import { notifyWarn } from "../../../utility/dialogs";
+import CustomerResponseActions from "../../quoteModule/customerResponse/CustomerResponseActions";
+import RequestForQuotationButton from "../../../module/Placement/RequestForQuotationButton";
+import productConfiguratorService from "../../../services/productConfiguratorService";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -51,19 +57,18 @@ const personalDetailsInitialValue = {
   ContactNumber: "",
   HouseNo: "",
   Barangay: "",
-  Country: "",
+  Country: "Philippines",
   Province: "",
   City: "",
   ZIPCode: "",
-  RoadThanon: "",
-  SoiAlley: "",
-  MooVillage: "",
+  Street: "",
+  Region: "",
   DateofBirth: "",
   category: "Retail",
   gender: "Male",
 };
 
-const getPersonalDetailsValidation = (t) => (values) => {
+const getPersonalDetailsValidation = (t, ageLimits) => (values) => {
   const errors = {};
   if (values.category === "Corporate") {
     if (!values.CompanyName) errors.CompanyName = t("fireLead.fieldRequired");
@@ -79,8 +84,8 @@ const getPersonalDetailsValidation = (t) => (values) => {
   }
   if (!values.ContactNumber) {
     errors.ContactNumber = t("fireLead.phoneRequired");
-  } else if (!/^\d{10}$/.test(values.ContactNumber)) {
-    errors.ContactNumber = t("fireLead.invalidPhone");
+  } else if (!isValidMobile(values.ContactNumber)) {
+    errors.ContactNumber = `${t("fireLead.invalidPhone")} (e.g. ${mobileHint()})`;
   }
   if (!values.HouseNo) errors.HouseNo = t("fireLead.fieldRequired");
   if (!values.Barangay) errors.Barangay = t("fireLead.fieldRequired");
@@ -89,6 +94,7 @@ const getPersonalDetailsValidation = (t) => (values) => {
   if (!values.City) errors.City = t("fireLead.fieldRequired");
   if (!values.ZIPCode) errors.ZIPCode = t("fireLead.fieldRequired");
   if (!values.DateofBirth) errors.DateofBirth = t("fireLead.fieldRequired");
+  else if (birthDateError(values.DateofBirth, ageLimits)) errors.DateofBirth = birthDateError(values.DateofBirth, ageLimits);
   if (!values.category) errors.category = t("fireLead.fieldRequired");
   if (!values.gender) errors.gender = t("fireLead.fieldRequired");
   return errors;
@@ -111,9 +117,8 @@ const leadToPersonalFormValues = (lead) => {
     Province: lead.province || "",
     City: lead.city || "",
     ZIPCode: lead.zipCode || "",
-    RoadThanon: lead.roadThanon || "",
-    SoiAlley: lead.soiAlley || "",
-    MooVillage: lead.mooVillage || "",
+    Street: lead.street || lead.roadThanon || "",
+    Region: lead.region || "",
     DateofBirth: lead.DOB
       ? typeof lead.DOB === "string"
         ? new Date(lead.DOB)
@@ -126,6 +131,10 @@ const leadToPersonalFormValues = (lead) => {
 
 const IarLeadCreationCard = ({ step, onStepChange }) => {
   const { t } = useTranslation();
+  // VAT of the fire line from the premium tax and charge engine, the rate the server prices the quotation with
+  const taxRates = useTaxRates("fire");
+  const vatPercentConfigured = Number(((Number(taxRates.valueAddedTax) || 0) * 100).toFixed(4));
+  const ageLimits = useAgeLimits();
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -134,7 +143,9 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   const setStep = onStepChange;
   const currentStep = step;
 
-  const existingLeadFromState = location.state?.lead;
+  // an existing customer picked in Create prospect pre-fills the personal details, and the prospect is linked to it
+  const existingClient = location.state?.existingClient;
+  const existingLeadFromState = location.state?.lead || existingClient;
   const existingLeadRefId =
     location.state?.leadRefId ||
     location.state?.leadId ||
@@ -157,10 +168,14 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   );
   const [premiumDetails, setPremiumDetails] = useState({
     sections: [],
-    vatPercent: IAR_VAT_PERCENT,
+    vatPercent: vatPercentConfigured,
     discount: 0,
     discountPercent: 0,
   });
+  // The configured rate arrives after the first render: re-price with it
+  useEffect(() => {
+    setPremiumDetails((prev) => (prev.vatPercent === vatPercentConfigured ? prev : recalculateIarPremiumDetails({ ...prev, vatPercent: vatPercentConfigured })));
+  }, [vatPercentConfigured]);
   const [discountPct, setDiscountPct] = useState(0);
   const [commissionDetails, setCommissionDetails] = useState(
     defaultCommissionDetails()
@@ -168,11 +183,6 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
-  const [countryList, setCountryList] = useState([]);
-  const [provinceList, setProvinceList] = useState([]);
-  const [cityList, setCityList] = useState([]);
-  const [districtList, setDistrictList] = useState([]);
-  const [postalLookupLoading, setPostalLookupLoading] = useState(false);
 
   useEffect(() => {
     if (existingLeadRefId && !existingLeadFromState) {
@@ -185,7 +195,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       ? leadToPersonalFormValues(existingLeadFromState)
       : personalDetailsInitialValue,
     enableReinitialize: true,
-    validate: getPersonalDetailsValidation(t),
+    validate: getPersonalDetailsValidation(t, ageLimits),
     onSubmit: async (values) => {
       if (existingLeadRefId) {
         setCreatedLeadId(existingLeadRefId);
@@ -196,13 +206,14 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       try {
         const payload = {
           lob: "IAR",
+          ...(existingClient ? { clientId: existingClient.clientId || existingClient.id } : {}),
           companyName: values.CompanyName || null,
           taxInformationNumber: values.TaxNumber || null,
           firstName: values.FirstName,
           lastName: values.LastName,
           preferredName: values.PreferredName,
           emailId: values.EmailID,
-          contactNumber: values.ContactNumber,
+          contactNumber: normalizeMobile(values.ContactNumber),
           houseNo: values.HouseNo,
           barangay: values.Barangay,
           country:
@@ -216,13 +227,12 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           city:
             typeof values.City === "object" ? values.City?.label : values.City,
           zipCode: values.ZIPCode,
-          roadThanon: values.RoadThanon || undefined,
-          soiAlley: values.SoiAlley || undefined,
-          mooVillage: values.MooVillage || undefined,
+          street: values.Street || undefined,
+          region: typeof values.Region === "object" ? values.Region?.label : values.Region || undefined,
           DOB: values.DateofBirth
             ? typeof values.DateofBirth === "string"
               ? values.DateofBirth
-              : values.DateofBirth.toISOString?.().split("T")[0]
+              : toIsoDate(values.DateofBirth)
             : "",
           leadCategory: values.category || "Retail",
           gender: values.gender || "Male",
@@ -276,150 +286,6 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     }
   }, [existingLeadRefId, currentLeadDetails, existingLeadFromState]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCountries();
-      if (!cancelled && res.success && res.data) {
-        setCountryList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const selectedCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === personalFormik.values.Country ||
-      c.id === personalFormik.values.Country
-  )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) =>
-      (p.name || p.code) === personalFormik.values.Province ||
-      p.id === personalFormik.values.Province
-  )?.id;
-  const selectedCityId = cityList.find(
-    (c) =>
-      (c.name || c.code) === personalFormik.values.City ||
-      c.id === personalFormik.values.City
-  )?.id;
-
-  useEffect(() => {
-    if (!selectedCountryId) {
-      setProvinceList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getProvincesByCountry(selectedCountryId);
-      if (!cancelled && res.success && res.data) {
-        setProvinceList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCountryId]);
-
-  useEffect(() => {
-    if (!selectedProvinceId) {
-      setCityList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCitiesByProvince(selectedProvinceId);
-      if (!cancelled && res.success && res.data) {
-        setCityList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedProvinceId]);
-
-  useEffect(() => {
-    if (!selectedCityId || !isThailand(personalFormik.values.Country)) {
-      setDistrictList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getDistrictsByCity(selectedCityId);
-      if (!cancelled && res.success && res.data) {
-        setDistrictList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCityId, personalFormik.values.Country]);
-
-  const handlePostalCodeLookup = useCallback(async () => {
-    const country = personalFormik.values.Country;
-    const zip = personalFormik.values.ZIPCode?.trim();
-    if (!isThailand(country) || !zip) return;
-    setPostalLookupLoading(true);
-    try {
-      const countryCode =
-        (typeof country === "object" && country?.code) ||
-        countryList.find((c) => (c.name || c.code) === country)?.code ||
-        "TH";
-      const res = await addressService.getPostalCodeLookup(
-        countryCode || "TH",
-        zip
-      );
-      if (res.success && res.data && res.data.length > 0) {
-        const first = res.data[0];
-        personalFormik.setFieldValue(
-          "Province",
-          first.province ?? first.Province ?? ""
-        );
-        personalFormik.setFieldValue("City", first.city ?? first.City ?? "");
-        personalFormik.setFieldValue(
-          "Barangay",
-          first.district ?? first.District ?? ""
-        );
-      }
-    } finally {
-      setPostalLookupLoading(false);
-    }
-  }, [personalFormik.values.Country, personalFormik.values.ZIPCode, countryList]);
-
-  const countryOptions = useMemo(
-    () =>
-      countryList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [countryList]
-  );
-  const availableProvinces = useMemo(
-    () =>
-      provinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [provinceList]
-  );
-  const availableCities = useMemo(
-    () =>
-      cityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [cityList]
-  );
-  const availableDistricts = useMemo(
-    () =>
-      districtList.map((d) => ({
-        label: d.name || d.code || String(d.id),
-        value: d.name || d.code || String(d.id),
-      })),
-    [districtList]
-  );
-
   const policyFormik = useFormik({
     initialValues: {
       isCoInsurance: false,
@@ -430,13 +296,31 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     onSubmit: () => {},
   });
 
+  // the sections offered come from Product Configurator > Risk Mapping (IAR risk sections), else the built-in catalog
+  const [sectionCatalog, setSectionCatalog] = useState(() => iarCatalogFromMappings([]).sections);
+  useEffect(() => {
+    let alive = true;
+    productConfiguratorService
+      .getRiskMappings({ definitionType: "RISK_SECTIONS", status: "Active" })
+      .then((rows) => {
+        if (!alive) return;
+        const { sections } = iarCatalogFromMappings(rows);
+        setSectionCatalog(sections);
+        if (!sections.some((x) => x.sectionCode === selectedSectionCode)) setSelectedSectionCode(sections[0]?.sectionCode);
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const sectionOptions = useMemo(
     () =>
-      IAR_SECTION_CATALOG.map((s) => ({
+      sectionCatalog.map((s) => ({
         label: s.sectionLabel,
         value: s.sectionCode,
       })),
-    []
+    [sectionCatalog]
   );
 
   const calculatedPremium = useMemo(
@@ -445,7 +329,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   );
 
   const addSection = () => {
-    const catalog = IAR_SECTION_CATALOG.find(
+    const catalog = sectionCatalog.find(
       (s) => s.sectionCode === selectedSectionCode
     );
     if (!catalog) return;
@@ -482,8 +366,8 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     setPremiumDetails((prev) =>
       recalculateIarPremiumDetails({
         ...prev,
-        vatPercent: IAR_VAT_PERCENT,
-        sections: buildPremiumSectionsFromRisks(iarSections),
+        vatPercent: vatPercentConfigured,
+        sections: buildPremiumSectionsFromRisks(iarSections, sectionCatalog),
       })
     );
     setStep(3);
@@ -631,7 +515,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     try {
       const premium = recalculateIarPremiumDetails({
         ...calculatedPremium,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
         discount: 0,
         discountPercent: 0,
       });
@@ -685,7 +569,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
         ...prev,
         discountPercent: capped,
         discount: discountAmount,
-        vatPercent: IAR_VAT_PERCENT,
+        vatPercent: vatPercentConfigured,
       })
     );
   };
@@ -696,7 +580,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
     }
     const premium = recalculateIarPremiumDetails({
       ...calculatedPremium,
-      vatPercent: IAR_VAT_PERCENT,
+      vatPercent: vatPercentConfigured,
     });
     const values = policyFormik.values;
     const result = await quotationService.updateIarQuotation(createdQuotationId, {
@@ -747,7 +631,8 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       );
       if (result.success) {
         setQuotationStatus("PendingCustomer");
-        toastRef.current?.showToast({
+        if (result.data?.emailSending === false) notifyWarn(t("customerResponse.emailNotConfigured"));
+        else toastRef.current?.showToast({
           detail: t("iarLead.quoteSentToCustomer", "Quote sent to customer for approval"),
         });
       } else if (result.error?.includes?.("PendingCustomer")) {
@@ -778,7 +663,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
         if (status) setQuotationStatus(status);
       }
     } catch (err) {
-      console.warn("Failed to fetch quotation status:", err);
+      logger.warn("Failed to fetch quotation status:", err);
     }
   }, [createdQuotationId]);
 
@@ -834,7 +719,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.CompanyName &&
               personalFormik.errors.CompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.CompanyName}
                 </div>
               )}
@@ -847,7 +732,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.TaxNumber &&
               personalFormik.errors.TaxNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.TaxNumber}
                 </div>
               )}
@@ -864,7 +749,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.FirstName &&
             personalFormik.errors.FirstName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.FirstName}
               </div>
             )}
@@ -877,7 +762,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.LastName &&
             personalFormik.errors.LastName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.LastName}
               </div>
             )}
@@ -893,7 +778,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.PreferredName &&
             personalFormik.errors.PreferredName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.PreferredName}
               </div>
             )}
@@ -902,13 +787,14 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           <DatepickerField
             label={t("fireLead.dateOfBirth") + "*"}
             value={personalFormik.values.DateofBirth}
+            {...birthDateRange(ageLimits)}
             onChange={(date) =>
               personalFormik.setFieldValue("DateofBirth", date.target.value)
             }
           />
           {personalFormik.touched.DateofBirth &&
             personalFormik.errors.DateofBirth && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.DateofBirth}
               </div>
             )}
@@ -952,7 +838,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.EmailID &&
             personalFormik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.EmailID}
               </div>
             )}
@@ -962,180 +848,23 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             label={t("fireLead.contactNumber") + "*"}
             value={personalFormik.values.ContactNumber}
             onChange={personalFormik.handleChange("ContactNumber")}
+            inputMode="tel"
+            hint={mobileHint()}
           />
           {personalFormik.touched.ContactNumber &&
             personalFormik.errors.ContactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.ContactNumber}
               </div>
             )}
         </div>
       </div>
 
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={t("fireLead.country")}
-            value={personalFormik.values.Country}
-            options={countryOptions}
-            onChange={(e) => {
-              personalFormik.setFieldValue("Country", e.value);
-              personalFormik.setFieldValue("Province", "");
-              personalFormik.setFieldValue("City", "");
-              personalFormik.setFieldValue("Barangay", "");
-              personalFormik.setFieldValue("ZIPCode", "");
-            }}
-          />
-          {personalFormik.touched.Country &&
-            personalFormik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.Country}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <InputTextField
-            label={
-              isThailand(personalFormik.values.Country)
-                ? t("fireLead.postalCode")
-                : t("fireLead.zipCode")
-            }
-            value={personalFormik.values.ZIPCode}
-            onChange={personalFormik.handleChange("ZIPCode")}
-            onBlur={handlePostalCodeLookup}
-          />
-          {postalLookupLoading && (
-            <div style={{ fontSize: 12, color: "#666" }} className="mt-1">
-              {t("fireLead.lookupInProgress")}
-            </div>
-          )}
-          {personalFormik.touched.ZIPCode &&
-            personalFormik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.ZIPCode}
-              </div>
-            )}
-        </div>
-      </div>
-
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={
-              isThailand(personalFormik.values.Country)
-                ? t("fireLead.provinceChangwat")
-                : t("fireLead.province")
-            }
-            value={personalFormik.values.Province}
-            options={availableProvinces}
-            onChange={(e) => {
-              personalFormik.setFieldValue("Province", e.value);
-              personalFormik.setFieldValue("City", "");
-              personalFormik.setFieldValue("Barangay", "");
-            }}
-            disabled={!personalFormik.values.Country}
-          />
-          {personalFormik.touched.Province &&
-            personalFormik.errors.Province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.Province}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={
-              isThailand(personalFormik.values.Country)
-                ? t("fireLead.districtAmphoe")
-                : t("fireLead.city")
-            }
-            value={personalFormik.values.City}
-            options={availableCities}
-            onChange={(e) => {
-              personalFormik.setFieldValue("City", e.value);
-              personalFormik.setFieldValue("Barangay", "");
-            }}
-            disabled={!personalFormik.values.Province}
-          />
-          {personalFormik.touched.City && personalFormik.errors.City && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-              {personalFormik.errors.City}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          {isThailand(personalFormik.values.Country) &&
-          districtList.length > 0 ? (
-            <DropdownField
-              label={t("fireLead.subDistrictTambon")}
-              value={personalFormik.values.Barangay}
-              options={availableDistricts}
-              onChange={(e) =>
-                personalFormik.setFieldValue("Barangay", e.value)
-              }
-              disabled={!personalFormik.values.City}
-            />
-          ) : (
-            <InputTextField
-              label={
-                isThailand(personalFormik.values.Country)
-                  ? t("fireLead.subDistrictTambon")
-                  : t("fireLead.barangay")
-              }
-              value={personalFormik.values.Barangay}
-              onChange={personalFormik.handleChange("Barangay")}
-            />
-          )}
-          {personalFormik.touched.Barangay &&
-            personalFormik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.Barangay}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <InputTextField
-            label={t("fireLead.houseNoStreet")}
-            value={personalFormik.values.HouseNo}
-            onChange={personalFormik.handleChange("HouseNo")}
-          />
-          {personalFormik.touched.HouseNo &&
-            personalFormik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.HouseNo}
-              </div>
-            )}
-        </div>
-      </div>
-
-      {isThailand(personalFormik.values.Country) && (
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.roadThanon")}
-              value={personalFormik.values.RoadThanon}
-              onChange={personalFormik.handleChange("RoadThanon")}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.soiAlley")}
-              value={personalFormik.values.SoiAlley}
-              onChange={personalFormik.handleChange("SoiAlley")}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.mooVillage")}
-              value={personalFormik.values.MooVillage}
-              onChange={personalFormik.handleChange("MooVillage")}
-            />
-          </div>
-        </div>
-      )}
+      {/* Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+      <PhAddressFields
+        formik={personalFormik}
+        required={{ houseNo: true, barangay: true, city: true, province: true, zipCode: true, country: true }}
+      />
 
       <div className="save_continue_conatiner">
         <div className="btn_lable_save_container flex justify-content-end mt-2">
@@ -1303,8 +1032,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
                       text
                       rounded
                       severity="danger"
-                      onClick={() => removeItem(section.sectionId, item.id)}
-                    />
+                      onClick={() => removeItem(section.sectionId, item.id)} aria-label="Remove" tooltip="Remove" tooltipOptions={{ position: "top" }} />
                   </div>
                 </div>
                 <div className="mt-2">
@@ -1340,8 +1068,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
                         severity="danger"
                         onClick={() =>
                           removePeril(section.sectionId, item.id, peril.id)
-                        }
-                      />
+                        } aria-label="Remove" tooltip="Remove" tooltipOptions={{ position: "top" }} />
                     </div>
                   ))}
                   <PerilAdder
@@ -1372,6 +1099,21 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       </div>
       <div className="flex justify-content-between gap-2 mt-4">
         <Button label={t("common.back", "Back")} outlined onClick={() => setStep(2)} />
+        {/* same prospect and risk, sent to the market instead of priced from the tariff */}
+        <RequestForQuotationButton
+          disabled={!createdLeadId || !calculatedPremium.totalSumInsured}
+          prefill={{
+            leadRefId: createdLeadId,
+            leadName: personalFormik.values.CompanyName || [personalFormik.values.FirstName, personalFormik.values.LastName].filter(Boolean).join(" "),
+            productType: IAR_PRODUCT_TYPE,
+            riskDetails: Object.fromEntries(iarSections.map((s) => [s.sectionLabel, s.riskLocation || s.remarks])),
+            // one requested cover per section: the sum of its items' perils
+            requestedCovers: (calculatedPremium.sections || []).map((s) => ({
+              cover: iarSections.find((x) => x.id === s.sectionId)?.sectionLabel || s.sectionLabel,
+              sumInsured: (s.items || []).reduce((sum, item) => sum + (item.perils || []).reduce((a, p) => a + (Number(p.sumInsured) || 0), 0), 0),
+            })),
+          }}
+        />
         <Button
           label={t("common.continue", "Continue")}
           loading={isSaving}
@@ -1495,7 +1237,7 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
               </div>
               <div className="quote_details">
                 <label className="insurance_text">
-                  {t("agent.valueAddedTax", "Value Added Tax")} ({IAR_VAT_PERCENT}
+                  {t("agent.valueAddedTax", "Value Added Tax")} ({vatPercentConfigured}
                   %)
                 </label>
                 <label className="alpha_text">
@@ -1564,7 +1306,6 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
               </div>
               <div
                 className="discount__action__container"
-                style={{ color: "green" }}
               >
                 <div className="discount__action__text">
                   {t("agent.minPercent", "Min 0%")}
@@ -1592,23 +1333,11 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
             onClick={() => setStep(3)}
           />
           {quotationStatus === "PendingCustomer" ? (
-            <div
-              className="waiting-notice"
-              style={{
-                padding: "8px 16px",
-                backgroundColor: "#fef3c7",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                fontSize: 14,
-              }}
-            >
-              <i className="pi pi-clock" style={{ marginRight: "8px" }} />
-              {t(
-                "quoteDetailView.waitingForCustomerApproval",
-                "Waiting for customer approval"
-              )}
-            </div>
+            <CustomerResponseActions
+              quotationId={createdQuotationId}
+              notice={t("quoteDetailView.waitingForCustomerApproval", "Waiting for customer approval")}
+              onRecorded={fetchQuotationStatus}
+            />
           ) : (
             <Button
               label={t(

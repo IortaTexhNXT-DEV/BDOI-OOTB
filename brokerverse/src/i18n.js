@@ -3,11 +3,10 @@ import { initReactI18next } from "react-i18next";
 import LanguageDetector from "i18next-browser-languagedetector";
 
 import en from "./locales/en.json";
-import th from "./locales/th.json";
 
+// English is the only language offered (Thai was withdrawn from the pickers).
 const resources = {
   en: { translation: en },
-  th: { translation: th },
 };
 
 i18n

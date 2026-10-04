@@ -1,1 +1,3 @@
-export { ReconciliationDashboard as default } from '../ReinsuranceScreens';
+import { ReconciliationDashboard } from "../ReinsuranceScreens";
+
+export default ReconciliationDashboard;

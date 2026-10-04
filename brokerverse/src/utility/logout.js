@@ -1,5 +1,6 @@
 import authService from "../services/authService";
 import { showLogoutSuccessMessage } from "./toastUtils";
+import logger from "./logger";
 
 /**
  * Logout utility function
@@ -18,7 +19,7 @@ export const logout = async () => {
       window.location.href = "/login";
     }, 1000);
   } catch (error) {
-    console.error("Logout error:", error);
+    logger.error("Logout error:", error);
     // Force redirect even if there's an error
     window.location.href = "/login";
   }

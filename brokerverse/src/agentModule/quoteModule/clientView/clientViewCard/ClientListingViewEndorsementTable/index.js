@@ -1,6 +1,5 @@
 import { InputText } from "primereact/inputtext";
-import TableDropdownField from "../../../../component/tableDropDwonField";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -13,6 +12,9 @@ import "../../../clientView/index.scss";
 import SvgMotorTable from "../../../../../assets/agentIcon/SvgMotorTable";
 import endorsementService from "../../../../../services/endorsementService";
 import { Skeleton } from "primereact/skeleton";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import { notifyError } from "../../../../../utility/dialogs";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -24,6 +26,16 @@ const PAYMENT_CLASS_MAP = {
   pending: "company__status__type__green",
   completed: "company__status__type__blue",
   reviewing: "company__status__type__red",
+};
+
+const ENDORSEMENT_TYPE_LABELS = {
+  "personal-details": "Personal Details Change",
+  "motor-details": "Motor Details Change",
+  coverage: "Coverage Change",
+  "policy-extension": "Policy Extension",
+  cancellation: "Policy Cancellation",
+  "fire-details": "Fire Risk / Premium Change",
+  other: "Other",
 };
 
 const normalizeEndorsement = (record) => {
@@ -43,6 +55,12 @@ const normalizeEndorsement = (record) => {
 
   const endorsementNumber =
     record.endorsementNumber || record.endorsementId || record.id;
+  // endorsements.types values, one or more joined by commas
+  const typeLabel = String(record.endorsementType || "")
+    .split(",")
+    .filter(Boolean)
+    .map((k) => ENDORSEMENT_TYPE_LABELS[k] || k)
+    .join(", ");
 
   const createdAt = record.createdAt || record.endorsementDate || record.submittedOn;
   const expiry = record.completionDetails?.expiryDate || record.policyExpiry || record.expiryDate;
@@ -68,26 +86,26 @@ const normalizeEndorsement = (record) => {
     status,
     payment,
     productType,
-    type: productType,
+    // the endorsement type (Coverage Change, Personal Details Change, ...) from the server
+    type: typeLabel || productType,
   };
 };
 
 const LeadListingAllTable = ({ clientId }) => {
   const { t } = useTranslation();
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const [search, setSearch] = useState("");
-  const [selectionMode, setSelectionMode] = useState("multiple");
   const navigate = useNavigate();
   const [globalFilter, setGlobalFilter] = useState("endorsementNumber");
   const [endorsementData, setEndorsementData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
   const [loading, setLoading] = useState(false);
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loading && !filteredData.length;
   const [error, setError] = useState(null);
   const cities = [
     { name: "Policy Number", code: "policyNumber" },
     { name: "Endorsement Number", code: "endorsementNumber" },
   ];
-  const searchDebounce = useRef(null);
 
   useEffect(() => {
     if (!clientId) {
@@ -119,7 +137,6 @@ const LeadListingAllTable = ({ clientId }) => {
         if (!active) {
           return;
         }
-        console.error("Endorsement fetch error", fetchError);
         setError(fetchError.message || "Failed to fetch endorsements");
         setEndorsementData([]);
         setFilteredData([]);
@@ -157,18 +174,7 @@ const LeadListingAllTable = ({ clientId }) => {
     setSearch(value);
   };
 
-  const formatDate = (value) => {
-    if (!value) return "N/A";
-    try {
-      return new Date(value).toLocaleDateString("en-US", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
-    } catch (error) {
-      return value;
-    }
-  };
+  const formatDate = (value) => formatConfiguredDate(value, { empty: "N/A" });
 
   const handleView = (rowData) => {
     const endorsement = normalizeEndorsement(rowData);
@@ -180,13 +186,12 @@ const LeadListingAllTable = ({ clientId }) => {
     const endorsementRef = endorsementId || endorsementNumber;
 
     if (!policyId) {
-      alert("Policy reference missing for this endorsement.");
+      notifyError("Policy reference missing for this endorsement.");
       return;
     }
 
     const statusUpper = status?.toUpperCase();
     const paymentUpper = payment?.toUpperCase();
-   
 
     if (statusUpper === "REJECTED") {
       navigate(`/agent/endorsement/rejected/${endorsementRef}`, {
@@ -256,10 +261,9 @@ const LeadListingAllTable = ({ clientId }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -291,8 +295,7 @@ const LeadListingAllTable = ({ clientId }) => {
           <Button
             icon={<SvgArrow />}
             className="view__btn"
-            onClick={() => handleView(rowData)}
-          />
+            onClick={() => handleView(rowData)} aria-label="Open" tooltip="Open" tooltipOptions={{ position: "top" }} />
         </div>
       </div>
     );
@@ -301,7 +304,7 @@ const LeadListingAllTable = ({ clientId }) => {
   const renderPolicyNumber = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
 
-    if (loading) {
+    if (showSkeleton) {
       return (
         <div className="name__box__container">
           <Skeleton width="2rem" shape="circle" className="mr-2" />
@@ -326,11 +329,12 @@ const LeadListingAllTable = ({ clientId }) => {
 
   const renderEndorsementID = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 
-    const displayId = normalized?.endorsementId || normalized?.endorsementNumber || "N/A";
+    // the END- number, not the internal record id
+    const displayId = normalized?.endorsementNumber || normalized?.endorsementId || "N/A";
     return (
       <div className="category__text">
         {displayId.toString().toUpperCase()}
@@ -341,19 +345,18 @@ const LeadListingAllTable = ({ clientId }) => {
   const renderDes = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
 
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
-    const description =
-      normalized?.productType || normalized?.type || "N/A";
+    const description = normalized?.productType || "N/A";
 
-    return <div className="category__text">{description.toUpperCase()}</div>;
+    return <div className="category__text">{description}</div>;
   };
 
   const renderDate = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 
@@ -362,7 +365,7 @@ const LeadListingAllTable = ({ clientId }) => {
 
   const renderExpiryDate = (rowData) => {
     const normalized = normalizeEndorsement(rowData);
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 
@@ -374,11 +377,11 @@ const LeadListingAllTable = ({ clientId }) => {
     const status = normalized?.status || "processing";
     const className = STATUS_CLASS_MAP[status] || "company__status__type__green";
 
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="4rem" />;
     }
 
-    return <div className={className}>{status.toUpperCase()}</div>;
+    return <div className={className}>{statusLabel(status)}</div>;
   };
 
   const renderPayment = (rowData) => {
@@ -387,11 +390,11 @@ const LeadListingAllTable = ({ clientId }) => {
     const className =
       PAYMENT_CLASS_MAP[payment] || "endorsement__payment__type";
 
-    if (loading) {
+    if (showSkeleton) {
       return <Skeleton width="4rem" />;
     }
 
-    return <div className={className}>{payment.toUpperCase()}</div>;
+    return <div className={className}>{statusLabel(payment)}</div>;
   };
 
   const ViewheaderStyle = {
@@ -414,22 +417,9 @@ const LeadListingAllTable = ({ clientId }) => {
     border: " none",
   };
 
-  const rendercheckedHeader = (value) => {
-    return selectedProducts.length === 0 ? (
-      value
-    ) : selectedProducts.length === 1 ? (
-      <div className="header__btn__container">
-        <div className="header__delete__btn">Delete</div>
-        <div className="header__edit__btn">Edit</div>
-      </div>
-    ) : (
-      <div className="header__delete__btn">Delete</div>
-    );
-  };
+  const rendercheckedHeader = (value) => value;
 
-  const renderUncheckedHeader = (value) => {
-    return selectedProducts.length == 0 && value;
-  };
+  const renderUncheckedHeader = (value) => value;
 
   return (
     <div>
@@ -437,7 +427,6 @@ const LeadListingAllTable = ({ clientId }) => {
         <div class="col-12 md:col-9 lg:col-9">
           <span className="p-input-icon-left" style={{ width: "100%" }}>
             <i className="pi pi-search" />
-            {/* <SvgSearch/> */}
             <InputText
               placeholder={t("tables.search")}
               style={{
@@ -467,10 +456,8 @@ const LeadListingAllTable = ({ clientId }) => {
         <DataTable
           value={filteredData}
           paginator
-          rows={5}
-          selectionMode={selectionMode}
-          selection={selectedProducts}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           className="corrections__table__main"
@@ -492,10 +479,10 @@ const LeadListingAllTable = ({ clientId }) => {
             field="type"
             headerStyle={headerStyle}
             body={(rowData) =>
-              loading ? (
+              showSkeleton ? (
                 <Skeleton width="6rem" />
               ) : (
-                (rowData.type || rowData.Type || "N/A").toUpperCase()
+                normalizeEndorsement(rowData)?.type || rowData.Type || "N/A"
               )
             }
           ></Column>

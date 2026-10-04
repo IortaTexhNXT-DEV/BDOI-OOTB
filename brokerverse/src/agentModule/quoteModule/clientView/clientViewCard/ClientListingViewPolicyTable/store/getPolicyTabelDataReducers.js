@@ -3,7 +3,6 @@ import {
   getPolicyTabelData,
   getPolicyTabelSearchList,
 } from "./getPolicyTabelDataMiddleWare";
-import SvgArrow from "../../../../../../assets/icons/SvgArrow";
 import SvgDot from "../../../../../../assets/agentIcon/SvgDot";
 import SvgMotorTable from "../../../../../../assets/agentIcon/SvgMotorTable";
 
@@ -138,7 +137,6 @@ const initialState = {
   policySearchListData: [],
 };
 
-let nextId = 2;
 const policyTabelDataReducers = createSlice({
   name: "endorsementTabelData",
   initialState,

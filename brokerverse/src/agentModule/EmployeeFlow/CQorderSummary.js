@@ -1,13 +1,12 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { Card } from "primereact/card"; 
 import { Button } from "primereact/button";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
-import { AuthorizedSignatureOptions } from "./mockdataforcoverDetails"; 
+import useSignatoryOptions, { NoSignatoryHint } from "../quoteModule/utils/useSignatoryOptions";
 import { useDispatch } from "react-redux";
-// import CardComponent from "../../../components/Cardcomponent";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { postOrderSummaryMiddleware } from "../quoteModule/orderSummary/store/orderSummaryMiddleware";
 import customHistory from "../../routes/customHistory";
@@ -15,7 +14,7 @@ import CustomToast from "../../components/Toast";
 import CalculaitionTextInputs from "../component/calculaitionTextInputs";
 import SvgCountMinusIcon from "../../assets/icons/SvgCountMinusIcon";
 import SvgCountPlusIcon from "../../assets/icons/SvgCountPlusIcon";
-import DropdownField from "../component/DropdwonField";
+import DropdownField from "../component/DropdownField";
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
 
 const initialValue = {
@@ -39,15 +38,11 @@ const CQOrderSummary = ({ action, flow }) => {
   const navigate = useNavigate();
   const { state } = useLocation();
 
-  console.log(state, "ades")
   const handleclick = (values) => {
-    console.log(values, "valuesleo");
     dispatch(postOrderSummaryMiddleware(values));
     toastRef.current.showToast();
     setTimeout(() => {
-      console.log(action, "find ");
       if (action === "post") {
-        // navigate("/agent/quotedetailedit");
         navigate("/agent/quotedetailview", { state: state });
       }
       if (action === "view") {
@@ -66,6 +61,13 @@ const CQOrderSummary = ({ action, flow }) => {
       handleclick(values);
     },
   });
+  const signatoryOptions = useSignatoryOptions(formik.values.AuthorizedSignature);
+  useEffect(() => {
+    if (!formik.values.AuthorizedSignature && signatoryOptions.defaultValue) {
+      formik.setFieldValue("AuthorizedSignature", signatoryOptions.defaultValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signatoryOptions.defaultValue]);
 
   const handleDiscountChange = (amount) => {
     const newDiscount = Math.max(0, Math.min(discount + amount, 30));
@@ -81,7 +83,6 @@ const CQOrderSummary = ({ action, flow }) => {
   const handleLeadNavigation = () => {
     navigate("/agent/leadlisting");
   };
-  console.log(flow, "find test");
   return (
     <div className="order__summary__container">
       <CustomToast ref={toastRef} message={t("employeeBenefit.quoteCreatedSuccess")} />
@@ -154,7 +155,6 @@ const CQOrderSummary = ({ action, flow }) => {
             </div>
             <div
               className="discount__action__container"
-              style={{ color: "green" }}
             >
               <div className="discount__action__text">Min 0%</div>
               <div className="discount__action__text">Max 30%</div>
@@ -172,9 +172,8 @@ const CQOrderSummary = ({ action, flow }) => {
             <DropdownField
               label="Authorized Signature"
               value={formik.values.AuthorizedSignature}
-              options={AuthorizedSignatureOptions}
+              options={signatoryOptions}
               onChange={(e) => {
-                console.log(e.value);
                 formik.setFieldValue("AuthorizedSignature", e.value);
               }}
               optionLabel="label"
@@ -183,9 +182,8 @@ const CQOrderSummary = ({ action, flow }) => {
                 formik.errors.AuthorizedSignature
               }
             />
+            <NoSignatoryHint options={signatoryOptions} />
           </div>
-
-
 
           <div class="col-12 md:col-6 lg:col-6 xl:col-6">
             <div class="grid">
@@ -288,7 +286,7 @@ const CQOrderSummary = ({ action, flow }) => {
                     }}>Apex Assurance</div>
                     <div style={{
                       width: '10%', fontSize: 14,
-                      color: '#0072d8'
+                      color: 'var(--bv-primary)'
                     }}>20</div>
                     <div style={{
                       width: '20%', fontSize: 16, textAlign: 'end'
@@ -305,7 +303,7 @@ const CQOrderSummary = ({ action, flow }) => {
                       width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
                     }}>Liberty Shield Insurance</div>
                     <div style={{
-                      width: '10%', fontSize: 14, color: '#0072d8'
+                      width: '10%', fontSize: 14, color: 'var(--bv-primary)'
 
                     }}>30</div>
                     <div style={{
@@ -323,7 +321,7 @@ const CQOrderSummary = ({ action, flow }) => {
                       width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
                     }}>Sentinel Underwriters</div>
                     <div style={{
-                      width: '10%', fontSize: 14, color: '#0072d8'
+                      width: '10%', fontSize: 14, color: 'var(--bv-primary)'
 
                     }}>10</div>
                     <div style={{
@@ -348,7 +346,7 @@ const CQOrderSummary = ({ action, flow }) => {
                       width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
                     }}>Total</div>
                     <div style={{
-                      width: '10%', fontSize: 14, color: '#0072d8'
+                      width: '10%', fontSize: 14, color: 'var(--bv-primary)'
 
                     }}>60</div>
                     <div style={{
@@ -368,7 +366,7 @@ const CQOrderSummary = ({ action, flow }) => {
               <div className="back__btn__container">
                 <Button
                   className="back__btn"
-                  onClick={() => handleBackNavigation}
+                  onClick={handleBackNavigation}
                 >
                   Back
                 </Button>
@@ -377,7 +375,6 @@ const CQOrderSummary = ({ action, flow }) => {
                 <Button
                   className="next__btn"
                   onClick={() => {
-                    // formik.handleSubmit();
                     navigate('/agent/employee-benefit/create-quote-quote-details')
                   }}
                 >

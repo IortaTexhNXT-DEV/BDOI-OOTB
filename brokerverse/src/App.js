@@ -9,6 +9,9 @@ import { isAuthenticated, getUserData } from "./utility/tokenManager";
 import { NotificationProvider } from "./context/NotificationContext";
 import { fetchSystemSettings } from "./module/SystemSettings/store/systemSettingsSlice";
 import { applyAppTitle } from "./utility/applySystemSettings";
+import AppDialogs from "./components/AppDialogs";
+import InAppLinks from "./components/InAppLinks";
+import { BrandingProvider } from "./theme/runtime/BrandingProvider";
 
 const App = () => {
   const [authState, setAuthState] = useState(() => {
@@ -18,8 +21,9 @@ const App = () => {
   });
 
   const dispatch = useDispatch();
+  // The application name (general.system_name, Master > System Settings) in the browser tab
   const appTitle = useSelector(
-    (state) => state.systemSettingsReducer?.appTitle || "Brokerverse"
+    (state) => state.systemSettingsReducer?.systemName || "BrokerVerse"
   );
 
   const { hasToken, userData } = authState;
@@ -61,8 +65,11 @@ const App = () => {
   }, [hasToken, userName, appTitle]);
 
   return (
+    <BrandingProvider>
     <NotificationProvider>
       <div className="App">
+        <AppDialogs />
+        <InAppLinks />
         <Routes>
           <Route
             path="/login"
@@ -84,6 +91,7 @@ const App = () => {
         </Routes>
       </div>
     </NotificationProvider>
+    </BrandingProvider>
   );
 };
 

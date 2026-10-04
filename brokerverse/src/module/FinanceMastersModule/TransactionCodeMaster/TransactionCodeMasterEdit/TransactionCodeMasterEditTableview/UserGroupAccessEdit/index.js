@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import { Button } from "primereact/button";
@@ -17,16 +16,12 @@ import {
   getUserEditData,
   postAddUserGroupAccess,
 } from "../../../store/transactionCodeMasterMiddleware";
-import SvgEditicon from "../../../../../../assets/icons/SvgEdit";
 import UserGroupAccessEditPopup from "./UserGroupAccessEditPopup";
 import SvgEditIcon from "../../../../../../assets/icons/SvgEditIcon";
 
 const UserGroupAccess = () => {
   const {
-    TransactioncodeListsearch,
     UserGroupAccessList,
-    loading,
-    getUserAccessData,
   } = useSelector(({ transactionCodeMasterReducer }) => {
     return {
       loading: transactionCodeMasterReducer?.loading,
@@ -35,7 +30,7 @@ const UserGroupAccess = () => {
       getUserAccessData: transactionCodeMasterReducer?.getUserAccessData,
     };
   });
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
 
@@ -45,9 +40,7 @@ const UserGroupAccess = () => {
   const handleEdit = (columnData) => {
     setShowEdit(true);
     dispatch(getUserEditData(columnData));
-    console.log(columnData, "columnData");
   };
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -68,10 +61,9 @@ const UserGroupAccess = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -117,7 +109,7 @@ const UserGroupAccess = () => {
     const errors = {};
 
     if (!values.UserRole) {
-      errors.UserRole = "This field Code is required";
+      errors.UserRole = "This field is required";
     }
     if (!values.MinimumTransaction) {
       errors.MinimumTransaction = "This field is required";
@@ -142,10 +134,6 @@ const UserGroupAccess = () => {
     // onSubmit: handleSubmit
   });
 
-  const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
-  };
   const headerStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -155,9 +143,6 @@ const UserGroupAccess = () => {
     border: "none",
   };
 
-  const handleSave = () => {
-    setShow(false);
-  };
   return (
     <div className="transactioncode__master__tableedit_UserGroupAccess">
       {/* <Card className="mt-1"> */}
@@ -181,9 +166,8 @@ const UserGroupAccess = () => {
           scrollable={true}
           scrollHeight="40vh"
           paginator
-          rows={5}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -209,12 +193,6 @@ const UserGroupAccess = () => {
             className="fieldvalue_container"
             //   sortable
           ></Column>
-          {/* <Column
-            field="Edit"
-            header="Edit"
-            headerStyle={headerStyle}
-            className="fieldvalue_container"
-          ></Column> */}
           <Column
             field="Edit"
             body={(columnData) => (
@@ -232,12 +210,6 @@ const UserGroupAccess = () => {
             header="Edit"
             headerStyle={headerStyle}
             className="fieldvalue_container"
-            // header="View"
-            // className="fieldvalue_container"
-            // headerStyle={
-            //   { display: 'flex', justifyContent: 'center', alignItems: 'center' }
-            // }
-            // style={{ textAlign: 'center' }}
           ></Column>
         </DataTable>
       </div>
@@ -263,15 +235,7 @@ const UserGroupAccess = () => {
               dropdownIcon={<SvgDropdown color={"#000"} />}
               // label="User Role"
               // placeholder="Select"
-              // textColor={"#111927"}
-              // textSize={"16"}
-              // textWeight={500}
-              // dropdownIcon={<SvgDropdown color={"#000"} />}
-              // value={formik.values.Description}
-              // options={BankAccountCode}
               // onChange={(e) => {
-              //   console.log(e.value);
-              //   formik.setFieldValue("Description", e.value);
               //   handleAccountcode(e.value.);
               // }}
               // optionLabel="Description"
@@ -282,7 +246,7 @@ const UserGroupAccess = () => {
             />
             {formik.touched.UserRole && formik.errors.UserRole && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV"
               >
                 {formik.errors.UserRole}
@@ -338,102 +302,6 @@ const UserGroupAccess = () => {
           setShowEdit={setShowEdit}
         />
       </div>
-      {/* <Dialog
-        header="Add User Group Access"
-        visible={showEdit}
-        style={{ width: "50vw" }}
-        onHide={() => setShowEdit(false)}
-      >
-        <div className="grid mt-1">
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <DropDowns
-              className="inputdialog__fieled"
-              label="User Role"
-              placeholder="Select"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={formik.values.UserRole}
-              onChange={(e) =>
-                formik.setFieldValue("UserRole", e.target.value)
-              }
-
-              options={BankAccountCode}
-
-              optionLabel='label'
-
-              dropdownIcon={<SvgDropdown color={"#000"} />}
-            // label="User Role"
-            // placeholder="Select"
-            // textColor={"#111927"}
-            // textSize={"16"}
-            // textWeight={500}
-            // dropdownIcon={<SvgDropdown color={"#000"} />}
-            // value={formik.values.Description}
-            // options={BankAccountCode}
-            // onChange={(e) => {
-            //   console.log(e.value);
-            //   formik.setFieldValue("Description", e.value);
-            //   handleAccountcode(e.value.);
-            // }}
-            // optionLabel="Description"
-            // error={
-            //   formik.touched.BankAccountNumber &&
-            //   formik.errors.BankAccountNumber
-            // }
-            />
-            {formik.touched.UserRole && formik.errors.UserRole && (
-              <div
-                style={{ fontSize: 12, color: "red" }}
-                className="formik__errror__JV"
-              >
-                {formik.errors.UserRole}
-              </div>
-            )}
-          </div>
-        </div>
-        <div className="grid mt-1">
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <InputField
-              classNames="input__filed"
-              label="Minimum Transaction"
-              placeholder="Enter"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={formik.values.MinimumTransaction}
-              onChange={formik.handleChange("MinimumTransaction")}
-              error={
-                formik.touched.MinimumTransaction &&
-                formik.errors.MinimumTransaction
-              }
-            />
-          </div>
-          <div className=" col-12 md:col-6 lg-col-6 ">
-            <InputField
-              classNames="input__filed"
-              label="Maximum Transaction"
-              placeholder="Enter"
-              textColor={"#111927"}
-              textSize={"16"}
-              textWeight={500}
-              value={formik.values.MaximumTransaction}
-              onChange={formik.handleChange("MaximumTransaction")}
-              error={
-                formik.touched.MaximumTransaction &&
-                formik.errors.MaximumTransaction
-              }
-            />
-          </div>
-        </div>
-        <div className="btn__container">
-          <Button
-            label="Save"
-            className="add__btn"
-            onClick={formik.handleSubmit}
-          />
-        </div>
-      </Dialog> */}
       {/* </Card> */}
     </div>
   );

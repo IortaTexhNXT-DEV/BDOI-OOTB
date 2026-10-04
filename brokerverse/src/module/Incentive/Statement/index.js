@@ -6,95 +6,101 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Card } from "primereact/card";
-import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Chart } from "primereact/chart";
 import { Dropdown } from "primereact/dropdown";
 import { Badge } from "primereact/badge";
 import { Divider } from "primereact/divider";
-import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { incentiveMockData } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { downloadCsv, showError } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+
+const emptyStatement = { agentName: "", agentCode: "", period: "", statementDate: null, totalEarnings: 0, ytdEarnings: 0, pendingPayment: 0, lastPayment: 0, lastPaymentDate: null, lastPaymentPeriods: [], pendingPeriods: [], programBreakdown: [], monthlyTrend: [], contact: null };
+
+/** Last 12 calendar months as { label: "September 2026", value: "2026-09" }. */
+const recentMonths = () => {
+  const now = new Date();
+  return Array.from({ length: 12 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return { label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }), value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}` };
+  });
+};
 
 const Statement = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
+  const periodOptions = recentMonths();
 
   // State management
-  const [statementData, setStatementData] = useState(incentiveMockData.statementData);
-  const [selectedPeriod, setSelectedPeriod] = useState("January 2025");
+  const [statementData, setStatementData] = useState(emptyStatement);
+  const [selectedPeriod, setSelectedPeriod] = useState(periodOptions[0].value);
+  const [agentId, setAgentId] = useState(null);
+  const [agentOptions, setAgentOptions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Chart data
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
 
-  // Period options
-  const periodOptions = [
-    { label: "January 2025", value: "January 2025" },
-    { label: "December 2024", value: "December 2024" },
-    { label: "November 2024", value: "November 2024" },
-    { label: "October 2024", value: "October 2024" },
-    { label: "September 2024", value: "September 2024" },
-    { label: "August 2024", value: "August 2024" }
-  ];
-
   // Breadcrumb items
   const items = [
-    { label: "Incentive", url: "/incentive" },
-    { label: "Statement", url: "/incentive/statement" }
+    { label: t("incentive.incentive") },
+    { label: t("incentive.statement", { defaultValue: "Statement" }), url: "/incentive/statement" }
   ];
 
-  const home = { label: "Dashboard" };
+  const home = { label: t("sidebar.Accounts") };
 
-  // Initialize data and charts
-  useEffect(() => {
-    loadStatement();
-    initializeChart();
-  }, [selectedPeriod]);
+  // Users who are not agents (managers) pick an agent; agents see their own statement.
+  const loadAgentChoices = async () => {
+    const agents = await incentiveService.agents();
+    setAgentOptions(agents.map((a) => ({ label: `${a.name} (${a.code})`, value: a.id })));
+    return agents[0]?.id || null;
+  };
 
   const loadStatement = async () => {
     setLoading(true);
     try {
-      // Simulate loading statement data for selected period
-      // In real application, this would fetch from API based on selectedPeriod
-      setTimeout(() => {
-        toast.current.show({
-          severity: 'success',
-          summary: t('incentive.statementLoaded'),
-          detail: t('incentive.statementLoadedSuccess', { period: selectedPeriod }),
-          life: 3000
-        });
-        setLoading(false);
-      }, 500);
+      const data = await incentiveService.statement({ agentId: agentId || undefined, period: selectedPeriod });
+      // A manager who is not an agent gets eligible: false; offer the agents and show the first one's statement.
+      if (!agentId && data?.eligible === false) {
+        const firstAgent = data.selectAgent ? await loadAgentChoices() : null;
+        if (firstAgent) {
+          setAgentId(firstAgent);
+          return;
+        }
+      }
+      setStatementData({ ...emptyStatement, ...data });
+      initializeChart(data);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t('common.error', 'Error'),
-        detail: t('incentive.failedToLoadStatement'),
-        life: 3000
-      });
+      showError(toast, error, t('incentive.failedToLoadStatement'));
+    } finally {
       setLoading(false);
     }
   };
 
-  const initializeChart = () => {
+  // Initialize data and charts
+  useEffect(() => {
+    loadStatement();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedPeriod, agentId]);
+
+  const initializeChart = (statement) => {
     const documentStyle = getComputedStyle(document.documentElement);
 
     // Monthly trend chart
     const data = {
-      labels: statementData.monthlyTrend.map(item => item.month),
+      labels: statement.monthlyTrend.map(item => item.month),
       datasets: [
         {
           label: 'Monthly Earnings',
-          data: statementData.monthlyTrend.map(item => item.earnings),
-          fill: true,
+          data: statement.monthlyTrend.map(item => item.earnings),
+          fill: false,
           backgroundColor: 'rgba(102, 126, 234, 0.1)',
           borderColor: documentStyle.getPropertyValue('--primary-color') || '#0072d8',
-          tension: 0.4
+          tension: 0
         }
       ]
     };
@@ -144,22 +150,22 @@ const Statement = () => {
 
   // Handle print statement
   const handlePrintStatement = () => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Print Statement',
-      detail: 'Statement is being prepared for printing...',
-      life: 3000
-    });
+    window.print();
   };
 
   // Handle export statement
   const handleExportStatement = () => {
-    toast.current.show({
-      severity: 'info',
-      summary: 'Export Statement',
-      detail: 'Statement is being exported to PDF...',
-      life: 3000
-    });
+    downloadCsv(`incentive_statement_${statementData.agentCode}_${selectedPeriod}.csv`, statementData.programBreakdown, [
+      { field: () => statementData.agentName, header: "Sales person" },
+      { field: () => statementData.period, header: "Period" },
+      { field: "program", header: "Program" },
+      { field: "target", header: "Target" },
+      { field: "achievement", header: "Achievement" },
+      { field: "achievementPercent", header: "Achievement %" },
+      { field: "rate", header: "Tier" },
+      { field: "earnedAmount", header: "Earned Amount" },
+      { field: "status", header: "Status" }
+    ]);
   };
 
   // Template functions
@@ -189,6 +195,15 @@ const Statement = () => {
       <div className="top__container">
         <div className="page__title">{t("incentive.incentiveStatement")}</div>
         <div className="header-actions">
+          {agentOptions.length > 0 && (
+            <Dropdown
+              value={agentId}
+              options={agentOptions}
+              onChange={(e) => setAgentId(e.value)}
+              filter
+              className="period-selector"
+            />
+          )}
           <Dropdown
             value={selectedPeriod}
             options={periodOptions}
@@ -199,13 +214,13 @@ const Statement = () => {
             icon="pi pi-print"
             className="p-button-outlined"
             onClick={handlePrintStatement}
-            tooltip="Print Statement"
+            tooltip="Print Statement" aria-label="Print Statement"
           />
           <Button
             icon="pi pi-download"
             className="p-button-outlined"
             onClick={handleExportStatement}
-            tooltip="Export to PDF"
+            tooltip="Export to PDF" aria-label="Export to PDF"
           />
         </div>
         <BreadCrumb
@@ -227,7 +242,7 @@ const Statement = () => {
             </div>
             <div className="period-info">
               <h3>{statementData.period}</h3>
-              <p className="statement-date">Statement Date: {new Date(statementData.statementDate).toLocaleDateString()}</p>
+              <p className="statement-date">Statement Date: {formatAppDate(statementData.statementDate)}</p>
             </div>
           </div>
         </Card>
@@ -287,7 +302,7 @@ const Statement = () => {
                   <span className="card-value">
                     {formatCurrency(statementData.lastPayment)}
                   </span>
-                  <span className="card-date">{new Date(statementData.lastPaymentDate).toLocaleDateString()}</span>
+                  <span className="card-date">{formatAppDate(statementData.lastPaymentDate)}</span>
                 </div>
               </div>
             </Card>
@@ -367,32 +382,47 @@ const Statement = () => {
               <h3>Recent Payment History</h3>
             </div>
 
+            {/* From the statement data: the last payment and the approved results not paid yet (no sample dates) */}
             <div className="payment-history">
-              <div className="payment-item">
-                <div className="payment-date">
-                  <span className="date">{new Date(statementData.lastPaymentDate).toLocaleDateString()}</span>
-                  <span className="status paid">Paid</span>
-                </div>
-                <div className="payment-details">
-                  <div className="payment-description">December 2024 Incentive Payment</div>
-                  <div className="payment-amount">
-                    {formatCurrency(statementData.lastPayment)}
+              {!statementData.lastPaymentDate && !(statementData.pendingPayment > 0) && (
+                <div className="payment-item">
+                  <div className="payment-details">
+                    <div className="payment-description">{t("followUps.noIncentivePayments", "No incentive payments yet")}</div>
                   </div>
                 </div>
-              </div>
-
-              <div className="payment-item">
-                <div className="payment-date">
-                  <span className="date">Expected: February 15, 2025</span>
-                  <span className="status pending">Pending</span>
-                </div>
-                <div className="payment-details">
-                  <div className="payment-description">January 2025 Incentive Payment</div>
-                  <div className="payment-amount">
-                    {formatCurrency(statementData.pendingPayment)}
+              )}
+              {statementData.lastPaymentDate && (
+                <div className="payment-item">
+                  <div className="payment-date">
+                    <span className="date">{formatAppDate(statementData.lastPaymentDate)}</span>
+                    <span className="status paid">Paid</span>
+                  </div>
+                  <div className="payment-details">
+                    <div className="payment-description">
+                      {t("followUps.incentivePaymentFor", "Incentive payment: {{periods}}", { periods: (statementData.lastPaymentPeriods || []).join(", ") || "-" })}
+                    </div>
+                    <div className="payment-amount">
+                      {formatCurrency(statementData.lastPayment)}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
+              {statementData.pendingPayment > 0 && (
+                <div className="payment-item">
+                  <div className="payment-date">
+                    <span className="date">{t("followUps.approvedNotPaid", "Approved, not yet paid")}</span>
+                    <span className="status pending">Pending</span>
+                  </div>
+                  <div className="payment-details">
+                    <div className="payment-description">
+                      {t("followUps.incentivePaymentFor", "Incentive payment: {{periods}}", { periods: (statementData.pendingPeriods || []).join(", ") || "-" })}
+                    </div>
+                    <div className="payment-amount">
+                      {formatCurrency(statementData.pendingPayment)}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </Card>
         </div>
@@ -411,11 +441,12 @@ const Statement = () => {
             </div>
             <div className="footer-section">
               <h4>Contact Information:</h4>
+              {/* The letterhead company (Company master); lines without a value are left out */}
               <p>
-                <strong>Incentive Support:</strong><br />
-                Email: incentives@company.com<br />
-                Phone: (02) 123-4567<br />
-                Office Hours: Monday - Friday, 8:00 AM - 5:00 PM
+                {statementData.contact?.companyName && (<><strong>{statementData.contact.companyName}</strong><br /></>)}
+                {statementData.contact?.email && (<>Email: {statementData.contact.email}<br /></>)}
+                {statementData.contact?.phone && (<>Phone: {statementData.contact.phone}<br /></>)}
+                {!statementData.contact?.email && !statementData.contact?.phone && t("followUps.contactSupervisor", "Contact your supervisor or the finance team.")}
               </p>
             </div>
           </div>

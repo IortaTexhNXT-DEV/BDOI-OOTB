@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .overall__quotecomparision__view__container {
   .header_title {
     color: #111927;
@@ -197,12 +198,12 @@
     }
   }
 
-  // AI Insights Card
-  .ai-insights-card {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border: 2px solid #3b82f6 !important;
+  // Comparison insights card
+  .comparison-insights-card {
+    background: $brand-blue-050;
+    border: 1px solid $color-border !important;
 
-    .ai-insights-header {
+    .comparison-insights-header {
       display: flex;
       align-items: center;
       gap: 12px;
@@ -223,7 +224,7 @@
       }
     }
 
-    .ai-section {
+    .insights-section {
       padding: 1.5rem;
       border-bottom: 1px solid #e0f2fe;
 
@@ -267,7 +268,6 @@
           border-radius: 4px;
           font-size: 11px;
           font-weight: 600;
-          text-transform: uppercase;
           white-space: nowrap;
 
           &.impact-badge-high {
@@ -412,7 +412,7 @@
         }
 
         .cons-label {
-          color: #ef4444;
+          color: var(--color-danger);
           font-size: 14px;
           font-weight: 600;
         }

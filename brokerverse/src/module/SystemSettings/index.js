@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -22,17 +23,17 @@ import {
   SYSTEM_CURRENCY_OPTIONS,
 } from "../../utility/systemCurrencies";
 import { getUserData } from "../../utility/tokenManager";
+import { getDisplayCurrencyConfig } from "../../utility/currencyConverter";
 import "./index.scss";
 
 const LANGUAGE_OPTIONS = [
   { label: "English", value: "en" },
-  { label: "Thai", value: "th" },
 ];
 
 /** Preset theme colors — label includes hex so users can pick or type a code */
 const THEME_COLOR_PRESETS = [
-  { label: "BDO Blue — #0072d8", value: "#0072d8" },
-  { label: "BDO Navy — #004ea8", value: "#004ea8" },
+  { label: "Classic Blue — #0072d8", value: "#0072d8" },
+  { label: "Navy — #004ea8", value: "#004ea8" },
   { label: "Indigo — #6366f1", value: "#6366f1" },
   { label: "Deep Indigo — #4f46e5", value: "#4f46e5" },
   { label: "Teal — #0d9488", value: "#0d9488" },
@@ -54,12 +55,12 @@ const SystemSettingsPage = () => {
 
   const [form, setForm] = useState({
     logoUrl: "",
-    displayCurrency: "PHP",
+    displayCurrency: getDisplayCurrencyConfig().currency,
     primaryColor: "#0072d8",
     secondaryColor: "#004ea8",
     defaultLanguage: "en",
     faviconUrl: "/favicon.ico",
-    appTitle: "Brokerverse",
+    systemName: "BrokerVerse",
   });
   const [addLogoVisible, setAddLogoVisible] = useState(false);
   const [newLogoLabel, setNewLogoLabel] = useState("");
@@ -79,7 +80,7 @@ const SystemSettingsPage = () => {
         secondaryColor: settings.secondaryColor,
         defaultLanguage: settings.defaultLanguage,
         faviconUrl: settings.faviconUrl,
-        appTitle: settings.appTitle,
+        systemName: settings.systemName,
       });
     }
   }, [
@@ -90,7 +91,7 @@ const SystemSettingsPage = () => {
     settings.secondaryColor,
     settings.defaultLanguage,
     settings.faviconUrl,
-    settings.appTitle,
+    settings.systemName,
   ]);
 
   const home = { label: t("systemSettings.masters", "Master") };
@@ -360,15 +361,17 @@ const SystemSettingsPage = () => {
           </div>
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-3 field">
-              <label>{t("systemSettings.appTitle", "App Title")}</label>
+              <label htmlFor="system-name">{t("systemSettings.applicationName", "Application name")}</label>
               <InputText
-                value={form.appTitle}
-                onChange={(e) => updateField("appTitle", e.target.value)}
+                id="system-name"
+                value={form.systemName}
+                onChange={(e) => updateField("systemName", e.target.value)}
                 maxLength={80}
               />
+              <small className="block mt-1">{t("systemSettings.applicationNameHint", "Shown on the sign-in page, the side bar and the browser tab.")}</small>
             </div>
             <div className="col-12 md:col-6 lg:col-3 field">
-              <label>{t("systemSettings.logoPreset", "Logo Preset")}</label>
+              <label>{t("systemSettings.logoPreset", "Application logo (screen)")}</label>
               <Dropdown
                 value={
                   logoPresetOptions.some((p) => p.value === form.logoUrl)
@@ -384,8 +387,11 @@ const SystemSettingsPage = () => {
                 className="mt-2"
                 value={form.logoUrl}
                 onChange={(e) => updateField("logoUrl", e.target.value)}
-                placeholder="/BDO_insure_logo.png.png"
+                placeholder="/bdoi/iorta-technxt.png"
               />
+              <small className="block mt-1">
+                {t("systemSettings.applicationLogoHint", "Shown on screen. Printed documents use the logo of the primary company in Master > Company.")}
+              </small>
               <div className="logo-preset-actions mt-2">
                 <Button
                   type="button"
@@ -478,6 +484,15 @@ const SystemSettingsPage = () => {
                 )}
                 className="w-full"
               />
+              {settings.baseCurrency && (
+                <small className="block mt-1">
+                  {t("systemSettings.baseCurrencyHint", {
+                    defaultValue:
+                      "Accounts are kept in the base currency {{base}} (Master > Finance > Currency); the display currency only changes how amounts are labelled.",
+                    base: settings.baseCurrency,
+                  })}
+                </small>
+              )}
             </div>
             <div className="col-12 md:col-6 lg:col-3 field">
               <label>
@@ -492,8 +507,12 @@ const SystemSettingsPage = () => {
             </div>
           </div>
 
-          <div className="main__tabel__title mb-3 mt-4">
+          <div className="main__tabel__title mb-3 mt-4 flex align-items-center justify-content-between flex-wrap gap-2">
             {t("systemSettings.theme", "Theme")}
+            <Link to="/master/configuration/theme-branding" className="p-button p-button-sm p-button-outlined no-underline" data-testid="open-theme-branding">
+              <i className="pi pi-palette mr-2" />
+              {t("systemSettings.openThemeBranding", "Theme and Branding (full theme, sign-in page, documents, e-mail, signatures, brand packs)")}
+            </Link>
           </div>
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-4 field">
@@ -537,7 +556,7 @@ const SystemSettingsPage = () => {
               <small className="hex-hint">
                 {t(
                   "systemSettings.hexHint",
-                  "Hex code (e.g. #0072d8) — picker and presets stay in sync"
+                  "Hex code, for example #0072d8. The picker and the presets stay in sync."
                 )}
               </small>
             </div>
@@ -584,7 +603,7 @@ const SystemSettingsPage = () => {
               <small className="hex-hint">
                 {t(
                   "systemSettings.hexHint",
-                  "Hex code (e.g. #0072d8) — picker and presets stay in sync"
+                  "Hex code, for example #0072d8. The picker and the presets stay in sync."
                 )}
               </small>
             </div>

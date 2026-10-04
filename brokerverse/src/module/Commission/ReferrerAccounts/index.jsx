@@ -4,8 +4,9 @@ import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import CommissionService from "../../../services/commissionService";
-import { formatBaht } from "../utils/formatBaht";
+import { formatAmount } from "../utils/formatAmount";
 import "./style.scss";
+import logger from "../../../utility/logger";
 
 const ReferrerAccounts = () => {
   const navigate = useNavigate();
@@ -30,7 +31,7 @@ const ReferrerAccounts = () => {
       setSummary(data?.summary || summary);
       setReferrers(data?.referrers || []);
     } catch (err) {
-      console.error("Failed to load referrer accounts", err);
+      logger.error("Failed to load referrer accounts", err);
       setReferrers([]);
     } finally {
       setLoading(false);
@@ -53,7 +54,7 @@ const ReferrerAccounts = () => {
   };
 
   const netBody = (row) => (
-    <span className="net-payable">{formatBaht(row.netPayable)}</span>
+    <span className="net-payable">{formatAmount(row.netPayable)}</span>
   );
 
   const levelBody = (row) => row.level || "—";
@@ -62,13 +63,6 @@ const ReferrerAccounts = () => {
     <div className="referrer-accounts-page">
       <div className="page-header">
         <h1>Agents / Referrer Accounts</h1>
-        <p className="page-desc">
-          Click a referrer to open their account — policies split by payment
-          cycle (current / future / past). Run the lifecycle (mark eligible →
-          approve → generate payout) and override per-policy rates from inside
-          the account. Identity only — <strong>no fixed rate</strong> (rates
-          live on each policy line).
-        </p>
       </div>
 
       <div className="referrer-card">
@@ -86,13 +80,13 @@ const ReferrerAccounts = () => {
             <span className="stat">
               Due this cycle ({summary.cycleLabel}){" "}
               <strong className="due">
-                {formatBaht(summary.dueThisCycle)}
+                {formatAmount(summary.dueThisCycle)}
               </strong>
             </span>
             <span className="stat">
               Ready to pay{" "}
               <strong className="ready">
-                {formatBaht(summary.readyToPay)}
+                {formatAmount(summary.readyToPay)}
               </strong>
             </span>
           </div>

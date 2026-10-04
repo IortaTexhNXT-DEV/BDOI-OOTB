@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -9,29 +9,37 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
-import ToggleButton from "../../../../../components/ToggleButton";
 import { useSelector, useDispatch } from "react-redux";
 import { useFormik } from "formik";
 import {
   getInsurancePatchData,
   getInsuranceViewMiddleWare,
   getSearchInsuranceCompanyMiddleware,
+  getInsuranceCompanyListMiddleWare,
 } from "../store/insuranceCompanyMiddleware";
+import MasterStatusToggle from "../../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
+import { formatDate as formatAppDate } from "../../../../../utility/dateFormat";
 
 const TableData = ({ navigate }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { InsuranceCompanyList, loading, SearchTableList } = useSelector(
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getInsuranceCompanyListMiddleWare());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getInsuranceCompanyListMiddleWare());
+  }, [dispatch]);
+  const { InsuranceCompanyList, SearchTableList } = useSelector(
     ({ insuranceCompanyReducers }) => {
       return {
         loading: insuranceCompanyReducers?.loading,
         InsuranceCompanyList: insuranceCompanyReducers?.InsuranceCompanyList,
-        SearchTableList: insuranceCompanyReducers?.SearchTableList,
+        SearchTableList: insuranceCompanyReducers?.searchInsuranceList,
       };
     }
   );
-  console.log(InsuranceCompanyList, "InsuranceCompanyList");
   const headeraction = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -46,7 +54,7 @@ const TableData = ({ navigate }) => {
 
   const headerstyle = {
     // width: '10rem',
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -67,10 +75,9 @@ const TableData = ({ navigate }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -89,32 +96,27 @@ const TableData = ({ navigate }) => {
     },
   };
   const renderActionButton = (rowData) => {
-    console.log(rowData, "rowDatarowData");
     return (
       <div className="action__button__container">
         <Button
           icon={<SvgIconeye />}
           onClick={() => handleView(rowData)}
-          className="action__button p-0"
-        />
+          className="action__button p-0" aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
         <Button
           icon={<SvgEdit />}
           onClick={() => handleEdit(rowData)}
-          className="action__button p-0 w-auto"
-        />
+          className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
 
   const handleView = (rowData) => {
-    console.log(rowData, "find");
     dispatch(getInsuranceViewMiddleWare(rowData));
     navigate(
       `/master/generals/insurancemanagement/insurancecompany/view/${rowData?.id}`
     );
   };
   const handleEdit = (rowData) => {
-    console.log(rowData, "rowData");
     dispatch(getInsurancePatchData(rowData));
     navigate(
       `/master/generals/insurancemanagement/insurancecompany/edit/${rowData?.id}`
@@ -140,6 +142,7 @@ const TableData = ({ navigate }) => {
   }, [formik.values.search]);
   return (
     <div className="insurance__company__table__container">
+      <Toast ref={statusToast} />
       <div className="grid m-0 header_search_container">
         <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
           <span className="p-input-icon-left w-full">
@@ -161,8 +164,8 @@ const TableData = ({ navigate }) => {
           formik.values.search !== "" ? SearchTableList : InsuranceCompanyList
         }
         paginator
-        rows={5}
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rows={20}
+        rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         className="reversal__table__main"
@@ -182,7 +185,6 @@ const TableData = ({ navigate }) => {
           header={t("generalMasters.companyName")}
           className="fieldvalue_container"
           headerStyle={headerstyle}
-          body={(rowData) => rowData.insuranceCompanyName?.toUpperCase()}
         ></Column>
         <Column
           field="email"
@@ -197,13 +199,13 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
         ></Column>
         <Column
-          field="modifiedby"
+          field="modifiedBy"
           header={t("generalMasters.modifiedBy")}
           headerStyle={headerstyle}
           className="fieldvalue_container"
-          body={(rowData) => rowData.modifiedby?.toUpperCase()}
+          body={(rowData) => rowData.modifiedBy || rowData.updatedBy || rowData.createdBy || "-"}
         ></Column>
-        <Column
+        <Column body={(row) => formatAppDate(row.modifiedOn)}
           field="modifiedOn"
           header={t("generalMasters.modifiedOn")}
           className="fieldvalue_container"
@@ -214,21 +216,11 @@ const TableData = ({ navigate }) => {
           header={t("common.status")}
           className="fieldvalue_container"
           headerStyle={headerstyle}
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="insurance-company" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
-          // style={{
-          //   padding: "20px 1rem 17px 0px",
-          // }}
-          // field="id"
           body={renderActionButton}
           header={t("common.actions")}
-          // className="fieldvalue_container"
-          // headerStyle={{
-          //   display: "flex",
-          //   justifyContent: "center",
-          //   alignItems: "center",
-          // }}
           className="fieldvalueaction_container"
           headerStyle={headeraction}
         ></Column>

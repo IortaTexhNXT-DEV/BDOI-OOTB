@@ -37,6 +37,14 @@
         transition: background-color 0.2s, color 0.2s, border-color 0.2s,
           box-shadow 0.2s;
         border-radius: 10px !important;
+        // Keep the view / edit icons at their normal size in a narrow Action column
+        min-width: 2.5rem;
+        flex-shrink: 0;
+        svg {
+          width: 20px;
+          height: 20px;
+          flex-shrink: 0;
+        }
       }
       .p-button:focus {
         box-shadow: none !important;
@@ -64,7 +72,7 @@
             background-color: #0072d8;
             height: 40px;
             width: 110px;
-            border-radius: 30px;
+            border-radius: 6px;
             color: #fff;
             font-family: "Nunito", Arial, sans-serif;
             gap:8px;
@@ -132,7 +140,7 @@ margin-top: 20px;
     }
     .addbutton_container__hierarchy{
         background-color: #0072d8;
-        border-radius: 60px;
+        border-radius: 6px;
         width: 100px !important;
         height: 38px;
         display: flex;

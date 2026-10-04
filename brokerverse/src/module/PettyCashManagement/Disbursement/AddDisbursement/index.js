@@ -1,27 +1,22 @@
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-// import CustomToast from "../../../../components/Toast";
 import { Button } from "primereact/button";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
-import {
-  PettyCashCodessingle,
-  Criteria,
-  VATMainAccount,
-  WHTSubAccount,
-  WHTMainAccount,
-  VATSubAccount,
-} from "../../mock";
+import usePettyCashOptions from "../../usePettyCashOptions";
 import { useDispatch, useSelector } from "react-redux";
-import { postAddDisbursmentMiddleware } from "../store/pettyCashDisbursementMiddleware";
+import {
+  getAddDisbursmentRequestListTableMiddleware,
+  getAddDisbursmentTableMiddleware,
+  postAddDisbursmentMiddleware,
+} from "../store/pettyCashDisbursementMiddleware";
 import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { Column } from "primereact/column";
@@ -29,6 +24,13 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../../components/LabelWrapper";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import { optionCode } from "../../pettyCashFormat";
+import { calendarDateFormat } from "../../../../utility/dateFormat";
+
+const CRITERIA = [
+  { label: "Request", value: "Request" },
+  { label: "Direct", value: "Direct" },
+];
 
 const initialValue = {
   PettyCashCode: "",
@@ -48,9 +50,8 @@ const AddDisbursement = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [selectedRows, setSelectedRows] = useState([]);
-  // const toastRef = useRef(null);
 
-  const { AddDisbursment, loading, AddDisbursmentRequestTable } = useSelector(
+  const { AddDisbursmentRequestTable } = useSelector(
     ({ pettyCashDisbursementReducers }) => {
       return {
         loading: pettyCashDisbursementReducers?.loading,
@@ -75,20 +76,20 @@ const AddDisbursement = () => {
   const handleBack = () => {
     navigate("/accounts/pettycash/disbursement");
   };
-  const toastRef = useRef(null);
-  const handleSubmit = (value) => {
-    // const valueWithId = {
-    //   ...value,
-    //   id: AddDisbursment?.length + 1,
-    // };
-    dispatch(postAddDisbursmentMiddleware(formik.values));
-    // toastRef.current.showToast();
-    // {
-    //   setTimeout(() => {
+  const { funds, mainAccounts, subAccounts } = usePettyCashOptions();
+  const Criteria = CRITERIA;
+  const handleSubmit = async (values) => {
+    await dispatch(postAddDisbursmentMiddleware(values));
+    if (optionCode(values.Criteria) === "Request") {
+      await dispatch(getAddDisbursmentTableMiddleware(selectedRows));
+    }
     navigate("/accounts/pettycash/adddisbursementtable");
-    //   }, 2000);
-    // }
-  }
+  };
+  const handleFundChange = (fund) => {
+    formik.setFieldValue("PettyCashCode", fund);
+    setSelectedRows([]);
+    dispatch(getAddDisbursmentRequestListTableMiddleware(fund?.code));
+  };
 
   const validate = (values) => {
     const errors = {};
@@ -102,21 +103,6 @@ const AddDisbursement = () => {
     if (!values.Criteria) {
       errors.Criteria = t("pettyCash.thisFieldRequired");
     }
-    // if (!values.VATMainAccount) {
-    //   errors.VATMainAccount = "This field is required";
-    // }
-    // if (!values.VATSubAccount) {
-    //   errors.VATSubAccount = "This field is required";
-    // }
-    // if (!values.WHTMainAccount) {
-    //   errors.WHTMainAccount = "This field is required";
-    // }
-    // if (!values.WHTSubAccount) {
-    //   errors.WHTSubAccount = "This field is required";
-    // }
-    // if (!values.Remarks) {
-    //   errors.Remarks = "This field is required";
-    // }
 
     return errors;
   };
@@ -129,36 +115,14 @@ const AddDisbursement = () => {
     },
   });
 
-  const handlePettyCashDescribtion = (value) => {
-    let description = "";
-    switch (value.pettycashcode) {
-      case "PC001":
-        description = "PC-1";
-        break;
-      case "PC002":
-        description = "PC-2";
-        break;
-      case "PC003":
-        description = "PC-3";
-        break;
-      case "PC004":
-        description = "PC-4";
-        break;
-      default:
-        description = "Unknown";
-        break;
-    }
-    formik.setFieldValue("PettyCashdescription", description);
-  };
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -215,7 +179,6 @@ const AddDisbursement = () => {
   minDate.setDate(minDate.getDate() + 1);
   return (
     <div className="add__disbursement__container">
-      {/* <CustomToast ref={toastRef} /> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
         
@@ -241,24 +204,6 @@ const AddDisbursement = () => {
         <Card className="mt-3">
           <div className="grid mt-1">
             <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">
-              {/* <LabelWrapper className="calenderlable__container">
-                Date
-              </LabelWrapper>
-              <Calendar
-                minDate={minDate}
-                showIcon
-                classNames="calender__container"
-                label="Date"
-                textColor={"#111927"}
-                textSize={"16"}
-                textWeight={500}
-                value={formik.values.Date}
-                onChange={(e) => {
-                  formik.setFieldValue("Date", e.target.value);
-                }}
-                error={formik.touched.Date && formik.errors.Date}
-                dateFormat="yy-mm-dd"
-              /> */}
               <LabelWrapper className="calenderlable__container">
                 Date
               </LabelWrapper>
@@ -270,7 +215,7 @@ const AddDisbursement = () => {
                 onChange={(e) => {
                   formik.setFieldValue("Date", e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-3 xl:col-3 input__view">
@@ -316,8 +261,8 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.PettyCashCode}
-                options={PettyCashCodessingle}
-                onChange={(e) => formik.setFieldValue("PettyCashCode", e.value)}
+                options={funds}
+                onChange={(e) => handleFundChange(e.value)}
                 optionLabel="label"
                 error={
                   formik.touched.PettyCashCode && formik.errors.PettyCashCode
@@ -350,7 +295,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.VATMainAccount}
-                options={VATMainAccount}
+                options={mainAccounts}
                 onChange={(e) =>
                   formik.setFieldValue("VATMainAccount", e.value)
                 }
@@ -370,7 +315,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.VATSubAccount}
-                options={VATSubAccount}
+                options={subAccounts.filter((a) => a.parentCode === formik.values.VATMainAccount?.code)}
                 onChange={(e) => formik.setFieldValue("VATSubAccount", e.value)}
                 optionLabel="label"
                 error={
@@ -388,7 +333,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.WHTMainAccount}
-                options={WHTMainAccount}
+                options={mainAccounts}
                 onChange={(e) =>
                   formik.setFieldValue("WHTMainAccount", e.value)
                 }
@@ -408,7 +353,7 @@ const AddDisbursement = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.WHTSubAccount}
-                options={WHTSubAccount}
+                options={subAccounts.filter((a) => a.parentCode === formik.values.WHTMainAccount?.code)}
                 onChange={(e) => formik.setFieldValue("WHTSubAccount", e.value)}
                 optionLabel="label"
                 error={
@@ -432,7 +377,7 @@ const AddDisbursement = () => {
           </div>
         </Card>
       </div>
-      {formik.values.Criteria === "Request" ?
+      {optionCode(formik.values.Criteria) === "Request" ?
         <Card className="mt-4">
           <div className="sub__container grid ">
             <div className="sub__container__title col-12">
@@ -444,7 +389,6 @@ const AddDisbursement = () => {
           <div className="table__container">
             <DataTable
               value={AddDisbursmentRequestTable}
-              // tableStyle={{ minWidth: "50rem" }}
               emptyMessage={emptyTableIcon}
               selection={selectedRows}
               onSelectionChange={(e) => setSelectedRows(e.value)}
@@ -452,9 +396,8 @@ const AddDisbursement = () => {
               scrollable={true}
               scrollHeight="40vh"
               paginator
-              rows={5}
-              rowsPerPageOptions={[5, 10, 25, 50]}
-              // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+              rows={20}
+              rowsPerPageOptions={[20, 50, 100]}
               currentPageReportTemplate="{first} - {last} of {totalRecords}"
               paginatorTemplate={template2}
             >
@@ -463,7 +406,6 @@ const AddDisbursement = () => {
                 selectionMode="multiple"
                 selectedItem
                 style={{ textAlign: "center" }}
-              // headerStyle={{ width: "4rem" }}
               ></Column>
               <Column
                 field="TransactionCode"
@@ -492,7 +434,7 @@ const AddDisbursement = () => {
               onClick={() => {
                 formik.handleSubmit();
               }}
-              disabled={selectedRows.length === 0 && formik.values.Criteria === "Request"}
+              disabled={selectedRows.length === 0 && optionCode(formik.values.Criteria) === "Request"}
             />
           </div>
         </div>

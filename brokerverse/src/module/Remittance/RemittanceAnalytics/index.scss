@@ -51,10 +51,12 @@
 
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 1.5rem;
 
       .kpi-card {
+        min-height: 17.75rem;
+
         .p-card-body {
           padding: 1.5rem;
 
@@ -88,19 +90,13 @@
                 }
 
                 &.negative {
-                  color: #dc3545;
+                  color: var(--color-danger);
                 }
 
                 i {
                   font-size: 0.75rem;
                 }
               }
-            }
-
-            .kpi-gauge {
-              margin: 1rem 0;
-              display: flex;
-              justify-content: center;
             }
 
             .kpi-details {
@@ -131,7 +127,7 @@
 
   .charts-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem;
 
     .chart-card {
@@ -150,9 +146,6 @@
           cursor: pointer;
           transition: transform 0.2s;
 
-          &:hover {
-            transform: translateY(-2px);
-          }
         }
 
         &.summary-stats {
@@ -186,12 +179,18 @@
   }
 
   .performers-section {
+    // minmax(0, 1fr): a wide table scrolls inside its card; one column below 1500px so no column is cut
     .performers-grid {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      @media (max-width: 1500px) {
+        grid-template-columns: minmax(0, 1fr);
+      }
       gap: 1.5rem;
 
       .performers-card {
+        min-width: 0;
         .p-card-body {
           padding: 1.5rem;
 
@@ -202,34 +201,6 @@
           }
         }
       }
-    }
-  }
-
-  .success-rate {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    span {
-      min-width: 40px;
-      font-weight: 500;
-    }
-
-    .rate-bar {
-      flex: 1;
-      height: 8px;
-
-      .p-progressbar-value {
-        background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
-      }
-    }
-  }
-
-  .performance-bar {
-    height: 8px;
-
-    .p-progressbar-value {
-      background: linear-gradient(90deg, #007bff, #28a745);
     }
   }
 
@@ -245,7 +216,7 @@
       }
 
       &.negative {
-        color: #dc3545;
+        color: var(--color-danger);
       }
 
       i {
@@ -257,7 +228,7 @@
   .alerts-section {
     .alerts-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
       gap: 1.5rem;
 
       .alerts-card {
@@ -418,24 +389,6 @@
     .p-tabview-panels {
       background: transparent;
       padding: 1.5rem 0;
-    }
-  }
-
-  .p-badge {
-    &.p-badge-danger {
-      background: #dc3545;
-    }
-  }
-
-  .p-tag {
-    &.p-tag-info {
-      background: #007bff;
-    }
-    &.p-tag-warning {
-      background: #ffc107;
-    }
-    &.p-tag-danger {
-      background: #dc3545;
     }
   }
 

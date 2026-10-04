@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .container__approvals {
   padding: 0;
   background: #f8f9fa;
@@ -41,7 +42,6 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
 
         &:hover {
-          transform: translateY(-2px);
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
         }
 
@@ -55,7 +55,8 @@
           gap: 1rem;
 
           .card-icon {
-            font-size: 2.5rem;
+            font-size: 1.25rem;
+            color: var(--color-text-muted);
             padding: 1rem;
             border-radius: 50%;
 
@@ -168,7 +169,6 @@
             &:hover:not(:disabled) {
               background: #218838;
               border-color: #1e7e34;
-              transform: translateY(-1px);
               box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
             }
 
@@ -224,29 +224,29 @@
         }
 
         .view-details-button {
-          background: #e3f2fd;
-          color: #1976d2;
+          background: $brand-blue-050;
+          color: $brand-blue;
 
           &:hover {
-            background: #bbdefb;
+            background: var(--bv-primary-100);
           }
         }
 
         .approve-button {
-          background: #e8f5e8;
-          color: #2e7d32;
+          background: $color-success-050;
+          color: $color-success;
 
           &:hover {
-            background: #c8e6c9;
+            border-color: $color-success;
           }
         }
 
         .reject-button {
-          background: #ffebee;
-          color: #c62828;
+          background: $color-danger-050;
+          color: $color-danger;
 
           &:hover {
-            background: #ffcdd2;
+            border-color: $color-danger;
           }
         }
       }
@@ -256,26 +256,9 @@
   // Dialog Styles
   .p-dialog {
     .p-dialog-header {
-      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-      color: white;
-      border-radius: 12px 12px 0 0;
-      padding: 1.5rem 2rem;
-
       .p-dialog-title {
         font-size: 1.25rem;
         font-weight: 600;
-      }
-
-      .p-dialog-header-icons {
-        .p-dialog-header-icon {
-          color: white;
-          width: 2rem;
-          height: 2rem;
-
-          &:hover {
-            background: rgba(255, 255, 255, 0.1);
-          }
-        }
       }
     }
 
@@ -360,21 +343,23 @@
                 margin-bottom: 1rem;
 
                 &.approved {
-                  background: #e8f5e8;
-                  border-left: 4px solid #28a745;
+                  background: $color-success-050;
+                  border: 1px solid $color-border;
+                  border-left: 3px solid $color-success;
 
                   i {
-                    color: #28a745;
+                    color: $color-success;
                     font-size: 1.25rem;
                   }
                 }
 
                 &.rejected {
-                  background: #ffebee;
-                  border-left: 4px solid #dc3545;
+                  background: $color-danger-050;
+                  border: 1px solid $color-border;
+                  border-left: 3px solid $color-danger;
 
                   i {
-                    color: #dc3545;
+                    color: var(--color-danger);
                     font-size: 1.25rem;
                   }
                 }
@@ -510,16 +495,6 @@
             }
           }
 
-          &:not(.p-button-text):not(.p-button-danger) {
-            background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-            border: none;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-
-            &:hover {
-              transform: translateY(-1px);
-              box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            }
-          }
         }
       }
     }
@@ -532,25 +507,6 @@
     font-weight: 500;
     font-size: 0.75rem;
 
-    &.p-tag-success {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    &.p-tag-info {
-      background: #d1ecf1;
-      color: #0c5460;
-    }
-
-    &.p-tag-warning {
-      background: #fff3cd;
-      color: #856404;
-    }
-
-    &.p-tag-danger {
-      background: #f8d7da;
-      color: #721c24;
-    }
   }
 
   // Responsive Design

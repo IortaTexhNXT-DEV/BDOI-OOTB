@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,15 +12,14 @@ import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { TabView, TabPanel } from "primereact/tabview";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { Badge } from "primereact/badge";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
+import quotationService from "../../../services/quotationService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const QuoteGeneration = () => {
@@ -28,13 +27,15 @@ const QuoteGeneration = () => {
   const { formatCurrency, currencyCode, locale } = useFormatCurrency();
   const navigate = useNavigate();
   const location = useLocation();
+  const { policyId: renewalId } = useParams();
   const [activeIndex, setActiveIndex] = useState(0);
+  const [settings, setSettings] = useState({});
   const [loading, setLoading] = useState(false);
   const [policyData, setPolicyData] = useState(null);
   const [quoteData, setQuoteData] = useState(null);
   const [premiumCalculation, setPremiumCalculation] = useState(null);
   const [selectedOffers, setSelectedOffers] = useState([]);
-  const [paymentMethod, setPaymentMethod] = useState('Annual');
+  const [paymentMethod, setPaymentMethod] = useState(null);
   const [comparisonVisible, setComparisonVisible] = useState(false);
   const [sendQuoteVisible, setSendQuoteVisible] = useState(false);
   const toast = useRef(null);
@@ -71,7 +72,7 @@ const QuoteGeneration = () => {
     { label: t("renewal.quoteSummary") }
   ];
 
-  const paymentOptions = renewalMockData.marketRequirements.paymentMethods.map(method => ({
+  const paymentOptions = Object.keys(settings["accounting.cash_account_by_payment_mode"] || {}).map(method => ({
     label: method,
     value: method
   }));
@@ -84,30 +85,50 @@ const QuoteGeneration = () => {
   const home = { icon: <SvgDot />, url: "#" };
 
   useEffect(() => {
-    // Get policy data from location state or URL params
-    if (location.state?.policy) {
-      setPolicyData(location.state.policy);
-      initializeFormData(location.state.policy);
-    } else {
-      // Default to first policy if no data passed
-      const defaultPolicy = renewalMockData.renewalQueue[0];
-      setPolicyData(defaultPolicy);
-      initializeFormData(defaultPolicy);
-    }
-  }, [location]);
+    const loadRenewal = async () => {
+      setLoading(true);
+      try {
+        const [renewal, renewalSettings, accountingSettings] = await Promise.all([
+          renewalsWorkspaceService.getRenewal(renewalId || location.state?.policy?.id),
+          renewalsWorkspaceService.getSettings("renewals"),
+          renewalsWorkspaceService.getSettings("accounting")
+        ]);
+        // Statutory taxes: the effective rates of the premium tax and charge engine (Premium Taxes & LGU Rates) for
+        // the policy's line, the same engine the server quotes the renewal with
+        const engine = await quotationService.getTaxRates(renewal?.lob || "motor").catch(() => ({}));
+        const taxRates = { vat: engine.valueAddedTax, dst: engine.documentaryStampTax, lgt: engine.localGovernmentTax, fst: engine.fireServiceTax };
+        const allSettings = { ...renewalSettings, ...accountingSettings, taxRates };
+        setSettings(allSettings);
+        setPolicyData(renewal);
+        initializeFormData(renewal, allSettings);
+        const currentQuote = renewal.quotes?.find(q => q.status === 'generated');
+        if (currentQuote) applyQuote(currentQuote);
+      } catch (error) {
+        toast.current?.show({
+          severity: 'error',
+          summary: t("common.error"),
+          detail: error?.message || t("renewal.failedToLoadRenewalData"),
+          life: 3000
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadRenewal();
+  }, [renewalId, location.state, t]);
 
-  const initializeFormData = (policy) => {
-    const hasClaimsImpact = policy.claimsHistory?.hasClaimsLastYear ? 15 : 0;
-    const loyaltyDiscount = Math.min(policy.loyaltyYears * 2, 10);
-    const inflationRate = 5; // Standard inflation adjustment
+  const initializeFormData = (policy, config) => {
+    const percent = (key) => Number(config[key] || 0) * 100;
+    const claimsImpact = Math.min((policy.claimsHistory?.totalClaims || 0) * percent("renewals.claims_loading_rate"), percent("renewals.claims_loading_cap"));
+    const loyaltyDiscount = Math.min((policy.loyaltyYears || 0) * percent("renewals.loyalty_discount_rate"), percent("renewals.loyalty_discount_cap"));
 
     setFormData(prev => ({
       ...prev,
-      claimsImpact: hasClaimsImpact,
-      loyaltyDiscount: loyaltyDiscount,
-      inflationAdjustment: inflationRate,
+      claimsImpact,
+      loyaltyDiscount,
+      inflationAdjustment: 0,
       newSumInsured: policy.sumInsured,
-      newDeductible: policy.deductible || 50000
+      newDeductible: policy.deductible ?? null
     }));
   };
 
@@ -142,14 +163,13 @@ const QuoteGeneration = () => {
     const subtotal = basePremium + claimsLoading + riskAdjustment + inflationAdjustment
                     - loyaltyDiscount - multiPolicyDiscount - earlyRenewalDiscount - noClaimsBonus;
 
-    // Calculate taxes
-    // Note: DST should be 0.5% = 0.005, not 0.125/100 = 0.00125
-    // Using standard Thailand insurance tax rates
+    // Statutory taxes at the charge engine's rates for the policy's line (preview; the generated quote is server-rated)
+    const rate = (key) => Number(settings.taxRates?.[key] || 0);
     const taxes = {
-      vat: subtotal * 0.12, // 12% VAT
-      dst: subtotal * 0.005, // 0.5% Documentary Stamp Tax (corrected from 0.125/100)
-      lgt: subtotal * 0.05, // 5% Local Government Tax (corrected from 0.0075)
-      fst: policyData.product.includes('Fire') ? subtotal * 0.02 : 0 // 2% Fire Service Tax
+      vat: subtotal * rate("vat"),
+      dst: subtotal * rate("dst"),
+      lgt: subtotal * rate("lgt"),
+      fst: subtotal * rate("fst")
     };
 
     const totalTaxes = Object.values(taxes).reduce((sum, tax) => sum + tax, 0);
@@ -178,10 +198,10 @@ const QuoteGeneration = () => {
   };
 
   useEffect(() => {
-    if (policyData) {
+    if (policyData && !quoteData) {
       calculatePremium();
     }
-  }, [formData, policyData]);
+  }, [formData, policyData, settings, quoteData]);
 
   const handleNext = () => {
     if (activeIndex < stepItems.length - 1) {
@@ -195,33 +215,39 @@ const QuoteGeneration = () => {
     }
   };
 
+  /** Shows a server-rated quote (re-rated premium, loadings, statutory taxes) in the breakdown and summary. */
+  const applyQuote = (quote) => {
+    const calc = quote.premiumCalculation || {};
+    const totalTaxes = Object.values(calc.taxes || {}).reduce((sum, tax) => sum + tax, 0);
+    setPremiumCalculation({
+      basePremium: calc.basePremium,
+      adjustments: { claimsLoading: calc.claimsLoading || 0, loyaltyDiscount: calc.loyaltyDiscount || 0 },
+      subtotal: calc.subtotal,
+      taxes: calc.taxes || {},
+      totalTaxes,
+      totalPremium: quote.quotedPremium,
+      percentageChange: quote.premiumVariancePct
+    });
+    setQuoteData(quote);
+    setFormData(prev => ({ ...prev, validUntil: new Date(quote.validUntil) }));
+  };
+
   const handleGenerateQuote = async () => {
     setLoading(true);
     try {
-      const result = await renewalCrudOperations.generateQuote(policyData.id);
-
-      if (result.success) {
-        const generatedQuote = {
-          ...result.data,
-          premiumCalculation,
-          selectedOffers,
-          paymentMethod,
-          formData
-        };
-
-        setQuoteData(generatedQuote);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.quoteGenerated"),
-          detail: t("renewal.quoteGeneratedSuccess", { number: result.data.quoteNumber }),
-          life: 3000
-        });
-      }
+      const quote = await renewalsWorkspaceService.generateQuote(policyData.id);
+      applyQuote(quote);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.quoteGenerated"),
+        detail: t("renewal.quoteGeneratedSuccess", { number: quote.quoteNumber }),
+        life: 3000
+      });
     } catch (error) {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToGenerateQuote"),
+        detail: error?.message || t("renewal.failedToGenerateQuote"),
         life: 3000
       });
     } finally {
@@ -233,19 +259,55 @@ const QuoteGeneration = () => {
     setSendQuoteVisible(true);
   };
 
-  const handleSendQuoteConfirm = () => {
-    setSendQuoteVisible(false);
-    toast.current.show({
-      severity: 'success',
-      summary: t("renewal.quoteSent"),
-      detail: t("renewal.quoteSentTo", { name: policyData.insuredName }),
-      life: 3000
-    });
+  const quoteNote = () => {
+    const offers = selectedOffers.map(id => retentionOffers.find(o => o.id === id)?.type).filter(Boolean);
+    return [formData.specialTerms, offers.length ? `Offers: ${offers.join(', ')}` : '', paymentMethod ? `Payment: ${paymentMethod}` : '']
+      .filter(Boolean)
+      .join('; ');
+  };
 
-    // Navigate back to renewal queue
-    setTimeout(() => {
-      navigate('/renewals/queue');
-    }, 2000);
+  const handleSendQuoteConfirm = async () => {
+    setSendQuoteVisible(false);
+    try {
+      await renewalsWorkspaceService.submitForApproval(policyData.id, quoteNote() || undefined);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.quoteSent"),
+        detail: t("renewal.quoteSentTo", { name: policyData.insuredName }),
+        life: 3000
+      });
+      navigate('/renewal/queue');
+    } catch (error) {
+      toast.current.show({
+        severity: 'error',
+        summary: t("common.error"),
+        detail: error?.message,
+        life: 3000
+      });
+    }
+  };
+
+  const handleCompleteRenewal = async () => {
+    setLoading(true);
+    try {
+      const result = await renewalsWorkspaceService.complete(policyData.id);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.completeRenewal", "Complete Renewal"),
+        detail: result?.newPolicy?.policyNumber,
+        life: 3000
+      });
+      navigate('/renewal/queue');
+    } catch (error) {
+      toast.current.show({
+        severity: 'error',
+        summary: t("common.error"),
+        detail: error?.message,
+        life: 3000
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatPercentage = (value, decimals = 1) => {
@@ -326,7 +388,7 @@ const QuoteGeneration = () => {
           </div>
           <div className="summary-item">
             <label>Expiry Date:</label>
-            <span>{new Date(policyData?.expiryDate).toLocaleDateString()}</span>
+            <span>{formatAppDate(policyData?.expiryDate)}</span>
           </div>
         </div>
       </div>
@@ -499,7 +561,7 @@ const QuoteGeneration = () => {
               </div>
 
               <div className="breakdown-row">
-                <span>VAT (12%):</span>
+                <span>VAT ({Math.round(Number(settings.taxRates?.vat || 0) * 1e6) / 1e4}%):</span>
                 <span>{formatCurrency(premiumCalculation.taxes.vat)}</span>
               </div>
 
@@ -674,7 +736,7 @@ const QuoteGeneration = () => {
                 <Calendar
                   value={formData.validUntil}
                   onChange={(e) => setFormData({...formData, validUntil: e.value})}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   minDate={new Date()}
                 />
               </div>
@@ -706,7 +768,17 @@ const QuoteGeneration = () => {
               onClick={handleGenerateQuote}
               loading={loading}
               className="p-button-success"
+              disabled={!policyData?.isOpen || ['pending-approval'].includes(policyData?.statusCode)}
             />
+
+            {policyData?.statusCode === 'approved' && (
+              <Button
+                label={t("renewal.completeRenewal", "Complete Renewal")}
+                icon="pi pi-check-circle"
+                onClick={handleCompleteRenewal}
+                loading={loading}
+              />
+            )}
 
             {quoteData && (
               <>
@@ -747,7 +819,7 @@ const QuoteGeneration = () => {
         <Card className="content-card">
           {loading ? (
             <div className="loading-container">
-              <ProgressSpinner />
+              <ProgressSpinner style={{ width: "2rem", height: "2rem" }} strokeWidth="4" />
               <p>{t("renewal.processingQuoteGeneration")}</p>
             </div>
           ) : (
@@ -776,7 +848,7 @@ const QuoteGeneration = () => {
               label={t("renewal.backToQueue")}
               icon="pi pi-times"
               className="p-button-secondary"
-              onClick={() => navigate('/renewals/queue')}
+              onClick={() => navigate('/renewal/queue')}
             />
           </div>
         </Card>
@@ -853,7 +925,7 @@ const QuoteGeneration = () => {
             {quoteData && (
               <div className="quote-info">
                 <div><strong>Quote Number:</strong> {quoteData.quoteNumber}</div>
-                <div><strong>Valid Until:</strong> {formData.validUntil?.toLocaleDateString()}</div>
+                <div><strong>Valid Until:</strong> {formatAppDate(formData.validUntil)}</div>
               </div>
             )}
           </div>

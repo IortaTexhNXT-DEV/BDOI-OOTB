@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { vehicleColourLabel } from "../../../utility/quoteOptions";
 import "./index.scss";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import { Button } from "primereact/button";
 import SvgImageUpload from "../../../assets/icons/SvgImageUpload";
 import { FileUpload } from "primereact/fileupload";
@@ -16,16 +17,50 @@ import {
   patchinformationMiddleWare,
 } from "./store/infoMiddleWare";
 import { useDispatch, useSelector } from "react-redux";
-import { MortgageOptions } from "../../endorsementModule/personalDetails/mock";
 import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import quotationService from "../../../services/quotationService";
 import { Toast } from "primereact/toast";
 import leadService from "../../../services/leadService";
+import s3Service from "../../../services/s3Service";
+import { ProgressBar } from "primereact/progressbar";
+import {
+  KYC_DEFAULT_ID_TYPES,
+  KYC_DEFAULT_REQUIRED,
+  kycErrors,
+  loadKycConfig,
+  requiredKycFor,
+} from "../../../utility/kyc";
+import { notifyError } from "../../../utility/dialogs";
+import useMasterOptions from "../../../module/GeneralMasters/common/useMasterOptions";
+import logger from "../../../utility/logger";
+
+const FieldError = ({ formik, name }) =>
+  formik.touched[name] && formik.errors[name] ? (
+    <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-2">
+      {formik.errors[name]}
+    </div>
+  ) : null;
 
 const CustomerInfo = ({ action }) => {
-  console.log(action, "find action in customer info");
   const { t } = useTranslation();
+  // Mortgagee banks from Master > Finance > Bank
+  const MortgageOptions = useMasterOptions("bank");
   const [imageURL, setimageURL] = useState("");
+  const [idUploadProgress, setIdUploadProgress] = useState(null);
+  const [kycConfig, setKycConfig] = useState({
+    required: KYC_DEFAULT_REQUIRED,
+    idTypes: KYC_DEFAULT_ID_TYPES,
+  });
+
+  useEffect(() => {
+    let active = true;
+    loadKycConfig().then((cfg) => {
+      if (active) setKycConfig(cfg);
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
   const navigate = useNavigate();
   const { state } = useLocation();
   const { quotationId } = useParams();
@@ -38,15 +73,25 @@ const CustomerInfo = ({ action }) => {
   const [isLoadingQuotation, setIsLoadingQuotation] = useState(false);
   const [quotationLoadError, setQuotationLoadError] = useState(null);
   const [leadData, setLeadData] = useState(null);
+  // identifiers already captured for the insured (earlier policies, the renewed policy, the quotation)
+  const [prefill, setPrefill] = useState({});
+
+  useEffect(() => {
+    if (!quotationId) return undefined;
+    let active = true;
+    quotationService
+      .getKycPrefill(quotationId)
+      .then((data) => active && setPrefill(data || {}))
+      .catch((error) => logger.error("KYC pre-fill not loaded:", error));
+    return () => {
+      active = false;
+    };
+  }, [quotationId]);
 
   // Load quotation details if not in state
   useEffect(() => {
     const loadQuotation = async () => {
       if (quotationId) {
-        console.log(
-          "CustomerInfo: Loading quotation details for ID:",
-          quotationId
-        );
         setIsLoadingQuotation(true);
         setQuotationLoadError(null);
 
@@ -56,19 +101,11 @@ const CustomerInfo = ({ action }) => {
           );
 
           if (result.type.endsWith("/fulfilled")) {
-            console.log(
-              "CustomerInfo: Quotation loaded successfully:",
-              result.payload
-            );
             setQuotationDetails(result.payload);
           } else {
-            console.error(
-              "CustomerInfo: Failed to load quotation:",
-              result.payload
-            );
             const errorMsg = t("agent.failedToLoadQuotation", { id: quotationId });
             setQuotationLoadError(errorMsg);
-            alert(errorMsg);
+            notifyError(errorMsg);
 
             // Redirect back to quote listing after 2 seconds
             setTimeout(() => {
@@ -76,10 +113,9 @@ const CustomerInfo = ({ action }) => {
             }, 2000);
           }
         } catch (error) {
-          console.error("CustomerInfo: Error loading quotation:", error);
           const errorMsg = t("agent.errorLoadingQuotation");
           setQuotationLoadError(errorMsg);
-          alert(errorMsg);
+          notifyError(errorMsg);
         } finally {
           setIsLoadingQuotation(false);
         }
@@ -93,17 +129,15 @@ const CustomerInfo = ({ action }) => {
   useEffect(() => {
     const fetchLeadData = async () => {
       if (quotationDetails?.leadRefId) {
-        console.log("Fetching lead data for leadRefId:", quotationDetails.leadRefId);
         try {
           const response = await leadService.getLeadById(quotationDetails.leadRefId);
           if (response.success) {
-            console.log("Lead data fetched successfully:", response.data);
             setLeadData(response.data);
           } else {
-            console.error("Failed to fetch lead data:", response.error);
+            logger.error("Failed to fetch lead data:", response.error);
           }
         } catch (error) {
-          console.error("Error fetching lead data:", error);
+          logger.error("Error fetching lead data:", error);
         }
       }
     };
@@ -116,12 +150,14 @@ const CustomerInfo = ({ action }) => {
     // If we have quotation details with vehicle info, use those
     if (quotationDetails) {
       return {
-        IdCardNumber: quotationDetails.idCardNumber || "",
-        MotorNumber: quotationDetails.motorNumber || "",
-        ChassisNumber: quotationDetails.chassisNumber || "",
+        IdType: quotationDetails.idType || prefill.idType || "",
+        IdCardImage: quotationDetails.idCardImage || "",
+        IdCardNumber: quotationDetails.idCardNumber || prefill.idCardNumber || "",
+        MotorNumber: quotationDetails.motorNumber || prefill.motorNumber || "",
+        ChassisNumber: quotationDetails.chassisNumber || prefill.chassisNumber || "",
         Mortgage: quotationDetails.mortgage || "",
         CertNumber: quotationDetails.certNumber || "",
-        PlateNumber: quotationDetails.plateNumber || "",
+        PlateNumber: quotationDetails.plateNumber || prefill.plateNumber || "",
         MVFileNumber: quotationDetails.MvFileNumber || "",
         AuthenCode: quotationDetails.authenCode || "",
         Aluminium: quotationDetails.aluminum || "",
@@ -132,25 +168,10 @@ const CustomerInfo = ({ action }) => {
     }
 
     // Fallback for edit action (backward compatibility)
-    if (action === "edit") {
-      return {
-        IdCardNumber: "",
-        MotorNumber: "8546791234",
-        ChassisNumber: "8529637412",
-        Mortgage: "",
-        CertNumber: "2583694671",
-        PlateNumber: "4568231975",
-        MVFileNumber: "1456239857",
-        AuthenCode: "3219758642",
-        Aluminium: "",
-        AirBag: "",
-        TNVS: "",
-        TruckType: "",
-      };
-    }
-
-    // Default empty values
+    // Default empty values (never pre-filled with sample identifiers)
     return {
+      IdType: "",
+      IdCardImage: "",
       IdCardNumber: "",
       MotorNumber: "",
       ChassisNumber: "",
@@ -168,12 +189,10 @@ const CustomerInfo = ({ action }) => {
 
   const initialValues = useMemo(
     () => getInitialValues(),
-    [quotationDetails, action]
+    [quotationDetails, action, prefill]
   );
 
   const handleSubmit = async (values) => {
-    console.log(values, "find full datas");
-
     if (!quotationId) {
       toast.current?.show({
         severity: "error",
@@ -186,6 +205,8 @@ const CustomerInfo = ({ action }) => {
 
     // Prepare customer info data
     const customerInfo = {
+      IdType: values.IdType,
+      IdCardImage: values.IdCardImage,
       IdCardNumber: values.IdCardNumber,
       MotorNumber: values.MotorNumber,
       ChassisNumber: values.ChassisNumber,
@@ -202,6 +223,8 @@ const CustomerInfo = ({ action }) => {
 
     // Prepare vehicle info for API
     const vehicleInfo = {
+      idType: values.IdType,
+      idCardImage: values.IdCardImage,
       idCardNumber: values.IdCardNumber,
       motorNumber: values.MotorNumber,
       chassisNumber: values.ChassisNumber,
@@ -266,7 +289,7 @@ const CustomerInfo = ({ action }) => {
         });
       }, 1000);
     } catch (error) {
-      console.error("Failed to save vehicle information:", error);
+      logger.error("Failed to save vehicle information:", error);
       toast.current?.show({
         severity: "error",
         summary: "Error",
@@ -276,7 +299,7 @@ const CustomerInfo = ({ action }) => {
     }
   };
 
-  const { postcustomerinfodata, loading } = useSelector(
+  const { postcustomerinfodata } = useSelector(
     ({ CustomerInfoReducer }) => {
       return {
         loading: CustomerInfoReducer?.loading,
@@ -285,11 +308,30 @@ const CustomerInfo = ({ action }) => {
     }
   );
 
-  console.log("first21", postcustomerinfodata);
-
-  const handleUppendImg = (name, src) => {
-    setimageURL(src?.objectURL);
-    console.log(name, src?.objectURL, "find handleUppendImg");
+  // The ID card photo is uploaded as soon as it is chosen; the stored URL is saved on the quotation (idCardImage).
+  const handleIdCardSelected = async (file) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.current?.show({ severity: "error", summary: "File too large", detail: "The ID card photo must be 2 MB or smaller", life: 4000 });
+      return;
+    }
+    setimageURL(file.objectURL || URL.createObjectURL(file));
+    setIdUploadProgress(0);
+    try {
+      const result = await s3Service.uploadFile(file, "id-cards", (p) => setIdUploadProgress(p));
+      if (!result.success || !result.url) throw new Error(result.error || "Upload failed");
+      formik.setFieldValue("IdCardImage", result.url);
+    } catch (error) {
+      setimageURL("");
+      formik.setFieldValue("IdCardImage", "");
+      toast.current?.show({ severity: "error", summary: "ID card upload failed", detail: error.message, life: 5000 });
+    } finally {
+      setIdUploadProgress(null);
+    }
+  };
+  const handleRemoveIdCard = () => {
+    setimageURL("");
+    formik.setFieldValue("IdCardImage", "");
   };
   const handleBackNavigation = () => {
     customHistory.back();
@@ -310,58 +352,35 @@ const CustomerInfo = ({ action }) => {
   const TruckTypes = [
     { label: "Heavy duty", value: "AL" },
     { label: "Heavy Xl", value: "AZ" },
-    //  { label: "duty", value: "AR" },
   ];
 
   // const customValidation = (values) => {
-  //   const errors = {};
-
   //   if (!values.MotorNumber) {
-  //     errors.MotorNumber = "This field Code is required";
   //   }
   //   if (!values.ChassisNumber) {
-  //     errors.ChassisNumber = "This field is required";
   //   }
   //   if (!values.TruckType) {
-  //     errors.TruckType = "This field is required";
   //   }
   //   if (!values.Mortgage) {
-  //     errors.Mortgage = "This field is required";
   //   }
   //   if (!values.CertNumber) {
-  //     errors.CertNumber = "This field is required";
   //   }
   //   if (!values.PlateNumber) {
-  //     errors.PlateNumber = "This field is required";
   //   }
   //   if (!values.MVFileNumber) {
-  //     errors.MVFileNumber = "This field is required";
   //   }
   //   if (!values.AuthenCode) {
-  //     errors.AuthenCode = "This field is required";
   //   }
   //   if (!values.Aluminium) {
-  //     errors.Aluminium = "This field is required";
   //   }
   //   if (!values.AirBag) {
-  //     errors.AirBag = "This field is required";
   //   }
   //   if (!values.TNVS) {
-  //     errors.TNVS = "This field is required";
   //   }
   //   if (!values.file) {
-  //     errors.file = "This field is required";
   //   }
-  //   return errors;
   // };
 
-  //   useEffect(() => {
-  //     console.log(action,'find sction call')
-  //     if (action === "edit") {
-  // console.log(postcustomerinfodata,'find postcustomerinfodata')
-  //     setFormikValues(postcustomerinfodata);
-  //     }
-  //   },[action]);
   useEffect(() => {
     if (action === "edit" && postcustomerinfodata) {
       setFormikValues(postcustomerinfodata);
@@ -369,8 +388,6 @@ const CustomerInfo = ({ action }) => {
   }, [action, postcustomerinfodata]);
 
   const setFormikValues = (data) => {
-    console.log(data, "find data");
-    // const IsoCode = getExchangeEdit?.ISOcode;
     const updatedValues = {
       MotorNumber: data?.MotorNumber,
       ChassisNumber: data?.ChassisNumber,
@@ -386,23 +403,42 @@ const CustomerInfo = ({ action }) => {
     };
 
     formik.setValues({ ...formik.values, ...updatedValues });
-    console.log("1211", updatedValues);
   };
+
+  // KYC and vehicle identifiers required for this line (policy.kyc_required_fields); the server enforces the same rule.
+  const requiredKyc = requiredKycFor(kycConfig, quotationDetails?.lob || "MOTOR");
+  const isRequired = (item) => requiredKyc.includes(item);
+  const plateOrMv = isRequired("plateOrMvFile");
 
   const formik = useFormik({
     initialValues: initialValues,
     enableReinitialize: true, // Allow form to reinitialize when quotation data loads
-    // validate: customValidation,
+    validate: (values) => kycErrors(values, requiredKyc, kycConfig.idTypes),
     onSubmit: handleSubmit,
   });
 
+  const submitWithValidation = async () => {
+    const errors = await formik.validateForm();
+    formik.setTouched(Object.fromEntries(Object.keys(formik.initialValues).map((k) => [k, true])), false);
+    if (Object.keys(errors).length) {
+      toast.current?.show({
+        severity: "warn",
+        summary: "Customer information incomplete",
+        detail: [...new Set(Object.values(errors))].join(". "),
+        life: 6000,
+      });
+      return;
+    }
+    formik.handleSubmit();
+  };
+
   useEffect(() => {
-    // if (action === "edit") {
-    // }
+    if (formik.values.IdCardImage && !imageURL) setimageURL(formik.values.IdCardImage);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formik.values.IdCardImage]);
+
+  useEffect(() => {
     if (action === "edit") {
-      if (!formik.values.Mortgage) {
-        formik.setFieldValue("Mortgage", MortgageOptions[0].value);
-      }
       if (!formik.values.Aluminium) {
         formik.setFieldValue("Aluminium", Aluminium[0].value);
       }
@@ -417,9 +453,22 @@ const CustomerInfo = ({ action }) => {
       }
     }
   }, []);
+  // back to the prospect or client the quotation was prepared for, else to the quotation
   const handleLeadNavigation = () => {
-    navigate("/agent/leadlisting");
+    const insured = quotationDetails?.insured;
+    if (insured?.type === "client" && insured.id) navigate(`/agent/clientview/${insured.id}`);
+    else if (quotationDetails?.leadRefId) navigate("/agent/leadlisting");
+    else navigate(quotationId ? `/agent/quotedetailview/${quotationId}` : "/agent/quotelisting");
   };
+
+  const insuredName =
+    quotationDetails?.insured?.name ||
+    (leadData ? `${leadData.firstName || ""} ${leadData.lastName || ""}`.trim() : "") ||
+    (quotationDetails?.lead ? `${quotationDetails.lead.firstName || ""} ${quotationDetails.lead.lastName || ""}`.trim() : "");
+  const insuredRef = quotationDetails?.insured?.number || leadData?.generatedLeadId || quotationDetails?.lead?.generatedLeadId || "";
+  const insuredLabel = quotationDetails
+    ? [insuredName, insuredRef && (quotationDetails.insured?.type === "client" ? `${t("agent.clientIdLabel")} ${insuredRef}` : `${t("agent.leadIdLabel")} ${insuredRef}`)].filter(Boolean).join(" / ")
+    : t("common.loading");
 
   // Show loading state while fetching quotation
   if (isLoadingQuotation) {
@@ -450,9 +499,9 @@ const CustomerInfo = ({ action }) => {
           <div style={{ textAlign: "center", padding: "2rem" }}>
             <i
               className="pi pi-times-circle"
-              style={{ fontSize: "2rem", color: "#f44336" }}
+              style={{ fontSize: "1.25rem", color: "var(--color-danger)" }}
             ></i>
-            <p style={{ marginTop: "1rem", color: "#f44336" }}>
+            <p style={{ marginTop: "1rem", color: "var(--color-danger)" }}>
               {quotationLoadError}
             </p>
             <Button
@@ -479,11 +528,7 @@ const CustomerInfo = ({ action }) => {
             <span className="icon__container">
               <SvgLeftArrow />
             </span>
-            {leadData
-              ? `${leadData.firstName || ""} ${leadData.lastName || ""} / ${t("agent.leadIdLabel")} ${leadData.generatedLeadId || ""}`
-              : quotationDetails?.leadRefId
-              ? `${t("agent.leadIdLabel")} ${quotationDetails.leadRefId}`
-              : t("agent.loadingLeadData")}
+            {insuredLabel}
           </div>
         </div>
         <div className="customer__info__quote__title">
@@ -498,46 +543,44 @@ const CustomerInfo = ({ action }) => {
         <div class="grid m-0">
           <div class="col-12 mt-2">
             <InputTextField
-              label="Insured Name"
-              value={
-                quotationDetails?.lead
-                  ? `${quotationDetails.lead.firstName || ""} ${
-                      quotationDetails.lead.lastName || ""
-                    }`.trim()
-                  : "Loading..."
-              }
+              label={t("agent.insuredName")}
+              value={insuredName}
               disabled
             />
           </div>
+          <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+            <DropdownField
+              label={`ID Type${isRequired("idType") ? " *" : ""}`}
+              options={(kycConfig.idTypes || []).map((v) => ({ label: v, value: v }))}
+              optionLabel="label"
+              value={formik.values.IdType}
+              onChange={(e) => formik.setFieldValue("IdType", e.value)}
+            />
+            <FieldError formik={formik} name="IdType" />
+          </div>
+          <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
+            <InputTextField
+              label={`ID Card Number${isRequired("idNumber") ? " *" : ""}`}
+              value={formik.values.IdCardNumber}
+              onChange={formik.handleChange("IdCardNumber")}
+            />
+            <FieldError formik={formik} name="IdCardNumber" />
+          </div>
           <div class="col-12 mt-2">
-            <div className="upload__label">ID Card</div>
+            <div className="upload__label">ID Card{isRequired("idImage") ? " *" : ""}</div>
             {!imageURL ? (
               <div className="upload__card__container mt-2">
                 <div className="file_icon_selector">
                   <FileUpload
-                    url="./upload"
                     auto
                     customUpload
                     mode="basic"
-                    name="demo"
+                    name="idCard"
                     accept=".png,.jpg,.jpeg"
-                    // maxFileSize={2000000}
                     uploadHandler={(e) => {
-                      formik.setFieldValue("file", e.files[0]);
-                      handleUppendImg(
-                        e.options.props.name,
-                        e.files[0],
-                        "the data"
-                      );
+                      handleIdCardSelected(e.files[0]);
+                      e.options.clear();
                     }}
-                    // uploadHandler={(e) => {
-                    //   formik.setFieldValue("file", e.files[0]);
-                    //   handleUppendImg(
-                    //     e.options.props.name,
-                    //     e.files[0],
-                    //     "the data"
-                    //   );
-                    // }}
                   />
                   <div className="icon_click_option">
                     <SvgImageUpload />
@@ -550,21 +593,33 @@ const CustomerInfo = ({ action }) => {
               </div>
             ) : (
               <div className="upload__image__area mt-2">
-                <img src={imageURL} alt="Image" className="image__view" />
+                <img src={imageURL} alt="ID card" className="image__view" />
+                <div className="flex align-items-center gap-2 mt-2">
+                  {idUploadProgress !== null ? (
+                    <div className="bv-meter flex-1">
+                      <ProgressBar value={idUploadProgress} showValue={false} />
+                      <span className="bv-meter__value">{`${Math.round(idUploadProgress)}%`}</span>
+                    </div>
+                  ) : (
+                    formik.values.IdCardImage && (
+                      <span className="text-sm text-green-600">
+                        <i className="pi pi-check-circle mr-1" />
+                        Uploaded
+                      </span>
+                    )
+                  )}
+                  <Button
+                    type="button"
+                    icon="pi pi-trash"
+                    label="Remove"
+                    className="p-button-text p-button-danger p-button-sm"
+                    disabled={idUploadProgress !== null}
+                    onClick={handleRemoveIdCard}
+                  />
+                </div>
               </div>
             )}
-            {formik.touched.file && formik.errors.file && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {formik.errors.file}
-              </div>
-            )}
-          </div>
-          <div class="col-12 mt-2">
-            <InputTextField
-              label="ID Card Number"
-              value={formik.values.IdCardNumber}
-              onChange={formik.handleChange("IdCardNumber")}
-            />
+            <FieldError formik={formik} name="IdCardImage" />
           </div>
 
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
@@ -624,7 +679,7 @@ const CustomerInfo = ({ action }) => {
             <InputTextField
               label="Vehicle Color"
               value={
-                quotationDetails?.insuranceVehicleDetails?.[0]?.vehicleColor ||
+                vehicleColourLabel(quotationDetails?.insuranceVehicleDetails?.[0]?.vehicleColor) ||
                 "N/A"
               }
               disabled
@@ -638,24 +693,24 @@ const CustomerInfo = ({ action }) => {
         <div class="grid m-0">
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="Motor Number"
+              label={`Motor Number${isRequired("motorNumber") ? " *" : ""}`}
               value={formik.values.MotorNumber}
               onChange={formik.handleChange("MotorNumber")}
             />
             {formik.touched.MotorNumber && formik.errors.MotorNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.MotorNumber}
               </div>
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="Chassis Number"
+              label={`Chassis Number${isRequired("chassisNumber") ? " *" : ""}`}
               value={formik.values.ChassisNumber}
               onChange={formik.handleChange("ChassisNumber")}
             />
             {formik.touched.ChassisNumber && formik.errors.ChassisNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.ChassisNumber}
               </div>
             )}
@@ -669,7 +724,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("Mortgage", e.value)}
             />
             {formik.touched.Mortgage && formik.errors.Mortgage && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Mortgage}
               </div>
             )}
@@ -681,31 +736,31 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("CertNumber")}
             />
             {formik.touched.CertNumber && formik.errors.CertNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.CertNumber}
               </div>
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="Plate Number"
+              label={`Plate Number${isRequired("plateNumber") ? " *" : plateOrMv ? " (or MV file no.) *" : ""}`}
               value={formik.values.PlateNumber}
               onChange={formik.handleChange("PlateNumber")}
             />
             {formik.touched.PlateNumber && formik.errors.PlateNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PlateNumber}
               </div>
             )}
           </div>
           <div class="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
             <InputTextField
-              label="MV File Number"
+              label={`MV File Number${isRequired("mvFileNumber") ? " *" : plateOrMv ? " (if no plate yet)" : ""}`}
               value={formik.values.MVFileNumber}
               onChange={formik.handleChange("MVFileNumber")}
             />
             {formik.touched.MVFileNumber && formik.errors.MVFileNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.MVFileNumber}
               </div>
             )}
@@ -717,7 +772,7 @@ const CustomerInfo = ({ action }) => {
               onChange={formik.handleChange("AuthenCode")}
             />
             {formik.touched.AuthenCode && formik.errors.AuthenCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.AuthenCode}
               </div>
             )}
@@ -732,7 +787,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("TruckType", e.value)}
             />
             {formik.touched.TruckType && formik.errors.TruckType && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.TruckType}
               </div>
             )}
@@ -746,7 +801,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("Aluminium", e.value)}
             />
             {formik.touched.Aluminium && formik.errors.Aluminium && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Aluminium}
               </div>
             )}
@@ -760,7 +815,7 @@ const CustomerInfo = ({ action }) => {
               onChange={(e) => formik.setFieldValue("AirBag", e.value)}
             />
             {formik.touched.AirBag && formik.errors.AirBag && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.AirBag}
               </div>
             )}
@@ -775,7 +830,7 @@ const CustomerInfo = ({ action }) => {
               error={formik.touched.TNVS && formik.errors.TNVS}
             />
             {formik.touched.TNVS && formik.errors.TNVS && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.TNVS}
               </div>
             )}
@@ -790,9 +845,8 @@ const CustomerInfo = ({ action }) => {
               <div className="next__btn__container">
                 <Button
                   className="next__btn"
-                  onClick={() => {
-                    formik.handleSubmit();
-                  }}
+                  disabled={idUploadProgress !== null}
+                  onClick={submitWithValidation}
                 >
                   Next
                 </Button>

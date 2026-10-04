@@ -1,22 +1,24 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { BreadCrumb } from "primereact/breadcrumb";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { Message } from "primereact/message";
+import documentTemplateService from "../../../services/documentTemplateService";
+import emailService from "../../../services/emailService";
+import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { useFormik } from "formik";
 import { Dropdown } from "primereact/dropdown";
 import SvgEye from "../../../assets/icons/SvgEye";
 import { useDispatch, useSelector } from "react-redux";
 import SvgDropdownicon from "../../../assets/icons/SvgDropdownicon";
 import {
-  getReceiptsListBySearchMiddleware,
   getReceiptsListByFilterMiddleware,
   getReceiptsListMiddleware,
   getReceiptsListByIdMiddleware,
@@ -24,6 +26,7 @@ import {
 } from "../store/receiptsMiddleware";
 import { clearBulkPrintError } from "../store/receiptsReducers";
 import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
 import DropDowns from "../../../components/DropDowns";
 import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Calendar } from "primereact/calendar";
@@ -31,6 +34,10 @@ import LabelWrapper from "../../../components/LabelWrapper";
 import { Toast } from "primereact/toast";
 import clientService from "../../../services/clientService";
 import BulkUploadModal from "../BulkUploadModal";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
+
+const CONVERTED = "Converted";
 
 const PolicyReceipts = () => {
   const { t } = useTranslation();
@@ -83,12 +90,7 @@ const PolicyReceipts = () => {
     { name: "CASH002", code: "CASH002" },
     { name: "CASH003", code: "CASH003" },
   ];
-  const initialValue = {
-    receiptDate: new Date(),
-  };
   // Remove minDate restriction to allow selecting today and past dates
-  // const minDate = new Date();
-  // minDate.setDate(minDate.getDate() + 1);
   const search = [
     { name: t("accounts.receipts.searchName"), value: "name" },
     { name: t("accounts.receipts.searchCustomerCode"), value: "customerCode" },
@@ -99,10 +101,8 @@ const PolicyReceipts = () => {
   const {
     receiptsTableList,
     loading,
-    receiptsSearchTable,
     receiptsFilterTable,
     pagination,
-    bulkPrintData,
     bulkPrintLoading,
     bulkPrintError,
   } = useSelector(({ receiptsTableReducers }) => {
@@ -117,21 +117,13 @@ const PolicyReceipts = () => {
       bulkPrintError: receiptsTableReducers?.error,
     };
   });
-  // Filter to only show Converted (fully paid) receipts
-  const convertedReceipts = Array.isArray(receiptsTableList)
-    ? receiptsTableList.filter(
-        (receipt) => receipt.receiptStatus === "Converted"
-      )
+  // The history lists Converted (fully paid) receipts only; the server filters them.
+  const safeReceiptsList = Array.isArray(receiptsTableList)
+    ? receiptsTableList
     : [];
-
-  // Filter search results to only show Converted receipts
   const convertedFilteredReceipts = Array.isArray(receiptsFilterTable)
-    ? receiptsFilterTable.filter(
-        (receipt) => receipt.receiptStatus === "Converted"
-      )
+    ? receiptsFilterTable
     : [];
-
-  const safeReceiptsList = convertedReceipts;
 
   // Transform clients data to dropdown options for Customer Code (for bulk print modal)
   const getCustomerCodeOptions = () => {
@@ -150,10 +142,9 @@ const PolicyReceipts = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -216,9 +207,21 @@ const PolicyReceipts = () => {
   const home = { label: t("sidebar.Accounts") };
 
   const navigate = useNavigate();
+  const location = useLocation();
+  // the receipt just recorded on Record Receipt: confirmed here, shown first in the list and highlighted
+  const [recorded, setRecorded] = useState(location.state?.recorded || null);
+  const [emailRecordedOpen, setEmailRecordedOpen] = useState(false);
+  const dismissRecorded = () => {
+    setRecorded(null);
+    navigate(location.pathname + location.search, { replace: true, state: null });
+  };
+  const printRecorded = async () => {
+    const r = await documentTemplateService.getReceiptPdf(recorded.receiptId, { fileName: `receipt-${recorded.receiptNumber}.pdf` });
+    if (!r.success) toast.current?.show({ severity: "error", summary: t("accounts.receipts.error"), detail: r.error });
+  };
 
   const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(10);
+  const [rows, setRows] = useState(20);
   const [globalFilter, setGlobalFilter] = useState();
   const dispatch = useDispatch();
   const [searches, setSearch] = useState("");
@@ -226,7 +229,7 @@ const PolicyReceipts = () => {
 
   // Load receipts data on component mount
   useEffect(() => {
-    const filters = { page: currentPage, pageSize: rows };
+    const filters = { page: currentPage, pageSize: rows, receiptStatus: CONVERTED };
 
     // Add policyId filter if provided in URL
     if (policyId) {
@@ -248,10 +251,10 @@ const PolicyReceipts = () => {
         if (response.success && response.data?.data?.clients) {
           setClientsData(response.data.data.clients);
         } else {
-          console.error("Failed to fetch clients:", response.error);
+          logger.error("Failed to fetch clients:", response.error);
         }
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        logger.error("Error fetching clients:", error);
       } finally {
         setClientsLoading(false);
       }
@@ -259,12 +262,6 @@ const PolicyReceipts = () => {
 
     fetchClients();
   }, []);
-
-  // Handle bulk print response
-  useEffect(() => {
-    if (bulkPrintData && bulkPrintData.success) {
-    }
-  }, [bulkPrintData]);
 
   // Handle bulk print error from Redux state - only when there's an actual error from bulk print operation
   useEffect(() => {
@@ -347,6 +344,7 @@ const PolicyReceipts = () => {
             value: searches,
             page: currentPage,
             pageSize: rows,
+            receiptStatus: CONVERTED,
           })
         );
       }
@@ -367,10 +365,11 @@ const PolicyReceipts = () => {
           value: searches,
           page: newPage,
           pageSize: event.rows,
+          receiptStatus: CONVERTED,
         })
       );
     } else {
-      const filters = { page: newPage, pageSize: event.rows };
+      const filters = { page: newPage, pageSize: event.rows, receiptStatus: CONVERTED };
 
       // Add policyId filter if provided in URL
       if (policyId) {
@@ -403,7 +402,7 @@ const PolicyReceipts = () => {
 
   const handleBulkUploadSuccess = () => {
     // Refresh the receipts list after successful upload
-    const filters = { page: currentPage, pageSize: rows };
+    const filters = { page: currentPage, pageSize: rows, receiptStatus: CONVERTED };
     if (policyId) {
       filters.policyId = policyId;
     }
@@ -532,9 +531,9 @@ const PolicyReceipts = () => {
         });
       }
     } catch (error) {
-      console.error("Bulk print error:", error);
-      console.error("Error type:", typeof error);
-      console.error("Error structure:", JSON.stringify(error, null, 2));
+      logger.error("Bulk print error:", error);
+      logger.error("Error type:", typeof error);
+      logger.error("Error structure:", JSON.stringify(error, null, 2));
 
       // Only handle non-"No data found" errors here
       // "No data found" errors are handled by the Redux state useEffect
@@ -572,14 +571,36 @@ const PolicyReceipts = () => {
     }
   };
 
+  // Real buttons (keyboard focus, Enter / Space) for the header actions; rendered for desktop and mobile layouts.
+  const headerActions = (
+    <>
+      <div className="filter_bulk_button_container">
+        <Button type="button" className="bulk_button_container" outlined onClick={handleModal}>
+          <span className="addtext">{t("accounts.receipts.bulkPrint")}</span>
+        </Button>
+      </div>
+      <div className="filter_bulk_button_container">
+        <Button type="button" className="bulk_button_container" outlined onClick={handleBulkUploadModal}>
+          <span className="addtext">{t("accounts.receipts.bulkUpload")}</span>
+        </Button>
+      </div>
+      <div className="filterbutton_container">
+        <Button type="button" className="addbutton_container" onClick={handlePolicy}>
+          <SvgAdd className="addicon" aria-hidden="true" />
+          <span className="addtext">{t("accounts.receipts.receipt")}</span>
+        </Button>
+      </div>
+    </>
+  );
+
   return (
     <div className="overall__policyreceipts__container mt-1">
       {/* Policy ID Filter Indicator */}
       {policyId && (
         <div
           style={{
-            backgroundColor: "#e3f2fd",
-            border: "1px solid #1976d2",
+            backgroundColor: "var(--color-surface-muted)",
+            borderLeft: "3px solid var(--bv-primary)",
             borderRadius: "8px",
             padding: "12px 16px",
             marginBottom: "16px",
@@ -588,15 +609,15 @@ const PolicyReceipts = () => {
             gap: "8px",
           }}
         >
-          <span style={{ color: "#1976d2", fontWeight: "500" }}>
-            📋 {t("accounts.receipts.filteredByPolicyId")} {policyId}
+          <span style={{ color: "var(--color-text)", fontWeight: "500" }}>
+            {t("accounts.receipts.filteredByPolicyId")} {policyId}
           </span>
           <button
             onClick={() => navigate("/accounts/receipts")}
             style={{
               background: "none",
               border: "none",
-              color: "#1976d2",
+              color: "var(--bv-primary)",
               cursor: "pointer",
               textDecoration: "underline",
               fontSize: "14px",
@@ -618,47 +639,11 @@ const PolicyReceipts = () => {
           />
         </div>
         <div className="bulk__texts">
-          <div className="filter_bulk_button_container">
-            <div className="bulk_button_container" onClick={handleModal}>
-              <p className="addtext">{t("accounts.receipts.bulkPrint")}</p>
-            </div>
-          </div>
-          <div className="filter_bulk_button_container">
-            <div
-              className="bulk_button_container"
-              onClick={handleBulkUploadModal}
-            >
-              <p className="addtext">{t("accounts.receipts.bulkUpload")}</p>
-            </div>
-          </div>
-          <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
-              <SvgAdd className="addicon" />
-              <p className="addtext">{t("accounts.receipts.receipt")}</p>
-            </div>
-          </div>
+          {headerActions}
         </div>
         {/* Mobile/Tablet Actions - moved below title */}
         <div className="mobile-header-actions">
-          <div className="filter_bulk_button_container">
-            <div className="bulk_button_container" onClick={handleModal}>
-              <p className="addtext">{t("accounts.receipts.bulkPrint")}</p>
-            </div>
-          </div>
-          <div className="filter_bulk_button_container">
-            <div
-              className="bulk_button_container"
-              onClick={handleBulkUploadModal}
-            >
-              <p className="addtext">{t("accounts.receipts.bulkUpload")}</p>
-            </div>
-          </div>
-          <div className="filterbutton_container">
-            <div className="addbutton_container" onClick={handlePolicy}>
-              <SvgAdd className="addicon" />
-              <p className="addtext">{t("accounts.receipts.receipt")}</p>
-            </div>
-          </div>
+          {headerActions}
         </div>
       </div>
 
@@ -692,6 +677,40 @@ const PolicyReceipts = () => {
             />
           </div>
         </div>
+        {recorded && (
+          <Message
+            severity="success"
+            className="w-full justify-content-start mb-3"
+            content={
+              <div className="receipt-recorded">
+                <div>
+                  <strong>{t("accounts.receipts.recordedTitle", { receipt: recorded.receiptNumber })}</strong>
+                  <span className="block">
+                    {recorded.remaining > 0
+                      ? t("accounts.receipts.recordedPartial", { amount: formatCurrency(recorded.amount), bill: recorded.billNumber, balance: formatCurrency(recorded.remaining) })
+                      : t("accounts.receipts.recordedPaid", { amount: formatCurrency(recorded.amount), bill: recorded.billNumber })}
+                  </span>
+                </div>
+                <div className="receipt-recorded__actions">
+                  {recorded.receiptId && <Button type="button" size="small" outlined icon="pi pi-print" label={t("accounts.receipts.printReceipt")} onClick={printRecorded} />}
+                  {recorded.receiptId && <Button type="button" size="small" outlined icon="pi pi-envelope" label={t("emailDocument.emailReceipt")} onClick={() => setEmailRecordedOpen(true)} />}
+                  <Button type="button" size="small" outlined icon="pi pi-plus" label={t("accounts.receipts.recordAnother")} onClick={() => navigate("/accounts/receipts/addreceipts")} />
+                  <Button type="button" size="small" text icon="pi pi-times" aria-label={t("accounts.receipts.dismiss")} onClick={dismissRecorded} tooltip={t("accounts.receipts.dismiss")} tooltipOptions={{ position: "top" }} />
+                </div>
+              </div>
+            }
+          />
+        )}
+        {recorded?.receiptId && (
+          <EmailDocumentDialog
+            visible={emailRecordedOpen}
+            onHide={() => setEmailRecordedOpen(false)}
+            title={t("emailDocument.emailReceiptTitle", { number: recorded.receiptNumber })}
+            defaultTo={recorded.clientEmail || ""}
+            fileName={`receipt-${recorded.receiptNumber}.pdf`}
+            send={(body) => emailService.emailReceipt(recorded.receiptId, body)}
+          />
+        )}
         <div className="listlable_textcontainer">
           <label className="listlable_text">{t("accounts.receipts.receiptsHistory")}</label>
         </div>
@@ -712,16 +731,14 @@ const PolicyReceipts = () => {
               }}
               scrollable={true}
               scrollHeight="40vh"
+              rowClassName={(row) => (recorded && row.receiptNumber === recorded.receiptNumber ? "receipt-row--recorded" : "")}
               paginator
+              lazy
               rows={rows}
-              totalRecords={
-                searches && globalFilter
-                  ? convertedFilteredReceipts.length
-                  : safeReceiptsList.length
-              }
+              totalRecords={pagination?.total ?? safeReceiptsList.length}
               first={first}
               onPage={onPageChange}
-              rowsPerPageOptions={[5, 10, 25, 50]}
+              rowsPerPageOptions={[20, 50, 100]}
               currentPageReportTemplate="{first} - {last} of {totalRecords}"
               paginatorTemplate={template2}
               className="datatable_container"
@@ -759,8 +776,8 @@ const PolicyReceipts = () => {
                 field="name"
                 header={t("common.name")}
                 headerStyle={headerStyle1}
-                className="fieldvalue_container"
-                body={(rowData) => rowData.name?.toUpperCase()}
+                className="fieldvalue_container receipts_name_cell"
+                body={(rowData) => rowData.name}
               ></Column>
               <Column
                 sortable
@@ -769,7 +786,7 @@ const PolicyReceipts = () => {
                 headerStyle={headerStyle2}
                 className="fieldvalue_container"
               ></Column>
-              <Column
+              <Column body={(row) => formatAppDate(row.date)}
                 sortable
                 field="date"
                 header={t("common.date")}
@@ -781,6 +798,7 @@ const PolicyReceipts = () => {
                 header={t("accounts.receipts.amount")}
                 headerStyle={headerStyle3}
                 className="fieldvalue_container"
+                body={(rowData) => formatCurrency(rowData.amount ?? 0)}
               ></Column>
               <Column
                 field="totalPaid"
@@ -814,7 +832,7 @@ const PolicyReceipts = () => {
                         gap: "4px",
                       }}
                     >
-                      <div style={{ fontWeight: "600", color: "#10b981" }}>
+                      <div style={{ fontWeight: "600", color: "var(--color-success)" }}>
                         {t("accounts.receipts.total")} {formatCurrency(totalPaid)}
                       </div>
                       <div style={{ fontSize: "11px", color: "#6b7280" }}>
@@ -1047,7 +1065,7 @@ const PolicyReceipts = () => {
                 onChange={(e) => {
                   setDateFrom(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-6">
@@ -1061,7 +1079,7 @@ const PolicyReceipts = () => {
                 onChange={(e) => {
                   setDateTo(e.target.value);
                 }}
-                dateFormat="yy-mm-dd"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>

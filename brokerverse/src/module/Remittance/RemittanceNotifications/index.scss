@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .remittance-notifications {
   padding: 1rem;
 
@@ -42,7 +43,7 @@
             }
 
             &.blue {
-              background: #2196f3;
+              background: $brand-blue;
             }
 
             &.green {
@@ -264,7 +265,7 @@
           }
 
           .pi-file-pdf {
-            color: #f44336;
+            color: var(--color-danger);
             font-size: 1.2rem;
           }
         }
@@ -309,31 +310,6 @@
     .p-tabview-panels {
       background: transparent;
       padding: 1.5rem 0;
-    }
-  }
-
-  .p-badge {
-    &.p-badge-danger {
-      background: #f44336;
-    }
-
-    &.p-badge-info {
-      background: #2196f3;
-    }
-  }
-
-  .p-tag {
-    &.p-tag-danger {
-      background: #f44336;
-    }
-    &.p-tag-warning {
-      background: #ff9800;
-    }
-    &.p-tag-info {
-      background: #2196f3;
-    }
-    &.p-tag-success {
-      background: #4caf50;
     }
   }
 

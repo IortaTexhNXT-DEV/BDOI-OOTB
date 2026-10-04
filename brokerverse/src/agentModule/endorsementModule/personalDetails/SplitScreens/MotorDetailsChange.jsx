@@ -1,17 +1,15 @@
 import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import { useFormik } from "formik";
-import {
-  ModelVariantOptions,
-  ModelYearOptions,
-  MortgageOptions,
-  TNVSOptions,
-  VehicleBrandOptions,
-  VehicleColorOptions,
-  VehicleModelOptions,
-} from "../mock";
+import useQuoteOptions from "../../../quoteModule/policyDetails/policyDetailsCard/useQuoteOptions";
+import useMasterOptions from "../../../../module/GeneralMasters/common/useMasterOptions";
+
+const TNVSOptions = [
+  { label: "True", value: "Yes" },
+  { label: "False", value: "No" },
+];
 
 const initialValue = {
   TNVS: "",
@@ -89,39 +87,24 @@ const MotorDetailsChange = ({
     [formikInitialValues.TNVS]
   );
 
+  // Mortgagee banks (Bank master) and the vehicle brand -> model -> variant cascade, model years and colours
+  // (vehicle masters and configuration), as on Create Quote; a stored value stays selectable.
+  const mortgageMaster = useMasterOptions("bank");
   const mortgageOptions = useMemo(
-    () => addFallbackOption(formikInitialValues.Mortgage, MortgageOptions),
-    [formikInitialValues.Mortgage]
+    () => addFallbackOption(formikInitialValues.Mortgage, mortgageMaster),
+    [formikInitialValues.Mortgage, mortgageMaster]
   );
-
-  const vehicleBrandOptions = useMemo(
-    () =>
-      addFallbackOption(formikInitialValues.VehicleBrand, VehicleBrandOptions),
-    [formikInitialValues.VehicleBrand]
-  );
-
-  const modelYearOptions = useMemo(
-    () => addFallbackOption(formikInitialValues.ModelYear, ModelYearOptions),
-    [formikInitialValues.ModelYear]
-  );
-
-  const modelVariantOptions = useMemo(
-    () =>
-      addFallbackOption(formikInitialValues.ModelVariant, ModelVariantOptions),
-    [formikInitialValues.ModelVariant]
-  );
-
-  const vehicleModelOptions = useMemo(
-    () =>
-      addFallbackOption(formikInitialValues.VehicleModel, VehicleModelOptions),
-    [formikInitialValues.VehicleModel]
-  );
-
-  const vehicleColorOptions = useMemo(
-    () =>
-      addFallbackOption(formikInitialValues.VehicleColor, VehicleColorOptions),
-    [formikInitialValues.VehicleColor]
-  );
+  const {
+    brandOptions: vehicleBrandOptions,
+    modelYearOptions,
+    variantOptions: modelVariantOptions,
+    modelOptions: vehicleModelOptions,
+    colourOptions: vehicleColorOptions,
+  } = useQuoteOptions({
+    brand: formik.values.VehicleBrand,
+    model: formik.values.VehicleModel,
+    current: formikInitialValues,
+  });
 
   useEffect(() => {
     if (!shouldSubmit) {
@@ -129,7 +112,6 @@ const MotorDetailsChange = ({
     }
 
     formik.submitForm();
-    // formik.resetForm()
   }, [formik, shouldSubmit]);
 
   return (
@@ -145,7 +127,6 @@ const MotorDetailsChange = ({
               <DropdownField
                 label={t("endorsement.tnvs")}
                 disabled={disabled}
-                // disabled={true}
                 value={formik.values.TNVS}
                 options={tnvsOptions}
                 onChange={(e) => {
@@ -180,7 +161,6 @@ const MotorDetailsChange = ({
             disabled={disabled}
             label={t("endorsement.mortgage")}
             value={formik.values.Mortgage}
-            // options={MortgageOptions || mortgage}
             options={mortgageOptions}
             onChange={(e) => {
               formik.setFieldValue("Mortgage", e.value);

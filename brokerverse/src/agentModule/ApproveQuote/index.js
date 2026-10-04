@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useState, useEffect } from 'react';
 import { useFormatCurrency } from '../../hooks/useFormatCurrency';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { Card } from 'primereact/card';
 import { Button } from 'primereact/button';
 import { DataTable } from 'primereact/datatable';
@@ -11,33 +10,13 @@ import i18n from '../../i18n';
 import './ApproveQuote.scss';
 
 const ApproveQuote = () => {
-  const { t } = useTranslation();
-  const currentLng = i18n.language && i18n.language.startsWith('th') ? 'th' : 'en';
-
-  const languageBar = (
-    <div className="approve-quote-lang-bar">
-      <button
-        type="button"
-        className={currentLng === 'en' ? 'active' : ''}
-        onClick={() => i18n.changeLanguage('en')}
-      >
-        {t('common.english')}
-      </button>
-      <span className="lang-sep">|</span>
-      <button
-        type="button"
-        className={currentLng === 'th' ? 'active' : ''}
-        onClick={() => i18n.changeLanguage('th')}
-      >
-        {t('common.thai')}
-      </button>
-    </div>
-  );
+  // The client approves in English: this public page offers no language switch (Philippine clients; the
+  // system has no configured list of client languages) and never follows the agent's saved app language.
+  const t = i18n.getFixedT('en');
   const { formatCurrency } = useFormatCurrency();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [token, setToken] = useState(null);
-  const [tokenPayload, setTokenPayload] = useState(null);
+  const [, setTokenPayload] = useState(null);
   const [quotationData, setQuotationData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [approving, setApproving] = useState(false);
@@ -55,14 +34,12 @@ const ApproveQuote = () => {
     // Decode token to get basic info (quotationId, etc.)
     try {
       const payload = JSON.parse(atob(tokenParam.split('.')[1]));
-      console.log('Token payload:', payload);
       setToken(tokenParam);
       setTokenPayload(payload);
       
       // Fetch full quotation details in preview mode
       fetchQuotationPreview(tokenParam);
     } catch (e) {
-      console.error('Error decoding token:', e);
       setError(t('approveQuote.invalidLink'));
       setLoading(false);
     }
@@ -82,14 +59,11 @@ const ApproveQuote = () => {
       const result = await response.json();
       
       if (result.success) {
-        console.log('✅ Fetched quote preview:', result);
         setQuotationData(result);
       } else {
-        console.error('Failed to fetch quote preview:', result.message);
         setError(result.message || t('approveQuote.failedToLoad'));
       }
     } catch (error) {
-      console.error('Error fetching quote preview:', error);
       setError(t('approveQuote.failedToLoad'));
     } finally {
       setLoading(false);
@@ -111,8 +85,6 @@ const ApproveQuote = () => {
       const result = await response.json();
       
       if (result.success) {
-        console.log('✅ Quote approved successfully!');
-        console.log('Full quotation data from backend:', result);
         setApproved(true);
         // Backend returns full quotation with all details and premium values
         setQuotationData(result);
@@ -121,7 +93,6 @@ const ApproveQuote = () => {
       }
     } catch (error) {
       setError(t('approveQuote.failedToApprove'));
-      console.error(error);
     } finally {
       setApproving(false);
     }
@@ -130,7 +101,6 @@ const ApproveQuote = () => {
   if (loading) {
     return (
       <div className="approve-quote-container">
-        {languageBar}
         <Card>
           <div style={{textAlign: 'center', padding: '40px'}}>
             <i className="pi pi-spin pi-spinner" style={{fontSize: '2rem'}}></i>
@@ -144,10 +114,9 @@ const ApproveQuote = () => {
   if (error) {
     return (
       <div className="approve-quote-container">
-        {languageBar}
         <Card>
           <div style={{textAlign: 'center', padding: '40px'}}>
-            <i className="pi pi-times-circle" style={{fontSize: '3rem', color: '#ef4444'}}></i>
+            <i className="pi pi-times-circle" style={{fontSize: '1.25rem', color: 'var(--color-danger)'}}></i>
             <h2>{t('approveQuote.error')}</h2>
             <p>{error}</p>
           </div>
@@ -168,10 +137,9 @@ const ApproveQuote = () => {
 
     return (
       <div className="approve-quote-container">
-        {languageBar}
         <Card>
           <div style={{textAlign: 'center', padding: '20px 20px 30px'}}>
-            <i className="pi pi-check-circle" style={{fontSize: '3.5rem', color: '#10b981', marginBottom: '16px'}}></i>
+            <i className="pi pi-check-circle" style={{fontSize: '1.25rem', color: 'var(--color-success)', marginBottom: '16px'}}></i>
             <h2 style={{marginBottom: '8px'}}>{t('approveQuote.quoteApprovedSuccess')}</h2>
             <p style={{marginBottom: '30px'}}>{t('approveQuote.thankYouApprove')}</p>
             
@@ -223,7 +191,7 @@ const ApproveQuote = () => {
 
                 {/* Premium Breakdown Table */}
                 <div className="premium-breakdown-section">
-                  <h3 style={{marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: '#1e293b'}}>
+                  <h3 style={{marginBottom: '16px', fontSize: '18px', fontWeight: '600', color: 'var(--color-heading)'}}>
                     {t('approveQuote.premiumBreakdown')}
                   </h3>
                   <DataTable 
@@ -240,6 +208,8 @@ const ApproveQuote = () => {
                       field="value" 
                       header={t('approveQuote.amount')} 
                       body={(rowData) => formatCurrency(rowData.value)}
+                    headerClassName="bv-num"
+                    bodyClassName="bv-num"
                       style={{textAlign: 'right', fontWeight: '500'}}
                     />
                   </DataTable>
@@ -273,11 +243,10 @@ const ApproveQuote = () => {
 
   return (
     <div className="approve-quote-container">
-      {languageBar}
       <Card>
         <div style={{padding: '20px'}}>
           <h2 style={{textAlign: 'center', marginBottom: '8px'}}>{t('approveQuote.approveInsuranceQuote')}</h2>
-          <p style={{textAlign: 'center', marginBottom: '30px', color: '#64748b'}}>
+          <p style={{textAlign: 'center', marginBottom: '30px', color: 'var(--color-text-muted)'}}>
             {t('approveQuote.reviewBeforeApprove')}
           </p>
           
@@ -355,7 +324,7 @@ const ApproveQuote = () => {
                   {quotationData.insuranceVehicleDetails[0].vehicleType && (
                     <div className="info-row">
                       <span className="info-label">{t('approveQuote.type')}</span>
-                      <span className="info-value">{quotationData.insuranceVehicleDetails[0].vehicleType}</span>
+                      <span className="info-value">{quotationData.vehicleTypeLabel || quotationData.insuranceVehicleDetails[0].vehicleType}</span>
                     </div>
                   )}
                   
@@ -419,6 +388,8 @@ const ApproveQuote = () => {
                     field="value" 
                     header={t('approveQuote.amount')} 
                     body={(rowData) => formatCurrency(rowData.value)}
+                    headerClassName="bv-num"
+                    bodyClassName="bv-num"
                     style={{textAlign: 'right', fontWeight: '500'}}
                   />
                 </DataTable>

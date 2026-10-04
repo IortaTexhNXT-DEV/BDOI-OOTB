@@ -8,20 +8,15 @@ import { Column } from "primereact/column";
 import SvgDownArrow from "../../assets/agentIcon/SvgDownArrow";
 import { Dropdown } from "primereact/dropdown";
 import React, { useRef, useState } from "react";
-import SvgArrow from "../../assets/icons/SvgArrow";
 import { Dialog } from "primereact/dialog";
 import InputTextField from '../../components/InputField';
 import { useFormik } from "formik";
-import DatepickerField from "../../components/DatePicker";
 import "./index.scss";
 import PlusIcon from "./PlusIcon";
 import SvgDeleteIcon from "../../assets/icons/SvgDeleteIcon";
-import SvgEditIcon from "../../assets/icons/SvgEditIcon";
 import SvgEdit from "../../assets/icons/SvgEdits";
-import { Navigate, useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom"; 
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
-
-
 
 const CQEmployeeBulkUpload = ({ action, flow, }) => {
     const { t } = useTranslation();
@@ -35,11 +30,10 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
             "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
         RowsPerPageDropdown: (options) => {
             const dropdownOptions = [
-                { label: 5, value: 5 },
-                { label: 10, value: 10 },
-                { label: 20, value: 20 },
-                { label: 120, value: 120 },
-            ];
+        { label: 20, value: 20 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
+      ];
 
             return (
                 <div className="table__selector">
@@ -62,7 +56,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
             );
         },
     };
-
 
     const formik = useFormik({
         initialValues: {
@@ -89,8 +82,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
             if (!values.SumInsured.trim()) errors.SumInsured = t("employeeBenefit.sumInsuredRequired");
             if (!values.Remarks.trim()) errors.Remarks = t("employeeBenefit.remarksRequired");
 
-
-
             if (Object.keys(errors).length > 0) {
                 formik.setErrors(errors);
                 return;
@@ -98,19 +89,17 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
 
             setEmployeeList(prevList => [...prevList, values]);
 
-            console.log("Submitted Values:", values);
             setShowAddEmployeeModal(false);
             formik.resetForm();
         }
     });
-
 
     const renderEmployeeID = (rowData) => (
         <div className="category__text">{rowData.EmployeeID?.toUpperCase()}</div>
     );
 
     const renderName = (rowData) => (
-        <div className="category__text">{rowData.Name?.toUpperCase()}</div>
+        <div className="category__text">{rowData.Name}</div>
     );
 
     const renderDOB = (rowData) => (
@@ -121,35 +110,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
     );
 
 
-    const ViewheaderStyle = {
-        textalign: "center",
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-    };
-
-    const headerStyle = {
-        textalign: "center",
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-    };
-
-    const headeraction = {
-        textalign: "center",
-        fontSize: 16,
-        fontFamily: "Nunito, Arial, sans-serif",
-        fontWeight: 500,
-        color: "#000",
-        border: " none",
-        display: "flex",
-        justifyContent: "center",
-        alignItem: "center",
-    };
 
 
     const handleDummyUpload = () => {
@@ -228,7 +188,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
         <div>
 
             <div className="order__summary__main__title">
-                {flow === "renewal" ? "Client" : "Leads"}
+                {flow === "renewal" ? "Client" : "Prospects"}
             </div>
             <div
                 onClick={handleLeadNavigation}
@@ -239,7 +199,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                 <div className="order__summary__back__btn__title">
                     {flow === "renewal"
                         ? "Carson Darrin / Client ID : 12345678"
-                        : "Lead ID : 12345678"}
+                        : "Prospect ID : 12345678"}
                 </div>
             </div>
 
@@ -264,8 +224,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                         {action === "quotedetails" ? "Edit Quote" : "Create Quote"}
                     </div>
 
-
-
                     <div
                         style={{
                             display: 'flex',
@@ -280,11 +238,11 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                backgroundColor: '#0072d8',
+                                backgroundColor: 'var(--bv-primary)',
                                 gap: '8px',
                                 padding: '10px',
                                 color: '#fff',
-                                border: '1px solid #0072d8',
+                                border: '1px solid var(--bv-primary)',
                                 borderRadius: '6px',
                                 fontFamily: "Nunito, Arial, sans-serif",
                                 fontSize: '16px',
@@ -299,11 +257,11 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                backgroundColor: '#0072d8',
+                                backgroundColor: 'var(--bv-primary)',
                                 gap: '8px',
                                 padding: '10px',
                                 color: '#fff',
-                                border: '1px solid #0072d8',
+                                border: '1px solid var(--bv-primary)',
                                 borderRadius: '6px',
                                 fontFamily: "Nunito, Arial, sans-serif",
                                 fontSize: '16px',
@@ -313,7 +271,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                         />
                     </div>
 
-
                 </div>
 
                 <div style={{ paddingTop: '40px' }} className="lead__table__container">
@@ -321,8 +278,8 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                     <DataTable
                         value={employeeList}
                         paginator
-                        rows={5}
-                        rowsPerPageOptions={[5, 10, 25, 50]}
+                        rows={20}
+                        rowsPerPageOptions={[20, 50, 100]}
                         currentPageReportTemplate="{first} - {last} of {totalRecords}"
                         paginatorTemplate={template2}
                         className="corrections__table__main"
@@ -352,16 +309,10 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             body={(rowData, { rowIndex }) => (
                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                     <Button
-                                        icon={<SvgEdit />}
-                                    // className="view__btn"
-                                    // onClick={() => handleView(rowData)}
-                                    />
+                                        icon={<SvgEdit />} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                                     <Button
                                         icon={<SvgDeleteIcon />}
-                                        // className="delete__btn"
-                                        // onClick={() => handleDelete(rowData)}
-                                        severity="danger"
-                                    />
+                                        severity="danger" aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
                                 </div>
                             )}
                             style={{ textAlign: 'center', width: '150px' }}
@@ -372,18 +323,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
 
                 <div >
 
-
-                    {/* <div className="bottom__button__wrapper">
-                        <div style={{color:'black'}} className="bottom__button__wrapper">
-                            Back
-                        </div>
-                        <Button
-                            onClick={() => {
-                             }}
-                            label="Next"
-                            className="next__button"
-                        />
-                    </div> */}
                     <div className="bottom__button__wrapper" style={{ display: 'flex', alignItems: 'center' }}>
                         <div onClick={handleBack} style={{ color: 'black', cursor: 'pointer', marginInline: '25px' }}>
                             Back
@@ -397,7 +336,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             className="next__button"
                         />
                     </div>
-
 
                 </div>
 
@@ -415,7 +353,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('EmployeeID')}
                         />
                         {formik.errors.EmployeeID && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.EmployeeID}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.EmployeeID}</div>
                         )}
 
                         <InputTextField
@@ -424,17 +362,8 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Name')}
                         />
                         {formik.errors.Name && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Name}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Name}</div>
                         )}
-
-                        {/* <DatepickerField
-                            label="Date of Birth*"
-                            value={formik.values.DateofBirth}
-                            onChange={(e) => formik.setFieldValue("DateofBirth", e.target.value)}
-                        />
-                        {formik.errors.DateofBirth && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.DateofBirth}</div>
-                        )} */}
 
                         <div className="field">
                             <label>Date of Birth*</label>
@@ -453,10 +382,9 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 }}
                             />
                             {formik.errors.DateofBirth && (
-                                <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.DateofBirth}</div>
+                                <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.DateofBirth}</div>
                             )}
                         </div>
-
 
                         <div className="field">
                             <label>Gender*</label>
@@ -472,7 +400,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 className="w-full"
                             />
                             {formik.errors.Gender && (
-                                <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Gender}</div>
+                                <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Gender}</div>
                             )}
                         </div>
 
@@ -482,7 +410,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Occupation')}
                         />
                         {formik.errors.Occupation && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Occupation}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Occupation}</div>
                         )}
 
                         <InputTextField
@@ -491,7 +419,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Salary')}
                         />
                         {formik.errors.Salary && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Salary}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Salary}</div>
                         )}
 
                         <InputTextField
@@ -500,7 +428,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('PlanClass')}
                         />
                         {formik.errors.PlanClass && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.PlanClass}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.PlanClass}</div>
                         )}
 
                         <InputTextField
@@ -509,7 +437,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('SumInsured')}
                         />
                         {formik.errors.SumInsured && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.SumInsured}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.SumInsured}</div>
                         )}
 
                         <InputTextField
@@ -518,7 +446,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             onChange={formik.handleChange('Remarks')}
                         />
                         {formik.errors.Remarks && (
-                            <div style={{ fontSize: 12, color: 'red' }}>{formik.errors.Remarks}</div>
+                            <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.Remarks}</div>
                         )}
 
                         <div style={{ marginTop: '20px', textAlign: 'right' }}>
@@ -526,7 +454,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 type="submit"
                                 label="Submit"
                                 style={{
-                                    backgroundColor: '#0072d8',
+                                    backgroundColor: 'var(--bv-primary)',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '6px',
@@ -560,7 +488,6 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                     const file = e.target.files[0];
                                     if (file) {
                                         setSelectedFileName(file.name);
-                                        console.log("Uploaded file:", file);
                                     }
                                 }}
                             />
@@ -568,7 +495,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             <div
                                 onClick={() => fileInputRef.current.click()}
                                 style={{
-                                    border: '2px dashed #0072d8',
+                                    border: '2px dashed var(--bv-primary)',
                                     padding: '20px',
                                     borderRadius: '10px',
                                     textAlign: 'center',
@@ -588,13 +515,12 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             </div>
                         </div>
 
-
                         <div style={{ textAlign: 'right' }}>
                             <Button
                                 label="Upload"
                                 icon={<SvgUploadArrowIcon />}
                                 style={{
-                                    backgroundColor: '#0072d8',
+                                    backgroundColor: 'var(--bv-primary)',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '6px',

@@ -1,0 +1,79 @@
+digraph G {
+ rankdir=LR; dpi=170; bgcolor="white"; nodesep=0.25; ranksep=0.45; newrank=true;
+ node [fontname="DejaVu Sans", fontsize=10, margin="0.10,0.06"]; edge [fontname="DejaVu Sans", arrowsize=0.7];
+ "bank_p" [label="Banks", shape=box, style="rounded,filled", color="#BF8F00", fillcolor="#FFF2CC", fontcolor="#101820", penwidth=1.2];
+ "bank_c" [label="Layout validated with the\nbank; test file accepted", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "bank_f" [label="Bank payment files (bulk\ncredit, InstaPay, PESONet)", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "bank_b" [label="Fallback: Cheques and manual\ntransfers in the bank portal", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "bank_p" -> "bank_c" [color="#555F6D", penwidth=1.1];
+ "bank_c" -> "bank_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "bank_p" -> "bank_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "bank_f"; "bank_b"; }
+ "bankst_p" [label="Banks", shape=box, style="rounded,filled", color="#BF8F00", fillcolor="#FFF2CC", fontcolor="#101820", penwidth=1.2];
+ "bankst_c" [label="One statement per account\nimported with a balancing\npreview", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "bankst_f" [label="Bank reconciliation imports", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "bankst_b" [label="Fallback: Manual bank items", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "bankst_p" -> "bankst_c" [color="#555F6D", penwidth=1.1];
+ "bankst_c" -> "bankst_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "bankst_p" -> "bankst_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "bankst_f"; "bankst_b"; }
+ "sms_p" [label="SMS or Viber provider", shape=box, style="rounded,filled", color="#BF8F00", fillcolor="#FFF2CC", fontcolor="#101820", penwidth=1.2];
+ "sms_c" [label="Account, sender name, live\ntest message", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "sms_f" [label="Renewal notices, payment\nreminders, claim updates", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "sms_b" [label="Fallback: E-mail notices;\njobs stay off", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "sms_p" -> "sms_c" [color="#555F6D", penwidth=1.1];
+ "sms_c" -> "sms_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "sms_p" -> "sms_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "sms_f"; "sms_b"; }
+ "ctpl_p" [label="CTPL authentication\nprovider (IC-\naccredited); LTO", shape=box, style="rounded,filled", color="#BF8F00", fillcolor="#FFF2CC", fontcolor="#101820", penwidth=1.2];
+ "ctpl_c" [label="Broker accredited; COC series\nloaded; one COC authenticated\nlive", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "ctpl_f" [label="CTPL authentication at\nissue; LTO feed", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "ctpl_b" [label="Fallback: Enter code from\nthe provider portal", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "ctpl_p" -> "ctpl_c" [color="#555F6D", penwidth=1.1];
+ "ctpl_c" -> "ctpl_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "ctpl_p" -> "ctpl_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "ctpl_f"; "ctpl_b"; }
+ "ins_p" [label="Insurers", shape=box, style="rounded,filled", color="#BF8F00", fillcolor="#FFF2CC", fontcolor="#101820", penwidth=1.2];
+ "ins_c" [label="Mapping, preview, test\nissuance and claim status\naccepted", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "ins_f" [label="Insurer API connectors", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "ins_b" [label="Fallback: Record Issued\nPolicy; claim status file\n(CSV)", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "ins_p" -> "ins_c" [color="#555F6D", penwidth=1.1];
+ "ins_c" -> "ins_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "ins_p" -> "ins_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "ins_f"; "ins_b"; }
+ "pg_p" [label="Payment gateway", shape=box, style="rounded,filled", color="#BF8F00", fillcolor="#FFF2CC", fontcolor="#101820", penwidth=1.2];
+ "pg_c" [label="Sandbox payment receipted;\nlive test payment", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "pg_f" [label="Payment links", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "pg_b" [label="Fallback: Bank transfer,\ncheque, cash", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "pg_p" -> "pg_c" [color="#555F6D", penwidth=1.1];
+ "pg_c" -> "pg_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "pg_p" -> "pg_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "pg_f"; "pg_b"; }
+ "eis_p" [label="BIR EIS", shape=box, style="rounded,filled", color="#7030A0", fillcolor="#EDE1F5", fontcolor="#101820", penwidth=1.2];
+ "eis_c" [label="Enrolment; test submissions\naccepted", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "eis_f" [label="E-invoicing (EIS) live", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "eis_b" [label="Fallback: Connector off;\nqueue earlier invoices\nlater; export payloads", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "eis_p" -> "eis_c" [color="#555F6D", penwidth=1.1];
+ "eis_c" -> "eis_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "eis_p" -> "eis_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "eis_f"; "eis_b"; }
+ "amlc_p" [label="AMLC portal", shape=box, style="rounded,filled", color="#7030A0", fillcolor="#EDE1F5", fontcolor="#101820", penwidth=1.2];
+ "amlc_c" [label="Portal access; CTR test file\ngenerated", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontcolor="#101820", penwidth=1.2];
+ "amlc_f" [label="CTR and STR filing", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontcolor="#101820", penwidth=1.2];
+ "amlc_b" [label="No fallback: needed before\ngo-live", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontcolor="#101820", penwidth=1.2];
+ "amlc_p" -> "amlc_c" [color="#555F6D", penwidth=1.1];
+ "amlc_c" -> "amlc_f" [color="#555F6D", penwidth=1.1, label="live", fontsize=9, fontcolor="#555F6D"];
+ "amlc_p" -> "amlc_b" [color="#7F7F7F", penwidth=1.1, label="if late", fontsize=9, fontcolor="#7F7F7F", style=dashed];
+ { rank=same; "amlc_f"; "amlc_b"; }
+ subgraph cluster_legend { label="Legend"; fontname="DejaVu Sans"; fontsize=10; color="#BFC7D1"; style=rounded;
+  "lg0" [label="Partner", shape=box, style="rounded,filled", color="#BF8F00", fillcolor="#FFF2CC", fontsize=9];
+  "lg1" [label="Regulator portal", shape=box, style="rounded,filled", color="#7030A0", fillcolor="#EDE1F5", fontsize=9];
+  "lg0" -> "lg1" [style=invis];
+  "lg2" [label="Certification step", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", fontsize=9];
+  "lg1" -> "lg2" [style=invis];
+  "lg3" [label="Feature switched on", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", fontsize=9];
+  "lg2" -> "lg3" [style=invis];
+  "lg4" [label="Fallback at go-live", shape=box, style="rounded,filled", color="#7F7F7F", fillcolor="#F2F2F2", fontsize=9];
+  "lg3" -> "lg4" [style=invis];
+ }
+}

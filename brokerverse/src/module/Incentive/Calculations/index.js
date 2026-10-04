@@ -9,31 +9,52 @@ import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { TabView, TabPanel } from "primereact/tabview";
 import { MultiSelect } from "primereact/multiselect";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { Steps } from "primereact/steps";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
-import { useNavigate } from "react-router-dom";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
 import SvgSearchIcon from "../../../assets/icons/SvgSearchIcon";
 import InputField from "../../../components/InputField";
-import { incentiveMockData, incentiveCrudOperations } from "../../../services/mockData/incentiveMockData";
+import incentiveService from "../../../services/incentiveService";
+import { showError, showSuccess } from "../../Remittance/shared";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { promptText } from "../../../utility/dialogs";
+
+/** Last `count` calendar months as { label: "September 2026", value: "2026-09" }. */
+const recentMonths = (count = 12) => {
+  const now = new Date();
+  return Array.from({ length: count }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    return {
+      label: d.toLocaleDateString("en-US", { month: "long", year: "numeric" }),
+      value: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`
+    };
+  });
+};
+
+/** Execution log rebuilt from the batch lifecycle fields. */
+const executionLog = (batch) => [
+  { timestamp: batch.calculationDate, action: "Calculation batch created", details: `By ${batch.createdBy || "-"}${batch.description ? ` - ${batch.description}` : ""}` },
+  batch.submittedDate && { timestamp: batch.submittedDate, action: "Submitted for approval", details: `By ${batch.submittedBy}` },
+  batch.approvalDate && { timestamp: batch.approvalDate, action: "Approved", details: `By ${batch.approvedBy}` },
+  batch.rejectionDate && { timestamp: batch.rejectionDate, action: "Rejected", details: `By ${batch.rejectedBy}: ${batch.rejectionReason || ""}` },
+  batch.paymentDate && { timestamp: batch.paymentDate, action: "Paid", details: batch.paymentReference || "" }
+].filter(Boolean);
 
 const Calculations = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
-  const navigate = useNavigate();
   const toast = useRef(null);
 
   // State management
-  const [calculations, setCalculations] = useState(incentiveMockData.calculationBatches);
+  const [calculations, setCalculations] = useState([]);
+  const [programOptions, setProgramOptions] = useState([]);
   const [search, setSearch] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [selectedPeriod, setSelectedPeriod] = useState(null);
@@ -54,33 +75,40 @@ const Calculations = () => {
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [calculationDetails, setCalculationDetails] = useState(null);
 
+  const loadCalculations = async () => {
+    setLoading(true);
+    try {
+      setCalculations(await incentiveService.listCalculations());
+    } catch (error) {
+      showError(toast, error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadCalculations();
+    incentiveService.listPrograms({ status: "Active" })
+      .then((rows) => setProgramOptions(rows.map((p) => ({ label: p.programName, value: p.programCode }))))
+      .catch((error) => showError(toast, error));
+  }, []);
+
   // Options
   const statusOptions = [
     { label: "All", value: "All" },
-    { label: "Pending Approval", value: "Pending Approval" },
-    { label: "Approved", value: "Approved" },
-    { label: "Paid", value: "Paid" },
-    { label: "Rejected", value: "Rejected" }
+    ...[...new Set(["Calculated", "Pending Approval", "Approved", "Paid", "Rejected", ...calculations.map((c) => c.status)])].map((s) => ({ label: s, value: s }))
   ];
 
-  const periodOptions = [
-    { label: "January 2025", value: "January 2025" },
-    { label: "December 2024", value: "December 2024" },
-    { label: "November 2024", value: "November 2024" },
-    { label: "October 2024", value: "October 2024" }
-  ];
-
-  const programOptions = incentiveMockData.programs
-    .filter(p => p.status === "Active")
-    .map(p => ({ label: p.programName, value: p.programCode }));
+  const periodOptions = recentMonths();
+  const periodLabel = (value) => periodOptions.find((p) => p.value === value)?.label || value;
 
   // Breadcrumb items
   const items = [
-    { label: t("incentive.incentive"), url: "/incentive" },
+    { label: t("incentive.incentive") },
     { label: t("incentive.calculations"), url: "/incentive/calculations" }
   ];
 
-  const home = { label: t("incentive.dashboard") };
+  const home = { label: t("sidebar.Accounts") };
 
   // Steps for new calculation
   const calculationSteps = [
@@ -96,7 +124,7 @@ const Calculations = () => {
       calc.period.toLowerCase().includes(search.toLowerCase());
 
     const matchesStatus = selectedStatus === "All" || calc.status === selectedStatus;
-    const matchesPeriod = !selectedPeriod || calc.period === selectedPeriod;
+    const matchesPeriod = !selectedPeriod || calc.period === periodLabel(selectedPeriod);
 
     return matchesSearch && matchesStatus && matchesPeriod;
   });
@@ -128,83 +156,62 @@ const Calculations = () => {
   const handleSubmitCalculation = async () => {
     setLoading(true);
     try {
-      const result = await incentiveCrudOperations.runCalculation(
-        newCalculation.period,
-        newCalculation.selectedPrograms
-      );
-
-      const newBatch = {
-        batchId: result.data.batchId,
+      const batch = await incentiveService.createCalculation({
         period: newCalculation.period,
-        calculationDate: new Date().toISOString().split('T')[0],
-        programsIncluded: newCalculation.selectedPrograms,
-        totalAmount: result.data.totalAmount,
-        agentCount: result.data.agentCount,
-        status: "Pending Approval",
-        submittedBy: "Current User",
-        submittedDate: new Date().toISOString(),
-        details: []
-      };
-
-      setCalculations([newBatch, ...calculations]);
+        selectedPrograms: newCalculation.selectedPrograms,
+        description: newCalculation.description
+      });
       setShowNewCalculationDialog(false);
-
-      toast.current.show({
-        severity: "success",
-        summary: t("incentive.calculationStarted"),
-        detail: t("incentive.batchCreatedPendingApproval", { batchId: result.data.batchId }),
-        life: 5000
-      });
+      showSuccess(toast, `${batch.batchId}: ${batch.agentCount} agent(s), ${formatCurrency(batch.totalAmount)} (${batch.status})`, t("incentive.calculationStarted"));
+      await loadCalculations();
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: t("common.error", "Error"),
-        detail: t("incentive.failedToStartCalculation"),
-        life: 3000
-      });
+      showError(toast, error, t("incentive.failedToStartCalculation"));
     } finally {
       setLoading(false);
     }
   };
 
+  const refreshDetails = async (batchId) => {
+    const batch = await incentiveService.getCalculation(batchId);
+    setSelectedCalculation(batch);
+    setCalculationDetails({ ...batch, executionLog: executionLog(batch) });
+  };
+
   // Handle view details
   const handleViewDetails = async (calculation) => {
-    setSelectedCalculation(calculation);
     setLoading(true);
     try {
-      // Simulate loading calculation details
-      const details = {
-        ...calculation,
-        executionLog: [
-          {
-            timestamp: "2025-02-01 10:00:00",
-            action: "Calculation batch created",
-            details: "Batch initialized for processing"
-          },
-          {
-            timestamp: "2025-02-01 10:05:00",
-            action: "Program data retrieved",
-            details: "Retrieved agent assignments and performance data"
-          },
-          {
-            timestamp: "2025-02-01 10:10:00",
-            action: "Calculations completed",
-            details: "Incentive amounts calculated for all eligible agents"
-          }
-        ]
-      };
-      setCalculationDetails(details);
+      await refreshDetails(calculation.batchId);
       setDetailsVisible(true);
     } catch (error) {
-      toast.current.show({
-        severity: "error",
-        summary: t("common.error", "Error"),
-        detail: t("incentive.failedToLoadCalculationDetails"),
-        life: 3000
-      });
+      showError(toast, error, t("incentive.failedToLoadCalculationDetails"));
     } finally {
       setLoading(false);
     }
+  };
+
+  const runAction = async (action, summary, detail) => {
+    setLoading(true);
+    try {
+      await action();
+      showSuccess(toast, detail, summary);
+      await loadCalculations();
+      return true;
+    } catch (error) {
+      showError(toast, error);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmitForApproval = (calculation) => {
+    confirmDialog({
+      message: `Submit ${calculation.batchId} for approval?`,
+      header: t("incentive.confirmApproval"),
+      icon: "pi pi-send",
+      accept: () => runAction(() => incentiveService.submitCalculation(calculation.batchId), calculation.batchId, "Submitted for approval")
+    });
   };
 
   // Handle approval actions
@@ -213,56 +220,35 @@ const Calculations = () => {
       message: t("incentive.approveCalculationBatch", { batchId: calculation.batchId }),
       header: t("incentive.confirmApproval"),
       icon: "pi pi-check",
-      accept: async () => {
-        setLoading(true);
-        try {
-          await incentiveCrudOperations.approveCalculation(calculation.batchId);
-          setCalculations(calculations.map(c =>
-            c.batchId === calculation.batchId
-              ? { ...c, status: "Approved", approvedBy: "Current User", approvalDate: new Date().toISOString() }
-              : c
-          ));
-
-          toast.current.show({
-            severity: "success",
-            summary: t("incentive.approved"),
-            detail: t("incentive.calculationBatchApproved", { batchId: calculation.batchId }),
-            life: 3000
-          });
-        } catch (error) {
-          toast.current.show({
-            severity: "error",
-            summary: t("common.error", "Error"),
-            detail: t("incentive.failedToApproveCalculation"),
-            life: 3000
-          });
-        } finally {
-          setLoading(false);
-        }
-      }
+      accept: () => runAction(
+        () => incentiveService.approveCalculation(calculation.batchId),
+        t("incentive.approved"),
+        t("incentive.calculationBatchApproved", { batchId: calculation.batchId })
+      )
     });
   };
 
-  const handleReject = (calculation) => {
-    confirmDialog({
-      message: t("incentive.rejectCalculationBatch", { batchId: calculation.batchId }),
-      header: t("incentive.confirmRejection"),
-      icon: "pi pi-times",
-      accept: () => {
-        setCalculations(calculations.map(c =>
-          c.batchId === calculation.batchId
-            ? { ...c, status: "Rejected", rejectedBy: "Current User", rejectionDate: new Date().toISOString() }
-            : c
-        ));
+  const handleReject = async (calculation) => {
+    const reason = await promptText(t("incentive.rejectCalculationBatch", { batchId: calculation.batchId }), "");
+    if (!reason) return;
+    runAction(
+      () => incentiveService.rejectCalculation(calculation.batchId, reason),
+      t("incentive.rejected"),
+      t("incentive.calculationBatchRejected", { batchId: calculation.batchId })
+    );
+  };
 
-        toast.current.show({
-          severity: "warn",
-          summary: t("incentive.rejected"),
-          detail: t("incentive.calculationBatchRejected", { batchId: calculation.batchId }),
-          life: 3000
-        });
-      }
-    });
+  const handleAdjustLine = async (line) => {
+    const amount = await promptText(`Adjustment for ${line.agentName} (${line.program})`, String(line.adjustments || 0));
+    if (amount === null || Number.isNaN(Number(amount))) return;
+    const reason = await promptText("Reason for adjustment", line.adjustmentReason || "");
+    if (!reason) return;
+    const done = await runAction(
+      () => incentiveService.adjustCalculation(calculationDetails.batchId, [{ id: line.id, adjustments: Number(amount), reason }]),
+      calculationDetails.batchId,
+      `${line.agentName} adjusted`
+    );
+    if (done) await refreshDetails(calculationDetails.batchId);
   };
 
   // Template functions
@@ -281,7 +267,7 @@ const Calculations = () => {
   };
 
   const dateBodyTemplate = (rowData) => {
-    return new Date(rowData.calculationDate).toLocaleDateString();
+    return formatAppDate(rowData.calculationDate);
   };
 
   const amountBodyTemplate = (rowData) => {
@@ -295,21 +281,29 @@ const Calculations = () => {
           icon={<SvgEyeIcon />}
           className="view-details-button"
           onClick={() => handleViewDetails(rowData)}
-          tooltip={t("incentive.viewDetails")}
+          tooltip={t("incentive.viewDetails")} aria-label={t("incentive.viewDetails")}
         />
+        {["Calculated", "Rejected"].includes(rowData.status) && (
+          <Button
+            icon="pi pi-send"
+            className="approve-button"
+            onClick={() => handleSubmitForApproval(rowData)}
+            tooltip="Submit for Approval" aria-label="Submit for Approval"
+          />
+        )}
         {rowData.status === "Pending Approval" && (
           <>
             <Button
               icon="pi pi-check"
               className="approve-button"
               onClick={() => handleApprove(rowData)}
-              tooltip={t("incentive.approve", "Approve")}
+              tooltip={t("incentive.approve", "Approve")} aria-label={t("incentive.approve", "Approve")}
             />
             <Button
               icon="pi pi-times"
               className="reject-button"
               onClick={() => handleReject(rowData)}
-              tooltip={t("common.reject", "Reject")}
+              tooltip={t("common.reject", "Reject")} aria-label={t("common.reject", "Reject")}
             />
           </>
         )}
@@ -399,8 +393,7 @@ const Calculations = () => {
           <Button
             icon={<div className="pr-2"><SvgAdd /></div>}
             className="main__btn__action"
-            onClick={handleNewCalculation}
-          >
+            onClick={handleNewCalculation} aria-label="Add" tooltip="Add" tooltipOptions={{ position: "top" }} >
             {t("incentive.newCalculation")}
           </Button>
         </div>
@@ -454,7 +447,7 @@ const Calculations = () => {
             className="calculations-table"
             stripedRows
             paginator
-            rows={10}
+            rows={20}
             loading={loading}
             emptyMessage="No calculations found"
           >
@@ -477,7 +470,7 @@ const Calculations = () => {
             />
             <Column
               field="agentCount"
-              header="Agents"
+              header="Sales person"
               style={{ width: "8%", textAlign: "center" }}
             />
             <Column field="submittedBy" header="Submitted By" style={{ width: "12%" }} />
@@ -548,7 +541,7 @@ const Calculations = () => {
                     />
                   </div>
                 </div>
-                <div className="program-info">
+                <div className="bv-info-box program-info">
                   <p>Selected {newCalculation.selectedPrograms.length} program(s)</p>
                   <p className="note">Only active programs are available for calculation.</p>
                 </div>
@@ -561,7 +554,7 @@ const Calculations = () => {
                 <div className="review-section">
                   <div className="review-item">
                     <label>Period:</label>
-                    <span>{newCalculation.period}</span>
+                    <span>{periodLabel(newCalculation.period)}</span>
                   </div>
                   <div className="review-item">
                     <label>Programs:</label>
@@ -573,10 +566,10 @@ const Calculations = () => {
                   </div>
                   <div className="review-item">
                     <label>Calculation Date:</label>
-                    <span>{new Date().toLocaleDateString()}</span>
+                    <span>{formatAppDate(new Date())}</span>
                   </div>
                 </div>
-                <div className="warning-note">
+                <div className="bv-note warning-note">
                   <i className="pi pi-info-circle"></i>
                   <p>This calculation will process all eligible agents for the selected programs and period. The results will require approval before payout.</p>
                 </div>
@@ -625,20 +618,26 @@ const Calculations = () => {
                   </span>
                 </div>
                 <div className="detail-item">
-                  <label>Agent Count:</label>
+                  <label>Sales persons:</label>
                   <span>{calculationDetails.agentCount}</span>
                 </div>
                 <div className="detail-item">
                   <label>Submitted By:</label>
-                  <span>{calculationDetails.submittedBy}</span>
+                  <span>{calculationDetails.submittedBy || "-"}</span>
                 </div>
+                {calculationDetails.rejectionReason && (
+                  <div className="detail-item">
+                    <label>Rejection Reason:</label>
+                    <span>{calculationDetails.rejectionReason}</span>
+                  </div>
+                )}
               </div>
             </TabPanel>
 
             <TabPanel header={`Agent Details (${calculationDetails.details?.length || 0})`}>
               {calculationDetails.details && calculationDetails.details.length > 0 ? (
                 <DataTable value={calculationDetails.details} className="detail-table">
-                  <Column field="agentName" header="Agent Name" />
+                  <Column field="agentName" header="Sales person" />
                   <Column field="program" header="Program" />
                   <Column field="achievementPercent" header="Achievement %" body={(data) => `${data.achievementPercent}%`} />
                   <Column field="baseIncentive" header="Base Incentive" body={(data) => formatCurrency(data.baseIncentive)} />
@@ -647,6 +646,11 @@ const Calculations = () => {
                   <Column field="status" header="Status" body={(data) =>
                     <Tag value={data.status} severity={data.status === "Calculated" ? "success" : "warning"} />
                   } />
+                  {["Calculated", "Rejected"].includes(calculationDetails.status) && (
+                    <Column body={(data) => (
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" tooltip="Adjust" onClick={() => handleAdjustLine(data)} aria-label="Adjust" />
+                    )} />
+                  )}
                 </DataTable>
               ) : (
                 <div className="empty-details">

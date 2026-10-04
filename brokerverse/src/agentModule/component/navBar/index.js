@@ -1,408 +1,248 @@
-import React, { useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { showLanguagePicker, useLanguageOptions } from "../../../utility/languages";
+import { ChangePasswordDialog, TwoFactorDialog } from "../../authModule/security/AccountSecurityDialogs";
 import "./index.scss";
-import { Image } from "primereact/image";
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
+import { OverlayPanel } from "primereact/overlaypanel";
 import { Dropdown } from "primereact/dropdown";
-import SvgClose from "../../../assets/agentIcon/SvgClose";
-import SvgProfile from "../../../assets/agentIcon/SvgProfile";
-import SvgHelp from "../../../assets/agentIcon/SvgHelp";
-import SvgLogOut from "../../../assets/agentIcon/SvgLogout";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../../utility/logout";
 import { useNotificationContext } from "../../../context/NotificationContext";
-import SvgArrow from "../../../assets/icons/SvgArrow";
-import Cookies from "js-cookie";
 import { useTranslation } from "react-i18next";
 import i18n from "../../../i18n";
+import InitialsAvatar from "../InitialsAvatar";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import { currentUser, displayNameOf, roleLineOf } from "../../../utility/userIdentity";
+import profileService, { PROFILE_UPDATED_EVENT } from "../../../services/profileService";
+import logger from "../../../utility/logger";
+import { openHelp } from "../../../components/HelpPanel/helpEvents";
+import { canViewFullIdentifiers, isRevealOn, setRevealOn } from "../../../utility/piiReveal";
 
-const getLanguageOptions = (t) => [
-  { label: t("common.english"), value: "en" },
-  { label: t("common.thai"), value: "th" },
-];
+export const PROFILE_PATH = "/account/profile";
+/** Notifications listed in the bell panel (the full list is on the Notifications page). */
+const PANEL_SIZE = 6;
+
+/** Unread count as shown on the bell: 1..99, then "99+". */
+export const badgeText = (count) => (count > 99 ? "99+" : String(count));
+
+/** Newest first, whatever order the list arrived in. */
+export const newestFirst = (list) =>
+  [...(list || [])].sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+
+const TYPE_ICON = {
+  LEAD_CREATED: "pi-user-plus",
+  CLAIM_CREATED: "pi-exclamation-triangle",
+  POLICY_CREATED: "pi-file",
+  POLICY_ACTIVATED: "pi-file-check",
+  QUOTE_CREATED: "pi-calculator",
+  PAYMENT_COMPLETED: "pi-wallet",
+};
 
 const AgentNavBar = () => {
-  const menuRight = useRef(null);
+  const notificationPanel = useRef(null);
   const menuProfile = useRef(null);
+  // "password" | "2fa" | "" : the account security dialog that is open
+  const [securityDialog, setSecurityDialog] = useState("");
+  // configured languages that have a translation (see utility/languages.js); the picker only when there is a choice
+  const languageOptions = useLanguageOptions();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const { notifications, unreadCount, markAsRead, deleteNotification } =
-    useNotificationContext();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, deleteNotification } = useNotificationContext();
+  const [me, setMe] = useState(() => currentUser());
 
-  // Get user data from localStorage
-  const userName = localStorage.getItem("USER_NAME") || "User";
-  const userEmail = localStorage.getItem("USER_EMAIL") || "user@example.com";
-  const currentLanguage = (i18n.language && i18n.language.startsWith("th")) ? "th" : "en";
+  // Name, initials and role names from the profile (also after the user edits it on My Profile)
+  useEffect(() => {
+    let live = true;
+    profileService
+      .getCachedProfile()
+      .then((p) => live && setMe((m) => ({ ...m, ...p })))
+      .catch(() => {});
+    const onUpdate = (e) => setMe((m) => ({ ...m, ...(e.detail || {}) }));
+    window.addEventListener(PROFILE_UPDATED_EVENT, onUpdate);
+    return () => {
+      live = false;
+      window.removeEventListener(PROFILE_UPDATED_EVENT, onUpdate);
+    };
+  }, []);
 
-  // Debug logging
-  console.log("NavBar - Unread Count:", unreadCount);
-  console.log("NavBar - Notifications:", notifications);
+  const name = displayNameOf(me);
+  const roleLine = roleLineOf(me);
+  const currentLanguage =
+    languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value;
 
   const handleLogOut = async () => {
     try {
       await logout();
     } catch (error) {
-      console.error("Logout failed:", error);
-      // Fallback: clear data and redirect
+      logger.error("Logout failed:", error);
       navigate("/login");
     }
   };
-  const handleNotificationNavigation = () => {
-    navigate("/agent/notification");
+
+  const typeLabel = (type) => {
+    const key = {
+      LEAD_CREATED: "newLeadCreated",
+      POLICY_CREATED: "policyCreated",
+      POLICY_ACTIVATED: "policyActivated",
+      PAYMENT_COMPLETED: "paymentCompleted",
+      QUOTE_CREATED: "quoteCreated",
+      CLAIM_CREATED: "claimCreated",
+    }[type];
+    return key ? t(`header.${key}`) : "";
   };
 
-  const handleProfile = () => {
-    navigate("/agent/viewprofile");
+  const latest = useMemo(() => newestFirst(notifications).slice(0, PANEL_SIZE), [notifications]);
+
+  const openNotification = async (n) => {
+    if (!n.isRead) await markAsRead(n.id);
   };
 
-  // Format notification data for display
-  const formatNotificationData = (notification) => {
-    return {
-      id: notification.id,
-      name: notification.title || t("header.notification"),
-      policyNo: notification.message || t("common.noDetails"),
-      status: getStatusFromType(notification.type),
-      date: formatDate(notification.createdAt),
-      isRead: notification.isRead,
-    };
-  };
-
-  // Get status based on notification type
-  const getStatusFromType = (type) => {
-    switch (type) {
-      case "LEAD_CREATED":
-        return t("header.newLeadCreated");
-      case "POLICY_CREATED":
-        return t("header.policyCreated");
-      case "POLICY_ACTIVATED":
-        return t("header.policyActivated");
-      case "PAYMENT_COMPLETED":
-        return t("header.paymentCompleted");
-      case "QUOTE_CREATED":
-        return t("header.quoteCreated");
-      case "CLAIM_CREATED":
-        return t("header.claimCreated");
-      default:
-        return t("header.notification");
-    }
-  };
-
-  // Format date for display (use Thai locale when language is Thai)
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const locale = currentLanguage === "th" ? "th-TH" : "en-US";
-    return date.toLocaleDateString(locale, {
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
-  };
-
-  // Handle notification click
-  const handleNotificationClick = async (notification) => {
-    if (!notification.isRead) {
-      await markAsRead(notification.id);
-    }
-  };
-
-  // Handle notification delete
-  const handleNotificationDelete = async (notificationId, e) => {
+  const removeNotification = async (id, e) => {
     e.stopPropagation();
-    await deleteNotification(notificationId);
+    await deleteNotification(id);
   };
-  const items = [
-    {
-      label: (
-        <div
-          style={{
-            fontFamily: "Nunito, Arial, sans-serif",
-            fontWeight: 500,
-            fontSize: "24px",
-            color: "#111927",
-          }}
-        >
-          {t("header.notification")}
-        </div>
-      ),
-      items: notifications.slice(0, 5).map((notification) => {
-        const item = formatNotificationData(notification);
-        return {
-          template: (
-            <div>
-              <div
-                className="grid m-0"
-                style={{
-                  padding: "1rem",
-                  borderRadius: "10px",
-                  backgroundColor: !notification.isRead
-                    ? "#fff3cd"
-                    : "transparent",
-                  borderLeft: !notification.isRead
-                    ? "4px solid #ffc107"
-                    : "none",
-                }}
-                onClick={() => handleNotificationClick(notification)}
-              >
-                <div className="col-8 md:col-8 lg:col-8">
-                  <div
-                    style={{
-                      color: "#111927",
-                      fontFamily: "Nunito, Arial, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                    }}
-                  >
-                    {item.name}
-                  </div>
-                  <div
-                    style={{
-                      color: "#6C737F",
-                      fontFamily: "Nunito, Arial, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                    }}
-                    className="mt-1"
-                  >
-                    {item.policyNo}
-                  </div>
-                  <div
-                    style={{
-                      color: "#0072d8",
-                      fontFamily: "Nunito, Arial, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "14px",
-                    }}
-                    className="mt-1"
-                  >
-                    {item.status}
-                  </div>
-                  <div
-                    style={{
-                      color: "#6C737F",
-                      fontFamily: "Nunito, Arial, sans-serif",
-                      fontWeight: 500,
-                      fontSize: "12px",
-                    }}
-                    className="mt-1"
-                  >
-                    {item.date}
-                  </div>
-                </div>
-                <div
-                  className="col-4 md:col-4 lg:col-4"
-                  style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    padding: "15px",
-                  }}
-                >
-                  <div
-                    onClick={(e) =>
-                      handleNotificationDelete(notification.id, e)
-                    }
-                  >
-                    <SvgClose />
-                  </div>
-                </div>
-              </div>
-            </div>
-          ),
-        };
-      }),
-    },
-    {
-      label: (
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            color: "#111927",
-            fontFamily: "Nunito, Arial, sans-serif",
-            fontSize: "14px",
-            fontWeight: 400,
-          }}
-          onClick={handleNotificationNavigation}
-        >
-          {t("common.seeMore")} <SvgArrow />
-        </div>
-      ),
-    },
-  ];
 
-  const Profileitems = [
+  const menuItem = (label, icon, command) => ({ label, icon: `pi ${icon}`, command, className: "bv-user-menu__item" });
+  // "Show full identifiers": holders of view:pii unmask personal identifiers for this tab (recorded in the audit trail)
+  const [revealOn, setReveal] = useState(isRevealOn());
+  const toggleReveal = () => {
+    setRevealOn(!revealOn);
+    setReveal(!revealOn);
+    window.location.reload();
+  };
+
+  const profileItems = [
     {
       label: (
-        <div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-            }}
-          >
-            {userName}
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#6C737F",
-            }}
-            className="mt-2"
-          >
-            {userEmail}
+        <div className="bv-user-menu__who">
+          <InitialsAvatar person={me} size="40px" />
+          <div className="bv-user-menu__who-text">
+            <div className="bv-user-menu__name">{name}</div>
+            {roleLine && <div className="bv-user-menu__role">{roleLine}</div>}
           </div>
         </div>
       ),
       items: [
-        {
-          label: (
-            <div
-              style={{
-                fontFamily: "Nunito, Arial, sans-serif",
-                fontWeight: 400,
-                fontSize: "16px",
-                color: "#111927",
-              }}
-              onClick={handleProfile}
-            >
-              {t("header.profile")}
-            </div>
-          ),
-          icon: (
-            <div className="mr-3">
-              <SvgProfile onClick={handleProfile} />
-            </div>
-          ),
-        },
-        {
-          label: (
-            <div
-              style={{
-                fontFamily: "Nunito, Arial, sans-serif",
-                fontWeight: 400,
-                fontSize: "16px",
-                color: "#111927",
-              }}
-            >
-              {t("header.help")}
-            </div>
-          ),
-          icon: (
-            <div className="mr-3">
-              <SvgHelp />
-            </div>
-          ),
-        },
-        {
-          label: (
-            <div
-              style={{
-                fontFamily: "Nunito, Arial, sans-serif",
-                fontWeight: 400,
-                fontSize: "16px",
-                color: "#111927",
-              }}
-              onClick={() => handleLogOut()}
-            >
-              {t("header.logout")}
-            </div>
-          ),
-          icon: (
-            <div className="mr-3">
-              <SvgLogOut />
-            </div>
-          ),
-        },
+        menuItem(t("header.profile"), "pi-user", () => navigate(PROFILE_PATH)),
+        menuItem(t("security.changePassword"), "pi-key", () => setSecurityDialog("password")),
+        menuItem(t("security.twoFactor"), "pi-shield", () => setSecurityDialog("2fa")),
+        menuItem(t("header.help"), "pi-question-circle", openHelp),
+        ...(canViewFullIdentifiers()
+          ? [menuItem(revealOn ? t("header.hideFullIdentifiers") : t("header.showFullIdentifiers"), revealOn ? "pi-eye-slash" : "pi-eye", toggleReveal)]
+          : []),
       ],
     },
+    { separator: true },
+    menuItem(t("header.logout"), "pi-sign-out", handleLogOut),
   ];
-
-  const menuStyle = {
-    width: "360px",
-    maxHeight: "100vh",
-    overflowY: "scroll",
-    left: "calc(100% - 400px)",
-  };
 
   return (
     <div className="Agentnavbar__container">
-      <div className="bdo-logo-section">
-        {/* <img
-          src="/iorta.png"
-          alt="iortaTechNxt Logo"
-          className="bdo-logo-nav"
-        /> */}
-      </div>
+      <div className="bdo-logo-section"></div>
       <div className="nav-spacer"></div>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <Dropdown
-          value={currentLanguage}
-          options={getLanguageOptions(t)}
-          onChange={(e) => i18n.changeLanguage(e.value)}
-          aria-label={t("common.language")}
-          style={{ minWidth: "100px" }}
-          className="language-selector-navbar"
-        />
-        <Menu
-          model={items}
-          popup
-          ref={menuRight}
-          id="popup_menu_right"
-          popupAlignment="right"
-          style={menuStyle}
-        />
+      <div className="bv-topbar__tools">
+        {showLanguagePicker(languageOptions) && (
+          <Dropdown
+            value={currentLanguage}
+            options={languageOptions}
+            onChange={(e) => i18n.changeLanguage(e.value)}
+            aria-label={t("common.language")}
+            className="language-selector-navbar"
+          />
+        )}
         <div className="notification-badge-container">
           <Button
+            type="button"
             icon="pi pi-bell"
-            className="p-button-text p-button-lg notification-button-hover"
-            onClick={(event) => menuRight.current.toggle(event)}
-            aria-controls="popup_menu_right"
+            className="p-button-text p-button-rounded bv-topbar__icon-btn"
+            onClick={(event) => notificationPanel.current.toggle(event)}
             aria-haspopup
-            style={{
-              position: "relative",
-              fontSize: "1.2rem",
-              color: "#6c757d",
-              border: "none",
-              background: "transparent",
-              padding: "0.5rem",
-              borderRadius: "50%",
-              transition: "all 0.3s ease",
-            }}
+            aria-controls="bv-notification-panel"
+            aria-label={unreadCount > 0 ? t("header.notificationsUnread", { count: unreadCount }) : t("header.notifications")}
           />
           {unreadCount > 0 && (
-            <span className="notification-badge">
-              {unreadCount > 99 ? "99+" : unreadCount}
+            <span className="notification-badge" aria-hidden="true">
+              {badgeText(unreadCount)}
             </span>
           )}
         </div>
+        <OverlayPanel ref={notificationPanel} id="bv-notification-panel" className="bv-notification-panel" aria-label={t("header.notifications")}>
+          <div className="bv-notification-panel__head">
+            <div className="bv-notification-panel__title">
+              {t("header.notifications")}
+              {unreadCount > 0 && <span className="bv-notification-panel__count">{t("header.unreadCount", { count: unreadCount })}</span>}
+            </div>
+            <Button
+              type="button"
+              label={t("header.markAllRead")}
+              className="p-button-text p-button-sm bv-notification-panel__mark"
+              onClick={markAllAsRead}
+              disabled={unreadCount === 0}
+            />
+          </div>
+          {latest.length === 0 ? (
+            <div className="bv-notification-panel__empty">
+              <i className="pi pi-inbox" aria-hidden="true" />
+              {t("header.noNotifications")}
+            </div>
+          ) : (
+            <ul className="bv-notification-panel__list">
+              {latest.map((n) => (
+                <li key={n.id} className={`bv-notification ${n.isRead ? "" : "is-unread"}`}>
+                  <button type="button" className="bv-notification__body" onClick={() => openNotification(n)}>
+                    <span className="bv-notification__icon" aria-hidden="true">
+                      <i className={`pi ${TYPE_ICON[n.type] || "pi-bell"}`} />
+                    </span>
+                    <span className="bv-notification__text">
+                      <span className="bv-notification__title">{n.title || typeLabel(n.type) || t("header.notification")}</span>
+                      {n.message && <span className="bv-notification__message">{n.message}</span>}
+                      <span className="bv-notification__meta">
+                        {typeLabel(n.type) && <span>{typeLabel(n.type)}</span>}
+                        <span>{formatAppDate(n.createdAt, { withTime: true })}</span>
+                      </span>
+                    </span>
+                    {!n.isRead && <span className="bv-notification__dot" aria-label={t("header.unread")} />}
+                  </button>
+                  <Button
+                    type="button"
+                    icon="pi pi-times"
+                    className="p-button-text p-button-rounded p-button-sm bv-notification__remove"
+                    aria-label={t("header.removeNotification")}
+                    onClick={(e) => removeNotification(n.id, e)}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="bv-notification-panel__foot">
+            <Button
+              type="button"
+              label={t("header.viewAllNotifications")}
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              className="p-button-text p-button-sm"
+              onClick={(e) => {
+                notificationPanel.current.hide(e);
+                navigate("/agent/notification");
+              }}
+            />
+          </div>
+        </OverlayPanel>
       </div>
-      <Menu
-        model={Profileitems}
-        popup
-        ref={menuProfile}
-        id="popup_menu_right"
-        popupAlignment="right"
-        //   style={menuStyle}
-      />
+      <Menu model={profileItems} popup ref={menuProfile} id="bv-user-menu" popupAlignment="right" className="bv-user-menu" />
       <Button
-        className="p-0"
+        type="button"
+        className="p-0 bv-topbar__avatar-btn"
         onClick={(event) => menuProfile.current.toggle(event)}
-        aria-controls="popup_menu_right"
+        aria-controls="bv-user-menu"
         aria-haspopup
+        aria-label={t("header.accountMenu", { name })}
       >
-        <Image
-          src="https://i.ibb.co/7jx27CN/Mask-group-1.png"
-          width="40px"
-          height="40px"
-          className="navbar__container__profile__image"
-        />
+        <InitialsAvatar person={me} size="40px" className="navbar__container__profile__image" />
       </Button>
+      <ChangePasswordDialog visible={securityDialog === "password"} onHide={() => setSecurityDialog("")} />
+      <TwoFactorDialog visible={securityDialog === "2fa"} onHide={() => setSecurityDialog("")} />
     </div>
   );
 };

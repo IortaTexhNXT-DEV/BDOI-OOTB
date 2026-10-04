@@ -1,27 +1,42 @@
-import SvgAgentClientIcon from "../../assets/agentIcon/SvgAgentClientIcon";
-import SvgAgentHomeIcon from "../../assets/agentIcon/SvgAgentHomeIcon";
-import SvgAgentItemsIcon from "../../assets/agentIcon/SvgAgentItemsIcon";
-import SvgAgentLeadIcon from "../../assets/agentIcon/SvgAgentLeadIcon";
-import SvgAgentPaymentIcon from "../../assets/agentIcon/SvgAgentPaymentIcon";
-import SvgClient from "../../assets/agentIcon/SvgClient";
-import SvgLead from "../../assets/agentIcon/SvgLead";
-import SvgPolicyIcon from "../../assets/agentIcon/SvgPolicyIcon";
-import SvgQuotationIcon from "../../assets/agentIcon/SvgQuotationIcon";
-import SvgAccountIcon from "../../assets/icons/SvgAccountIcon";
-import SvgMassterIcon from "../../assets/icons/SvgMassterIcon";
-import SvgReportsIcon from "../../assets/icons/SvgReportsIcon";
-import { useParams } from "react-router-dom";
-
+/**
+ * The application menu. Conventions (components/SideBar renders it):
+ *  - at most three levels: group > item, or group > sub-group > item;
+ *  - only top-level entries carry an icon (a PrimeIcons class, all the same size and colour);
+ *  - `section: true` turns a sub-group into a plain heading inside its group instead of a collapsible level (Master);
+ *  - `name` is the key of the role grants (utils/menuPermissions.js) and of the label (sidebar.<name> in en.json):
+ *    shorten a label in en.json, not here, so that grants and links keep working.
+ */
 export const menuList = [
   {
+    // the first screen of every role after sign-in: My Work with the role preset (module/MyWork); a top-level entry,
+    // not part of Operations. "/", the former Home and the former Open Items addresses lead here.
+    name: "My Work",
+    icon: "pi pi-inbox",
+    path: "/my-work",
+    // the notifications page and the user's own profile are open to every signed-in role (not part of My Work)
+    includes: [
+      "/",
+      "/my-work",
+      "/agent/home",
+      "/operations/my-work",
+      "/agent/openitems",
+      "/agent/openitems/upcomingevents",
+      "/agent/openitemslistdata",
+      "/agent/openitems/expiringpolicy",
+      "/agent/openitems/quotepending",
+      "/agent/openitems/renewalrequest",
+    ],
+    permissions: ["read:home"],
+  },
+  {
     name: "Dashboard",
-    icon: <SvgAgentHomeIcon color="#0072d8" />,
+    icon: "pi pi-chart-bar",
     submenu: [
       {
         id: 1,
         name: "Executive Dashboard",
         path: "/executive/dashboard",
-        includes: ["/executive/dashboard", "/"],
+        includes: ["/executive/dashboard"],
         permissions: ["read:executive-dashboard"],
       },
       {
@@ -33,608 +48,154 @@ export const menuList = [
       },
       {
         id: 3,
-        name: "Underwriting Dashboard",
-        path: "/underwriting/dashboard",
-        includes: ["/underwriting/dashboard"],
-        permissions: ["read:underwriting-dashboard"],
+        name: "Processing Dashboard",
+        path: "/processing/dashboard",
+        includes: ["/processing/dashboard"],
+        permissions: ["read:processing-dashboard"],
       },
       {
         id: 4,
-        name: "Agent Dashboard",
-        path: "/agent/home",
-        includes: ["/agent/home"],
+        name: "Sales Dashboard",
+        path: "/sales/dashboard",
+        includes: ["/sales/dashboard"],
         permissions: ["read:agent-dashboard"],
       },
     ],
   },
   {
-    name: "Product Configurator",
-    icon: <SvgMassterIcon />,
-    submenu: [
-      {
-        id: 1,
-        name: "Dashboard",
-        path: "/product-configurator/dashboard",
-        includes: ["/product-configurator/dashboard"],
-        permissions: ["read:product-configurator-dashboard"],
-      },
-      {
-        id: 2,
-        name: "Product Templates",
-        path: "/product-configurator/templates",
-        includes: [
-          "/product-configurator/templates",
-          "/product-configurator/template/",
-          "/product-configurator/create",
-        ],
-        permissions: ["read:product-templates"],
-      },
-      {
-        id: 3,
-        name: "Coverage Builder",
-        path: "/product-configurator/coverages",
-        includes: ["/product-configurator/coverages"],
-        permissions: ["read:product-coverages"],
-      },
-      {
-        id: 4,
-        name: "Rating Engine",
-        path: "/product-configurator/rating",
-        includes: ["/product-configurator/rating"],
-        permissions: ["read:product-rating"],
-      },
-      {
-        id: 5,
-        name: "Underwriting Rules",
-        path: "/product-configurator/underwriting",
-        includes: ["/product-configurator/underwriting"],
-        permissions: ["read:product-underwriting"],
-      },
-      {
-        id: 6,
-        name: "Document Manager",
-        path: "/product-configurator/documents",
-        includes: ["/product-configurator/documents"],
-        permissions: ["read:product-documents"],
-      },
-      {
-        id: 7,
-        name: "Approval Workflows",
-        path: "/product-configurator/workflows",
-        includes: ["/product-configurator/workflows"],
-        permissions: ["read:product-workflows"],
-      },
-      {
-        id: 8,
-        name: "Market Mapping",
-        path: "/product-configurator/market-mapping",
-        includes: ["/product-configurator/market-mapping"],
-        permissions: ["read:product-market-mapping"],
-      },
-      {
-        id: 10,
-        name: "Risk Mapping",
-        path: "/product-configurator/risk-mapping",
-        includes: [
-          "/product-configurator/risk-mapping",
-          "/product-configurator/risk-mapping/",
-        ],
-        permissions: [
-          "read:product-risk-mapping",
-          "read:product-templates",
-        ],
-      },
-      {
-        id: 9,
-        name: "Product Analytics",
-        path: "/product-configurator/analytics",
-        includes: ["/product-configurator/analytics"],
-        permissions: ["read:product-analytics"],
-      },
-    ],
-  },
-  {
-    name: "Master",
-    icon: <SvgMassterIcon />,
-    submenu: [
-      {
-        id: 0,
-        name: "System Settings",
-        path: "/master/configuration/system-settings",
-        includes: ["/master/configuration/system-settings"],
-      },
-      {
-        id: 1,
-        name: "Generals",
-        submenu: [
-          {
-            id: 1,
-            name: "Organization",
-            path: "/master/generals/organization",
-            submenu: [
-              {
-                id: 1,
-                name: "Company",
-                path: "/master/generals/organization/companymaster",
-                includes: [
-                  "/master/generals/organization/companymaster",
-                  "/master/generals/organization/companymaster/add/",
-                  "/master/generals/organization/companymaster/edit/",
-                  "/master/generals/organization/companymaster/view/",
-                ],
-              },
-
-              {
-                id: 2,
-                name: "Branch",
-                path: "/master/generals/organization/branchmaster",
-                includes: [
-                  "/master/generals/organization/branchmaster",
-                  "/master/generals/organization/branchmaster/add/",
-                  "/master/generals/organization/branchmaster/edit/",
-                  "/master/generals/organization/branchmaster/view/",
-                ],
-              },
-            ],
-          },
-          {
-            id: 2,
-            name: "Insurance Management",
-            path: "/master/generals/organization",
-            submenu: [
-              {
-                id: 1,
-                name: "Insurance Company",
-                path: "/master/generals/insurancemanagement/insurancecompany",
-                includes: [
-                  "/master/generals/insurancemanagement/insurancecompany",
-                  "/master/generals/insurancemanagement/insurancecompany/add/",
-                  "/master/generals/insurancemanagement/insurancecompany/edit/",
-                  "/master/generals/insurancemanagement/insurancecompany/view/",
-                ],
-              },
-              {
-                id: 2,
-                name: "Line of Business",
-                path: "/master/generals/insurancemanagement/lineofbusiness",
-                includes: [
-                  "/master/generals/insurancemanagement/lineofbusiness",
-                  "/master/generals/insurancemanagement/lineofbusiness/add/",
-                  "/master/generals/insurancemanagement/lineofbusiness/edit/",
-                  "/master/generals/insurancemanagement/lineofbusiness/view/",
-                ],
-              },
-              {
-                id: 3,
-                name: "Product",
-                path: "/master/generals/insurancemanagement/productmaster",
-                includes: [
-                  "/master/generals/insurancemanagement/productmaster",
-                  "/master/generals/insurancemanagement/productmaster/add/",
-                  "/master/generals/insurancemanagement/productmaster/edit/",
-                  "/master/generals/insurancemanagement/productmaster/view/",
-                ],
-              },
-              // {
-              //   id: 4,
-              //   name: "Policy Type",
-              //   path: "/master/generals/insurancemanagement/policytype",
-              // },
-              {
-                id: 5,
-                name: "Cover",
-                path: "/master/generals/insurancemanagement/cover",
-                includes: [
-                  "/master/generals/insurancemanagement/cover",
-                  "/master/generals/insurancemanagement/cover/add/",
-                  "/master/generals/insurancemanagement/cover/view/",
-                  "/master/generals/insurancemanagement/cover/edit/",
-                ],
-              },
-              {
-                id: 6,
-                name: "Signatories",
-                path: "/master/generals/insurancemanagement/signatories",
-                includes: [
-                  "/master/generals/insurancemanagement/signatories",
-                  "/master/generals/insurancemanagement/signatories/add/",
-                  "/master/generals/insurancemanagement/signatories/edit/",
-                  "/master/generals/insurancemanagement/signatories/view/",
-                ],
-              },
-              {
-                id: 7,
-                name: "Vehicle",
-                path: "/master/generals/insurancemanagement/vehicle",
-                includes: [
-                  "/master/generals/insurancemanagement/vehicle",
-                  "/master/generals/insurancemanagement/vehicle/add/",
-                  "/master/generals/insurancemanagement/vehicle/edit/",
-                  "/master/generals/insurancemanagement/vehicle/view/",
-                ],
-              },
-            ],
-          },
-          {
-            id: 3,
-            name: "Location",
-            path: "/master/generals/organization",
-            submenu: [
-              {
-                id: 1,
-                name: "Country",
-                path: "/master/generals/location/country",
-                includes: [
-                  "/master/generals/location/country",
-                  "/master/generals/location/country/add",
-                  "/master/generals/location/country/edit",
-                  "/master/generals/location/country/view",
-                ],
-              },
-              {
-                id: 2,
-                name: "State",
-                path: "/master/generals/location/state",
-                includes: [
-                  "/master/generals/location/state",
-                  "/master/generals/location/state/add",
-                  "/master/generals/location/state/edit",
-                  "/master/generals/location/state/view",
-                ],
-              },
-              {
-                id: 3,
-                name: "City Master",
-                path: "/master/generals/location/city",
-                includes: [
-                  "/master/generals/location/city",
-                  "/master/generals/location/city/add",
-                  "/master/generals/location/city/edit",
-                  "/master/generals/location/city/view",
-                ],
-              },
-            ],
-          },
-          {
-            id: 4,
-            name: "Commission",
-            path: "/master/generals/commission",
-            includes: [
-              "/master/generals/commission",
-              "/master/generals/commission/addcommission",
-              "/master/generals/commission/editcommission",
-              "/master/generals/commission/viewcommission/",
-            ],
-          },
-          {
-            id: 5,
-            name: "Employee Management",
-            path: "/master/generals/organization",
-            submenu: [
-              {
-                id: 1,
-                name: "Hierarchy",
-                path: "/master/generals/employeemanagement/hierarchy",
-                includes: [
-                  "/master/generals/employeemanagement/hierarchy",
-                  "/master/generals/employeemanagement/hierarchy/add",
-                  "/master/generals/employeemanagement/hierarchy/edit/",
-                  "/master/generals/employeemanagement/hierarchy/view/",
-                ],
-              },
-              {
-                id: 2,
-                name: "Designation",
-                path: "/master/generals/employeemanagement/designation",
-                includes: [
-                  "/master/generals/employeemanagement/designation",
-                  "/master/generals/employeemanagement/designation/add/",
-                  "/master/generals/employeemanagement/designation/edit/",
-                  "/master/generals/employeemanagement/designation/view/",
-                ],
-              },
-              {
-                id: 3,
-                name: "Employee",
-                path: "/master/generals/employeemanagement/employee",
-                includes: [
-                  "/master/generals/employeemanagement/employee",
-                  "/master/generals/employeemanagement/employee/add/",
-                  "/master/generals/employeemanagement/employee/edit/",
-                  "/master/generals/employeemanagement/employee/view/",
-                ],
-              },
-            ],
-          },
-          {
-            id: 6,
-            name: "User Management",
-            path: "/master/generals/organization",
-            submenu: [
-              {
-                id: 1,
-                name: "User",
-                path: "/master/generals/usermanagement/user",
-                includes: [
-                  "/master/generals/usermanagement/user",
-                  "/master/generals/usermanagement/user/add",
-                  "/master/generals/usermanagement/user/edit/",
-                  "/master/generals/usermanagement/user/view/",
-                ],
-              },
-              {
-                id: 2,
-                name: "Role",
-                path: "/master/generals/usermanagement/role",
-                includes: [
-                  "/master/generals/usermanagement/role",
-                  "/master/generals/usermanagement/role/add/",
-                  "/master/generals/usermanagement/role/edit/",
-                  "/master/generals/usermanagement/role/view/",
-                ],
-              },
-            ],
-          },
-        ],
-      },
-      {
-        id: 2,
-        name: "Finance",
-        submenu: [
-          {
-            id: 1,
-            name: "Premium Account Setup",
-            path: "/master/finance/premium-account-setup",
-            includes: ["/master/finance/premium-account-setup"],
-          },
-          {
-            id: 2,
-            name: "Miscellaneous Account Setup",
-            path: "/master/finance/miscellaneous-account-setup",
-            includes: ["/master/finance/miscellaneous-account-setup"],
-          },
-          {
-            id: 3,
-            name: "Customer Account Setup",
-            path: "/master/finance/customer-account-setup",
-            includes: ["/master/finance/customer-account-setup"],
-          },
-          {
-            id: 4,
-            name: "RI-Claims Account Setup",
-            path: "/master/finance/ri-claim-account-setup",
-            includes: ["/master/finance/ri-claim-account-setup"],
-          },
-          {
-            id: 13,
-            name: "Transaction code",
-            path: "/master/finance/transactioncode",
-            includes: [
-              "/master/finance/transactioncode",
-              "/master/finance/transactioncode/addtransactioncode",
-              "/master/finance/transactioncode/transactioncodeedit",
-              "/master/finance/transactioncode/transactioncodedetails",
-            ],
-          },
-          {
-            id: 14,
-            name: "Currency",
-            path: "/master/finance/currency",
-            includes: [
-              "/master/finance/currency",
-              "/master/finance/currency/addcurrency",
-              "/master/finance/currency/editcurrency",
-              "/master/finance/currency/viewcurrency",
-            ],
-          },
-          {
-            id: 15,
-            name: "Exchange Rate",
-            path: "/master/finance/exchangerate",
-            includes: [
-              "/master/finance/exchangerate",
-              "/master/finance/exchangerate/addexchange",
-              "/master/finance/exchangerate/saveandeditexchange",
-              "/master/finance/exchangerate/viewexchange",
-            ],
-          },
-          {
-            id: 16,
-            name: "Bank",
-            path: "/master/finance/bank",
-            includes: [
-              "/master/finance/bank",
-              "/master/finance/bank/addbankmaster",
-              "/master/finance/bank/accountdataview",
-              "/master/finance/bank/accountdataview/addaccountdetail",
-              "/master/finance/bank/accountdataview/viewaccountdetail",
-              "/master/finance/bank/accountdataview/editaccountdetail",
-            ],
-          },
-          {
-            id: 5,
-            name: "Account Category",
-            path: "/master/finance/accountcategory",
-            includes: ["/master/finance/accountcategory"],
-          },
-          {
-            id: 6,
-            name: "Main Account",
-            path: "/master/finance/mainaccount",
-            includes: [
-              "/master/finance/mainaccount",
-              "/master/finance/mainaccount/addmainaccount",
-              "/master/finance/mainaccount/editmainaccount",
-              "/master/finance/mainaccount/viewmainaccount",
-            ],
-          },
-          {
-            id: 7,
-            name: "Sub Account",
-            path: "/master/finance/subaccount",
-            includes: [
-              "/master/finance/subaccount",
-              "/master/finance/subaccount/subaccountedit",
-              "/master/finance/subaccount/subaccountdetails",
-            ],
-          },
-          {
-            id: 8,
-            name: "Taxation",
-            path: "/master/finance/taxation",
-            includes: [
-              "/master/finance/taxation",
-              "/master/finance/taxation/addtaxation",
-              "/master/finance/taxation/taxationedit",
-              "/master/finance/taxation/taxationdetails",
-            ],
-          },
-          {
-            id: 9,
-            name: "Petty cash",
-            path: "/master/finance/pettycash",
-            includes: [
-              "/master/finance/pettycash",
-              "/master/finance/pettycash/addpettycash",
-              "/master/finance/pettycash/editpettycash/",
-              "/master/finance/pettycash/pettycashdetail/",
-            ],
-          },
-          {
-            id: 10,
-            name: "Remittance Master",
-            path: "/master/finance/remittance",
-            includes: [
-              "/master/finance/remittance",
-              "/master/finance/remittance/automatedremittance/add",
-              "/master/finance/remittance/automatedremittance/edit",
-              "/master/finance/remittance/automatedremittance/view",
-              "/master/finance/remittance/statementtemplate/add",
-              "/master/finance/remittance/statementtemplate/edit",
-              "/master/finance/remittance/statementtemplate/view",
-              "/master/finance/remittance/settlementparameter/add",
-              "/master/finance/remittance/settlementparameter/edit",
-              "/master/finance/remittance/settlementparameter/view",
-              "/master/finance/remittance/reconciliationmaster/add",
-              "/master/finance/remittance/reconciliationmaster/edit",
-              "/master/finance/remittance/reconciliationmaster/view",
-              "/master/finance/remittance/bulkprocessingmaster/add",
-              "/master/finance/remittance/bulkprocessingmaster/edit",
-              "/master/finance/remittance/bulkprocessingmaster/view",
-              "/master/finance/remittance/schedulemaster/add",
-              "/master/finance/remittance/schedulemaster/edit",
-              "/master/finance/remittance/schedulemaster/view",
-              "/master/finance/remittance/electronictransfermaster/add",
-              "/master/finance/remittance/electronictransfermaster/edit",
-              "/master/finance/remittance/electronictransfermaster/view",
-              "/master/finance/remittance/approvalworkflowmaster/add",
-              "/master/finance/remittance/approvalworkflowmaster/edit",
-              "/master/finance/remittance/approvalworkflowmaster/view",
-              "/master/finance/remittance/exceptionmaster/add",
-              "/master/finance/remittance/exceptionmaster/edit",
-              "/master/finance/remittance/exceptionmaster/view",
-              "/master/finance/remittance/reporttemplatemaster/add",
-              "/master/finance/remittance/reporttemplatemaster/edit",
-              "/master/finance/remittance/reporttemplatemaster/view",
-              "/master/finance/remittance/agencybillmaster/add",
-              "/master/finance/remittance/agencybillmaster/edit",
-              "/master/finance/remittance/agencybillmaster/view",
-              "/master/finance/remittance/directbillmaster/add",
-              "/master/finance/remittance/directbillmaster/edit",
-              "/master/finance/remittance/directbillmaster/view",
-              "/master/finance/remittance/adjustmentmaster/add",
-              "/master/finance/remittance/adjustmentmaster/edit",
-              "/master/finance/remittance/adjustmentmaster/view",
-              "/master/finance/remittance/notificationmaster/add",
-              "/master/finance/remittance/notificationmaster/edit",
-              "/master/finance/remittance/notificationmaster/view",
-              "/master/finance/remittance/historyconfiguration/add",
-              "/master/finance/remittance/historyconfiguration/edit",
-              "/master/finance/remittance/historyconfiguration/view",
-              "/master/finance/remittance/analyticsconfiguration/add",
-              "/master/finance/remittance/analyticsconfiguration/edit",
-              "/master/finance/remittance/analyticsconfiguration/view",
-            ],
-          },
-          {
-            id: 11,
-            name: "Incentive Programs",
-            path: "/master/incentive/programs/view",
-            includes: [
-              "/master/incentive/programs/add",
-              "/master/incentive/programs/edit",
-              "/master/incentive/programs/view",
-            ],
-          },
-          {
-            id: 12,
-            name: "Reinsurance Treaty",
-            path: "/master/reinsurance/treaty",
-            includes: [
-              "/master/reinsurance/treaty",
-              "/master/reinsurance/treaty/add",
-              "/master/reinsurance/treaty/edit",
-              "/master/reinsurance/treaty/view",
-            ],
-          },
-        ],
-      },
-    ],
-  },
-  {
     name: "Operations",
-    icon: <SvgReportsIcon />,
+    icon: "pi pi-briefcase",
     submenu: [
       {
-        name: "Home",
-        icon: <SvgAgentHomeIcon color="#9DA4AE" />,
-        path: "/",
-        includes: [
-          "/",
-          "/agent/notification",
-          "/agent/viewprofile",
-          "/agent/openitems",
-          "/agent/openitems/upcomingevents",
+        // Sales & Marketing: prospects, quick quotes for package products, requests for quotation (broker slips) and
+        // quotations for non-package risks, and the placement slips that bind them with the insurers
+        id: 29,
+        name: "Sales & Marketing",
+        submenu: [
+          {
+            id: 30,
+            // the prospect (lead) list and the motor quote and policy conversion screens opened from it
+            name: "Prospects",
+            path: "/agent/leadlisting",
+            includes: [
+              "/agent/createlead/employee-benefit",
+              "/agent/createlead/fire-allied-perils",
+              "/agent/leadlisting",
+              "/agent/createlead",
+              "/createquote/policydetails/createquote/",
+              "/createquote/coveragedetails/coveragecreate/",
+              "/createquote/accessories/accessoriescreate/",
+              "/agent/createquote/ordersummary",
+              "/agent/quotedetailview",
+              "/agent/convertpolicy/customerinfo/view/",
+              "/agent/convertpolicy/customerinfo/fire/new/",
+              "/agent/convertpolicy/uploadvehiclephotos",
+              "/agent/coveragedetailedview",
+              "/agent/policyapproval",
+              "/agent/uploadpolicy",
+              "/agent/createquote/policydetails/createquote/",
+              "/agent/createquote/coveragedetails/coveragecreate/",
+              "/agent/leadedit",
+              "/agent/createquote/accessories/accessoriescreate/",
+              "/agent/quotelisting",
+              "/agent/convertpolicy/customerinfo/edit/",
+              "/agent/editquote/policydetails/quotedetails/",
+              "/agent/quotedetailedit",
+            ],
+            permissions: ["read:leads"],
+          },
+          {
+            id: 31,
+            name: "Quick Quote",
+            path: "/sales/quick-quote",
+            includes: ["/sales/quick-quote"],
+            permissions: ["write:quotations"],
+          },
+          {
+            // package products: premiums of several insurers side by side from their rate tables
+            id: 35,
+            name: "Compare Insurers",
+            path: "/sales/compare-insurers",
+            includes: ["/sales/compare-insurers"],
+            permissions: ["write:quotations"],
+          },
+          {
+            // the broker slip is the request for quotation sent to several insurers
+            id: 32,
+            name: "Request for Quotation",
+            path: "/placement/broker-slips",
+            includes: ["/placement/broker-slips"],
+            permissions: ["read:quotations"],
+          },
+          {
+            id: 33,
+            name: "Quotations",
+            path: "/agent/Quotation",
+            includes: [
+              "/agent/Quotation",
+              "/agent/employee-benefit/create-quote",
+              "/agent/employee-benefit/create-quote-employeebulkupload",
+              "/agent/employee-benefit/create-quote-Coverage-details",
+              "/agent/employee-benefit/create-quote-order-summary",
+              "/agent/employee-benefit/create-quote-quote-details",
+            ],
+            permissions: ["read:quotations"],
+          },
+          {
+            // firm orders to the insurers, binding and policy issuance; direct policy entry
+            id: 34,
+            name: "Placement Slips",
+            path: "/placement/placement-slips",
+            includes: ["/placement/placement-slips", "/placement/record-issued-policy"],
+            permissions: ["read:quotations"],
+          },
+          // distribution: lead assignment and team view, brand-new vehicle programmes of dealers and banks, client
+          // comparison reports and marketing campaigns to consenting clients
+          {
+            id: 36,
+            name: "Lead Assignment",
+            path: "/sales/lead-assignment",
+            includes: ["/sales/lead-assignment"],
+            permissions: ["read:leads"],
+          },
+          {
+            id: 37,
+            name: "Dealer Programmes",
+            path: "/sales/dealer-programmes",
+            includes: ["/sales/dealer-programmes"],
+            permissions: ["read:motor-programmes"],
+          },
+          {
+            id: 38,
+            name: "Comparison Reports",
+            path: "/sales/comparison-reports",
+            includes: ["/sales/comparison-reports"],
+            permissions: ["read:quotations"],
+          },
+          {
+            id: 39,
+            name: "Campaigns",
+            path: "/sales/campaigns",
+            includes: ["/sales/campaigns"],
+            permissions: ["read:campaigns"],
+          },
+          // calls, meetings, e-mails and visits of the account executives, and the activity report
+          {
+            id: 50,
+            name: "Sales Activities",
+            path: "/sales/activities",
+            includes: ["/sales/activities"],
+            permissions: ["read:sales-activities"],
+          },
         ],
-        permissions: ["read:home"],
-      },
-      {
-        name: "Leads/Prospects",
-        icon: <SvgAgentLeadIcon color="#9DA4AE" />,
-        path: "/agent/leadlisting",
-        includes: [
-          "/agent/createlead/employee-benefit",
-          "/agent/createlead/fire-allied-perils",
-          "/agent/leadlisting",
-          "/agent/createlead",
-          "/createquote/policydetails/createquote/",
-          "/createquote/coveragedetails/coveragecreate/",
-          "/createquote/accessories/accessoriescreate/",
-          "/agent/createquote/ordersummary",
-          "/agent/quotedetailview",
-          "/agent/convertpolicy/customerinfo/view/",
-          "/agent/convertpolicy/customerinfo/fire/new/",
-          "/agent/convertpolicy/uploadvehiclephotos",
-          "/agent/coveragedetailedview",
-          "/agent/policyapproval",
-          "/agent/uploadpolicy",
-          "/agent/createquote/policydetails/createquote/",
-          "/agent/createquote/coveragedetails/coveragecreate/",
-          "/agent/leadedit",
-          "/agent/createquote/accessories/accessoriescreate/",
-          "/agent/quotelisting",
-          "/agent/convertpolicy/customerinfo/edit/",
-          "/agent/editquote/policydetails/quotedetails/",
-          "/agent/quotedetailedit",
-        ],
-        permissions: ["read:leads"],
       },
       {
         name: "Clients",
-        icon: <SvgAgentClientIcon color="#9DA4AE" />,
         path: "/agent/clientlisting",
         includes: [
           "/agent/clientlisting",
+          // client onboarding before the first policy (customer due diligence)
+          "/agent/client-onboarding",
           "/agent/clientedit",
           "/agent/clientview/",
           "/agent/policydetailedview",
@@ -675,22 +236,7 @@ export const menuList = [
         permissions: ["read:clients"],
       },
       {
-        name: "Quotation",
-        icon: <SvgQuotationIcon color="#9DA4AE" />,
-        path: "/agent/Quotation",
-        includes: [
-          "/agent/Quotation",
-          "/agent/employee-benefit/create-quote",
-          "/agent/employee-benefit/create-quote-employeebulkupload",
-          "/agent/employee-benefit/create-quote-Coverage-details",
-          "/agent/employee-benefit/create-quote-order-summary",
-          "/agent/employee-benefit/create-quote-quote-details",
-        ],
-        permissions: ["read:quotations"],
-      },
-      {
         name: "Policy",
-        icon: <SvgPolicyIcon color="#9DA4AE" />,
         path: "/agent/policy",
         includes: [
           "/agent/policy",
@@ -699,34 +245,41 @@ export const menuList = [
         ],
         permissions: ["read:policies"],
       },
+      // one policy for many vehicles, and marine cargo open covers with their certificates and declarations
+      {
+        name: "Fleet Schedules",
+        path: "/operations/fleet-schedules",
+        includes: ["/operations/fleet-schedules"],
+        permissions: ["read:fleet"],
+      },
+      {
+        name: "Marine Open Covers",
+        path: "/operations/open-covers",
+        includes: ["/operations/open-covers"],
+        permissions: ["read:marine"],
+      },
 
       {
         name: "Claims",
-        icon: <SvgAgentItemsIcon color="#9DA4AE" />,
         path: "/agent/claim",
         includes: ["/agent/claim"],
         permissions: ["read:claims"],
       },
       {
         id: 9,
-        icon: <SvgAgentItemsIcon color="#9DA4AE" />,
         name: "Renewals",
         submenu: [
           {
             id: 18,
             name: "Renewal Policy",
-            // icon: <SvgPolicyIcon color="#9DA4AE" />,
             path: "/agent/expired-policies",
             includes: ["/agent/expired-policies"],
-            // permissions: ["read:renewals"],
           },
           {
             id: 19,
             name: "Renewal Batch",
-            // icon: <SvgPolicyIcon color="#9DA4AE" />,
             path: "/agent/renewal-batch",
             includes: ["/agent/renewal-batch"],
-            // permissions: ["read:renewals"],
           },
           {
             id: 1,
@@ -767,31 +320,28 @@ export const menuList = [
         ],
       },
       {
-        name: "Open Items",
-        icon: <SvgAgentItemsIcon color="#9DA4AE" />,
-        path: "/agent/openitemslistdata",
-        includes: [
-          "/agent/openitemslistdata",
-          "/agent/openitemslistdata",
-          "/agent/openitems/expiringpolicy",
-          "/agent/openitems/quotepending",
-
-          "/agent/openitems/renewalrequest",
-        ],
-        permissions: ["read:openitems"],
-      },
-      {
         name: "Payments",
-        icon: <SvgAgentPaymentIcon color="#9DA4AE" />,
         path: "/agent/payments",
         includes: ["/agent/payments"],
         permissions: ["read:payments"],
       },
+      {
+        // CTPL certificates of cover: COC series, authentication with the IC-accredited provider, unauthenticated report
+        name: "CTPL Authentication",
+        path: "/operations/ctpl-authentication",
+        includes: ["/operations/ctpl-authentication"],
+        permissions: ["read:policies"],
+      },
+      // cover notes, cancellation with computed return premium, claim document checklist and motor claim repairs
+      { id: 40, name: "Cover Notes", path: "/operations/cover-notes", includes: ["/operations/cover-notes"], permissions: ["read:policies"] },
+      { id: 41, name: "Policy Cancellation", path: "/operations/policy-cancellation", includes: ["/operations/policy-cancellation"], permissions: ["read:endorsements"] },
+      { id: 42, name: "Claim Documents", path: "/operations/claim-documents", includes: ["/operations/claim-documents"], permissions: ["read:claims"] },
+      { id: 43, name: "Motor Claim Repairs", path: "/operations/motor-claim-repairs", includes: ["/operations/motor-claim-repairs"], permissions: ["read:claims"] },
     ],
   },
   {
     name: "Accounts",
-    icon: <SvgAccountIcon />,
+    icon: "pi pi-wallet",
     submenu: [
       {
         id: 1,
@@ -803,45 +353,67 @@ export const menuList = [
           "/accounts/receipts/addreceiptedit",
           "/accounts/receipts/paymentdetails",
           "/accounts/receipts",
+          // finance verifies payments captured on a policy (linked from the "Premium payment to verify" notification)
+          "/agent/policy/paymentoptions",
+          "/agent/policy/paymentconfirmation",
         ],
         permissions: ["read:receipts"],
       },
-      {
+  {
         id: 12,
         name: "Collections",
         path: "/agent/collections",
         includes: ["/agent/collections", "/agent/collections/aging-report"],
         permissions: ["read:collections"],
       },
-      {
-        id: 13,
-        name: "Accounting Query",
-        path: "/agent/accounting/query",
-        includes: ["/agent/accounting/query"],
-        permissions: ["read:accounting"],
+  {
+        id: 24,
+        name: "Credit Control",
+        submenu: [
+          { id: 1, name: "Instalment Plans", path: "/accounts/credit-control/instalments", includes: ["/accounts/credit-control/instalments"] },
+          { id: 2, name: "Premium Warranty Monitor", path: "/accounts/credit-control/warranty", includes: ["/accounts/credit-control/warranty"] },
+          { id: 3, name: "Client Credit Limits", path: "/accounts/credit-control/limits", includes: ["/accounts/credit-control/limits"] },
+          { id: 4, name: "Remittance Ageing", path: "/accounts/credit-control/remittance-ageing", includes: ["/accounts/credit-control/remittance-ageing"] },
+        ],
       },
-      {
-        id: 14,
-        name: "All Clients Accounting",
-        path: "/agent/accounting/all-clients-details",
-        includes: ["/agent/accounting/all-clients-details"],
-        permissions: ["read:accounting"],
+  // post-dated cheques, claims paid through the broker, accounts payable and fixed assets
+  {
+        id: 40,
+        name: "Post-Dated Cheques",
+        path: "/accounts/post-dated-cheques",
+        includes: ["/accounts/post-dated-cheques"],
+        permissions: ["read:receipts"],
       },
-      {
-        id: 15,
-        name: "Open Entry Matching",
-        path: "/accounts/open-entry-matching",
-        includes: ["/accounts/open-entry-matching"],
-        permissions: ["read:accounting"],
+  {
+        id: 41,
+        name: "Claims Settlements",
+        path: "/accounts/claims-settlements",
+        includes: ["/accounts/claims-settlements"],
+        permissions: ["read:receipts"],
       },
-      {
-        id: 16,
-        name: "Open Entry Un-Matching",
-        path: "/accounts/open-entry-unmatching",
-        includes: ["/accounts/open-entry-unmatching"],
-        permissions: ["read:accounting"],
+  {
+        id: 42,
+        name: "Payables",
+        submenu: [
+          { id: 1, name: "Supplier Invoices", path: "/accounts/payables/invoices", includes: ["/accounts/payables/invoices"] },
+          { id: 2, name: "Supplier Payments", path: "/accounts/payables/payments", includes: ["/accounts/payables/payments"] },
+          { id: 3, name: "AP Ageing", path: "/accounts/payables/ageing", includes: ["/accounts/payables/ageing"] },
+          { id: 4, name: "Suppliers", path: "/accounts/payables/suppliers", includes: ["/accounts/payables/suppliers"] },
+          // BIR Form 2307 of the expanded withholding tax withheld from suppliers
+          { id: 5, name: "Supplier 2307", path: "/accounts/payables/2307", includes: ["/accounts/payables/2307"] },
+        ],
       },
-      {
+  {
+        id: 43,
+        name: "Fixed Assets",
+        submenu: [
+          { id: 1, name: "Asset Register", path: "/accounts/fixed-assets/register", includes: ["/accounts/fixed-assets/register"] },
+          { id: 2, name: "Depreciation Run", path: "/accounts/fixed-assets/depreciation", includes: ["/accounts/fixed-assets/depreciation"] },
+          // sale or write-off of an asset and the disposal register
+          { id: 3, name: "Disposals", path: "/accounts/fixed-assets/disposals", includes: ["/accounts/fixed-assets/disposals"] },
+        ],
+      },
+  {
         id: 2,
         name: "Disbursement",
         path: "/accounts/paymentvoucher",
@@ -856,96 +428,15 @@ export const menuList = [
         ],
         permissions: ["read:disbursements"],
       },
-      {
-        id: 3,
-        name: "Petty Cash",
-        permissions: ["read:pettycash"],
-        submenu: [
-          {
-            id: 1,
-            name: "Initiate",
-            path: "/accounts/pettycash/pettycashcodeinitiate",
-            includes: [
-              "/accounts/pettycash/pettycashcodeinitiate",
-              "/accounts/pettycash/pettycashcodeinitiate/initiate",
-              "/accounts/pettycash/PettyCashCodeDetails",
-            ],
-          },
-          {
-            id: 2,
-            name: "Request",
-            path: "/accounts/pettycash/pettycashrequest",
-            includes: [
-              "/accounts/pettycash/pettycashrequest",
-              "/accounts/pettycash/addrequest/add/",
-              "/accounts/pettycash/addrequesttable",
-              "/accounts/pettycash/request",
-              "/accounts/pettycash/editrequestform/edit/",
-              "/accounts/pettycash/editrequestform/view/",
-            ],
-          },
-          {
-            id: 3,
-            name: "Disbursement",
-            path: "/accounts/pettycash/disbursement",
-            includes: [
-              "/accounts/pettycash/disbursement",
-              "/accounts/pettycash/adddisbursement",
-              "/accounts/pettycash/adddisbursementtable",
-              "/accounts/pettycash/disbursementdetailview",
-            ],
-          },
-          {
-            id: 4,
-            name: "Receipts",
-            path: "/accounts/pettycash/receipts",
-            includes: [
-              "/accounts/pettycash/receipts",
-              "/accounts/pettycash/addreceipts",
-              "/accounts/pettycash/receiptlist",
-              "/accounts/pettycash/addreceiptstable",
-            ],
-          },
-          {
-            id: 5,
-            name: "Replenish",
-            path: "/accounts/pettycash/replenish",
-            includes: [
-              "/accounts/pettycash/replenish",
-              "/accounts/pettycash/addreplenish",
-              "/accounts/pettycash/addreplenishtable",
-              "/accounts/pettycash/replenishtdetailview",
-            ],
-          },
-        ],
+  {
+        // payment vouchers paid by a bank's bulk credit / InstaPay / PESONet upload file
+        id: 30,
+        name: "Bank Payment Files",
+        path: "/accounts/bank-payment-files",
+        includes: ["/accounts/bank-payment-files"],
+        permissions: ["read:disbursements"],
       },
-
-      {
-        id: 4,
-        name: "Journal Voucher",
-        path: "/accounts/journalvoucher",
-        includes: [
-          "/accounts/journalvoucher",
-          "/accounts/journalvoucher/addjournalvoucture",
-          "/accounts/journalvoucher/detailsjournalvocture/",
-        ],
-        permissions: ["read:journalvoucher"],
-      },
-      {
-        id: 5,
-        name: "Correction JV",
-        path: "/accounts/correctionsjv/correctionsjvdetails",
-        includes: ["/accounts/correctionsjv/correctionsjvdetails"],
-        permissions: ["read:correctionjv"],
-      },
-      {
-        id: 6,
-        name: "Reversal JV",
-        path: "/accounts/reversaljv/reversaljvdetails",
-        includes: ["/accounts/reversaljv/reversaljvdetails"],
-        permissions: ["read:reversaljv"],
-      },
-      {
+  {
         id: 7,
         name: "Remittance",
         submenu: [
@@ -1108,7 +599,179 @@ export const menuList = [
           },
         ],
       },
-      {
+  {
+        id: 4,
+        name: "Journal Voucher",
+        path: "/accounts/journalvoucher",
+        includes: [
+          "/accounts/journalvoucher",
+          "/accounts/journalvoucher/addjournalvoucture",
+          "/accounts/journalvoucher/detailsjournalvocture/",
+        ],
+        permissions: ["read:journalvoucher"],
+      },
+  {
+        id: 5,
+        name: "Correction JV",
+        path: "/accounts/correctionsjv/correctionsjvdetails",
+        includes: ["/accounts/correctionsjv/correctionsjvdetails"],
+        permissions: ["read:correctionjv"],
+      },
+  {
+        id: 6,
+        name: "Reversal JV",
+        path: "/accounts/reversaljv/reversaljvdetails",
+        includes: ["/accounts/reversaljv/reversaljvdetails"],
+        permissions: ["read:reversaljv"],
+      },
+  {
+        id: 15,
+        name: "Open Entry Matching",
+        path: "/accounts/open-entry-matching",
+        includes: ["/accounts/open-entry-matching"],
+        permissions: ["read:accounting"],
+      },
+  {
+        id: 16,
+        name: "Open Entry Unmatching",
+        path: "/accounts/open-entry-unmatching",
+        includes: ["/accounts/open-entry-unmatching"],
+        permissions: ["read:accounting"],
+      },
+  {
+        id: 13,
+        name: "Accounting Query",
+        path: "/agent/accounting/query",
+        includes: ["/agent/accounting/query"],
+        permissions: ["read:accounting"],
+      },
+  {
+        id: 14,
+        name: "All Clients Accounting",
+        path: "/agent/accounting/all-clients-details",
+        includes: ["/agent/accounting/all-clients-details"],
+        permissions: ["read:accounting"],
+      },
+  {
+        id: 3,
+        name: "Petty Cash",
+        permissions: ["read:pettycash"],
+        submenu: [
+          {
+            id: 1,
+            name: "Initiate",
+            path: "/accounts/pettycash/pettycashcodeinitiate",
+            includes: [
+              "/accounts/pettycash/pettycashcodeinitiate",
+              "/accounts/pettycash/pettycashcodeinitiate/initiate",
+              "/accounts/pettycash/PettyCashCodeDetails",
+            ],
+          },
+          {
+            id: 2,
+            name: "Request",
+            path: "/accounts/pettycash/pettycashrequest",
+            includes: [
+              "/accounts/pettycash/pettycashrequest",
+              "/accounts/pettycash/addrequest/add/",
+              "/accounts/pettycash/addrequesttable",
+              "/accounts/pettycash/request",
+              "/accounts/pettycash/editrequestform/edit/",
+              "/accounts/pettycash/editrequestform/view/",
+            ],
+          },
+          {
+            id: 3,
+            name: "Disbursement",
+            path: "/accounts/pettycash/disbursement",
+            includes: [
+              "/accounts/pettycash/disbursement",
+              "/accounts/pettycash/adddisbursement",
+              "/accounts/pettycash/adddisbursementtable",
+              "/accounts/pettycash/disbursementdetailview",
+            ],
+          },
+          {
+            id: 4,
+            name: "Receipts",
+            path: "/accounts/pettycash/receipts",
+            includes: [
+              "/accounts/pettycash/receipts",
+              "/accounts/pettycash/addreceipts",
+              "/accounts/pettycash/receiptlist",
+              "/accounts/pettycash/addreceiptstable",
+            ],
+          },
+          {
+            id: 5,
+            name: "Replenish",
+            path: "/accounts/pettycash/replenish",
+            includes: [
+              "/accounts/pettycash/replenish",
+              "/accounts/pettycash/addreplenish",
+              "/accounts/pettycash/addreplenishtable",
+              "/accounts/pettycash/replenishtdetailview",
+            ],
+          },
+        ],
+      },
+  {
+        id: 22,
+        name: "Bank Reconciliation",
+        submenu: [
+          { id: 1, name: "Reconciliation Workspace", path: "/accounts/bank-reconciliation", includes: ["/accounts/bank-reconciliation"] },
+          { id: 2, name: "Reconciliations", path: "/accounts/bank-reconciliation/reconciliations", includes: ["/accounts/bank-reconciliation/reconciliations"] },
+          { id: 3, name: "Reconciliation Statement Report", path: "/accounts/bank-reconciliation/reports/bank-reconciliation-statement", includes: ["/accounts/bank-reconciliation/reports/bank-reconciliation-statement"] },
+          { id: 4, name: "Outstanding Cheques", path: "/accounts/bank-reconciliation/reports/bank-outstanding-cheques", includes: ["/accounts/bank-reconciliation/reports/bank-outstanding-cheques"] },
+          { id: 5, name: "Deposits in Transit", path: "/accounts/bank-reconciliation/reports/bank-deposits-in-transit", includes: ["/accounts/bank-reconciliation/reports/bank-deposits-in-transit"] },
+          { id: 6, name: "Unmatched Bank Lines", path: "/accounts/bank-reconciliation/reports/bank-unmatched-lines", includes: ["/accounts/bank-reconciliation/reports/bank-unmatched-lines"] },
+          { id: 7, name: "Bank Book", path: "/accounts/bank-reconciliation/reports/bank-book", includes: ["/accounts/bank-reconciliation/reports/bank-book"] },
+        ],
+      },
+  {
+        id: 23,
+        name: "Insurer Reconciliation",
+        submenu: [
+          {
+            id: 1,
+            name: "Insurer Statements",
+            path: "/accounts/insurer-reconciliation/statements",
+            includes: ["/accounts/insurer-reconciliation/statements"],
+          },
+        ],
+      },
+  {
+        id: 21,
+        name: "Tax",
+        submenu: [
+          { id: 1, name: "BIR Form 2307", path: "/accounts/tax/2307", includes: ["/accounts/tax/2307"] },
+          { id: 2, name: "VAT Summary", path: "/accounts/tax/reports/bir-vat-summary", includes: ["/accounts/tax/reports/bir-vat-summary"] },
+          { id: 3, name: "SAWT", path: "/accounts/tax/reports/bir-sawt", includes: ["/accounts/tax/reports/bir-sawt"] },
+          { id: 4, name: "QAP", path: "/accounts/tax/reports/bir-qap", includes: ["/accounts/tax/reports/bir-qap"] },
+          { id: 5, name: "SLSP Sales", path: "/accounts/tax/reports/bir-slsp-sales", includes: ["/accounts/tax/reports/bir-slsp-sales"] },
+          { id: 6, name: "SLSP Purchases", path: "/accounts/tax/reports/bir-slsp-purchases", includes: ["/accounts/tax/reports/bir-slsp-purchases"] },
+          // BIR forms, invoicing and tax: returns with filing records, DAT files, EOPT invoices, EIS, CAS pack
+          { id: 7, name: "Withholding Returns", path: "/accounts/tax/withholding-returns", includes: ["/accounts/tax/withholding-returns"] },
+          { id: 8, name: "Annual Alphalist 1604-E", path: "/accounts/tax/alphalist-1604e", includes: ["/accounts/tax/alphalist-1604e"] },
+          { id: 9, name: "Percentage Tax 2551Q", path: "/accounts/tax/percentage-tax", includes: ["/accounts/tax/percentage-tax"] },
+          { id: 10, name: "BIR DAT Files", path: "/accounts/tax/dat-files", includes: ["/accounts/tax/dat-files"] },
+          { id: 11, name: "Sales Invoices", path: "/accounts/tax/sales-invoices", includes: ["/accounts/tax/sales-invoices"] },
+          { id: 12, name: "E-Invoicing (EIS)", path: "/accounts/tax/eis", includes: ["/accounts/tax/eis"] },
+          { id: 13, name: "CAS Books and Documents", path: "/accounts/tax/cas", includes: ["/accounts/tax/cas"] },
+        ],
+      },
+  {
+        id: 20,
+        name: "Period End",
+        submenu: [
+          { id: 1, name: "Period Management", path: "/accounts/period-end/periods", includes: ["/accounts/period-end/periods"] },
+          { id: 2, name: "Month-End Close", path: "/accounts/period-end/close", includes: ["/accounts/period-end/close"] },
+          { id: 3, name: "Year-End Close", path: "/accounts/period-end/year-end", includes: ["/accounts/period-end/year-end"] },
+          { id: 4, name: "Recurring Journals", path: "/accounts/period-end/recurring", includes: ["/accounts/period-end/recurring"] },
+          { id: 5, name: "Financial Statements", path: "/accounts/period-end/statements", includes: ["/accounts/period-end/statements"] },
+        ],
+      },
+  {
         id: 8,
         name: "Incentive",
         submenu: [
@@ -1142,7 +805,7 @@ export const menuList = [
   },
   {
     name: "Commission",
-    icon: <SvgAgentPaymentIcon color="#0072d8" />,
+    icon: "pi pi-percentage",
     submenu: [
       {
         id: 1,
@@ -1159,11 +822,20 @@ export const menuList = [
           "/commission/referrer-accounts/",
         ],
       },
+      // overriding, profit and contingent commission from insurers
+      {
+        id: 3,
+        name: "Insurer Overrides",
+        submenu: [
+          { id: 1, name: "Agreements", path: "/commission/insurer-overrides/agreements", includes: ["/commission/insurer-overrides/agreements"] },
+          { id: 2, name: "Computations", path: "/commission/insurer-overrides/computations", includes: ["/commission/insurer-overrides/computations"] },
+        ],
+      },
     ],
   },
   {
     name: "Reinsurance",
-    icon: <SvgReportsIcon />,
+    icon: "pi pi-shield",
     submenu: [
       {
         id: 1,
@@ -1201,13 +873,98 @@ export const menuList = [
           "/reinsurance/analytics/performance",
         ],
       },
+      {
+        // the broker as reinsurance broker: facultative slips, signed lines, binding, settlements, bordereaux
+        id: 6,
+        name: "Facultative Placements",
+        path: "/reinsurance/facultative",
+        includes: ["/reinsurance/facultative"],
+        permissions: ["read:reinsurance"],
+      },
     ],
   },
-
+  {
+    // AML/CFT programme of the broker (Compliance Officer role; read:aml, write:aml, approve:aml)
+    name: "Compliance",
+    icon: "pi pi-verified",
+    submenu: [
+      { id: 1, name: "AML Dashboard", path: "/compliance/aml/dashboard", includes: ["/compliance/aml/dashboard"] },
+      { id: 2, name: "Client Due Diligence", path: "/compliance/aml/clients", includes: ["/compliance/aml/clients"] },
+      { id: 3, name: "EDD Reviews", path: "/compliance/aml/edd", includes: ["/compliance/aml/edd"] },
+      { id: 4, name: "KYC Refresh", path: "/compliance/aml/kyc-refresh", includes: ["/compliance/aml/kyc-refresh"] },
+      { id: 5, name: "Screening Hits", path: "/compliance/aml/hits", includes: ["/compliance/aml/hits"] },
+      { id: 6, name: "Screening Lists", path: "/compliance/aml/lists", includes: ["/compliance/aml/lists"] },
+      { id: 7, name: "Transaction Alerts", path: "/compliance/aml/alerts", includes: ["/compliance/aml/alerts"] },
+      { id: 8, name: "AML Cases", path: "/compliance/aml/cases", includes: ["/compliance/aml/cases"] },
+      { id: 9, name: "AMLC Reports", path: "/compliance/aml/reports", includes: ["/compliance/aml/reports"] },
+      { id: 10, name: "AML Settings", path: "/compliance/aml/settings", includes: ["/compliance/aml/settings"] },
+      // regulatory compliance: Insurance Commission registers and reports, and the NPC breach register
+      {
+        id: 11,
+        name: "Insurance Commission",
+        submenu: [
+          {
+            id: 1,
+            name: "Licence Register",
+            path: "/compliance/licences",
+            includes: ["/compliance/licences"],
+          },
+          {
+            id: 2,
+            name: "Fit and Proper",
+            path: "/compliance/fit-and-proper",
+            includes: ["/compliance/fit-and-proper"],
+          },
+          {
+            id: 3,
+            name: "Insurer Authority",
+            path: "/compliance/insurer-authority",
+            includes: ["/compliance/insurer-authority"],
+          },
+          {
+            id: 4,
+            name: "Complaints",
+            path: "/compliance/complaints",
+            includes: ["/compliance/complaints"],
+          },
+          {
+            id: 5,
+            name: "IC Annual Statement",
+            path: "/compliance/ic-annual-statement",
+            includes: ["/compliance/ic-annual-statement"],
+          },
+          {
+            id: 6,
+            name: "IC Production Report",
+            path: "/compliance/ic-production-report",
+            includes: ["/compliance/ic-production-report"],
+          },
+        ],
+      },
+      {
+        id: 12,
+        name: "Data Privacy (NPC)",
+        submenu: [
+          {
+            id: 1,
+            name: "Breach Register",
+            path: "/compliance/breaches",
+            includes: ["/compliance/breaches"],
+          },
+        ],
+      },
+    ],
+  },
   {
     name: "Reports",
-    icon: <SvgReportsIcon />,
+    icon: "pi pi-file",
     submenu: [
+      {
+        id: 0,
+        name: "All Reports",
+        path: "/reports/catalogue",
+        includes: ["/reports/catalogue", "/reports/run/"],
+      },
       {
         id: 1,
         name: "Operational Reports",
@@ -1248,6 +1005,14 @@ export const menuList = [
             includes: ["/reports/operationalreports/brokercommision"],
             permissions: ["read:commission-reports"],
           },
+          {
+            // business per dealer, financing bank and affinity partner, rolled up to the dealer group (catalogue report)
+            id: 6,
+            name: "Dealer Production",
+            path: "/reports/run/dealer-production",
+            includes: ["/reports/run/dealer-production"],
+            permissions: ["read:reports"],
+          },
         ],
       },
       {
@@ -1285,11 +1050,707 @@ export const menuList = [
           },
           {
             id: 5,
-            name: "Trail Balance",
+            name: "Trial Balance",
             path: "/reports/financialreports/trailbalance",
             includes: ["/reports/financialreports/trailbalance"],
           },
+          { id: 6, name: "Income Statement", path: "/reports/financialreports/pe/income-statement", includes: ["/reports/financialreports/pe/income-statement"] },
+          { id: 7, name: "Balance Sheet", path: "/reports/financialreports/pe/balance-sheet", includes: ["/reports/financialreports/pe/balance-sheet"] },
+          { id: 8, name: "Trial Balance Movement", path: "/reports/financialreports/pe/trial-balance-ocm", includes: ["/reports/financialreports/pe/trial-balance-ocm"] },
+          { id: 9, name: "General Ledger Detail", path: "/reports/financialreports/pe/gl-detail", includes: ["/reports/financialreports/pe/gl-detail"] },
+          { id: 10, name: "Aged Payables to Insurers", path: "/reports/financialreports/pe/aged-payables-insurers", includes: ["/reports/financialreports/pe/aged-payables-insurers"] },
+          { id: 11, name: "Month-End Close Status", path: "/reports/financialreports/pe/month-end-close-status", includes: ["/reports/financialreports/pe/month-end-close-status"] },
+          {
+            id: 12,
+            name: "Co-insurance Register",
+            path: "/reports/financialreports/coinsuranceregister",
+            includes: ["/reports/financialreports/coinsuranceregister"],
+            permissions: ["read:financial-reports"],
+          },
+          {
+            id: 13,
+            name: "Due to Insurers by Co-insurer",
+            path: "/reports/financialreports/duetoinsurers",
+            includes: ["/reports/financialreports/duetoinsurers"],
+            permissions: ["read:financial-reports"],
+          },
         ],
+      },
+      {
+        // ad hoc reports over curated datasets, saved and shared with roles, Excel export, BI extract
+        id: 3,
+        name: "Report Builder",
+        path: "/reports/builder",
+        includes: ["/reports/builder"],
+        permissions: ["read:reports"],
+      },
+    ],
+  },
+  {
+    name: "Master",
+    icon: "pi pi-database",
+    submenu: [
+      // Master is two levels deep: each entry below is a section heading inside Master (not a collapsible group),
+      // so every master screen is one click from the Master group. Section names are the grant keys of menuPermissions.
+      {
+        id: 1,
+        name: "Organization",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Company",
+            path: "/master/generals/organization/companymaster",
+            includes: [
+              "/master/generals/organization/companymaster",
+              "/master/generals/organization/companymaster/add/",
+              "/master/generals/organization/companymaster/edit/",
+              "/master/generals/organization/companymaster/view/",
+            ],
+          },
+
+          {
+            id: 2,
+            name: "Branch",
+            path: "/master/generals/organization/branchmaster",
+            includes: [
+              "/master/generals/organization/branchmaster",
+              "/master/generals/organization/branchmaster/add/",
+              "/master/generals/organization/branchmaster/edit/",
+              "/master/generals/organization/branchmaster/view/",
+            ],
+          },
+          // the activity types and outcomes account executives choose when they log a sales activity
+          { id: 3, name: "Sales Activity Types", path: "/master/organization/sales-activity-types", includes: ["/master/organization/sales-activity-types"] },
+          { id: 4, name: "Sales Activity Outcomes", path: "/master/organization/sales-activity-outcomes", includes: ["/master/organization/sales-activity-outcomes"] },
+        ],
+      },
+      {
+        id: 2,
+        name: "Insurance Management",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Insurance Company",
+            path: "/master/generals/insurancemanagement/insurancecompany",
+            includes: [
+              "/master/generals/insurancemanagement/insurancecompany",
+              "/master/generals/insurancemanagement/insurancecompany/add/",
+              "/master/generals/insurancemanagement/insurancecompany/edit/",
+              "/master/generals/insurancemanagement/insurancecompany/view/",
+            ],
+          },
+          {
+            id: 2,
+            name: "Line of Business",
+            path: "/master/generals/insurancemanagement/lineofbusiness",
+            includes: [
+              "/master/generals/insurancemanagement/lineofbusiness",
+              "/master/generals/insurancemanagement/lineofbusiness/add/",
+              "/master/generals/insurancemanagement/lineofbusiness/edit/",
+              "/master/generals/insurancemanagement/lineofbusiness/view/",
+            ],
+          },
+          {
+            id: 3,
+            name: "Product",
+            path: "/master/generals/insurancemanagement/productmaster",
+            includes: [
+              "/master/generals/insurancemanagement/productmaster",
+              "/master/generals/insurancemanagement/productmaster/add/",
+              "/master/generals/insurancemanagement/productmaster/edit/",
+              "/master/generals/insurancemanagement/productmaster/view/",
+            ],
+          },
+          {
+            id: 5,
+            name: "Cover",
+            path: "/master/generals/insurancemanagement/cover",
+            includes: [
+              "/master/generals/insurancemanagement/cover",
+              "/master/generals/insurancemanagement/cover/add/",
+              "/master/generals/insurancemanagement/cover/view/",
+              "/master/generals/insurancemanagement/cover/edit/",
+            ],
+          },
+          {
+            id: 6,
+            name: "Signatories",
+            path: "/master/generals/insurancemanagement/signatories",
+            includes: [
+              "/master/generals/insurancemanagement/signatories",
+              "/master/generals/insurancemanagement/signatories/add/",
+              "/master/generals/insurancemanagement/signatories/edit/",
+              "/master/generals/insurancemanagement/signatories/view/",
+            ],
+          },
+          {
+            id: 7,
+            name: "Vehicle",
+            path: "/master/generals/insurancemanagement/vehicle",
+            includes: [
+              "/master/generals/insurancemanagement/vehicle",
+              "/master/generals/insurancemanagement/vehicle/add/",
+              "/master/generals/insurancemanagement/vehicle/edit/",
+              "/master/generals/insurancemanagement/vehicle/view/",
+            ],
+          },
+          {
+            id: 12,
+            name: "Reinsurance Treaty",
+            path: "/master/reinsurance/treaty",
+            includes: [
+              "/master/reinsurance/treaty",
+              "/master/reinsurance/treaty/add",
+              "/master/reinsurance/treaty/edit",
+              "/master/reinsurance/treaty/view",
+            ],
+          },
+          // cancellation and claims masters: short-period scale, cancellation reasons, claim document checklist, repair shops
+          { id: 30, name: "Short-Period Rates", path: "/master/insurance/short-period-rates", includes: ["/master/insurance/short-period-rates"] },
+          { id: 31, name: "Cancellation Reasons", path: "/master/insurance/cancellation-reasons", includes: ["/master/insurance/cancellation-reasons"] },
+          { id: 32, name: "Claim Document Checklist", path: "/master/insurance/claim-document-checklist", includes: ["/master/insurance/claim-document-checklist"] },
+          { id: 33, name: "Repair Shops", path: "/master/insurance/repair-shops", includes: ["/master/insurance/repair-shops"] },
+          {
+            // dealer groups and branches, financing banks, affinity partners (hierarchy, referrer, mortgagee clause)
+            id: 13,
+            name: "Distribution Channels",
+            path: "/master/insurance/channels",
+            includes: ["/master/insurance/channels"],
+            permissions: ["read:channels"],
+          },
+        ],
+      },
+      {
+        id: 3,
+        name: "Location",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Country",
+            path: "/master/generals/location/country",
+            includes: [
+              "/master/generals/location/country",
+              "/master/generals/location/country/add",
+              "/master/generals/location/country/edit",
+              "/master/generals/location/country/view",
+            ],
+          },
+          {
+            id: 2,
+            name: "Province",
+            path: "/master/generals/location/state",
+            includes: [
+              "/master/generals/location/state",
+              "/master/generals/location/state/add",
+              "/master/generals/location/state/edit",
+              "/master/generals/location/state/view",
+            ],
+          },
+          {
+            id: 3,
+            name: "City / Municipality",
+            path: "/master/generals/location/city",
+            includes: [
+              "/master/generals/location/city",
+              "/master/generals/location/city/add",
+              "/master/generals/location/city/edit",
+              "/master/generals/location/city/view",
+            ],
+          },
+        ],
+      },
+      {
+        id: 5,
+        name: "Employee Management",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Hierarchy",
+            path: "/master/generals/employeemanagement/hierarchy",
+            includes: [
+              "/master/generals/employeemanagement/hierarchy",
+              "/master/generals/employeemanagement/hierarchy/add",
+              "/master/generals/employeemanagement/hierarchy/edit/",
+              "/master/generals/employeemanagement/hierarchy/view/",
+            ],
+          },
+          {
+            id: 2,
+            name: "Designation",
+            path: "/master/generals/employeemanagement/designation",
+            includes: [
+              "/master/generals/employeemanagement/designation",
+              "/master/generals/employeemanagement/designation/add/",
+              "/master/generals/employeemanagement/designation/edit/",
+              "/master/generals/employeemanagement/designation/view/",
+            ],
+          },
+        ],
+      },
+      {
+        id: 6,
+        name: "User Management",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "User",
+            path: "/master/generals/usermanagement/user",
+            includes: [
+              "/master/generals/usermanagement/user",
+              "/master/generals/usermanagement/user/add",
+              "/master/generals/usermanagement/user/edit/",
+              "/master/generals/usermanagement/user/view/",
+            ],
+          },
+          {
+            id: 2,
+            name: "Role",
+            path: "/master/generals/usermanagement/role",
+            includes: [
+              "/master/generals/usermanagement/role",
+              "/master/generals/usermanagement/role/add/",
+              "/master/generals/usermanagement/role/edit/",
+              "/master/generals/usermanagement/role/view/",
+            ],
+          },
+          {
+            id: 3,
+            name: "User Access Matrix",
+            path: "/master/generals/usermanagement/access-matrix",
+            includes: ["/master/generals/usermanagement/access-matrix"],
+          },
+          {
+            id: 4,
+            name: "Role Permissions",
+            path: "/master/generals/usermanagement/role-permissions",
+            includes: ["/master/generals/usermanagement/role-permissions"],
+          },
+          {
+            id: 5,
+            name: "Authority Matrix",
+            path: "/master/generals/usermanagement/authority-matrix",
+            includes: ["/master/generals/usermanagement/authority-matrix"],
+          },
+          {
+            id: 6,
+            name: "Delegations",
+            path: "/master/generals/usermanagement/delegations",
+            includes: ["/master/generals/usermanagement/delegations"],
+          },
+          {
+            id: 7,
+            name: "Segregation of Duties",
+            path: "/master/generals/usermanagement/segregation-of-duties",
+            includes: ["/master/generals/usermanagement/segregation-of-duties"],
+          },
+          {
+            id: 8,
+            name: "Access Reviews",
+            path: "/master/generals/usermanagement/access-reviews",
+            includes: ["/master/generals/usermanagement/access-reviews"],
+          },
+        ],
+      },
+      {
+        id: 2,
+        name: "Finance",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Account Determination",
+            path: "/master/finance/account-determination",
+            includes: [
+              "/master/finance/account-determination",
+              "/master/finance/premium-account-setup",
+              "/master/finance/miscellaneous-account-setup",
+              "/master/finance/customer-account-setup",
+              "/master/finance/ri-claim-account-setup",
+            ],
+          },
+          {
+            id: 2,
+            name: "Posting Rules",
+            path: "/master/finance/posting-rules",
+            includes: ["/master/finance/posting-rules"],
+          },
+          {
+            id: 3,
+            name: "Configuration Approvals",
+            path: "/master/finance/configuration-approvals",
+            includes: ["/master/finance/configuration-approvals"],
+          },
+          {
+            id: 4,
+            name: "Accounting Flow",
+            path: "/master/finance/accounting-flow",
+            includes: ["/master/finance/accounting-flow"],
+          },
+          {
+            // packaged products: bundles sold under one master policy, and each insurer's rates for comparisons
+            id: 41,
+            name: "Package Bundles",
+            path: "/master/finance/package-bundles",
+            includes: ["/master/finance/package-bundles"],
+          },
+          {
+            id: 42,
+            name: "Insurer Rate Tables",
+            path: "/master/finance/insurer-rate-tables",
+            includes: ["/master/finance/insurer-rate-tables"],
+          },
+          {
+            // premium tax and charge engine: VAT or premium tax, DST, FST and the local government tax per city
+            id: 43,
+            name: "Premium Taxes & LGU Rates",
+            path: "/master/finance/premium-taxes",
+            includes: ["/master/finance/premium-taxes"],
+          },
+          {
+            id: 44,
+            name: "Payment Gateways",
+            path: "/master/finance/payment-gateways",
+            includes: ["/master/finance/payment-gateways"],
+          },
+          {
+            id: 40,
+            name: "Commission Rate Matrix",
+            path: "/master/finance/commission-rate-matrix",
+            includes: ["/master/finance/commission-rate-matrix"],
+          },
+          {
+            id: 13,
+            name: "Transaction Code",
+            path: "/master/finance/transactioncode",
+            includes: [
+              "/master/finance/transactioncode",
+              "/master/finance/transactioncode/addtransactioncode",
+              "/master/finance/transactioncode/transactioncodeedit",
+              "/master/finance/transactioncode/transactioncodedetails",
+            ],
+          },
+          {
+            id: 14,
+            name: "Currency",
+            path: "/master/finance/currency",
+            includes: [
+              "/master/finance/currency",
+              "/master/finance/currency/addcurrency",
+              "/master/finance/currency/editcurrency",
+              "/master/finance/currency/viewcurrency",
+            ],
+          },
+          {
+            id: 15,
+            name: "Exchange Rate",
+            path: "/master/finance/exchangerate",
+            includes: [
+              "/master/finance/exchangerate",
+              "/master/finance/exchangerate/addexchange",
+              "/master/finance/exchangerate/saveandeditexchange",
+              "/master/finance/exchangerate/viewexchange",
+            ],
+          },
+          {
+            id: 16,
+            name: "Bank",
+            path: "/master/finance/bank",
+            includes: [
+              "/master/finance/bank",
+              "/master/finance/bank/addbankmaster",
+              "/master/finance/bank/accountdataview",
+              "/master/finance/bank/accountdataview/addaccountdetail",
+              "/master/finance/bank/accountdataview/viewaccountdetail",
+              "/master/finance/bank/accountdataview/editaccountdetail",
+            ],
+          },
+          {
+            id: 5,
+            name: "Account Category",
+            path: "/master/finance/accountcategory",
+            includes: ["/master/finance/accountcategory"],
+          },
+          {
+            id: 6,
+            name: "Main Account",
+            path: "/master/finance/mainaccount",
+            includes: [
+              "/master/finance/mainaccount",
+              "/master/finance/mainaccount/addmainaccount",
+              "/master/finance/mainaccount/editmainaccount",
+              "/master/finance/mainaccount/viewmainaccount",
+            ],
+          },
+          {
+            id: 7,
+            name: "Sub Account",
+            path: "/master/finance/subaccount",
+            includes: [
+              "/master/finance/subaccount",
+              "/master/finance/subaccount/subaccountedit",
+              "/master/finance/subaccount/subaccountdetails",
+            ],
+          },
+          {
+            id: 8,
+            name: "Taxation",
+            path: "/master/finance/taxation",
+            includes: ["/master/finance/taxation"],
+          },
+          {
+            id: 20,
+            name: "Close Checklist",
+            path: "/master/finance/close-checklist",
+            includes: ["/master/finance/close-checklist"],
+          },
+          // fixed asset classes: useful life and accounts of the depreciation
+          { id: 40, name: "Asset Classes", path: "/master/finance/asset-classes", includes: ["/master/finance/asset-classes"] },
+          {
+            id: 21,
+            name: "Bank Statement Formats",
+            path: "/master/finance/bank-statement-formats",
+            includes: ["/master/finance/bank-statement-formats"],
+          },
+          {
+            id: 22,
+            name: "Bank Transaction Types",
+            path: "/master/finance/bank-transaction-types",
+            includes: ["/master/finance/bank-transaction-types"],
+          },
+          {
+            id: 23,
+            name: "Insurer Statement Formats",
+            path: "/master/finance/insurer-statement-formats",
+            includes: ["/master/finance/insurer-statement-formats"],
+          },
+          {
+            // bank payment file layouts (bulk credit, InstaPay, PESONet) and payee bank accounts
+            id: 30,
+            name: "Bank File Layouts",
+            path: "/master/finance/bank-file-layouts",
+            includes: ["/master/finance/bank-file-layouts"],
+          },
+          {
+            id: 10,
+            name: "Remittance Master",
+            path: "/master/finance/remittance",
+            includes: [
+              "/master/finance/remittance",
+              "/master/finance/remittance/automatedremittance/add",
+              "/master/finance/remittance/automatedremittance/edit",
+              "/master/finance/remittance/automatedremittance/view",
+              "/master/finance/remittance/statementtemplate/add",
+              "/master/finance/remittance/statementtemplate/edit",
+              "/master/finance/remittance/statementtemplate/view",
+              "/master/finance/remittance/settlementparameter/add",
+              "/master/finance/remittance/settlementparameter/edit",
+              "/master/finance/remittance/settlementparameter/view",
+              "/master/finance/remittance/bulkprocessingmaster/add",
+              "/master/finance/remittance/bulkprocessingmaster/edit",
+              "/master/finance/remittance/bulkprocessingmaster/view",
+              "/master/finance/remittance/exceptionmaster/add",
+              "/master/finance/remittance/exceptionmaster/edit",
+              "/master/finance/remittance/exceptionmaster/view",
+              "/master/finance/remittance/agencybillmaster/add",
+              "/master/finance/remittance/agencybillmaster/edit",
+              "/master/finance/remittance/agencybillmaster/view",
+              "/master/finance/remittance/adjustmentmaster/add",
+              "/master/finance/remittance/adjustmentmaster/edit",
+              "/master/finance/remittance/adjustmentmaster/view",
+              "/master/finance/remittance/notificationmaster/add",
+              "/master/finance/remittance/notificationmaster/edit",
+              "/master/finance/remittance/notificationmaster/view",
+            ],
+          },
+          {
+            id: 11,
+            name: "Incentive Programs",
+            path: "/master/incentive/programs/view",
+            includes: [
+              "/master/incentive/programs/add",
+              "/master/incentive/programs/edit",
+              "/master/incentive/programs/view",
+            ],
+          },
+        ],
+      },
+      {
+        // system parameters, numbering, schedules, audit trail and the e-mail outbox
+        name: "System Configuration",
+        section: true,
+        submenu: [
+          {
+            id: 0,
+            name: "System Settings",
+            path: "/master/configuration/system-settings",
+            includes: ["/master/configuration/system-settings", "/master/configuration/theme-branding"],
+          },
+          {
+            id: 20,
+            name: "Configuration",
+            path: "/master/configuration/settings",
+            includes: ["/master/configuration/settings"],
+          },
+          {
+            id: 23,
+            name: "Document Numbering",
+            path: "/master/configuration/document-numbering",
+            includes: ["/master/configuration/document-numbering"],
+          },
+          {
+            id: 21,
+            name: "Schedules",
+            path: "/master/configuration/schedules",
+            includes: ["/master/configuration/schedules"],
+          },
+          {
+            id: 22,
+            name: "Audit Trail",
+            path: "/master/configuration/audit-trail",
+            includes: ["/master/configuration/audit-trail"],
+          },
+          {
+            id: 24,
+            name: "E-mail Outbox",
+            path: "/master/configuration/email-outbox",
+            includes: ["/master/configuration/email-outbox"],
+          },
+          {
+            // integration framework: connectors, outbox and inbox; SMS / Viber templates; insurer API mappings
+            id: 30,
+            name: "Integrations",
+            path: "/master/configuration/integrations",
+            includes: ["/master/configuration/integrations"],
+          },
+          {
+            id: 31,
+            name: "Message Templates",
+            path: "/master/configuration/message-templates",
+            includes: ["/master/configuration/message-templates"],
+          },
+          {
+            id: 32,
+            name: "Insurer Integration",
+            path: "/master/configuration/insurer-integration",
+            includes: ["/master/configuration/insurer-integration"],
+          },
+        ],
+      },
+      {
+        id: 25,
+        name: "Data Privacy",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Data Subject Requests",
+            path: "/master/data-privacy/requests",
+            includes: ["/master/data-privacy/requests"],
+          },
+          {
+            id: 2,
+            name: "Consent Register",
+            path: "/master/data-privacy/consents",
+            includes: ["/master/data-privacy/consents"],
+          },
+        ],
+      },
+      {
+        // configuration and migration workbooks loaded before go-live
+        name: "Go-Live and Data",
+        section: true,
+        submenu: [
+          {
+            id: 26,
+            name: "Go-Live Data Load",
+            path: "/master/go-live-data-load",
+            includes: ["/master/go-live-data-load"],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    name: "Product Configurator",
+    icon: "pi pi-sliders-h",
+    submenu: [
+      {
+        id: 1,
+        name: "Dashboard",
+        path: "/product-configurator/dashboard",
+        includes: ["/product-configurator/dashboard"],
+        permissions: ["read:product-configurator-dashboard"],
+      },
+      {
+        id: 2,
+        name: "Product Templates",
+        path: "/product-configurator/templates",
+        includes: [
+          "/product-configurator/templates",
+          "/product-configurator/template/",
+          "/product-configurator/create",
+        ],
+        permissions: ["read:product-templates"],
+      },
+      {
+        id: 3,
+        name: "Coverage Builder",
+        path: "/product-configurator/coverages",
+        includes: ["/product-configurator/coverages"],
+        permissions: ["read:product-coverages"],
+      },
+      {
+        id: 4,
+        name: "Rating Engine",
+        path: "/product-configurator/rating",
+        includes: ["/product-configurator/rating"],
+        permissions: ["read:product-rating"],
+      },
+      {
+        id: 5,
+        name: "Acceptance Rules",
+        path: "/product-configurator/underwriting",
+        includes: ["/product-configurator/underwriting"],
+        permissions: ["read:product-underwriting"],
+      },
+      {
+        id: 6,
+        name: "Document Manager",
+        path: "/product-configurator/documents",
+        includes: ["/product-configurator/documents"],
+        permissions: ["read:product-documents"],
+      },
+      {
+        id: 8,
+        name: "Market Mapping",
+        path: "/product-configurator/market-mapping",
+        includes: ["/product-configurator/market-mapping"],
+        permissions: ["read:product-market-mapping"],
+      },
+      {
+        id: 10,
+        name: "Risk Mapping",
+        path: "/product-configurator/risk-mapping",
+        includes: [
+          "/product-configurator/risk-mapping",
+          "/product-configurator/risk-mapping/",
+        ],
+        permissions: [
+          "read:product-risk-mapping",
+          "read:product-templates",
+        ],
+      },
+      {
+        id: 9,
+        name: "Product Analytics",
+        path: "/product-configurator/analytics",
+        includes: ["/product-configurator/analytics"],
+        permissions: ["read:product-analytics"],
       },
     ],
   },

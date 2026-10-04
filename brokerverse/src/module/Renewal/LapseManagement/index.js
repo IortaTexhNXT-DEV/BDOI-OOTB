@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -18,17 +17,18 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { InputNumber } from "primereact/inputnumber";
 import { Badge } from "primereact/badge";
 import { ProgressBar } from "primereact/progressbar";
-import { Chip } from "primereact/chip";
 import { Calendar } from "primereact/calendar";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import FieldError from "../../../components/FieldError";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
 import "./index.scss";
+import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const LapseManagement = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode, locale } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [reasonFilter, setReasonFilter] = useState("All");
@@ -39,7 +39,9 @@ const LapseManagement = () => {
   const [campaignVisible, setCampaignVisible] = useState(false);
   const [lapsedPolicies, setLapsedPolicies] = useState([]);
   const [filteredPolicies, setFilteredPolicies] = useState([]);
-  const [winBackCampaigns, setWinBackCampaigns] = useState(renewalMockData.winBackCampaigns);
+  const [winBackCampaigns, setWinBackCampaigns] = useState([]);
+  const [lapseVisible, setLapseVisible] = useState(false);
+  const [lapseReason, setLapseReason] = useState('');
   const [dashboardData, setDashboardData] = useState({
     totalLapsed: 0,
     inGracePeriod: 0,
@@ -53,6 +55,7 @@ const LapseManagement = () => {
     validUntil: new Date(Date.now() + 30*24*60*60*1000),
     message: ''
   });
+  const [campaignErrors, setCampaignErrors] = useState({});
   const [newCampaign, setNewCampaign] = useState({
     name: '',
     startDate: new Date(),
@@ -122,56 +125,64 @@ const LapseManagement = () => {
     applyFilters();
   }, [search, statusFilter, reasonFilter, lapsedPolicies]);
 
+  const showError = (error, fallbackKey) => {
+    toast.current.show({
+      severity: 'error',
+      summary: t("common.error"),
+      detail: error?.message || t(fallbackKey),
+      life: 3000
+    });
+  };
+
+  const addDays = (date, days) => {
+    const d = new Date(date);
+    d.setDate(d.getDate() + Number(days || 0));
+    return toIsoDate(d);
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Get lapsed and grace period policies from renewal queue
-      const gracePeriodPolicies = renewalMockData.renewalQueue
-        .filter(policy => policy.status === 'In Grace Period')
+      const [lapsed, queue, campaigns, settings] = await Promise.all([
+        renewalsWorkspaceService.getLapsed(),
+        renewalsWorkspaceService.getQueue(),
+        renewalsWorkspaceService.getCampaigns(),
+        renewalsWorkspaceService.getSettings("renewals")
+      ]);
+      const graceDays = settings["renewals.grace_period_days"];
+      const gracePeriodPolicies = queue.items
+        .filter(policy => policy.inGracePeriod)
         .map(policy => ({
           ...policy,
+          status: 'In Grace Period',
+          gracePeriodEnd: addDays(policy.expiryDate, graceDays),
           lapseDate: null,
           daysLapsed: 0,
           premiumLost: policy.currentPremium,
           lapseReason: null,
           winBackAttempts: [],
-          reinstatementEligible: true,
-          reinstatementDeadline: policy.gracePeriodEnd,
+          reinstatementEligible: false,
           winBackStatus: 'Eligible'
         }));
+      const lapsedPolicies = lapsed.map(policy => ({
+        ...policy,
+        status: 'Lapsed',
+        winBackAttempts: (policy.winBackAttempts || []).map(a => ({ ...a, response: a.outcome || 'Pending' }))
+      }));
 
-      // Combine with existing lapsed policies
-      const combinedData = [
-        ...renewalMockData.lapsedPolicies,
-        ...gracePeriodPolicies
-      ];
-
+      const combinedData = [...lapsedPolicies, ...gracePeriodPolicies];
       setLapsedPolicies(combinedData);
+      setWinBackCampaigns(campaigns);
       calculateDashboard(combinedData);
-
-      setTimeout(() => {
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.lapseDataLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToLoadLapseData"),
-        life: 3000
-      });
+      showError(error, "renewal.failedToLoadLapseData");
+    } finally {
       setLoading(false);
     }
   };
 
   const calculateDashboard = (data) => {
     const inGrace = data.filter(p => p.status === 'In Grace Period');
-    const lapsed = data.filter(p => p.lapseDate);
     const eligible = data.filter(p => p.reinstatementEligible);
     const totalRevenue = data.reduce((sum, p) => sum + (p.premiumLost || p.currentPremium), 0);
 
@@ -250,83 +261,117 @@ const LapseManagement = () => {
       benefits: [],
       budget: 100000
     });
+    setCampaignErrors({});
     setCampaignVisible(true);
   };
 
   const handleSendWinBack = async () => {
     setLoading(true);
     try {
-      const result = await renewalCrudOperations.processWinBack(
-        selectedPolicy.policyNumber,
-        winBackOffer
-      );
-
-      if (result.success) {
-        // Update policy status
-        const updatedPolicies = lapsedPolicies.map(p =>
-          p.policyNumber === selectedPolicy.policyNumber
-            ? {
-                ...p,
-                winBackAttempts: [
-                  ...p.winBackAttempts,
-                  {
-                    date: new Date().toISOString().split('T')[0],
-                    method: 'Email',
-                    offer: `${winBackOffer.discount}% discount`,
-                    response: 'Pending'
-                  }
-                ],
-                winBackStatus: 'In Progress'
-              }
-            : p
-        );
-
-        setLapsedPolicies(updatedPolicies);
-        setWinBackVisible(false);
-
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.winBackSent"),
-          detail: t("renewal.winBackOfferSentTo", { name: selectedPolicy.insuredName }),
-          life: 3000
-        });
-      }
-    } catch (error) {
+      const offer = [
+        `${winBackOffer.discount}% discount`,
+        ...winBackOffer.additionalBenefits,
+        `${winBackOffer.paymentTerms} payment terms`,
+        `valid until ${formatAppDate(winBackOffer.validUntil)}`
+      ].join(', ');
+      const activeCampaign = winBackCampaigns.find(c => c.status === 'active');
+      await renewalsWorkspaceService.winBack(selectedPolicy.id, {
+        offer,
+        method: 'Email',
+        campaignId: activeCampaign?.id,
+        response: winBackOffer.message || undefined
+      });
+      setWinBackVisible(false);
       toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSendWinBackOffer"),
+        severity: 'success',
+        summary: t("renewal.winBackSent"),
+        detail: t("renewal.winBackOfferSentTo", { name: selectedPolicy.insuredName }),
         life: 3000
       });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToSendWinBackOffer");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCreateCampaignConfirm = () => {
-    const campaignId = `WB-2025-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`;
+  const handleCreateCampaignConfirm = async () => {
+    const errors = requiredErrors(newCampaign, [
+      ["name", "Campaign name"],
+      ["startDate", "Start date"],
+      ["endDate", "End date"],
+      ["endDate", "End date", (v) => !v.startDate || !v.endDate || v.endDate >= v.startDate, "End date must be on or after the start date"],
+    ]);
+    setCampaignErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors), life: 4000 });
+      return;
+    }
+    try {
+      await renewalsWorkspaceService.createCampaign({
+        campaignName: newCampaign.name,
+        targetSegment: newCampaign.targetSegment,
+        startDate: toIsoDate(newCampaign.startDate),
+        endDate: toIsoDate(newCampaign.endDate),
+        discount: newCampaign.discount,
+        budget: newCampaign.budget,
+        offers: newCampaign.benefits
+      });
+      setCampaignVisible(false);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.campaignCreated"),
+        detail: t("renewal.campaignCreatedSuccess", { name: newCampaign.name }),
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToLoadLapseData");
+    }
+  };
 
-    const campaign = {
-      ...newCampaign,
-      campaignId,
-      statistics: {
-        targetedPolicies: 0,
-        contacted: 0,
-        responded: 0,
-        converted: 0,
-        conversionRate: 0,
-        revenueRecovered: 0
+  const openLapse = (rowData) => {
+    setSelectedPolicy(rowData);
+    setLapseReason('');
+    setLapseVisible(true);
+  };
+
+  const handleLapseConfirm = async () => {
+    try {
+      await renewalsWorkspaceService.lapse(selectedPolicy.id, lapseReason);
+      setLapseVisible(false);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.lapsed"),
+        detail: selectedPolicy.policyNumber,
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToLoadLapseData");
+    }
+  };
+
+  const handleReinstate = (rowData) => {
+    confirmDialog({
+      message: t("renewal.confirmReinstate", "Reinstate {{policy}}?", { policy: rowData.policyNumber }),
+      header: t("renewal.reinstated"),
+      icon: 'pi pi-replay',
+      accept: async () => {
+        try {
+          await renewalsWorkspaceService.reinstate(rowData.id);
+          toast.current.show({
+            severity: 'success',
+            summary: t("renewal.reinstated"),
+            detail: rowData.policyNumber,
+            life: 3000
+          });
+          loadInitialData();
+        } catch (error) {
+          showError(error, "renewal.failedToLoadLapseData");
+        }
       }
-    };
-
-    setWinBackCampaigns([...winBackCampaigns, campaign]);
-    setCampaignVisible(false);
-
-    toast.current.show({
-      severity: 'success',
-      summary: t("renewal.campaignCreated"),
-      detail: t("renewal.campaignCreatedSuccess", { name: newCampaign.name }),
-      life: 3000
     });
   };
 
@@ -394,9 +439,9 @@ const LapseManagement = () => {
     const percentage = (attempts / maxAttempts) * 100;
 
     return (
-      <div className="attempts-cell">
-        <ProgressBar value={percentage} style={{ width: '60px', height: '8px' }} />
-        <span>{attempts}/{maxAttempts}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(percentage)} showValue={false} />
+        <span className="bv-meter__value">{`${attempts} of ${maxAttempts}`}</span>
       </div>
     );
   };
@@ -408,15 +453,31 @@ const LapseManagement = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleViewDetails(rowData)}
-          tooltip="View Details"
+          tooltip="View Details" aria-label="View Details"
         />
         <Button
           icon="pi pi-send"
           className="p-button-text"
           onClick={() => handleWinBack(rowData)}
           tooltip="Send Win-back"
-          disabled={!rowData.reinstatementEligible || rowData.winBackStatus === 'Converted'}
+          disabled={!rowData.reinstatementEligible || rowData.winBackStatus === 'Converted'} aria-label="Send Win-back"
         />
+        {rowData.status === 'In Grace Period' ? (
+          <Button
+            icon="pi pi-ban"
+            className="p-button-text p-button-danger"
+            onClick={() => openLapse(rowData)}
+            tooltip={t("renewal.lapsed")} aria-label={t("renewal.lapsed")}
+          />
+        ) : (
+          <Button
+            icon="pi pi-replay"
+            className="p-button-text p-button-success"
+            onClick={() => handleReinstate(rowData)}
+            tooltip={t("renewal.reinstated")}
+            disabled={!rowData.reinstatementEligible} aria-label={t("renewal.reinstated")}
+          />
+        )}
       </div>
     );
   };
@@ -549,7 +610,7 @@ const LapseManagement = () => {
 
           <Card className="dashboard-card">
             <div className="card-content">
-              <i className="pi pi-dollar card-icon dark-red"></i>
+              <i className="pi pi-wallet card-icon dark-red"></i>
               <div className="card-info">
                 <span className="card-value">{formatCurrency(dashboardData.revenueAtRisk)}</span>
                 <span className="card-label">{t("renewal.revenueAtRisk")}</span>
@@ -576,7 +637,7 @@ const LapseManagement = () => {
                         icon="pi pi-refresh"
                         className="p-button-text"
                         onClick={loadInitialData}
-                        tooltip="Refresh"
+                        tooltip="Refresh" aria-label="Refresh"
                       />
                       <Button
                         icon="pi pi-file-excel"
@@ -589,17 +650,17 @@ const LapseManagement = () => {
                             life: 3000
                           });
                         }}
-                        tooltip="Export to Excel"
+                        tooltip="Export to Excel" aria-label="Export to Excel"
                       />
                     </div>
                   </div>
 
                   <DataTable
-                    value={filteredPolicies.length > 0 ? filteredPolicies : lapsedPolicies}
+                    value={filteredPolicies}
                     className="lapse-table"
                     stripedRows
                     paginator
-                    rows={10}
+                    rows={20}
                     loading={loading}
                     emptyMessage="No lapsed policies found"
                     sortMode="multiple"
@@ -692,8 +753,8 @@ const LapseManagement = () => {
                             <div className="detail-item">
                               <label>Period:</label>
                               <span>
-                                {new Date(campaign.startDate).toLocaleDateString()} -
-                                {new Date(campaign.endDate).toLocaleDateString()}
+                                {formatAppDate(campaign.startDate)} -
+                                {formatAppDate(campaign.endDate)}
                               </span>
                             </div>
                             <div className="detail-item">
@@ -716,7 +777,7 @@ const LapseManagement = () => {
                               <span className="stat-label">Converted</span>
                             </div>
                             <div className="stat-item">
-                              <span className="stat-value">{campaign.statistics?.conversionRate || 0}%</span>
+                              <span className="stat-value">{formatPercent(campaign.statistics?.conversionRate || 0)}</span>
                               <span className="stat-label">Rate</span>
                             </div>
                             <div className="stat-item">
@@ -725,11 +786,9 @@ const LapseManagement = () => {
                             </div>
                           </div>
 
-                          <div className="campaign-progress">
-                            <ProgressBar
-                              value={campaign.statistics?.conversionRate || 0}
-                              style={{ height: '6px' }}
-                            />
+                          <div className="bv-meter">
+                            <ProgressBar value={progressValue(campaign.statistics?.conversionRate)} showValue={false} />
+                            <span className="bv-meter__value">{formatPercent(campaign.statistics?.conversionRate ?? 0)}</span>
                           </div>
                         </div>
                       </Card>
@@ -771,7 +830,7 @@ const LapseManagement = () => {
                   {selectedPolicy.lapseDate && (
                     <div className="detail-item">
                       <label>Lapse Date:</label>
-                      <span>{new Date(selectedPolicy.lapseDate).toLocaleDateString()}</span>
+                      <span>{formatAppDate(selectedPolicy.lapseDate)}</span>
                     </div>
                   )}
                   {selectedPolicy.lapseReason && (
@@ -790,7 +849,7 @@ const LapseManagement = () => {
                       <div key={index} className="winback-item">
                         <div className="winback-header">
                           <strong>{attempt.method}</strong>
-                          <span>{new Date(attempt.date).toLocaleDateString()}</span>
+                          <span>{formatAppDate(attempt.date)}</span>
                         </div>
                         <div className="winback-details">
                           <p>Offer: {attempt.offer}</p>
@@ -805,6 +864,32 @@ const LapseManagement = () => {
               </TabPanel>
             </TabView>
           )}
+        </Dialog>
+
+        <Dialog
+          header={t("renewal.lapsed")}
+          visible={lapseVisible}
+          onHide={() => setLapseVisible(false)}
+          style={{ width: '400px' }}
+          footer={
+            <div>
+              <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setLapseVisible(false)} />
+              <Button label={t("renewal.lapsed")} icon="pi pi-ban" className="p-button-danger"
+                onClick={handleLapseConfirm} disabled={lapseReason.trim().length < 3} />
+            </div>
+          }
+        >
+          <div className="form-field">
+            <label>{selectedPolicy?.policyNumber} - {selectedPolicy?.insuredName}</label>
+            <Dropdown
+              value={lapseReason}
+              options={reasonOptions.filter(o => o.value !== 'All')}
+              onChange={(e) => setLapseReason(e.value || '')}
+              editable
+              placeholder={t("renewal.allReasons")}
+              style={{ width: '100%' }}
+            />
+          </div>
         </Dialog>
 
         {/* Win-back Offer Dialog */}
@@ -863,7 +948,7 @@ const LapseManagement = () => {
                     <Calendar
                       value={winBackOffer.validUntil}
                       onChange={(e) => setWinBackOffer({...winBackOffer, validUntil: e.value})}
-                      dateFormat="mm/dd/yy"
+                      dateFormat={calendarDateFormat()}
                       minDate={new Date()}
                     />
                   </div>
@@ -923,12 +1008,13 @@ const LapseManagement = () => {
           <div className="campaign-form">
             <div className="form-grid">
               <div className="form-field">
-                <label>Campaign Name</label>
+                <label>Campaign Name *</label>
                 <InputText
                   value={newCampaign.name}
                   onChange={(e) => setNewCampaign({...newCampaign, name: e.target.value})}
                   placeholder="Enter campaign name"
                 />
+                <FieldError error={campaignErrors.name} />
               </div>
 
               <div className="form-field">
@@ -941,23 +1027,25 @@ const LapseManagement = () => {
               </div>
 
               <div className="form-field">
-                <label>Start Date</label>
+                <label>Start Date *</label>
                 <Calendar
                   value={newCampaign.startDate}
                   onChange={(e) => setNewCampaign({...newCampaign, startDate: e.value})}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   minDate={new Date()}
                 />
+                <FieldError error={campaignErrors.startDate} />
               </div>
 
               <div className="form-field">
-                <label>End Date</label>
+                <label>End Date *</label>
                 <Calendar
                   value={newCampaign.endDate}
                   onChange={(e) => setNewCampaign({...newCampaign, endDate: e.value})}
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   minDate={newCampaign.startDate}
                 />
+                <FieldError error={campaignErrors.endDate} />
               </div>
 
               <div className="form-field">

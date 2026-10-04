@@ -1,26 +1,17 @@
-import React from "react";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import DropDowns from "../../../../components/DropDowns";
 import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-// import CustomToast from "../../../../components/Toast";
 import { Button } from "primereact/button";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
-import {
-  Name,
-  BankAccountCode,
-  Transcode,
-  Branchcode,
-  Departcode,
-  SubAccount,
-} from "../../mock";
-import { useDispatch, useSelector } from "react-redux";
-import { postAddReceiptMiddleware } from "../store/pettyCashReceiptsMiddleware";
+import usePettyCashOptions, { describe } from "../../usePettyCashOptions";
+import { setReceiptDraft } from "../store/pettyCashReceiptsReducer";
+import { useDispatch } from "react-redux";
+import { getAddReceiptTableMiddleware } from "../store/pettyCashReceiptsMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
 
 const initialValue = {
@@ -41,7 +32,6 @@ const initialValue = {
 const AddReceipts = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  // const toastRef = useRef(null);
   const items = [
     { label: "Petty Cash", command: () => navigate("/accounts/pettycash/receipts") },
     {
@@ -55,29 +45,13 @@ const AddReceipts = () => {
     navigate("/accounts/pettycash/receipts");
   };
 
-  const { ReceiptList, loading } = useSelector(
-    ({ pettyCashReceiptsReducer }) => {
-      return {
-        loading: pettyCashReceiptsReducer?.loading,
-        ReceiptList: pettyCashReceiptsReducer?.ReceiptList,
-      };
-    }
-  );
-
-  const handleSubmit = (value) => {
-    const valueWithId = {
-      ...value,
-      id: ReceiptList?.length + 1,
-    };
-    dispatch(postAddReceiptMiddleware(valueWithId));
-    // toastRef.current.showToast();
-    // {
-    //   setTimeout(() => {
+  const { requesters, banks, subAccounts, transactionCodes, branches, departments } =
+    usePettyCashOptions();
+  const handleSubmit = (values) => {
+    dispatch(setReceiptDraft(values));
+    dispatch(getAddReceiptTableMiddleware());
     navigate("/accounts/pettycash/addreceiptstable");
-    //   }, 3000);
-    // }
   };
-
   const validate = (values) => {
     const errors = {};
 
@@ -112,150 +86,21 @@ const AddReceipts = () => {
       handleSubmit(values);
     },
   });
+  const handleTrans = (option) =>
+    formik.setFieldValue("TransactionDescription", describe(transactionCodes, option?.code));
+  const handleBankcode = (option) =>
+    formik.setFieldValue("BankAccountName", describe(banks, option?.code));
+  const handleBranch = (option) =>
+    formik.setFieldValue("BranchDescription", describe(branches, option?.code));
+  const handleDepart = (option) =>
+    formik.setFieldValue("DepartmentDescription", describe(departments, option?.code));
+  const handleSubAccount = (option) =>
+    formik.setFieldValue("SubAccountDescription", describe(subAccounts, option?.code));
 
-  const Requester = (value) => {
-    let Receiptnumber = "";
-    switch (value) {
-      case "Leo":
-        Receiptnumber = "82821";
-        break;
-      case "Yuva":
-        Receiptnumber = "82822";
-        break;
-      case "Sindhu":
-        Receiptnumber = "29923";
-        break;
-      case "Ayisha":
-        Receiptnumber = "28284";
-        break;
-      case "Pandi":
-        Receiptnumber = "18284";
-        break;
-      default:
-        Receiptnumber = "Unknown";
-        break;
-    }
-    formik.setFieldValue("ReceiptNumber", Receiptnumber);
-  };
-  const handleTrans = (value) => {
-    let Trans = "";
-    switch (value) {
-      case "PRM":
-        Trans = "Trans-1";
-        break;
-      case "COMM":
-        Trans = "Trans-2";
-        break;
-      case "REMT":
-        Trans = "Trans-3";
-        break;
-      // case "Trans00123":
-      //   Trans = "Trans-4";
-      //   break;
-      default:
-        Trans = "Unknown";
-        break;
-    }
-    formik.setFieldValue("TransactionDescription", Trans);
-  };
-  const handleBankcode = (value) => {
-    let Branch = "";
-    switch (value) {
-      case "Bk001":
-        Branch = "Bank-1";
-        break;
-      case "Bk002":
-        Branch = "Bank-2";
-        break;
-      case "Bk003":
-        Branch = "Bank-3";
-        break;
-      // case "1818810131":
-      //   Branch = "Bank-1";
-      //   break;
-      default:
-        Branch = "Unknown";
-        break;
-    }
-    formik.setFieldValue("BankAccountName", Branch);
-  };
-  const handleDepart = (value) => {
-    let Depart = "";
-    switch (value) {
-      case "FIN":
-        Depart = "Depart-1";
-        break;
-      case "MKT":
-        Depart = "Depart-2";
-        break;
-      case "IT":
-        Depart = "Depart-3";
-        break;
-      case "SLS":
-        Depart = "Depart-4";
-        break;
-      default:
-        Depart = "Unknown";
-        break;
-    }
-    formik.setFieldValue("DepartmentDescription", Depart);
-  };
-  const handleBranch = (value) => {
-    let Depart = "";
-    switch (value) {
-      case "THB001":
-        Depart = "Branch-1";
-        break;
-      case "THB002":
-        Depart = "Branch-2";
-        break;
-      case "THB003":
-        Depart = "Branch-3";
-        break;
-      case "THB004":
-        Depart = "Branch-4";
-        break;
-      default:
-        Depart = "Unknown";
-        break;
-    }
-    formik.setFieldValue("BranchDescription", Depart);
-  };
-  const handleSubAccount = (value) => {
-    let Depart = "";
-    switch (value) {
-      case "SAC001":
-        Depart = "Sub-1";
-        break;
-      case "SAC002":
-        Depart = "Sub-2";
-        break;
-      case "SAC003":
-        Depart = "Sub-3";
-        break;
-      // case "Sub1818811":
-      //   Depart = "Sub-4";
-      //   break;
-      default:
-        Depart = "Unknown";
-        break;
-    }
-    formik.setFieldValue("SubAccountDescription", Depart);
-  };
   return (
     <div className="add__receipts__container">
-      {/* <CustomToast ref={toastRef} /> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
-          {/* <div
-            className="pettycash__title"
-            onClick={() => {
-              handleBack();
-            }}
-          >
-            <SvgBackArrow />
-            Add Receipt
-          </div> */}
           <div>
           <span onClick={handleBack}>
             <SvgBackicon />
@@ -281,7 +126,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Receipt Number"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -303,15 +147,12 @@ const AddReceipts = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.Requester}
-                options={Name}
+                options={requesters}
                 onChange={(e) => {
-                  console.log(e.value);
-                  formik.setFieldValue("Requester", e.value).then(() => {
-                    Requester(e.value.Name);
-                  })
+                  formik.setFieldValue("Requester", e.value);
 
                 }}
-                optionLabel="Name"
+                optionLabel="label"
                 error={formik.touched.Requester && formik.errors.Requester}
 
               />
@@ -328,15 +169,14 @@ const AddReceipts = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.BankCode}
-                options={BankAccountCode}
+                options={banks}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("BankCode", e.value).then(() => {
-                    handleBankcode(e.value.BankAccountCode);
+                    handleBankcode(e.value);
                   })
 
                 }}
-                optionLabel="BankAccountCode"
+                optionLabel="code"
                 error={formik.touched.BankCode && formik.errors.BankCode}
               />
             </div>
@@ -344,7 +184,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Bank Account Name"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -369,15 +208,14 @@ const AddReceipts = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.SubAccountCode}
-                options={SubAccount}
+                options={subAccounts}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("SubAccountCode", e.value).then(() => {
-                    handleSubAccount(e.value.SubAccount);
+                    handleSubAccount(e.value);
                   })
 
                 }}
-                optionLabel="SubAccount"
+                optionLabel="label"
                 error={
                   formik.touched.SubAccountCode && formik.errors.SubAccountCode
                 }
@@ -387,7 +225,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Sub Account Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -412,15 +249,14 @@ const AddReceipts = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.TransactionCode}
-                options={Transcode}
+                options={transactionCodes}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("TransactionCode", e.value).then(() => {
-                    handleTrans(e.value.Transcode);
+                    handleTrans(e.value);
                   })
 
                 }}
-                optionLabel="Transcode"
+                optionLabel="code"
                 error={
                   formik.touched.TransactionCode &&
                   formik.errors.TransactionCode
@@ -431,7 +267,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Transaction Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -456,15 +291,14 @@ const AddReceipts = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.BranchCode}
-                options={Branchcode}
+                options={branches}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("BranchCode", e.value).then(() => {
-                    handleBranch(e.value.Branchcode);
+                    handleBranch(e.value);
                   })
 
                 }}
-                optionLabel="Branchcode"
+                optionLabel="code"
                 error={formik.touched.BranchCode && formik.errors.BranchCode}
               />
             </div>
@@ -472,7 +306,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Branch Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}
@@ -497,15 +330,14 @@ const AddReceipts = () => {
                 textWeight={500}
                 dropdownIcon={<SvgDropdown color={"#000"} />}
                 value={formik.values.DepartmentCode}
-                options={Departcode}
+                options={departments}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("DepartmentCode", e.value).then(() => {
-                    handleDepart(e.value.Departcode);
+                    handleDepart(e.value);
                   })
 
                 }}
-                optionLabel="Departcode"
+                optionLabel="code"
                 error={
                   formik.touched.DepartmentCode && formik.errors.DepartmentCode
                 }
@@ -515,7 +347,6 @@ const AddReceipts = () => {
               <InputField
                 classNames="input__filed"
                 label="Department Description"
-                // placeholder="Enter"
                 disabled={true}
                 textColor={"#111927"}
                 textSize={"16"}

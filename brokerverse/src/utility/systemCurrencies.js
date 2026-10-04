@@ -70,17 +70,17 @@ export const SYSTEM_CURRENCY_OPTIONS = SYSTEM_CURRENCIES.map((c) => ({
 
 export const LOGO_PRESETS = [
   { label: "EastWest Bank", value: "/temp-logo/eastwestbank.png" },
-  { label: "BDO", value: "/BDO_insure_logo.png.png" },
   { label: "China Bank", value: "/chinabank.png" },
   { label: "iorta", value: "/iorta.png" },
 ];
 
 export const DEFAULT_SYSTEM_SETTINGS = {
-  logoUrl: "/BDO_insure_logo.png.png",
+  logoUrl: "/bdoi/iorta-technxt.png",
   displayCurrency: "PHP",
   primaryColor: "#0072d8",
   secondaryColor: "#004ea8",
   defaultLanguage: "en",
   faviconUrl: "/favicon.ico",
-  appTitle: "Brokerverse",
+  systemName: "BrokerVerse",
+  dateFormat: "DD/MM/YYYY",
 };

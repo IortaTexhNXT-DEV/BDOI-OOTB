@@ -1,20 +1,17 @@
-import React from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import "./index.scss";
 import SvgWhatsAppIcon from "../../../../assets/agentIcon/SvgWhatsAppIcon";
-import SvgDownloadIcon from "../../../../assets/agentIcon/SvgDownloadIcon";
 import SvgEmailIcon from "../../../../assets/agentIcon/SvgEmailIcon";
+import { useTranslation } from "react-i18next";
+import { copyText } from "../../../../utility/clipboard";
+import { notifyError, notifySuccess } from "../../../../utility/dialogs";
 
 const ShareOption = ({ modalVisible, setModalVisible }) => {
+  const { t } = useTranslation();
   const handleCopyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(
-        "https://www.figma.com/file/STJkBwHGeOlCFmrkBBL"
-      );
-    } catch (err) {
-      console.error(err);
-    }
+    if (await copyText(window.location.href)) notifySuccess(t("shareOption.linkCopied"));
+    else notifyError(t("shareOption.copyFailed"));
   };
   return (
     <Dialog
@@ -27,8 +24,8 @@ const ShareOption = ({ modalVisible, setModalVisible }) => {
     >
       <div className="grid m-0">
         <div className="col-12 submit__container">
-          <div>https://www.figma.com/file/STJkBwHGeOlCFmrkBBL</div>
-          <Button onClick={handleCopyToClipboard}>Copy</Button>
+          <div>{window.location.href}</div>
+          <Button onClick={handleCopyToClipboard}>{t("shareOption.copyLink")}</Button>
         </div>
         <div className="share__option__area">
           <div className="common__div mb-2 cursor-pointer">

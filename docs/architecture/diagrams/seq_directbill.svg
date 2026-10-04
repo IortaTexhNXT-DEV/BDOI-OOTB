@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="810" height="592" viewBox="0 0 810 592" font-family="Nunito, DejaVu Sans, Arial, sans-serif">
+<rect width="100%" height="100%" fill="white"/>
+<defs><marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#1F2937"/></marker></defs>
+<text x="30" y="26" font-size="16" text-anchor="start" fill="#0065B3" font-weight="bold">Direct bill: commission debit note to the insurer</text>
+<rect x="38.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="105.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Accounting (maker)</text>
+<rect x="38.0" y="545" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="105.0" y="564" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Accounting (maker)</text>
+<line x1="105.0" y1="87" x2="105.0" y2="545" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="188.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="255.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Accounting (checker)</text>
+<rect x="188.0" y="545" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="255.0" y="564" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Accounting (checker)</text>
+<line x1="255.0" y1="87" x2="255.0" y2="545" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="338.0" y="60" width="134" height="42" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="405.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Remittance module</text>
+<text x="405.0" y="94" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">(direct bill)</text>
+<rect x="338.0" y="530" width="134" height="42" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="405.0" y="549" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Remittance module</text>
+<text x="405.0" y="564" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">(direct bill)</text>
+<line x1="405.0" y1="102" x2="405.0" y2="530" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="488.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="555.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">PostgreSQL</text>
+<rect x="488.0" y="545" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="555.0" y="564" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">PostgreSQL</text>
+<line x1="555.0" y1="87" x2="555.0" y2="545" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="638.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="705.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Insurer</text>
+<rect x="638.0" y="545" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="705.0" y="564" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Insurer</text>
+<line x1="705.0" y1="87" x2="705.0" y2="545" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="255.0" y="116" font-size="11" text-anchor="middle" fill="#1F2937">set policy billing mode to direct (at issue or later;</text>
+<text x="255.0" y="130" font-size="11" text-anchor="middle" fill="#1F2937">premium bill cancelled and booking reversed)</text>
+<line x1="105.0" y1="139" x2="403.0" y2="139" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="480.0" y="164" font-size="11" text-anchor="middle" fill="#1F2937">direct_bill_items; JV Dr</text>
+<text x="480.0" y="178" font-size="11" text-anchor="middle" fill="#1F2937">commission receivable / Cr</text>
+<text x="480.0" y="192" font-size="11" text-anchor="middle" fill="#1F2937">commission income / Cr</text>
+<text x="480.0" y="206" font-size="11" text-anchor="middle" fill="#1F2937">output VAT (12%)</text>
+<line x1="405.0" y1="215" x2="553.0" y2="215" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="255.0" y="240" font-size="11" text-anchor="middle" fill="#1F2937">raise debit note DN- for an insurer and period from</text>
+<text x="255.0" y="254" font-size="11" text-anchor="middle" fill="#1F2937">unbilled items</text>
+<line x1="105.0" y1="263" x2="403.0" y2="263" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="255.0" y="288" font-size="11" text-anchor="middle" fill="#1F2937">submit for approval</text>
+<line x1="105.0" y1="297" x2="403.0" y2="297" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="330.0" y="322" font-size="11" text-anchor="middle" fill="#1F2937">approve (maker-checker)</text>
+<text x="330.0" y="336" font-size="11" text-anchor="middle" fill="#1F2937">-&gt; Open</text>
+<line x1="255.0" y1="345" x2="403.0" y2="345" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="555.0" y="370" font-size="11" text-anchor="middle" fill="#1F2937">send debit note (e-mail via outbox)</text>
+<line x1="405.0" y1="379" x2="703.0" y2="379" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="405.0" y="404" font-size="11" text-anchor="middle" fill="#5B6776">payment: cash + creditable EWT (10%, BIR Form 2307)</text>
+<line x1="705.0" y1="413" x2="107.0" y2="413" stroke="#5B6776" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="255.0" y="438" font-size="11" text-anchor="middle" fill="#1F2937">record collection DNC-: cash, EWT, reference</text>
+<line x1="105.0" y1="447" x2="403.0" y2="447" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="480.0" y="472" font-size="11" text-anchor="middle" fill="#1F2937">JV Dr cash + Dr creditable</text>
+<text x="480.0" y="486" font-size="11" text-anchor="middle" fill="#1F2937">WHT / Cr commission</text>
+<text x="480.0" y="500" font-size="11" text-anchor="middle" fill="#1F2937">receivable; status Partially</text>
+<text x="480.0" y="514" font-size="11" text-anchor="middle" fill="#1F2937">Collected / Collected</text>
+<line x1="405.0" y1="523" x2="553.0" y2="523" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+</svg>

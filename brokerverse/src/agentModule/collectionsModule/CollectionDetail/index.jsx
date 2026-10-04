@@ -9,8 +9,12 @@ import { Column } from "primereact/column";
 import { Tooltip } from "primereact/tooltip";
 import { useParams, useNavigate } from "react-router-dom";
 import collectionService from "../../../services/collectionService";
+import emailService from "../../../services/emailService";
+import EmailDocumentDialog from "../../../components/EmailDocumentDialog";
 import FollowUpModal from "../FollowUpModal";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
 
 const CollectionDetail = () => {
   const { t } = useTranslation();
@@ -24,6 +28,7 @@ const CollectionDetail = () => {
   const [loadingFollowUp, setLoadingFollowUp] = useState(false);
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
   const [followUpType, setFollowUpType] = useState("");
+  const [showInvoiceEmail, setShowInvoiceEmail] = useState(false);
 
   const loadCollectionDetails = useCallback(async () => {
     setLoading(true);
@@ -33,7 +38,7 @@ const CollectionDetail = () => {
         setCollection(result.data);
       }
     } catch (error) {
-      console.error("Load collection details error:", error);
+      logger.error("Load collection details error:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),
@@ -51,22 +56,12 @@ const CollectionDetail = () => {
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    return formatAppDate(dateString);
   };
 
   const formatDateTime = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    return formatAppDate(dateString, { withTime: true });
   };
 
   const handleFollowUpAction = (type) => {
@@ -74,7 +69,6 @@ const CollectionDetail = () => {
     setShowFollowUpModal(true);
   };
   const handleSendEmail = async (body) => {
-    console.log("send email");
     setLoadingFollowUp(true);
     const sendEmail = await collectionService.sendEmail(collection.id, {
       notes: body,
@@ -449,12 +443,13 @@ const CollectionDetail = () => {
             className="p-button-outlined p-button-primary"
             onClick={() => handleFollowUpAction("Email")}
           />
-          {/* <Button
-            label="Log Call"
-            icon="pi pi-phone"
-            className="p-button-outlined p-button-success"
-            onClick={() => handleFollowUpAction("Call")}
-          /> */}
+          <Button
+            label={t("emailDocument.emailInvoice")}
+            icon="pi pi-file-pdf"
+            className="p-button-outlined p-button-primary"
+            disabled={!collection.receivableId}
+            onClick={() => setShowInvoiceEmail(true)}
+          />
           <Button
             label={t("collectionDetail.addNote")}
             icon="pi pi-file-edit"
@@ -576,6 +571,19 @@ const CollectionDetail = () => {
           />
         </DataTable>
       </Card>
+
+      {/* E-mail the invoice / statement of account of the bill with its PDF */}
+      {collection.receivableId && (
+        <EmailDocumentDialog
+          visible={showInvoiceEmail}
+          onHide={() => setShowInvoiceEmail(false)}
+          title={t("emailDocument.emailInvoiceTitle", { number: collection.billNumber || "" })}
+          defaultTo={collection.client?.email || ""}
+          fileName={`invoice-${collection.billNumber}.pdf`}
+          send={(body) => emailService.emailInvoice(collection.receivableId, body)}
+          onSent={loadCollectionDetails}
+        />
+      )}
 
       {/* Follow-Up Modal */}
       <FollowUpModal

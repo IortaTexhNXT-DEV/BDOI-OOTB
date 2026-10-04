@@ -1,11 +1,13 @@
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Image } from "primereact/image";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import SvgRightarrow from "../../../../assets/agentIcon/SvgRightArrow";
 import policyService from "../../../../services/policyService";
+import StatusIllustration from "../../../component/StatusIllustration";
+import { notifyError } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 
 const PolicyApprovalCard = ({ state }) => {
   const { t } = useTranslation();
@@ -18,10 +20,6 @@ const PolicyApprovalCard = ({ state }) => {
   const policyData = state?.policyData;
 
   const handlePolicyReceived = async () => {
-    console.log('=== POLICY RECEIVED - PROCEEDING TO PAYMENT ===');
-    console.log('Policy ID:', policyId);
-    console.log('Quotation ID:', quotationId);
-    
     let resolvedPolicyId = policyId;
     let resolvedPolicyData = policyData;
 
@@ -34,13 +32,12 @@ const PolicyApprovalCard = ({ state }) => {
           resolvedPolicyData = policyRecord;
         }
       } catch (error) {
-        console.error('Failed to resolve policy ID on waiting page:', error);
+        logger.error('Failed to resolve policy ID on waiting page:', error);
       }
     }
 
     if (!resolvedPolicyId) {
-      console.error('Policy ID not found in state');
-      alert(t("agent.policyIdNotFound"));
+      notifyError(t("agent.policyIdNotFound"));
       return;
     }
     
@@ -53,10 +50,7 @@ const PolicyApprovalCard = ({ state }) => {
       policyData: resolvedPolicyData,
       fromWaitingPage: true, // This MUST be true for auto-payment flow
     };
-    
-    console.log('Final navigation state:', navigationState);
-    console.log('fromWaitingPage is:', navigationState.fromWaitingPage);
-    
+
     navigate(`/agent/uploadpolicy/${quotationId || ''}`, {
       state: navigationState,
     });
@@ -76,11 +70,7 @@ const PolicyApprovalCard = ({ state }) => {
       <Card className="pt-5">
         <div className="policy__approval__card__title">{t("agent.waitingForPolicy")}</div>
         <div className="policy__approval__card__image__containe mt-4">
-          <Image
-            src="https://i.ibb.co/gz54P23/Hourglass.png"
-            width="106px"
-            height="187px"
-          />
+          <StatusIllustration variant="waiting" />
         </div>
         <div className="policy__approval__card__sub__text__container mt-3">
           <div className="policy__approval__card__sub__text">

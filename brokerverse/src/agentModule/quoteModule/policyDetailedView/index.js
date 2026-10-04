@@ -12,18 +12,26 @@ const PolicyDetailedView = ({ action }) => {
   const { state } = useLocation();
   const { id: policyId } = useParams();
 
-  const { policydetailedlist } = useSelector(
-    ({ policyDetailedViewMainReducers }) => ({
-      policydetailedlist: policyDetailedViewMainReducers?.policydetailedlist,
-    })
-  );
+  const { loaded } = useSelector(({ policyDetailedViewMainReducers }) => ({
+    loaded: policyDetailedViewMainReducers?.policydetailedlist,
+  }));
+  // only the policy of this page (the store may still hold one opened elsewhere)
+  const policydetailedlist =
+    loaded && [loaded.policyId, loaded.id, loaded.policyNumber].includes(policyId) ? loaded : null;
 
   const clientName =
     state?.ClientName ||
     state?.clientName ||
     policydetailedlist?.ClientName ||
     policydetailedlist?.clientName;
+  // Show the client code (CL-2026-00001), never the internal id
   const clientId =
+    state?.ClientCode ||
+    state?.client?.clientCode ||
+    state?.clientCode ||
+    policydetailedlist?.ClientCode ||
+    policydetailedlist?.client?.clientCode ||
+    policydetailedlist?.client?.generatedClientId ||
     state?.ClientId ||
     state?.clientId ||
     policydetailedlist?.ClientId ||

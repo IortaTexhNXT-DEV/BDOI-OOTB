@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TabView, TabPanel } from "primereact/tabview";
 import { DataTable } from "primereact/datatable";
@@ -8,17 +8,28 @@ import { Card } from "primereact/card";
 import { Tag } from "primereact/tag";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
 import { Dropdown } from "primereact/dropdown";
 import { Calendar } from "primereact/calendar";
 import { Badge } from "primereact/badge";
 import { Avatar } from "primereact/avatar";
 import { Tooltip } from "primereact/tooltip";
+import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
+import remittanceService, { apiRequest } from "../../../services/remittanceService";
+import { calendarDateFormat, dateBody, isoDate, showError, showSuccess, statusSeverity } from "../shared";
 import "./index.scss";
+import { confirmAction } from "../../../utility/dialogs";
+
+const TEMPLATE_ROUTE = "/master/finance/remittance/notificationmaster";
+const emptyMessage = { type: "", subject: "", content: "", recipients: "", recipientType: "Client", channel: "Email", priority: "Normal", templateCode: null };
+const allOption = (values) => [{ label: "All", value: "All" }, ...values.map((v) => ({ label: v, value: v }))];
+const pct = (part, whole) => (whole ? `${Math.round((part / whole) * 1000) / 10}%` : "-");
 
 const RemittanceNotifications = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const toast = useRef(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedRows, setSelectedRows] = useState([]);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
@@ -26,169 +37,94 @@ const RemittanceNotifications = () => {
   const [filterType, setFilterType] = useState("All");
   const [filterStatus, setFilterStatus] = useState("All");
   const [filterDateRange, setFilterDateRange] = useState(null);
+  const [inboxNotifications, setInboxNotifications] = useState([]);
+  const [sentNotifications, setSentNotifications] = useState([]);
+  const [templates, setTemplates] = useState([]);
+  const [showCompose, setShowCompose] = useState(false);
+  const [message, setMessage] = useState(emptyMessage);
+  const [loading, setLoading] = useState(false);
 
-  const inboxNotifications = [
-    {
-      id: 1,
-      type: "Payment Reminder",
-      subject: "Payment Due - Policy POL123456789",
-      sender: "Remittance System",
-      recipientType: "Client",
-      sentDate: "2025-09-26 10:30",
-      status: "Delivered",
-      priority: "High",
-      channel: "Email",
-      content: "Dear Client, your payment for policy POL123456789 is due on 2025-09-30.",
-      isRead: false,
-      hasAttachment: true
-    },
-    {
-      id: 2,
-      type: "Settlement Confirmation",
-      subject: "Settlement Processed - REF20250926001",
-      sender: "Finance Team",
-      recipientType: "Agent",
-      sentDate: "2025-09-26 09:15",
-      status: "Delivered",
-      priority: "Medium",
-      channel: "Email + SMS",
-      content: "Your settlement for reference REF20250926001 has been processed successfully.",
-      isRead: true,
-      hasAttachment: false
-    },
-    {
-      id: 3,
-      type: "Approval Required",
-      subject: "Adjustment Approval Required - ADJ20250926002",
-      sender: "Workflow System",
-      recipientType: "Manager",
-      sentDate: "2025-09-26 08:45",
-      status: "Pending",
-      priority: "High",
-      channel: "Email",
-      content: "An adjustment request requires your approval. Amount: ₱5,000",
-      isRead: false,
-      hasAttachment: true
-    },
-    {
-      id: 4,
-      type: "System Alert",
-      subject: "Exception in Processing - EXC20250926001",
-      sender: "System",
-      recipientType: "Operations",
-      sentDate: "2025-09-26 07:20",
-      status: "Failed",
-      priority: "Critical",
-      channel: "System Alert",
-      content: "Exception occurred during bulk processing. Manual intervention required.",
-      isRead: false,
-      hasAttachment: false
-    },
-    {
-      id: 5,
-      type: "Commission Statement",
-      subject: "Commission Statement Ready - September 2025",
-      sender: "Statement Generator",
-      recipientType: "Agent",
-      sentDate: "2025-09-25 18:00",
-      status: "Delivered",
-      priority: "Low",
-      channel: "Email",
-      content: "Your commission statement for September 2025 is ready for download.",
-      isRead: true,
-      hasAttachment: true
+  const loadNotifications = async () => {
+    setLoading(true);
+    try {
+      const [inbox, sent, tpl] = await Promise.all([
+        remittanceService.inbox(),
+        remittanceService.sentNotifications(),
+        remittanceService.notificationTemplates()
+      ]);
+      setInboxNotifications(inbox || []);
+      setSentNotifications((sent || []).map((n) => ({ ...n, sentDate: n.sentDate || n.createdDate })));
+      setTemplates(tpl || []);
+      setSelectedRows([]);
+    } catch (e) {
+      showError(toast, e);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const sentNotifications = [
-    {
-      id: 101,
-      type: "Payment Reminder",
-      subject: "Payment Overdue - Policy POL987654321",
-      recipients: "client@example.com",
-      sentDate: "2025-09-25 14:30",
-      status: "Delivered",
-      channel: "Email",
-      deliveryRate: "100%",
-      openRate: "85%"
-    },
-    {
-      id: 102,
-      type: "Settlement Alert",
-      subject: "Settlement Delayed - REF20250925001",
-      recipients: "agent@broker.com",
-      sentDate: "2025-09-25 12:15",
-      status: "Bounced",
-      channel: "Email",
-      deliveryRate: "0%",
-      openRate: "0%"
-    },
-    {
-      id: 103,
-      type: "Bulk SMS Campaign",
-      subject: "Payment Reminder Campaign",
-      recipients: "125 Recipients",
-      sentDate: "2025-09-25 10:00",
-      status: "Delivered",
-      channel: "SMS",
-      deliveryRate: "95%",
-      openRate: "N/A"
+  useEffect(() => {
+    loadNotifications();
+  }, []);
+
+  const today = isoDate(new Date());
+  const [fromDate, toDate] = filterDateRange || [];
+  const applyFilters = (rows) => rows.filter((r) => {
+    const day = String(r.sentDate || "").slice(0, 10);
+    return (filterType === "All" || r.type === filterType)
+      && (filterStatus === "All" || r.status === filterStatus)
+      && (!fromDate || day >= isoDate(fromDate)) && (!toDate || day <= isoDate(toDate));
+  });
+  const visibleInbox = applyFilters(inboxNotifications);
+  const visibleSent = applyFilters(sentNotifications);
+  const unread = inboxNotifications.filter((n) => !n.isRead).length;
+  const failed = sentNotifications.filter((n) => n.status === "Failed").length;
+  const templateUsage = (code) => sentNotifications.filter((n) => n.templateCode === code);
+  const templateRows = templates.map((tpl) => {
+    const uses = templateUsage(tpl.code);
+    return { ...tpl, type: tpl.trigger, lastUsed: uses[0]?.sentDate?.slice(0, 10) || "-", usageCount: uses.length };
+  });
+  const channels = [...new Set(sentNotifications.map((n) => n.channel).filter(Boolean))];
+  const deliveredWithin = (days) => {
+    const since = isoDate(new Date(Date.now() - days * 86400000));
+    const rows = sentNotifications.filter((n) => String(n.sentDate).slice(0, 10) >= since);
+    return pct(rows.filter((n) => n.status !== "Failed").length, rows.length);
+  };
+  const topTemplates = [...templateRows].sort((a, b) => b.usageCount - a.usageCount).slice(0, 3);
+  const allRows = [...inboxNotifications, ...sentNotifications];
+
+  const typeOptions = allOption([...new Set(allRows.map((n) => n.type).filter(Boolean))]);
+
+  const statusOptions = allOption([...new Set(allRows.map((n) => n.status).filter(Boolean))]);
+
+  const openCompose = (preset = {}) => {
+    setMessage({ ...emptyMessage, ...preset });
+    setShowCompose(true);
+  };
+
+  const handleSend = async () => {
+    try {
+      const sent = await remittanceService.sendNotification({ ...message, recipients: message.recipients.split(/[,;]/).map((r) => r.trim()).filter(Boolean) });
+      showSuccess(toast, `${sent.referenceNo} sent`);
+      setShowCompose(false);
+      loadNotifications();
+    } catch (e) {
+      showError(toast, e);
     }
-  ];
+  };
 
-  const templates = [
-    {
-      id: 1,
-      name: "Payment Due Reminder",
-      type: "Payment Reminder",
-      channel: "Email",
-      lastUsed: "2025-09-26",
-      usageCount: 156,
-      status: "Active"
-    },
-    {
-      id: 2,
-      name: "Settlement Confirmation",
-      type: "Settlement",
-      channel: "Email + SMS",
-      lastUsed: "2025-09-26",
-      usageCount: 89,
-      status: "Active"
-    },
-    {
-      id: 3,
-      name: "Approval Request",
-      type: "Workflow",
-      channel: "Email",
-      lastUsed: "2025-09-25",
-      usageCount: 43,
-      status: "Draft"
-    }
-  ];
-
-  const typeOptions = [
-    { label: "All", value: "All" },
-    { label: "Payment Reminder", value: "Payment Reminder" },
-    { label: "Settlement Confirmation", value: "Settlement Confirmation" },
-    { label: "Approval Required", value: "Approval Required" },
-    { label: "System Alert", value: "System Alert" },
-    { label: "Commission Statement", value: "Commission Statement" }
-  ];
-
-  const statusOptions = [
-    { label: "All", value: "All" },
-    { label: "Delivered", value: "Delivered" },
-    { label: "Pending", value: "Pending" },
-    { label: "Failed", value: "Failed" },
-    { label: "Bounced", value: "Bounced" }
-  ];
+  const reply = (n) => openCompose({ type: n.type, subject: `Re: ${n.subject}`, recipients: n.recipients || "", channel: n.channel === "System" ? "Email" : n.channel });
+  const forward = (n) => openCompose({ type: n.type, subject: `Fwd: ${n.subject}`, content: n.content || "" });
+  const applyTemplate = (tpl) => openCompose({ type: tpl.trigger || tpl.name, subject: tpl.subject || tpl.name, content: tpl.body || tpl.message || "", channel: tpl.channel || "Email", templateCode: tpl.code });
 
   const priorityBodyTemplate = (rowData) => {
     const getSeverity = (priority) => {
       switch (priority) {
         case 'Critical': return 'danger';
+        case 'Urgent': return 'danger';
         case 'High': return 'warning';
         case 'Medium': return 'info';
+        case 'Normal': return 'info';
         case 'Low': return 'success';
         default: return null;
       }
@@ -197,16 +133,7 @@ const RemittanceNotifications = () => {
   };
 
   const statusBodyTemplate = (rowData) => {
-    const getSeverity = (status) => {
-      switch (status) {
-        case 'Delivered': return 'success';
-        case 'Pending': return 'warning';
-        case 'Failed': return 'danger';
-        case 'Bounced': return 'danger';
-        default: return null;
-      }
-    };
-    return <Tag value={rowData.status} severity={getSeverity(rowData.status)} />;
+    return <Tag value={rowData.status} severity={statusSeverity(rowData.status)} />;
   };
 
   const subjectBodyTemplate = (rowData) => {
@@ -227,14 +154,46 @@ const RemittanceNotifications = () => {
     return (
       <div className="sender-cell">
         <Avatar
-          label={rowData.sender.charAt(0)}
+          label={(rowData.sender || "?").charAt(0)}
           className="mr-2"
           size="small"
-          style={{ backgroundColor: '#007bff', color: 'white' }}
+          style={{ backgroundColor: 'var(--bv-primary-050)', color: 'var(--bv-secondary)' }}
         />
         <span>{rowData.sender}</span>
       </div>
     );
+  };
+
+  const isInbox = (row) => inboxNotifications.some((n) => n.id === row?.id);
+
+  const markAsRead = async (rows) => {
+    const ids = rows.filter(isInbox).map((r) => r.id);
+    if (!ids.length) return;
+    try {
+      await apiRequest("PUT", "/notifications/read", { body: { notificationIds: ids } });
+      showSuccess(toast, `${ids.length} notification(s) marked as read`);
+      loadNotifications();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
+  const deleteRows = async (rows) => {
+    const ids = rows.filter(isInbox).map((r) => r.id);
+    if (!ids.length || !(await confirmAction(`Delete ${ids.length} notification(s)?`, { danger: true }))) return;
+    try {
+      await apiRequest("DELETE", "/notifications", { body: { notificationIds: ids } });
+      showSuccess(toast, `${ids.length} notification(s) deleted`);
+      loadNotifications();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
+  const openDetail = (rowData) => {
+    setSelectedNotification(rowData);
+    setShowDetailDialog(true);
+    if (isInbox(rowData) && !rowData.isRead) markAsRead([rowData]);
   };
 
   const actionsBodyTemplate = (rowData) => {
@@ -244,26 +203,27 @@ const RemittanceNotifications = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
           tooltip="View"
-          onClick={() => {
-            setSelectedNotification(rowData);
-            setShowDetailDialog(true);
-          }}
+          onClick={() => openDetail(rowData)} aria-label="View"
         />
         <Button
           icon="pi pi-reply"
           className="p-button-rounded p-button-text"
           tooltip="Reply"
-          disabled={rowData.type === 'System Alert'}
+          disabled={isInbox(rowData)}
+          onClick={() => reply(rowData)} aria-label="Reply"
         />
         <Button
           icon="pi pi-forward"
           className="p-button-rounded p-button-text"
           tooltip="Forward"
+          onClick={() => forward(rowData)} aria-label="Forward"
         />
         <Button
           icon="pi pi-trash"
           className="p-button-rounded p-button-danger p-button-text"
           tooltip="Delete"
+          disabled={!isInbox(rowData)}
+          onClick={() => deleteRows([rowData])} aria-label="Delete"
         />
       </div>
     );
@@ -276,37 +236,36 @@ const RemittanceNotifications = () => {
           icon="pi pi-eye"
           className="p-button-rounded p-button-text"
           tooltip="Preview"
+          onClick={() => openDetail({ subject: rowData.subject || rowData.name, type: rowData.trigger, channel: rowData.channel, status: rowData.status, content: rowData.body || rowData.message, sender: "Template" })} aria-label="Preview"
         />
         <Button
           icon="pi pi-pencil"
           className="p-button-rounded p-button-text"
           tooltip="Edit"
-        />
-        <Button
-          icon="pi pi-copy"
-          className="p-button-rounded p-button-text"
-          tooltip="Duplicate"
+          onClick={() => navigate(`${TEMPLATE_ROUTE}/edit`, { state: { data: rowData, mode: "edit" } })} aria-label="Edit"
         />
         <Button
           icon="pi pi-send"
           className="p-button-rounded p-button-success p-button-text"
           tooltip="Use Template"
+          onClick={() => applyTemplate(rowData)} aria-label="Use Template"
         />
       </div>
     );
   };
 
-  const handleBackToMaster = () => {
-    navigate("/master/finance/remittance");
-  };
+  const handleMarkAsRead = () => markAsRead(selectedRows);
 
-  const handleMarkAsRead = () => {
-    console.log("Marking selected notifications as read");
-  };
+  const handleBulkDelete = () => deleteRows(selectedRows);
 
-  const handleBulkDelete = () => {
-    console.log("Deleting selected notifications");
-  };
+  const setField = (field, value) => setMessage((m) => ({ ...m, [field]: value }));
+
+  const composeFooter = (
+    <div>
+      <Button label="Cancel" icon="pi pi-times" className="p-button-text" onClick={() => setShowCompose(false)} />
+      <Button label="Send" icon="pi pi-send" onClick={handleSend} disabled={!message.subject || !message.content || !message.recipients} />
+    </div>
+  );
 
   const detailDialogFooter = (
     <div>
@@ -314,12 +273,14 @@ const RemittanceNotifications = () => {
         label="Reply"
         icon="pi pi-reply"
         className="p-button-primary mr-2"
-        disabled={selectedNotification?.type === 'System Alert'}
+        disabled={!selectedNotification || isInbox(selectedNotification)}
+        onClick={() => { setShowDetailDialog(false); reply(selectedNotification); }}
       />
       <Button
         label="Forward"
         icon="pi pi-forward"
         className="p-button-secondary mr-2"
+        onClick={() => { setShowDetailDialog(false); forward(selectedNotification); }}
       />
       <Button
         label="Close"
@@ -332,14 +293,9 @@ const RemittanceNotifications = () => {
 
   return (
     <div className="remittance-notifications">
+      <Toast ref={toast} />
       <div className="header-section">
         <h2>{t("remittance.remittanceNotifications")}</h2>
-        <Button
-          label="Back to Master"
-          icon="pi pi-arrow-left"
-          className="p-button-secondary"
-          onClick={handleBackToMaster}
-        />
       </div>
 
       <div className="summary-cards">
@@ -349,7 +305,7 @@ const RemittanceNotifications = () => {
               <i className="pi pi-inbox" />
             </div>
             <div className="card-details">
-              <div className="card-value">15</div>
+              <div className="card-value">{unread}</div>
               <div className="card-label">Unread Messages</div>
             </div>
           </div>
@@ -360,7 +316,7 @@ const RemittanceNotifications = () => {
               <i className="pi pi-send" />
             </div>
             <div className="card-details">
-              <div className="card-value">248</div>
+              <div className="card-value">{sentNotifications.filter((n) => String(n.sentDate).startsWith(today)).length}</div>
               <div className="card-label">Sent Today</div>
             </div>
           </div>
@@ -371,7 +327,7 @@ const RemittanceNotifications = () => {
               <i className="pi pi-exclamation-triangle" />
             </div>
             <div className="card-details">
-              <div className="card-value">3</div>
+              <div className="card-value">{failed}</div>
               <div className="card-label">Failed Deliveries</div>
             </div>
           </div>
@@ -382,7 +338,7 @@ const RemittanceNotifications = () => {
               <i className="pi pi-file" />
             </div>
             <div className="card-details">
-              <div className="card-value">12</div>
+              <div className="card-value">{templates.filter((tpl) => tpl.status === "Active").length}</div>
               <div className="card-label">Active Templates</div>
             </div>
           </div>
@@ -396,11 +352,13 @@ const RemittanceNotifications = () => {
               label="Compose"
               icon="pi pi-plus"
               className="p-button-primary mr-2"
+              onClick={() => openCompose()}
             />
             <Button
               label="Refresh"
               icon="pi pi-refresh"
               className="p-button-secondary"
+              onClick={loadNotifications}
             />
           </div>
           <div className="filter-section">
@@ -418,21 +376,22 @@ const RemittanceNotifications = () => {
               placeholder="Status"
               className="mr-2"
             />
-            <Calendar
+            <Calendar dateFormat={calendarDateFormat()}
               value={filterDateRange}
               onChange={(e) => setFilterDateRange(e.value)}
               selectionMode="range"
               placeholder="Date Range"
               className="mr-2"
             />
-            <Button label="Filter" icon="pi pi-filter" className="p-button-secondary" />
+            <Button label="Filter" icon="pi pi-filter" className="p-button-secondary" onClick={loadNotifications} />
           </div>
         </div>
 
         <TabView activeIndex={activeIndex} onTabChange={(e) => setActiveIndex(e.index)}>
-          <TabPanel header={<span>Inbox <Badge value="15" severity="danger" className="ml-2" /></span>}>
+          <TabPanel header={<span>Inbox <Badge value={unread} severity="danger" className="ml-2" /></span>}>
             <DataTable
-              value={inboxNotifications}
+              value={visibleInbox}
+              loading={loading}
               selection={selectedRows}
               onSelectionChange={(e) => setSelectedRows(e.value)}
               dataKey="id"
@@ -446,7 +405,7 @@ const RemittanceNotifications = () => {
               <Column field="channel" header="Channel" style={{ width: '10%' }} />
               <Column field="priority" header="Priority" body={priorityBodyTemplate} style={{ width: '8%' }} />
               <Column field="status" header="Status" body={statusBodyTemplate} style={{ width: '8%' }} />
-              <Column field="sentDate" header="Date" style={{ width: '12%' }} />
+              <Column field="sentDate" body={dateBody("sentDate")} header="Date" style={{ width: '12%' }} />
               <Column header="Actions" body={actionsBodyTemplate} style={{ width: '150px' }} />
             </DataTable>
 
@@ -464,17 +423,12 @@ const RemittanceNotifications = () => {
                   className="p-button-danger mr-2"
                   onClick={handleBulkDelete}
                 />
-                <Button
-                  label="Archive"
-                  icon="pi pi-folder"
-                  className="p-button-secondary"
-                />
               </div>
             )}
           </TabPanel>
 
           <TabPanel header="Sent">
-            <DataTable value={sentNotifications} stripedRows>
+            <DataTable value={visibleSent} stripedRows loading={loading}>
               <Column field="subject" header="Subject" />
               <Column field="recipients" header="Recipients" />
               <Column field="type" header="Type" />
@@ -482,7 +436,7 @@ const RemittanceNotifications = () => {
               <Column field="status" header="Status" body={statusBodyTemplate} />
               <Column field="deliveryRate" header="Delivery Rate" />
               <Column field="openRate" header="Open Rate" />
-              <Column field="sentDate" header="Sent Date" />
+              <Column field="sentDate" body={dateBody("sentDate")} header="Sent Date" />
               <Column header="Actions" body={actionsBodyTemplate} />
             </DataTable>
           </TabPanel>
@@ -494,10 +448,11 @@ const RemittanceNotifications = () => {
                   label="New Template"
                   icon="pi pi-plus"
                   className="p-button-primary"
+                  onClick={() => navigate(`${TEMPLATE_ROUTE}/add`, { state: { mode: "add" } })}
                 />
               </div>
 
-              <DataTable value={templates} stripedRows>
+              <DataTable value={templateRows} stripedRows loading={loading}>
                 <Column field="name" header="Template Name" />
                 <Column field="type" header="Type" />
                 <Column field="channel" header="Channel" />
@@ -516,64 +471,55 @@ const RemittanceNotifications = () => {
                   <h4>Delivery Performance</h4>
                   <div className="metric-row">
                     <span>Today's Delivery Rate:</span>
-                    <strong>97.5%</strong>
+                    <strong>{deliveredWithin(0)}</strong>
                   </div>
                   <div className="metric-row">
                     <span>This Week:</span>
-                    <strong>96.8%</strong>
+                    <strong>{deliveredWithin(7)}</strong>
                   </div>
                   <div className="metric-row">
                     <span>This Month:</span>
-                    <strong>98.1%</strong>
+                    <strong>{deliveredWithin(30)}</strong>
                   </div>
                 </Card>
 
                 <Card className="analytics-card">
                   <h4>Engagement Metrics</h4>
                   <div className="metric-row">
-                    <span>Average Open Rate:</span>
-                    <strong>78%</strong>
+                    <span>Messages Sent:</span>
+                    <strong>{sentNotifications.length}</strong>
                   </div>
                   <div className="metric-row">
-                    <span>Click Through Rate:</span>
-                    <strong>12.5%</strong>
+                    <span>Inbox Read Rate:</span>
+                    <strong>{pct(inboxNotifications.length - unread, inboxNotifications.length)}</strong>
                   </div>
                   <div className="metric-row">
-                    <span>Response Rate:</span>
-                    <strong>8.3%</strong>
+                    <span>Failed Deliveries:</span>
+                    <strong>{failed}</strong>
                   </div>
                 </Card>
 
                 <Card className="analytics-card">
                   <h4>Channel Performance</h4>
-                  <div className="metric-row">
-                    <span>Email:</span>
-                    <strong>85% Success</strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>SMS:</span>
-                    <strong>96% Success</strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>System Alert:</span>
-                    <strong>100% Success</strong>
-                  </div>
+                  {channels.map((channel) => {
+                    const rows = sentNotifications.filter((n) => n.channel === channel);
+                    return (
+                      <div className="metric-row" key={channel}>
+                        <span>{channel}:</span>
+                        <strong>{pct(rows.filter((n) => n.status !== "Failed").length, rows.length)} Success</strong>
+                      </div>
+                    );
+                  })}
                 </Card>
 
                 <Card className="analytics-card">
                   <h4>Top Templates</h4>
-                  <div className="metric-row">
-                    <span>Payment Reminder:</span>
-                    <strong>156 uses</strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>Settlement Confirmation:</span>
-                    <strong>89 uses</strong>
-                  </div>
-                  <div className="metric-row">
-                    <span>Approval Request:</span>
-                    <strong>43 uses</strong>
-                  </div>
+                  {topTemplates.map((tpl) => (
+                    <div className="metric-row" key={tpl.code}>
+                      <span>{tpl.name}:</span>
+                      <strong>{tpl.usageCount} uses</strong>
+                    </div>
+                  ))}
                 </Card>
               </div>
             </div>
@@ -594,8 +540,8 @@ const RemittanceNotifications = () => {
               <h3>{selectedNotification.subject}</h3>
               <div className="detail-meta">
                 <Tag value={selectedNotification.type} className="mr-2" />
-                <Tag value={selectedNotification.priority} severity={priorityBodyTemplate(selectedNotification).props.severity} className="mr-2" />
-                <Tag value={selectedNotification.status} severity={statusBodyTemplate(selectedNotification).props.severity} />
+                {selectedNotification.priority && <Tag value={selectedNotification.priority} severity={priorityBodyTemplate(selectedNotification).props.severity} className="mr-2" />}
+                <Tag value={selectedNotification.status} severity={statusSeverity(selectedNotification.status)} />
               </div>
             </div>
 
@@ -606,7 +552,7 @@ const RemittanceNotifications = () => {
               </div>
               <div className="info-row">
                 <label>To:</label>
-                <span>{selectedNotification.recipientType}</span>
+                <span>{selectedNotification.recipients || selectedNotification.recipientType}</span>
               </div>
               <div className="info-row">
                 <label>Channel:</label>
@@ -614,7 +560,7 @@ const RemittanceNotifications = () => {
               </div>
               <div className="info-row">
                 <label>Sent:</label>
-                <span>{selectedNotification.sentDate}</span>
+                <span>{dateBody("sentDate")(selectedNotification)}</span>
               </div>
             </div>
 
@@ -625,20 +571,38 @@ const RemittanceNotifications = () => {
               </div>
             </div>
 
-            {selectedNotification.hasAttachment && (
-              <div className="detail-attachments">
-                <h4>Attachments</h4>
-                <div className="attachment-list">
-                  <div className="attachment-item">
-                    <i className="pi pi-file-pdf mr-2" />
-                    <span>payment_details.pdf</span>
-                    <Button icon="pi pi-download" className="p-button-text p-button-sm ml-2" />
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
+      </Dialog>
+
+      <Dialog header="Compose Notification" visible={showCompose} style={{ width: '50vw' }} footer={composeFooter} onHide={() => setShowCompose(false)}>
+        <div className="p-fluid">
+          <div className="p-field field">
+            <label>Template</label>
+            <Dropdown value={message.templateCode} options={templates.map((tpl) => ({ label: tpl.name, value: tpl.code }))} showClear
+              onChange={(e) => (e.value ? applyTemplate(templates.find((tpl) => tpl.code === e.value)) : setField("templateCode", null))} />
+          </div>
+          <div className="p-field field">
+            <label>Type</label>
+            <InputText value={message.type} onChange={(e) => setField("type", e.target.value)} />
+          </div>
+          <div className="p-field field">
+            <label>Recipients *</label>
+            <InputText value={message.recipients} onChange={(e) => setField("recipients", e.target.value)} placeholder="email@example.com, ..." />
+          </div>
+          <div className="p-field field">
+            <label>Channel</label>
+            <Dropdown value={message.channel} options={[...new Set(["Email", ...templates.map((tpl) => tpl.channel).filter(Boolean)])]} onChange={(e) => setField("channel", e.value)} />
+          </div>
+          <div className="p-field field">
+            <label>Subject *</label>
+            <InputText value={message.subject} onChange={(e) => setField("subject", e.target.value)} />
+          </div>
+          <div className="p-field field">
+            <label>Message *</label>
+            <InputTextarea rows={5} value={message.content} onChange={(e) => setField("content", e.target.value)} />
+          </div>
+        </div>
       </Dialog>
 
       <Tooltip target=".p-button" />

@@ -1,14 +1,9 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { POST_UPLOAD_ENDROSMENT } from "../../../../redux/actionTypes";
 
-
-
-
-
 export const postEndromentMiddleWare = createAsyncThunk(
     POST_UPLOAD_ENDROSMENT,
     async (payload, { rejectWithValue }) => {
-        console.log(payload.production, "payload");
         let data = {
             policyNumber: payload?.policyNumber,
             endrosementNumber: payload?.endrosementNumber,
@@ -38,7 +33,6 @@ export const postEndromentMiddleWare = createAsyncThunk(
             }),
         };
         try {
-            console.log(data, "datadata");
             return data
         } catch (error) {
             return rejectWithValue(error?.response?.data?.error?.message);

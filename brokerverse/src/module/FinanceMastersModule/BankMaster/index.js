@@ -2,41 +2,48 @@ import React, { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../assets/icons/SvgDot";
-import SvgFilters from "../../../assets/icons/SvgFilters";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import { ProductService } from "./mock";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
 import SvgUpload from "../../../assets/icons/SvgUpload";
-import SvgMenudots from "../../../assets/icons/SvgMenudots";
-import { TieredMenu } from "primereact/tieredmenu";
 import { Dialog } from "primereact/dialog";
 import InputField from "../../../components/InputField";
-import ToggleButton from "../../../components/ToggleButton";
 import SvgTable from "../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
 import { useFormik } from "formik";
 import {
   getBankSearchList,
   patchBankDetailEdit,
+  getBankList,
 } from "./store/bankMasterMiddleware";
 import MenuData from "./MenuData";
+import MasterStatusToggle from "../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
+import ImportDialog, { masterTarget } from "../../../components/ImportDialog";
+
+const UPLOAD_TARGETS = [masterTarget("bank", "Banks"), masterTarget("bank-account", "Bank accounts")];
 
 const BankMaster = () => {
   const { t } = useTranslation();
-  const menu = useRef(null);
+  const [showUpload, setShowUpload] = useState(false);
   const [visible, setVisible] = useState(false);
   const [visibleview, setVisibleview] = useState(false);
-  const [currentDialog, setDialog] = useState({});
+  const [, setDialog] = useState({});
   const [search, setSearch] = useState("");
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getBankList());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getBankList());
+  }, [dispatch]);
   const navigate = useNavigate();
   const menuitems = [
     { label: t("financeMasters.edit"), command: (rowData) => handleEdit(rowData) },
@@ -47,64 +54,47 @@ const BankMaster = () => {
     },
   ];
 
+  const fillBankForm = (rowData) => {
+    formik.setValues({
+      ...formik.values,
+      id: rowData?.id,
+      bankCode: rowData?.bankCode ?? "",
+      bankName: rowData?.bankName ?? "",
+      bankBranch: rowData?.bankBranch ?? "",
+      ifscCode: rowData?.ifscCode ?? "",
+      addressLine1: rowData?.AddressLine1 ?? "",
+      addressLine2: rowData?.AddressLine2 ?? "",
+      addressLine3: rowData?.AddressLine3 ?? "",
+      city: rowData?.City ?? "",
+      state: rowData?.state ?? "",
+      country: rowData?.Country ?? "",
+      mobile: rowData?.mobile ?? "",
+      fax: rowData?.Fax ?? "",
+      email: rowData?.email ?? "",
+    });
+  };
+
   const handleEdit = (rowData) => {
-    console.log(rowData, "rowData");
     setVisible(true);
     setDialog(rowData);
-    // console.log(currentDialog, "current detail")
-    formik.setFieldValue("id", rowData?.id);
-    formik.setFieldValue("bankCode", rowData?.bankCode);
-    formik.setFieldValue("bankName", rowData?.bankName);
-    formik.setFieldValue("bankBranch", rowData?.bankBranch);
-    formik.setFieldValue("ifscCode", rowData?.ifscCode);
-    formik.setFieldValue("addressLine1", "Sudharshan Building");
-    formik.setFieldValue("addressLine2", "2nd floor,chamiers Road");
-    formik.setFieldValue("addressLine3", "Nanthanam");
-    formik.setFieldValue("city", "MATI");
-    formik.setFieldValue("state", "DON SALVADOR BENEDICTO");
-    formik.setFieldValue("country", "Thailand");
-    formik.setFieldValue("mobile", rowData?.mobile);
-    formik.setFieldValue("fax", rowData?.mobile);
-    formik.setFieldValue("email", rowData?.email);
-    // or any other logic you want to perform
-    // Use the rowData as needed
-    console.log("Edit clicked for row:", rowData);
+    fillBankForm(rowData);
   };
 
   const handleView = (rowData) => {
     setVisibleview(true);
-    setDialog(rowData); // or any other logic you want to perform
-    // Use the rowData as needed
-    formik.setFieldValue("id", rowData?.id);
-    formik.setFieldValue("bankCode", rowData?.bankCode);
-    formik.setFieldValue("bankName", rowData?.bankName);
-    formik.setFieldValue("bankBranch", rowData?.bankBranch);
-    formik.setFieldValue("ifscCode", rowData?.ifscCode);
-    formik.setFieldValue("addressLine1", "Sudharshan Building");
-    formik.setFieldValue("addressLine2", "2nd floor,chamiers Road");
-    formik.setFieldValue("addressLine3", "Nanthanam");
-    formik.setFieldValue("city", "MATI");
-    formik.setFieldValue("state", "DON SALVADOR BENEDICTO");
-    formik.setFieldValue("country", "Thailand");
-    formik.setFieldValue("mobile", rowData?.mobile);
-    formik.setFieldValue("fax", rowData?.mobile);
-    formik.setFieldValue("email", rowData?.email);
-    console.log("View clicked for row:", rowData);
+    setDialog(rowData);
+    fillBankForm(rowData);
   };
 
-  const [products, setProducts] = useState([]);
   const { bankList, BankSearchList } = useSelector(({ bankMasterReducer }) => {
     return {
       bankList: bankMasterReducer?.BankList,
       BankSearchList: bankMasterReducer?.BankSearchList,
     };
   });
-  useEffect(() => {}, [bankList]);
   // useEffect(() => {
-  //   console.log(currentDialog, "ads")
   //   if(Object.keys(currentDialog).length>0){
   //   }
-  //   // formik.setFieldValue()
 
   // }, [currentDialog])
 
@@ -124,9 +114,7 @@ const BankMaster = () => {
     email: "",
   };
   const validate = (values) => {
-    console.log(values, "ggg");
     const errors = {};
-    console.log(values, errors, "values");
     if (!values.dropdown) {
       errors.dropdown = t("financeMasters.selectAnyOne");
     }
@@ -149,9 +137,7 @@ const BankMaster = () => {
   };
 
   const handleSubmit = () => {
-    const formErrors = validate(formik.values);
-    // setErrors(formErrors);
-    console.log(formErrors, "hfgdh");
+    validate(formik.values);
   };
 
   const formik = useFormik({
@@ -159,19 +145,17 @@ const BankMaster = () => {
     validate,
     onSubmit: handleSubmit,
   });
-  // console.log(formik.values, "asdd")
 
-  const handleUpdate = () => {
-    dispatch(patchBankDetailEdit(formik.values));
-    setVisible(false);
-    console.log(formik.values, "dddd");
-    // formik.values
+  const handleUpdate = async () => {
+    try {
+      await dispatch(patchBankDetailEdit(formik.values)).unwrap();
+      setVisible(false);
+    } catch (error) {
+      statusToast.current?.show({ severity: "error", detail: error });
+    }
   };
-  // useEffect(() => {
-  //   ProductService.getProductsMini().then(data => setProducts(data));
-  // }, []);
 
-  const isEmpty = products.length === 0;
+  const isEmpty = !bankList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -186,10 +170,9 @@ const BankMaster = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -217,7 +200,7 @@ const BankMaster = () => {
 
   const headerStyle = {
     // width: '10rem',
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -227,38 +210,12 @@ const BankMaster = () => {
   };
 
   const items = [{ label: t("financeMasters.bank") }];
-  const renderToggleButton = (state) => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const home = { label: t("financeMasters.master") };
 
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
-  const handlePolicy = () => {
-    navigate("/createvoucher");
-  };
-  const handleArrowClick = () => {
-    navigate("/policyreceiptsview");
-  };
-  const handleEditClick = () => {
-    navigate("/otherreceiptsview");
-  };
 
   useEffect(() => {
     if (search?.length > 0) {
@@ -268,6 +225,7 @@ const BankMaster = () => {
 
   return (
     <div className="overall__bankmaster__container">
+      <Toast ref={statusToast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("financeMasters.bankMaster")}</label>
@@ -279,7 +237,7 @@ const BankMaster = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <Button
+          <Button onClick={() => setShowUpload(true)}
             type="button"
             label={t("financeMasters.upload")}
             className="uploadbutton_container"
@@ -287,6 +245,7 @@ const BankMaster = () => {
             outlined
           />
 
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload banks and bank accounts" targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button
             type="button"
             label={t("generalMasters.add")}
@@ -298,7 +257,6 @@ const BankMaster = () => {
       </div>
 
       <Card
-      //   className="overallcard_container"
       >
         {/* <div className="searchiput_container"> */}
 
@@ -308,7 +266,7 @@ const BankMaster = () => {
             <span className="p-input-icon-left" style={{ width: "100%" }}>
               <i className="pi pi-search" />
               <InputText
-                placeholder={t("financeMasters.searchCustomers")}
+                placeholder={t("financeMasters.searchBanks")}
                 className="searchinput_left"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -325,9 +283,8 @@ const BankMaster = () => {
             value={search ? BankSearchList : bankList}
             tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -348,7 +305,7 @@ const BankMaster = () => {
               sortable
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.bankName?.toUpperCase()}
+              body={(rowData) => rowData.bankName}
             ></Column>
             <Column
               field="bankBranch"
@@ -378,7 +335,7 @@ const BankMaster = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="bank" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header={t("common.status")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
@@ -386,23 +343,18 @@ const BankMaster = () => {
 
             <Column
               body={(rowData) => (
-                console.log(rowData, "rowDataaa"),
-                (<MenuData menuitems={menuitems} rowData={rowData} />)
+                <MenuData menuitems={menuitems} rowData={rowData} />
                 // <div className="card flex justify-content-center">
                 //   <TieredMenu
                 //     model={menuitems.map((item) => ({
                 //       ...item,
-                //       command: () => item.command(rowData),
                 //       // data: rowData
                 //     }))}
 
                 //     popup
-                //     ref={menu}
                 //     breakpoint="767px"
                 //   />
                 //   <Button
-                //     icon={<SvgMenudots />}
-                //     onClick={(e) => menu.current.toggle(e)}
                 //     className="menubutton_popup"
                 //   />
                 // </div>

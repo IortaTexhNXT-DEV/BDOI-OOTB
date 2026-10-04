@@ -1,3 +1,4 @@
+@import "../../theme/bdoi/tokens";
 @import "../../styles/responsive.scss";
 
 .overall__paymentvoucher__container {
@@ -88,7 +89,7 @@
 
   .addbutton_container {
     background-color: #0072d8;
-    border-radius: 60px;
+    border-radius: 6px;
     padding: 0px 22px;
     height: 38px;
     display: flex;
@@ -108,9 +109,11 @@
     display: flex;
     align-items: center;
   }
+  // secondary header actions (bulk print, bulk upload, bulk disburse): outlined; Create stays the one filled button
   .bulk_button_container {
-    background-color: #0072d8;
-    border-radius: 60px;
+    background-color: $color-surface;
+    border: 1px solid $brand-blue;
+    border-radius: 6px;
     // width: 100px !important;
     height: 38px;
     gap: 10px;
@@ -119,7 +122,15 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    color: #fff;
+    color: $brand-blue;
+
+    .addtext {
+      color: $brand-blue;
+    }
+
+    &:hover {
+      background-color: $brand-blue-050;
+    }
   }
   .filterbutton_container {
     display: flex;
@@ -412,4 +423,28 @@
       }
     }
   }
+}
+
+// banner after a voucher is approved, and its row in the list
+.voucher-recorded {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+  width: 100%;
+}
+
+.voucher-recorded__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.p-datatable .p-datatable-tbody > tr.voucher-row--recorded > td {
+  background: #eff7f2 !important;
+}
+
+// same text size as the other lists, so every column fits the card
+.paymentvoucher-table-container .p-datatable .p-datatable-tbody > tr > td {
+  font-size: 14px;
 }

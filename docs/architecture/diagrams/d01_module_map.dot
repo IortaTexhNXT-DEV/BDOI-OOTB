@@ -1,0 +1,37 @@
+// Module map: front-end areas (side menu, components/SideBar/list.js) and the backend modules (src/modules) they call. Document 01.
+digraph G {
+  graph [rankdir=LR, fontname="Nunito", fontsize=11, nodesep=0.12, ranksep=0.9, pad=0.2];
+  node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10, width=2.3];
+  edge  [color="#9FB3C8", arrowsize=0.5, fontname="Nunito", fontsize=9];
+  subgraph cluster_fe { label="Front-end areas (side menu)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    f_home [label="Home, My Work, Dashboard\nmy items, my team, my tasks,\ncalendar, dashboards"];
+    f_ops [label="Operations\nclients, policy, cover notes, cancellation,\nclaims, claim documents, motor repairs,\nfleet, marine open covers, CTPL, renewals"];
+    f_sm [label="Operations > Sales & Marketing\nleads, lead assignment, quotation,\nbroker slips, placement slips, comparison,\ndealer programmes, campaigns"];
+    f_acc [label="Accounts\nreceipts, PDCs, collections, credit control,\ndisbursement, bank payment files, payables,\nfixed assets, petty cash, JV, period end,\nbank and insurer reconciliation, tax and BIR,\nremittance, claims settlements, incentive"];
+    f_com [label="Commission and Reinsurance\nreferrer accounts, override commission,\ntreaties, cessions, facultative"];
+    f_cmp [label="Compliance\nAML/CFT; IC registers, complaints,\nbreach register (package B)"];
+    f_rep [label="Reports\nall, operational, financial,\nreport builder"];
+    f_mas [label="Master (in sections)\norganization, insurance management,\nlocation, users and access, finance,\nsystem configuration (theme and branding,\nintegrations, schedules, audit trail),\ndata privacy, go-live and data"];
+    f_pc [label="Product configurator\ntemplates, covers, rating,\nacceptance rules, documents"];
+  }
+  subgraph cluster_be { label="Backend modules (src/modules)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
+    node [fillcolor="#FFFFFF", width=2.6];
+    b_work [label="my-work, dashboard, search,\nnotifications, audit"];
+    b_sales [label="leads, clients, addresses, quotations,\nplacement, comparison-reports, channels,\nmotor-programmes, campaigns, packages,\npremium-charges, documents"];
+    b_pol [label="cover-notes, policies, endorsements,\ncancellations, fleet, marine"];
+    b_claims [label="claims, claim-documents,\nmotor-claims, claim-payments"];
+    b_ren [label="renewals"];
+    b_fin [label="receipts, pdc, collections, credit-control,\naccounting, journal-vouchers,\ndisbursements, payables, fixed-assets,\npayments, payment-gateway"];
+    b_pe [label="period-end, bir, posting-rules,\nbank-reconciliation, insurer-reconciliation"];
+    b_com [label="commission, commission-rates,\ninsurer-overrides, incentive, remittance"];
+    b_ri [label="reinsurance"];
+    b_cmp [label="aml, privacy;\nic-compliance, data-breaches (package B)"];
+    b_int [label="integrations (framework, messaging,\nCTPL, insurer connectors, bank files)"];
+    b_rep [label="reports, report-builder"];
+    b_adm [label="auth, users, access-control, masters,\nops-masters, settings, system-settings,\nbranding, e-signatures, schedules,\ndocument-numbering, data-load, uploads, system"];
+    b_pc [label="product-configurator"];
+  }
+  f_home -> b_work; f_ops -> b_pol; f_ops -> b_claims; f_ops -> b_ren; f_ops -> b_int; f_sm -> b_sales;
+  f_acc -> b_fin; f_acc -> b_pe; f_acc -> b_com; f_acc -> b_int; f_acc -> b_claims; f_com -> b_com; f_com -> b_ri;
+  f_cmp -> b_cmp; f_rep -> b_rep; f_mas -> b_adm; f_mas -> b_int; f_mas -> b_pe; f_mas -> b_cmp; f_pc -> b_pc;
+}

@@ -5,7 +5,13 @@ import React, {
   useEffect,
   useCallback,
 } from "react";
+import { useLocation } from "react-router-dom";
 import notificationService from "../services/notificationService";
+import authService from "../services/authService";
+import logger from "../utility/logger";
+
+/** Notifications are per user: nothing is fetched or polled on the sign-in page or after sign-out. */
+const signedIn = () => Boolean(authService.getAccessToken());
 
 const NotificationContext = createContext();
 
@@ -25,8 +31,11 @@ export const NotificationProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const [lastFetch, setLastFetch] = useState(null);
 
+  const { pathname } = useLocation();
+
   // Fetch notifications
   const fetchNotifications = useCallback(async (params = {}) => {
+    if (!signedIn()) return;
     setLoading(true);
     try {
       const response = await notificationService.getNotifications(params);
@@ -46,16 +55,8 @@ export const NotificationProvider = ({ children }) => {
       setLastFetch(new Date());
 
       // Debug logging
-      console.log(
-        "NotificationContext - Setting unread count:",
-        unreadCountData
-      );
-      console.log(
-        "NotificationContext - Setting notifications:",
-        notificationsData
-      );
     } catch (error) {
-      console.error("Error fetching notifications:", error);
+      logger.error("Error fetching notifications:", error);
     } finally {
       setLoading(false);
     }
@@ -80,7 +81,7 @@ export const NotificationProvider = ({ children }) => {
 
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
-      console.error("Error marking notification as read:", error);
+      logger.error("Error marking notification as read:", error);
     }
   }, []);
 
@@ -99,7 +100,7 @@ export const NotificationProvider = ({ children }) => {
 
       setUnreadCount(0);
     } catch (error) {
-      console.error("Error marking all notifications as read:", error);
+      logger.error("Error marking all notifications as read:", error);
     }
   }, []);
 
@@ -120,7 +121,7 @@ export const NotificationProvider = ({ children }) => {
           setUnreadCount((prev) => Math.max(0, prev - 1));
         }
       } catch (error) {
-        console.error("Error deleting notification:", error);
+        logger.error("Error deleting notification:", error);
       }
     },
     [notifications]
@@ -128,11 +129,12 @@ export const NotificationProvider = ({ children }) => {
 
   // Get unread count
   const getUnreadCount = useCallback(async () => {
+    if (!signedIn()) return;
     try {
       const count = await notificationService.getUnreadCount();
       setUnreadCount(count);
     } catch (error) {
-      console.error("Error fetching unread count:", error);
+      logger.error("Error fetching unread count:", error);
     }
   }, []);
 
@@ -147,10 +149,17 @@ export const NotificationProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [loading, getUnreadCount]);
 
-  // Initial fetch
+  // First fetch once signed in (the provider is mounted on the sign-in page too); cleared after sign-out
   useEffect(() => {
-    fetchNotifications();
-  }, [fetchNotifications]);
+    if (!signedIn()) {
+      setNotifications([]);
+      setUnreadCount(0);
+      setLastFetch(null);
+      return;
+    }
+    if (!lastFetch) fetchNotifications();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, fetchNotifications]);
 
   const value = {
     // State

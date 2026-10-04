@@ -1,3 +1,4 @@
+@import "../../../../theme/bdoi/tokens";
 @import "../../../../Color.scss";
 
 .container__automated__remittance__master {
@@ -31,8 +32,8 @@
     }
 
     .mode-badge {
-      background: $primary-blue;
-      color: white;
+      background: $brand-blue-050;
+      color: $brand-navy;
       padding: 6px 16px;
       border-radius: 20px;
       font-size: 12px;
@@ -143,7 +144,7 @@
 
           &.required::after {
             content: " *";
-            color: $dark-red;
+            color: $color-danger;
           }
 
           .help-text {
@@ -277,11 +278,11 @@
         }
 
         &.delete-button {
-          background: $dark-red;
+          background: $color-danger;
           color: white;
 
           &:hover {
-            background: darken($dark-red, 10%);
+            background: $color-danger;
           }
         }
 

@@ -1,26 +1,26 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Checkbox } from "primereact/checkbox";
-import { InputNumber } from "primereact/inputnumber";
-import { useNavigate, useLocation, useParams } from "react-router-dom";
-import SvgDot from "../../../../assets/icons/SvgDot";
+import { Link, useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
-import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
+import { Toast } from "primereact/toast";
+import { MasterLookup, deleteAndReturn, saveAndReturn } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
 
 const SettlementParameterMaster = () => {
   const { t } = useTranslation();
-  const { currencyCode } = useFormatCurrency();
   const navigate = useNavigate();
   const location = useLocation();
   const { mode } = useParams();
   const { data } = location.state || {};
+  const toast = useRef(null);
+  const TYPE = "remittance-settlement-parameter";
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
@@ -28,9 +28,6 @@ const SettlementParameterMaster = () => {
     paramName: "",
     settlementType: null,
     autoCalculate: true,
-    level1Limit: 50000.00,
-    level2Limit: 100000.00,
-    level3Limit: 500000.00,
     payableAccount: "",
     clearingAccount: "",
     commissionAccount: "",
@@ -56,19 +53,15 @@ const SettlementParameterMaster = () => {
     if (mode === "edit" || mode === "view") {
       // Load existing data
       if (data) {
-        setFormData({
-          paramCode: data.code || "STP-001",
-          paramName: data.name || "Regular Settlement",
-          settlementType: "Regular",
-          autoCalculate: true,
-          level1Limit: 50000.00,
-          level2Limit: 100000.00,
-          level3Limit: 500000.00,
-          payableAccount: "GL-PAY-001",
-          clearingAccount: "GL-CLR-001",
-          commissionAccount: "GL-COM-001",
-          taxAccount: "GL-TAX-001",
-        });
+        const { level1Limit, level2Limit, level3Limit, ...form } = data.form || {};
+        setFormData((prev) => ({
+          ...prev,
+          ...form,
+          paramCode: data.code,
+          paramName: data.name,
+          payableAccount: data.form?.payableAccount || data.glAccounts?.debit || "",
+          clearingAccount: data.form?.clearingAccount || data.glAccounts?.credit || "",
+        }));
       }
     } else {
       // Generate new code for add mode
@@ -91,17 +84,22 @@ const SettlementParameterMaster = () => {
     }));
   };
 
-  const handleSave = () => {
-    console.log("Saving settlement parameters:", formData);
-    // Add save logic here
-    navigate("/master/finance/remittance");
-  };
+  const handleSave = () => saveAndReturn({
+    type: TYPE,
+    id: data?.id,
+    toast,
+    navigate,
+    record: {
+      code: formData.paramCode,
+      name: formData.paramName,
+      glAccounts: { debit: formData.payableAccount, credit: formData.clearingAccount },
+      form: formData
+    }
+  });
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete these settlement parameters?")) {
-      console.log("Deleting settlement parameters:", formData.paramCode);
-      // Add delete logic here
-      navigate("/master/finance/remittance");
+  const handleDelete = async () => {
+    if (await confirmAction("Are you sure you want to delete these settlement parameters?", { danger: true })) {
+      deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
     }
   };
 
@@ -109,25 +107,20 @@ const SettlementParameterMaster = () => {
     navigate("/master/finance/remittance");
   };
 
-  const openAccountLookup = (accountType) => {
-    console.log(`Opening ${accountType} account lookup`);
-    // Add lookup modal logic here
-  };
-
   const isViewMode = mode === "view";
 
   return (
     <div className="container__settlement__parameter__master">
+        <Toast ref={toast} />
         <div className="top__container">
           <div className="header-actions">
             <Button
               icon={<SvgBackArrow />}
               className="back-button"
               onClick={handleClose}
-              text
-            />
+              text aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
             <h1 className="page__title">Settlement Parameter Master</h1>
-            <span className="mode-badge">{mode?.toUpperCase() || "ADD"}</span>
+            <span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>
           </div>
           <BreadCrumb model={items} home={home} />
         </div>
@@ -188,57 +181,14 @@ const SettlementParameterMaster = () => {
                   </div>
                 </div>
 
-                <div className="section-title">Approval Limits</div>
-                <div className="form-grid three-column">
-                  <div className="form-field">
-                    <label htmlFor="level1Limit">
-                      Level 1 Limit
-                      <span className="help-text">Supervisor approval</span>
-                    </label>
-                    <InputNumber
-                      id="level1Limit"
-                      value={formData.level1Limit}
-                      onValueChange={(e) => handleInputChange("level1Limit", e.value)}
-                      disabled={isViewMode}
-                      mode="currency"
-                      currency={currencyCode}
-                      locale="en-US"
-                      className="full-width"
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="level2Limit">
-                      Level 2 Limit
-                      <span className="help-text">Manager approval</span>
-                    </label>
-                    <InputNumber
-                      id="level2Limit"
-                      value={formData.level2Limit}
-                      onValueChange={(e) => handleInputChange("level2Limit", e.value)}
-                      disabled={isViewMode}
-                      mode="currency"
-                      currency={currencyCode}
-                      locale="en-US"
-                      className="full-width"
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label htmlFor="level3Limit">
-                      Level 3 Limit
-                      <span className="help-text">Director approval</span>
-                    </label>
-                    <InputNumber
-                      id="level3Limit"
-                      value={formData.level3Limit}
-                      onValueChange={(e) => handleInputChange("level3Limit", e.value)}
-                      disabled={isViewMode}
-                      mode="currency"
-                      currency={currencyCode}
-                      locale="en-US"
-                      className="full-width"
-                    />
+                <div className="bv-info-box info-box">
+                  <i className="pi pi-info-circle"></i>
+                  <div>
+                    <strong>{t("remittance.approvalLimitsTitle")}</strong>
+                    <p>
+                      {t("remittance.approvalLimitsNote")}{" "}
+                      <Link to="/master/generals/usermanagement/authority-matrix">{t("remittance.openAuthorityMatrix")}</Link>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -250,90 +200,54 @@ const SettlementParameterMaster = () => {
                 <div className="form-grid two-column">
                   <div className="form-field">
                     <label htmlFor="payableAccount" className="required">Settlement Payable Account</label>
-                    <div className="input-with-button">
-                      <InputText
-                        id="payableAccount"
-                        value={formData.payableAccount}
-                        onChange={(e) => handleInputChange("payableAccount", e.target.value)}
-                        disabled={isViewMode}
-                        placeholder={t("remittance.selectPayableAccount")}
-                        className="full-width"
-                      />
-                      {!isViewMode && (
-                        <Button
-                          icon={<SvgSearchIcon />}
-                          className="lookup-button"
-                          onClick={() => openAccountLookup("payable")}
-                        />
-                      )}
-                    </div>
+                    <MasterLookup
+                      type="main-account"
+                      value={formData.payableAccount}
+                      onChange={(v) => handleInputChange("payableAccount", v)}
+                      disabled={isViewMode}
+                      placeholder={t("remittance.selectPayableAccount")}
+                      toast={toast}
+                    />
                   </div>
 
                   <div className="form-field">
                     <label htmlFor="clearingAccount" className="required">Settlement Clearing Account</label>
-                    <div className="input-with-button">
-                      <InputText
-                        id="clearingAccount"
-                        value={formData.clearingAccount}
-                        onChange={(e) => handleInputChange("clearingAccount", e.target.value)}
-                        disabled={isViewMode}
-                        placeholder="Select clearing account"
-                        className="full-width"
-                      />
-                      {!isViewMode && (
-                        <Button
-                          icon={<SvgSearchIcon />}
-                          className="lookup-button"
-                          onClick={() => openAccountLookup("clearing")}
-                        />
-                      )}
-                    </div>
+                    <MasterLookup
+                      type="main-account"
+                      value={formData.clearingAccount}
+                      onChange={(v) => handleInputChange("clearingAccount", v)}
+                      disabled={isViewMode}
+                      placeholder={"Select clearing account"}
+                      toast={toast}
+                    />
                   </div>
 
                   <div className="form-field">
                     <label htmlFor="commissionAccount" className="required">Commission Account</label>
-                    <div className="input-with-button">
-                      <InputText
-                        id="commissionAccount"
-                        value={formData.commissionAccount}
-                        onChange={(e) => handleInputChange("commissionAccount", e.target.value)}
-                        disabled={isViewMode}
-                        placeholder={t("remittance.selectCommissionAccount")}
-                        className="full-width"
-                      />
-                      {!isViewMode && (
-                        <Button
-                          icon={<SvgSearchIcon />}
-                          className="lookup-button"
-                          onClick={() => openAccountLookup("commission")}
-                        />
-                      )}
-                    </div>
+                    <MasterLookup
+                      type="main-account"
+                      value={formData.commissionAccount}
+                      onChange={(v) => handleInputChange("commissionAccount", v)}
+                      disabled={isViewMode}
+                      placeholder={t("remittance.selectCommissionAccount")}
+                      toast={toast}
+                    />
                   </div>
 
                   <div className="form-field">
                     <label htmlFor="taxAccount" className="required">Tax Account</label>
-                    <div className="input-with-button">
-                      <InputText
-                        id="taxAccount"
-                        value={formData.taxAccount}
-                        onChange={(e) => handleInputChange("taxAccount", e.target.value)}
-                        disabled={isViewMode}
-                        placeholder={t("remittance.selectTaxAccount")}
-                        className="full-width"
-                      />
-                      {!isViewMode && (
-                        <Button
-                          icon={<SvgSearchIcon />}
-                          className="lookup-button"
-                          onClick={() => openAccountLookup("tax")}
-                        />
-                      )}
-                    </div>
+                    <MasterLookup
+                      type="main-account"
+                      value={formData.taxAccount}
+                      onChange={(v) => handleInputChange("taxAccount", v)}
+                      disabled={isViewMode}
+                      placeholder={t("remittance.selectTaxAccount")}
+                      toast={toast}
+                    />
                   </div>
                 </div>
 
-                <div className="info-box">
+                <div className="bv-info-box info-box">
                   <i className="pi pi-info-circle"></i>
                   <div>
                     <strong>GL Account Configuration</strong>

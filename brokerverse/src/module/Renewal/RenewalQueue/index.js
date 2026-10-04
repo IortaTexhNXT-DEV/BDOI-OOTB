@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
@@ -15,18 +15,18 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
 import { TabView, TabPanel } from "primereact/tabview";
-import { Badge } from "primereact/badge";
 import { ProgressBar } from "primereact/progressbar";
 import { Avatar } from "primereact/avatar";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const RenewalQueue = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("All");
   const [dateRange, setDateRange] = useState([null, null]);
@@ -44,7 +44,7 @@ const RenewalQueue = () => {
     inGracePeriod: 0
   });
   const [filteredPolicies, setFilteredPolicies] = useState([]);
-  const [policies, setPolicies] = useState(renewalMockData.renewalQueue);
+  const [policies, setPolicies] = useState([]);
   const toast = useRef(null);
 
   const statusOptions = [
@@ -66,9 +66,7 @@ const RenewalQueue = () => {
 
   const agentOptions = [
     { label: t("renewal.allAgents"), value: "All" },
-    { label: "Juan Dela Cruz", value: "Juan Dela Cruz" },
-    { label: "Ana Reyes", value: "Ana Reyes" },
-    { label: "Carlos Mendoza", value: "Carlos Mendoza" }
+    ...[...new Set(policies.map(p => p.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
   ];
 
   const reminderMethods = [
@@ -96,26 +94,79 @@ const RenewalQueue = () => {
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Simulate loading
-      setTimeout(() => {
-        calculateDashboard(policies);
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.renewalQueueLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
+      const { items } = await renewalsWorkspaceService.getQueue();
+      setPolicies(items);
     } catch (error) {
       toast.current.show({
         severity: 'error',
         summary: t("common.error"),
-        detail: t("renewal.failedToLoadRenewalData"),
+        detail: error?.message || t("renewal.failedToLoadRenewalData"),
         life: 3000
       });
+    } finally {
       setLoading(false);
     }
+  };
+
+  const showError = (error, fallbackKey) => {
+    toast.current.show({
+      severity: 'error',
+      summary: t("common.error"),
+      detail: error?.message || t(fallbackKey),
+      life: 3000
+    });
+  };
+
+  const handleRefresh = async () => {
+    try {
+      const result = await renewalsWorkspaceService.refreshPipeline();
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.dataLoaded"),
+        detail: t("renewal.pipelineRefreshed", "Pipeline refreshed: {{created}} added, {{lapsed}} lapsed", result),
+        life: 3000
+      });
+    } catch (error) {
+      showError(error, "renewal.failedToLoadRenewalData");
+    }
+    loadInitialData();
+  };
+
+  const handleSendNotice = async (rowData) => {
+    try {
+      await renewalsWorkspaceService.sendNotice(rowData.id);
+      toast.current.show({
+        severity: 'success',
+        summary: t("renewal.reminderSent"),
+        detail: `${rowData.nextNotice?.label}: ${rowData.policyNumber}`,
+        life: 3000
+      });
+      loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToSendReminder");
+    }
+  };
+
+  const handleComplete = (rowData) => {
+    confirmDialog({
+      message: t("renewal.confirmCompleteRenewal", "Renew policy {{policy}} for a new term?", { policy: rowData.policyNumber }),
+      header: t("renewal.completeRenewal", "Complete Renewal"),
+      icon: 'pi pi-check-circle',
+      accept: async () => {
+        try {
+          const result = await renewalsWorkspaceService.complete(rowData.id);
+          toast.current.show({
+            severity: 'success',
+            summary: t("renewal.completeRenewal", "Complete Renewal"),
+            detail: result?.newPolicy?.policyNumber,
+            life: 3000
+          });
+          loadInitialData();
+        } catch (error) {
+          showError(error, "renewal.failedToLoadRenewalData");
+        }
+      }
+    });
   };
 
   const calculateDashboard = (data) => {
@@ -185,7 +236,7 @@ const RenewalQueue = () => {
   };
 
   const handleGenerateQuote = (rowData) => {
-    navigate('/renewals/quote-generation', { state: { policy: rowData } });
+    navigate(`/renewal/generate-quote/${rowData.id}`, { state: { policy: rowData } });
   };
 
   const handleSendReminder = (rowData) => {
@@ -196,18 +247,8 @@ const RenewalQueue = () => {
   const handleSendReminderConfirm = async () => {
     setLoading(true);
     try {
-      const result = await renewalCrudOperations.sendReminder(
-        selectedPolicy.id,
-        reminderMethod
-      );
-
-      // Update renewal attempts
-      const updatedPolicies = policies.map(p =>
-        p.id === selectedPolicy.id
-          ? { ...p, renewalAttempts: p.renewalAttempts + 1, lastContactDate: new Date().toISOString().split('T')[0] }
-          : p
-      );
-      setPolicies(updatedPolicies);
+      await renewalsWorkspaceService.sendReminder(selectedPolicy.id, reminderMethod);
+      loadInitialData();
 
       setSendReminderVisible(false);
       toast.current.show({
@@ -217,32 +258,12 @@ const RenewalQueue = () => {
         life: 3000
       });
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSendReminder"),
-        life: 3000
-      });
+      showError(error, "renewal.failedToSendReminder");
     } finally {
       setLoading(false);
     }
   };
 
-  const handlePriorityChange = (rowData, newPriority) => {
-    confirmDialog({
-      message: t("renewal.confirmPriorityChange", { policy: rowData.policyNumber, priority: newPriority }),
-      header: t("renewal.confirmPriorityChangeHeader"),
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.priorityUpdated"),
-          detail: t("renewal.priorityChangedTo", { priority: newPriority }),
-          life: 3000
-        });
-      }
-    });
-  };
 
   const daysToExpiryBodyTemplate = (rowData) => {
     const days = rowData.daysToExpiry;
@@ -308,7 +329,7 @@ const RenewalQueue = () => {
   const agentBodyTemplate = (rowData) => {
     return (
       <div className="agent-cell">
-        <Avatar label={rowData.assignedAgent.split(' ').map(n => n[0]).join('')}
+        <Avatar label={(rowData.assignedAgent || '').split(' ').map(n => n[0]).join('')}
                 size="small" shape="circle" />
         <span>{rowData.assignedAgent}</span>
       </div>
@@ -320,9 +341,9 @@ const RenewalQueue = () => {
     const percentage = (rowData.renewalAttempts / maxAttempts) * 100;
 
     return (
-      <div className="attempts-cell">
-        <ProgressBar value={percentage} style={{ width: '60px', height: '8px' }} />
-        <span>{rowData.renewalAttempts}/{maxAttempts}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(percentage)} showValue={false} />
+        <span className="bv-meter__value">{`${rowData.renewalAttempts} of ${maxAttempts}`}</span>
       </div>
     );
   };
@@ -334,21 +355,36 @@ const RenewalQueue = () => {
           icon="pi pi-eye"
           className="p-button-text"
           onClick={() => handleView(rowData)}
-          tooltip={t("renewal.viewDetails")}
+          tooltip={t("renewal.viewDetails")} aria-label={t("renewal.viewDetails")}
         />
         <Button
           icon="pi pi-file-o"
           className="p-button-text"
           onClick={() => handleGenerateQuote(rowData)}
           tooltip={t("renewal.generateQuote")}
-          disabled={rowData.status === 'Quote Sent'}
+          disabled={!rowData.isOpen || rowData.statusCode === 'pending-approval'} aria-label={t("renewal.generateQuote")}
         />
         <Button
           icon="pi pi-send"
           className="p-button-text"
           onClick={() => handleSendReminder(rowData)}
-          tooltip={t("renewal.sendReminder")}
+          tooltip={t("renewal.sendReminder")} aria-label={t("renewal.sendReminder")}
         />
+        <Button
+          icon="pi pi-envelope"
+          className="p-button-text"
+          onClick={() => handleSendNotice(rowData)}
+          tooltip={rowData.nextNotice?.label || t("renewal.allNoticesSent", "All notices sent")}
+          disabled={!rowData.nextNotice} aria-label={rowData.nextNotice?.label || t("renewal.allNoticesSent", "All notices sent")}
+        />
+        {rowData.statusCode === 'approved' && (
+          <Button
+            icon="pi pi-check-circle"
+            className="p-button-text p-button-success"
+            onClick={() => handleComplete(rowData)}
+            tooltip={t("renewal.completeRenewal", "Complete Renewal")} aria-label={t("renewal.completeRenewal", "Complete Renewal")}
+          />
+        )}
       </div>
     );
   };
@@ -440,7 +476,7 @@ const RenewalQueue = () => {
                   value={dateRange}
                   onChange={(e) => setDateRange(e.value)}
                   selectionMode="range"
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                   placeholder={t("renewal.selectDateRange")}
                 />
               </div>
@@ -503,8 +539,8 @@ const RenewalQueue = () => {
                 <Button
                   icon="pi pi-refresh"
                   className="p-button-text"
-                  onClick={loadInitialData}
-                  tooltip={t("renewal.refresh")}
+                  onClick={handleRefresh}
+                  tooltip={t("renewal.refresh")} aria-label={t("renewal.refresh")}
                 />
                 <Button
                   icon="pi pi-file-excel"
@@ -517,17 +553,17 @@ const RenewalQueue = () => {
                       life: 3000
                     });
                   }}
-                  tooltip={t("renewal.exportToExcel")}
+                  tooltip={t("renewal.exportToExcel")} aria-label={t("renewal.exportToExcel")}
                 />
               </div>
             </div>
 
             <DataTable
-              value={filteredPolicies.length > 0 ? filteredPolicies : policies}
+              value={filteredPolicies}
               className="renewal-table"
               stripedRows
               paginator
-              rows={10}
+              rows={20}
               loading={loading}
               emptyMessage={t("renewal.noPoliciesFound")}
               sortMode="multiple"
@@ -629,7 +665,7 @@ const RenewalQueue = () => {
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.expiryDate")}</label>
-                    <span>{new Date(selectedPolicy.expiryDate).toLocaleDateString()}</span>
+                    <span>{formatAppDate(selectedPolicy.expiryDate)}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.currentPremium")}</label>
@@ -650,15 +686,15 @@ const RenewalQueue = () => {
                 <div className="detail-grid">
                   <div className="detail-item">
                     <label>{t("renewal.mobile")}</label>
-                    <span>{selectedPolicy.insuredContact.mobile}</span>
+                    <span>{selectedPolicy.insuredContact?.mobile}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.email")}</label>
-                    <span>{selectedPolicy.insuredContact.email}</span>
+                    <span>{selectedPolicy.insuredContact?.email}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.preferredContact")}</label>
-                    <span>{selectedPolicy.insuredContact.preferredContact}</span>
+                    <span>{selectedPolicy.insuredContact?.preferredContact}</span>
                   </div>
                   <div className="detail-item">
                     <label>{t("renewal.lastContact")}</label>
@@ -693,7 +729,7 @@ const RenewalQueue = () => {
                     {selectedPolicy.claimsHistory.claimsRatio && (
                       <div className="detail-item">
                         <label>{t("renewal.claimsRatio")}</label>
-                        <span>{selectedPolicy.claimsHistory.claimsRatio}%</span>
+                        <span>{formatPercent(selectedPolicy.claimsHistory.claimsRatio)}</span>
                       </div>
                     )}
                   </div>
@@ -728,9 +764,9 @@ const RenewalQueue = () => {
               <div className="form-field">
                 <label>{t("renewal.contactInfo")}</label>
                 <span>
-                  {reminderMethod === 'Email' && selectedPolicy.insuredContact.email}
-                  {reminderMethod === 'SMS' && selectedPolicy.insuredContact.mobile}
-                  {reminderMethod === 'Phone' && selectedPolicy.insuredContact.mobile}
+                  {reminderMethod === 'Email' && selectedPolicy.insuredContact?.email}
+                  {reminderMethod === 'SMS' && selectedPolicy.insuredContact?.mobile}
+                  {reminderMethod === 'Phone' && selectedPolicy.insuredContact?.mobile}
                   {reminderMethod === 'Letter' && t("renewal.mailingAddressOnFile")}
                 </span>
               </div>

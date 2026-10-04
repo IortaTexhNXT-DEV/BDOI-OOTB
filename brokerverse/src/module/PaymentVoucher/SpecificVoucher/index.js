@@ -4,29 +4,24 @@ import "./index.scss";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { BreadCrumb } from "primereact/breadcrumb";
 import InputField from "../../../components/InputField";
-import SubmitButton from "../../../components/SubmitButton";
-import SvgEdit from "../../../assets/icons/SvgEdit";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import SvgDot from "../../../assets/icons/SvgDot";
-import { Paginator } from "primereact/paginator";
 import { Dialog } from "primereact/dialog";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import NavBar from "../../../components/NavBar";
 import SvgBackicon from "../../../assets/icons/SvgBackicon";
 import { Dropdown } from "primereact/dropdown";
-import SvgEditicon from "../../../assets/icons/SvgEdit";
-import SvgEditIcon from "../../../assets/icons/SvgEditicons";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
-  getpaymentCheckbookDetailsMiddleware,
   patchpaymentVocherInvoiceListMiddleware,
-  getDisbursementDetailsMiddleware,
 } from "../store/paymentVocherMiddleware";
 import { useFormik } from "formik";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
+import logger from "../../../utility/logger";
+import { DetailPageSkeleton } from "../../../components/Skeletons";
 
 function SpecificVoucher() {
   const { t } = useTranslation();
@@ -38,9 +33,8 @@ function SpecificVoucher() {
   const location = useLocation();
   const { disbursementData: disbursementDataFromState } = location.state || {};
   const [visible, setVisible] = useState(false);
-  const [products, setProducts] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [EditID, setEditID] = useState(null);
+  const [EditID] = useState(null);
   const [loading, setLoading] = useState(true);
   const [disbursementData, setDisbursementData] = useState(null);
   const [invoiceListData, setInvoiceListData] = useState([]);
@@ -69,7 +63,7 @@ function SpecificVoucher() {
 
     const result = await disbursementService.getDisbursementById(disbursementId);
     if (!result.success) {
-      console.error("Failed to fetch disbursement for customerCode:", result.error);
+      logger.error("Failed to fetch disbursement for customerCode:", result.error);
       return null;
     }
 
@@ -99,7 +93,9 @@ function SpecificVoucher() {
     if (isAgentPayee) {
       Navigate("/accounts/paymentvoucher/bankdetailselection", {
         state: {
-          disbursementData: disbursementDataFromState,
+          disbursementData: disbursementDataFromState || {
+            referrerName: disbursementData?.referrer?.name,
+          },
           selectedInvoice: selectedProducts,
           commissionLineIds,
           isAgentPayee: true,
@@ -110,19 +106,22 @@ function SpecificVoucher() {
     }
 
     const createCheckbookData = await disbursementService.createCheckbook({
+      disbursementId,
       customerCode: disbursementDataFromState?.CustomerCode?.code,
       customerName: disbursementDataFromState?.CustomerName?.name,
-      mainAccount: "ACC-001",
-      instrumentBookId: "BOOK-001",
-      instrumentNo: "CHK-1001",
-      instrumentDate: "2025-10-12",
       totaleAmount: selectedProducts
         .reduce((acc, curr) => acc + parseFloat(curr.rawData.totalAmount), 0)
         .toString(),
-      status: "Pending",
       invoiceListRefId: selectedProducts.map((item) => item.id)[0],
     });
-    console.log(createCheckbookData, "createCheckbookData");
+    if (!createCheckbookData.success) {
+      toastRef.current?.showToast({
+        severity: "error",
+        summary: t("common.error"),
+        detail: createCheckbookData.error,
+      });
+      return;
+    }
     if (createCheckbookData.success) {
       Navigate("/accounts/paymentvoucher/bankdetailselection", {
         state: {
@@ -137,20 +136,31 @@ function SpecificVoucher() {
   useEffect(() => {
     const fetchDisbursementDetails = async () => {
       if (!disbursementId) {
-        console.warn("No disbursement ID found in URL params");
+        logger.warn("No disbursement ID found in URL params");
         setLoading(false);
         return;
       }
 
       setLoading(true);
       try {
-        const agentPayee =
-          payeeTypeFromState === "Agent/Referrer" || Boolean(referrerIdFromState);
+        // Opened from the list or a link (no navigation state): read the payee from the saved voucher,
+        // so the checker can open a pending agent payout.
+        let payeeType = payeeTypeFromState;
+        let referrerId = referrerIdFromState;
+        let voucherInvoicesOnly = false;
+        if (!payeeType && !referrerId) {
+          voucherInvoicesOnly = true;
+          const saved = await disbursementService.getDisbursementById(disbursementId);
+          const voucher = saved.data?.data || saved.data;
+          payeeType = voucher?.payeeType;
+          referrerId = voucher?.referrerId;
+        }
+        const agentPayee = payeeType === "Agent/Referrer" || Boolean(referrerId);
         setIsAgentPayee(agentPayee);
 
-        if (agentPayee && referrerIdFromState) {
+        if (agentPayee && referrerId) {
           const result = await disbursementService.getAgentInvoiceLines(
-            referrerIdFromState
+            referrerId
           );
           if (result.success) {
             const payload = result.data?.data || result.data;
@@ -161,12 +171,12 @@ function SpecificVoucher() {
               commissionLineId: invoice.commissionLineId || invoice.invoiceListId,
               VoucherNumber: formatCurrency(invoice.payables ?? 0),
               TransactionNumber: formatCurrency(invoice.outstanding ?? 0),
-              fcamount: invoice.fcAmount || "-",
-              VoucheDate: invoice.lcAmount || "-",
-              discount: invoice.excess || "-",
-              Amount: invoice.balAmount || "-",
-              vat: invoice.vat || "-",
-              wht: invoice.wht || "-",
+              fcamount: invoice.fcAmount ? formatCurrency(invoice.fcAmount) : "-",
+              VoucheDate: invoice.lcAmount ? formatCurrency(invoice.lcAmount) : "-",
+              discount: invoice.excess ? formatCurrency(invoice.excess) : "-",
+              Amount: invoice.balAmount ? formatCurrency(invoice.balAmount) : "-",
+              vat: invoice.vat ? formatCurrency(invoice.vat) : "-",
+              wht: invoice.wht ? formatCurrency(invoice.wht) : "-",
               comsub: invoice.comsub,
               policyNumber: invoice.policyNumber,
               totalAmount: formatCurrency(invoice.totalAmount ?? 0),
@@ -175,12 +185,13 @@ function SpecificVoucher() {
             }));
             setInvoiceListData(transformedData);
           } else {
-            console.error("Failed to fetch agent invoice lines:", result.error);
+            logger.error("Failed to fetch agent invoice lines:", result.error);
           }
         } else {
-          const customerCode = await resolveCustomerCode();
+          const insurerVoucher = voucherInvoicesOnly && payeeType === "Insurer";
+          const customerCode = insurerVoucher ? null : await resolveCustomerCode();
 
-          if (!customerCode) {
+          if (!insurerVoucher && !customerCode) {
             setInvoiceListData([]);
             toastRef.current?.showToast({
               severity: "error",
@@ -190,12 +201,22 @@ function SpecificVoucher() {
             return;
           }
 
-          const result = await disbursementService.getInvoiceListByCustomerCode(
-            customerCode
-          );
+          // an insurer voucher (e.g. raised by a remittance settlement) lists its own invoices
+          const result =
+            insurerVoucher
+              ? await disbursementService.getInvoiceListByDisbursement(disbursementId)
+              : await disbursementService.getInvoiceListByCustomerCode(customerCode);
           const { success, data } = result;
 
           if (success) {
+            // once the voucher's lines carry a live cheque, the next step is its approval on the detail view
+            const hasCheque = (data.data || []).some((inv) =>
+              (inv.checkbooks || []).some((c) => !["Cancelled"].includes(c.status))
+            );
+            if (insurerVoucher && hasCheque) {
+              Navigate(`/accounts/paymentvoucher/detailview/${disbursementId}`, { replace: true });
+              return;
+            }
             setDisbursementData(data.data);
 
             if (data.data) {
@@ -203,12 +224,12 @@ function SpecificVoucher() {
                 id: invoice.invoiceListId || index,
                 VoucherNumber: formatCurrency(invoice.payables ?? 0),
                 TransactionNumber: formatCurrency(invoice.outstanding ?? 0),
-                fcamount: invoice.fcAmount || "-",
-                VoucheDate: invoice.lcAmount || "-",
-                discount: invoice.excess || "-",
-                Amount: invoice.balAmount || "-",
-                vat: invoice.vat || "-",
-                wht: invoice.wht || "-",
+                fcamount: invoice.fcAmount ? formatCurrency(invoice.fcAmount) : "-",
+                VoucheDate: invoice.lcAmount ? formatCurrency(invoice.lcAmount) : "-",
+                discount: invoice.excess ? formatCurrency(invoice.excess) : "-",
+                Amount: invoice.balAmount ? formatCurrency(invoice.balAmount) : "-",
+                vat: invoice.vat ? formatCurrency(invoice.vat) : "-",
+                wht: invoice.wht ? formatCurrency(invoice.wht) : "-",
                 comsub: invoice.comsub,
                 totalAmount: formatCurrency(invoice.totalAmount ?? 0),
                 checkbooks: invoice.checkbooks || [],
@@ -217,7 +238,7 @@ function SpecificVoucher() {
               setInvoiceListData(transformedData);
             }
           } else {
-            console.error(
+            logger.error(
               "Failed to fetch invoice list by customer code:",
               result.error
             );
@@ -230,7 +251,7 @@ function SpecificVoucher() {
           }
         }
       } catch (error) {
-        console.error("Error fetching disbursement details:", error);
+        logger.error("Error fetching disbursement details:", error);
       } finally {
         setLoading(false);
       }
@@ -245,9 +266,7 @@ function SpecificVoucher() {
     }
   }, [EditID]);
   const setFormikValues = () => {
-    console.log("find action");
     const targetInvoice = invoiceListData.find((item) => item.id === EditID);
-    console.log(targetInvoice, "find data");
     const fcAmount = targetInvoice?.fcamount;
     const discount = targetInvoice?.discount;
     const vat = targetInvoice?.vat;
@@ -275,9 +294,6 @@ function SpecificVoucher() {
     };
     dispatch(patchpaymentVocherInvoiceListMiddleware(valueWithId));
     toastRef.current.showToast();
-    {
-      setTimeout(() => {}, 3000);
-    }
     setVisible(false);
   };
 
@@ -301,10 +317,9 @@ function SpecificVoucher() {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -328,7 +343,7 @@ function SpecificVoucher() {
 
   const headerStyle = {
     width: "9rem",
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -342,20 +357,10 @@ function SpecificVoucher() {
   if (loading) {
     return (
       <div className="overall__specific__container">
-        <div className="loading-message">{t("paymentVoucher.loadingDisbursementDetails")}</div>
+        <DetailPageSkeleton />
       </div>
     );
   }
-
-  // if (!disbursementData) {
-  //   return (
-  //     <div className="overall__specific__container">
-  //       <div className="error-message">
-  //         Failed to load disbursement details.
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="overall__specific__container">
@@ -386,8 +391,8 @@ function SpecificVoucher() {
           value={invoiceListData}
           tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
           paginator
-          rows={5}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           scrollable={true}
@@ -422,7 +427,7 @@ function SpecificVoucher() {
             headerStyle={headerStyle}
             className="fieldvalue_container"
           ></Column>
-          <Column
+          <Column body={(row) => formatAppDate(row.VoucheDate)}
             field="VoucheDate"
             header={t("paymentVoucher.lcAmount")}
             style={{ width: "20rem" }}
@@ -552,7 +557,6 @@ function SpecificVoucher() {
             label={t("paymentVoucher.update")}
             className="update_btnlabel"
             onClick={formik.handleSubmit}
-            // onClick={() => setVisible(false)}
           />
         </div>
       </Dialog>

@@ -1,10 +1,8 @@
-import React from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
 import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
-// import CustomToast from "../../../../components/Toast";
 import InputField from "../../../../components/InputField";
 import { Card } from "primereact/card";
 import ReceiptListTable from "./ReceiptsListTable";
@@ -12,18 +10,15 @@ import { useSelector } from "react-redux";
 
 const ReceiptList = () => {
   const navigate = useNavigate();
-  //   const toastRef = useRef(null);
-  const { ViewReceipt, loading,AddReceiptTable } = useSelector(
+  const { ViewReceipt, AddReceiptTable } = useSelector(
     ({ pettyCashReceiptsReducer }) => {
       return {
         loading: pettyCashReceiptsReducer?.loading,
         ViewReceipt: pettyCashReceiptsReducer?.ViewReceipt,
-        AddReceiptTable:pettyCashReceiptsReducer?.AddReceiptTable
+        AddReceiptTable: pettyCashReceiptsReducer?.ViewReceiptTable || []
       };
     }
   );
-
-  console.log(ViewReceipt,"ViewReceipt")
 
   const items = [
     { label: "Petty Cash", command: () => navigate( "/accounts/pettycash/receipts") },
@@ -40,7 +35,6 @@ const ReceiptList = () => {
 
   return (
     <div className="add__receipts__view__container">
-      {/* <CustomToast ref={toastRef} /> */}
       <div className="grid  m-0">
         <div className="col-12 md:col-6 lg:col-6">
           <div
@@ -68,7 +62,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Receipt Number"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -80,7 +73,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Requester"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -94,7 +86,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Bank Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -106,7 +97,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Bank Account Name"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -120,7 +110,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Sub Account Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -132,7 +121,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Sub Account Description"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -146,7 +134,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Transaction Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -158,7 +145,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Transaction Description"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -172,7 +158,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Branch Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -184,7 +169,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Branch Description"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -198,7 +182,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Department Code"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}
@@ -210,7 +193,6 @@ const ReceiptList = () => {
             <InputField
               classNames="input__filed"
               label="Department Description"
-              //   placeholder="Enter"
               disabled={true}
               textColor={"#111927"}
               textSize={"16"}

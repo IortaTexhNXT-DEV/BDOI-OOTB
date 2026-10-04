@@ -1,0 +1,11 @@
+{
+  "id": "toyota-insurance-services",
+  "name": "Toyota Insurance Services",
+  "description": "Client brand pack for the Toyota Insurance Services (Philippines) engagement: white header and side bar, near-black text and buttons, light grey backgrounds, Toyota red as a small accent, Inter font, the Toyota Insurance Services logo on screens and printed documents.",
+  "trademarkOwner": "Toyota Motor Corporation and Toyota Insurance Services (Philippines)",
+  "requiresAcknowledgement": true,
+  "permissionBasis": "Contract between iorta TechNXT and Toyota Insurance Services (Philippines), covering the use of these marks in the BrokerVerse environments of that engagement",
+  "permissionNote": "The Toyota name, the Toyota emblem and the Toyota Insurance Services logo are trademarks of their owners. Toyota Insurance Services (Philippines) is a client of iorta TechNXT and its contract covers the use of these marks in the BrokerVerse environments of that engagement. Enable this pack in those environments only.",
+  "version": "1.0.0",
+  "pack": "theme.json"
+}

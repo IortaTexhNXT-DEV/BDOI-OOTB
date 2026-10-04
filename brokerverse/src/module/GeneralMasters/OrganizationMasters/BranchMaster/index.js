@@ -1,8 +1,7 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "../BranchMaster/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgAdd from "../../../../assets/icons/SvgAdd";
@@ -10,10 +9,8 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
-import ToggleButton from "../../../../components/ToggleButton";
 import SvgEditicons from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
 import { useDispatch, useSelector } from "react-redux";
@@ -21,13 +18,16 @@ import {
   getOrganizationBranchView,
   getPatchBranchData,
   getSearchBranchMiddleware,
+  getBranchListMiddleware,
 } from "./store/branchMiddleware";
 import { useFormik } from "formik";
+import MasterStatusToggle from "../../common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const Index = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { branchTableList, loading, branchTabelSearchList } = useSelector(
+  const { branchTableList, branchTabelSearchList } = useSelector(
     ({ organizationBranchMainReducers }) => {
       return {
         loading: organizationBranchMainReducers?.loading,
@@ -37,14 +37,19 @@ const Index = () => {
       };
     }
   );
-  console.log(branchTableList, "branchTableList");
 
   const handlePolicy = (id) => {
     navigate(`/master/generals/organization/branchmaster/add/${123}`);
   };
   const dispatch = useDispatch();
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getBranchListMiddleware());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getBranchListMiddleware());
+  }, [dispatch]);
   const handleSubmit = (values) => {
-    console.log(values.search, "getSearchBranchMiddleware");
     dispatch(getSearchBranchMiddleware({ textSearch: values.search }));
   };
   const formik = useFormik({
@@ -58,20 +63,18 @@ const Index = () => {
   }, [formik.values.search]);
   const handleView = (columnData) => {
     dispatch(getOrganizationBranchView(columnData));
-    console.log(columnData, "columnData");
     navigate(
       `/master/generals/organization/branchmaster/view/${columnData.id}`
     );
   };
   const handleEdit = (columnData) => {
     dispatch(getPatchBranchData(columnData));
-    console.log(columnData, "columnData");
     navigate(
       `/master/generals/organization/branchmaster/edit/${columnData.id}`
     );
   };
 
-  const isEmpty = Productdata.length === 0;
+  const isEmpty = !branchTableList?.length;
 
   const emptyTableIcon = (
     <div>
@@ -87,10 +90,9 @@ const Index = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -109,26 +111,6 @@ const Index = () => {
     },
   };
 
-  const menu = useRef(null);
-  const menuitems = [
-    {
-      label: t("generalMasters.name"),
-    },
-    {
-      label: t("generalMasters.date"),
-    },
-    {
-      label: t("generalMasters.voucherNumber"),
-    },
-  ];
-
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
-      </div>
-    );
-  };
 
   const headerStyle = {
     fontSize: 16,
@@ -158,21 +140,12 @@ const Index = () => {
   ];
   const home = { label: t("generalMasters.master") };
 
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
   return (
     <div className="overall__branch__container">
+      <Toast ref={statusToast} />
       <div className="overallfilter_container">
         <div>
           <label className="label_header">{t("generalMasters.branch")}</label>
@@ -184,12 +157,11 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          {/* <SvgFilters/> */}
 
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd />
             <p className="addtext">{t("generalMasters.add")}</p>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -217,8 +189,8 @@ const Index = () => {
             }
             tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -232,11 +204,11 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              field="CompanyName"
+              field="BranchName"
               header={t("generalMasters.branchName")}
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(rowData) => rowData.CompanyName?.toUpperCase()}
+              body={(rowData) => rowData.BranchName}
             ></Column>
             <Column
               field="Country"
@@ -252,7 +224,7 @@ const Index = () => {
               className="fieldvalue_container"
             ></Column>
             <Column
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="branch" record={columnData} onChanged={reloadList} onError={showStatusError} />}
               header={t("common.status")}
               headerStyle={headerStyle}
               className="fieldvalue_container"

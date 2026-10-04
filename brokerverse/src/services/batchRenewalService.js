@@ -32,9 +32,33 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batches error:", error);
       throw error;
     }
+  }
+
+  /**
+   * Criteria defaults (expiry window from today, grace period) and the insurer / product choices.
+   * @returns {Promise<Object>} { expiryFrom, expiryTo, insurers, products, paymentStatuses }
+   */
+  static async getRenewalOptions() {
+    const response = await getRequest("policy-renewals/options");
+    return response.data?.data || {};
+  }
+
+  /**
+   * Policies that can be renewed for the criteria, each with its renewal state (due, grace period, lapsed renewable).
+   * @param {Object} criteria - expiryFrom, expiryTo, insurerId, productId, premiumMin, premiumMax, clientName, paymentStatus
+   * @returns {Promise<Object[]>} policies
+   */
+  static async getRenewablePolicies(criteria = {}) {
+    const q = new URLSearchParams();
+    // renewable policies only unless the caller says otherwise (renewableOnly: "")
+    Object.entries({ renewableOnly: "true", limit: "500", ...criteria }).forEach(([k, v]) => {
+      if (v !== null && v !== undefined && v !== "") q.set(k, v);
+    });
+    const response = await getRequest(`policy-renewals/renewable-policies?${q.toString()}`);
+    const body = response.data || {};
+    return body.data || body.policies || [];
   }
 
   /**
@@ -47,7 +71,6 @@ class BatchRenewalService {
       const response = await getRequest(`policy-renewals/batches/${batchId}`);
       return response.data;
     } catch (error) {
-      console.error("Get batch by ID error:", error);
       throw error;
     }
   }
@@ -65,7 +88,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Create batch error:", error);
       throw error;
     }
   }
@@ -84,7 +106,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Update batch error:", error);
       throw error;
     }
   }
@@ -101,7 +122,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Delete batch error:", error);
       throw error;
     }
   }
@@ -128,7 +148,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batch policies error:", error);
       throw error;
     }
   }
@@ -148,7 +167,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Update policy selection error:", error);
       throw error;
     }
   }
@@ -167,7 +185,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Send renewal notices error:", error);
       throw error;
     }
   }
@@ -184,7 +201,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batch statistics error:", error);
       throw error;
     }
   }
@@ -199,7 +215,6 @@ class BatchRenewalService {
       const response = await getRequest(`policy-renewals/queue/${jobId}`);
       return response.data;
     } catch (error) {
-      console.error("Get queue job status error:", error);
       throw error;
     }
   }
@@ -217,7 +232,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Retry failed notices error:", error);
       throw error;
     }
   }
@@ -234,7 +248,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Get batch notice status error:", error);
       throw error;
     }
   }
@@ -248,7 +261,6 @@ class BatchRenewalService {
       const response = await getRequest(`policy-renewals/queue-stats`);
       return response.data;
     } catch (error) {
-      console.error("Get queue stats error:", error);
       throw error;
     }
   }
@@ -268,7 +280,6 @@ class BatchRenewalService {
       );
       return response.data;
     } catch (error) {
-      console.error("Generate batch report error:", error);
       throw error;
     }
   }

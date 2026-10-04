@@ -72,11 +72,6 @@ class PolicyService {
       }
       if (filters.lob) params.append("lob", filters.lob);
 
-      console.log(
-        `Fetching policies - Page: ${page}, PageSize: ${pageSize}, Filters:`,
-        filters
-      );
-
       const response = await fetch(
         `${this.baseURL}/policies?${params.toString()}`,
         {
@@ -99,14 +94,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Policies API response:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Get policies error:", error);
       return {
         success: false,
         error:
@@ -155,7 +148,6 @@ class PolicyService {
         data,
       };
     } catch (error) {
-      console.error("Update policy error:", error);
       return {
         success: false,
         error:
@@ -183,8 +175,6 @@ class PolicyService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-      console.log(`Fetching policy details for: ${policyId}`);
-
       const response = await fetch(`${this.baseURL}/policies/${policyId}`, {
         method: "GET",
         headers: {
@@ -204,14 +194,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Policy details API response:", data);
 
       return {
         success: true,
         data,
       };
     } catch (error) {
-      console.error("Get policy details error:", error);
       return {
         success: false,
         error:
@@ -283,13 +271,21 @@ class PolicyService {
       id: apiPolicy.policyId,
       policyId: apiPolicy.policyId,
 
-      // Client information (FIXED)
+      // Client information
       ClientId: client.clientId || apiPolicy.clientId || "N/A",
+      // Client code shown to users (CL-2026-00001); ClientId stays the internal id used for API calls
+      ClientCode:
+        client.clientCode ||
+        client.generatedClientId ||
+        apiPolicy.clientCode ||
+        client.clientId ||
+        apiPolicy.clientId ||
+        "N/A",
       ClientName: clientName,
       clientId: apiPolicy.clientId,
       client: client,
 
-      // Payment status (FIXED)
+      // Payment status
       Payment: apiPolicy.paymentStatus || "Pending",
       paymentStatus: apiPolicy.paymentStatus,
 
@@ -365,55 +361,6 @@ class PolicyService {
     };
   }
 
-  /**
-   * Fetch individual policy details by policy ID
-   * @param {string} policyId - Policy ID to fetch details for
-   * @returns {Promise<Object>} API response with policy details
-   */
-  async getPolicyDetails(policyId) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
-
-      console.log(`Fetching policy details for ID: ${policyId}`);
-
-      const response = await fetch(`${this.baseURL}/policies/${policyId}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...this.getAuthHeader(),
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.message || `HTTP error! status: ${response.status}`
-        );
-      }
-
-      const data = await response.json();
-      console.log("Policy details API response:", data);
-
-      return {
-        success: true,
-        data: data,
-      };
-    } catch (error) {
-      console.error("Get policy details error:", error);
-      return {
-        success: false,
-        error:
-          error.name === "AbortError"
-            ? "Request timeout. Please try again."
-            : error.message || "Failed to fetch policy details",
-      };
-    }
-  }
-
   async getPolicyEndorsementDetails(policyId) {
     try {
       const response = await fetch(
@@ -441,7 +388,6 @@ class PolicyService {
         data: data,
       };
     } catch (error) {
-      console.error("Get policy endorsement details error:", error);
       return {
         success: false,
         error:
@@ -535,7 +481,6 @@ class PolicyService {
         coverage: transformedCoverage,
       };
     } catch (error) {
-      console.error("Get policy renewal coverage error:", error);
       return {
         success: false,
         error:
@@ -594,7 +539,6 @@ class PolicyService {
         message: responseData?.message || "",
       };
     } catch (error) {
-      console.error("Create policy renewal error:", error);
       return {
         success: false,
         error:
@@ -605,6 +549,49 @@ class PolicyService {
     } finally {
       clearTimeout(timeoutId);
     }
+  }
+
+  /** JSON call to the policies API returning { success, data, error, errors }. */
+  async paymentCall(path, { method = "GET", body } = {}) {
+    try {
+      const response = await fetch(`${this.baseURL}/policies/${path}`, {
+        method,
+        headers: { "Content-Type": "application/json", ...this.getAuthHeader() },
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        return { success: false, error: data.message || `Request failed (${response.status})`, errors: data.errors || [] };
+      }
+      return { success: true, data: data.data, message: data.message };
+    } catch (error) {
+      return { success: false, error: error.message || "Request failed" };
+    }
+  }
+
+  /** Payment screen: open bills, captured payments, payment modes, gateway, whether the user may confirm. */
+  getPolicyPayments(policyId) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments`);
+  }
+
+  /** Record a payment (mode, reference, amount, date, proof) for finance to verify. */
+  capturePolicyPayment(policyId, payment) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments`, { method: "POST", body: { option: "payment", ...payment } });
+  }
+
+  /** Client pays later: the bill stays open; nothing is posted. */
+  recordPayLater(policyId) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments`, { method: "POST", body: { option: "pay-later" } });
+  }
+
+  /** Finance: confirm a captured payment (raises the official receipt). */
+  confirmPolicyPayment(policyId, paymentId) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments/${encodeURIComponent(paymentId)}/confirm`, { method: "POST", body: {} });
+  }
+
+  /** Finance: reject a captured payment. */
+  rejectPolicyPayment(policyId, paymentId, reason) {
+    return this.paymentCall(`${encodeURIComponent(policyId)}/payments/${encodeURIComponent(paymentId)}/reject`, { method: "POST", body: { reason } });
   }
 
   async updatePaymentStatus(policyId, paymentData) {
@@ -637,14 +624,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Payment status updated successfully:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Update payment status error:", error);
       return {
         success: false,
         error: error.message || "Failed to update payment status",
@@ -697,7 +682,6 @@ class PolicyService {
         message: responseData?.message || "",
       };
     } catch (error) {
-      console.error("Update policy renewal error:", error);
       return {
         success: false,
         error:
@@ -837,16 +821,16 @@ class PolicyService {
   /**
    * Bulk upload policies from Excel file
    * @param {File} file - Excel file to upload
+   * @param {string} [mode] - "go-live" for in-force policies of the old system (no bill, journal or commission)
    * @returns {Promise<Object>} API response with upload results
    */
-  async bulkUploadPolicies(file) {
+  async bulkUploadPolicies(file, mode) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout for file upload
 
-      console.log("Uploading policies file:", file.name);
-
       const formData = new FormData();
+      if (mode) formData.append("mode", mode);
       formData.append("file", file);
 
       const response = await fetch(`${this.baseURL}/policies/bulk-upload`, {
@@ -867,14 +851,12 @@ class PolicyService {
       }
 
       const data = await response.json();
-      console.log("Policies bulk upload completed:", data);
 
       return {
         success: true,
         data: data,
       };
     } catch (error) {
-      console.error("Bulk upload policies error:", error);
       return {
         success: false,
         error:

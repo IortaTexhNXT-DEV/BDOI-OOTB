@@ -51,6 +51,7 @@ const CoverageDeatails = ({ action, flow }) => {
     policydetailedlist?.ClientName ||
     policydetailedlist?.clientName;
   const clientId =
+    policydetailedlist?.client?.clientCode ||
     state?.ClientId ||
     state?.clientId ||
     policydetailedlist?.ClientId ||

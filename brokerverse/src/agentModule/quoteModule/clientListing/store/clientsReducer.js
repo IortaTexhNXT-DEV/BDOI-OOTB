@@ -2,6 +2,35 @@ import { createSlice } from "@reduxjs/toolkit";
 import { getClientEditMiddleWare, getClientTableMiddleware, getClientTableSearchListMiddleware, getPaymentSearchDataMiddleWare, patchClientEditMiddleWare } from "./clientsMiddleware";
 
 
+/** One client of GET /clients as a list row (the shape the client screens use). */
+export const toClientRow = (client) => ({
+    id: client.clientId,
+    CompanyName: client.companyName || "",
+    TaxNumber: client.taxNumber || "",
+    FirstName: client.firstName,
+    DisplayName: client.displayName || client.companyName
+        || [client.firstName, client.lastName].filter(Boolean).join(" "),
+    LastName: client.lastName,
+    PreferredName: client.preferredName,
+    EmailID: client.emailId,
+    ContactNumber: client.contactNumber,
+    HouseNo: client.houseNo,
+    Barangay: client.barangay,
+    Country: client.country,
+    Province: client.province,
+    City: client.city,
+    ZIPCode: client.zipCode,
+    DateofBirth: client.DOB,
+    createdAt: client.createdAt || client.created_at || client.dateCreated || client.date_created,
+    // Individual / Corporate from the client type; the lead category may still say Retail for a company
+    category: String(client.clientType || "").toLowerCase() === "corporate" || (!client.clientType && client.companyName) ? "Corporate" : "Individual",
+    gender: client.gender,
+    Quotes: client.policies?.length?.toString() || "0",
+    LeadID: client.generatedClientId,
+    type: "motor",
+    ProductDescription: client.policies?.[0]?.status || "N/A"
+});
+
 const initialState = {
     loading: false,
     error: "",
@@ -35,30 +64,7 @@ const clientReducer = createSlice({
                 // Handle API response structure: { data: { clients: [...], pagination: {...} } }
                 if (action.payload?.data?.clients) {
                     // Transform API data to match component expectations
-                    state.clientListTable = action.payload.data.clients.map(client => ({
-                        id: client.clientId,
-                        CompanyName: client.companyName || "",
-                        TaxNumber: client.taxNumber || "",
-                        FirstName: client.firstName,
-                        LastName: client.lastName,
-                        PreferredName: client.preferredName,
-                        EmailID: client.emailId,
-                        ContactNumber: client.contactNumber,
-                        HouseNo: client.houseNo,
-                        Barangay: client.barangay,
-                        Country: client.country,
-                        Province: client.province,
-                        City: client.city,
-                        ZIPCode: client.zipCode,
-                        DateofBirth: client.DOB,
-                        createdAt: client.createdAt || client.created_at || client.dateCreated || client.date_created,
-                        category: client.leadCategory || "Retail",
-                        gender: client.gender,
-                        Quotes: client.policies?.length?.toString() || "0",
-                        LeadID: client.generatedClientId,
-                        type: "motor",
-                        ProductDescription: client.policies?.[0]?.status || "N/A"
-                    }));
+                    state.clientListTable = action.payload.data.clients.map(toClientRow);
                     state.page = action.payload.data.pagination?.page || state.page;
                     state.pageSize = action.payload.data.pagination?.pageSize || state.pageSize;
                     state.total = action.payload.data.pagination?.totalCount || 0;

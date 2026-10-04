@@ -1,120 +1,115 @@
-name: CI/CD Pipeline
+name: Build and deploy
+
+# Used only when brokerverse/ is its own repository (GitHub reads workflows at the repository root; in the full
+# BrokerVerse repository .github/workflows/ci.yml and deploy.yml are used instead).
+#
+# One environment-neutral build; the environment's settings go into /env-config.js at publish time, so the same
+# build can be published anywhere. Runs the tests on every push and pull request; publishes on a push to dev.
+#
+# Repository secrets:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID
+# Repository variables: API_BASE_URL (empty when CloudFront forwards /api/* to the backend, else
+#                       https://<api>/api), ENVIRONMENT_NAME (e.g. UAT; empty in production), ENVIRONMENT_COLOR
 
 on:
   push:
     branches:
       - dev
-  # pull_request:
-  #   branches:
-  #     - dev
+      - brokerverse-platform
+  pull_request:
 
 env:
-  NODE_VERSION: "20"
+  NODE_VERSION: "22"
+  AWS_REGION: ap-southeast-1
 
 jobs:
-  # test:
-  #   name: Run Tests
-  #   runs-on: ubuntu-latest
-
-  #   steps:
-  #     - name: Checkout Repository
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0 # Needed for SonarQube analysis
-
-  #     - name: Setup Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-
-  #     - name: Install dependencies
-  #       run: npm install
-
-  #     - name: Run tests with coverage
-  #       run: npm run test:coverage
-  #       env:
-  #         AWS_S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-  #         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-  #     - name: Upload coverage reports
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: coverage-reports
-  #         path: coverage/
-  #         retention-days: 1
-
   build:
-    name: Build and Analyze
+    name: Lint, test and build
     runs-on: ubuntu-latest
-    # needs: test
-
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: npm
 
       - name: Install dependencies
-        run: npm install --legacy-peer-deps
+        run: npm ci --legacy-peer-deps
 
-      # - name: Download coverage reports
-      #   uses: actions/download-artifact@v4
-      #   with:
-      #     name: coverage-reports
-      #     path: coverage/
+      - name: Lint
+        run: npm run lint
 
-      # - name: SonarQube Analysis
-      #   uses: SonarSource/sonarqube-scan-action@v5
-      #   env:
-      #     SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: Run tests
+        run: npx craco test --watchAll=false
+        env:
+          CI: true
 
-  deploy:
-    name: Deploy to S3 & Invalidate CloudFront
-    runs-on: ubuntu-latest
-    needs: [build]
-    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install dependencies
-        run: npm install --legacy-peer-deps
-
-      - name: Relax TypeScript rules for CI
-        run: |
-          echo "Relaxing TypeScript compiler checks (noUnusedLocals/Parameters)..."
-          sed -i 's/"noUnusedLocals": true/"noUnusedLocals": false/g' tsconfig.json || true
-          sed -i 's/"noUnusedParameters": true/"noUnusedParameters": false/g' tsconfig.json || true
-
-      - name: Build application
+      - name: Build (environment-neutral)
         run: npm run build
         env:
           NODE_ENV: production
-          # Prevent warnings (ESLint, autoprefixer) from failing the build
           CI: false
+          GENERATE_SOURCEMAP: false
+          INLINE_RUNTIME_CHUNK: false
 
-      - name: Configure AWS Credentials
+      - name: Check the build output
+        run: |
+          # an unbuilt index.html still holds %PUBLIC_URL% and loads no script: never publish it
+          if grep -q "%PUBLIC_URL%" build/index.html || ! grep -q "/static/js/" build/index.html; then
+            echo "build/index.html is not a production build; nothing is published." >&2
+            exit 1
+          fi
+
+      - name: Keep the build for the deploy job
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-${{ github.sha }}
+          path: build/
+          retention-days: 30
+
+  deploy:
+    name: Publish to S3 and refresh CloudFront
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    concurrency:
+      group: deploy-web
+      cancel-in-progress: false
+    steps:
+      - name: Checkout (runtime configuration script)
+        uses: actions/checkout@v4
+
+      - name: Download the build
+        uses: actions/download-artifact@v4
+        with:
+          name: web-${{ github.sha }}
+          path: build/
+
+      - name: Write env-config.js
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL || vars.REACT_APP_BASE_URL }}
+          ENVIRONMENT_NAME: ${{ vars.ENVIRONMENT_NAME }}
+          ENVIRONMENT_COLOR: ${{ vars.ENVIRONMENT_COLOR }}
+        run: sh scripts/env-config.sh build/env-config.js
+
+      - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-southeast-1 # Update to your region
+          aws-region: ${{ env.AWS_REGION }}
 
-      - name: Deploy to S3
-        run: aws s3 sync build/ s3://${{ secrets.S3_BUCKET }} --delete
+      - name: Upload to S3 (hashed bundles cached, index.html and env-config.js never)
+        run: |
+          set -euo pipefail
+          aws s3 sync build/static "s3://${{ secrets.S3_BUCKET }}/static" --cache-control "public,max-age=31536000,immutable"
+          aws s3 sync build/ "s3://${{ secrets.S3_BUCKET }}" --delete --exclude "static/*" --exclude "index.html" --exclude "env-config.js" --cache-control "no-cache"
+          aws s3 cp build/env-config.js "s3://${{ secrets.S3_BUCKET }}/env-config.js" --cache-control "no-store,max-age=0" --content-type "application/javascript"
+          aws s3 cp build/index.html "s3://${{ secrets.S3_BUCKET }}/index.html" --cache-control "no-cache" --content-type "text/html"
+          aws s3 sync build/static "s3://${{ secrets.S3_BUCKET }}/static" --delete --cache-control "public,max-age=31536000,immutable"
 
-      - name: Invalidate CloudFront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+      - name: Invalidate the CloudFront cache
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/index.html" "/env-config.js" "/"

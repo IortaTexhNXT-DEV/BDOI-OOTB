@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgAdd from "../../../assets/icons/SvgAdd";
@@ -10,7 +9,7 @@ import TableData from "./TableData/index";
 import ModalEditData from "./PopUpData/ModalEditData";
 import ModalViewData from "./PopUpData/ModalViewData";
 import ModalAddData from "./PopUpData/ModalAddData";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   getAccountCategoryDetailViewMiddleWare,
   getAccountCategoryDetailEditMiddleWare,
@@ -22,8 +21,8 @@ const AccountCategoryMaster = () => {
   const [visibleAdd, setVisibleAdd] = useState(false);
   const [visibleView, setVisibleView] = useState(false);
   const [visibleEdit, setVisibleEdit] = useState(false);
-  const [EditID, setEditID] = useState(null);
-  const [popUpAction, setpopUpAction] = useState(null);
+  const [, setEditID] = useState(null);
+  const [popUpAction] = useState(null);
   const [EmptyTable, setEmptyTable] = useState(false);
   const items = [
     {
@@ -33,11 +32,9 @@ const AccountCategoryMaster = () => {
   ];
   const home = { label: t("financeMasters.master") };
   const handleSave = (values) => {
-    // setVisible(false);
     setEmptyTable(true);
   };
   const handleEdit = (values) => {
-    // setVisible(false);
   };
   const handleViewAction = (data) => {
     dispatch(getAccountCategoryDetailViewMiddleWare(data));
@@ -51,11 +48,6 @@ const AccountCategoryMaster = () => {
     setVisibleAdd(true);
   };
 
-  const handleAction = (editindex, actionName) => {
-    setVisibleAdd(true);
-    setEditID(editindex);
-    setpopUpAction(actionName);
-  };
   return (
     <div className="container__account__category__master">
       <div className="grid m-0 top__container">

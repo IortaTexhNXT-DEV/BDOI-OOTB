@@ -8,8 +8,8 @@ import SvgDot from "../../assets/agentIcon/SvgDots";
 import "./index.scss";
 const ClientListingCard = () => {
   const { t } = useTranslation();
-  const items = [{ label: t("claims.title"), url: "/agent/clientlisting" }];
-  const Initiate = { label: t("claims.home") };
+  const items = [{ label: t("claims.title") }];
+  const Initiate = { label: t("sidebar.Operations") };
 
   return (
     <div className="claim__table__container mt-4">

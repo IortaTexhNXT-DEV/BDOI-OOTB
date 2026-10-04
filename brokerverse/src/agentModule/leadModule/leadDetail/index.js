@@ -9,6 +9,10 @@ import { Message } from 'primereact/message';
 import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
 import { Toast } from 'primereact/toast';
 import { getLeadByIdMiddleware, deleteLeadMiddleware } from '../Store/leadMiddleware';
+import { isFireLob, isIarLob } from '../../endorsementModule/constants/endorsementCategories';
+import { formatDate as formatConfiguredDate } from '../../../utility/dateFormat';
+import PartyPrivacyPanel from '../../../module/DataPrivacy/PartyPrivacyPanel';
+import ActivityPanel from '../../../components/SalesActivities/ActivityPanel';
 import './index.scss';
 
 const LeadDetail = () => {
@@ -74,6 +78,21 @@ const LeadDetail = () => {
     navigate('/agent/leadlisting');
   };
 
+  /** Same entry point as straight after creating the lead: the quote wizard for the lead's line of business. */
+  const handleCreateQuote = () => {
+    const id = currentLeadDetails.leadId || leadId;
+    const lob = currentLeadDetails.lob;
+    if (lob && isIarLob(lob)) {
+      navigate('/agent/createlead/iar', { state: { leadRefId: id, leadId: id, isEdit: true } });
+      return;
+    }
+    if (lob && isFireLob(lob)) {
+      navigate('/agent/createlead/fire-allied-perils', { state: { leadId: id, isEdit: true } });
+      return;
+    }
+    navigate(`/agent/createquote/policydetails/createquote/${id}`, { state: { lead: currentLeadDetails } });
+  };
+
   if (loading) {
     return (
       <div className="lead-detail-container">
@@ -109,14 +128,7 @@ const LeadDetail = () => {
     );
   }
 
-  const formatDate = (dateString) => {
-    if (!dateString) return t('policyDetail.nA');
-    const date = new Date(dateString);
-    const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+  const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: t('policyDetail.nA') });
 
   return (
     <div className="lead-detail-container">
@@ -126,6 +138,13 @@ const LeadDetail = () => {
       <div className="header">
         <h2>{t('leadDetail.title')}</h2>
         <div className="actions">
+          <Button
+            label={t('leadDetail.createQuote', 'Create Quote')}
+            icon="pi pi-file-edit"
+            className="mr-2"
+            onClick={handleCreateQuote}
+            disabled={!currentLeadDetails.leadId && !leadId}
+          />
           <Button
             label={t('leadDetail.edit')}
             icon="pi pi-pencil"
@@ -204,6 +223,10 @@ const LeadDetail = () => {
               <span className="value">{currentLeadDetails.houseNo || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
+              <span className="label">{t('address.street')}</span>
+              <span className="value">{currentLeadDetails.street || currentLeadDetails.roadThanon || t('policyDetail.nA')}</span>
+            </div>
+            <div className="detail-row">
               <span className="label">{t('leadDetail.barangay')}</span>
               <span className="value">{currentLeadDetails.barangay || t('policyDetail.nA')}</span>
             </div>
@@ -214,6 +237,10 @@ const LeadDetail = () => {
             <div className="detail-row">
               <span className="label">{t('leadDetail.province')}</span>
               <span className="value">{currentLeadDetails.province || t('policyDetail.nA')}</span>
+            </div>
+            <div className="detail-row">
+              <span className="label">{t('address.region')}</span>
+              <span className="value">{currentLeadDetails.region || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
               <span className="label">{t('leadDetail.country')}</span>
@@ -258,6 +285,16 @@ const LeadDetail = () => {
                 <span className="value">{currentLeadDetails.quotationsCount || '0'}</span>
               </div>
             </Card>
+        </div>
+
+        <div className="col-12">
+          <Card className="detail-card">
+            <PartyPrivacyPanel partyType="lead" partyId={currentLeadDetails.leadId || leadId} />
+          </Card>
+        </div>
+
+        <div className="col-12">
+          <ActivityPanel entity="lead" recordId={String(currentLeadDetails.leadId || leadId)} />
         </div>
       </div>
     </div>

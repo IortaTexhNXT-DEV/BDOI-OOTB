@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .claim__settlementdetails__container {
   .p-card {
     background: #ffffff;
@@ -164,7 +165,6 @@
       font-size: 13px;
       font-weight: 600;
       letter-spacing: 0.04em;
-      text-transform: uppercase;
     }
   }
 
@@ -173,13 +173,12 @@
     align-items: center;
     padding: 4px 10px;
     border-radius: 999px;
-    background: #dcfce7;
-    color: #166534;
+    background: $color-success-050;
+    color: $color-success;
     font-family: "Nunito", Arial, sans-serif;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.03em;
-    text-transform: uppercase;
     white-space: nowrap;
   }
 
@@ -206,7 +205,6 @@
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.04em;
-      text-transform: uppercase;
       padding-top: 8px;
       padding-bottom: 8px;
     }
@@ -287,23 +285,23 @@
   }
 
   .role-pill--lead {
-    background: #dcfce7;
-    color: #166534;
+    background: $color-success-050;
+    color: $color-success;
   }
 
   .role-pill--co {
-    background: #e5f5ff;
-    color: #3730a3;
+    background: $brand-blue-050;
+    color: $brand-navy;
   }
 
   .status-pill {
-    background: #f3f4f6;
-    color: #4b5563;
+    background: $color-surface-muted;
+    color: $color-text;
   }
 
   .status-pill--settled {
-    background: #dcfce7;
-    color: #166534;
+    background: $color-success-050;
+    color: $color-success;
   }
 
   .co-insurance-settlement-note {

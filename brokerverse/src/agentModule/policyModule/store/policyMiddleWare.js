@@ -15,7 +15,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
  * - { data: { data: [], total, page?, pageSize? } } (nested)
  * - { results: [], total } or { content: [], totalElements }
  */
-function extractPolicyListFromResponse(apiResponse, requestPage = 1, requestPageSize = 10) {
+export function extractPolicyListFromResponse(apiResponse, requestPage = 1, requestPageSize = 10) {
   const data = apiResponse?.data;
   let policies = [];
   let total = 0;
@@ -84,7 +84,6 @@ export const policyListDataMiddleWare = createAsyncThunk(
       );
 
       if (!Array.isArray(policies)) {
-        console.error("Policy list API: expected policies array, got:", typeof policies);
         return rejectWithValue("Invalid API response: policies data is not an array");
       }
 
@@ -113,7 +112,6 @@ export const policyListDataMiddleWare = createAsyncThunk(
         },
       };
     } catch (error) {
-      console.error("Policy list middleware error:", error);
       return rejectWithValue(error.message || "Failed to fetch policies");
     }
   }
@@ -122,10 +120,8 @@ export const policyListDataMiddleWare = createAsyncThunk(
 export const policyListSerachDataMiddleWare = createAsyncThunk(
   POLICY_SEARCH_DATA,
   async ({ field, value }, { rejectWithValue, getState }) => {
-    console.log(field, value, "data find");
     const { policyMainReducers } = getState();
     const { rawApiData } = policyMainReducers;
-    console.log(policyMainReducers, "policyMainReducers");
 
     try {
       // Use the policy service search function
@@ -145,10 +141,8 @@ export const policyListSerachDataMiddleWare = createAsyncThunk(
         };
       });
 
-      console.log(transformedData, "filteredPolicies");
       return transformedData;
     } catch (error) {
-      console.error("Policy search middleware error:", error);
       return rejectWithValue(error.message || "Search failed");
     }
   }
@@ -158,8 +152,6 @@ export const policyDetailsDataMiddleWare = createAsyncThunk(
   POLICY_DETAILS_DATA,
   async ({ policyId }, { rejectWithValue }) => {
     try {
-      console.log(`Fetching policy details for ID: ${policyId}`);
-
       const response = await policyService.getPolicyDetails(policyId);
 
       if (!response.success) {
@@ -167,7 +159,6 @@ export const policyDetailsDataMiddleWare = createAsyncThunk(
       }
 
       const policyData = response.data;
-      console.log("Policy details API response:", policyData);
 
       // Transform the policy data to match frontend format
       const transformedData = policyService.transformPolicyData(policyData);
@@ -177,7 +168,6 @@ export const policyDetailsDataMiddleWare = createAsyncThunk(
         rawPolicyData: policyData,
       };
     } catch (error) {
-      console.error("Policy details middleware error:", error);
       return rejectWithValue(error.message || "Failed to fetch policy details");
     }
   }

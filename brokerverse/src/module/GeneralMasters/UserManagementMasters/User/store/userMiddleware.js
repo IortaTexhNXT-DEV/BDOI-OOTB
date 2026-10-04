@@ -54,9 +54,13 @@ export const postAddUserMiddleware = createAsyncThunk(
         username: payload?.username,
         email: payload?.email,
         displayName: payload?.displayName,
-        password: payload?.password,
+        // empty: the server generates a temporary password
+        password: payload?.password || undefined,
         roles: Array.isArray(payload?.roles) ? payload.roles : [],
         permissions: payload?.permissions || [],
+        branchCode: payload?.branchCode || undefined,
+        designation: payload?.designation || undefined,
+        reportingTo: payload?.reportingTo || undefined,
       };
 
       const response = await userService.createUser(userData);
@@ -80,6 +84,10 @@ export const patchUserEditMiddleware = createAsyncThunk(
         displayName: payload?.displayName,
         roles: Array.isArray(payload?.roles) ? payload.roles : undefined,
         permissions: payload?.permissions || undefined,
+        // empty clears the field (the server keeps a value that is not sent)
+        branchCode: payload?.branchCode ?? undefined,
+        designation: payload?.designation ?? undefined,
+        reportingTo: payload?.reportingTo ?? undefined,
       };
 
       const response = await userService.updateUser(payload.id, userData);
@@ -114,7 +122,6 @@ export const getBranchAddUserMiddleware = createAsyncThunk(
   GET_ADD_BRANCH_USER,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -126,7 +133,6 @@ export const getUserViewDataMiddleWare = createAsyncThunk(
   GET_USER_DATA_VIEW,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -137,7 +143,6 @@ export const getUserEditDataMiddleWare = createAsyncThunk(
   GET_USER_DATA_EDIT,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -149,7 +154,6 @@ export const getMainBranchAccessMiddleWare = createAsyncThunk(
   GET_MAIN_BRANCH_ACCESS_VIEW,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -161,7 +165,6 @@ export const getViewMainBranchUser = createAsyncThunk(
   GET_MAIN_BRANCH_VIEW,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -172,7 +175,6 @@ export const getViewMainBranchUser = createAsyncThunk(
 export const postViewMainBranchUser = createAsyncThunk(
   POST_MAIN_BRANCH_VIEW,
   async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
     const data = {
       branchCode: payload?.branchCode,
       branchName: "branchName",
@@ -181,7 +183,6 @@ export const postViewMainBranchUser = createAsyncThunk(
       departmentName: "departmentName",
     };
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return data;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -193,7 +194,6 @@ export const getAdditionalRoleTabelMiddleWare = createAsyncThunk(
   GET_ADDITIONAL_ROLE_TABEL,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -205,7 +205,6 @@ export const getAdditionalRoleViewMiddleWare = createAsyncThunk(
   GET_ADDITIONAL_ROLE_VIEW,
   async (payload, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -216,7 +215,6 @@ export const getAdditionalRoleViewMiddleWare = createAsyncThunk(
 export const postAdditionalRoleViewMiddleWare = createAsyncThunk(
   POST_ADDITIONAL_ROLE,
   async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
     const data = {
       id: payload?.id,
       RoleCode: payload?.RoleCode,
@@ -224,7 +222,6 @@ export const postAdditionalRoleViewMiddleWare = createAsyncThunk(
       ActiveHours: payload?.ActiveHours,
     };
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return data;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);

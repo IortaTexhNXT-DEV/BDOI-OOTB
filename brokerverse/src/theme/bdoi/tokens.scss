@@ -1,46 +1,99 @@
 // BDOI design tokens for iNXT BrokerVerse, from the BDO Style Guide (ITG User Experience Design).
 // Colours, type and spacing are defined here once; bdoi.scss and the screens use the tokens.
+//
+// Runtime theming (broker branding): the brand tokens are CSS custom properties (--bv-*), so a theme saved in
+// Master > System Settings > Theme and Branding restyles every screen without a rebuild
+// (src/theme/runtime/themeEngine.js sets the properties from GET /api/branding). The values below are the defaults
+// (the iorta TechNXT preset) and the fallback when no theme is loaded. Do not use these variables in Sass colour
+// functions (darken, rgba($x, ...)): they are var() references, not colours.
 
 // Brand digital colours
-$brand-navy: #004ea8; // Header Blue: table heads, section bars, navigation text
-$brand-blue: #0072d8; // CTA Blue: primary buttons, links, active items
-$brand-blue-600: #005fb4; // CTA hover / pressed
-$brand-blue-050: #e5f5ff; // Background Blue: highlights, alternate rows, active menu item
-$brand-field-blue: #99c1e7; // Text Field Blue: input borders
-$brand-gold: #fdb913; // Yellow: accents (active tab bar), used sparingly
+$brand-navy: var(--bv-secondary, #004ea8); // Header Blue: table heads, section bars, navigation text
+$brand-blue: var(--bv-primary, #0072d8); // CTA Blue: primary buttons, links, active items
+$brand-blue-600: var(--bv-primary-dark, #005fb4); // CTA hover / pressed
+$brand-blue-050: var(--bv-primary-050, #e5f5ff); // Background Blue: highlights, alternate rows, active menu item
+$brand-field-blue: var(--bv-field-border, #99c1e7); // Text Field Blue: input borders
+$brand-gold: var(--bv-accent, #fdb913); // Yellow: accents (active tab bar), used sparingly
 $brand-gold-600: #e0a100;
 $brand-gold-050: #fff4d6;
 
 // Neutrals (never pure black)
-$color-bg: #f6f6f6; // Dirty White: page background behind white cards
+$color-bg: var(--bv-page-bg, #f6f6f6); // Dirty White: page background behind white cards
 $color-surface: #ffffff;
-$color-heading: #2e2e2e; // Near Black
+$color-heading: var(--bv-heading-text, #2e2e2e); // Near Black
 $color-text: #4b4b4b; // Dark Grey
 $color-text-muted: #656565; // Base Grey
 $color-placeholder: #919191; // Medium Grey
 $color-border: #e4e4e4; // dividers and borders
 $color-border-strong: #c2c2c1; // Light Grey: separators, disabled fills
+$color-surface-muted: #f5f6f7; // quiet tint for information boxes, hints and notes (a grey, never a colour)
 
+// Status colours stay semantic on every brand (not part of a theme).
+// The -050 tints are the backgrounds of messages and tags: very light, never pink or saturated. The danger tint is
+// a warm grey rather than a pale red so that an error box reads as a notice and a page of errors never turns pink.
 $color-success: #1d7f4e;
-$color-danger: #d32f2f;
+$color-danger: #b42318; // errors: a deep red that reads as a notice, not an alarm
+$color-danger-050: #f7f4f3;
 $color-warning: #8a5a00;
+$color-warning-050: #fdf8ec;
+$color-success-050: #eff7f2;
 
-// Typography: Nunito, Arial as the approved fallback
-$font-heading: "Nunito", Arial, sans-serif;
-$font-body: "Nunito", Arial, sans-serif;
+// Typography: Nunito, Arial as the approved fallback (a theme may choose another font of the safe list)
+$font-heading: var(--bv-font-family, "Nunito", Arial, sans-serif);
+$font-body: var(--bv-font-family, "Nunito", Arial, sans-serif);
 
-$radius-sm: 8px;
-$radius-md: 12px;
-$radius-lg: 16px;
+$radius-sm: var(--bv-radius-sm, 8px);
+$radius-md: var(--bv-radius-md, 12px);
+$radius-lg: var(--bv-radius-lg, 16px);
 $shadow-sm: 0 1px 3px rgba(46, 46, 46, 0.06);
 $shadow-md: 0 4px 16px rgba(46, 46, 46, 0.08);
-$focus-ring: 0 0 0 3px rgba(0, 114, 216, 0.35);
+$focus-ring: 0 0 0 3px var(--bv-focus-ring, rgba(0, 114, 216, 0.35));
 
 $control-height: 44px;
 $header-height: 72px;
 $sidebar-width: 280px;
 
+// Defaults of the runtime theme (iorta TechNXT preset). themeEngine.js overrides them on <html>.
 :root {
+  --bv-primary: #0072d8;
+  --bv-primary-rgb: 0, 114, 216;
+  --bv-primary-dark: #005fb4;
+  --bv-primary-text: #ffffff;
+  --bv-primary-050: #e5f5ff;
+  --bv-primary-100: #bfdcf2;
+  --bv-secondary: #004ea8;
+  --bv-secondary-rgb: 0, 78, 168;
+  --bv-accent: #fdb913;
+  --bv-header-bg: #ffffff;
+  --bv-header-text: #2e2e2e;
+  --bv-sidebar-bg: #ffffff;
+  --bv-sidebar-text: #004ea8;
+  --bv-sidebar-active-bg: #e5f5ff;
+  --bv-sidebar-active-text: #004ea8;
+  --bv-sidebar-hover-bg: #f6f6f6;
+  --bv-table-header-bg: #004ea8;
+  --bv-table-header-text: #ffffff;
+  --bv-table-stripe: #f5faff;
+  --bv-button-bg: #0072d8;
+  --bv-button-text: #ffffff;
+  --bv-button-hover-bg: #005fb4;
+  --bv-link: #0072d8;
+  --bv-focus-ring: rgba(0, 114, 216, 0.35);
+  --bv-focus-color: #0072d8;
+  --bv-field-border: #99c1e7;
+  --bv-page-bg: #f6f6f6;
+  --bv-heading-text: #2e2e2e;
+  --bv-font-family: "Nunito", Arial, sans-serif;
+  --bv-radius-sm: 8px;
+  --bv-radius-md: 12px;
+  --bv-radius-lg: 16px;
+  --bv-radius-button: 8px;
+  --bv-logo-app-height: 36px;
+  --bv-logo-login-height: 56px;
+  --bv-row-height: 44px;
+  --bv-cell-pad-y: 10px;
+
+  // names of earlier releases, kept for screens that read them
   --brand-navy: #{$brand-navy};
   --brand-blue: #{$brand-blue};
   --brand-blue-600: #{$brand-blue-600};
@@ -54,6 +107,10 @@ $sidebar-width: 280px;
   --color-text-muted: #{$color-text-muted};
   --color-placeholder: #{$color-placeholder};
   --color-border: #{$color-border};
+  --color-surface-muted: #{$color-surface-muted};
+  --color-danger: #{$color-danger};
+  --color-success: #{$color-success};
+  --color-warning: #{$color-warning};
   --font-heading: #{$font-heading};
   --font-body: #{$font-body};
 }

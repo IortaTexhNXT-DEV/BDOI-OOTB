@@ -13,8 +13,6 @@ import { Dropdown } from "primereact/dropdown";
 import SvgDownArrow from "../../../../assets/agentIcon/SvgDownArrow";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
 import SvgArrow from "../../../../assets/agentIcon/SvgArrow";
-// import { postinformationMiddleWare,patchinformationMiddleWare } from "./store/infoMiddleWare";
-// import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { getQuoteSearchDataMiddleWare } from "../quoteListingCard/store/quoteMiddleware";
@@ -27,12 +25,9 @@ import {
   loadQuotationForEdit,
   clearCurrentQuoteCreation,
 } from "../../Store/quotationReducer";
-import { getLeadByIdMiddleware } from "../../../leadModule/Store/leadMiddleware";
-import quotationService from "../../../../services/quotationService";
 import {
   canConvertToPolicy,
   canEditQuotation,
-  QuotationStatus,
 } from "../../../../utils/statusHelpers";
 import StatusBadge from "../../../../components/StatusBadge";
 import SvgHome from "../../../../assets/agentIcon/SvgHome";
@@ -41,6 +36,8 @@ import EmployeeBenefitIcon from "../../../EmployeeFlow/EmployeeBenefitIcon";
 import SvgMotor from "../../../../assets/agentIcon/SvgMotor";
 import SvgFire from "../../../../assets/agentIcon/SvgFire";
 import "./index.scss";
+import { formatDate as formatConfiguredDate } from "../../../../utility/dateFormat";
+import { confirmAction, notifyError, notifySuccess } from "../../../../utility/dialogs";
 const QuoteListingCard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -69,23 +66,17 @@ const QuoteListingCard = () => {
     }
   );
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [selectionMode] = useState("multiple");
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("Company");
   const [currentPageState, setCurrentPageState] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [rowsPerPage, setRowsPerPage] = useState(20);
   const cities = [
     { name: t("quoteListing.company"), code: "Company" },
     { name: t("quoteListing.quoteId"), code: "QuoteID" },
   ];
 
-  // Fetch lead details when leadRefId is available
-  useEffect(() => {
-    if (leadRefId) {
-      dispatch(getLeadByIdMiddleware(leadRefId));
-    }
-  }, [dispatch, leadRefId]);
+  // (the prospect itself is loaded once by the page, quoteListing/index.js)
 
   // Fetch quotations on component mount and when pagination changes
   useEffect(() => {
@@ -114,10 +105,9 @@ const QuoteListingCard = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -145,7 +135,7 @@ const QuoteListingCard = () => {
   const handleDelete = async () => {
     if (selectedProducts.length === 0) return;
 
-    const confirmDelete = window.confirm(
+    const confirmDelete = await confirmAction(
       `Are you sure you want to delete ${selectedProducts.length} quotation(s)?`
     );
 
@@ -162,7 +152,7 @@ const QuoteListingCard = () => {
       // Clear selection after deletion
       setSelectedProducts([]);
 
-      alert(t("quoteListing.quotationsDeletedSuccess"));
+      notifySuccess(t("quoteListing.quotationsDeletedSuccess"));
 
       // Refresh the list
       dispatch(
@@ -173,50 +163,13 @@ const QuoteListingCard = () => {
         })
       );
     } catch (error) {
-      console.error("Failed to delete quotations:", error);
-      alert(t("quoteListing.failedToDeleteQuotations", { error: error?.message || error }));
+      notifyError(t("quoteListing.failedToDeleteQuotations", { error: error?.message || error }));
     }
   };
 
-  const rendercheckedHeader = (value) => {
-    return selectedProducts.length === 0 ? (
-      value
-    ) : selectedProducts.length === 1 ? (
-      <div className="header__btn__container">
-        <div className="header__delete__btn" onClick={handleDelete}>
-          {t("quoteListing.delete")}
-        </div>
-        <div
-          className="header__edit__btn"
-          onClick={() => handleEdit(selectedProducts[0])}
-        >
-          {t("quoteListing.edit")}
-        </div>
-      </div>
-    ) : (
-      <div className="header__btn__container">
-        <div className="header__delete__btn" onClick={handleDelete}>
-          {t("quoteListing.delete")}
-        </div>
-        {selectedProducts.length === 2 && (
-          <div
-            className="header__edit__btn"
-            onClick={() =>
-              navigate(
-                `/agent/quotecomparisonview?quotationId1=${selectedProducts[0].quotationId}&quotationId2=${selectedProducts[1].quotationId}`
-              )
-            }
-          >
-            {t("quoteListing.compare")}
-          </div>
-        )}
-      </div>
-    );
-  };
+  const rendercheckedHeader = (value) => value;
 
-  const renderUncheckedHeader = (value) => {
-    return selectedProducts.length == 0 && value;
-  };
+  const renderUncheckedHeader = (value) => value;
 
   const handleclick = () => {
     // Clear any existing quote creation state
@@ -322,14 +275,7 @@ const QuoteListingCard = () => {
   };
 
   const renderDate = (rowData) => {
-    const formatDate = (dateString) => {
-      if (!dateString) return t("policyDetail.nA");
-      const date = new Date(dateString);
-      const day = String(date.getDate()).padStart(2, "0");
-      const month = String(date.getMonth() + 1).padStart(2, "0");
-      const year = date.getFullYear();
-      return `${day} ${month} ${year}`;
-    };
+    const formatDate = (dateString) => formatConfiguredDate(dateString, { empty: t("policyDetail.nA") });
 
     return (
       <div>
@@ -423,7 +369,7 @@ const QuoteListingCard = () => {
             className="view__btn"
             onClick={() => handleEdit(rowData)}
             tooltip={t("quoteListing.editQuote")}
-            tooltipOptions={{ position: "top" }}
+            tooltipOptions={{ position: "top" }} aria-label={t("quoteListing.editQuote")}
           />
         )}
 
@@ -445,7 +391,7 @@ const QuoteListingCard = () => {
           className="edit__btn"
           onClick={() => handleView(rowData)}
           tooltip={t("quoteListing.viewDetails")}
-          tooltipOptions={{ position: "top" }}
+          tooltipOptions={{ position: "top" }} aria-label={t("quoteListing.viewDetails")}
         />
       </div>
     );
@@ -453,8 +399,6 @@ const QuoteListingCard = () => {
 
   const handleEdit = async (rowData) => {
     try {
-      console.log("Editing quotation:", rowData.quotationId);
-
       // First, clear any existing quote creation state
       dispatch(clearCurrentQuoteCreation());
 
@@ -464,8 +408,6 @@ const QuoteListingCard = () => {
       );
 
       if (result.type.endsWith("/fulfilled")) {
-        console.log("Quotation details fetched:", result.payload);
-
         const quotationData = result.payload;
         const isIarLOB =
           quotationData?.productType === "Industrial All Risks" ||
@@ -490,27 +432,23 @@ const QuoteListingCard = () => {
           `/agent/editquote/policydetails/quotedetails/${rowData.quotationId}`
         );
       } else if (result.type.endsWith("/rejected")) {
-        console.error("Failed to fetch quotation details:", result.payload);
-        alert(
+        notifyError(
           t("quoteListing.failedToFetchQuotationError", { error: result.payload || "Unknown error" })
         );
       }
     } catch (error) {
-      console.error("Unexpected error:", error);
-      alert(t("quoteListing.unexpectedErrorFetching"));
+      notifyError(t("quoteListing.unexpectedErrorFetching"));
     }
   };
 
   const handleConvertToPolicy = async (rowData) => {
     try {
       // Confirm conversion
-      const confirmConvert = window.confirm(
+      const confirmConvert = await confirmAction(
         `Are you sure you want to convert quotation ${rowData.quotationNumber} to a policy?`
       );
 
       if (!confirmConvert) return;
-
-      console.log("Converting quotation to policy:", rowData.quotationId);
 
       const isIarLOB =
         rowData.productType === "Industrial All Risks" ||
@@ -530,8 +468,7 @@ const QuoteListingCard = () => {
         state: { quotation: rowData },
       });
     } catch (error) {
-      console.error("Unexpected error:", error);
-      alert(t("quoteListing.unexpectedErrorConverting"));
+      notifyError(t("quoteListing.unexpectedErrorConverting"));
     }
   };
 
@@ -544,19 +481,16 @@ const QuoteListingCard = () => {
 
       if (result.type.endsWith("/fulfilled")) {
         const quotationData = result.payload;
-        console.log("Full quotation data fetched for view:", quotationData);
 
         // Navigate to quote detail view with full data
         navigate("/agent/quotedetailview", {
           state: { quotationData: quotationData },
         });
       } else {
-        console.error("Failed to fetch quotation details:", result.payload);
-        alert(t("quoteListing.failedToLoadQuotation"));
+        notifyError(t("quoteListing.failedToLoadQuotation"));
       }
     } catch (error) {
-      console.error("Error fetching quotation details:", error);
-      alert(t("quoteListing.errorLoadingQuotation"));
+      notifyError(t("quoteListing.errorLoadingQuotation"));
     }
   };
 
@@ -669,7 +603,6 @@ const QuoteListingCard = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickEmployeeBenefit();
           }}
         >
           <div>
@@ -695,7 +628,6 @@ const QuoteListingCard = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -721,7 +653,6 @@ const QuoteListingCard = () => {
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
           onClick={() => {
-            // handleClickMotor();
           }}
         >
           <div>
@@ -765,11 +696,6 @@ const QuoteListingCard = () => {
           </div>
           <div class="col-12 md:col-6 lg:col-6">
             <div class="btn__container__quote__listing col-12 md:col-6 lg:col-6">
-              {/* <Button
-                icon={<SvgAdd />}
-                label="Add Quote"
-                onClick={() => handleclick()}
-              /> */}
               <Dropdown
                 value={null}
                 options={dropdownOptionsQuote}
@@ -818,27 +744,25 @@ const QuoteListingCard = () => {
           <DataTable
             value={search ? quoteSearchList : quotetabledata}
             paginator
+            // the server sends one page at a time (the search results are filtered here)
+            lazy={!search}
             rows={rowsPerPage}
             totalRecords={totalQuotations}
             first={(currentPageState - 1) * rowsPerPage}
-            selectionMode={selectionMode}
-            selection={selectedProducts}
             onPage={(e) => {
               setCurrentPageState(e.page + 1);
               setRowsPerPage(e.rows);
             }}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             className="corrections__table__main"
-            onSelectionChange={(e) => setSelectedProducts(e.value)}
             dataKey="quotationId"
             tableStyle={{ minWidth: "50rem" }}
             scrollable={true}
             scrollHeight="60vh"
           >
             <Column
-              selectionMode={selectionMode}
               body={(rowData) => (
                 <Checkbox
                   checked={selectedProducts.includes(rowData)}

@@ -1,30 +1,22 @@
-import React, { useState, useRef } from 'react';
+import { useRef } from 'react';
 import './index.scss';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import InputField from '../../../../components/InputField';
-import SubmitButton from '../../../../components/SubmitButton'
 import SvgDot from '../../../../assets/icons/SvgDot';
 import DropDowns from '../../../../components/DropDowns';
 import SvgDropdown from '../../../../assets/icons/SvgDropdown';
 import { Button } from 'primereact/button';
 import { useNavigate } from 'react-router-dom';
-import NavBar from '../../../../components/NavBar';
 import SvgBackicon from '../../../../assets/icons/SvgBackicon';
 import { Card } from "primereact/card";
-import DatePicker from '../../../../components/DatePicker';
-import { Calendar } from 'primereact/calendar';
-import LabelWrapper from '../../../../components/LabelWrapper';
 import { useFormik } from "formik";
-import { Toast } from 'primereact/toast';
 import CustomToast from "../../../../components/Toast";
 import { InputText } from "primereact/inputtext";
-import countriesData from "./data";
+import useMasterOptions from "../../../GeneralMasters/common/useMasterOptions";
 
-import { postAddBankMiddleware, postAddBank } from '../store/bankMasterMiddleware';
-import { useDispatch, useSelector } from 'react-redux';
-
-
-
+import { postAddBankMiddleware } from '../store/bankMasterMiddleware';
+import { useDispatch } from 'react-redux';
+import { phoneCountryCode } from "../../../../utility/phoneFormat";
 
 const initialValues = {
   bankCode: "",
@@ -59,39 +51,14 @@ const initialValues = {
 }
 
 function AddBankMaster() {
-  const [date, setDate] = useState(null);
   const dispatch = useDispatch();
   const Navigate = useNavigate()
-  const [departmentcode, setDepartmentCode] = useState(null);
-  const [branchcode, setBranchCode] = useState(null);
-  const [payeetype, setPayeeType] = useState(null);
-  const [criteria, setCriteria] = useState(null);
-  const [customercode, setCustomerCode] = useState(null);
-  const [transactioncode, setTransactioncode] = useState(null);
-  const [selectinstrumentcurrency, setSelectInstrumentCurrency] = useState(null);
   const toastRef = useRef(null);
 
-  const { BankList, loading } = useSelector(({ bankMasterReducer }) => {
-    return {
-      loading: bankMasterReducer?.loading,
-      BankList: bankMasterReducer?.BankList,
 
-    };
-  });
-
-  const City = countriesData.city.map(city => ({
-    label: city,
-  }));
-
-  const State = countriesData.state.map(state => ({
-    label: state,
-  }));
-
-
-  const Country = countriesData.countries.map(country => ({
-    label: country,
-  }));
-
+  const City = useMasterOptions("city");
+  const State = useMasterOptions("state");
+  const Country = useMasterOptions("country");
   const home = { label: "Master" };
   const items = [
     { label: 'Bank', url: '/master/finance/bank' },
@@ -102,40 +69,24 @@ function AddBankMaster() {
   minDate.setDate(minDate.getDate() + 1);
 
   // const handleSubmit=(value)=>{
-
-  //     Navigate("/master/finance/bank")
   // }
 
-  // const toastRef = useRef(null);
-  const handleSubmit = (values) => {
-
-    const valueWithId = {
-      ...values,
-      id: BankList?.length + 1,
-    };
-    console.log(values, "find values");
-    dispatch(postAddBankMiddleware(valueWithId))
-
-    // Handle form submission
-    console.log(values, "value");
-
-    // dispatch(postAddBank(formik.values));
-
-
-    toastRef.current.showToast();
-
-    setTimeout(() => {
-      Navigate("/master/finance/bank")
-    }, 3000);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postAddBankMiddleware(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        Navigate("/master/finance/bank");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
+
   // const handleSubmit = (values) => {
   //   // Handle form submission
-  //   console.log(values, "find values");
 
-  //   toastRef.current.showToast();
-  //   // {
   //     setTimeout(() => {
-  //     Navigate("/master/finance/bank")
   //     }, 3000);
   //   }
 
@@ -145,7 +96,7 @@ function AddBankMaster() {
     const errors = {};
 
     if (!values.bankCode) {
-      errors.bankCode = "This field Code is required";
+      errors.bankCode = "This field is required";
     }
     if (!values.bankName) {
       errors.bankName = "This field is required";
@@ -182,8 +133,8 @@ function AddBankMaster() {
 
     if (!values.mobile) {
       errors.mobile = "Phone Number is required";
-    } else if (!/^\d{10}$/.test(values.mobile)) {
-      errors.mobile = "Invalid phone number (10 digits)";
+    } else if (!/^\+?[\d\s()-]{7,20}$/.test(values.mobile)) {
+      errors.mobile = "Invalid phone number";
     }
     if (!values.Fax) {
       errors.Fax = "This field is required";
@@ -199,7 +150,6 @@ function AddBankMaster() {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
@@ -208,11 +158,6 @@ function AddBankMaster() {
   return (
     <div className='overall__addbankmaster__container'>
 
-
-      {/* <CustomToast ref={toastRef} 
-            // detail="Some detail text"
-            // content={"Voucher Details Save Successfully"}
-            /> */}
       <CustomToast ref={toastRef} message="Save Successfully" />
       <div>
         <span onClick={() => Navigate(-1)}>
@@ -224,10 +169,6 @@ function AddBankMaster() {
         home={home}
         className='breadcrumbs_container'
         separatorIcon={<SvgDot color={"#000"} />} />
-
-
-
-
 
       <Card>
 
@@ -244,7 +185,7 @@ function AddBankMaster() {
               />
               {formik.touched.bankCode && formik.errors.bankCode && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
 
                 >
                   {formik.errors.bankCode}
@@ -264,7 +205,7 @@ function AddBankMaster() {
               />
               {formik.touched.bankName && formik.errors.bankName && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
 
                 >
                   {formik.errors.bankName}
@@ -285,7 +226,7 @@ function AddBankMaster() {
               />
               {formik.touched.bankBranch && formik.errors.bankBranch && (
                 <div
-                  style={{ fontSize: 12, color: "red" }}
+                  style={{ fontSize: 12, color: "var(--color-danger)" }}
 
                 >
                   {formik.errors.bankBranch}
@@ -295,14 +236,12 @@ function AddBankMaster() {
           </div>
         </div>
 
-
-
         <div class="grid">
           <div class="col-3 md:col-3 lg-col-3">
 
             <InputField
               classNames="field__container"
-              label="IFSC Code"
+              label="SWIFT / BIC Code"
               placeholder={"Enter"}
               value={formik.values.ifscCode}
               onChange={formik.handleChange("ifscCode")}
@@ -310,7 +249,7 @@ function AddBankMaster() {
             />
             {formik.touched.ifscCode && formik.errors.ifscCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.ifscCode}
@@ -328,7 +267,7 @@ function AddBankMaster() {
             />
             {formik.touched.AddressLine1 && formik.errors.AddressLine1 && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.AddressLine1}
@@ -346,7 +285,7 @@ function AddBankMaster() {
             />
             {formik.touched.AddressLine2 && formik.errors.AddressLine2 && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.AddressLine2}
@@ -364,7 +303,7 @@ function AddBankMaster() {
             />
             {formik.touched.AddressLine3 && formik.errors.AddressLine3 && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.AddressLine3}
@@ -378,19 +317,20 @@ function AddBankMaster() {
 
             <DropDowns
               className="dropdown__container"
-              label="City"
+              label="City / Municipality"
               value={formik.values.City}
               onChange={(e) =>
                 formik.setFieldValue("City", e.value)
               }
               options={City}
               optionLabel="label"
+              optionValue="value"
               placeholder={"Select"}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.City && formik.errors.City && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.City}
@@ -400,19 +340,20 @@ function AddBankMaster() {
           <div class="col-3 md:col-3 lg-col-3">
             <DropDowns
               className="dropdown__container"
-              label="state"
+              label="Province"
               value={formik.values.state}
               onChange={(e) =>
                 formik.setFieldValue("state", e.value)
               }
               options={State}
               optionLabel="label"
+              optionValue="value"
               placeholder={"Select"}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.state && formik.errors.state && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.state}
@@ -429,12 +370,13 @@ function AddBankMaster() {
               }
               options={Country}
               optionLabel="label"
+              optionValue="value"
               placeholder={"Select"}
               dropdownIcon={<SvgDropdown color={"#000"} />}
             />
             {formik.touched.Country && formik.errors.Country && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.Country}
@@ -446,7 +388,7 @@ function AddBankMaster() {
             <div className="p-inputgroup flex-1">
 
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText placeholder="enter"
@@ -456,7 +398,7 @@ function AddBankMaster() {
             </div>
             {formik.touched.mobile && formik.errors.mobile && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.mobile}
@@ -467,12 +409,11 @@ function AddBankMaster() {
 
         <div class="grid">
 
-
           <div class="sm-col-12  md:col-3 lg-col-3">
             <label className='label_text'>Fax</label>
             <div className="p-inputgroup flex-1">
               <span className="p-inputgroup-addon">
-                <div>+91</div>
+                <div>{phoneCountryCode()}</div>
                 <i className={<SvgDropdown />}></i>
               </span>
               <InputText placeholder="enter"
@@ -483,7 +424,7 @@ function AddBankMaster() {
 
             {formik.touched.Fax && formik.errors.Fax && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.Fax}
@@ -500,7 +441,7 @@ function AddBankMaster() {
             />
             {formik.touched.email && formik.errors.email && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
 
               >
                 {formik.errors.email}
@@ -511,19 +452,12 @@ function AddBankMaster() {
         </div>
       </Card>
 
-
       <div className="next_container">
 
-        <Button className="submit_button p-0" label="Save" disabled={!formik.isValid}
+        <Button className="submit_button p-0" label="Save"
           onClick={() => { formik.handleSubmit(); }}
         />
       </div>
-
-
-
-
-
-
 
     </div>
   );

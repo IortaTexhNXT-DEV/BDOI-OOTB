@@ -16,8 +16,6 @@ export const createQuotationMiddleware = createAsyncThunk(
   CREATE_QUOTATION_DATA,
   async (quotationData, { rejectWithValue }) => {
     try {
-      console.log("Creating quotation with data:", quotationData);
-
       const result = await quotationService.createQuotation(quotationData);
 
       if (result.success) {
@@ -26,7 +24,6 @@ export const createQuotationMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Create quotation middleware error:", error);
       return rejectWithValue(error?.message || "Failed to create quotation");
     }
   }
@@ -42,12 +39,6 @@ export const getQuotationsMiddleware = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log("Fetching quotations with pagination:", {
-        page,
-        pageSize,
-        leadRefId,
-      });
-
       const result = await quotationService.getAllQuotations(
         page,
         pageSize,
@@ -65,7 +56,6 @@ export const getQuotationsMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Get quotations middleware error:", error);
       return rejectWithValue(error?.message || "Failed to fetch quotations");
     }
   }
@@ -78,8 +68,6 @@ export const getQuotationByIdMiddleware = createAsyncThunk(
   GET_QUOTATION_BY_ID,
   async (quotationId, { rejectWithValue }) => {
     try {
-      console.log("Fetching quotation by ID:", quotationId);
-
       const result = await quotationService.getQuotationById(quotationId);
 
       if (result.success) {
@@ -88,7 +76,6 @@ export const getQuotationByIdMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Get quotation by ID middleware error:", error);
       return rejectWithValue(error?.message || "Failed to fetch quotation");
     }
   }
@@ -101,13 +88,6 @@ export const updateQuotationMiddleware = createAsyncThunk(
   UPDATE_QUOTATION_DATA,
   async ({ quotationId, quotationData }, { rejectWithValue }) => {
     try {
-      console.log(
-        "Updating quotation:",
-        quotationId,
-        "with data:",
-        quotationData
-      );
-
       const result = await quotationService.updateQuotation(
         quotationId,
         quotationData
@@ -119,7 +99,6 @@ export const updateQuotationMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Update quotation middleware error:", error);
       return rejectWithValue(error?.message || "Failed to update quotation");
     }
   }
@@ -132,8 +111,6 @@ export const deleteQuotationMiddleware = createAsyncThunk(
   DELETE_QUOTATION_DATA,
   async (quotationId, { rejectWithValue }) => {
     try {
-      console.log("Deleting quotation:", quotationId);
-
       const result = await quotationService.deleteQuotation(quotationId);
 
       if (result.success) {
@@ -142,7 +119,6 @@ export const deleteQuotationMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Delete quotation middleware error:", error);
       return rejectWithValue(error?.message || "Failed to delete quotation");
     }
   }
@@ -155,8 +131,6 @@ export const getQuotationStatsMiddleware = createAsyncThunk(
   GET_QUOTATION_STATS,
   async ({ leadRefId } = {}, { rejectWithValue }) => {
     try {
-      console.log("Fetching quotation statistics with filters:", leadRefId);
-
       let result;
       if (leadRefId) {
         result = await quotationService.getQuotationStats(leadRefId);
@@ -170,7 +144,6 @@ export const getQuotationStatsMiddleware = createAsyncThunk(
         return rejectWithValue(result.error);
       }
     } catch (error) {
-      console.error("Get quotation stats middleware error:", error);
       return rejectWithValue(
         error?.message || "Failed to fetch quotation statistics"
       );

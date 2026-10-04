@@ -1,17 +1,4 @@
-// Thailand Employee Benefits Policy Details Mock Data
-
-export const InsuranceCompanyOptions = [
-  { label: "Malayan Insurance", value: "Malayan Insurance" },
-  { label: "PGA Sompo", value: "PGA Sompo" },
-  { label: "AXA Thailand", value: "AXA Thailand" },
-  { label: "Charter Ping An", value: "Charter Ping An" },
-  { label: "FPG Insurance", value: "FPG Insurance" },
-  { label: "Pioneer Insurance", value: "Pioneer Insurance" },
-  { label: "Standard Insurance", value: "Standard Insurance" },
-  { label: "Maxicare", value: "Maxicare" },
-  { label: "Medicard Thailand", value: "Medicard Thailand" },
-  { label: "Intellicare", value: "Intellicare" },
-];
+// Employee Benefits Policy Details Mock Data
 
 export const InsurancePolicyTypes = [
   { label: "Group Medical/HMO", value: "GroupMedical" },
@@ -24,9 +11,9 @@ export const InsurancePolicyTypes = [
 
 export const InsurancePolicycontainer = [
   { label: "Maxicare", value: "Maxicare", sumInsured: "₱500,000" },
-  { label: "Medicard Thailand", value: "Medicard Thailand", sumInsured: "₱750,000" },
+  { label: "Medicard Philippines", value: "Medicard Philippines", sumInsured: "₱750,000" },
   { label: "Intellicare", value: "Intellicare", sumInsured: "₱1,000,000" },
-  { label: "AXA Thailand", value: "AXA Thailand", sumInsured: "₱2,000,000" },
+  { label: "AXA Philippines", value: "AXA Philippines", sumInsured: "₱2,000,000" },
 ];
 
 export const pesoTypes = [

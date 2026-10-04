@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__settlement__processing__master {
@@ -67,7 +68,6 @@
               border-radius: 20px;
               font-size: 12px;
               font-weight: 600;
-              text-transform: uppercase;
 
               &.draft {
                 background: $default-background-grey;
@@ -173,7 +173,7 @@
 
               &.required::after {
                 content: " *";
-                color: $dark-red;
+                color: $color-danger;
               }
             }
 
@@ -262,10 +262,10 @@
                   padding: 4px;
 
                   &.p-button-danger {
-                    color: $dark-red;
+                    color: $color-danger;
 
                     &:hover {
-                      background: lighten($dark-red, 45%);
+                      background: $color-danger-050;
                     }
                   }
                 }
@@ -307,7 +307,6 @@
             label {
               font-size: 12px;
               color: $grey;
-              text-transform: uppercase;
               font-weight: 600;
             }
 
@@ -429,7 +428,6 @@
       label {
         font-size: 12px;
         color: $grey;
-        text-transform: uppercase;
         font-weight: 600;
       }
 

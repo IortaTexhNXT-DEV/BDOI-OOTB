@@ -1,8 +1,8 @@
+@import "../../theme/bdoi/tokens";
 @import "../../styles/responsive.scss";
 
 .executive-dashboard {
   padding: 1.5rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
   min-height: 100vh;
 
   @include tablet-sm {
@@ -14,12 +14,12 @@
   }
 
   .dashboard-header {
-    background: linear-gradient(135deg, #001e60 0%, #0066cc 100%);
-    color: white;
+    background: $color-surface;
+    color: $color-heading;
     padding: 2rem;
     border-radius: 12px;
+    border: 1px solid $color-border;
     margin-bottom: 2rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
     @include tablet-sm {
       padding: 1.5rem;
@@ -36,6 +36,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
 
       @include mobile-sm {
         flex-direction: column;
@@ -44,10 +46,13 @@
       }
 
       .header-left {
+        min-width: 0;
+
         h1 {
           margin: 0;
           font-size: 2rem;
           font-weight: 600;
+          color: $color-heading;
 
           @include tablet-sm {
             font-size: 1.75rem;
@@ -72,8 +77,15 @@
 
       .header-right {
         display: flex;
-        gap: 1rem;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.75rem;
         align-items: center;
+
+        // the date range must show both dates in full (DD/MM/YYYY - DD/MM/YYYY)
+        .p-calendar {
+          min-width: 15.5rem;
+        }
 
         @include tablet-md {
           display: none;
@@ -128,15 +140,24 @@
   .kpi-section {
     margin-bottom: 2rem;
 
+    // KPI cards wrap onto a second row instead of running past the right edge
     .kpi-scroll-container {
-      display: flex;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 1.5rem;
-      overflow-x: auto;
       padding-bottom: 0.5rem;
-      scroll-behavior: smooth;
 
       @include tablet-sm {
         gap: 1rem;
+      }
+
+      // four columns with seven cards: the last card takes the empty place so the row stays complete
+      @media (min-width: 1200px) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        .kpi-card:last-child:nth-child(4n + 3) {
+          grid-column: span 2;
+        }
       }
 
       @include mobile-sm {
@@ -164,24 +185,17 @@
     }
 
     .kpi-card {
-      min-width: 280px;
-      flex-shrink: 0;
+      min-width: 0;
       background: white;
       border-radius: 12px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
       transition: transform 0.2s, box-shadow 0.2s;
 
-      @include tablet-sm {
-        min-width: 250px;
-      }
-
       @include mobile-sm {
-        min-width: 220px;
         border-radius: 8px;
       }
 
       &:hover {
-        transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
       }
 
@@ -243,9 +257,6 @@
         font-weight: 700;
         color: #2c3e50;
         margin-bottom: 1rem;
-        background: linear-gradient(135deg, #0066cc 0%, #001e60 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
 
         @include tablet-sm {
           font-size: 1.75rem;
@@ -283,9 +294,6 @@
             height: 4px;
           }
 
-          .p-progressbar-value {
-            background: linear-gradient(90deg, #0066cc 0%, #00c851 100%);
-          }
         }
       }
     }
@@ -460,7 +468,6 @@
         color: #6c757d;
         font-weight: 600;
         font-size: 0.75rem;
-        text-transform: uppercase;
         letter-spacing: 0.5px;
         border: none;
         padding: 0.75rem;
@@ -600,9 +607,6 @@
             font-size: 0.9rem;
           }
 
-          &:hover {
-            transform: translateY(-2px);
-          }
         }
       }
     }
@@ -618,16 +622,6 @@
     @include mobile-sm {
       font-size: 0.7rem;
       padding: 0.2rem 0.4rem;
-    }
-
-    &.p-tag-success {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    &.p-tag-danger {
-      background: #f8d7da;
-      color: #721c24;
     }
 
     .pi {
@@ -650,7 +644,6 @@
     }
 
     .p-progressbar-value {
-      background: linear-gradient(90deg, #0066cc 0%, #4285f4 100%);
       border-radius: 4px;
     }
 

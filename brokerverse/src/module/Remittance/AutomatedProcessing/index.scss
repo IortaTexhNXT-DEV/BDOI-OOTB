@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__automated__processing__master {
@@ -34,7 +35,6 @@
         .label {
           font-size: 12px;
           color: $grey;
-          text-transform: uppercase;
           font-weight: 600;
         }
 
@@ -148,8 +148,8 @@
             }
 
             &.p-tag-danger {
-              background: lighten($dark-red, 40%);
-              color: $dark-red;
+              background: $color-danger-050;
+              color: $color-danger;
             }
           }
         }
@@ -435,19 +435,19 @@
 
     .validation-errors {
       h4 {
-        color: $dark-red;
+        color: $color-danger;
         margin-bottom: 15px;
       }
 
       .error-item {
         padding: 10px;
-        background: lighten($dark-red, 45%);
-        border-left: 3px solid $dark-red;
+        background: $color-danger-050;
+        border-left: 3px solid $color-danger;
         margin-bottom: 10px;
         border-radius: 4px;
 
         strong {
-          color: $dark-red;
+          color: $color-danger;
         }
 
         ul {

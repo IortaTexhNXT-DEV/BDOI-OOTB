@@ -1,0 +1,253 @@
+// Sign-in steps (two-factor code, enrolment, change password, forgot password) and the account security dialogs.
+.bv-security__form,
+.bv-security__enrol {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  width: 100%;
+}
+
+.bv-security__intro {
+  margin: 0;
+  color: var(--text-color-secondary, #4d5761);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.bv-security__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+
+  label {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-color, #111927);
+  }
+
+  .p-password,
+  .p-password input {
+    width: 100%;
+  }
+}
+
+.bv-security__code {
+  width: 100%;
+  max-width: 12rem;
+  font-size: 1.4rem;
+  letter-spacing: 0.4rem;
+  text-align: center;
+}
+
+.bv-security__help {
+  color: var(--text-color-secondary, #6c737f);
+  font-size: 0.8rem;
+}
+
+.bv-security__error {
+  color: var(--red-600, #b42318);
+  font-size: 0.8rem;
+}
+
+.bv-security__alert {
+  border-left: 3px solid var(--color-danger, #b42318);
+  background: var(--red-50, #fef3f2);
+  color: var(--red-700, #912018);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.bv-security__success {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.45;
+  border-left: 3px solid var(--color-success, #1d7f4e);
+  background: var(--green-50, #ecfdf3);
+  color: var(--green-800, #05603a);
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+}
+
+.bv-security__actions {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.bv-security__rules {
+  list-style: none;
+  margin: -0.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.2rem;
+  font-size: 0.82rem;
+  color: var(--text-color-secondary, #6c737f);
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  li.is-ok {
+    color: var(--green-700, #027a48);
+  }
+}
+
+.bv-security__steps {
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.6rem;
+  font-size: 0.92rem;
+}
+
+.bv-security__secret {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.35rem;
+
+  code {
+    font-size: 0.9rem;
+    letter-spacing: 0.02rem;
+    min-width: 0;
+    padding: 0.35rem 0.5rem;
+    border-radius: 6px;
+    background: var(--surface-100, #f3f4f6);
+    overflow-wrap: anywhere;
+  }
+}
+
+// Two-step set-up: QR code to scan, the setup key below as the fallback
+.bv-security__qr {
+  display: flex;
+  width: fit-content;
+  margin: 10px 0 4px;
+  padding: 8px;
+  border: 1px solid var(--color-border, #e4e4e4);
+  border-radius: 8px;
+  background: #ffffff;
+
+  img {
+    display: block;
+    width: 176px;
+    height: 176px;
+  }
+}
+
+.bv-security__manual {
+  margin-top: 6px;
+
+  a {
+    color: var(--brand-blue, #0072d8);
+    font-weight: 600;
+  }
+}
+
+.bv-security__manual-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text, #4b4b4b);
+}
+
+// Account security dialogs (Change password, Two-factor authentication): the same frame, spacing and button order
+// (secondary on the left, primary on the right) as each other.
+.p-dialog.bv-security-dialog {
+  .p-dialog-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--color-border, #e4e4e4);
+  }
+
+  .p-dialog-content {
+    padding: 20px 24px 24px !important;
+  }
+
+  .bv-security__form,
+  .bv-security__enrol {
+    gap: 16px;
+  }
+
+  .bv-security__actions {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border, #e4e4e4);
+    gap: 8px;
+
+    .p-button.p-button-text {
+      color: var(--color-heading, #2e2e2e);
+      border: 1px solid var(--color-border-strong, #c2c2c1);
+      background: #ffffff;
+
+      &:enabled:hover {
+        background: #f7f8fa;
+      }
+    }
+  }
+
+  .bv-security__enrol > .bv-security__form > .bv-security__actions {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .p-dialog.bv-security-dialog .bv-security__actions {
+    flex-direction: column-reverse;
+
+    .p-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+
+.bv-security__status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+
+  &.is-on {
+    color: var(--green-700, #027a48);
+  }
+}
+
+// User list: account actions button (the neighbouring view / edit buttons use SVG icons with their own colour)
+.p-button.user__actions__btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--text-color-secondary, #4d5761);
+  background: transparent;
+  border: 0;
+
+  &:hover {
+    background: var(--surface-100, #f3f4f6);
+  }
+}
+
+.bv-security__history {
+  .p-datatable-thead > tr > th,
+  .p-datatable-tbody > tr > td {
+    padding: 0.55rem 0.75rem;
+    white-space: nowrap;
+  }
+}
+
+.bv-security__temp-password {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  code {
+    font-size: 1.1rem;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    background: var(--surface-100, #f3f4f6);
+    user-select: all;
+  }
+}

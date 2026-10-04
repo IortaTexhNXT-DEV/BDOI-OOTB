@@ -1,0 +1,253 @@
+[
+ {
+  "code": "production-register",
+  "name": "Production Register",
+  "status": 201,
+  "rowCount": 3,
+  "fileName": "production-register_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "POL-2026-00001",
+   "Andrea Villanueva",
+   "Ramon Dela Cruz",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "claims-position",
+  "name": "Claims Position",
+  "status": 201,
+  "rowCount": 7,
+  "fileName": "claims-position_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "POL-2026-00001",
+   "CLM-2026-00002",
+   "Andrea Villanueva",
+   "Ramon Dela Cruz",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "renewal-retention",
+  "name": "Renewal Retention",
+  "status": 201,
+  "rowCount": 3,
+  "fileName": "renewal-retention_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "remittance-summary",
+  "name": "Remittance Summary",
+  "status": 201,
+  "rowCount": 18,
+  "fileName": "remittance-summary_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "REM-2026-00018",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "commission-statement",
+  "name": "Broker Commission Statement",
+  "status": 201,
+  "rowCount": 42,
+  "fileName": "commission-statement_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "POL-2026-00001",
+   "Andrea Villanueva",
+   "Ramon Dela Cruz",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "premium-by-product",
+  "name": "Premium by Product / Month / Insurer",
+  "status": 201,
+  "rowCount": 3,
+  "fileName": "premium-by-product_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "new-vs-renewal",
+  "name": "New Business vs Renewals",
+  "status": 201,
+  "rowCount": 2,
+  "fileName": "new-vs-renewal_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "claims-ageing",
+  "name": "Claims Ageing",
+  "status": 201,
+  "rowCount": 2,
+  "fileName": "claims-ageing_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "lead-conversion-funnel",
+  "name": "Lead Conversion Funnel",
+  "status": 201,
+  "rowCount": 3,
+  "fileName": "lead-conversion-funnel_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "cession-register",
+  "name": "Reinsurance Cession Register",
+  "status": 201,
+  "rowCount": 12,
+  "fileName": "cession-register_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "premium-receivable-soa",
+  "name": "SOA / Premium Receivable",
+  "status": 201,
+  "rowCount": 23,
+  "fileName": "premium-receivable-soa_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "POL-2026-00001",
+   "INV-2026-00002",
+   "Andrea Villanueva",
+   "Ramon Dela Cruz",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "collections-summary",
+  "name": "Collection Report",
+  "status": 201,
+  "rowCount": 1,
+  "fileName": "collections-summary_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "collections-ageing",
+  "name": "Receivables Ageing",
+  "status": 201,
+  "rowCount": 5,
+  "fileName": "collections-ageing_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "receipts-register",
+  "name": "Receipts Register",
+  "status": 201,
+  "rowCount": 4,
+  "fileName": "receipts-register_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "POL-2026-00001",
+   "INV-2026-00002",
+   "OR-2026-00020",
+   "OR-2026-00021",
+   "Andrea Villanueva",
+   "Ramon Dela Cruz",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "disbursement-register",
+  "name": "Payables / Disbursement Register",
+  "status": 201,
+  "rowCount": 23,
+  "fileName": "disbursement-register_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "PV-2026-00022",
+   "PV-2026-00023",
+   "Ramon Dela Cruz",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "journal-register",
+  "name": "Journal Register",
+  "status": 201,
+  "rowCount": 140,
+  "fileName": "journal-register_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [
+   "POL-2026-00001",
+   "INV-2026-00002",
+   "OR-2026-00020",
+   "OR-2026-00021",
+   "PV-2026-00022",
+   "JV-2026-00106",
+   "Ramon Dela Cruz",
+   "MAPFRE"
+  ],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "trial-balance",
+  "name": "Trial Balance",
+  "status": 201,
+  "rowCount": 17,
+  "fileName": "trial-balance_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [],
+  "xlsx": true,
+  "pdf": true
+ },
+ {
+  "code": "incentive-results",
+  "name": "Incentive Results",
+  "status": 201,
+  "rowCount": 15,
+  "fileName": "incentive-results_2026-09-01_2026-09-30_20260928-180859.csv",
+  "download": 200,
+  "found": [],
+  "xlsx": true,
+  "pdf": true
+ }
+]

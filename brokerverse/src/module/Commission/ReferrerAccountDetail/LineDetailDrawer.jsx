@@ -3,7 +3,9 @@ import { Sidebar } from "primereact/sidebar";
 import { Button } from "primereact/button";
 import { InputNumber } from "primereact/inputnumber";
 import CommissionService from "../../../services/commissionService";
-import { formatBaht } from "../utils/formatBaht";
+import { formatAmount } from "../utils/formatAmount";
+import { currencySymbol } from "../../../utility/currencyConverter";
+import logger from "../../../utility/logger";
 
 const stepDate = (value) => value || "—";
 
@@ -15,6 +17,7 @@ const LineDetailDrawer = ({
   whtApplicable,
   line,
   onUpdated,
+  onError,
 }) => {
   const [actionLoading, setActionLoading] = useState(false);
   const [ratePct, setRatePct] = useState(null);
@@ -72,7 +75,7 @@ const LineDetailDrawer = ({
 
   const stepLabel = (key, dateValue) => {
     if (key === "Approved" && isApproved) {
-      return "Approved ✓";
+      return "Approved";
     }
     return `${key} ${stepDate(dateValue)}`;
   };
@@ -85,7 +88,8 @@ const LineDetailDrawer = ({
       const payload = res?.data || res;
       onUpdated?.(payload);
     } catch (err) {
-      console.error("Line action failed", err);
+      logger.error("Line action failed", err);
+      onError?.(err);
     } finally {
       setActionLoading(false);
     }
@@ -128,46 +132,46 @@ const LineDetailDrawer = ({
           <h3 className="card-title">CALCULATION</h3>
           <div className="calc-row">
             <span>Gross premium</span>
-            <span>{formatBaht(line.grossPremium)}</span>
+            <span>{formatAmount(line.grossPremium)}</span>
           </div>
           <div className="calc-row muted">
             <span>- Discount ({line.discountLabel})</span>
-            <span>-{formatBaht(line.discountAmount)}</span>
+            <span>-{formatAmount(line.discountAmount)}</span>
           </div>
           <div className="calc-row strong">
             <span>Net premium</span>
-            <span>{formatBaht(line.netPremium)}</span>
+            <span>{formatAmount(line.netPremium)}</span>
           </div>
           <div className="calc-row">
             <span>Brokerage @ {line.brokeragePct}%</span>
             <span className="amt-with-badge">
               <span className="income-amt">
-                {formatBaht(line.brokerageAmount)}
+                {formatAmount(line.brokerageAmount)}
               </span>
               <span className="badge income">INCOME</span>
             </span>
           </div>
           <div className="calc-row">
             <span>
-              Comsub = {formatBaht(line.comsubFixed)} + {line.comsubPct}% of
+              Comsub = {formatAmount(line.comsubFixed)} + {line.comsubPct}% of
               net
             </span>
             <span className="amt-with-badge">
-              <span className="payable-amt">{formatBaht(line.comsub)}</span>
+              <span className="payable-amt">{formatAmount(line.comsub)}</span>
               <span className="badge payable">PAYABLE</span>
             </span>
           </div>
           <div className="calc-row muted">
             <span>{whtLabel}</span>
-            <span>-{formatBaht(line.wht)}</span>
+            <span>-{formatAmount(line.wht)}</span>
           </div>
           <div className="calc-row strong">
             <span>Net payable</span>
-            <span>{formatBaht(line.net)}</span>
+            <span>{formatAmount(line.net)}</span>
           </div>
           <div className="calc-row strong margin-row">
             <span>Net margin</span>
-            <span className="margin-amt">{formatBaht(line.netMargin)}</span>
+            <span className="margin-amt">{formatAmount(line.netMargin)}</span>
           </div>
 
           {canEditRate && (
@@ -179,7 +183,7 @@ const LineDetailDrawer = ({
               </p>
               <div className="rate-fields">
                 <label>
-                  Fixed (₱)
+                  Fixed ({currencySymbol()})
                   <InputNumber
                     value={rateFixed}
                     onValueChange={(e) => setRateFixed(e.value ?? 0)}
@@ -221,15 +225,15 @@ const LineDetailDrawer = ({
             <div className={`step-pill ${stepState("Accrued")}`}>
               {stepLabel("Accrued", lifecycle.accruedAt)}
             </div>
-            <span className="step-arrow">→</span>
+            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
             <div className={`step-pill ${stepState("Eligible")}`}>
               {stepLabel("Eligible", lifecycle.eligibleAt)}
             </div>
-            <span className="step-arrow">→</span>
+            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
             <div className={`step-pill ${stepState("Approved")}`}>
               {stepLabel("Approved", lifecycle.approvedAt)}
             </div>
-            <span className="step-arrow">→</span>
+            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
             <div className={`step-pill ${stepState("Paid")}`}>
               {stepLabel("Paid", lifecycle.paidAt)}
             </div>
@@ -259,7 +263,7 @@ const LineDetailDrawer = ({
             {canPay && (
               <Button
                 label="Pay (voucher)"
-                className="pay-line-btn"
+                className="p-button-outlined pay-line-btn"
                 disabled={actionLoading}
                 onClick={() => runLineAction(CommissionService.payLine)}
               />
@@ -267,7 +271,7 @@ const LineDetailDrawer = ({
             {canReverse && (
               <Button
                 label="Reverse (claw-back)"
-                className="reverse-line-btn"
+                className="p-button-outlined reverse-line-btn"
                 disabled={actionLoading}
                 onClick={() => runLineAction(CommissionService.reverseLine)}
               />

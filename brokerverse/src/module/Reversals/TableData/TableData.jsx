@@ -1,23 +1,19 @@
-import React, { useState } from "react";
+import React from "react";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Productdata from "./mock";
 import { Dropdown } from "primereact/dropdown";
 
 const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
-  const [products, setProducts] = useState([]);
-  console.log(reversalJVGetDataList, "reversalJVGetDataList");
 
   const template2 = {
     layout:
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -42,10 +38,9 @@ const TableData = ({ reversalJVList, reversalJVGetDataList }) => {
     <div className="reversal__table__container">
       <DataTable
         value={reversalJVGetDataList}
-        //   tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
         paginator
-        rows={5}
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rows={20}
+        rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         className="reversal__table__main"

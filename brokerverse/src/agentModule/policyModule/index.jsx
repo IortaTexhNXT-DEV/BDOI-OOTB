@@ -12,6 +12,7 @@ import SvgFire from "../../assets/agentIcon/SvgFire";
 import SvgAdd from "../../assets/agentIcon/SvgAdd";
 import BulkUploadModal from "./BulkUploadModal";
 import { useLocation, useNavigate } from "react-router-dom";
+import { canOpen, hasPermission } from "../../utils/canOpen";
 
 const ClientListingCard = () => {
   const { t } = useTranslation();
@@ -24,17 +25,22 @@ const ClientListingCard = () => {
     display: false,
     policyId: null,
   });
-  const items = [{ label: t("policyList.policy"), url: "/agent/clientlisting" }];
-  const Initiate = { label: t("policyList.home") };
+  const items = [{ label: t("policyList.title") }];
+  const Initiate = { label: t("sidebar.Operations") };
 
   const handleBulkUploadSuccess = () => {
     // Refresh the policies table by updating key
     setRefreshKey((prev) => prev + 1);
   };
 
-  const handleCreatePolicy = () => {
+  // A policy is issued from a lead's quotation: offer Create Policy only to roles that may open Leads (not claims,
+  // as for Create Lead), and Bulk Upload only to roles the server lets write policies.
+  const mayCreatePolicy = canOpen("/agent/leadlisting");
+  const mayBulkUpload = hasPermission("write:policies");
+
+  const handleCreatePolicy = (lob) => {
     // Navigate to lead listing to select a lead for policy creation
-    navigate("/agent/leadlisting");
+    navigate("/agent/leadlisting", { state: { createPolicyLob: lob } });
   };
 
   const dropdownOptions = [
@@ -42,7 +48,6 @@ const ClientListingCard = () => {
       label: (
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => handleCreatePolicy()}
         >
           <div>
             <SvgMotor />
@@ -66,7 +71,6 @@ const ClientListingCard = () => {
       label: (
         <div
           style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => handleCreatePolicy()}
         >
           <div>
             <SvgFire />
@@ -124,24 +128,30 @@ const ClientListingCard = () => {
               gap: "10px",
             }}
           >
-            <Button
-              label={t("policies.bulkUpload")}
-              className="p-button-outlined"
-              onClick={() => setShowBulkUpload(true)}
-            />
-            <Dropdown
-              value={selectedOption}
-              options={dropdownOptions}
-              placeholder={t("policies.createPolicy")}
-              dropdownIcon={<SvgAdd />}
-            />
+            {mayBulkUpload && (
+              <Button
+                label={t("policies.bulkUpload")}
+                className="p-button-outlined"
+                onClick={() => setShowBulkUpload(true)}
+              />
+            )}
+            {mayCreatePolicy && (
+              <Dropdown
+                value={selectedOption}
+                options={dropdownOptions}
+                // a policy is issued from a lead's quotation: choosing a line (mouse or keyboard) opens the leads
+                onChange={(e) => {
+                  setSelectedOption(null);
+                  handleCreatePolicy(e.value);
+                }}
+                placeholder={t("policies.createPolicy")}
+                dropdownIcon={<SvgAdd />}
+              />
+            )}
           </div>
         </div>
 
         {/* Policy Statistics Cards */}
-        {/* <div className="col-12">
-          <PolicyStatsCards />
-        </div> */}
 
         <div className="card__container__outer">
           <Card style={{ borderRadius: "20px" }}>

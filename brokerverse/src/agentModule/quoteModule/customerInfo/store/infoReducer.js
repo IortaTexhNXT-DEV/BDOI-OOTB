@@ -1,7 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { postinformationMiddleWare,patchinformationMiddleWare} from "./infoMiddleWare";
 
-
 const initialState = {
     loading: false,
     error: "",
@@ -15,11 +14,6 @@ const customerInfoReducer = createSlice({
     initialState,
     reducers: {},
     extraReducers: (builder) => {
-
-
-
-      
-
     builder.addCase(postinformationMiddleWare.pending, (state) => {
         state.loading = true;
       });
@@ -42,13 +36,10 @@ const customerInfoReducer = createSlice({
       patchinformationMiddleWare.fulfilled,
       (state, action) => {
         state.loading = false;
-        console.log(action.payload, "find patch in red");
 
        state.postcustomerinfodata =action.payload
-        
       }
     );
-    
     },
 });
 

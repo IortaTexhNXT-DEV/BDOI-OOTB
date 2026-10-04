@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import i18n from "../../../i18n";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Badge } from "primereact/badge";
 import { Tag } from "primereact/tag";
+import { Paginator } from "primereact/paginator";
+import { PAGE_SIZES, PAGE_REPORT, PAGINATOR_TEMPLATE } from "../../../hooks/useServerList";
 import { useNavigate } from "react-router-dom";
 import { useNotifications } from "../../../hooks/useNotifications";
 import {
@@ -13,7 +14,7 @@ import {
 } from "../../../utility/toastUtils";
 import NotificationFallback from "../../../components/NotificationFallback";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import SvgGreenDots from "../../../assets/agentIcon/SvgGreenDots";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const Notification = () => {
@@ -24,12 +25,20 @@ const Notification = () => {
     loading,
     error,
     unreadCount,
+    pagination,
     markAsRead,
     deleteNotification,
     refresh,
+    fetchNotifications,
   } = useNotifications();
+  // the list is paged by the server (20 a page by default)
+  const [pager, setPager] = useState({ first: 0, rows: 20 });
+  const onPage = (e) => {
+    setPager({ first: e.first, rows: e.rows });
+    fetchNotifications({ page: e.page + 1, pageSize: e.rows });
+  };
 
-  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [, setSelectedNotification] = useState(null);
 
   const handleHomeNavigation = () => {
     navigate("/");
@@ -54,14 +63,7 @@ const Notification = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const locale = i18n.language && i18n.language.startsWith("th") ? "th-TH" : "en-US";
-    return date.toLocaleDateString(locale, {
-      month: "short",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    });
+    return formatAppDate(date, { withTime: true });
   };
 
   const getPrioritySeverity = (priority) => {
@@ -95,13 +97,12 @@ const Notification = () => {
     }
   };
 
-  if (loading) {
+  if (loading && !notifications.length) {
     return (
       <div className="notificaition__container">
         <div className="notificaition__container__titles">{t("header.notification")}</div>
         <div className="loading-spinner">
-          <i className="pi pi-spin pi-spinner" style={{ fontSize: "2rem" }}></i>
-          <p>{t("notificationPage.loading")}</p>
+          <i className="pi pi-spin pi-spinner" style={{ fontSize: "2rem" }} aria-label={t("notificationPage.loading")}></i>
         </div>
       </div>
     );
@@ -198,12 +199,13 @@ const Notification = () => {
                         className="priority-tag"
                       />
                       <Button
-                        icon="pi pi-times"
-                        className="p-button-rounded p-button-text p-button-sm delete-btn"
+                        icon="pi pi-trash"
+                        className="p-button-rounded p-button-text p-button-sm p-button-danger delete-btn"
                         onClick={(e) =>
                           handleDeleteNotification(notification.id, e)
                         }
                         tooltip={t("notificationPage.deleteNotificationTooltip")}
+                        aria-label={t("notificationPage.deleteNotificationTooltip")}
                       />
                     </div>
                   </div>
@@ -230,6 +232,10 @@ const Notification = () => {
           ))
         )}
       </div>
+      {(pagination?.total || 0) > PAGE_SIZES[0] && (
+        <Paginator first={pager.first} rows={pager.rows} totalRecords={pagination.total} rowsPerPageOptions={PAGE_SIZES} onPageChange={onPage}
+          template={PAGINATOR_TEMPLATE} currentPageReportTemplate={PAGE_REPORT} className="mt-2" />
+      )}
     </div>
   );
 };

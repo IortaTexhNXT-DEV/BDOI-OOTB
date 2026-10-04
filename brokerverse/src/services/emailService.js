@@ -1,222 +1,120 @@
-import authService from './authService';
-import { BASE_URL } from '../utility/constant';
+import authService from "./authService";
+import { BASE_URL } from "../utility/constant";
 
 /**
- * Email Service - Handles sending emails
+ * E-mails of the quote Share dialog (/email/*). Every method resolves to
+ * { success: true, data } or { success: false, error } and never throws.
  */
-class EmailService {
-  constructor() {
-    this.baseURL = `${BASE_URL}/email`;
-  }
+const EMAIL_URL = `${BASE_URL}/email`;
 
-  /**
-   * Share quote via email
-   * @param {string} to - Recipient email address
-   * @param {Object} quotationData - Quotation data to share
-   * @param {string} message - Optional custom message
-   * @returns {Promise<Object>} Result
-   */
-  async shareQuote(to, quotationData, message = '') {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
+async function post(path, body, fallbackError, timeoutMs = 15000) {
+  return postUrl(`${EMAIL_URL}${path}`, body, fallbackError, timeoutMs);
+}
 
-      console.log('Sharing quote via email:', to);
-
-      const response = await fetch(`${this.baseURL}/share-quote`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authService.getAuthHeader()
-        },
-        body: JSON.stringify({ to, quotationData, message }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to share quote via email');
-      }
-
-      const data = await response.json();
-      console.log('Quote shared successfully:', data);
-
-      return {
-        success: true,
-        data: data
-      };
-    } catch (error) {
-      console.error('Share quote error:', error);
-      return {
-        success: false,
-        error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to share quote')
-      };
-    }
-  }
-
-  /**
-   * Share quote to insurance companies (one email per company, PDF attached)
-   * @param {Object} params
-   * @param {string} params.quotationId
-   * @param {string[]} params.insuranceCompanies
-   * @param {string} [params.productType]
-   * @param {string} [params.quotationNumber]
-   * @returns {Promise<Object>} Result
-   */
-  async shareQuoteToInsurers({
-    quotationId,
-    insuranceCompanies,
-    productType,
-    quotationNumber,
-  }) {
-    try {
-      const controller = new AbortController();
-      // PDF generation + multiple sends can take longer than a single email
-      const timeoutId = setTimeout(() => controller.abort(), 60000);
-
-      console.log('Sharing quote to insurers:', insuranceCompanies);
-
-      const response = await fetch(`${this.baseURL}/share-quote-to-insurers`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authService.getAuthHeader()
-        },
-        body: JSON.stringify({
-          quotationId,
-          insuranceCompanies,
-          productType,
-          quotationNumber,
-        }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(
-          errorData.message || 'Failed to share quote to insurance companies'
-        );
-      }
-
-      const data = await response.json();
-      console.log('Quote shared to insurers successfully:', data);
-
-      return {
-        success: true,
-        data,
-        partial: Array.isArray(data?.data?.failed) && data.data.failed.length > 0,
-      };
-    } catch (error) {
-      console.error('Share quote to insurers error:', error);
-      return {
-        success: false,
-        error:
-          error.name === 'AbortError'
-            ? 'Request timeout. Please try again.'
-            : error.message || 'Failed to share quote to insurance companies',
-      };
-    }
-  }
-
-  /**
-   * Send custom email
-   * @param {Object} emailData - Email data (to, subject, text/html)
-   * @returns {Promise<Object>} Result
-   */
-  async sendEmail(emailData) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-      console.log('Sending email to:', emailData.to);
-
-      const response = await fetch(`${this.baseURL}/send`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authService.getAuthHeader()
-        },
-        body: JSON.stringify(emailData),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to send email');
-      }
-
-      const data = await response.json();
-      console.log('Email sent successfully:', data);
-
-      return {
-        success: true,
-        data: data
-      };
-    } catch (error) {
-      console.error('Send email error:', error);
-      return {
-        success: false,
-        error: error.name === 'AbortError' ? 'Request timeout. Please try again.' : (error.message || 'Failed to send email')
-      };
-    }
-  }
-
-  /**
-   * Generate AI-powered email content
-   * @param {Object} params - Generation parameters
-   * @param {string} params.template - Template type (welcome, policy-renewal, custom)
-   * @param {Object} params.context - Domain context (quote data, policy data, etc.)
-   * @param {Object} params.recipient - Recipient information
-   * @param {Object} params.brand - Brand tone customization
-   * @returns {Promise<Object>} Result with generated content
-   */
-  async generateEmailContent({ template = 'custom', context = {}, recipient = {}, brand = {} }) {
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // Longer timeout for AI
-
-      console.log('Generating AI email content...');
-
-      const response = await fetch(`${this.baseURL}/generate`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...authService.getAuthHeader()
-        },
-        body: JSON.stringify({ template, context, recipient, brand }),
-        signal: controller.signal
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate email content');
-      }
-
-      const data = await response.json();
-      console.log('Email content generated successfully:', data);
-
-      return {
-        success: true,
-        data: data.data // { subject, previewText, html, text }
-      };
-    } catch (error) {
-      console.error('Generate email content error:', error);
-      return {
-        success: false,
-        error: error.name === 'AbortError' ? 'Request timeout. AI is taking too long.' : (error.message || 'Failed to generate content')
-      };
-    }
+async function postUrl(url, body, fallbackError, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    const json = await response.json().catch(() => ({}));
+    // a validation failure names the field: show its message ("The client has no e-mail address; enter one")
+    if (!response.ok) throw new Error((Array.isArray(json.errors) && json.errors[0]?.message) || json.message || fallbackError);
+    return { success: true, data: json };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.name === "AbortError" ? "Request timeout. Please try again." : error.message || fallbackError,
+    };
+  } finally {
+    clearTimeout(timeoutId);
   }
 }
 
-const emailService = new EmailService();
-export default emailService;
+/** Last answer of GET /email/sending-status: { at, value }. */
+let sendingCache = null;
 
+const emailService = {
+  /** E-mail a quotation with the standard share_quote template. */
+  shareQuote(to, quotationData, message = "") {
+    return post("/share-quote", { to, quotationData, message }, "Failed to share quote");
+  },
+
+  /** Send the quotation to insurers (one e-mail per company, PDF attached); `partial` is true when some failed. */
+  async shareQuoteToInsurers({ quotationId, insuranceCompanies, productType, quotationNumber }) {
+    // PDF generation and several sends take longer than one e-mail.
+    const result = await post(
+      "/share-quote-to-insurers",
+      { quotationId, insuranceCompanies, productType, quotationNumber },
+      "Failed to share quote to insurance companies",
+      60000
+    );
+    if (result.success) result.partial = Array.isArray(result.data?.data?.failed) && result.data.data.failed.length > 0;
+    return result;
+  },
+
+  /** Send an e-mail composed in the dialog: { to, subject, html | text, quotationId }. */
+  sendEmail(emailData) {
+    return post("/send", emailData, "Failed to send email");
+  },
+
+  /**
+   * Suggested subject and body for a quote e-mail, filled in by the backend from the configured
+   * share_quote template. data: { subject, previewText, html, text }.
+   */
+  async generateEmailContent({ template = "custom", context = {}, recipient = {} }) {
+    const result = await post("/generate", { template, context, recipient }, "Failed to prepare the e-mail content", 30000);
+    return result.success ? { success: true, data: result.data.data } : result;
+  },
+
+  /**
+   * Whether queued e-mail actually goes out: { enabled, smtpConfigured, active }. Read once and kept for a minute;
+   * null when the server cannot be asked (the caller then assumes sending works, as before).
+   */
+  async sendingStatus() {
+    if (sendingCache && Date.now() - sendingCache.at < 60000) return sendingCache.value;
+    try {
+      const response = await fetch(`${EMAIL_URL}/sending-status`, { headers: { ...authService.getAuthHeader() } });
+      const json = await response.json().catch(() => ({}));
+      const value = response.ok ? json.data || null : null;
+      sendingCache = { at: Date.now(), value };
+      return value;
+    } catch {
+      return null;
+    }
+  },
+
+  /** E-mail an official receipt to the client with its PDF attached: body { to, cc, note }; data: { message, data: { emailId, to } }. */
+  emailReceipt(receiptId, body) {
+    return postUrl(`${BASE_URL}/receipts/${encodeURIComponent(receiptId)}/email`, body, "Failed to e-mail the receipt", 30000);
+  },
+
+  /** E-mail the premium invoice / statement of account of a bill (receivable id or bill number) with its PDF attached. */
+  emailInvoice(billId, body) {
+    return postUrl(`${BASE_URL}/billing-statement/bills/${encodeURIComponent(billId)}/email`, body, "Failed to e-mail the invoice", 30000);
+  },
+
+  /** E-mail outbox (administrators): { data, sending, counts, total }. params: status, search, page, pageSize. */
+  async getOutbox(params = {}) {
+    const qs = new URLSearchParams(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "")).toString();
+    const response = await fetch(`${EMAIL_URL}/outbox${qs ? `?${qs}` : ""}`, { headers: { ...authService.getAuthHeader() } });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(json.message || "Failed to load the e-mail outbox");
+    return json;
+  },
+
+  /** Queue a failed e-mail again (sent at once when sending is enabled): { message, data }. */
+  async retryOutbox(id) {
+    const result = await post(`/outbox/${encodeURIComponent(id)}/retry`, {}, "Failed to retry the e-mail", 30000);
+    if (!result.success) throw new Error(result.error);
+    sendingCache = null;
+    return result.data;
+  },
+};
+
+
+export default emailService;

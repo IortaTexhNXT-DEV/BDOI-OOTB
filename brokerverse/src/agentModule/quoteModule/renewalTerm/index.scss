@@ -1,0 +1,72 @@
+@import "../../../theme/bdoi/tokens";
+
+// Renewal terms of a non-motor policy: expiring term for reference, then the renewal sum insured and premium.
+.renewal-term {
+  padding-bottom: 24px;
+
+  &__title {
+    margin: 0;
+    font-size: 26px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  &__sub {
+    margin: 4px 0 16px;
+    color: $color-text-muted;
+  }
+
+  &__section {
+    margin: 0 0 12px;
+    font-size: 16px;
+    font-weight: 700;
+    color: $brand-navy;
+
+    &:not(:first-child) {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid $color-border;
+    }
+  }
+
+  &__facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px 24px;
+    margin: 0;
+
+    dt {
+      font-size: 12px;
+      color: $color-text-muted;
+    }
+
+    dd {
+      margin: 2px 0 0;
+      font-size: 14px;
+      color: $color-heading;
+    }
+  }
+
+  &__note {
+    margin: 12px 0 0;
+    font-size: 13px;
+    color: $color-warning;
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid $color-border;
+  }
+
+  &__loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 24px;
+    color: $color-text-muted;
+  }
+}

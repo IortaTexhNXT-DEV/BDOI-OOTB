@@ -1,55 +1,36 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
-import DropDowns from "../../../../../components/DropDowns";
-import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import { MultiSelect } from "primereact/multiselect";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { Button } from "primereact/button";
-import { SelectButton } from "primereact/selectbutton";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
-import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   patchInsurancelineOfBusinessMiddleWare,
   postInsurancelineOfBusinessMiddleWare,
 } from "../store/insuranceLineOfBusinessMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const LineBusinessDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
-  const { InsuranceLineOfBusinessList, loading } = useSelector(
-    ({ insuranceLineOfBusinessReducers }) => {
-      return {
-        loading: insuranceLineOfBusinessReducers?.loading,
-        InsuranceLineOfBusinessList:
-          insuranceLineOfBusinessReducers?.InsuranceLineOfBusinessList,
-      };
-    }
-  );
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceLineOfBusinessList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("line-of-business", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -80,34 +61,23 @@ const LineBusinessDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceLineOfBusinessList?.length + 1,
-      };
-      dispatch(postInsurancelineOfBusinessMiddleWare(valueWithId));
-
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/lineofbusiness");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsurancelineOfBusinessMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/lineofbusiness");
-    } else {
-      navigation("/master/generals/insurancemanagement/lineofbusiness");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsurancelineOfBusinessMiddleWare : patchInsurancelineOfBusinessMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/lineofbusiness");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find data in setFormikValues");
     const lineofBusinessCode = data[0]?.businessCode;
     const LOBName = data[0]?.LOBName;
     const LOBDescription = data[0]?.description;
@@ -115,11 +85,11 @@ const LineBusinessDetailsAction = ({ action }) => {
     const modifiedOn = "12/12/23";
 
     const updatedValues = {
-      lineofBusinessCode: `${lineofBusinessCode}`,
-      LOBName: `${LOBName}`,
-      LOBDescription: `${LOBDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
+      lineofBusinessCode: lineofBusinessCode ?? "",
+      LOBName: LOBName ?? "",
+      LOBDescription: LOBDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -142,7 +112,7 @@ const LineBusinessDetailsAction = ({ action }) => {
       <div className="grid m-0 top-container">
         <CustomToast
           ref={toastRef}
-          message="Line of Business LOB1234 is added"
+          message={`Line of Business ${formik.values.lineofBusinessCode || ""} is added`}
         />
                 <div className="col-12 p-0">
           <div className="svgback_container">
@@ -183,7 +153,7 @@ const LineBusinessDetailsAction = ({ action }) => {
             />
             {formik.touched.lineofBusinessCode &&
               formik.errors.lineofBusinessCode && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.lineofBusinessCode}
                 </div>
               )}
@@ -199,7 +169,7 @@ const LineBusinessDetailsAction = ({ action }) => {
               onChange={(e) => formik.setFieldValue("LOBName", e.target.value)}
             />
             {formik.touched.LOBName && formik.errors.LOBName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.LOBName}
               </div>
             )}
@@ -217,7 +187,7 @@ const LineBusinessDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.LOBDescription && formik.errors.LOBDescription && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.LOBDescription}
               </div>
             )}
@@ -252,7 +222,6 @@ const LineBusinessDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -261,7 +230,6 @@ const LineBusinessDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

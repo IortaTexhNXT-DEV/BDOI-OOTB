@@ -15,23 +15,31 @@ import { Dialog } from "primereact/dialog";
 import { Menu } from "primereact/menu";
 import policyRenewalService from "../../../../../services/policyRenewalService";
 import { Skeleton } from "primereact/skeleton";
+import { notifyWarn } from "../../../../../utility/dialogs";
+import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
+import { useFormatCurrency } from "../../../../../hooks/useFormatCurrency";
+import logger from "../../../../../utility/logger";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
+  const { formatCurrency } = useFormatCurrency();
   const menu = useRef(null);
   const [displayDialog, setDisplayDialog] = useState(false);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const [selectedProducts] = useState([]);
   const [selectionMode, setSelectionMode] = useState("multiple");
-  const [disableOption, setdisableOption] = useState(false);
+  const [, setdisableOption] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState([]);
-  const [paymentStatus, setPaymentStatus] = useState("");
-  const [statusAction, setstatusAction] = useState("");
+  const [, setPaymentStatus] = useState("");
+  const [, setstatusAction] = useState("");
   const [globalFilter, setGlobalFilter] = useState("policy Number");
   const [search, setSearch] = useState("");
   const cities = [{ name: t("tables.policyNumber"), code: "policy Number" }];
   const [renewalPolicy, setRenewalPolicy] = useState([]);
   const [filteredRenewals, setFilteredRenewals] = useState([]);
   const [loadingState, setLoadingState] = useState(false);
+  // Skeleton rows only on the first load; a refresh keeps the rows on screen.
+  const showSkeleton = loadingState && !filteredRenewals.length;
   const [error, setError] = useState(null);
   const [selectedRowData, setSelectedRowData] = useState(null);
 
@@ -140,7 +148,6 @@ const Index = ({ clientId, action }) => {
           return;
         }
 
-        console.error("Renewal fetch error", fetchError);
         setError(fetchError.message || "Failed to fetch renewals");
         setRenewalPolicy([]);
         setFilteredRenewals([]);
@@ -189,9 +196,6 @@ const Index = ({ clientId, action }) => {
     );
   }, [search, renewalPolicy]);
 
-  const handleSearch = (event) => {
-    setSearch(event.target.value);
-  };
 
   const categories = [
     { name: "Personal Details Change", key: "personaldetail" },
@@ -214,7 +218,6 @@ const Index = ({ clientId, action }) => {
   };
   const handleTypes = () => {
     let result = [];
-    console.log(selectedCategories, "out 1");
     if (selectedCategories.some((obj) => obj.key === "personaldetail")) {
       result.push("1");
     }
@@ -227,7 +230,6 @@ const Index = ({ clientId, action }) => {
     if (selectedCategories.some((obj) => obj.key === "ploicyextend")) {
       result.push("4");
     }
-    console.log(result, "out");
     return result;
   };
   const navigate = useNavigate();
@@ -245,7 +247,7 @@ const Index = ({ clientId, action }) => {
   const handleMenuClick = (menuItem) => {
     if (menuItem == "view") {
       if (!selectedRowData) {
-        console.error("No row data selected");
+        logger.error("No row data selected");
         return;
       }
 
@@ -253,7 +255,7 @@ const Index = ({ clientId, action }) => {
       const policyIdToUse = selectedRowData.policyId || selectedRowData.id || policy.policyId || policy.id;
       
       if (!policyIdToUse) {
-        alert("Policy information is missing");
+        notifyWarn("Policy information is missing");
         return;
       }
 
@@ -291,7 +293,7 @@ const Index = ({ clientId, action }) => {
     }
     if (menuItem == "renewal") {
       if (!selectedRowData) {
-        console.error("No row data selected for renewal");
+        logger.error("No row data selected for renewal");
         return;
       }
 
@@ -299,7 +301,7 @@ const Index = ({ clientId, action }) => {
       const policyIdToUse = selectedRowData.policyId || selectedRowData.id || policy.policyId || policy.id;
       
       if (!policyIdToUse) {
-        alert("Policy information is missing");
+        notifyWarn("Policy information is missing");
         return;
       }
 
@@ -319,7 +321,6 @@ const Index = ({ clientId, action }) => {
       });
     }
     // Handle the menu item click here
-    console.log(`${menuItem} clicked`);
   };
 
   const onCategoryChange = (e) => {
@@ -339,10 +340,9 @@ const Index = ({ clientId, action }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -413,14 +413,13 @@ const Index = ({ clientId, action }) => {
         <Button
           icon={<SvgDot />}
           className="view__btn"
-          onClick={(event) => handleMenuToggle(event, menu, rowData)}
-        />
+          onClick={(event) => handleMenuToggle(event, menu, rowData)} aria-label="More actions" tooltip="More actions" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
 
   const renderPolicyNumber = (rowData) => {
-    if (loadingState) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
@@ -440,14 +439,14 @@ const Index = ({ clientId, action }) => {
 
   const renderRenewalDate = (rowData) => {
     const value = rowData.policyIssued || rowData.IssueDate;
-    if (loadingState) return <Skeleton width="6rem" />;
+    if (showSkeleton) return <Skeleton width="6rem" />;
     return <div className="date__text">{formatDate(value)}</div>;
   };
 
   const renderExpiryDate = (rowData) => {
     const expiryDate = rowData.policyExpiry || rowData.ExpiryDate;
     
-    if (loadingState) return <Skeleton width="6rem" />;
+    if (showSkeleton) return <Skeleton width="6rem" />;
     if (!expiryDate) return <div className="date__text">N/A</div>;
 
     // Calculate days until expiry
@@ -489,10 +488,10 @@ const Index = ({ clientId, action }) => {
   };
 
   const renderPremium = (rowData) => {
-    if (loadingState) return <Skeleton width="4rem" />;
+    if (showSkeleton) return <Skeleton width="4rem" />;
     const premium =
       rowData.grossPremium || rowData.totalPremium || rowData.GrossPremium || 0;
-    return <div className="category__text">{premium}</div>;
+    return <div className="category__text">{formatCurrency(Number(String(premium).replace(/,/g, "")) || 0)}</div>;
   };
 
   const renderProductDescription = (rowData) => {
@@ -501,48 +500,31 @@ const Index = ({ clientId, action }) => {
       rowData.ProductDescription ||
       rowData.type ||
       "MOTOR COMPREHENSIVE";
-    if (loadingState) {
+    if (showSkeleton) {
       return <Skeleton width="8rem" />;
     }
 
-    return <div className="category__text">{description.toUpperCase()}</div>;
+    return <div className="category__text">{description}</div>;
   };
 
   const renderType = (rowData) => {
     const type = rowData.type || rowData.Status || rowData.status || "Pending";
-    if (loadingState) {
+    if (showSkeleton) {
       return <Skeleton width="6rem" />;
     }
 
-    return <div className="category__text">{type.toUpperCase()}</div>;
+    return <div className="category__text">{statusLabel(type)}</div>;
   };
 
   const formatDate = (value) => {
     if (!value) return "N/A";
     try {
-      return new Date(value).toLocaleDateString("en-US", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      });
+      return formatConfiguredDate(value);
     } catch (error) {
       return value;
     }
   };
 
-  const renderStatus = (rowData) => {
-    const status = (rowData.status || "Pending").toLowerCase();
-    const className =
-      status === "pending"
-        ? "company__status__type__green"
-        : status === "approved" || status === "completed"
-        ? "company__status__type__blue"
-        : "company__status__type__red";
-
-    if (loadingState) return <Skeleton width="4rem" />;
-
-    return <div className={className}>{status.toUpperCase()}</div>;
-  };
   const ViewheaderStyle = {
     textalign: "center",
     fontSize: 16,
@@ -596,10 +578,10 @@ const Index = ({ clientId, action }) => {
         <DataTable
           value={filteredRenewals}
           paginator
-          rows={5}
+          rows={20}
           selectionMode={selectionMode}
           selection={selectedProducts}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           className="corrections__table__main"

@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate, useLocation } from "react-router-dom";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -12,34 +11,36 @@ import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
-import { confirmDialog, ConfirmDialog } from "primereact/confirmdialog";
+import { ConfirmDialog } from "primereact/confirmdialog";
 import { Timeline } from "primereact/timeline";
 import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
 import { Badge } from "primereact/badge";
-import { Chip } from "primereact/chip";
 import { FileUpload } from "primereact/fileupload";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { Splitter, SplitterPanel } from "primereact/splitter";
-import { renewalMockData, renewalCrudOperations } from "../../../services/mockData/renewalMockData";
+import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
+import FieldError from "../../../components/FieldError";
 import SvgDot from "../../../assets/icons/SvgDot";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
+import { requiredErrors, hasErrors, errorSummary } from "../../../utility/requiredFields";
 import "./index.scss";
 
 const NegotiationWorkspace = () => {
   const { t } = useTranslation();
   const { formatCurrency, currencyCode, locale } = useFormatCurrency();
-  const navigate = useNavigate();
-  const location = useLocation();
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [agentFilter, setAgentFilter] = useState("All");
   const [loading, setLoading] = useState(false);
   const [selectedNegotiation, setSelectedNegotiation] = useState(null);
-  const [negotiations, setNegotiations] = useState(renewalMockData.negotiations);
+  const [negotiations, setNegotiations] = useState([]);
+  const [approvals, setApprovals] = useState([]);
   const [filteredNegotiations, setFilteredNegotiations] = useState([]);
   const [updateVisible, setUpdateVisible] = useState(false);
+  const [updateErrors, setUpdateErrors] = useState({});
   const [approvalVisible, setApprovalVisible] = useState(false);
   const [communicationVisible, setCommunicationVisible] = useState(false);
   const [dashboardData, setDashboardData] = useState({
@@ -74,18 +75,12 @@ const NegotiationWorkspace = () => {
 
   const statusFilterOptions = [
     { label: "All Statuses", value: "All" },
-    { label: "Pending Approval", value: "Pending Approval" },
-    { label: "Active Negotiation", value: "Active Negotiation" },
-    { label: "Counter Offer", value: "Counter Offer" },
-    { label: "Awaiting Response", value: "Awaiting Response" },
-    { label: "Closed", value: "Closed" }
+    ...[...new Set(negotiations.map(n => n.currentStage).filter(Boolean))].map(stage => ({ label: stage, value: stage }))
   ];
 
   const agentFilterOptions = [
-    { label: "All Agents", value: "All" },
-    { label: "Juan Dela Cruz", value: "Juan Dela Cruz" },
-    { label: "Ana Reyes", value: "Ana Reyes" },
-    { label: "Carlos Mendoza", value: "Carlos Mendoza" }
+    { label: "All sales persons", value: "All" },
+    ...[...new Set(negotiations.map(n => n.assignedAgent).filter(Boolean))].map(name => ({ label: name, value: name }))
   ];
 
   const updateTypeOptions = [
@@ -143,72 +138,65 @@ const NegotiationWorkspace = () => {
     }
   }, [negotiations]);
 
+  const showError = (error, fallbackKey) => {
+    toast.current.show({
+      severity: 'error',
+      summary: t("common.error"),
+      detail: error?.message || t(fallbackKey),
+      life: 3000
+    });
+  };
+
   const loadInitialData = async () => {
     setLoading(true);
     try {
-      // Simulate loading additional negotiations from renewal queue
-      const activeNegotiations = renewalMockData.renewalQueue
-        .filter(policy => policy.status === 'Under Negotiation')
-        .map(policy => ({
-          negotiationId: `NEG-2025-${String(Math.floor(Math.random() * 1000)).padStart(4, '0')}`,
-          policyNumber: policy.policyNumber,
-          clientName: policy.insuredName,
-          currentStage: 'Active Negotiation',
-          currentPremium: policy.currentPremium,
-          quotedPremium: policy.quotedPremium || Math.round(policy.currentPremium * 1.1),
-          timeline: [
-            {
-              date: "2025-01-20",
-              type: "Initial Contact",
-              method: "Email",
-              description: "Sent renewal notice with quote",
-              outcome: "Client requested meeting"
-            },
-            {
-              date: "2025-01-25",
-              type: "Meeting",
-              method: "Face-to-face",
-              description: "Discussed renewal terms",
-              outcome: "Client concerned about premium increase"
-            }
-          ],
-          competitorAnalysis: {
-            ourAdvantages: [
-              "Established relationship",
-              "Quick claims processing",
-              "Local service team"
-            ],
-            competitorAdvantages: [
-              "Lower premium quoted",
-              "Additional features"
-            ]
-          },
-          finalOffer: null,
-          createdDate: "2025-01-20",
-          lastUpdated: "2025-01-25",
-          assignedAgent: policy.assignedAgent
-        }));
-
-      const combinedData = [...renewalMockData.negotiations, ...activeNegotiations];
-      setNegotiations(combinedData);
-      calculateDashboard(combinedData);
-
-      setTimeout(() => {
-        setLoading(false);
-        toast.current.show({
-          severity: 'success',
-          summary: t("renewal.dataLoaded"),
-          detail: t("renewal.negotiationDataLoadedSuccess"),
-          life: 3000
-        });
-      }, 1000);
+      const [rows, pending] = await Promise.all([
+        renewalsWorkspaceService.getNegotiations(),
+        renewalsWorkspaceService.getApprovals()
+      ]);
+      setNegotiations(rows);
+      setApprovals(pending);
+      setSelectedNegotiation(current => rows.find(n => n.id === current?.id) || rows[0] || null);
+      calculateDashboard(rows);
     } catch (error) {
+      showError(error, "renewal.failedToLoadNegotiationData");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  /** Adds an entry to the selected renewal's timeline and reloads the workspace. */
+  const recordActivity = async (activity, successSummary, successDetail, fallbackKey) => {
+    setLoading(true);
+    try {
+      await renewalsWorkspaceService.addActivity(selectedNegotiation.id, activity);
+      toast.current.show({ severity: 'success', summary: successSummary, detail: successDetail, life: 3000 });
+      await loadInitialData();
+      return true;
+    } catch (error) {
+      showError(error, fallbackKey);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const pendingApproval = approvals.find(a => a.renewalId === selectedNegotiation?.id);
+
+  const handleDecision = async (decision) => {
+    setLoading(true);
+    try {
+      await renewalsWorkspaceService.decide(selectedNegotiation.id, decision);
       toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToLoadNegotiationData"),
+        severity: 'success',
+        summary: decision === 'approve' ? t("renewal.approved", "Approved") : t("renewal.rejected", "Rejected"),
+        detail: selectedNegotiation.policyNumber,
         life: 3000
       });
+      await loadInitialData();
+    } catch (error) {
+      showError(error, "renewal.failedToSubmitApprovalRequest");
+    } finally {
       setLoading(false);
     }
   };
@@ -269,6 +257,7 @@ const NegotiationWorkspace = () => {
   };
 
   const handleAddUpdate = () => {
+    setUpdateErrors({});
     setNewUpdate({
       type: 'Update',
       method: 'Phone',
@@ -301,134 +290,66 @@ const NegotiationWorkspace = () => {
   };
 
   const handleSaveUpdate = async () => {
-    setLoading(true);
-    try {
-      const updatedNegotiation = {
-        ...selectedNegotiation,
-        timeline: [
-          ...selectedNegotiation.timeline,
-          {
-            date: new Date().toISOString().split('T')[0],
-            type: newUpdate.type,
-            method: newUpdate.method,
-            description: newUpdate.description,
-            outcome: newUpdate.outcome,
-            nextAction: newUpdate.nextAction,
-            followUpDate: newUpdate.followUpDate?.toISOString().split('T')[0]
-          }
-        ],
-        lastUpdated: new Date().toISOString().split('T')[0]
-      };
-
-      const updatedNegotiations = negotiations.map(n =>
-        n.negotiationId === selectedNegotiation.negotiationId ? updatedNegotiation : n
-      );
-
-      setNegotiations(updatedNegotiations);
-      setSelectedNegotiation(updatedNegotiation);
-      setUpdateVisible(false);
-
-      toast.current.show({
-        severity: 'success',
-        summary: t("renewal.updateAdded"),
-        detail: t("renewal.negotiationTimelineUpdated"),
-        life: 3000
-      });
-    } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSaveUpdate"),
-        life: 3000
-      });
-    } finally {
-      setLoading(false);
+    const errors = requiredErrors(newUpdate, [["type", "Update type"], ["method", "Communication method"], ["description", "Description"]]);
+    setUpdateErrors(errors);
+    if (hasErrors(errors)) {
+      toast.current?.show({ severity: "warn", summary: t("common.validation", "Validation"), detail: errorSummary(errors), life: 4000 });
+      return;
     }
+    const saved = await recordActivity(
+      {
+        type: newUpdate.type,
+        method: newUpdate.method,
+        description: newUpdate.description,
+        outcome: newUpdate.outcome || undefined,
+        nextAction: newUpdate.nextAction || undefined,
+        followUpDate: toIsoDate(newUpdate.followUpDate) || undefined
+      },
+      t("renewal.updateAdded"),
+      t("renewal.negotiationTimelineUpdated"),
+      "renewal.failedToSaveUpdate"
+    );
+    if (saved) setUpdateVisible(false);
   };
 
   const handleSubmitApproval = async () => {
     setLoading(true);
     try {
-      const approvalUpdate = {
-        date: new Date().toISOString().split('T')[0],
-        type: "Approval Request",
-        requestedBy: "Current User",
-        requestedPremium: approvalRequest.requestedPremium,
-        discountPercent: approvalRequest.discountPercent,
-        specialTerms: approvalRequest.specialTerms,
-        justification: approvalRequest.justification,
-        urgency: approvalRequest.urgency,
-        status: "Pending"
-      };
-
-      const updatedNegotiation = {
-        ...selectedNegotiation,
-        currentStage: 'Pending Approval',
-        timeline: [
-          ...selectedNegotiation.timeline,
-          approvalUpdate
-        ],
-        pendingApproval: approvalUpdate
-      };
-
-      const updatedNegotiations = negotiations.map(n =>
-        n.negotiationId === selectedNegotiation.negotiationId ? updatedNegotiation : n
-      );
-
-      setNegotiations(updatedNegotiations);
-      setSelectedNegotiation(updatedNegotiation);
+      const note = [
+        `Requested premium ${approvalRequest.requestedPremium} (${approvalRequest.discountPercent}% discount)`,
+        approvalRequest.specialTerms.length ? `Terms: ${approvalRequest.specialTerms.join(', ')}` : '',
+        `Urgency: ${approvalRequest.urgency}`,
+        approvalRequest.justification
+      ].filter(Boolean).join('; ');
+      await renewalsWorkspaceService.submitForApproval(selectedNegotiation.id, note);
       setApprovalVisible(false);
-
       toast.current.show({
         severity: 'success',
         summary: t("renewal.approvalRequested"),
         detail: t("renewal.specialTermsApprovalSubmitted"),
         life: 3000
       });
+      await loadInitialData();
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: t("common.error"),
-        detail: t("renewal.failedToSubmitApprovalRequest"),
-        life: 3000
-      });
+      showError(error, "renewal.failedToSubmitApprovalRequest");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendCommunicationConfirm = () => {
-    setCommunicationVisible(false);
-    toast.current.show({
-      severity: 'success',
-      summary: t("renewal.communicationSent"),
-      detail: t("renewal.communicationSentToClient", { method: newCommunication.method }),
-      life: 3000
-    });
-
-    // Add communication to timeline
-    const communicationUpdate = {
-      date: new Date().toISOString().split('T')[0],
-      type: "Communication",
-      method: newCommunication.method,
-      description: `${newCommunication.subject}: ${newCommunication.message}`,
-      outcome: "Sent successfully"
-    };
-
-    const updatedNegotiation = {
-      ...selectedNegotiation,
-      timeline: [
-        ...selectedNegotiation.timeline,
-        communicationUpdate
-      ]
-    };
-
-    const updatedNegotiations = negotiations.map(n =>
-      n.negotiationId === selectedNegotiation.negotiationId ? updatedNegotiation : n
+  const handleSendCommunicationConfirm = async () => {
+    const sent = await recordActivity(
+      {
+        type: "Communication",
+        method: newCommunication.method,
+        description: `${newCommunication.subject}: ${newCommunication.message}`,
+        followUpDate: toIsoDate(newCommunication.scheduledDate) || undefined
+      },
+      t("renewal.communicationSent"),
+      t("renewal.communicationSentToClient", { method: newCommunication.method }),
+      "renewal.failedToSaveUpdate"
     );
-
-    setNegotiations(updatedNegotiations);
-    setSelectedNegotiation(updatedNegotiation);
+    if (sent) setCommunicationVisible(false);
   };
 
   const statusBodyTemplate = (rowData) => {
@@ -446,57 +367,8 @@ const NegotiationWorkspace = () => {
     return <Tag value={rowData.currentStage} severity={getSeverity(rowData.currentStage)} />;
   };
 
-  const premiumBodyTemplate = (rowData) => {
-    const current = rowData.currentPremium || 0;
-    const quoted = rowData.quotedPremium || current;
-    const change = quoted > 0 ? ((quoted - current) / current) * 100 : 0;
 
-    return (
-      <div className="premium-cell">
-        <div className="premium-current">
-          {formatCurrency(current)}
-        </div>
-        {quoted !== current && (
-          <div className={`premium-change ${change > 0 ? 'increase' : 'decrease'}`}>
-            {change > 0 ? '+' : ''}{change.toFixed(1)}%
-          </div>
-        )}
-      </div>
-    );
-  };
 
-  const lastUpdateBodyTemplate = (rowData) => {
-    const daysSince = Math.floor((new Date() - new Date(rowData.lastUpdated)) / (1000 * 60 * 60 * 24));
-
-    return (
-      <div className="last-update-cell">
-        <span>{new Date(rowData.lastUpdated).toLocaleDateString()}</span>
-        <small>({daysSince} days ago)</small>
-      </div>
-    );
-  };
-
-  const actionBodyTemplate = (rowData) => {
-    return (
-      <div className="action-buttons">
-        <Button
-          icon="pi pi-eye"
-          className="p-button-text"
-          onClick={() => handleSelectNegotiation(rowData)}
-          tooltip="View Details"
-        />
-        <Button
-          icon="pi pi-comments"
-          className="p-button-text"
-          onClick={() => {
-            setSelectedNegotiation(rowData);
-            handleSendCommunication();
-          }}
-          tooltip="Send Communication"
-        />
-      </div>
-    );
-  };
 
   const policyLinkTemplate = (rowData) => {
     return (
@@ -530,7 +402,7 @@ const NegotiationWorkspace = () => {
         case 'Counter Offer': return 'orange';
         case 'Competitor Quote': return 'red';
         case 'Revised Offer': return 'purple';
-        case 'Approval Request': return 'pink';
+        case 'Approval Request': return 'info';
         case 'Communication': return 'cyan';
         default: return 'gray';
       }
@@ -545,7 +417,8 @@ const NegotiationWorkspace = () => {
           </div>
           <div className="timeline-meta">
             <span className="timeline-method">{item.method}</span>
-            <span className="timeline-date">{new Date(item.date).toLocaleDateString()}</span>
+            <span className="timeline-date">{formatAppDate(item.date)}</span>
+            {item.by && <span className="timeline-by">{item.by}</span>}
           </div>
         </div>
         <div className="timeline-description">
@@ -563,7 +436,7 @@ const NegotiationWorkspace = () => {
         )}
         {item.followUpDate && (
           <div className="timeline-follow-up">
-            <strong>Follow-up:</strong> {new Date(item.followUpDate).toLocaleDateString()}
+            <strong>Follow-up:</strong> {formatAppDate(item.followUpDate)}
           </div>
         )}
       </div>
@@ -654,7 +527,7 @@ const NegotiationWorkspace = () => {
               </div>
 
               <div className="search-field">
-                <label>Agent</label>
+                <label>Sales person</label>
                 <Dropdown
                   value={agentFilter}
                   onChange={(e) => setAgentFilter(e.value)}
@@ -717,28 +590,44 @@ const NegotiationWorkspace = () => {
         <div className="workspace-section">
           <Card>
             <div className="workspace-header">
-              <h3>Negotiation Workspace</h3>
+              <h3>{t("renewal.negotiations")}</h3>
               <div className="workspace-actions">
                 <Button
-                  label="Add Update"
+                  label={t("renewal.addNote")}
                   icon="pi pi-plus"
+                  outlined
                   onClick={handleAddUpdate}
                   disabled={!selectedNegotiation}
                 />
                 <Button
-                  label="Request Approval"
+                  label={t("renewal.requestApproval")}
                   icon="pi pi-arrow-up"
-                  className="p-button-warning"
+                  outlined
                   onClick={handleRequestApproval}
                   disabled={!selectedNegotiation || selectedNegotiation.currentStage === 'Pending Approval'}
                 />
                 <Button
-                  label="Send Communication"
+                  label={t("renewal.sendCommunication")}
                   icon="pi pi-send"
-                  className="p-button-info"
                   onClick={handleSendCommunication}
                   disabled={!selectedNegotiation}
                 />
+                {pendingApproval && (
+                  <>
+                    <Button
+                      label={t("renewal.approve", "Approve")}
+                      icon="pi pi-check"
+                      className="p-button-success"
+                      onClick={() => handleDecision('approve')}
+                    />
+                    <Button
+                      label={t("renewal.reject", "Reject")}
+                      icon="pi pi-times"
+                      className="p-button-danger"
+                      onClick={() => handleDecision('reject')}
+                    />
+                  </>
+                )}
               </div>
             </div>
 
@@ -746,11 +635,11 @@ const NegotiationWorkspace = () => {
               <SplitterPanel className="negotiations-list" size={35}>
                 <div className="list-header">
                   <h4>Active Negotiations</h4>
-                  <Badge value={filteredNegotiations.length || negotiations.length} />
+                  <Badge value={filteredNegotiations.length} />
                 </div>
                 <ScrollPanel style={{ width: '100%', height: '520px' }}>
                   <DataTable
-                    value={filteredNegotiations.length > 0 ? filteredNegotiations : negotiations}
+                    value={filteredNegotiations}
                     className="negotiations-table compact"
                     loading={loading}
                     emptyMessage="No negotiations found"
@@ -782,9 +671,13 @@ const NegotiationWorkspace = () => {
                   <TabView>
                     <TabPanel header={t("renewal.timeline")}>
                       <div className="timeline-container">
+                        {!(selectedNegotiation.timeline || []).length && (
+                          <p className="text-color-secondary m-0">{t("renewal.noTimeline")}</p>
+                        )}
                         <Timeline
                           value={selectedNegotiation.timeline}
                           content={timelineItemTemplate}
+                          align="left"
                           className="negotiation-timeline"
                         />
                       </div>
@@ -813,11 +706,11 @@ const NegotiationWorkspace = () => {
                             </div>
                             <div className="detail-item">
                               <label>Created Date:</label>
-                              <span>{new Date(selectedNegotiation.createdDate).toLocaleDateString()}</span>
+                              <span>{formatAppDate(selectedNegotiation.createdDate)}</span>
                             </div>
                             <div className="detail-item">
                               <label>Last Updated:</label>
-                              <span>{new Date(selectedNegotiation.lastUpdated).toLocaleDateString()}</span>
+                              <span>{formatAppDate(selectedNegotiation.lastUpdated)}</span>
                             </div>
                           </div>
 
@@ -907,7 +800,7 @@ const NegotiationWorkspace = () => {
                                     <span>{comm.method}</span>
                                   </div>
                                   <span className="comm-date">
-                                    {new Date(comm.date).toLocaleDateString()}
+                                    {formatAppDate(comm.date)}
                                   </span>
                                 </div>
                                 <div className="comm-content">
@@ -928,7 +821,7 @@ const NegotiationWorkspace = () => {
                   <div className="no-selection">
                     <i className="pi pi-comments"></i>
                     <h3>Select a negotiation to view details</h3>
-                    <p>Choose a negotiation from the list to see timeline, details, and communications</p>
+                    <p>{t("renewal.chooseNegotiation")}</p>
                   </div>
                 )}
               </SplitterPanel>
@@ -947,32 +840,35 @@ const NegotiationWorkspace = () => {
           <div className="update-form">
             <div className="form-grid">
               <div className="form-field">
-                <label>Update Type</label>
+                <label>Update Type *</label>
                 <Dropdown
                   value={newUpdate.type}
                   onChange={(e) => setNewUpdate({...newUpdate, type: e.value})}
                   options={updateTypeOptions}
                 />
+                <FieldError error={updateErrors.type} />
               </div>
 
               <div className="form-field">
-                <label>Communication Method</label>
+                <label>Communication Method *</label>
                 <Dropdown
                   value={newUpdate.method}
                   onChange={(e) => setNewUpdate({...newUpdate, method: e.value})}
                   options={communicationMethodOptions}
                 />
+                <FieldError error={updateErrors.method} />
               </div>
             </div>
 
             <div className="form-field">
-              <label>Description</label>
+              <label>Description *</label>
               <InputTextarea
                 value={newUpdate.description}
                 onChange={(e) => setNewUpdate({...newUpdate, description: e.target.value})}
                 rows={3}
                 placeholder="Describe what happened during this interaction"
               />
+              <FieldError error={updateErrors.description} />
             </div>
 
             <div className="form-field">
@@ -998,7 +894,7 @@ const NegotiationWorkspace = () => {
               <Calendar
                 value={newUpdate.followUpDate}
                 onChange={(e) => setNewUpdate({...newUpdate, followUpDate: e.value})}
-                dateFormat="mm/dd/yy"
+                dateFormat={calendarDateFormat()}
               />
             </div>
           </div>
@@ -1149,7 +1045,7 @@ const NegotiationWorkspace = () => {
                   value={newCommunication.scheduledDate}
                   onChange={(e) => setNewCommunication({...newCommunication, scheduledDate: e.value})}
                   showTime
-                  dateFormat="mm/dd/yy"
+                  dateFormat={calendarDateFormat()}
                 />
               </div>
             </div>

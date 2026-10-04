@@ -1,11 +1,11 @@
 import { Card } from "primereact/card";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import InputTextField from "../../../component/inputText";
-import DropdownField from "../../../component/DropdwonField";
+import DropdownField from "../../../component/DropdownField";
 import DatepickerField from "../../../component/datePicker";
-import { InsuranceCompanyOptions } from "../../policyDetails/mock";
+import useInsuranceCompanyOptions from "../../../component/useInsuranceCompanyOptions";
 import { Button } from "primereact/button";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../components/Toast";
@@ -17,12 +17,8 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import S3FileUpload from "../../../../components/S3FileUpload";
 import policyService from "../../../../services/policyService";
 import { useSelector } from "react-redux";
-import { getUserData } from "../../../../utility/tokenManager";
-import { receiptsService } from "../../../../services/receiptsService";
-import quotationService from "../../../../services/quotationService";
-import { buildPayLaterReceiptData } from "../../../../utility/receiptHelper";
-import collectionService from "../../../../services/collectionService";
-import accountingService from "../../../../services/accountingService";
+import { notifyError, notifyWarn } from "../../../../utility/dialogs";
+import logger from "../../../../utility/logger";
 
 const UploadPolicyCard = ({
   state,
@@ -33,6 +29,7 @@ const UploadPolicyCard = ({
 }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const InsuranceCompanyOptions = useInsuranceCompanyOptions();
   const [policyDocumentUrl, setPolicyDocumentUrl] = useState(null);
   const [showUploadError, setShowUploadError] = useState(false);
   const [resolvedPolicyData, setResolvedPolicyData] = useState(
@@ -58,21 +55,6 @@ const UploadPolicyCard = ({
     policydetailedlist?.ClientId ||
     policydetailedlist?.clientId;
 
-  const grossPremium =
-    state?.GrossPremium ||
-    policydetailedlist?.GrossPremium ||
-    quotationDetails?.firePremiumDetails?.totalPremium ||
-    quotationDetails?.grossPremium ||
-    quotationDetails?.totalPremium ||
-    policydetailedlist?.quotation?.participantDetails
-      ?.reduce((sum, participant) => {
-        const premium = parseFloat(
-          participant.premiumCurrency?.replace(/[^0-9.-]/g, "") || 0
-        );
-        return sum + premium;
-      }, 0)
-      ?.toFixed(2) ||
-    "0.00";
 
   const policyIdFromState = useMemo(() => {
     return (
@@ -101,7 +83,7 @@ const UploadPolicyCard = ({
           setResolvedPolicyData(response.data);
         }
       } catch (error) {
-        console.error(
+        logger.error(
           "Failed to fetch policy details for upload screen:",
           error
         );
@@ -117,7 +99,7 @@ const UploadPolicyCard = ({
     // Validate policy document upload
     if (!policyDocumentUrl) {
       setShowUploadError(true);
-      alert(t("agent.pleaseUploadPolicy"));
+      notifyWarn(t("agent.pleaseUploadPolicy"));
       // Scroll to upload section
       document
         .querySelector(".upload__policy__card__sub__title")
@@ -130,7 +112,7 @@ const UploadPolicyCard = ({
 
     // Validate policy form data
     if (!value.PolicyNumber || !value.InsuranceCompany) {
-      alert(t("agent.pleaseFillRequired"));
+      notifyWarn(t("agent.pleaseFillRequired"));
       return;
     }
 
@@ -180,8 +162,7 @@ const UploadPolicyCard = ({
     const quotationId = propQuotationId || urlQuotationId || detailsQuotationId;
 
     if (!quotationId) {
-      console.error("❌ Quotation ID not found");
-      alert(t("agent.quotationIdMissing"));
+      notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
 
@@ -192,14 +173,11 @@ const UploadPolicyCard = ({
       resolvedPolicyData?.id;
 
     if (!existingPolicyId) {
-      alert(t("agent.policyNotFound"));
+      notifyError(t("agent.policyNotFound"));
       return;
     }
 
     try {
-      console.log("=== PAY LATER FLOW ===");
-      console.log("Updating existing policy:", existingPolicyId);
-
       // Update the existing policy with new details
       const updatePayload = {
         policyNumber: additionalPolicyData.policyNumber,
@@ -231,193 +209,17 @@ const UploadPolicyCard = ({
         paymentStatus: "Pending",
       };
 
-      const updateResult = await policyService.updatePolicy(existingPolicyId, updatePayload);
-      const policyData = updateResult.data || resolvedPolicyData;
+      await policyService.updatePolicy(existingPolicyId, updatePayload);
 
-      // Create receipt for the policy
-      const currentUser = getUserData();
-      console.log("policyData", policyData);
-      const receiptData = buildPayLaterReceiptData(policyData, {
-        clientData: policyData?.client,
-        fallbackClientId: clientId,
-        fallbackGrossPremium: grossPremium,
-        currentUserId: currentUser?.id || "system",
-      });
-
-      const receiptResult = await receiptsService.createReceipt(receiptData);
-
-      // Sync collection from receipt (for tracking overdue payments)
-      if (receiptResult.success && receiptResult.data?.receiptId) {
-        try {
-          await collectionService.syncFromReceipt(receiptResult.data.receiptId);
-        } catch (collectionError) {
-          console.error(
-            "Collection sync failed (non-blocking):",
-            collectionError
-          );
-          // Don't fail the entire flow if collection sync fails
-        }
+      // Pay later: nothing is received, so no receipt and no journal. The bill raised at issuance stays open
+      // and the payment is captured later on the policy payment screen.
+      const payLater = await policyService.recordPayLater(existingPolicyId);
+      if (!payLater.success) {
+        logger.warn("Pay later could not be recorded:", payLater.error);
       }
-
-      // Create accounting entries for Pay Later payment
-      try {
-        // Get the client's internal database ID from policy data
-        const internalClientId =
-          policyData?.clientId ||
-          policyData?.client?.id ||
-          clientId;
-
-        // Parse and validate amount - handle string amounts with commas/currency symbols
-        const premiumAmount = parseFloat(
-          String(
-            policyData?.grossPremium ||
-              policyData?.GrossPremium ||
-              grossPremium ||
-              0
-          ).replace(/[^0-9.-]/g, "")
-        ) || 0;
-
-        if (!internalClientId) {
-          console.warn(
-            "⚠️ Client ID not found in policy data, skipping accounting entries"
-          );
-          alert(
-            "Policy updated but accounting entry skipped: Client ID not found"
-          );
-        } else if (!premiumAmount || premiumAmount <= 0 || isNaN(premiumAmount)) {
-          console.warn(
-            "⚠️ Invalid premium amount, skipping accounting entries:",
-            premiumAmount
-          );
-          console.warn("PolicyData grossPremium:", policyData?.grossPremium);
-          console.warn("PolicyData GrossPremium:", policyData?.GrossPremium);
-          console.warn("Component grossPremium:", grossPremium);
-          alert(
-            "Policy updated but accounting entry skipped: Invalid premium amount"
-          );
-        } else {
-          // Extract complete premium breakdown from policy data; for Fire, fallback to quotation
-          const policyGrossPremium = parseFloat(
-            String(
-              policyData?.grossPremium ||
-              policyData?.GrossPremium ||
-              quotationDetails?.firePremiumDetails?.totalPremium ||
-              quotationDetails?.grossPremium ||
-              grossPremium ||
-              0
-            ).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyNetPremium = parseFloat(
-            String(
-              policyData?.netPremium ||
-              quotationDetails?.firePremiumDetails?.totalCoverPremium ||
-              quotationDetails?.netPremium ||
-              0
-            ).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyValueAddedTax = parseFloat(
-            String(policyData?.valueAddedTax || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyDocumentaryStampTax = parseFloat(
-            String(policyData?.documentaryStampTax || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyLocalGovernmentTax = parseFloat(
-            String(policyData?.localGovernmentTax || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          const policyAccountPremiumOthers = parseFloat(
-            String(policyData?.accountPremiumOthers || 0).replace(/[^0-9.-]/g, "")
-          ) || 0;
-          // Discount: policy may not have it for Fire; use quotation's firePremiumDetails.totalDiscount
-          const policyDiscount = parseFloat(
-            String(
-              policyData?.discount ||
-              policyData?.quotation?.discount ||
-              quotationDetails?.firePremiumDetails?.totalDiscount ||
-              quotationDetails?.discount ||
-              0
-            ).replace(/[^0-9.-]/g, "")
-          ) || 0;
-
-          // Validate accounting equation: grossPremium = netPremium + VAT + DST + LGT + Others - Discount
-          const calculatedTotal =
-            policyNetPremium +
-            policyValueAddedTax +
-            policyDocumentaryStampTax +
-            policyLocalGovernmentTax +
-            policyAccountPremiumOthers -
-            policyDiscount;
-          const difference = Math.abs(policyGrossPremium - calculatedTotal);
-
-          if (difference > 0.01 && policyGrossPremium > 0) {
-            const commission = policyGrossPremium - policyNetPremium;
-            console.warn("⚠️ Accounting equation warning (Pay Later):", {
-              grossPremium: policyGrossPremium,
-              netPremium: policyNetPremium,
-              valueAddedTax: policyValueAddedTax,
-              documentaryStampTax: policyDocumentaryStampTax,
-              localGovernmentTax: policyLocalGovernmentTax,
-              accountPremiumOthers: policyAccountPremiumOthers,
-              discount: policyDiscount,
-              commission,
-              calculatedTotal,
-              difference,
-            });
-          }
-
-          const accountingData = {
-            amount: premiumAmount,
-            grossPremium: policyGrossPremium,
-            netPremium: policyNetPremium,
-            valueAddedTax: policyValueAddedTax,
-            documentaryStampTax: policyDocumentaryStampTax,
-            localGovernmentTax: policyLocalGovernmentTax,
-            accountPremiumOthers: policyAccountPremiumOthers,
-            discount: policyDiscount,
-            paymentDate: new Date().toISOString(),
-            description: `Pay Later - Policy payment for policy ${
-              policyData?.policyNumber || existingPolicyId
-            }`,
-            referenceType: "Policy",
-            referenceId: existingPolicyId,
-            clientId: internalClientId, // Use internal database ID, not display ID
-            policyId: existingPolicyId,
-            policyNumber: policyData?.policyNumber,
-            isDirectBilled: policyData?.isDirectBilled || false,
-          };
-
-          console.log("📊 Sending complete premium breakdown to accounting (Pay Later):", {
-            grossPremium: accountingData.grossPremium,
-            netPremium: accountingData.netPremium,
-            valueAddedTax: accountingData.valueAddedTax,
-            commission: accountingData.grossPremium - accountingData.netPremium,
-          });
-          await accountingService.createPaymentAccountingEntry(accountingData);
-          console.log(
-            "✅ Accounting entries created successfully for Pay Later payment"
-          );
-        }
-      } catch (accountingError) {
-        console.error(
-          "❌ Failed to create accounting entries:",
-          accountingError
-        );
-        alert(
-          `Policy updated but accounting entry creation failed: ${
-            accountingError.message || "Unknown error"
-          }`
-        );
-        // Don't fail payment flow
-      }
-
-      if (receiptResult.success) {
-        navigate(`/agent/policy`, {});
-      } else {
-        alert(t("agent.receiptCreationFailed"));
-        navigate(`/agent/policy`, {});
-      }
+      navigate(`/agent/policydetail/${existingPolicyId}`, {});
     } catch (error) {
-      console.error("Failed to update policy (Pay Later):", error);
-      alert(
+      notifyError(
         `Error: ${error.message || "Failed to process. Please try again."}`
       );
     }
@@ -426,7 +228,7 @@ const UploadPolicyCard = ({
     // Validate policy document upload
     if (!policyDocumentUrl) {
       setShowUploadError(true);
-      alert(t("agent.pleaseUploadPolicy"));
+      notifyWarn(t("agent.pleaseUploadPolicy"));
       // Scroll to upload section
       document
         .querySelector(".upload__policy__card__sub__title")
@@ -439,7 +241,7 @@ const UploadPolicyCard = ({
 
     // Validate policy form data
     if (!value.PolicyNumber || !value.InsuranceCompany) {
-      alert(t("agent.pleaseFillRequired"));
+      notifyWarn(t("agent.pleaseFillRequired"));
       return;
     }
 
@@ -489,8 +291,7 @@ const UploadPolicyCard = ({
     const quotationId = propQuotationId || urlQuotationId || detailsQuotationId;
 
     if (!quotationId) {
-      console.error("❌ Quotation ID not found");
-      alert(t("agent.quotationIdMissing"));
+      notifyWarn(t("agent.quotationIdMissing"));
       return;
     }
 
@@ -500,7 +301,7 @@ const UploadPolicyCard = ({
       resolvedPolicyData?.id;
 
     if (!existingPolicyId) {
-      alert(t("agent.policyReferenceMissing"));
+      notifyWarn(t("agent.policyReferenceMissing"));
       return;
     }
 
@@ -535,14 +336,12 @@ const UploadPolicyCard = ({
         paymentStatus: "Pending",
       });
     } catch (error) {
-      console.error("Failed to update policy with uploaded details:", error);
+      logger.error("Failed to update policy with uploaded details:", error);
     }
 
     // Prepare complete policy data for payment flow
     const completePolicyForPayment =
       resolvedPolicyData || state?.policyData || {};
-
-    // Log premium data for verification
 
     navigate(`/agent/policy/paymentoptions/${existingPolicyId}`, {
       state: {
@@ -643,7 +442,7 @@ const UploadPolicyCard = ({
     ]
   );
 
-  const [expiryDateData, setExpieyDateData] = useState("");
+  const [, setExpieyDateData] = useState("");
 
   const handleBackNavigation = () => {
     customHistory.back();
@@ -665,7 +464,17 @@ const UploadPolicyCard = ({
   };
 
   // Get participant details from quotation (Motor, etc.) or build for Fire/Allied Perils when empty
-  const participantDetails = quotationDetails?.participantDetails || [];
+  // risk_participants from the API (lead first, amounts split by share) when the quotation carries them
+  const participantDetails = quotationDetails?.participants?.length
+    ? quotationDetails.participants.map((p) => ({
+        participantName: p.insuranceCompanyName,
+        sumInsuredCurrency: quotationDetails.currency,
+        premiumCurrency: quotationDetails.currency,
+        sharePercentage: String(p.sharePercent),
+        sumInsured: p.sumInsured,
+        premium: p.premiumTotal,
+      }))
+    : quotationDetails?.participantDetails || [];
   const lob = state?.lob || quotationDetails?.productType || "";
 
   // For Fire and Allied Perils: when participantDetails is empty, show insured name and premium
@@ -826,7 +635,7 @@ const UploadPolicyCard = ({
               disabled={!!(policySource?.policyNumber || state?.policyNumber)}
             />
             {formik.touched.PolicyNumber && formik.errors.PolicyNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.PolicyNumber}
               </div>
             )}
@@ -844,7 +653,7 @@ const UploadPolicyCard = ({
             />
             {formik.touched.InsuranceCompany &&
               formik.errors.InsuranceCompany && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {formik.errors.InsuranceCompany}
                 </div>
               )}
@@ -856,15 +665,13 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.production")}*`}
               value={formik.values.Production}
-              // minDate={minDate}
               onChange={(e) => {
                 formik.setFieldValue("Production", e.target.value);
               }}
               dateFormat="yy-mm-dd"
-              // error={formik.errors.Production}
             />
             {formik.touched.Production && formik.errors.Production && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Production}
               </div>
             )}
@@ -873,7 +680,6 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.inception")}*`}
               value={formik.values.Inception}
-              // minDate={minDate}
 
               onChange={(e) => {
                 handleIssuedDateChange();
@@ -882,7 +688,7 @@ const UploadPolicyCard = ({
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Inception && formik.errors.Inception && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Inception}
               </div>
             )}
@@ -898,7 +704,7 @@ const UploadPolicyCard = ({
               dateFormat="yy-mm-dd"
             />
             {formik.touched.IssuedDate && formik.errors.IssuedDate && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.IssuedDate}
               </div>
             )}
@@ -907,13 +713,10 @@ const UploadPolicyCard = ({
             <DatepickerField
               label={`${t("agent.expiry")}*`}
               value={formik.values.Expiry}
-              // onChange={(e) => {
-              //   formik.setFieldValue("Expiry", e.target.value);
-              // }}
               dateFormat="yy-mm-dd"
             />
             {formik.touched.Expiry && formik.errors.Expiry && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {formik.errors.Expiry}
               </div>
             )}
@@ -935,13 +738,13 @@ const UploadPolicyCard = ({
           maxFileSize={10 * 1024 * 1024} // 10MB for policy documents
           multiple={false}
           showPreview={false}
+          autoUpload
           uploadPath="policy-documents"
+          onRemove={() => {
+            setPolicyDocumentUrl(null);
+            formik.setFieldValue("file", "");
+          }}
           onUploadSuccess={(url, file) => {
-            console.log("=== S3 Upload Success Callback ===");
-            console.log("URL param:", url);
-            console.log("File param:", file);
-            console.log("URL type:", typeof url);
-
             // Extract URL from various possible formats
             let documentUrl = null;
 
@@ -954,43 +757,35 @@ const UploadPolicyCard = ({
                 url.url || url.data?.url || url.key || url.data?.key;
             }
 
-            console.log("Final extracted URL:", documentUrl);
-
             if (!documentUrl) {
-              console.error(
-                "❌ Failed to extract URL. Full object:",
-                JSON.stringify(url, null, 2)
-              );
-              alert(t("agent.uploadUrlFailed"));
+              notifyError(t("agent.uploadUrlFailed"));
               return;
             }
 
-            console.log("✅ Setting policy document URL:", documentUrl);
             setPolicyDocumentUrl(documentUrl);
             formik.setFieldValue("file", documentUrl);
             setShowUploadError(false);
           }}
           onUploadError={(error) => {
-            console.error("Policy document upload error:", error);
-            alert(t("agent.uploadFailed") + ": " + error.message);
+            notifyError(t("agent.uploadFailed") + ": " + error.message);
           }}
         />
 
         {policyDocumentUrl && (
           <div
             className="text-sm mt-2"
-            style={{ color: "#28a745", fontWeight: 500 }}
+            style={{ color: "var(--color-success)", fontWeight: 500 }}
           >
-            ✓ {t("agent.policyDocumentUploaded")}
+            <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.policyDocumentUploaded")}
           </div>
         )}
 
         {showUploadError && !policyDocumentUrl && (
           <div
             className="text-sm mt-2"
-            style={{ color: "#dc3545", fontWeight: 500 }}
+            style={{ color: "var(--color-danger)", fontWeight: 500 }}
           >
-            ⚠ {t("agent.uploadPolicyDocumentRequired")}
+            <i className="pi pi-exclamation-triangle mr-1" aria-hidden="true" />{t("agent.uploadPolicyDocumentRequired")}
           </div>
         )}
 

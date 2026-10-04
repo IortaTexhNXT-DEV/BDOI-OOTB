@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 $mobile-sm: 480px;
 $tablet-sm: 768px;
 $tablet-md: 1024px;
@@ -186,40 +187,27 @@ $tablet-md: 1024px;
   }
 
   .highlight-card {
-    background: linear-gradient(135deg, #ffffff, #f8fafc);
-    border-radius: 16px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: 12px;
     padding: 1.35rem;
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    box-shadow: $shadow-sm;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
     position: relative;
     overflow: hidden;
 
-    &::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    &:hover::after {
-      opacity: 1;
-    }
-
     &--success {
-      background: linear-gradient(135deg, #ecfdf5, #ffffff);
+      background: $color-success-050;
     }
 
     &--warning {
-      background: linear-gradient(135deg, #fff7ed, #ffffff);
+      background: $color-warning-050;
     }
 
     .highlight-label {
       font-size: 0.85rem;
-      text-transform: uppercase;
       letter-spacing: 0.08rem;
       color: #64748b;
       font-weight: 600;
@@ -340,7 +328,6 @@ $tablet-md: 1024px;
       font-size: 0.8rem;
       font-weight: 600;
       color: #64748b;
-      text-transform: uppercase;
       letter-spacing: 0.08rem;
     }
 
@@ -413,6 +400,31 @@ $tablet-md: 1024px;
         width: 100%;
         display: block;
         object-fit: cover;
+      }
+
+      .vehicle-photo-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        min-height: 12rem;
+        background: var(--surface-100, #f1f5f9);
+        color: var(--text-color-secondary, #64748b);
+        font-size: 0.875rem;
+
+        .pi {
+          font-size: 1.25rem;
+          color: var(--color-text-muted);
+        }
+      }
+
+      .vehicle-gallery-thumbnail.vehicle-photo-placeholder {
+        min-height: 3rem;
+
+        span {
+          display: none;
+        }
       }
     }
   }
@@ -787,7 +799,6 @@ $tablet-md: 1024px;
       h3 {
         font-size: 1.15rem;
         letter-spacing: 0.02em;
-        text-transform: uppercase;
         color: #e11d48;
       }
     }
@@ -804,12 +815,10 @@ $tablet-md: 1024px;
       width: fit-content;
       padding: 0.3rem 0.75rem;
       border-radius: 999px;
-      background: #e11d48;
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      background: $brand-blue-050;
+      color: $brand-navy;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     .co-insurance-policy-pill {
@@ -822,7 +831,6 @@ $tablet-md: 1024px;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.03em;
-      text-transform: uppercase;
       white-space: nowrap;
     }
 
@@ -847,7 +855,6 @@ $tablet-md: 1024px;
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.04em;
-        text-transform: uppercase;
         border: none;
         border-bottom: 1px solid #e2e8f0;
       }

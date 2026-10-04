@@ -1,11 +1,10 @@
-import React, { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { useFormik } from "formik";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import { useNavigate } from "react-router";
-import SvgBackArrow from "../../../../assets/icons/SvgBackArrow";
 import { Card } from "primereact/card";
 import InputField from "../../../../components/InputField";
 import DropDowns from "../../../../components/DropDowns";
@@ -13,10 +12,10 @@ import SvgDropdown from "../../../../assets/icons/SvgDropdown";
 import { Button } from "primereact/button";
 import CustomToast from "../../../../components/Toast";
 import TransactionCodeMasterViewTable from "./TransactionCodeMasterViewTable";
-import NavBar from "../../../../components/NavBar";
-import { useDispatch, useSelector } from "react-redux";
-import { postAddTransaction } from "../store/transactionCodeMasterMiddleware";
+import { useDispatch } from "react-redux";
+import { getUserGroupAccess, postAddTransaction } from "../store/transactionCodeMasterMiddleware";
 import SvgBackicon from "../../../../assets/icons/SvgBackicon";
+import useTransactionCodeOptions from "../useTransactionCodeOptions";
 
 const initialValue = {
   TransactionCode: "",
@@ -34,43 +33,19 @@ const initialValue = {
   // DepartmentCode: ""
 };
 
-const BankAccountCode = [
-  { label: "1101001", value: "1101001" },
-  { label: "1101002", value: "1101002" },
-];
-const MainAccountCode = [
-  { label: "1101001", value: "1101001" },
-  { label: "1101002", value: "1101002" },
-];
-const BranchCode = [
-  { label: "101", value: "101" },
-  { label: "102", value: "102" },
-];
-const DepartmentCode = [
-  { label: "1101002", value: "1101002" },
-  { label: "1101003", value: "1101003" },
-];
-const SubAccountCode = [
-  { label: "1101001", value: "1101001" },
-  { label: "1101002", value: "1101002" },
-];
-
 const TransactionCodeMasterView = () => {
   const { t } = useTranslation();
-  const { TransactioncodeList, loading } = useSelector(({ transactionCodeMasterReducer }) => {
-    return {
-      loading: transactionCodeMasterReducer?.loading,
-      TransactioncodeList: transactionCodeMasterReducer?.TransactioncodeList,
-
-      // addJournalVoucher: journalVoucherReducers?.addJournalVoucher
-
-    };
-  });
   const toastRef = useRef(null);
   const navigate = useNavigate();
+  const codeOptions = useTransactionCodeOptions();
+  const BankAccountCode = codeOptions.basis;
+  const MainAccountCode = codeOptions.mainAccounts;
+  const SubAccountCode = codeOptions.subAccounts;
+  const BranchCode = codeOptions.branches;
+  const DepartmentCode = codeOptions.departments;
   const items = [
     {
-      label: "Transaction code",
+      label: "Transaction Code",
       url: "/master/finance/transactioncode",
     },
     {
@@ -81,30 +56,29 @@ const TransactionCodeMasterView = () => {
   const Initiate = { label: "Master" };
 
   const handleClick = () => {
-    // navigate("/master/finance/transactioncode");
     navigate(-1);
   };
 
   const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    console.log(values, "values");
-    const valueWithId = {
-      ...values,
-      id: TransactioncodeList?.length + 1,
-    };
-    dispatch(postAddTransaction(valueWithId));
-    toastRef.current.showToast();
-    // {
-    setTimeout(() => {
-      navigate("/master/finance/transactioncode");
-    }, 3000);
+  useEffect(() => {
+    dispatch(getUserGroupAccess([]));
+  }, [dispatch]);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(postAddTransaction(values)).unwrap();
+      toastRef.current.showToast();
+      setTimeout(() => {
+        navigate("/master/finance/transactioncode");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
-
   const customValidation = (values) => {
     const errors = {};
 
     if (!values.TransactionCode) {
-      errors.TransactionCode = t("financeMasters.thisFieldCodeRequired");
+      errors.TransactionCode = t("validation.fieldRequired");
     }
     if (!values.TransactionName) {
       errors.TransactionName = t("financeMasters.thisFieldIsRequired");
@@ -119,21 +93,12 @@ const TransactionCodeMasterView = () => {
       errors.MainAccountCode = t("financeMasters.thisFieldIsRequired");
     }
 
-    // if (!values.MainAccountDescription) {
-    //   errors.MainAccountDescription = "This field is required";
-    // }
     if (!values.SubAccountCode) {
       errors.SubAccountCode = t("financeMasters.thisFieldIsRequired");
     }
-    // if (!values.SubAccountDescription) {
-    //   errors.SubAccountDescription = "This field is required";
-    // }
     if (!values.DepartmentCode) {
       errors.DepartmentCode = t("financeMasters.thisFieldIsRequired");
     }
-    // if (!values. DepartmentDescription) {
-    //   errors. DepartmentDescription= "This field is required";
-    // }
     if (!values.BranchCode) {
       errors.BranchCode = t("financeMasters.thisFieldIsRequired");
     }
@@ -151,7 +116,6 @@ const TransactionCodeMasterView = () => {
 
   return (
     <div className="transactioncode__master__view">
-      {/* <CustomToast ref={toastRef} message="Petty Cash Initiated Successfully"/> */}
       <CustomToast ref={toastRef} message={t("financeMasters.saveSuccessfully")} />
       <div className="grid  m-0">
         <div className="col-12 md:col-12 lg:col-12">
@@ -161,22 +125,8 @@ const TransactionCodeMasterView = () => {
           </span>
           <label className="label_header">
           Add Transaction Code
-            {/* {action === "add"
-            ? "Add Country"
-            : action === "edit"
-              ? "Edit Country"
-              : "Country Details"} */}
           </label>
         </div>
-          {/* <div
-            className="Transaction__Code__Master__title"
-            onClick={() => {
-              handleClick();
-            }}
-          >
-            <SvgBackArrow />
-            Add Transaction Code
-          </div> */}
           <div className="mt-3">
             <BreadCrumb
               model={items}
@@ -252,9 +202,7 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.TransactionBasis}
                 options={BankAccountCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("TransactionBasis", e.value);
-                  // handleAccountcode(e.value);
                 }}
                 optionLabel="label"
                 error={
@@ -277,7 +225,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.MainAccountCode}
                 options={MainAccountCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("MainAccountCode", e.value);
                   // handleAccountcode(e.value.);
                 }}
@@ -301,12 +248,7 @@ const TransactionCodeMasterView = () => {
                     ? `MainAccountCode ${formik.values.MainAccountDescription}`
                     : ""
                 }
-                //value={formik.values.MainAccountDescription}
                 onChange={formik.handleChange("MainAccountDescription")}
-              // error={
-              //   formik.touched.MainAccountDescription &&
-              //   formik.errors.MainAccountDescription
-              // }
               />
             </div>
           </div>
@@ -323,7 +265,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.SubAccountCode}
                 options={SubAccountCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("SubAccountCode", e.value);
                   // handleAccountcode(e.value.);
                 }}
@@ -341,17 +282,12 @@ const TransactionCodeMasterView = () => {
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formik.values.SubAccountDescription}
                 value={
                   formik.values.SubAccountCode
                     ? `MainAccountCode ${formik.values.SubAccountDescription}`
                     : ""
                 }
                 onChange={formik.handleChange("SubAccountDescription")}
-              // error={
-              //   formik.touched.SubAccountDescription &&
-              //   formik.errors.SubAccountDescription
-              // }
               />
             </div>
           </div>
@@ -368,7 +304,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.BranchCode}
                 options={BranchCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("BranchCode", e.value);
                   // handleAccountcode(e.value.);
                 }}
@@ -384,17 +319,12 @@ const TransactionCodeMasterView = () => {
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formik.values.BranchDescription}
                 value={
                   formik.values.BranchCode
                     ? `BranchCode ${formik.values.BranchDescription}`
                     : ""
                 }
                 onChange={formik.handleChange("BranchDescription")}
-              // error={
-              //   formik.touched.BranchDescription &&
-              //   formik.errors.BranchDescription
-              // }
               />
             </div>
           </div>
@@ -411,7 +341,6 @@ const TransactionCodeMasterView = () => {
                 value={formik.values.DepartmentCode}
                 options={DepartmentCode}
                 onChange={(e) => {
-                  console.log(e.value);
                   formik.setFieldValue("DepartmentCode", e.value);
                   // handleAccountcode(e.value.);
                 }}
@@ -427,17 +356,12 @@ const TransactionCodeMasterView = () => {
                 textColor={"#111927"}
                 textSize={"16"}
                 textWeight={500}
-                // value={formik.values.DepartmentDescription}
                 value={
                   formik.values.DepartmentCode
                     ? `DepartmentCode ${formik.values.DepartmentDescription}`
                     : ""
                 }
                 onChange={formik.handleChange("DepartmentDescription")}
-              // error={
-              //   formik.touched.DepartmentDescription &&
-              //   formik.errors.DepartmentDescription
-              // }
               />
             </div>
           </div>

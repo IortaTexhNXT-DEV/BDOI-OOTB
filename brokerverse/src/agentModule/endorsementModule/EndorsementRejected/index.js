@@ -1,22 +1,20 @@
-import React, { useRef } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
-import { useNavigate, useParams, useLocation } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
 import "./index.scss";
 import CustomToast from "../../../components/Toast";
+import StatusIllustration from "../../component/StatusIllustration";
 
 const EndorsementRejected = () => {
   const { t } = useTranslation();
-  const params = useParams();
-  const { endorsementId, id } = params;
   const location = useLocation();
   const toastRef = useRef(null);
   const navigate = useNavigate();
   const clientId = location.state?.clientId;
   const clientName = location.state?.clientName;
-  const displayId = endorsementId || id || location.state?.endorsementNumber;
 
   const navigateToClientView = (replace = false) => {
     if (clientId) {
@@ -28,12 +26,6 @@ const EndorsementRejected = () => {
     }
   };
 
-  const handleReject = () => {
-    toastRef.current.showToast();
-    setTimeout(() => {
-      navigateToClientView(true);
-    }, 2000);
-  };
   const handleCommonAction = () => {
     navigateToClientView(false);
   };
@@ -51,19 +43,15 @@ const EndorsementRejected = () => {
       >
         <SvgLeftArrow />
         <div className="endorsement__waiting__request__upload__back__btn__title">
-          {clientName || t("endorsement.client")} / {t("endorsement.clientId")} :{" "}
-          {location.state?.clientNumber || displayId || ""}
+          {clientName || t("endorsement.client")}
+          {location.state?.clientNumber && <> / {t("endorsement.clientId")} : {location.state.clientNumber}</>}
         </div>
       </div>
       <CustomToast ref={toastRef} message={t("endorsement.endorsementRejected")} />
       <Card className="mt-4 claimrequest__overall__card">
         <div className="mt-6">
           <div className="claimtitle__img__overallcontainer mt-4">
-            <img
-              src="https://i.ibb.co/V21pJZs/REJECTED-1.png"
-              className="claimtitle__img__container"
-              alt="Rejected"
-            />
+            <StatusIllustration variant="rejected" className="claimtitle__img__container" />
           </div>
           <div className="claimtitle__txt_container mt-6">
             <div>{t("endorsement.thisEndorsementRejected")}</div>

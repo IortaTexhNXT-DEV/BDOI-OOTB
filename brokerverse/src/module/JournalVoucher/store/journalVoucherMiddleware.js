@@ -1,6 +1,5 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { getRequest, postRequest } from "../../../utility/commonServices";
-import { APIROUTES } from "../../../routes/apiRoutes";
 import {
   GET_JOURNAL_VOUCHER,
   GET_JOURNAL_VOUCHER_SEARCH_LIST,
@@ -13,17 +12,15 @@ import {
   GET_JOURNAL_VOUCHER_HISTORY,
   GET_JOURNAL_VOUCHER_DETAILS,
 } from "../../../redux/actionTypes";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 
 export const journalVoucherMiddleware = createAsyncThunk(
   GET_JOURNAL_VOUCHER,
   async (payload, { rejectWithValue, getState }) => {
     const { journalVoucherMainReducers } = getState();
-    console.log(journalVoucherMainReducers, "dta");
     const { journalVoucherList } = journalVoucherMainReducers;
     const filteredData = journalVoucherList.filter((item) => item.id === 1);
-    console.log(filteredData, "filteredData");
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return filteredData[0];
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -36,8 +33,6 @@ export const getJournalVoucherSearchList = createAsyncThunk(
   async ({ field, value }, { rejectWithValue, getState }) => {
     const { journalVoucherMainReducers } = getState();
     const { journalVoucherList } = journalVoucherMainReducers;
-
-    console.log(journalVoucherList, field, value, "data search");
 
     function filterReceiptsByField(receipts, field, value) {
       const lowercasedValue = value.toLowerCase();
@@ -62,8 +57,6 @@ export const getJournalVoucherSearchList = createAsyncThunk(
 export const postTCJournalVoucher = createAsyncThunk(
   POST_JOURNAL_VOUCHER,
   async (payload, { rejectWithValue, getState }) => {
-    console.log(payload, "payload");
-
     let bodyTableData = {
       transationCode: payload?.transationCode,
       totalCredit: payload?.totalCredit,
@@ -76,8 +69,6 @@ export const postTCJournalVoucher = createAsyncThunk(
       }),
     };
     try {
-      console.log(bodyTableData, "find middleware");
-
       return bodyTableData;
     } catch (error) {
       return rejectWithValue(error?.response?.data?.error?.message);
@@ -85,22 +76,9 @@ export const postTCJournalVoucher = createAsyncThunk(
   }
 );
 
-// export const patchJVMiddleware = createAsyncThunk(
-//     PATCH_JOURNAL_VOUCHER_EDIT,
-//     async (payload, { rejectWithValue, getState }) => {
-//         try {
-//             console.log(payload, "find payload in patch");
-//             // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-//             return payload;
-//         } catch (error) {
-//             return rejectWithValue(error?.response.data.error.message);
-//         }
-//     }
-// );
 export const patchJVMiddleware = createAsyncThunk(
   PATCH_JOURNAL_VOUCHER_EDIT,
   async (payload, { rejectWithValue, getState }) => {
-    console.log(payload?.localAmount, "payloadpayload");
     const { journalVoucherMainReducers } = getState();
     const { journalVoucherPostTabelData } = journalVoucherMainReducers;
     try {
@@ -124,7 +102,6 @@ export const patchJVMiddleware = createAsyncThunk(
         }
         return item;
       });
-      console.log(editData, "editData");
       return editData;
     } catch (error) {
       return rejectWithValue(
@@ -137,14 +114,7 @@ export const patchJVMiddleware = createAsyncThunk(
 export const getJournalVoucherViewData = createAsyncThunk(
   GET_JOURNAL_VOUCHER_VIEW,
   async (payload, { rejectWithValue, getState }) => {
-    console.log(payload, "payload");
-    // const { journalVoucherMainReducers } = getState();
-    // console.log(journalVoucherMainReducers, "dta");
-    // const { journalVoucherList } = journalVoucherMainReducers
-    // const filteredData = journalVoucherList.filter(item => item.id === 1);
-    // console.log(filteredData, "filteredData")
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
       return payload;
     } catch (error) {
       return rejectWithValue(error?.response.data.error.message);
@@ -171,8 +141,6 @@ export const journalVoucherPostTabel = createAsyncThunk(
 export const postAddJournalVoucher = createAsyncThunk(
   POST_ADD_JOURNAL_VOUCHER,
   async (payload, { rejectWithValue, getState }) => {
-    console.log(payload, "first12");
-
     let bodyTableData = {
       mainAccount: payload?.mainAccount,
       subAccount: payload?.subAccount,
@@ -190,8 +158,6 @@ export const postAddJournalVoucher = createAsyncThunk(
       currencyDescription: payload?.currencyDescription,
     };
     try {
-      console.log(bodyTableData, "find middleware");
-
       return bodyTableData;
     } catch (error) {
       return rejectWithValue(error?.response?.data?.error?.message);
@@ -204,7 +170,7 @@ export const postApproveJournalVoucher = createAsyncThunk(
   async (payload, { rejectWithValue, getState }) => {
     try {
       const { data } = await postRequest(
-        APIROUTES.JOURNALVOUCHER.POST_APPROVE_JOURNAL_VOUCHER,
+        "journal-vouchers",
         payload
       );
       return data;
@@ -243,14 +209,12 @@ export const getJournalVoucherHistory = createAsyncThunk(
       }
 
       const response = await getRequest(
-        APIROUTES.JOURNALVOUCHER.GET_JOURNAL_VOUCHER_HISTORY,
+        "journal-vouchers/history",
         params
       );
 
       // Extract data from axios response
       const apiData = response?.data || {};
-      
-      console.log("Journal Voucher History API Response:", apiData);
 
       // Map the API response to match the table format
       const mappedData = (apiData?.data || []).map((item, index) => {
@@ -261,11 +225,7 @@ export const getJournalVoucherHistory = createAsyncThunk(
           try {
             const dateObj = new Date(dateValue);
             if (!isNaN(dateObj.getTime())) {
-              formattedDate = dateObj.toLocaleDateString("en-US", {
-                month: "2-digit",
-                day: "2-digit",
-                year: "numeric",
-              });
+              formattedDate = formatAppDate(dateObj);
             } else {
               formattedDate = dateValue;
             }
@@ -282,6 +242,7 @@ export const getJournalVoucherHistory = createAsyncThunk(
           totalCredit: item.totalCredit,
           transationDescription: item.transactionDescription || item.description || "",
           date: formattedDate,
+          status: item.status || "",
         };
       });
 
@@ -298,7 +259,6 @@ export const getJournalVoucherHistory = createAsyncThunk(
         },
       };
     } catch (error) {
-      console.error("Get journal voucher history error:", error);
       return rejectWithValue(
         error?.response?.data?.error?.message ||
           error?.message ||
@@ -329,14 +289,12 @@ export const getJournalVoucherDetails = createAsyncThunk(
       }
 
       const response = await getRequest(
-        APIROUTES.JOURNALVOUCHER.GET_JOURNAL_VOUCHER_DETAILS,
+        "journal-vouchers",
         params
       );
 
       // Extract data from axios response
       const apiData = response?.data || {};
-      
-      console.log("Journal Voucher Details API Response:", apiData);
 
       // Map the API response to match the table format
       const mappedData = (apiData?.data || []).map((item, index) => {
@@ -383,7 +341,6 @@ export const getJournalVoucherDetails = createAsyncThunk(
         },
       };
     } catch (error) {
-      console.error("Get journal voucher details error:", error);
       return rejectWithValue(
         error?.response?.data?.error?.message ||
           error?.message ||

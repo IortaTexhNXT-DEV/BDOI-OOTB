@@ -70,17 +70,9 @@ export const GET_VIEW_REPLENISH_VOUCHER =
 
 export const GET_PAYMENT_VOUCHER_BY_ID =
   "journalvoucher/GET_PAYMENT_VOUCHER_BY_ID";
-// export const GET_COMMISSION="commission/GET_COMMISSION";
-// export const GET_TAXATION="taxation/GET_TAXATION";
-// export const GET_SUB__ACCOUNT="subaccount/GET_SUB__ACCOUNT";
-// export const POST_ADD_PETTY_CASH="pettycash/POST_ADD_PETTY_CASH";
-// export const GET_JOURNAL_VOUCHER = "journalvoucher/GET_JOURNAL_VOUCHER";
 export const GET_POST_TABEL_JOURNAL_VOUCHER =
   "journalvoucher/GET_POST_TABEL_JOURNAL_VOUCHER";
 
-// export const GET_PAYMENT_VOUCHER = "journalvoucher/GET_PAYMENT_VOUCHER";
-// export const GET_PAYMENT_VOUCHER_BY_ID =
-//   "journalvoucher/GET_PAYMENT_VOUCHER_BY_ID";
 export const PATCH_PAYMENT_STATUS_BY_ID =
   "paymentvoucher/PATCH_PAYMENT_STATUS_BY_ID";
 export const POST_PAYMENT_VOUCHER_CREATE_DATA =
@@ -448,8 +440,6 @@ export const GET_ENDROSEMENT_VIEW_DATA =
 
 export const POST_SETTLEMENT_CLAIM_DATA =
   "claimsettlement/ POST_SETTLEMENT_CLAIM_DATA";
-
-//  export const  POST_SETTLEMENT_CLAIM_DATA ="claimsettlement/ POST_SETTLEMENT_CLAIM_DATA"
 
 export const GET_CLAIM_DETAILS_VIEW_DATA =
   "claimdetails/GET_CLAIM_DETAILS_VIEW_DATA";

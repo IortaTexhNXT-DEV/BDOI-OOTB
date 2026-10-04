@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -10,16 +10,15 @@ import DropDowns from "../../../../components/DropDowns";
 import { Card } from "primereact/card";
 import SuccessIcon from "../../../../assets/icons/SuccessIcon";
 import SvgEdit from '../../../../assets/icons/SvgEdit';
-import NavBar from "../../../../components/NavBar";
 
 function BranchDetailsView() {
   const { t } = useTranslation();
   const [selectedItem, setSelectedItem] = useState({name:'Active',code: "AC"});
   const [selected2, setSelected2] = useState({name:'Design',code: "DS"});
   const [selected3, setSelected3] = useState({name:'John doe',code: "JD"});
-  const [selected4, setSelected4] = useState({name:'Madurai',code: "MD"});
-  const [selected5, setSelected5] = useState({name:'Tamil Nadu',code: "TN"});
-  const [selected6, setSelected6] = useState({name:'Thailand',code: "TH"});
+  const [selected4, setSelected4] = useState({name:'Makati City',code: "MKT"});
+  const [selected5, setSelected5] = useState({name:'Metro Manila',code: "NCR"});
+  const [selected6, setSelected6] = useState({name:'Philippines',code: "PH"});
   const [visiblePopup, setVisiblePopup] = useState(false);
   const showPopup = () => {
     setVisiblePopup(true);
@@ -32,9 +31,9 @@ function BranchDetailsView() {
     { name: "Active", code: "AC" },
     { name: "Design", code: "DS" },
     { name: "John doe", code: "JD" },
-    { name: "Madurai", code: "MD" },
-    { name: "Tamil Nadu", code: "TN" },
-    { name: "Thailand", code: "TH" },
+    { name: "Makati City", code: "MKT" },
+    { name: "Metro Manila", code: "NCR" },
+    { name: "Philippines", code: "PH" },
   ];
   const home = { label: t("financeMasters.master") };
 
@@ -160,7 +159,7 @@ function BranchDetailsView() {
           <div class="col-3 md:col-3 lg-col-3">
             <DropDowns
               className="dropdown__container"
-              label="City"
+              label={t("financeMasters.city")}
               value={selected4}
               onChange={(e) => setSelected4(e.value)}
               options={item}
@@ -172,7 +171,7 @@ function BranchDetailsView() {
           <div class="col-3 md:col-3 lg-col-3">
             <DropDowns
               className="dropdown__container"
-              label="State"
+              label={t("financeMasters.state")}
               value={selected5}
               onChange={(e) => setSelected5(e.value)}
               options={item}

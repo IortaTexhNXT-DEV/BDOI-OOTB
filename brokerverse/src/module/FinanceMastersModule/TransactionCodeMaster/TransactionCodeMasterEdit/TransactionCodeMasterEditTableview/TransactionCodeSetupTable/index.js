@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
-import { useNavigate } from "react-router";
 import "./index.scss";
 import SvgTable from "../../../../../../assets/icons/SvgTable";
 import SvgAdd from "../../../../../../assets/icons/SvgAdd";
@@ -14,18 +13,16 @@ import InputField from "../../../../../../components/InputField";
 import { useFormik } from "formik";
 import { useDispatch, useSelector } from "react-redux";
 import { postAddTransactionCodeSetup } from "../../../store/transactionCodeMasterMiddleware";
+import { calendarDateFormat } from "../../../../../../utility/dateFormat";
 
 const TransactionCodeSetupTable = () => {
-  const { TransactioncodeListsearch, TransactionCodeSetup, loading } = useSelector(({ transactionCodeMasterReducer }) => {
+  const { TransactionCodeSetup } = useSelector(({ transactionCodeMasterReducer }) => {
     return {
       loading: transactionCodeMasterReducer?.loading,
       TransactionCodeSetup: transactionCodeMasterReducer?.TransactionCodeSetup,
-
-
     };
   });
-  console.log(TransactionCodeSetup, "TransactionCodeSetup")
-  const [products, setProducts] = useState([]);
+  const [products] = useState([]);
   const [show, setShow] = useState(false);
 
   const initialValues = {
@@ -38,7 +35,6 @@ const TransactionCodeSetupTable = () => {
   const handleClick = () => {
     setShow(!show);
   };
-  const navigate = useNavigate();
   const isEmpty = products.length === 0;
 
   const emptyTableIcon = (
@@ -54,10 +50,9 @@ const TransactionCodeSetupTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -95,10 +90,6 @@ const TransactionCodeSetupTable = () => {
     setShow(false)
   }
 
-  const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
-    // navigate("/accounts/pettycash/PettyCashCodeDetails")
-  };
   const headerStyle = {
     fontSize: 16,
     fontFamily: "Nunito, Arial, sans-serif",
@@ -111,7 +102,7 @@ const TransactionCodeSetupTable = () => {
     const errors = {};
 
     if (!values.TransactionNumberFrom) {
-      errors.TransactionNumberFrom = "This field Code is required";
+      errors.TransactionNumberFrom = "This field is required";
     }
     if (!values.TransactionNumberTo) {
       errors.TransactionNumberTo = "This field is required";
@@ -128,12 +119,10 @@ const TransactionCodeSetupTable = () => {
     validate: customValidation,
     // onSubmit: (values) => {
     //   // Handle form submission
-    //    handleSubmit(values);
 
     // },
     onSubmit: handleSubmit
   });
-
 
   return (
     <div className="transactioncode__master__table_edit">
@@ -160,9 +149,8 @@ const TransactionCodeSetupTable = () => {
           scrollable={true}
           scrollHeight="40vh"
           paginator
-          rows={5}
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
           paginatorTemplate={template2}
           emptyMessage={isEmpty ? emptyTableIcon : null}
@@ -215,7 +203,6 @@ const TransactionCodeSetupTable = () => {
             </LabelWrapper>
             <Calendar
               showIcon
-              // placeholder="Select"
 
               className="calendar_container"
               value={formik.values.AccountingPeriodStart}
@@ -223,7 +210,7 @@ const TransactionCodeSetupTable = () => {
               onChange={(e) => {
                 formik.setFieldValue("AccountingPeriodStart", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               error={formik.errors.AccountingPeriodStart}
             />
           </div>
@@ -240,7 +227,7 @@ const TransactionCodeSetupTable = () => {
               onChange={(e) => {
                 formik.setFieldValue("AccountingPeriodEnd", e.target.value);
               }}
-              dateFormat="yy-mm-dd"
+              dateFormat={calendarDateFormat()}
               error={formik.errors.AccountingPeriodEnd}
             />
           </div>
@@ -284,9 +271,6 @@ const TransactionCodeSetupTable = () => {
           <Button
             label="Save"
             className="add__btn"
-            // onClick={() => {
-            //   handleSave();
-            // }}
             onClick={() => { formik.handleSubmit(); }}
           />
         </div>

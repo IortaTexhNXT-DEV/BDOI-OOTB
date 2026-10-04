@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 900" preserveAspectRatio="xMidYMid slice">
+  <!-- BrokerVerse sign-in library: property. Original line art, drawn in white over the theme's colour gradient. -->
+  <defs>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0 H0 V48" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="960" height="900" fill="url(#grid)"/>
+  <!-- ground -->
+  <path d="M0 640 Q240 610 480 630 T960 620 V900 H0 Z" fill="#ffffff" fill-opacity="0.06"/>
+  <!-- office tower -->
+  <g fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity="0.55">
+    <rect x="600" y="180" width="170" height="460"/>
+    <path d="M600 240 H770 M600 300 H770 M600 360 H770 M600 420 H770 M600 480 H770 M600 540 H770 M657 180 V640 M713 180 V640"/>
+    <path d="M685 120 V180" stroke-linecap="round"/>
+  </g>
+  <!-- house -->
+  <g fill="none" stroke="#ffffff" stroke-width="6" stroke-linejoin="round" stroke-linecap="round" stroke-opacity="0.92">
+    <path d="M150 420 L340 270 L530 420"/>
+    <path d="M190 390 V640 H490 V390"/>
+    <rect x="300" y="520" width="80" height="120"/>
+    <rect x="225" y="450" width="60" height="55"/>
+    <rect x="400" y="450" width="60" height="55"/>
+    <path d="M430 310 V250 H470 V342"/>
+  </g>
+  <!-- trees -->
+  <g fill="#ffffff" fill-opacity="0.16">
+    <circle cx="90" cy="560" r="48"/><rect x="86" y="590" width="8" height="54"/>
+    <circle cx="880" cy="575" r="40"/><rect x="876" y="600" width="8" height="42"/>
+  </g>
+  <!-- umbrella of cover -->
+  <g transform="translate(250 90)" fill="none" stroke="#ffffff" stroke-width="4" stroke-opacity="0.5" stroke-linecap="round">
+    <path d="M0 110 Q90 0 180 110"/>
+    <path d="M0 110 Q30 90 60 110 Q90 90 120 110 Q150 90 180 110"/>
+    <path d="M90 110 V160 Q90 176 104 176"/>
+  </g>
+</svg>

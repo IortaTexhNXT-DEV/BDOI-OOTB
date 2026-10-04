@@ -1,163 +1,167 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
-import { Card } from "primereact/card";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { Button } from "primereact/button";
-import { useSelector } from "react-redux";
-import "./index.scss";
+import { Dialog } from "primereact/dialog";
+import { InputTextarea } from "primereact/inputtextarea";
 import CustomToast from "../../../components/Toast";
 import claimsService from "../../../services/claimsService";
-import customHistory from "../../../routes/customHistory";
+import { formatCurrency } from "../../../utility/currencyConverter";
+import { formatDate } from "../../../utility/dateFormat";
+import ClaimJourneyLayout, { ClaimActions, ClaimSection } from "../shared/ClaimJourneyLayout";
+import FormErrorSummary from "../shared/FormErrorSummary";
 
+/**
+ * Assessment: the claim as reported and adjusted, then the decision to go on to the settlement or to reject the claim.
+ * A settlement waiting for the checker (maker-checker) is approved or returned here.
+ */
 const SettlementApproval = () => {
   const { t } = useTranslation();
-  const params = useParams();
+  const { id } = useParams();
   const location = useLocation();
-  const { id } = params;
-  const toastRef = useRef(null);
   const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-
-  // Get claim ID from URL params or navigation state
+  const toastRef = useRef(null);
   const claimId = id || location.state?.claimId || location.state?.id;
+  const [claim, setClaim] = useState(null);
+  const [loadError, setLoadError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState("");
+  const [rejecting, setRejecting] = useState(false);
+  const [reason, setReason] = useState("");
 
-  // Get policy holder data from Redux
-  const {
-    policyHolderName: reduxPolicyHolderName,
-    policyNumber: reduxPolicyNumber,
-    claimNumber: reduxClaimNumber,
-  } = useSelector(({ claimDetailsMainReducers }) => ({
-    policyHolderName: claimDetailsMainReducers?.policyHolderName || "",
-    policyNumber: claimDetailsMainReducers?.policyNumber || "",
-    claimNumber: claimDetailsMainReducers?.claimNumber || "",
-  }));
+  useEffect(() => {
+    if (!claimId) return;
+    claimsService.getClaimDetails(claimId).then((result) => {
+      if (result.success) setClaim(result.data?.data || result.data);
+      else setLoadError(result.error);
+    });
+  }, [claimId]);
 
-  // Try to get policy holder name from Redux first, then fallback
-  const policyHolderName = reduxPolicyHolderName || t("agent.loading");
+  const status = claim?.lifecycleStatus;
+  const isPendingApproval = status === "pending-approval";
+  const canDecide = ["registered", "in-review"].includes(status);
+  const detailView = () => navigate(`/agent/claimdetailedview/${claimId}`, { replace: true });
 
-  const claimNumber = reduxClaimNumber || t("agent.loading");
-
-  console.log("=== SETTLEMENT APPROVAL PAGE DATA ===");
-  console.log("URL Params:", params);
-  console.log("Navigation State:", location.state);
-  console.log("Claim ID:", claimId);
-  console.log("=== REDUX POLICY HOLDER DATA ===");
-  console.log("Redux Policy Holder Name:", reduxPolicyHolderName);
-  console.log("Redux Policy Number:", reduxPolicyNumber);
-  console.log("Redux Claim Number:", reduxClaimNumber);
-  console.log("Final Policy Holder Name:", policyHolderName);
-  console.log("Final Claim Number:", claimNumber);
-  console.log("=== END REDUX POLICY HOLDER DATA ===");
-  console.log("=== END SETTLEMENT APPROVAL PAGE DATA ===");
-  const handleReject = async () => {
-    if (!claimId) {
-      console.error("No claim ID available for rejection");
+  const decideSettlement = async (decision) => {
+    setBusy(true);
+    setActionError("");
+    const result = await claimsService.approveSettlement(claimId, {
+      decision,
+      ...(decision === "approve" && claim?.settlementAmount ? { approvedAmount: claim.settlementAmount } : {}),
+    });
+    setBusy(false);
+    if (!result.success) {
+      setActionError(result.error);
       return;
     }
-
-    setLoading(true);
-    console.log("=== REJECTING CLAIM ===");
-    console.log("Claim ID:", claimId);
-    console.log("=== END REJECTING CLAIM ===");
-
-    try {
-      const result = await claimsService.rejectClaim(claimId);
-
-      if (result.success) {
-        console.log("Claim rejected successfully:", result.data);
-        toastRef.current.showToast();
-        setTimeout(async () => {
-          let resolvedClientId = location.state?.clientId;
-          if (!resolvedClientId && claimId) {
-            try {
-              const claimResult = await claimsService.getClaimDetails(claimId);
-              const claimPayload = claimResult?.data;
-              resolvedClientId =
-                claimPayload?.data?.policy?.clientId ||
-                claimPayload?.policy?.clientId ||
-                claimPayload?.data?.clientId ||
-                claimPayload?.clientId;
-            } catch (fetchError) {
-              console.error("Failed to resolve clientId after reject:", fetchError);
-            }
-          }
-          if (resolvedClientId) {
-            navigate(`/agent/clientview/${resolvedClientId}`, { replace: true });
-          } else {
-            navigate("/agent/clientlisting", { replace: true });
-          }
-        }, 2000);
-      } else {
-        console.error("Failed to reject claim:", result.error);
-        // You can add error handling here, like showing an error toast
-      }
-    } catch (error) {
-      console.error("Error rejecting claim:", error);
-      // You can add error handling here
-    } finally {
-      setLoading(false);
-    }
+    toastRef.current?.showToast({ severity: "success", detail: result.data?.message });
+    detailView();
   };
 
-  const handleBackNavigation = () => {
-    customHistory.back();
-  };
-
-  const handleSubmit = () => {
-    if (!claimId) {
-      console.error("No claim ID available for navigation");
+  const rejectClaim = async () => {
+    if (reason.trim().length < 3) {
+      setActionError(t("claimJourney.rejectReasonRequired"));
       return;
     }
-
-    navigate(`/agent/claimrequest/settlementdetails/${claimId}`);
+    setBusy(true);
+    setActionError("");
+    const result = await claimsService.rejectClaim(claimId, reason.trim());
+    setBusy(false);
+    if (!result.success) {
+      setActionError(result.error);
+      return;
+    }
+    setRejecting(false);
+    detailView();
   };
+
+  const rows = claim
+    ? [
+        [t("claimJourney.claimNumber"), claim.claimNumber],
+        [t("claimJourney.policyNumber"), claim.policyNumber || claim.policy?.policyNumber],
+        [t("claimJourney.insurer"), claim.insuranceCompanyName || claim.policy?.insuranceCompanyName],
+        [t("claimJourney.insurerClaimNumber"), claim.insuranceCompanyClaimNumber],
+        [t("claimJourney.dateOfLoss"), formatDate(claim.dateOfIncident)],
+        [t("claimJourney.dateReported"), formatDate(claim.reportedDate)],
+        [t("claimJourney.causeOfLoss"), claim.typeOfIncident],
+        [t("claimJourney.adjusterName"), claim.adjusterName],
+        [t("claimJourney.estimatedAmount"), formatCurrency(claim.estimatedClaimAmount)],
+        ...(isPendingApproval ? [[t("claimJourney.settlementAmount"), formatCurrency(claim.settlementAmount)]] : []),
+      ]
+    : [];
+
   return (
-    <div className="claimsettlement__approval__overall">
-      <div className="claim__requestapproval__upload__main__title">{t("settlementApproval.clients")}</div>
-      <div 
-        className="claim__request__uploadarrow__back__btn mt-3 cursor-pointer"
-        onClick={handleBackNavigation}
-      >
-        <SvgLeftArrow />
-        <div className="claim__request__upload__back__btn__title">
-          {policyHolderName} / {claimNumber ? t("settlementApproval.claimLabel", { claimNumber }) : t("settlementApproval.loading")}
-        </div>
-      </div>
-      <CustomToast ref={toastRef} message={t("settlementApproval.claimRejectedToast")} />
-      <Card className="mt-4 claimrequest__overall__card">
-        <div>
-          <div className="claim__title_txt mt-6">{t("settlementApproval.waitingForSettlement")}</div>
-          <div className="claimtitle__img__overallcontainer mt-4">
-            <img
-              src="https://i.ibb.co/4pbj1hp/waiting-for-approval.png"
-              className="claimtitle__img__container"
+    <ClaimJourneyLayout
+      step={isPendingApproval ? "approval" : "assessment"}
+      holderName={claim?.policyHolderName}
+      reference={claim?.claimNumber ? t("claimJourney.claimRef", { number: claim.claimNumber }) : ""}
+      status={claim?.claimStatus}
+      onBack={() => navigate(claim?.clientId ? `/agent/clientview/${claim.clientId}` : "/agent/claim")}
+      title={isPendingApproval ? t("claimJourney.approvalTitle") : t("claimJourney.assessmentTitle")}
+    >
+      <CustomToast ref={toastRef} />
+      {!claim && !loadError && <p className="claim-journey__hint">{t("claimJourney.loadingClaim")}</p>}
+      {loadError && <FormErrorSummary serverError={loadError} />}
+      {claim && (
+        <ClaimSection title={t("claimJourney.claimSummary")}>
+          <dl className="claim-journey__facts">
+            {rows.map(([label, value]) => (
+              <div key={label} className="claim-journey__fact">
+                <dt>{label}</dt>
+                <dd>{value || "-"}</dd>
+              </div>
+            ))}
+          </dl>
+          {isPendingApproval && <p className="claim-journey__hint">{t("claimJourney.checkerHint")}</p>}
+          {!isPendingApproval && !canDecide && (
+            <div className="claim-journey__notice">{t("claimJourney.decisionTaken", { status: claim.claimStatus })}</div>
+          )}
+        </ClaimSection>
+      )}
+      <FormErrorSummary serverError={actionError} />
+      <ClaimActions>
+        <Button
+          type="button"
+          label={t("claimJourney.back")}
+          outlined
+          onClick={() => navigate(`/agent/claimrequest/adjustersubmission/${claimId}`, { state: { claimId } })}
+          disabled={busy}
+        />
+        {isPendingApproval && (
+          <>
+            <Button type="button" label={t("claimJourney.returnSettlement")} severity="secondary" outlined onClick={() => decideSettlement("return")} disabled={busy} />
+            <Button type="button" label={t("claimJourney.approveSettlement")} onClick={() => decideSettlement("approve")} loading={busy} disabled={busy} />
+          </>
+        )}
+        {canDecide && (
+          <>
+            <Button type="button" label={t("claimJourney.rejectClaim")} severity="danger" outlined onClick={() => setRejecting(true)} disabled={busy} />
+            <Button
+              type="button"
+              label={t("claimJourney.proceedToSettlement")}
+              onClick={() => navigate(`/agent/claimrequest/settlementdetails/${claimId}`, { state: { claimId } })}
+              disabled={busy}
             />
-          </div>
-          <div className="claimtitle__txt_container mt-6">
-            <div>{t("settlementApproval.claimBeingProcessed")}</div>
-            <div>{t("settlementApproval.kindlyBePatientSettlement")}</div>
-          </div>
-        </div>
-        <div className="claimtitle__butt_container mt-6">
-          <Button
-            link
-            onClick={handleReject}
-            className="claim__back__but"
-            disabled={loading}
-            loading={loading}
-          >
-            {loading ? t("settlementApproval.rejecting") : t("settlementApproval.reject")}
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            className="claim__snd__but"
-          >
-            {t("settlementApproval.proceed")}
-          </Button>
-        </div>
-      </Card>
-    </div>
+          </>
+        )}
+        {claim && !isPendingApproval && !canDecide && <Button type="button" label={t("claimJourney.openClaim")} onClick={detailView} />}
+      </ClaimActions>
+      <Dialog
+        header={t("claimJourney.rejectClaim")}
+        visible={rejecting}
+        style={{ width: "32rem" }}
+        onHide={() => setRejecting(false)}
+        footer={
+          <>
+            <Button type="button" label={t("claimJourney.cancel")} text onClick={() => setRejecting(false)} disabled={busy} />
+            <Button type="button" label={t("claimJourney.rejectClaim")} severity="danger" onClick={rejectClaim} loading={busy} />
+          </>
+        }
+      >
+        <label htmlFor="reject-reason" className="block mb-2">{t("claimJourney.rejectReason")}</label>
+        <InputTextarea id="reject-reason" value={reason} onChange={(e) => setReason(e.target.value)} rows={3} autoResize className="w-full" />
+      </Dialog>
+    </ClaimJourneyLayout>
   );
 };
 

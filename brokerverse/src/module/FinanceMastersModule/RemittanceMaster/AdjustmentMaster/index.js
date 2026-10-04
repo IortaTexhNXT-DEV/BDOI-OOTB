@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 import { TabView, TabPanel } from "primereact/tabview";
@@ -12,8 +12,35 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
 import { useNavigate, useParams } from "react-router-dom";
-import { adjustmentMasterData, mockCrudOperations, commonData } from "../../../../services/mockData/remittanceMockData";
+import { masterService } from "../../../../services/remittanceService";
+import { showError } from "../../../Remittance/shared";
+import { MASTER_HOME, saveRecord } from "../masterRecord";
 import "./index.scss";
+
+const TYPE = "remittance-adjustment-type";
+const toRow = (type) => ({
+  id: type.id,
+  adjustmentCode: type.code,
+  adjustmentName: type.name,
+  category: type.category,
+  adjustmentNature: type.glAccounts ? "Debit/Credit" : "Credit",
+  glAccount: type.glAccounts ? `${type.glAccounts.debit}/${type.glAccounts.credit}` : "",
+  requiresApproval: type.requiresApproval,
+  approvalLimit: Number(type.approvalLimit || 0),
+  active: type.status === "Active"
+});
+const toRecord = (row) => {
+  const [debit, credit] = String(row.glAccount || "").split("/");
+  return {
+    code: row.adjustmentCode,
+    name: row.adjustmentName,
+    category: row.category,
+    glAccounts: { debit: debit || null, credit: credit || null },
+    requiresApproval: row.requiresApproval,
+    approvalLimit: row.approvalLimit,
+    isActive: row.active
+  };
+};
 
 const AdjustmentMaster = () => {
   const { t } = useTranslation();
@@ -23,20 +50,15 @@ const AdjustmentMaster = () => {
   const isViewMode = mode === "view";
   const toast = React.useRef(null);
 
-  // Adjustment types state from mock data
-  const [adjustmentTypes, setAdjustmentTypes] = useState(
-    adjustmentMasterData.adjustmentTypes.map(type => ({
-      id: type.id,
-      adjustmentCode: type.code,
-      adjustmentName: type.name,
-      category: type.category,
-      adjustmentNature: type.glAccounts ? "Debit/Credit" : "Credit",
-      glAccount: type.glAccounts ? `${type.glAccounts.debit}/${type.glAccounts.credit}` : commonData.glAccounts[0].code,
-      requiresApproval: type.requiresApproval,
-      approvalLimit: type.approvalLimit,
-      active: type.status === "Active"
-    }))
-  );
+  // Adjustment types are records of the remittance-adjustment-type master
+  const [adjustmentTypes, setAdjustmentTypes] = useState([]);
+  const [removedIds, setRemovedIds] = useState([]);
+
+  useEffect(() => {
+    masterService.list(TYPE)
+      .then((rows) => setAdjustmentTypes((rows || []).map(toRow)))
+      .catch((error) => showError(toast, error));
+  }, []);
 
   // Adjustment rules state
   const [maxAdjustmentAmount, setMaxAdjustmentAmount] = useState(10000);
@@ -44,7 +66,7 @@ const AdjustmentMaster = () => {
   const [frequencyLimit, setFrequencyLimit] = useState(3);
 
   // Approval matrix state
-  const [approvalMatrix] = useState({
+  const [approvalMatrix, setApprovalMatrix] = useState({
     User: { Premium: 100, Commission: 100, Tax: 100, Fee: 100, Refund: 0 },
     Supervisor: { Premium: 1000, Commission: 1000, Tax: 1000, Fee: 500, Refund: 500 },
     Manager: { Premium: 5000, Commission: 5000, Tax: 5000, Fee: 2500, Refund: 2500 },
@@ -68,15 +90,9 @@ const AdjustmentMaster = () => {
 
   const handleSave = async () => {
     try {
-      const configData = {
-        adjustmentTypes,
-        maxAdjustmentAmount,
-        maxAdjustmentPercent,
-        frequencyLimit,
-        approvalMatrix
-      };
-
-      await mockCrudOperations.update("adjustmentMaster", 1, configData);
+      await Promise.all(removedIds.map((id) => masterService.remove(TYPE, id)));
+      await Promise.all(adjustmentTypes.map((row) => saveRecord(TYPE, row.isNew ? null : row.id, toRecord(row))));
+      setRemovedIds([]);
 
       toast.current.show({
         severity: 'success',
@@ -86,15 +102,10 @@ const AdjustmentMaster = () => {
       });
 
       setTimeout(() => {
-        navigate("/master/finance/remittance");
+        navigate(MASTER_HOME);
       }, 1500);
     } catch (error) {
-      toast.current.show({
-        severity: 'error',
-        summary: 'Error',
-        detail: 'Failed to save configuration',
-        life: 3000
-      });
+      showError(toast, error, 'Failed to save configuration');
     }
   };
 
@@ -104,7 +115,8 @@ const AdjustmentMaster = () => {
 
   const handleAddType = () => {
     const newType = {
-      id: adjustmentTypes.length + 1,
+      id: Date.now(),
+      isNew: true,
       adjustmentCode: "",
       adjustmentName: "",
       category: "Premium",
@@ -150,14 +162,6 @@ const AdjustmentMaster = () => {
     );
   };
 
-  const checkboxEditor = (options) => {
-    return (
-      <Checkbox
-        checked={options.value}
-        onChange={(e) => options.editorCallback(e.checked)}
-      />
-    );
-  };
 
   const numberEditor = (options) => {
     return (
@@ -176,6 +180,7 @@ const AdjustmentMaster = () => {
         icon="pi pi-trash"
         className="p-button-text p-button-danger"
         onClick={() => {
+          if (!rowData.isNew) setRemovedIds((ids) => [...ids, rowData.id]);
           setAdjustmentTypes(adjustmentTypes.filter(type => type.id !== rowData.id));
           toast.current.show({
             severity: 'success',
@@ -184,8 +189,7 @@ const AdjustmentMaster = () => {
             life: 3000
           });
         }}
-        disabled={isViewMode}
-      />
+        disabled={isViewMode} aria-label="Delete" tooltip="Delete" tooltipOptions={{ position: "top" }} />
     );
   };
 
@@ -196,12 +200,9 @@ const AdjustmentMaster = () => {
     return (
       <InputNumber
         value={approvalMatrix[role][category]}
-        onValueChange={(e) => {
-          // Update matrix value
-          console.log(`Updating ${role} - ${category}: ${e.value}`);
-        }}
+        onValueChange={(e) => setApprovalMatrix((matrix) => ({ ...matrix, [role]: { ...matrix[role], [category]: e.value } }))}
         mode="currency"
-        currency="PHP"
+        currency={currencyCode}
         className="w-full"
         disabled={isViewMode}
       />
@@ -268,7 +269,7 @@ const AdjustmentMaster = () => {
                     <div className="p-inputgroup">
                       <span>{rowData.glAccount}</span>
                       {!isViewMode && (
-                        <Button icon="pi pi-search" className="p-button-text p-button-sm" />
+                        <Button icon="pi pi-search" className="p-button-text p-button-sm" aria-label="Search" tooltip="Search" tooltipOptions={{ position: "top" }} />
                       )}
                     </div>
                   )}
@@ -293,7 +294,7 @@ const AdjustmentMaster = () => {
                   field="approvalLimit"
                   header="Auto-Approve Below"
                   style={{ width: "12%" }}
-                  body={(rowData) => `$${rowData.approvalLimit.toLocaleString()}`}
+                  body={(rowData) => formatCurrency(rowData.approvalLimit)}
                   editor={!isViewMode ? numberEditor : null}
                 />
                 <Column
@@ -331,7 +332,7 @@ const AdjustmentMaster = () => {
                   <div className="rule-card">
                     <div className="rule-header">
                       <span>Rule 1: Late Payment Penalty</span>
-                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} />
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                     </div>
                     <div className="rule-content">
                       <strong>Condition:</strong> Payment Delay {'>'} 30 Days<br />
@@ -341,7 +342,7 @@ const AdjustmentMaster = () => {
                   <div className="rule-card">
                     <div className="rule-header">
                       <span>Rule 2: Small Balance Write-off</span>
-                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} />
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                     </div>
                     <div className="rule-content">
                       <strong>Condition:</strong> Amount Difference {'<'} {"\u20B1"}10<br />
@@ -351,7 +352,7 @@ const AdjustmentMaster = () => {
                   <div className="rule-card">
                     <div className="rule-header">
                       <span>Rule 3: Loyalty Discount</span>
-                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} />
+                      <Button icon="pi pi-pencil" className="p-button-text p-button-sm" disabled={isViewMode} aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
                     </div>
                     <div className="rule-content">
                       <strong>Condition:</strong> Customer Category = Gold<br />

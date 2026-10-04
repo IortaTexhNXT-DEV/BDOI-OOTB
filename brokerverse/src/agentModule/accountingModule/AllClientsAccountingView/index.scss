@@ -53,7 +53,6 @@
       transition: transform 0.2s ease, box-shadow 0.2s ease;
 
       &:hover {
-        transform: translateY(-2px);
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       }
 
@@ -70,7 +69,6 @@
           font-size: 0.8125rem;
           color: #5a6268;
           font-weight: 500;
-          text-transform: uppercase;
           letter-spacing: 0.5px;
           line-height: 1.4;
         }
@@ -82,7 +80,7 @@
           line-height: 1.3;
 
           &.debit-text {
-            color: #dc3545;
+            color: var(--color-danger);
           }
 
           &.credit-text {
@@ -174,8 +172,8 @@
       padding: 3rem 1.5rem;
 
       .empty-icon {
-        font-size: 3rem;
-        color: #adb5bd;
+        font-size: 1.25rem;
+        color: var(--color-text-muted);
         margin-bottom: 0.875rem;
       }
 
@@ -219,11 +217,11 @@
         align-items: center;
         padding: 1rem;
         cursor: pointer;
-        background: linear-gradient(135deg, $main-background 0%, $card-background 100%);
+        background: $card-background;
         transition: background 0.2s ease;
 
         &:hover {
-          background: linear-gradient(135deg, #e9ecef 0%, $main-background 100%);
+          background: $main-background;
         }
 
         .client-info {
@@ -285,7 +283,7 @@
                 color: #1a1d21;
 
                 &.debit-text {
-                  color: #dc3545;
+                  color: var(--color-danger);
                 }
 
                 &.credit-text {
@@ -384,7 +382,7 @@
   }
 
   .debit-text {
-    color: #dc3545;
+    color: var(--color-danger);
     font-weight: 600;
   }
 
@@ -558,7 +556,8 @@
         padding: 2rem 1rem;
 
         .empty-icon {
-          font-size: 2.5rem;
+          font-size: 1.25rem;
+          color: var(--color-text-muted);
         }
 
         h3 {

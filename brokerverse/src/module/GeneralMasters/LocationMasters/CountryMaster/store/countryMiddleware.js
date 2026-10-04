@@ -1,96 +1,31 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-// import { getRequest } from "../../../utility/commonServices";
-// import { APIROUTES } from "../../../routes/apiRoutes";
+import mastersService, { searchText } from "../../../../../services/mastersService";
+import masterThunk from "../../../common/masterThunk";
 import {
   GET_COUNTRY_DETAILS,
   GET_COUNTRY_BY_ID,
   POST_ADD_COUNTRY,
   PATCH_COUNTRY_EDIT,
   GET_SERACH_COUNTRY,
-
 } from "../../../../../redux/actionTypes";
 
-export const getCountryMiddleware = createAsyncThunk(
-  GET_COUNTRY_DETAILS,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const getCountryListByIdMiddleware = createAsyncThunk(
-  GET_COUNTRY_BY_ID,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload, "getCountryListByIdMiddleware");
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+const TYPE = "country";
+
+export const getCountryMiddleware = masterThunk(GET_COUNTRY_DETAILS, (params) =>
+  mastersService.list(TYPE, params)
 );
 
-export const getSearchCountryMiddleware = createAsyncThunk(
-  GET_SERACH_COUNTRY,
-  async (payload, { rejectWithValue, getState }) => {
-    const { textSearch } = payload;
-    const { countryReducers } = getState();
-
-    const { countryTableList } = countryReducers;
-    console.log(countryTableList, "1234")
-
-    try {
-      if (textSearch.trim() !== "") {
-        const searchResults = countryTableList.filter(item => {
-          return item.CountryName.toLowerCase().includes(textSearch.toLowerCase())
-        });
-        console.log(searchResults, "searchResults")
-        return searchResults;
-      } else {
-        return countryTableList;
-      }
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
-    }
-  },
-);
-export const postAddCountryMiddleware = createAsyncThunk(
-  POST_ADD_COUNTRY,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload, "postAddCountryMiddleware");
-
-    const dataTable = {
-      "CountryName": payload.CountryName,
-      "ISOCode": payload.ISOCode,
-      Description: payload?.Description,
-      "PhoneCode": payload.PhoneCode,
-      "Modifiedby": payload.Modifiedby,
-      "ModifiedOn": payload.ModifiedOn
-    }
-    console.log(dataTable, "dataTable")
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return dataTable;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-export const patchCountryEditMiddleware = createAsyncThunk(
-  PATCH_COUNTRY_EDIT,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+export const getCountryListByIdMiddleware = masterThunk(GET_COUNTRY_BY_ID, (row) =>
+  mastersService.get(TYPE, row?.id ?? row)
 );
 
+export const getSearchCountryMiddleware = masterThunk(GET_SERACH_COUNTRY, (query) =>
+  mastersService.list(TYPE, { search: searchText(query) })
+);
 
+export const postAddCountryMiddleware = masterThunk(POST_ADD_COUNTRY, (values) =>
+  mastersService.create(TYPE, values)
+);
 
+export const patchCountryEditMiddleware = masterThunk(PATCH_COUNTRY_EDIT, (values) =>
+  mastersService.update(TYPE, values.id, values)
+);

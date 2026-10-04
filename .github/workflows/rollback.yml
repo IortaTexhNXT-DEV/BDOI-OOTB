@@ -1,0 +1,64 @@
+name: Rollback
+
+# Manual rollback of the application of one environment to an earlier build: the API release and the front end
+# of that commit are switched back in (from the server's kept releases or from the CI artefacts, kept 90 days).
+# No backup, no migrations: the database keeps its forward-only migrations, which earlier releases tolerate
+# (expand/contract rule in deploy/RELEASE_PIPELINE.md). When data itself must go back, restore the pre-deploy
+# backup instead (deploy/RELEASE_PIPELINE.md, "Rollback").
+#
+# How: Actions > Rollback > Run workflow.
+#   - In "Use workflow from" choose the version to return to: for production its release tag vX.Y.Z (required),
+#     elsewhere a tag or branch, or give the commit SHA below.
+#   - The environment's reviewers approve the run as for a deployment.
+# A failed automatic smoke test already rolls back by itself (deploy.yml); this workflow is for a problem found
+# later, e.g. by users after go-live.
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Environment to roll back
+        type: choice
+        options: [dev, sit, uat, preprod, production]
+        required: true
+      sha:
+        description: Commit SHA to return to (empty = the commit of "Use workflow from"; production only from a vX.Y.Z tag)
+        type: string
+        required: false
+        default: ""
+      reason:
+        description: Why (recorded in the run summary)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+jobs:
+  record:
+    name: Record the request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        env:
+          TARGET_ENV: ${{ inputs.environment }}
+          REASON: ${{ inputs.reason }}
+          TARGET_SHA: ${{ inputs.sha || github.sha }}
+        run: |
+          {
+            echo "### Rollback of **$TARGET_ENV** to \`$TARGET_SHA\` requested by @$GITHUB_ACTOR"
+            echo
+            echo "Reason: $REASON"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  rollback:
+    name: Roll back ${{ inputs.environment }}
+    needs: record
+    uses: ./.github/workflows/deploy.yml
+    with:
+      environment: ${{ inputs.environment }}
+      sha: ${{ inputs.sha }}
+      mode: rollback
+    secrets: inherit

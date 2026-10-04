@@ -1,0 +1,13 @@
+import json,re
+from ddpaths import psql
+d=json.load(open('db.json'))
+views={t for t,ty in d['tables'] if ty=='VIEW'}
+out={}
+for r in d['columns']:
+    t,c,dt=r[0],r[1],r[3]
+    if t in views or dt!='text': continue
+    if re.search(r'(^|_)(status|kind|type|stage|mode|category|channel|basis|side|direction|severity|step|source|level|action|decision|outcome|frequency|reset_rule|priority|flag|method|measure|tier|lob|line|storage|audience|provider|regimes?|role_code|entry_type|business_type|line_status)$',c):
+        vals=psql(f'select coalesce("{c}",chr(39)||chr(39)), count(*) from {t} group by 1 order by 2 desc limit 40')
+        out[f'{t}.{c}']=vals
+json.dump(out,open('vals.json','w'),indent=0)
+print(len(out))

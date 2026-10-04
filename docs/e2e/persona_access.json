@@ -1,0 +1,129 @@
+[
+ {
+  "user": "bea.admin",
+  "persona": "Business Administrator",
+  "signIn": true,
+  "menu": [
+   "Dashboard",
+   "Product Configurator",
+   "Master",
+   "Operations",
+   "Accounts",
+   "Commission",
+   "Reinsurance",
+   "Reports"
+  ]
+ },
+ {
+  "user": "maria.sales",
+  "persona": "Sales / Relationship Manager",
+  "signIn": true,
+  "menu": [
+   "Dashboard",
+   "Product Configurator",
+   "Operations",
+   "Commission",
+   "Reports"
+  ],
+  "forbiddenScreen": "/accounts/journalvoucher",
+  "screenBlocked": true,
+  "forbiddenApi": "POST /journal-vouchers",
+  "apiStatus": 403,
+  "apiMessage": "Requires permission: write:journal-vouchers"
+ },
+ {
+  "user": "ramon.agent",
+  "persona": "Agent / Referrer",
+  "signIn": true,
+  "menu": [
+   "Dashboard",
+   "Operations",
+   "Commission"
+  ],
+  "forbiddenScreen": "/accounts/receipts",
+  "screenBlocked": true,
+  "forbiddenApi": "GET /receipts",
+  "apiStatus": 403,
+  "apiMessage": "Requires permission: read:receipts"
+ },
+ {
+  "user": "jose.uw",
+  "persona": "Underwriter",
+  "signIn": true,
+  "menu": [
+   "Dashboard",
+   "Product Configurator",
+   "Operations",
+   "Reinsurance",
+   "Reports"
+  ],
+  "forbiddenScreen": "/accounts/paymentvoucher",
+  "screenBlocked": true,
+  "forbiddenApi": "POST /journal-vouchers",
+  "apiStatus": 403,
+  "apiMessage": "Requires permission: write:journal-vouchers"
+ },
+ {
+  "user": "ana.cs",
+  "persona": "Customer Services",
+  "signIn": true,
+  "menu": [
+   "Dashboard",
+   "Product Configurator",
+   "Operations",
+   "Reports"
+  ],
+  "forbiddenScreen": "/master/configuration/settings",
+  "screenBlocked": true,
+  "forbiddenApi": "POST /journal-vouchers",
+  "apiStatus": 403,
+  "apiMessage": "Requires permission: write:journal-vouchers"
+ },
+ {
+  "user": "carlo.claims",
+  "persona": "Claims Officer",
+  "signIn": true,
+  "menu": [
+   "Dashboard",
+   "Operations",
+   "Reinsurance",
+   "Reports"
+  ],
+  "forbiddenScreen": "/accounts/paymentvoucher",
+  "screenBlocked": true,
+  "forbiddenApi": "POST /disbursements",
+  "apiStatus": 403,
+  "apiMessage": "Requires permission: write:disbursements"
+ },
+ {
+  "user": "liza.finance",
+  "persona": "Finance / Accounts",
+  "signIn": true,
+  "menu": [
+   "Dashboard",
+   "Operations",
+   "Accounts",
+   "Commission",
+   "Reinsurance",
+   "Reports"
+  ],
+  "forbiddenScreen": "/master/configuration/settings",
+  "screenBlocked": true,
+  "forbiddenApi": "POST /users",
+  "apiStatus": 403,
+  "apiMessage": "Requires permission: write:users"
+ },
+ {
+  "user": "carmela.morfe",
+  "persona": "User Access Administrator",
+  "signIn": true,
+  "menu": [
+   "Master"
+  ],
+  "forbiddenScreen": "/accounts/receipts",
+  "screenBlocked": true,
+  "forbiddenApi": "GET /policies",
+  "apiStatus": 403,
+  "apiMessage": "Requires permission: read:policies"
+ }
+]

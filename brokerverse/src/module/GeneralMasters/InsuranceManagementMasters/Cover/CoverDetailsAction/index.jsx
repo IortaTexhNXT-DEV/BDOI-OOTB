@@ -1,55 +1,37 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
-import NavBar from "../../../../../components/NavBar";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../../assets/icons/SvgDot";
 import InputField from "../../../../../components/InputField";
 import { useFormik } from "formik";
-import DropDowns from "../../../../../components/DropDowns";
-import SvgDropdown from "../../../../../assets/icons/SvgDropdown";
-import { MultiSelect } from "primereact/multiselect";
-import LabelWrapper from "../../../../../components/LabelWrapper";
 import { Button } from "primereact/button";
-import { SelectButton } from "primereact/selectbutton";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomToast from "../../../../../components/Toast";
-import SvgDropdownicon from "../../../../../assets/icons/SvgDropdownicon";
 import SvgBackicon from "../../../../../assets/icons/SvgBackicon";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import {
   patchInsuranceCoverMiddleWare,
   postInsuranceCoverMiddleWare,
 } from "../store/insuranceCoverMiddleware";
+import mastersService from "../../../../../services/mastersService";
 
 const CoverDetailsAction = ({ action }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { InsuranceCoverList, loading } = useSelector(
-    ({ insuranceCoverReducers }) => {
-      return {
-        loading: insuranceCoverReducers?.loading,
-        InsuranceCoverList: insuranceCoverReducers?.InsuranceCoverList,
-      };
-    }
-  );
 
-  console.log(action, "find action");
   const { id } = useParams();
-  console.log(id, "find route id");
   const toastRef = useRef(null);
   const navigation = useNavigate();
 
   useEffect(() => {
-    if (action === "edit" || action === "view") {
-      if (id != null) {
-        const FilteredList = InsuranceCoverList.filter(
-          (data) => data.id === parseInt(id)
-        );
-        setFormikValues(FilteredList);
-      }
+    if ((action === "edit" || action === "view") && id != null) {
+      mastersService
+        .get("cover", id)
+        .then((record) => setFormikValues([record]))
+        .catch((error) => toastRef.current.showToast({ severity: "error", detail: error.message }));
     }
-  }, [action]);
+  }, [action, id]); // eslint-disable-line react-hooks/exhaustive-deps
   const items = [
     {
       label: t("generalMasters.insuranceManagement"),
@@ -80,45 +62,35 @@ const CoverDetailsAction = ({ action }) => {
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    if (action === "add") {
-      const valueWithId = {
-        ...values,
-        id: InsuranceCoverList?.length + 1,
-      };
-      dispatch(postInsuranceCoverMiddleWare(valueWithId));
-      toastRef.current.showToast();
-
-      {
-        setTimeout(() => {
-          navigation("/master/generals/insurancemanagement/cover");
-          formik.resetForm();
-        }, 3000);
-      }
-    } else if (action === "edit") {
-      dispatch(patchInsuranceCoverMiddleWare(values));
+  const handleSubmit = async (values) => {
+    if (action !== "add" && action !== "edit") {
       navigation("/master/generals/insurancemanagement/cover");
-    } else {
-      navigation("/master/generals/insurancemanagement/cover");
+      return;
     }
-
-    console.log(values, "find values");
+    const thunk = action === "add" ? postInsuranceCoverMiddleWare : patchInsuranceCoverMiddleWare;
+    try {
+      await dispatch(thunk(values)).unwrap();
+      toastRef.current.showToast(action === "edit" ? { detail: t("financeMasters.saveSuccessfully") } : undefined);
+      setTimeout(() => {
+        navigation("/master/generals/insurancemanagement/cover");
+      }, 3000);
+    } catch (error) {
+      toastRef.current.showToast({ severity: "error", detail: error });
+    }
   };
   const setFormikValues = (data) => {
-    console.log(data, "find setFormikValues");
     const coverCode = data[0]?.coverCode;
     const coverName = data[0]?.coverName;
     const coverDescription = data[0]?.coverDescription;
-    const modifiedBy = data[0].modifiedby;
-    const modifiedOn = data[0].modifiedOn;
+    const modifiedBy = data[0]?.modifiedBy;
+    const modifiedOn = data[0]?.modifiedOn;
 
     const updatedValues = {
-      coverCode: `${coverCode}`,
-      coverName: `${coverName}`,
-      coverDescription: `${coverDescription}`,
-      modifiedBy: `${modifiedBy}`,
-      modifiedOn: `${modifiedOn}`,
+      coverCode: coverCode ?? "",
+      coverName: coverName ?? "",
+      coverDescription: coverDescription ?? "",
+      modifiedBy: modifiedBy ?? "",
+      modifiedOn: modifiedOn ?? "",
     };
     formik.setValues({ ...formik.values, ...updatedValues });
   };
@@ -139,7 +111,7 @@ const CoverDetailsAction = ({ action }) => {
   return (
     <div className="action__cover_container">
       <div className="grid m-0 top-container">
-        <CustomToast ref={toastRef} message="Cover Code CC1234 is added" />
+        <CustomToast ref={toastRef} message={`Cover Code ${formik.values.coverCode || ""} is added`} />
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
           <div className="svgback_container">
@@ -179,7 +151,7 @@ const CoverDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.coverCode && formik.errors.coverCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.coverCode}
               </div>
             )}
@@ -197,7 +169,7 @@ const CoverDetailsAction = ({ action }) => {
               }
             />
             {formik.touched.coverName && formik.errors.coverName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.coverName}
               </div>
             )}
@@ -216,7 +188,7 @@ const CoverDetailsAction = ({ action }) => {
             />
             {formik.touched.coverDescription &&
               formik.errors.coverDescription && (
-                <div style={{ fontSize: 12, color: "red" }}>
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                   {formik.errors.coverDescription}
                 </div>
               )}
@@ -251,7 +223,6 @@ const CoverDetailsAction = ({ action }) => {
         {action === "add" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Save
@@ -260,7 +231,6 @@ const CoverDetailsAction = ({ action }) => {
         {action === "edit" && (
           <Button
             className="save__action"
-            disabled={!formik.isValid}
             onClick={formik.handleSubmit}
           >
             Update

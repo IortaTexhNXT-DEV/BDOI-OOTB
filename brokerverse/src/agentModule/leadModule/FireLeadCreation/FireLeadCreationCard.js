@@ -1,12 +1,14 @@
 import React, { useRef, useState, useEffect, useMemo, useCallback } from "react";
+import { isValidMobile, mobileHint, normalizeMobile } from "../../../utility/phoneFormat";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { Card } from "primereact/card";
 import { RadioButton } from "primereact/radiobutton";
 import { InputNumber } from "primereact/inputnumber";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdwonField";
+import DropdownField from "../../component/DropdownField";
 import { Button } from "primereact/button";
+import { Message } from "primereact/message";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -17,13 +19,14 @@ import { useDispatch, useSelector } from "react-redux";
 import "../../quoteModule/quoteDetailView/index.scss";
 import "./FireLeadCreationCard.scss";
 import { useFormik } from "formik";
-import addressService from "../../../services/addressService";
-import { isThailand } from "../../../utility/addressHelpers";
+import PhAddressFields from "../../component/PhAddressFields";
 import {
   postFireCreateleadMiddleware,
   getLeadByIdMiddleware,
 } from "../Store/leadMiddleware";
 import quotationService from "../../../services/quotationService";
+import placementService from "../../../services/placementService";
+import { numberLocale } from "../../../utility/currencyConverter";
 import {
   CONSTRUCTION_TYPES,
   BUILDING_TYPES,
@@ -38,6 +41,11 @@ import {
   FIRE_EXTINGUISHER_DISCOUNT_MAX,
   DISCOUNT_STEP,
 } from "./fireRiskConstants";
+import { birthDateError, birthDateRange, toIsoDate, useAgeLimits } from "../../../utility/birthDate";
+import logger from "../../../utility/logger";
+import { notifyWarn } from "../../../utility/dialogs";
+import CustomerResponseActions from "../../quoteModule/customerResponse/CustomerResponseActions";
+import RequestForQuotationButton from "../../../module/Placement/RequestForQuotationButton";
 
 const personalDetailsInitialValue = {
   CompanyName: "",
@@ -49,13 +57,12 @@ const personalDetailsInitialValue = {
   ContactNumber: "",
   HouseNo: "",
   Barangay: "",
-  Country: "",
+  Country: "Philippines",
   Province: "",
   City: "",
   ZIPCode: "",
-  RoadThanon: "",
-  SoiAlley: "",
-  MooVillage: "",
+  Street: "",
+  Region: "",
   DateofBirth: "",
   category: "Retail",
   gender: "Male",
@@ -122,7 +129,7 @@ const getSiForCover = (cover, vals) => {
   return 0;
 };
 
-const getPersonalDetailsValidation = (t) => (values) => {
+const getPersonalDetailsValidation = (t, ageLimits) => (values) => {
   const errors = {};
   if (values.category === "Corporate") {
     if (!values.CompanyName) errors.CompanyName = t("fireLead.fieldRequired");
@@ -138,8 +145,8 @@ const getPersonalDetailsValidation = (t) => (values) => {
   }
   if (!values.ContactNumber) {
     errors.ContactNumber = t("fireLead.phoneRequired");
-  } else if (!/^\d{10}$/.test(values.ContactNumber)) {
-    errors.ContactNumber = t("fireLead.invalidPhone");
+  } else if (!isValidMobile(values.ContactNumber)) {
+    errors.ContactNumber = `${t("fireLead.invalidPhone")} (e.g. ${mobileHint()})`;
   }
   if (!values.HouseNo) errors.HouseNo = t("fireLead.fieldRequired");
   if (!values.Barangay) errors.Barangay = t("fireLead.fieldRequired");
@@ -148,6 +155,7 @@ const getPersonalDetailsValidation = (t) => (values) => {
   if (!values.City) errors.City = t("fireLead.fieldRequired");
   if (!values.ZIPCode) errors.ZIPCode = t("fireLead.fieldRequired");
   if (!values.DateofBirth) errors.DateofBirth = t("fireLead.fieldRequired");
+  else if (birthDateError(values.DateofBirth, ageLimits)) errors.DateofBirth = birthDateError(values.DateofBirth, ageLimits);
   if (!values.category) errors.category = t("fireLead.fieldRequired");
   if (!values.gender) errors.gender = t("fireLead.fieldRequired");
   return errors;
@@ -171,9 +179,8 @@ const leadToPersonalFormValues = (lead) => {
     Province: lead.province || "",
     City: lead.city || "",
     ZIPCode: lead.zipCode || "",
-    RoadThanon: lead.roadThanon || "",
-    SoiAlley: lead.soiAlley || "",
-    MooVillage: lead.mooVillage || "",
+    Street: lead.street || lead.roadThanon || "",
+    Region: lead.region || "",
     DateofBirth: lead.DOB
       ? (typeof lead.DOB === "string" ? new Date(lead.DOB) : lead.DOB)
       : "",
@@ -184,11 +191,14 @@ const leadToPersonalFormValues = (lead) => {
 
 const FireLeadCreationCard = ({ step, onStepChange }) => {
   const { t } = useTranslation();
+  const ageLimits = useAgeLimits();
   const { formatCurrency } = useFormatCurrency();
   const location = useLocation();
   const { state: locationState } = location;
   const existingLeadRefId = locationState?.leadRefId || locationState?.leadId;
-  const existingLeadFromState = locationState?.lead;
+  // an existing customer picked in Create prospect pre-fills the personal details, and the prospect is linked to it
+  const existingClient = locationState?.existingClient;
+  const existingLeadFromState = locationState?.lead || existingClient;
 
   const currentLeadDetails = useSelector(
     (state) => state.leadReducers?.currentLeadDetails
@@ -223,7 +233,6 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
     }
   }, [dispatch, existingLeadRefId, existingLeadFromState]);
 
-
   const getTranslatedOptionLabel = useCallback(
     (value, options) => {
       if (value == null || value === "") return t("policyDetail.nA");
@@ -233,18 +242,13 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
     [t]
   );
 
-  const [countryList, setCountryList] = useState([]);
-  const [provinceList, setProvinceList] = useState([]);
-  const [cityList, setCityList] = useState([]);
-  const [districtList, setDistrictList] = useState([]);
-  const [postalLookupLoading, setPostalLookupLoading] = useState(false);
 
   const personalFormik = useFormik({
     initialValues: existingLeadFromState
       ? leadToPersonalFormValues(existingLeadFromState)
       : personalDetailsInitialValue,
     enableReinitialize: true,
-    validate: getPersonalDetailsValidation(t),
+    validate: getPersonalDetailsValidation(t, ageLimits),
     onSubmit: async (values) => {
       setPersonalDetails(values);
       // When adding quote for existing lead, skip create-lead API and go to step 2
@@ -256,26 +260,26 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       // Step 1 = Lead only: Create Lead API with personal details
       const leadPayload = {
         lob: "FIRE",
+        ...(existingClient ? { clientId: existingClient.clientId || existingClient.id } : {}),
         companyName: values.CompanyName || null,
         taxInformationNumber: values.TaxNumber || null,
         firstName: values.FirstName,
         lastName: values.LastName,
         preferredName: values.PreferredName,
         emailId: values.EmailID,
-        contactNumber: values.ContactNumber,
+        contactNumber: normalizeMobile(values.ContactNumber),
         houseNo: values.HouseNo,
         barangay: values.Barangay,
         country: typeof values.Country === "object" ? values.Country?.label : values.Country,
         province: typeof values.Province === "object" ? values.Province?.label : values.Province,
         city: typeof values.City === "object" ? values.City?.label : values.City,
         zipCode: values.ZIPCode,
-        roadThanon: values.RoadThanon || undefined,
-        soiAlley: values.SoiAlley || undefined,
-        mooVillage: values.MooVillage || undefined,
+        street: values.Street || undefined,
+        region: typeof values.Region === "object" ? values.Region?.label : values.Region || undefined,
         DOB: values.DateofBirth
           ? (typeof values.DateofBirth === "string"
               ? values.DateofBirth
-              : values.DateofBirth.toISOString?.().split("T")[0])
+              : toIsoDate(values.DateofBirth))
           : "",
         leadCategory: values.category || "Retail",
         gender: values.gender || "Male",
@@ -316,119 +320,6 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
     }
   }, [existingLeadRefId, currentLeadDetails, existingLeadFromState]);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCountries();
-      if (!cancelled && res.success && res.data) setCountryList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  const selectedCountryId = countryList.find(
-    (c) => (c.name || c.code) === personalFormik.values.Country || c.id === personalFormik.values.Country
-  )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) => (p.name || p.code) === personalFormik.values.Province || p.id === personalFormik.values.Province
-  )?.id;
-  const selectedCityId = cityList.find(
-    (c) => (c.name || c.code) === personalFormik.values.City || c.id === personalFormik.values.City
-  )?.id;
-
-  useEffect(() => {
-    if (!selectedCountryId) {
-      setProvinceList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getProvincesByCountry(selectedCountryId);
-      if (!cancelled && res.success && res.data) setProvinceList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, [selectedCountryId]);
-
-  useEffect(() => {
-    if (!selectedProvinceId) {
-      setCityList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCitiesByProvince(selectedProvinceId);
-      if (!cancelled && res.success && res.data) setCityList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, [selectedProvinceId]);
-
-  useEffect(() => {
-    if (!selectedCityId || !isThailand(personalFormik.values.Country)) {
-      setDistrictList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getDistrictsByCity(selectedCityId);
-      if (!cancelled && res.success && res.data) setDistrictList(Array.isArray(res.data) ? res.data : []);
-    })();
-    return () => { cancelled = true; };
-  }, [selectedCityId, personalFormik.values.Country]);
-
-  const handlePostalCodeLookup = useCallback(async () => {
-    const country = personalFormik.values.Country;
-    const zip = personalFormik.values.ZIPCode?.trim();
-    if (!isThailand(country) || !zip) return;
-    setPostalLookupLoading(true);
-    try {
-      const countryCode =
-        (typeof country === "object" && country?.code) ||
-        countryList.find((c) => (c.name || c.code) === country)?.code ||
-        "TH";
-      const res = await addressService.getPostalCodeLookup(countryCode || "TH", zip);
-      if (res.success && res.data && res.data.length > 0) {
-        const first = res.data[0];
-        personalFormik.setFieldValue("Province", first.province ?? first.Province ?? "");
-        personalFormik.setFieldValue("City", first.city ?? first.City ?? "");
-        personalFormik.setFieldValue("Barangay", first.district ?? first.District ?? "");
-      }
-    } finally {
-      setPostalLookupLoading(false);
-    }
-  }, [personalFormik.values.Country, personalFormik.values.ZIPCode, countryList]);
-
-  const countryOptions = useMemo(
-    () =>
-      countryList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [countryList]
-  );
-  const availableProvinces = useMemo(
-    () =>
-      provinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [provinceList]
-  );
-  const availableCities = useMemo(
-    () =>
-      cityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [cityList]
-  );
-  const availableDistricts = useMemo(
-    () =>
-      districtList.map((d) => ({
-        label: d.name || d.code || String(d.id),
-        value: d.name || d.code || String(d.id),
-      })),
-    [districtList]
-  );
-
   const riskFormik = useFormik({
     initialValues: riskDetailsInitialValue,
     validate: (values) => {
@@ -445,7 +336,6 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
     },
   });
 
-
   // Fetch quotation status when on preview screen to check if customer has approved
   const fetchQuotationStatus = useCallback(async () => {
     if (!createdQuotationId) return;
@@ -456,7 +346,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         if (status) setQuotationStatus(status);
       }
     } catch (err) {
-      console.warn("Failed to fetch quotation status:", err);
+      logger.warn("Failed to fetch quotation status:", err);
     }
   }, [createdQuotationId]);
 
@@ -598,7 +488,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.CompanyName &&
               personalFormik.errors.CompanyName && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.CompanyName}
                 </div>
               )}
@@ -611,7 +501,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             />
             {personalFormik.touched.TaxNumber &&
               personalFormik.errors.TaxNumber && (
-                <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+                <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                   {personalFormik.errors.TaxNumber}
                 </div>
               )}
@@ -628,7 +518,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.FirstName &&
             personalFormik.errors.FirstName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.FirstName}
               </div>
             )}
@@ -641,7 +531,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.LastName &&
             personalFormik.errors.LastName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.LastName}
               </div>
             )}
@@ -657,7 +547,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.PreferredName &&
             personalFormik.errors.PreferredName && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.PreferredName}
               </div>
             )}
@@ -666,13 +556,14 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           <DatepickerField
             label={t("fireLead.dateOfBirth") + "*"}
             value={personalFormik.values.DateofBirth}
+            {...birthDateRange(ageLimits)}
             onChange={(date) =>
               personalFormik.setFieldValue("DateofBirth", date.target.value)
             }
           />
           {personalFormik.touched.DateofBirth &&
             personalFormik.errors.DateofBirth && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.DateofBirth}
               </div>
             )}
@@ -716,7 +607,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           />
           {personalFormik.touched.EmailID &&
             personalFormik.errors.EmailID && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.EmailID}
               </div>
             )}
@@ -726,160 +617,23 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             label={t("fireLead.contactNumber") + "*"}
             value={personalFormik.values.ContactNumber}
             onChange={personalFormik.handleChange("ContactNumber")}
+            inputMode="tel"
+            hint={mobileHint()}
           />
           {personalFormik.touched.ContactNumber &&
             personalFormik.errors.ContactNumber && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
                 {personalFormik.errors.ContactNumber}
               </div>
             )}
         </div>
       </div>
 
-      {/* Address: Country first, then Postal Code / ZIP, then Province, City, Barangay/District, then House No and Thailand fields */}
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={t("fireLead.country")}
-            value={personalFormik.values.Country}
-            options={countryOptions}
-            onChange={(e) => {
-              personalFormik.setFieldValue("Country", e.value);
-              personalFormik.setFieldValue("Province", "");
-              personalFormik.setFieldValue("City", "");
-              personalFormik.setFieldValue("Barangay", "");
-              personalFormik.setFieldValue("ZIPCode", "");
-            }}
-          />
-          {personalFormik.touched.Country &&
-            personalFormik.errors.Country && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.Country}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <InputTextField
-            label={isThailand(personalFormik.values.Country) ? t("fireLead.postalCode") : t("fireLead.zipCode")}
-            value={personalFormik.values.ZIPCode}
-            onChange={personalFormik.handleChange("ZIPCode")}
-            onBlur={handlePostalCodeLookup}
-          />
-          {postalLookupLoading && (
-            <div style={{ fontSize: 12, color: "#666" }} className="mt-1">{t("fireLead.lookupInProgress")}</div>
-          )}
-          {personalFormik.touched.ZIPCode &&
-            personalFormik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.ZIPCode}
-              </div>
-            )}
-        </div>
-      </div>
-
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={isThailand(personalFormik.values.Country) ? t("fireLead.provinceChangwat") : t("fireLead.province")}
-            value={personalFormik.values.Province}
-            options={availableProvinces}
-            onChange={(e) => {
-              personalFormik.setFieldValue("Province", e.value);
-              personalFormik.setFieldValue("City", "");
-              personalFormik.setFieldValue("Barangay", "");
-            }}
-            disabled={!personalFormik.values.Country}
-          />
-          {personalFormik.touched.Province &&
-            personalFormik.errors.Province && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.Province}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={isThailand(personalFormik.values.Country) ? t("fireLead.districtAmphoe") : t("fireLead.city")}
-            value={personalFormik.values.City}
-            options={availableCities}
-            onChange={(e) => {
-              personalFormik.setFieldValue("City", e.value);
-              personalFormik.setFieldValue("Barangay", "");
-            }}
-            disabled={!personalFormik.values.Province}
-          />
-          {personalFormik.touched.City && personalFormik.errors.City && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-              {personalFormik.errors.City}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          {isThailand(personalFormik.values.Country) && districtList.length > 0 ? (
-            <DropdownField
-              label={t("fireLead.subDistrictTambon")}
-              value={personalFormik.values.Barangay}
-              options={availableDistricts}
-              onChange={(e) => personalFormik.setFieldValue("Barangay", e.value)}
-              disabled={!personalFormik.values.City}
-            />
-          ) : (
-            <InputTextField
-              label={isThailand(personalFormik.values.Country) ? t("fireLead.subDistrictTambon") : t("fireLead.barangay")}
-              value={personalFormik.values.Barangay}
-              onChange={personalFormik.handleChange("Barangay")}
-            />
-          )}
-          {personalFormik.touched.Barangay &&
-            personalFormik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.Barangay}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <InputTextField
-            label={t("fireLead.houseNoStreet")}
-            value={personalFormik.values.HouseNo}
-            onChange={personalFormik.handleChange("HouseNo")}
-          />
-          {personalFormik.touched.HouseNo &&
-            personalFormik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "red" }} className="mt-3">
-                {personalFormik.errors.HouseNo}
-              </div>
-            )}
-        </div>
-      </div>
-
-      {isThailand(personalFormik.values.Country) && (
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.roadThanon")}
-              value={personalFormik.values.RoadThanon}
-              onChange={personalFormik.handleChange("RoadThanon")}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.soiAlley")}
-              value={personalFormik.values.SoiAlley}
-              onChange={personalFormik.handleChange("SoiAlley")}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.mooVillage")}
-              value={personalFormik.values.MooVillage}
-              onChange={personalFormik.handleChange("MooVillage")}
-            />
-          </div>
-        </div>
-      )}
+      {/* Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+      <PhAddressFields
+        formik={personalFormik}
+        required={{ houseNo: true, barangay: true, city: true, province: true, zipCode: true, country: true }}
+      />
 
       <div className="save_continue_conatiner">
         <div className="btn_lable_save_container flex justify-content-end mt-2">
@@ -1279,6 +1033,13 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         "FIRE"
       );
 
+      if (!result.success && result.code === "PLACEMENT_JOURNEY") {
+        // the line's placement journey requires a Placement Slip: place the risk with the insurer(s) first
+        const placement = await placementService.placeQuotation(createdQuotationId, { inceptionDate, expiryDate, insuredName });
+        toastRef.current?.showToast({ detail: t("placement.quoteJourney.created", { number: placement.placementNumber }), life: 2000 });
+        navigate(`/placement/placement-slips/${placement.id}`);
+        return;
+      }
       if (!result.success) {
         throw new Error(result.error || t("fireLead.failedToCreatePolicy"));
       }
@@ -1293,7 +1054,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       try {
         quotationDetailsForUpload = await quotationService.getQuotationById(createdQuotationId);
       } catch (e) {
-        console.warn("Could not fetch quotation for upload step:", e);
+        logger.warn("Could not fetch quotation for upload step:", e);
       }
 
       toastRef.current?.showToast({
@@ -1317,7 +1078,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
         },
       });
     } catch (error) {
-      console.error("Failed to create policy for upload step:", error);
+      logger.error("Failed to create policy for upload step:", error);
       toastErrorRef.current?.showToast({
         severity: "error",
         detail: error?.message || t("fireLead.failedToCreatePolicy"),
@@ -1339,7 +1100,8 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       const result = await quotationService.sendQuotationForApproval(createdQuotationId);
       if (result.success) {
         await fetchQuotationStatus();
-        toastRef.current?.showToast({ detail: t("fireLead.quoteSentToCustomer") });
+        if (result.data?.emailSending === false) notifyWarn(t("customerResponse.emailNotConfigured"));
+        else toastRef.current?.showToast({ detail: t("fireLead.quoteSentToCustomer") });
       } else {
         if (result.error?.includes?.("PendingCustomer")) {
           await fetchQuotationStatus();
@@ -1396,12 +1158,10 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       </div>
 
       {!hasAtLeastOneSi && (
-        <div className="mt-3" style={{ padding: "12px", backgroundColor: "#fef3c7", borderRadius: "6px", color: "#92400e", fontSize: 14 }}>
-          {t("fireLead.atLeastOneSiRequired")}
-        </div>
+        <Message severity="warn" className="mt-3 w-full" text={t("fireLead.atLeastOneSiRequired")} />
       )}
       {siErrors.atLeastOneSi && (
-        <div className="mt-2" style={{ fontSize: 12, color: "red" }}>{siErrors.atLeastOneSi}</div>
+        <div className="mt-2" style={{ fontSize: 12, color: "var(--color-danger)" }}>{siErrors.atLeastOneSi}</div>
       )}
 
       {hasAtLeastOneSi && (
@@ -1469,12 +1229,12 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
                     </div>
                   </div>
                 </div>
-                <div className="discount__action__container" style={{ color: "green" }}>
+                <div className="discount__action__container">
                   <div className="discount__action__text">{t("fireLead.min0Max15")}</div>
                   <div className="discount__action__text">{t("fireLead.max15")}</div>
                 </div>
                 {siErrors.sprinklerDiscount && (
-                  <small style={{ fontSize: 12, color: "red" }}>{siErrors.sprinklerDiscount}</small>
+                  <small style={{ fontSize: 12, color: "var(--color-danger)" }}>{siErrors.sprinklerDiscount}</small>
                 )}
               </div>
             )}
@@ -1515,12 +1275,12 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
                     </div>
                   </div>
                 </div>
-                <div className="discount__action__container" style={{ color: "green" }}>
+                <div className="discount__action__container">
                   <div className="discount__action__text">{t("fireLead.min0Max15")}</div>
                   <div className="discount__action__text">{t("fireLead.min0Max5")}</div>
                 </div>
                 {siErrors.fireExtinguisherDiscount && (
-                  <small style={{ fontSize: 12, color: "red" }}>{siErrors.fireExtinguisherDiscount}</small>
+                  <small style={{ fontSize: 12, color: "var(--color-danger)" }}>{siErrors.fireExtinguisherDiscount}</small>
                 )}
               </div>
             )}
@@ -1560,6 +1320,27 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             label={t("fireLead.back")}
             className="p-button-outlined"
             onClick={() => setStep(2)}
+          />
+          {/* same prospect and risk, sent to the market instead of priced from the tariff */}
+          <RequestForQuotationButton
+            disabled={!createdLeadId || !hasAtLeastOneSi}
+            prefill={{
+              leadRefId: createdLeadId,
+              leadName: personalDetails.CompanyName || [personalDetails.FirstName, personalDetails.LastName].filter(Boolean).join(" "),
+              productType: "Fire and Allied Perils",
+              riskDetails: {
+                location: riskDetails.LocationAddress,
+                locationCode: riskDetails.LocationCodeDescription,
+                occupancy: riskDetails.OccupancyType,
+                natureOfBusiness: riskDetails.NatureOfBusiness,
+                construction: riskDetails.ConstructionType,
+                buildingType: riskDetails.BuildingType,
+                floors: riskDetails.NoOfFloors,
+                earthquakeZone: riskDetails.EarthquakeZone,
+                fireProtection: riskDetails.FireProtection,
+              },
+              requestedCovers: SMI_ENTRY_FIELDS.map((f) => ({ cover: t(f.labelKey), sumInsured: Number(siValues[f.key]) || 0 })),
+            }}
           />
           <Button
             label={t("fireLead.continueToPreview")}
@@ -1661,9 +1442,11 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
             <label className="alpha_text">
               {[
                 personalDetails.HouseNo,
+                personalDetails.Street,
                 personalDetails.Barangay,
                 typeof personalDetails.City === "object" ? personalDetails.City?.label : personalDetails.City,
                 typeof personalDetails.Province === "object" ? personalDetails.Province?.label : personalDetails.Province,
+                personalDetails.Region,
                 typeof personalDetails.Country === "object" ? personalDetails.Country?.label : personalDetails.Country,
                 personalDetails.ZIPCode,
               ]
@@ -1728,7 +1511,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
               <label className="insurance_text">{t(f.labelKey)}</label>
               <label className="alpha_text">
                 {siValues[f.key] != null && siValues[f.key] !== ""
-                  ? Number(siValues[f.key]).toLocaleString()
+                  ? Number(siValues[f.key]).toLocaleString(numberLocale())
                   : "0"}
               </label>
             </div>
@@ -1789,20 +1572,11 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
           onClick={() => setStep(3)}
         />
         {quotationStatus === "PendingCustomer" ? (
-          <div
-            className="waiting-notice"
-            style={{
-              padding: "8px 16px",
-              backgroundColor: "#fef3c7",
-              borderRadius: "6px",
-              display: "flex",
-              alignItems: "center",
-              fontSize: 14,
-            }}
-          >
-            <i className="pi pi-clock" style={{ marginRight: "8px" }}></i>
-            {t("fireLead.waitingForCustomerApproval")}
-          </div>
+          <CustomerResponseActions
+            quotationId={createdQuotationId}
+            notice={t("fireLead.waitingForCustomerApproval")}
+            onRecorded={fetchQuotationStatus}
+          />
         ) : (
           <Button
             label={t("fireLead.sendToCustomer")}

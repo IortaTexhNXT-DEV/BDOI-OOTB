@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -9,17 +9,23 @@ import { Button } from "primereact/button";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import { InputSwitch } from "primereact/inputswitch";
-import ToggleButton from "../../../../components/ToggleButton";
 import { useDispatch, useSelector } from "react-redux";
-import { getAccountCategorySearchList } from "../store/accountCategoryMeddleware";
+import { getAccountCategorySearchList, getAccountCategoryList } from "../store/accountCategoryMeddleware";
+import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
+import { Toast } from "primereact/toast";
 
 const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const [products, setProducts] = useState([]);
+  const statusToast = useRef(null);
+  const reloadList = () => dispatch(getAccountCategoryList());
+  const showStatusError = (error) =>
+    statusToast.current?.show({ severity: "error", detail: error.message });
+  useEffect(() => {
+    dispatch(getAccountCategoryList());
+  }, [dispatch]);
   const [search, setSearch] = useState("");
-  const { AccountCategoryList, loading, AccountCategorySearchList } =
+  const { AccountCategoryList, AccountCategorySearchList } =
     useSelector(({ accountCategoryReducer }) => {
       return {
         loading: accountCategoryReducer?.loading,
@@ -28,7 +34,6 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
           accountCategoryReducer?.AccountCategorySearchList,
       };
     });
-  console.log(AccountCategoryList, "find AccountCategoryList");
   const emptyTableIcon = (
     <div>
       <div className="empty-table-icon">
@@ -42,10 +47,9 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -71,35 +75,11 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
         <Button
           icon={<SvgIconeye />}
           onClick={() => handleViewAction(rowData)}
-          className="action__button p-0"
-        />
+          className="action__button p-0" aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />
         <Button
           icon={<SvgEdit />}
           onClick={() => handleEditAction(rowData)}
-          className="action__button p-0 w-auto"
-        />
-      </div>
-    );
-  };
-  const renderStatusButton = (rowData) => {
-    console.log(rowData.status, "find status");
-    return (
-      <div className="action__switch__container">
-        <InputSwitch
-          checked={rowData.status ? true : false}
-          className={
-            rowData.status
-              ? "switch__action__input__active"
-              : "switch__action__input__inactive"
-          }
-        />
-      </div>
-    );
-  };
-  const renderToggleButton = () => {
-    return (
-      <div>
-        <ToggleButton />
+          className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -112,6 +92,7 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
 
   return (
     <div className="master__account__table__container">
+      <Toast ref={statusToast} />
       <div className="grid m-0 header_search_container">
         <div class="col-12 md:col-12 lg:col-12 xl:col-12 p-0">
           <span className="p-input-icon-left w-full">
@@ -131,8 +112,8 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
       <DataTable
         value={search ? AccountCategorySearchList : AccountCategoryList}
         paginator
-        rows={5}
-        rowsPerPageOptions={[5, 10, 25, 50]}
+        rows={20}
+        rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         className="reversal__table__main"
@@ -141,23 +122,23 @@ const TableData = ({ handleViewAction, handleEditAction, EmptyTable }) => {
         scrollHeight="40vh"
       >
         <Column
-          field="accountCategoryCode"
+          field="categoryCode"
           header={t("financeMasters.accountCategoryCodeHeader")}
           className="fieldvalue_container"
-          body={(rowData) => rowData.accountCategoryCode?.toUpperCase()}
+          body={(rowData) => rowData.categoryCode?.toUpperCase()}
           sortable
         ></Column>
         <Column
-          field="accountCategoryName"
+          field="categoryName"
           header={t("financeMasters.accountCategoryNameHeader")}
           className="fieldvalue_container"
-          body={(rowData) => rowData.accountCategoryName?.toUpperCase()}
+          body={(rowData) => rowData.categoryName}
         ></Column>
         <Column
           field="status"
           header={t("financeMasters.status")}
           className="fieldvalue_container"
-          body={(columnData) => <ToggleButton id={columnData.id} />}
+          body={(columnData) => <MasterStatusToggle type="account-category" record={columnData} onChanged={reloadList} onError={showStatusError} />}
         ></Column>
         <Column
           style={{

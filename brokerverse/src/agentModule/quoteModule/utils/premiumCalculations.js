@@ -3,6 +3,7 @@
  */
 
 import { parseNumericValue, calculatePremium } from "./quotationDataTransform";
+import logger from "../../../utility/logger";
 
 /**
  * Compute all premium values based on coverage details
@@ -19,33 +20,8 @@ export const computeAllPremiums = (values) => {
   const aonRate = parseNumericValue(values.actsOfNatureRate);
   const aonPremium = calculatePremium(ldCoverage, aonRate);
 
-  // CTPL Premium is a FLAT RATE, not a percentage of coverage
-  // IMPORTANT: The ctplCoverageRate value (e.g., "957.88") IS the premium itself
-  // CTPL is NOT calculated as: (coverage * rate) / 100
-  // Backend uses: ctplSetting[vehicleType] directly (see premium-calculator.js)
-  const ctplRateValue = parseNumericValue(values.ctplCoverageRate || 0);
-  const ctplPremium = ctplRateValue.toFixed(2);
-  
-  // Validate CTPL premium is reasonable (flat rates are typically 200-2000 THB)
-  // If CTPL > 10,000, it was likely calculated incorrectly as a percentage
-  if (ctplRateValue > 10000) {
-    console.warn(
-      `⚠️ [computeAllPremiums] CTPL Premium (${ctplPremium}) seems unusually high (>10,000). ` +
-      `CTPL should be a flat rate (typically 200-2000 THB). ` +
-      `If this value was calculated as a percentage of coverage, it's incorrect. ` +
-      `CTPL rate from config: ${values.ctplCoverageRate}`
-    );
-  }
-  
-  // Log CTPL calculation for debugging
-  if (ctplRateValue > 0) {
-    console.log("[computeAllPremiums] CTPL Premium (flat rate):", {
-      ctplCoverageRate: values.ctplCoverageRate,
-      ctplPremium,
-      note: "CTPL is a flat rate, not calculated as percentage",
-      validation: ctplRateValue <= 10000 ? "✓ Reasonable" : "⚠️ Unusually high",
-    });
-  }
+  // CTPL: the fixed Insurance Commission tariff premium of the vehicle class (motor tariff), not sum insured x rate.
+  const ctplPremium = parseNumericValue(values.ctplCoverageRate || 0).toFixed(2);
 
   // Roadside Assistance Premium (also based on Loss & Damage coverage)
   const raRate = parseNumericValue(values.roadsideAssistanceRate);
@@ -65,11 +41,11 @@ export const computeAllPremiums = (values) => {
   const pdRate = parseNumericValue(values.propertyDamageRate) || 1.0; // Default 1% if not specified
   const pdPremium = calculatePremium(pdCoverage, pdRate);
 
-  // APPA Premium
-  const appaCoverage = parseNumericValue(values.APPAtotalCoverage);
+  // Auto Passenger Personal Accident: limit per person x seats (driver and passengers) x tariff rate.
   const appaPerPerson = parseNumericValue(values.autoPassengerPersonalAccident);
-  const appaRate = parseNumericValue(values.APPARate) || 0.5; // Default 0.5% if not specified
-  const appaPremium = calculatePremium(appaCoverage, appaRate);
+  const appaSeats = parseNumericValue(values.appaSeats);
+  const appaCoverage = appaPerPerson * appaSeats;
+  const appaPremium = calculatePremium(appaCoverage, parseNumericValue(values.appaRatePercent));
 
   // Total Sum Insured
   const totalSumInsured = ldCoverage + biCoverage + pdCoverage + appaCoverage;
@@ -83,6 +59,7 @@ export const computeAllPremiums = (values) => {
     personalAccidentCoverPremium: pacPremium,
     bodilyInjuryCoveragePremium: biPremium,
     propertyDamageCoveragePremium: pdPremium,
+    APPAtotalCoverage: appaCoverage.toFixed(2),
     APPAcoveragePremium: appaPremium,
     totalSumInsured: totalSumInsured.toFixed(2),
   };
@@ -102,7 +79,8 @@ export const calculateOrderSummary = (
   accessories = {},
   discountPercent = 0,
   ncdPercent = 0,
-  productConfigurator = {}
+  productConfigurator = {},
+  settingsRates = {}
 ) => {
   // Calculate NET Premium (sum of all coverage premiums)
   const ldPremium = parseNumericValue(
@@ -141,10 +119,10 @@ export const calculateOrderSummary = (
   const accessoriesTotal =
     airconValue + stereoValue + magWheelsValue + othersValue;
 
+  // CTPL is the tariff amount inclusive of taxes and fees: outside the taxed net premium, added to the gross.
   let netPremium =
     ldPremium +
     aonPremium +
-    ctplPremium +
     raPremium +
     pacPremium +
     biPremium +
@@ -157,8 +135,8 @@ export const calculateOrderSummary = (
   netPremium = netPremium - ncdAmount;
 
   // Use centralized tax rates from product configurator (consistent with calculatePremiumBreakdown)
-  const taxRates = getTaxRates(productConfigurator);
-  
+  const taxRates = getTaxRates(productConfigurator, settingsRates);
+
   // Tax rates are already decimals (e.g., 0.12 for 12%), so multiply directly
   const valueAddedTax = netPremium * taxRates.valueAddedTax;
   const documentaryStampTax = netPremium * taxRates.documentaryStampTax;
@@ -166,7 +144,7 @@ export const calculateOrderSummary = (
 
   // Calculate gross before discount
   let grossBeforeDiscount =
-    netPremium + valueAddedTax + documentaryStampTax + localGovernmentTax;
+    netPremium + valueAddedTax + documentaryStampTax + localGovernmentTax + ctplPremium;
 
   // Apply discount
   const discountAmount = (grossBeforeDiscount * discountPercent) / 100;
@@ -182,7 +160,7 @@ export const calculateOrderSummary = (
     valueAddedTax,
     documentaryStampTax,
     localGovernmentTax,
-    others: 0, // calculateOrderSummary doesn't include others in calculation
+    others: ctplPremium, // CTPL (inclusive of taxes) is added to the gross like other charges
     discount: discountAmount,
     sumInsured,
     taxRates,
@@ -200,19 +178,6 @@ export const calculateOrderSummary = (
     grossPremium: grossPremium.toFixed(2),
     accountPremiumOthers: "0.00", // Can be set separately if needed
   };
-
-  console.log("[calculateOrderSummary] Calculation result:", {
-    netPremium: result.netPremium,
-    taxes: {
-      VAT: result.valueAddedTax,
-      DST: result.documentaryStampTax,
-      LGT: result.localGovernmentTax,
-    },
-    NCD: result.NCD,
-    discount: result.discount,
-    grossPremium: result.grossPremium,
-    sumInsured: sumInsured > 0 ? sumInsured.toFixed(2) : "N/A",
-  });
 
   return result;
 };
@@ -276,7 +241,7 @@ const validatePremiumCalculation = ({
   const difference = Math.abs(grossPremium - calculatedTotal);
 
   if (difference > 0.01 && grossPremium > 0) {
-    console.warn(`⚠️ [${context}] Accounting equation mismatch:`, {
+    logger.warn(`[${context}] Accounting equation mismatch:`, {
       grossPremium,
       netPremium,
       valueAddedTax,
@@ -302,7 +267,7 @@ const validatePremiumCalculation = ({
       rateIssues.push(`LGT rate seems like percentage (${taxRates.localGovernmentTax}), should be decimal`);
     }
     if (rateIssues.length > 0) {
-      console.warn(`⚠️ [${context}] Tax rate validation issues:`, rateIssues);
+      logger.warn(`[${context}] Tax rate validation issues:`, rateIssues);
     }
   }
 
@@ -310,8 +275,8 @@ const validatePremiumCalculation = ({
   if (sumInsured && sumInsured > 0) {
     const premiumRatio = (grossPremium / sumInsured) * 100;
     if (premiumRatio > 10) {
-      console.warn(
-        `⚠️ [${context}] Gross Premium (${grossPremium}) is ${premiumRatio.toFixed(2)}% of Sum Insured (${sumInsured}). This seems unusually high (>10%). Expected range: 1-5%.`
+      logger.warn(
+        `[${context}] Gross Premium (${grossPremium}) is ${premiumRatio.toFixed(2)}% of Sum Insured (${sumInsured}). This seems unusually high (>10%). Expected range: 1-5%.`
       );
     }
   }
@@ -320,49 +285,27 @@ const validatePremiumCalculation = ({
   if (ctplPremium !== undefined && ctplPremium !== null) {
     const ctplNum = typeof ctplPremium === 'string' ? parseFloat(ctplPremium) : ctplPremium;
     if (ctplNum > 10000) {
-      console.warn(
-        `⚠️ [${context}] CTPL Premium (${ctplPremium}) seems unusually high (>10,000). ` +
-        `CTPL should be a flat rate (typically 200-2000 THB). ` +
+      logger.warn(
+        `[${context}] CTPL Premium (${ctplPremium}) seems unusually high (>10,000). ` +
+        `CTPL should be a flat rate (typically 200 to 2,000). ` +
         `This may indicate CTPL was incorrectly calculated as a percentage of coverage.`
       );
     }
   }
-
-  // Log tax rates for debugging
-  console.log(`[${context}] Tax rates used:`, {
-    valueAddedTax: taxRates?.valueAddedTax,
-    documentaryStampTax: taxRates?.documentaryStampTax,
-    localGovernmentTax: taxRates?.localGovernmentTax,
-    source: "productConfigurator",
-  });
 };
 
 /**
- * Get centralized tax rates from product configurator
- * @param {Object} productConfigurator - Product configuration object
+ * Tax rates used on screen: the premium tax and charge engine's rates (Premium Taxes & LGU Rates, see useTaxRates),
+ * the same engine the server prices with. Values kept in an old product template ("Taxes and fees") are ignored: one source of truth.
+ * @param {Object} _productConfigurator - kept for the callers' signature; template taxes are not used
+ * @param {Object} settingsRates - decimal rates from useTaxRates
  * @returns {Object} Tax rates as decimals (e.g., 0.12 for 12%)
  */
-export const getTaxRates = (productConfigurator) => {
-  const config = productConfigurator?.configuration?.taxes;
-  
-  // Helper to convert percentage to decimal
-  // Tax rates in config are stored as percentages (e.g., "12" for 12%, "0.5" for 0.5%)
-  // Backend divides by 100, so frontend should also divide by 100 for consistency
-  // ALL rates in database are percentages, so always divide by 100
-  const toDecimal = (value, defaultDecimal) => {
-    if (!value) return defaultDecimal;
-    const num = parseFloat(value);
-    if (isNaN(num)) return defaultDecimal;
-    // Always divide by 100 - all rates in DB are stored as percentages
-    return num / 100;
-  };
-  
-  return {
-    documentaryStampTax: toDecimal(config?.documentary_stamp_tax, 0.005), // 0.5%
-    valueAddedTax: toDecimal(config?.value_added_tax, 0.12), // 12%
-    localGovernmentTax: toDecimal(config?.local_government_tax, 0.05), // 5%
-  };
-};
+export const getTaxRates = (_productConfigurator, settingsRates = {}) => ({
+  documentaryStampTax: Number(settingsRates.documentaryStampTax) || 0,
+  valueAddedTax: Number(settingsRates.valueAddedTax) || 0,
+  localGovernmentTax: Number(settingsRates.localGovernmentTax) || 0,
+});
 
 /**
  * Calculate all premium components based on coverage details
@@ -372,7 +315,8 @@ export const getTaxRates = (productConfigurator) => {
  */
 export const calculatePremiumBreakdown = (
   coverageValues,
-  productConfigurator = {}
+  productConfigurator = {},
+  settingsRates = {}
 ) => {
   // Helper to parse string values
   const parseValue = (val) => {
@@ -401,10 +345,10 @@ export const calculatePremiumBreakdown = (
   );
   const appaPremium = parseValue(coverageValues.APPAcoveragePremium);
 
+  // CTPL is the tariff amount inclusive of taxes and fees: outside the taxed net premium, added to the gross.
   const netPremium =
     lossAndDamagePremium +
     actsOfNaturePremium +
-    ctplPremium +
     roadsideAssistancePremium +
     personalAccidentCoverPremium +
     bodilyInjuryPremium +
@@ -412,11 +356,14 @@ export const calculatePremiumBreakdown = (
     appaPremium;
 
   // Use centralized tax rates
-  const taxRates = getTaxRates(productConfigurator);
+  const taxRates = getTaxRates(productConfigurator, settingsRates);
   
-  const documentaryStampTax = netPremium * taxRates.documentaryStampTax;
-  const valueAddedTax = netPremium * taxRates.valueAddedTax;
-  const localGovernmentTax = netPremium * taxRates.localGovernmentTax;
+  // Each tax is rounded to the centavo before the gross is added up, as the server does
+  // (backend quotations/premium.js), so the gross shown here equals the order summary's.
+  const toCentavo = (n) => Math.round((Number(n) + Number.EPSILON) * 100) / 100;
+  const documentaryStampTax = toCentavo(netPremium * taxRates.documentaryStampTax);
+  const valueAddedTax = toCentavo(netPremium * taxRates.valueAddedTax);
+  const localGovernmentTax = toCentavo(netPremium * taxRates.localGovernmentTax);
 
   // Get discount
   const discount = parseValue(coverageValues.discount || 0);
@@ -430,6 +377,7 @@ export const calculatePremiumBreakdown = (
     documentaryStampTax +
     valueAddedTax +
     localGovernmentTax +
+    ctplPremium +
     others -
     discount;
 
@@ -443,7 +391,7 @@ export const calculatePremiumBreakdown = (
     valueAddedTax,
     documentaryStampTax,
     localGovernmentTax,
-    others,
+    others: others + ctplPremium, // CTPL (inclusive of taxes) is added to the gross like other charges
     discount,
     sumInsured,
     taxRates,
@@ -460,19 +408,6 @@ export const calculatePremiumBreakdown = (
     discount: discount.toFixed(2),
     grossPremium: Math.max(0, grossPremium).toFixed(2),
   };
-
-  console.log("[calculatePremiumBreakdown] Calculation result:", {
-    netPremium: result.netPremium,
-    taxes: {
-      VAT: result.valueAddedTax,
-      DST: result.documentaryStampTax,
-      LGT: result.localGovernmentTax,
-    },
-    others: result.accountPremiumOthers,
-    discount: result.discount,
-    grossPremium: result.grossPremium,
-    sumInsured: sumInsured > 0 ? sumInsured.toFixed(2) : "N/A",
-  });
 
   return result;
 };

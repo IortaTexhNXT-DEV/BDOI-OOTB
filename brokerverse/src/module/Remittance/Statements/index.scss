@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__statement__generation__master {
@@ -91,7 +92,7 @@
 
               &.required::after {
                 content: " *";
-                color: $dark-red;
+                color: $color-danger;
               }
             }
 
@@ -217,7 +218,6 @@
           span {
             font-size: 12px;
             color: $grey;
-            text-transform: uppercase;
           }
 
           strong {

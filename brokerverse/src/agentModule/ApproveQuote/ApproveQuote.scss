@@ -1,45 +1,18 @@
+// Public quote approval page (outside the app shell): BDOI tokens, and the table rules the shell
+// normally applies (theme/bdoi/enterprise.scss) repeated here so leaked screen styles (italic,
+// centred, padded empty-state cells) do not reach the premium table.
+@import "../../theme/bdoi/tokens";
+
 .approve-quote-container {
+  font-family: $font-body;
+  color: $color-text;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: #f8fafc;
+  background-color: $color-bg;
   padding: 20px;
-
-  .approve-quote-lang-bar {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    button {
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 14px;
-      color: #64748b;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: color 0.2s, background-color 0.2s;
-
-      &:hover {
-        color: #2563eb;
-      }
-
-      &.active {
-        color: #2563eb;
-        font-weight: 600;
-      }
-    }
-
-    .lang-sep {
-      color: #cbd5e1;
-      user-select: none;
-    }
-  }
 
   .p-card {
     max-width: 800px;
@@ -49,7 +22,7 @@
     padding: 0;
 
     h2 {
-      color: #1e293b;
+      color: $color-heading;
       font-size: 28px;
       font-weight: 600;
       margin-bottom: 12px;
@@ -57,7 +30,7 @@
     }
 
     p {
-      color: #64748b;
+      color: $color-text-muted;
       font-size: 16px;
       line-height: 1.5;
       text-align: center;
@@ -65,7 +38,7 @@
     }
 
     h3 {
-      color: #2563eb;
+      color: $brand-blue;
       font-size: 18px;
       font-weight: 500;
       margin-bottom: 8px;
@@ -81,19 +54,19 @@
 
   // Quote Information Cards
   .quote-info-card {
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: $color-bg;
+    border: 1px solid $color-border;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
 
     .section-title {
-      color: #1e293b;
+      color: $color-heading;
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 16px;
       padding-bottom: 8px;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 2px solid $color-border;
     }
 
     .info-row {
@@ -101,28 +74,28 @@
       justify-content: space-between;
       align-items: center;
       padding: 10px 0;
-      border-bottom: 1px solid #e2e8f0;
+      border-bottom: 1px solid $color-border;
 
       &:last-child {
         border-bottom: none;
       }
 
       .info-label {
-        color: #64748b;
+        color: $color-text-muted;
         font-size: 14px;
         font-weight: 500;
         flex: 0 0 45%;
       }
 
       .info-value {
-        color: #1e293b;
+        color: $color-heading;
         font-size: 15px;
         font-weight: 600;
         text-align: right;
         flex: 1;
 
         &.highlight {
-          color: #2563eb;
+          color: $brand-blue;
           font-size: 16px;
         }
       }
@@ -132,40 +105,59 @@
   // Premium Breakdown Section
   .premium-breakdown-section {
     background-color: #fff;
-    border: 2px solid #e2e8f0;
+    border: 2px solid $color-border;
     border-radius: 8px;
     padding: 20px;
     margin-bottom: 20px;
 
     .section-title {
-      color: #1e293b;
+      color: $color-heading;
       font-size: 16px;
       font-weight: 600;
       margin-bottom: 16px;
       padding-bottom: 8px;
-      border-bottom: 2px solid #e2e8f0;
+      border-bottom: 2px solid $color-border;
     }
 
     .premium-table {
       margin-bottom: 16px;
       
       .p-datatable-thead > tr > th {
-        background-color: #f1f5f9;
-        color: #475569;
+        background-color: $brand-navy;
+        color: $color-surface;
         font-weight: 600;
         padding: 12px;
         font-size: 14px;
       }
 
       .p-datatable-tbody > tr > td {
-        padding: 12px;
+        padding: 12px !important;
         font-size: 14px;
-        color: #334155;
+        font-style: normal !important;
+        text-align: left !important;
+        color: $color-text !important;
+        vertical-align: middle;
+      }
+
+      .p-datatable-thead > tr > th {
+        text-align: left !important;
+        font-style: normal !important;
+      }
+
+      .p-datatable-thead > tr > th.bv-num,
+      .p-datatable-tbody > tr > td.bv-num {
+        text-align: right !important;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+
+        .p-column-header-content {
+          justify-content: flex-end;
+        }
       }
 
       .p-datatable-tbody > tr {
         &:hover {
-          background-color: #f8fafc;
+          background-color: $color-bg;
         }
       }
     }
@@ -174,12 +166,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-      color: white;
+      background: $brand-blue-050;
+      color: $color-heading;
+      border: 1px solid $color-border;
       padding: 16px 20px;
       border-radius: 8px;
       margin-top: 16px;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
 
       .total-label {
         font-size: 16px;
@@ -195,8 +187,8 @@
 
   // Next Steps Message
   .next-steps-message {
-    background-color: #dbeafe;
-    color: #1e40af;
+    background-color: $brand-blue-050;
+    color: $brand-navy;
     padding: 16px;
     border-radius: 8px;
     margin-top: 24px;
@@ -205,7 +197,7 @@
     justify-content: center;
     font-size: 15px;
     font-weight: 500;
-    border: 1px solid #93c5fd;
+    border: 1px solid $brand-field-blue;
 
     i {
       font-size: 18px;

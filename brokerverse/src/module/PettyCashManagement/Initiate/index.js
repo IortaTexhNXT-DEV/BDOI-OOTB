@@ -1,4 +1,3 @@
-import React from "react";
 import { useTranslation } from "react-i18next";
 import "../../PettyCashManagement/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -7,7 +6,6 @@ import InitiateTable from "./InitiateTable";
 import { Button } from "primereact/button";
 import SvgAdd from "../../../assets/icons/SvgAdd";
 import { useNavigate } from "react-router";
-import NavBar from "../../../components/NavBar";
 
 const Initiate = () => {
   const { t } = useTranslation();

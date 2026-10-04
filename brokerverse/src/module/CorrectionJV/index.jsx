@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../assets/icons/SvgDot";
@@ -6,47 +6,50 @@ import InputField from "../../components/InputField";
 import DropDowns from "../../components/DropDowns";
 import { Button } from "primereact/button";
 import SvgDropdown from "../../assets/icons/SvgDropdown";
-import NavBar from "../../components/NavBar";
 import TableData from "./TableData/TableData";
 import { useFormik } from "formik";
 import ModalData from "./EditData/ModalData";
-import ArrowLeftIcon from "../../assets/icons/ArrowLeftIcon";
 import CustomToast from "../../components/Toast";
 import { useDispatch, useSelector } from "react-redux";
-import { postCorrectionJVData } from "./store/correctionJVMiddleWare";
-import { Navigate, useNavigate } from "react-router-dom";
+import {
+  getCorrectionJVTabelData,
+  postCorrectionJVData,
+} from "./store/correctionJVMiddleWare";
+import { resetCorrectionJV } from "./store/correctionJVReducers";
+import useJvMasterData from "../JournalVoucher/useJvMasterData";
 import SvgBackicon from "../../assets/icons/SvgBackicon";
 import { useTranslation } from "react-i18next";
 
-const Reversals = () => {
+const toCorrectionEntry = (row) => ({
+  mainAccount: row.mainAccount,
+  mainAccountDescription: row.mainAccountDescription,
+  subAccount: row.subAccount || null,
+  subAccountDescription: row.subAccountDescription,
+  entryType: row.entryType,
+  branchCode: row.branchCode || null,
+  branchCodeDescription: row.branchCodeDescription,
+  departmentCode: row.departmentCode || null,
+  departmentDescription: row.departmentDescription,
+  currencyCode: row.currencyCode || undefined,
+  foreignAmount: parseFloat(row.foreignAmount) || 0,
+  remarks: row.remarks || undefined,
+});
+
+const CorrectionJV = () => {
   const { t } = useTranslation();
   const toastRef = useRef(null);
-  const handleApproval = () => {
-    setStep(2);
-    toastRef.current.showToast();
-    {
-      setTimeout(() => {
-        setStep(2);
-      }, 1000);
-    }
-  };
+  const dispatch = useDispatch();
   const { correctionJVList, loading } = useSelector(
-    ({ correctionJVMainReducers }) => {
-      return {
-        loading: correctionJVMainReducers?.loading,
-        correctionJVList: correctionJVMainReducers?.correctionJVList,
-      };
-    }
+    ({ correctionJVMainReducers }) => ({
+      loading: correctionJVMainReducers?.loading,
+      correctionJVList: correctionJVMainReducers?.correctionJVList || [],
+    })
   );
-  console.log(correctionJVList, "find original correctionJVList");
+  const { transactionCodesData } = useJvMasterData();
   const [step, setStep] = useState(0);
   const [visible, setVisible] = useState(false);
-  const [creditTotal, setCreditTotal] = useState(2600);
-  const [debitTotal, setDebitTotal] = useState(2500);
-  const [netTotal, setNetTotal] = useState(100);
-  const [newDataTable, setnewDataTable] = useState([]);
   const [editID, setEditID] = useState(null);
-  const [storeID, setStoreID] = useState(null);
+  const [toastMessage, setToastMessage] = useState("");
   const items = [
     {
       label: t("accounts.correctionsJV"),
@@ -58,33 +61,43 @@ const Reversals = () => {
     },
   ];
   const home = { label: t("sidebar.Accounts") };
-  const codeOptions = [
-    { label: t("accounts.option1"), value: "PRM" },
-    { label: t("accounts.option2"), value: "COMM" },
-    { label: t("accounts.option2"), value: "REMT" },
-  ];
+  const codeOptions = transactionCodesData.map((code) => ({
+    label: code.description,
+    value: code.code,
+  }));
+  const describeCode = (code) =>
+    transactionCodesData.find((row) => row.code === code)?.description || "";
+
+  const showToast = (message, severity = "success") => {
+    setToastMessage(message);
+    toastRef.current?.showToast({ severity, detail: message });
+  };
+
   const customValidation = (values) => {
     const errors = {};
-
     if (!values.transactionCode) {
       errors.transactionCode = "This field is required";
     }
-
     if (!values.transactionNumber) {
       errors.transactionNumber = "This field is required";
     }
     if (!values.correctionJVTransactionCode) {
       errors.correctionJVTransactionCode = "This field is required";
     }
-
     return errors;
   };
-  const dispatch = useDispatch();
-  const handleSubmit = (values) => {
-    // Handle form submission
-    // console.log(values, "find values");
-    // dispatch(postCorrectionJVData(formik.values));
+
+  const loadOriginalVoucher = async (values) => {
+    const result = await dispatch(
+      getCorrectionJVTabelData(values.transactionNumber.trim())
+    );
+    if (getCorrectionJVTabelData.rejected.match(result)) {
+      showToast(result.payload, "error");
+      return;
+    }
+    setStep(1);
   };
+
   const formik = useFormik({
     initialValues: {
       transactionCode: "",
@@ -92,75 +105,57 @@ const Reversals = () => {
       correctionJVTransactionCode: "",
     },
     validate: customValidation,
-    onSubmit: (values) => {
-      // Handle form submission
-      handleSubmit(values);
-      setStep(1);
-    },
+    onSubmit: loadOriginalVoucher,
   });
-  const handleEdit = (editID) => {
-    setEditID(editID);
-    console.log(editID, "find handleEdit success");
+
+  const handleEdit = (id) => {
+    setEditID(id);
     setVisible(true);
   };
-  const handleUpdate = (values) => {
-    setStoreID(editID);
-    setnewDataTable([values]);
+  const handleUpdate = () => {};
 
-    setNetTotal(0);
-    setDebitTotal(2600);
+  const handleApproval = async () => {
+    const result = await dispatch(
+      postCorrectionJVData({
+        transactionNumber: formik.values.transactionNumber.trim(),
+        correctionJVTransactionCode: formik.values.correctionJVTransactionCode,
+        description: describeCode(formik.values.correctionJVTransactionCode),
+        entries: correctionJVList.map(toCorrectionEntry),
+      })
+    );
+    if (postCorrectionJVData.rejected.match(result)) {
+      showToast(result.payload, "error");
+      return;
+    }
+    showToast(result.payload?.message);
+    setStep(2);
   };
-  const navigate = useNavigate();
+
   const handlePrint = () => {
     formik.resetForm();
-    toastRef.current.showToast();
-    // formik.resetForm();
+    dispatch(resetCorrectionJV());
     setStep(0);
-    // navigate("/accounts/correctionsjv/correctionsjvdetails")
   };
-  const totalForeignAmount = correctionJVList.reduce((total, item) => {
-    if (item.entryType === "Credit") {
-      const foreignAmount = parseFloat(item.foreignAmount);
-      return !isNaN(foreignAmount) ? total + foreignAmount : total;
-    }
-    return total; // Important: Return the total for each iteration.
-  }, 0);
-
-  const totalLocalAmount = correctionJVList.reduce((total, item) => {
-    if (item.entryType === "Debit") {
-      const localAmount = parseFloat(item.foreignAmount);
-      return !isNaN(localAmount) ? total + localAmount : total;
-    }
-    return total;
-  }, 0);
-
+  const sumBy = (entryType) =>
+    correctionJVList.reduce((total, item) => {
+      if (item.entryType !== entryType) return total;
+      const amount = parseFloat(item.localAmount || item.foreignAmount);
+      return !isNaN(amount) ? total + amount : total;
+    }, 0);
+  const totalForeignAmount = sumBy("Credit");
+  const totalLocalAmount = sumBy("Debit");
   return (
     <div className="container__corrections__jv">
-      {step === 1 ? (
-        <CustomToast
-          ref={toastRef}
-          message="Transaction Number 1234 is created"
-        />
-      ) : (
-        <CustomToast ref={toastRef} message="Successfully Printed" />
-      )}
+      <CustomToast ref={toastRef} message={toastMessage} />
       <div className="grid m-0 top__container">
         <div className="col-12 p-0"></div>
         <div className="col-12 p-0">
-          {/* <div className="correction__title__reversal">
-            <span onClick={() => setStep(step - 1)}>
-              {step !== 0 && <ArrowLeftIcon />}
-            </span>{" "}
-            Corrections JV Details
-          </div> */}
           <div className="correction__title__reversal">
             <span onClick={() => setStep(step - 1)}>
 
               {step !== 0 && <SvgBackicon />}
             </span>
-            <label className={step !== 0?"label_header":""}>
-              Corrections JV Details
-            </label>
+            <label className="label_header">Correction JV</label>
           </div>
         </div>
         <div className="col-12 p-0">
@@ -198,7 +193,7 @@ const Reversals = () => {
           />
 
           {formik.touched.transactionCode && formik.errors.transactionCode && (
-            <div style={{ fontSize: 12, color: "red" }} className="mt-3">
+            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
               {formik.errors.transactionCode}
             </div>
           )}
@@ -213,11 +208,7 @@ const Reversals = () => {
                 : "input__label__reversal__inactive"
             }
             label="Transaction Description"
-            value={
-              formik.values.transactionCode
-                ? `Transaction Description ${formik.values.transactionCode}`
-                : ""
-            }
+            value={describeCode(formik.values.transactionCode)}
             onChange={(e) =>
               formik.setFieldValue("transactionDescription", e.target.value)
             }
@@ -246,7 +237,7 @@ const Reversals = () => {
           />
           {formik.touched.transactionNumber &&
             formik.errors.transactionNumber && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.transactionNumber}
               </div>
             )}
@@ -278,7 +269,7 @@ const Reversals = () => {
           {formik.touched.correctionJVTransactionCode &&
             formik.errors.correctionJVTransactionCode && (
               <div
-                style={{ fontSize: 12, color: "red" }}
+                style={{ fontSize: 12, color: "var(--color-danger)" }}
                 className="formik__errror__JV mt-3"
               >
                 {formik.errors.correctionJVTransactionCode}
@@ -295,11 +286,7 @@ const Reversals = () => {
                 : "input__label__reversal__inactive"
             }
             label="Correction Description"
-            value={
-              formik.values.correctionJVTransactionCode
-                ? `Correction Description ${formik.values.correctionJVTransactionCode}`
-                : ""
-            }
+            value={describeCode(formik.values.correctionJVTransactionCode)}
           />
         </div>
       </div>
@@ -310,7 +297,6 @@ const Reversals = () => {
             <div className="col-12 p-0">
               <TableData
                 handleEdit={handleEdit}
-                newDataTable={newDataTable}
                 visible={visible}
                 editID={editID}
                 correctionJVList={correctionJVList}
@@ -364,7 +350,7 @@ const Reversals = () => {
           {step == 0 && (
             <Button
               className="correction__btn__reversal"
-              disabled={!formik.isValid}
+              disabled={!formik.isValid || loading}
               onClick={formik.handleSubmit}
             >
               Next
@@ -376,7 +362,9 @@ const Reversals = () => {
               className="correction__btn__reversal"
               onClick={handleApproval}
               disabled={
-                totalForeignAmount - totalLocalAmount === 0 ? false : true
+                loading ||
+                correctionJVList.length < 2 ||
+                Math.abs(totalForeignAmount - totalLocalAmount) > 0.01
               }
             >
               Approve
@@ -394,4 +382,4 @@ const Reversals = () => {
   );
 };
 
-export default Reversals;
+export default CorrectionJV;

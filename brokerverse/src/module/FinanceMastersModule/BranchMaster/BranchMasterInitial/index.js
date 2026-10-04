@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
-import NavBar from "../../../../components/NavBar";
 import { useNavigate } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
 import SvgFilters from "../../../../assets/icons/SvgFilters";
@@ -11,11 +10,11 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
-import ToggleButton from "../../../../components/ToggleButton";
-// import  {data} from "../BranchMasterInitial/mock"
 import SvgArrow from "../../../../assets/icons/SvgArrow";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
+import MasterStatusToggle from "../../../GeneralMasters/common/MasterStatusToggle";
+import { useMasterRecords } from "../../../GeneralMasters/common/useMasterOptions";
 
 const Index = () => {
   const { t } = useTranslation();
@@ -24,10 +23,9 @@ const Index = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -51,7 +49,7 @@ const Index = () => {
 
   const headerStyle = {
     width: "10rem",
-    // backgroundColor: 'red',
+    // backgroundColor: 'var(--color-danger)',
     fontSize: 14,
     fontFamily: "Nunito, Arial, sans-serif",
     fontWeight: 500,
@@ -64,18 +62,16 @@ const Index = () => {
   const home = { label: t("financeMasters.master") };
 
   const navigate = useNavigate();
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(5);
-  const [globalFilter, setGlobalFilter] = useState("");
+  const records = useMasterRecords("branch", (row) => ({
+    ...row,
+    branchCode: row.BranchCode,
+    companyName: row.CompanyName,
+    manager: row.Description,
+    country: row.Country,
+    email: row.EmailID,
+  }));
 
-  const onPageChange = (event) => {
-    setFirst(event.first);
-    setRows(event.rows);
-  };
 
-  const onGlobalFilterChange = (event) => {
-    setGlobalFilter(event.target.value);
-  };
 
   const handlePolicy = () => {
     navigate("/master/finance/branch/branchadding");
@@ -94,10 +90,10 @@ const Index = () => {
           />
         </div>
         <div className="filterbutton_container">
-          <div className="addbutton_container" onClick={handlePolicy}>
+          <button type="button" className="addbutton_container bv-add-button" onClick={handlePolicy}>
             <SvgAdd className="addicon" />
             <p className="addtext">Add</p>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -126,11 +122,11 @@ const Index = () => {
         <div className="branch_text">Branch List</div>
         <div className="card">
           <DataTable
-            // value={data}
+            value={records}
             tableStyle={{ minWidth: "50rem", color: "#2e2e2e" }}
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             scrollable={true}
@@ -171,7 +167,7 @@ const Index = () => {
               header="Status"
               headerStyle={headerStyle}
               className="fieldvalue_container"
-              body={(columnData) => <ToggleButton id={columnData.id} />}
+              body={(columnData) => <MasterStatusToggle type="branch" record={columnData} />}
             ></Column>
             <Column
               header="View"

@@ -47,10 +47,9 @@ const ViewDataTabel = ({
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -83,7 +82,7 @@ const ViewDataTabel = ({
         rows={rowsPerPage || 10}
         first={first || 0}
         totalRecords={pagination?.total || 0}
-        rowsPerPageOptions={[5, 10, 20, 50]}
+        rowsPerPageOptions={[20, 50, 100]}
         currentPageReportTemplate="{first} - {last} of {totalRecords}"
         paginatorTemplate={template2}
         emptyMessage={isEmpty ? emptyTableIcon : null}

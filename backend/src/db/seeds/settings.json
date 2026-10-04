@@ -1,0 +1,596 @@
+[
+  {
+    "key": "general.company_name",
+    "value": "iorta TechNXT Corp.",
+    "group": "general",
+    "label": "Company name (kept equal to the primary company of Master > Company; used only when no company exists)"
+  },
+  {
+    "key": "general.system_name",
+    "value": "BrokerVerse",
+    "group": "general",
+    "label": "Application name (sign-in page, side bar and browser tab)"
+  },
+  {
+    "key": "general.timezone",
+    "value": "Asia/Manila",
+    "group": "general",
+    "label": "Time zone"
+  },
+  {
+    "key": "general.date_format",
+    "value": "DD/MM/YYYY",
+    "group": "general",
+    "label": "Date format"
+  },
+  {
+    "key": "general.phone_country_code",
+    "value": "+63",
+    "group": "general",
+    "label": "Phone country code"
+  },
+  {
+    "key": "general.mobile_pattern",
+    "value": "^9\\d{9}$",
+    "group": "general",
+    "label": "Mobile number pattern (national number without the leading 0 or country code)"
+  },
+  {
+    "key": "general.mobile_example",
+    "value": "0917 123 4567 or +63 917 123 4567",
+    "group": "general",
+    "label": "Mobile number hint shown on forms"
+  },
+  {
+    "key": "quote.vehicle_colours",
+    "value": ["White", "Pearl White", "Black", "Silver", "Gray", "Red", "Blue", "Green", "Brown", "Beige", "Yellow", "Orange"],
+    "group": "quote",
+    "label": "Vehicle colours offered on the quote",
+    "type": "json"
+  },
+  {
+    "key": "quote.model_year_span",
+    "value": 20,
+    "group": "quote",
+    "label": "Vehicle model years offered (years back from next year)",
+    "type": "number"
+  },
+  {
+    "key": "branding.logo_url",
+    "value": "",
+    "group": "branding",
+    "label": "Application logo (screen)",
+    "type": "image"
+  },
+  {
+    "key": "branding.primary_color",
+    "value": "#0072d8",
+    "group": "branding",
+    "label": "Primary colour",
+    "type": "color"
+  },
+  {
+    "key": "branding.secondary_color",
+    "value": "#004ea8",
+    "group": "branding",
+    "label": "Secondary colour",
+    "type": "color"
+  },
+  {
+    "key": "currency.default",
+    "value": "PHP",
+    "group": "currency",
+    "label": "Display currency: labels amounts on screens and documents (the ledger is kept in the base currency of Master > Finance > Currency)"
+  },
+  {
+    "key": "currency.symbol",
+    "value": "₱",
+    "group": "currency",
+    "label": "Currency symbol"
+  },
+  {
+    "key": "currency.decimals",
+    "value": 2,
+    "group": "currency",
+    "label": "Decimal places",
+    "type": "number"
+  },
+  {
+    "key": "tax.vat_rate",
+    "value": 0.12,
+    "group": "tax",
+    "label": "Fallback VAT rate: used only when Premium Taxes & LGU Rates has no VAT rule",
+    "type": "number"
+  },
+  {
+    "key": "tax.dst_rate",
+    "value": 0.125,
+    "group": "tax",
+    "label": "Fallback documentary stamp tax rate: used only when Premium Taxes & LGU Rates has no DST rule",
+    "type": "number"
+  },
+  {
+    "key": "tax.lgt_rate",
+    "value": 0.0075,
+    "group": "tax",
+    "label": "Fallback local government tax rate: used only when Premium Taxes & LGU Rates has no LGT rule",
+    "type": "number"
+  },
+  {
+    "key": "tax.fst_rate",
+    "value": 0.02,
+    "group": "tax",
+    "label": "Fallback fire service tax rate (fire lines): used only when Premium Taxes & LGU Rates has no FST rule",
+    "type": "number"
+  },
+  {
+    "key": "numbering.lead.prefix",
+    "value": "LD",
+    "group": "numbering",
+    "label": "Lead number prefix"
+  },
+  {
+    "key": "numbering.quote.prefix",
+    "value": "QT",
+    "group": "numbering",
+    "label": "Quotation number prefix"
+  },
+  {
+    "key": "numbering.policy.prefix",
+    "value": "POL",
+    "group": "numbering",
+    "label": "Policy number prefix"
+  },
+  {
+    "key": "numbering.endorsement.prefix",
+    "value": "END",
+    "group": "numbering",
+    "label": "Endorsement number prefix"
+  },
+  {
+    "key": "numbering.claim.prefix",
+    "value": "CLM",
+    "group": "numbering",
+    "label": "Claim number prefix"
+  },
+  {
+    "key": "numbering.receipt.prefix",
+    "value": "OR",
+    "group": "numbering",
+    "label": "Official receipt prefix"
+  },
+  {
+    "key": "numbering.invoice.prefix",
+    "value": "INV",
+    "group": "numbering",
+    "label": "Invoice / bill prefix"
+  },
+  {
+    "key": "numbering.voucher.prefix",
+    "value": "PV",
+    "group": "numbering",
+    "label": "Payment voucher prefix"
+  },
+  {
+    "key": "numbering.journal.prefix",
+    "value": "JV",
+    "group": "numbering",
+    "label": "Journal voucher prefix"
+  },
+  {
+    "key": "numbering.client.prefix",
+    "value": "CL",
+    "group": "numbering",
+    "label": "Client code prefix"
+  },
+  {
+    "key": "limits.quote_validity_days",
+    "value": 30,
+    "group": "limits",
+    "label": "Quotation validity (days)",
+    "type": "number"
+  },
+  {
+    "key": "limits.renewal_notice_days",
+    "value": [
+      60,
+      30,
+      15
+    ],
+    "group": "limits",
+    "label": "Renewal notice days before expiry",
+    "type": "json"
+  },
+  {
+    "key": "limits.receivable_ageing_buckets",
+    "value": [
+      30,
+      60,
+      90,
+      120
+    ],
+    "group": "limits",
+    "label": "Receivable ageing buckets (days)",
+    "type": "json"
+  },
+  {
+    "key": "limits.max_login_attempts",
+    "value": 5,
+    "group": "limits",
+    "label": "Maximum failed logins before lock",
+    "type": "number"
+  },
+  {
+    "key": "limits.session_idle_minutes",
+    "value": 30,
+    "group": "limits",
+    "label": "Sign out after inactivity (minutes)",
+    "type": "number"
+  },
+  {
+    "key": "limits.password_min_length",
+    "value": 8,
+    "group": "limits",
+    "label": "Minimum password length",
+    "type": "number"
+  },
+  {
+    "key": "commission.default_rate",
+    "value": 0.15,
+    "group": "commission",
+    "label": "Default commission rate",
+    "type": "number"
+  },
+  {
+    "key": "commission.eligible_roles",
+    "value": ["sales"],
+    "group": "commission",
+    "label": "Roles that earn commission on the policies they produce (administrators and back-office staff do not)",
+    "type": "json"
+  },
+  {
+    "key": "commission.require_bank_account",
+    "value": true,
+    "group": "commission",
+    "label": "A referrer needs a bank account on file before commission can be approved or paid out",
+    "type": "boolean"
+  },
+  {
+    "key": "policy.kyc_required_fields",
+    "value": {
+      "MOTOR": ["idType", "idNumber", "idImage", "chassisNumber", "motorNumber", "plateOrMvFile"],
+      "*": []
+    },
+    "group": "policy",
+    "label": "KYC and vehicle identifiers required to issue a policy, per line of business (* = other lines). Items: idType, idNumber, idImage, chassisNumber, motorNumber, plateNumber, mvFileNumber, plateOrMvFile",
+    "type": "json"
+  },
+  {
+    "key": "policy.kyc_id_types",
+    "value": ["PhilSys ID", "UMID", "Passport", "Driver's License", "PRC ID", "SSS ID", "GSIS ID", "TIN ID", "Postal ID", "Voter's ID", "Senior Citizen ID"],
+    "group": "policy",
+    "label": "Accepted government ID documents for customer KYC",
+    "type": "json"
+  },
+  {
+    "key": "policy.payment_capture_modes",
+    "value": ["bank-transfer", "check", "online", "cash"],
+    "group": "policy",
+    "label": "How a client can pay the premium on the policy payment screen (besides Pay later)",
+    "type": "json"
+  },
+  {
+    "key": "policy.payment_gateway_url",
+    "value": "",
+    "group": "policy",
+    "label": "Online payment gateway checkout URL (empty = no gateway; online payments are captured manually with their reference)",
+    "type": "string"
+  },
+  {
+    "key": "notification.email_enabled",
+    "value": false,
+    "group": "notification",
+    "label": "Send e-mails",
+    "type": "boolean"
+  },
+  {
+    "key": "notification.from_address",
+    "value": "BrokerVerse <connect@iortatechnxt.com>",
+    "group": "notification",
+    "label": "E-mail sender"
+  },
+  {
+    "key": "notification.renewal_reminder",
+    "value": true,
+    "group": "notification",
+    "label": "Renewal reminders",
+    "type": "boolean"
+  },
+  {
+    "key": "notification.claim_status",
+    "value": true,
+    "group": "notification",
+    "label": "Claim status updates",
+    "type": "boolean"
+  },
+  {
+    "key": "notification.approval_requests",
+    "value": true,
+    "group": "notification",
+    "label": "Approval requests",
+    "type": "boolean"
+  },
+  {
+    "key": "reports.retention_days",
+    "value": 90,
+    "group": "reports",
+    "label": "Generated report retention (days)",
+    "type": "number"
+  },
+  {
+    "key": "motor.pricing_template_code",
+    "value": "MOT-003-2025",
+    "group": "premium",
+    "label": "Product Configurator template holding the motor tariff (vehicle classes, CTPL tariff premiums, own damage rates, Auto Passenger PA limits and rate)",
+    "type": "string"
+  },
+  {
+    "key": "product.market_panel_enforced",
+    "value": true,
+    "group": "premium",
+    "label": "Insurers approached on a Request for Quotation and compared in Compare Insurers must be on the product's insurer market (Product Configurator > Market Mapping); a product whose templates name no insurer is open to every insurer",
+    "type": "boolean"
+  },
+  {
+    "key": "underwriting.vehicle_use_by_class",
+    "value": { "taxi_puj_and_mini_bus": "PUV", "pub_and_tourist_bus": "PUV" },
+    "group": "premium",
+    "label": "Vehicle use assumed from the vehicle class when the quotation does not state it (acceptance rules on vehicle use, e.g. PUV)",
+    "type": "json"
+  },
+  {
+    "key": "direct_bill.default_billing_mode",
+    "value": "broker",
+    "group": "direct_bill",
+    "label": "Default billing mode when a policy is issued: broker (client pays the broker) or direct (client pays the insurer; the broker bills its commission with a debit note)"
+  },
+  {
+    "key": "direct_bill.broker_vat_registered",
+    "value": true,
+    "group": "direct_bill",
+    "label": "Broker is VAT-registered (output VAT is charged on direct-bill commission)",
+    "type": "boolean"
+  },
+  {
+    "key": "direct_bill.commission_vat_inclusive",
+    "value": false,
+    "group": "direct_bill",
+    "label": "Commission amounts already include VAT (VAT is extracted) instead of VAT being added on top",
+    "type": "boolean"
+  },
+  {
+    "key": "direct_bill.debit_note_due_days",
+    "value": 30,
+    "group": "direct_bill",
+    "label": "Days after the debit note date that the commission falls due",
+    "type": "number"
+  },
+  {
+    "key": "direct_bill.debit_note_title",
+    "value": "Commission Debit Note",
+    "group": "direct_bill",
+    "label": "Title printed on the commission debit note"
+  },
+  {
+    "key": "direct_bill.debit_note_remarks",
+    "value": "Please settle the amount due net of the expanded withholding tax on the commission and send BIR Form 2307 for the tax withheld.",
+    "group": "direct_bill",
+    "label": "Payment instructions printed on the commission debit note"
+  },
+  {
+    "key": "direct_bill.email_subject",
+    "value": "Commission debit note {{dnNumber}} – {{companyName}}",
+    "group": "direct_bill",
+    "label": "Debit note e-mail subject ({{dnNumber}}, {{insurerName}}, {{amount}}, {{dueDate}}, {{companyName}})"
+  },
+  {
+    "key": "direct_bill.email_body",
+    "value": "<p>Dear {{insurerName}},</p><p>Please find our commission debit note <b>{{dnNumber}}</b> for {{amount}}, due on {{dueDate}}.</p><p>Kindly settle the amount net of the expanded withholding tax on the commission and send BIR Form 2307 for the tax withheld.</p><p>{{companyName}}</p>",
+    "group": "direct_bill",
+    "label": "Debit note e-mail body (HTML with placeholders)"
+  },
+  {
+    "key": "numbering.commission_debit_note.prefix",
+    "value": "DN",
+    "group": "numbering",
+    "label": "Commission debit note prefix"
+  },
+  {
+    "key": "numbering.dn_collection.prefix",
+    "value": "DNC",
+    "group": "numbering",
+    "label": "Debit note collection (insurer payment) prefix"
+  },
+  {
+    "key": "leads.min_age_years",
+    "value": 18,
+    "group": "leads",
+    "label": "Minimum age (years) for a lead or client date of birth",
+    "type": "number"
+  },
+  {
+    "key": "leads.max_age_years",
+    "value": 100,
+    "group": "leads",
+    "label": "Maximum age (years) for a lead or client date of birth",
+    "type": "number"
+  },
+  {
+    "key": "security.api_rate_limit",
+    "value": {"max": 600, "windowSeconds": 60},
+    "group": "security",
+    "label": "API rate limit per signed-in user (or per IP without sign-in): max requests in windowSeconds (max 0 = off)",
+    "type": "json"
+  },
+  {
+    "key": "security.reset_code_max_attempts",
+    "value": 5,
+    "group": "security",
+    "label": "Wrong entries allowed for one password reset code before it is withdrawn",
+    "type": "number"
+  },
+  {
+    "key": "uploads.allowed_types",
+    "value": ["image/jpeg", "image/png", "image/gif", "image/webp", "application/pdf", "text/csv", "text/plain", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "application/vnd.ms-excel", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "application/msword"],
+    "group": "uploads",
+    "label": "File types users may upload (checked against the file signature, not the browser's claim)",
+    "type": "json"
+  },
+  {
+    "key": "dashboard.renewals_due_days",
+    "value": 60,
+    "group": "dashboard",
+    "label": "Renewals due window on the dashboards (days before expiry)",
+    "type": "number"
+  },
+  {
+    "key": "product.expiry_warning_days",
+    "value": 60,
+    "group": "product",
+    "label": "Product templates listed as expiring soon (days before the expiry date)",
+    "type": "number"
+  },
+  {
+    "key": "renewals.due_soon_days",
+    "value": 30,
+    "group": "renewals",
+    "label": "Renewal queue \"due soon\" counter (days to expiry)",
+    "type": "number"
+  },
+  {
+    "key": "renewals.risk_thresholds",
+    "value": {
+      "noContactDays": 30,
+      "increasePercent": 10,
+      "dueSoonDays": 15
+    },
+    "group": "renewals",
+    "label": "Retention risk factors: no contact within noContactDays of expiry, premium increase above increasePercent %, due within dueSoonDays",
+    "type": "json"
+  },
+  {
+    "key": "incentive.program_lookback_days",
+    "value": 30,
+    "group": "incentive",
+    "label": "Agent program view includes programs that ended up to this many days ago",
+    "type": "number"
+  },
+  {
+    "key": "security.restricted_token_minutes",
+    "value": 15,
+    "group": "security",
+    "label": "Minutes a restricted sign-in (forced password change, two-step enrolment) stays valid",
+    "type": "number"
+  },
+  {
+    "key": "security.reset_code_minutes",
+    "value": 15,
+    "group": "security",
+    "label": "Minutes a password reset code stays valid",
+    "type": "number"
+  },
+  {
+    "key": "security.reset_email_subject",
+    "value": "Your {{companyName}} password reset code",
+    "group": "security",
+    "label": "Password reset e-mail subject ({{companyName}})"
+  },
+  {
+    "key": "security.reset_email_body",
+    "value": "<p>Your verification code is <b>{{code}}</b>. It expires in {{minutes}} minutes. If you did not ask for it, ignore this e-mail.</p>",
+    "group": "security",
+    "label": "Password reset e-mail body (HTML; {{code}}, {{minutes}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.statement_email_subject",
+    "value": "Remittance statement {{period}}",
+    "group": "remittance",
+    "label": "Remittance statement e-mail subject ({{period}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.statement_email_body",
+    "value": "<p>Your remittance statement for {{period}} is available: <a href=\"{{downloadUrl}}\">{{fileName}}</a></p>",
+    "group": "remittance",
+    "label": "Remittance statement e-mail body (HTML; {{period}}, {{downloadUrl}}, {{fileName}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.bill_email_subject",
+    "value": "Statement of account {{billNumber}}",
+    "group": "remittance",
+    "label": "Agency bill e-mail subject ({{billNumber}}, {{companyName}})"
+  },
+  {
+    "key": "remittance.bill_email_body",
+    "value": "<p>Bill {{billNumber}} dated {{billDate}}: {{currency}} {{amount}}, due {{dueDate}}.</p>",
+    "group": "remittance",
+    "label": "Agency bill e-mail body (HTML; {{billNumber}}, {{billDate}}, {{currency}}, {{amount}}, {{dueDate}}, {{companyName}})"
+  },
+  {
+    "key": "quote.bodily_injury_limits",
+    "value": [
+      100000,
+      200000,
+      300000,
+      400000,
+      500000
+    ],
+    "group": "quote",
+    "label": "Excess bodily injury limits offered on motor quotes and endorsements",
+    "type": "json"
+  },
+  {
+    "key": "quote.property_damage_limits",
+    "value": [
+      100000,
+      200000,
+      300000,
+      400000,
+      500000
+    ],
+    "group": "quote",
+    "label": "Property damage limits offered on motor quotes and endorsements",
+    "type": "json"
+  },
+  { "key": "documents.default_logo_path", "value": "assets/iorta-technxt.png", "group": "documents", "label": "Logo printed on documents when the primary company of Master > Company has no logo (path relative to the backend folder)" },
+  { "key": "documents.accent_color", "value": "#1f4e79", "group": "documents", "label": "Accent colour of printed documents and report PDFs", "type": "color" },
+  { "key": "documents.payment_instructions", "value": "Please settle the total amount due on or before the due date. Make cheques payable to {{companyName}} and quote the bill number as the payment reference. For bank transfers or e-wallet payments, send the proof of payment to your account officer.", "group": "documents", "label": "Payment instructions printed on billing statements ({{companyName}} = letterhead company)" },
+  { "key": "documents.receipt_footer", "value": "", "group": "documents", "label": "Footer text printed on official receipts (e.g. BIR permit / ATP details); empty = none" },
+  { "key": "housekeeping.job_runs_days", "value": 90, "group": "housekeeping", "label": "Keep scheduled-job run history for (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.email_outbox_sent_days", "value": 180, "group": "housekeeping", "label": "Keep sent e-mails in the outbox for (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.email_outbox_failed_days", "value": 730, "group": "housekeeping", "label": "Keep failed (undelivered) e-mails in the outbox for (days; 0 = keep until resolved)", "type": "number" },
+  { "key": "housekeeping.login_history_days", "value": 365, "group": "housekeeping", "label": "Keep sign-in history for (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.refresh_tokens_days", "value": 30, "group": "housekeeping", "label": "Delete expired or revoked sign-in sessions (refresh tokens) after (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.password_resets_days", "value": 7, "group": "housekeeping", "label": "Delete used or expired password reset codes after (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.notifications_read_days", "value": 180, "group": "housekeeping", "label": "Delete read notifications after (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.job_queue_done_days", "value": 30, "group": "housekeeping", "label": "Delete completed background-queue jobs after (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.audit_log_days", "value": 0, "group": "housekeeping", "label": "Audit trail retention (days; 0 = keep forever). Never less than 7 years (2557 days): BIR / Insurance Commission record keeping", "type": "number" },
+  { "key": "housekeeping.integration_outbox_days", "value": 180, "group": "housekeeping", "label": "Delete finished integration messages (sent, failed, cancelled, skipped: SMS, CTPL, insurer requests, bank files) after (days; 0 = keep forever). Queued and retrying messages are never deleted", "type": "number" },
+  { "key": "housekeeping.integration_attempts_days", "value": 180, "group": "housekeeping", "label": "Delete the attempt log of finished integration messages after (days; 0 = keep forever)", "type": "number" },
+  { "key": "housekeeping.integration_inbox_days", "value": 180, "group": "housekeeping", "label": "Delete processed, ignored or failed inbound integration messages (webhooks, status files) after (days; 0 = keep forever). Received messages not yet processed are never deleted", "type": "number" },
+  { "key": "housekeeping.eis_submissions_days", "value": 3653, "group": "housekeeping", "label": "Delete accepted, rejected, failed or manually uploaded BIR EIS e-invoice submissions after (days; 0 = keep forever). Not less than 10 years is advised (BIR record keeping); queued submissions are never deleted", "type": "number" },
+  { "key": "housekeeping.aml_provider_requests_days", "value": 1827, "group": "housekeeping", "label": "Delete finished AML screening provider requests (succeeded, failed, abandoned) after (days; 0 = keep forever). The screenings themselves are kept; 5 years is advised (AMLA record keeping)", "type": "number" },
+  { "key": "housekeeping.data_load_rows_days", "value": 365, "group": "housekeeping", "label": "Delete the rows of go-live workbooks that were loaded or failed validation after (days; 0 = keep forever). The batch history stays; a validated workbook not yet loaded is never deleted", "type": "number" },
+  {"key": "email.max_attachment_mb", "value": 10, "group": "notification", "label": "Largest total size of the attachments of one e-mail (MB); a larger message fails with the reason shown in the E-mail Outbox", "type": "number"},
+  {"key": "receipts.email_on_record", "value": false, "group": "receipts", "label": "E-mail the official receipt (PDF attached) to the client automatically when a receipt is recorded", "type": "boolean"},
+  {"key": "receipts.email_subject", "value": "Official receipt {{receiptNumber}} for policy {{policyNumber}}", "group": "receipts", "label": "Official receipt e-mail subject ({{receiptNumber}}, {{policyNumber}}, {{clientName}}, {{amount}}, {{companyName}})"},
+  {"key": "receipts.email_template", "value": "<p>Dear {{clientName}},</p><p>Thank you for your payment. Attached is official receipt <b>{{receiptNumber}}</b> for policy <b>{{policyNumber}}</b>.</p><table cellpadding=\"4\" style=\"border-collapse:collapse\"><tr><td>Amount received</td><td><b>{{amount}}</b></td></tr><tr><td>Date received</td><td>{{receiptDate}}</td></tr><tr><td>Mode of payment</td><td>{{paymentMode}}</td></tr><tr><td>Reference</td><td>{{referenceNo}}</td></tr><tr><td>Balance remaining</td><td>{{balance}}</td></tr></table><p>{{note}}</p><p>Please keep this receipt for your records. If you have any questions about your account, please contact your account officer.</p><p>Thank you,<br/>{{companyName}}</p>", "group": "receipts", "label": "Official receipt e-mail body (HTML: {{clientName}}, {{receiptNumber}}, {{policyNumber}}, {{amount}}, {{receiptDate}}, {{paymentMode}}, {{referenceNo}}, {{balance}}, {{customerCode}}, {{note}}, {{companyName}})"},
+  {"key": "billing.email_on_issue", "value": false, "group": "billing", "label": "E-mail the premium invoice (PDF attached) to the client automatically when a bill is issued (policy, endorsement, renewal)", "type": "boolean"},
+  {"key": "billing.email_subject", "value": "Premium invoice {{billNumber}} for policy {{policyNumber}}", "group": "billing", "label": "Premium invoice e-mail subject ({{billNumber}}, {{policyNumber}}, {{clientName}}, {{grossPremium}}, {{dueDate}}, {{companyName}})"},
+  {"key": "billing.email_template", "value": "<p>Dear {{clientName}},</p><p>Attached is the premium invoice / statement of account <b>{{billNumber}}</b> for policy <b>{{policyNumber}}</b> ({{productName}}, {{insurerName}}).</p><table cellpadding=\"4\" style=\"border-collapse:collapse\"><tr><td>Net premium</td><td>{{netPremium}}</td></tr><tr><td>Taxes and charges</td><td>{{taxes}}</td></tr><tr><td>Gross premium (with taxes)</td><td><b>{{grossPremium}}</b></td></tr><tr><td>Amount due</td><td><b>{{amountDue}}</b></td></tr><tr><td>Due date</td><td><b>{{dueDate}}</b></td></tr></table><p>{{paymentInstructions}}</p><p>{{note}}</p><p>Please disregard this notice if payment has already been made. If you have any questions, please contact your account officer.</p><p>Thank you,<br/>{{companyName}}</p>", "group": "billing", "label": "Premium invoice e-mail body (HTML: {{clientName}}, {{billNumber}}, {{policyNumber}}, {{productName}}, {{insurerName}}, {{netPremium}}, {{taxes}}, {{grossPremium}}, {{amountDue}}, {{billDate}}, {{dueDate}}, {{paymentInstructions}}, {{note}}, {{companyName}})"},
+  {"key": "billing.payment_instructions", "value": "Please settle the amount due on or before the due date. Make cheques payable to {{companyName}} and quote bill number {{billNumber}} as the payment reference. For bank transfers or e-wallet payments, please send the proof of payment to your account officer.", "group": "billing", "label": "Payment instructions in the premium invoice e-mail ({{paymentInstructions}}; placeholders {{companyName}}, {{billNumber}}, {{policyNumber}})"},
+  {"key": "branding.theme", "value": {}, "group": "branding", "label": "Theme of the screens, the sign-in page, the documents and the report files (edited in Master > System Settings > Theme and Branding; empty = iorta TechNXT default)", "type": "json"},
+  {"key": "signatures.consent_text_user", "value": "I confirm that this is my own signature and I authorise {{companyName}} to print it on the documents I issue or approve in {{systemName}}, as mapped by the System Administrator. I can revoke it at any time; documents printed before the revocation keep it.", "group": "documents", "label": "E-signature consent statement a user accepts when capturing their own signature ({{companyName}}, {{systemName}})"},
+  {"key": "signatures.consent_text_signatory", "value": "I confirm that {{signatoryName}} has authorised {{companyName}} to capture this signature and to print it on the documents mapped to this signatory in {{systemName}}, and that their written consent is on file.", "group": "documents", "label": "E-signature consent statement for an authorised signatory captured by an administrator ({{signatoryName}}, {{companyName}}, {{systemName}})"},
+  {"key": "signatures.max_bytes", "value": 524288, "group": "documents", "label": "Maximum size of an e-signature image (bytes)", "type": "number"},
+  {"key": "signatures.draft_watermark", "value": "UNSIGNED DRAFT", "group": "documents", "label": "Watermark printed on a draft document whose signature slots are not signed yet (empty = none)"}
+]

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="810" height="668" viewBox="0 0 810 668" font-family="Nunito, DejaVu Sans, Arial, sans-serif">
+<rect width="100%" height="100%" fill="white"/>
+<defs><marker id="ah" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><path d="M0,0 L10,4 L0,8 z" fill="#1F2937"/></marker></defs>
+<text x="30" y="26" font-size="16" text-anchor="start" fill="#0065B3" font-weight="bold">Renewal pipeline to renewed policy</text>
+<rect x="38.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="105.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Scheduler</text>
+<rect x="38.0" y="621" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="105.0" y="640" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Scheduler</text>
+<line x1="105.0" y1="87" x2="105.0" y2="621" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="188.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="255.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Renewals module</text>
+<rect x="188.0" y="621" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="255.0" y="640" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Renewals module</text>
+<line x1="255.0" y1="87" x2="255.0" y2="621" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="338.0" y="60" width="134" height="42" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="405.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Operations / Sales &amp;</text>
+<text x="405.0" y="94" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Marketing</text>
+<rect x="338.0" y="606" width="134" height="42" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="405.0" y="625" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Operations / Sales &amp;</text>
+<text x="405.0" y="640" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Marketing</text>
+<line x1="405.0" y1="102" x2="405.0" y2="606" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="488.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="555.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Client</text>
+<rect x="488.0" y="621" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="555.0" y="640" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">Client</text>
+<line x1="555.0" y1="87" x2="555.0" y2="621" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<rect x="638.0" y="60" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="705.0" y="79" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">PostgreSQL</text>
+<rect x="638.0" y="621" width="134" height="27" rx="6" fill="#EAF6FD" stroke="#0065B3"/>
+<text x="705.0" y="640" font-size="11.5" text-anchor="middle" fill="#0065B3" font-weight="bold">PostgreSQL</text>
+<line x1="705.0" y1="87" x2="705.0" y2="621" stroke="#9FB3C8" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="180.0" y="116" font-size="11" text-anchor="middle" fill="#1F2937">renewal-pipeline job</text>
+<text x="180.0" y="130" font-size="11" text-anchor="middle" fill="#1F2937">(daily): enrol policies</text>
+<text x="180.0" y="144" font-size="11" text-anchor="middle" fill="#1F2937">expiring within</text>
+<text x="180.0" y="158" font-size="11" text-anchor="middle" fill="#1F2937">renewals.pipeline_days</text>
+<text x="180.0" y="172" font-size="11" text-anchor="middle" fill="#1F2937">(90)</text>
+<line x1="105.0" y1="181" x2="253.0" y2="181" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="480.0" y="206" font-size="11" text-anchor="middle" fill="#1F2937">renewal RN- per policy; lapse open renewals past renewals.grace_period_days (30)</text>
+<line x1="255.0" y1="215" x2="703.0" y2="215" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="180.0" y="240" font-size="11" text-anchor="middle" fill="#1F2937">renewal-notices job (daily):</text>
+<text x="180.0" y="254" font-size="11" text-anchor="middle" fill="#1F2937">reminders at</text>
+<text x="180.0" y="268" font-size="11" text-anchor="middle" fill="#1F2937">limits.renewal_notice_days</text>
+<text x="180.0" y="282" font-size="11" text-anchor="middle" fill="#1F2937">(60, 30, 15)</text>
+<line x1="105.0" y1="291" x2="253.0" y2="291" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="480.0" y="316" font-size="11" text-anchor="middle" fill="#1F2937">notifications; renewal-queue job (every minute) sends queued batch notices</text>
+<line x1="255.0" y1="325" x2="703.0" y2="325" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="330.0" y="350" font-size="11" text-anchor="middle" fill="#1F2937">renewal quote (RQ- or</text>
+<text x="330.0" y="364" font-size="11" text-anchor="middle" fill="#1F2937">quotation linked to the</text>
+<text x="330.0" y="378" font-size="11" text-anchor="middle" fill="#1F2937">expiring policy); negotiate;</text>
+<text x="330.0" y="392" font-size="11" text-anchor="middle" fill="#1F2937">activities logged</text>
+<line x1="405.0" y1="401" x2="257.0" y2="401" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="405.0" y="426" font-size="11" text-anchor="middle" fill="#1F2937">quotation e-mailed for customer approval</text>
+<line x1="255.0" y1="435" x2="553.0" y2="435" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="405.0" y="460" font-size="11" text-anchor="middle" fill="#5B6776">accepts</text>
+<line x1="555.0" y1="469" x2="257.0" y2="469" stroke="#5B6776" stroke-width="1.2" stroke-dasharray="5 4" marker-end="url(#ah)"/>
+<text x="330.0" y="494" font-size="11" text-anchor="middle" fill="#1F2937">issue renewal: convert</text>
+<text x="330.0" y="508" font-size="11" text-anchor="middle" fill="#1F2937">quotation to policy</text>
+<line x1="405.0" y1="517" x2="257.0" y2="517" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="480.0" y="542" font-size="11" text-anchor="middle" fill="#1F2937">new policy POL-; old policy status renewed (renewed_to); renewal renewed; new bill</text>
+<text x="480.0" y="556" font-size="11" text-anchor="middle" fill="#1F2937">and commission</text>
+<line x1="255.0" y1="565" x2="703.0" y2="565" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+<text x="405.0" y="590" font-size="11" text-anchor="middle" fill="#1F2937">policy-expiry job (daily): status expired for policies past expiry</text>
+<line x1="105.0" y1="599" x2="703.0" y2="599" stroke="#1F2937" stroke-width="1.2" marker-end="url(#ah)"/>
+</svg>

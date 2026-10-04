@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
@@ -6,11 +6,14 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Toast } from "primereact/toast";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { Dropdown } from "primereact/dropdown";
 import { Tag } from "primereact/tag";
+import { Button } from "primereact/button";
 import accountingService from "../../../services/accountingService";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import logger from "../../../utility/logger";
+import { FieldsSkeleton } from "../../../components/Skeletons";
 
 // Cell components for DataTable
 const DebitCreditCell = ({ debitCredit }) => {
@@ -41,18 +44,8 @@ const AmountCell = ({ amount, debitCredit }) => {
   );
 };
 
-const DateCell = ({ dateString }) => {
-  const formatDate = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
-
-  return formatDate(dateString);
-};
+// Dates in the configured display format (System Settings, general.date_format), not ISO
+const DateCell = ({ dateString }) => formatAppDate(dateString, { empty: "" });
 
 const EntryTypeBadge = ({ entryType, entrySubType, t }) => {
   const getEntryTypeConfig = (type, subType) => {
@@ -64,10 +57,15 @@ const EntryTypeBadge = ({ entryType, entrySubType, t }) => {
       };
     }
     const configs = {
-      NORMAL_BOOKING: {
+      NEW_BUSINESS: {
         label: t("accounting.normalBooking"),
         severity: "success",
         icon: "pi pi-book",
+      },
+      ENDORSEMENT: {
+        label: t("accounting.endorsement"),
+        severity: "info",
+        icon: "pi pi-pencil",
       },
       ENDORSEMENT_POSITIVE: {
         label: t("accounting.endorsementPositive"),
@@ -115,7 +113,8 @@ const EntryTypeBadge = ({ entryType, entrySubType, t }) => {
     };
     return (
       configs[type] || {
-        label: type || "N/A",
+        // a code without its own label reads as words: "COMMISSION_ADJUSTMENT" -> "Commission adjustment"
+        label: type ? type.charAt(0) + type.slice(1).toLowerCase().replace(/_/g, " ") : "-",
         severity: "secondary",
         icon: "pi pi-circle",
       }
@@ -142,7 +141,8 @@ const PremiumAccountingEntries = () => {
   const [selectedEntryType, setSelectedEntryType] = useState(null);
   const entryTypeOptions = [
     { label: t("accounting.allTypes"), value: null },
-    { label: t("accounting.normalBooking"), value: "NORMAL_BOOKING" },
+    { label: t("accounting.normalBooking"), value: "NEW_BUSINESS" },
+    { label: t("accounting.endorsement"), value: "ENDORSEMENT" },
     { label: t("accounting.coInsurance"), value: "CO_INSURANCE" },
     { label: t("accounting.endorsementPositiveLabel"), value: "ENDORSEMENT_POSITIVE" },
     { label: t("accounting.endorsementNegativeLabel"), value: "ENDORSEMENT_NEGATIVE" },
@@ -222,7 +222,7 @@ const PremiumAccountingEntries = () => {
         throw new Error(response.error || "Failed to fetch policy entries");
       }
     } catch (error) {
-      console.error("Error fetching policy entries:", error);
+      logger.error("Error fetching policy entries:", error);
       toast.current?.show({
         severity: "error",
         summary: t("accounting.error"),
@@ -241,26 +241,22 @@ const PremiumAccountingEntries = () => {
     return entries;
   }, [entries, selectedEntryType]);
 
-  const handleMotherPolicyClick = (motherPolicyId) => {
-    if (motherPolicyId && motherPolicyId !== policyId) {
-      navigate(`/agent/premium-accounting-entries/${motherPolicyId}`, {
-        state: { policyId: motherPolicyId },
-      });
-    }
-  };
 
+  // back to the screen the user came from (policy detail, accounting query, all clients view), else the policy
+  const goBack = () => {
+    if (location.key !== "default") navigate(-1);
+    else navigate(`/agent/policydetail/${policyId}`);
+  };
   const breadcrumbItems = [
-    { label: t("policyAccounting.policy"), command: () => navigate("/agent/clientlisting") },
+    { label: t("policyAccounting.policy"), command: () => navigate("/agent/policy") },
+    ...(policyInfo.policyNumber ? [{ label: policyInfo.policyNumber, command: () => navigate(`/agent/policydetail/${policyId}`) }] : []),
     { label: t("accounting.premiumAccountingEntries") },
   ];
 
   if (loading) {
     return (
       <div className="premium-accounting-entries">
-        <div className="loading-container">
-          <ProgressSpinner />
-          <p>{t("accounting.loadingPolicyEntries")}</p>
-        </div>
+        <FieldsSkeleton rows={4} columns={4} />
       </div>
     );
   }
@@ -287,6 +283,7 @@ const PremiumAccountingEntries = () => {
         </div>
 
         <div className="policy-info">
+          <Button type="button" icon="pi pi-arrow-left" label={t("accounting.back")} text onClick={goBack} className="p-0 mr-2" />
           <h2>{t("accounting.policyNumberLabel")} {policyInfo.policyNumber}</h2>
           {isCoInsurance ? (
             <Tag
@@ -319,12 +316,14 @@ const PremiumAccountingEntries = () => {
         <DataTable
           value={displayedEntries}
           paginator
-          rows={10}
-          rowsPerPageOptions={[5, 10, 25, 50]}
+          rows={20}
+          rowsPerPageOptions={[20, 50, 100]}
           paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
           currentPageReportTemplate={t("accounting.pageReportTemplate")}
           emptyMessage={t("accounting.noEntriesFound")}
           className="transactions-table"
+          scrollable
+          tableStyle={{ minWidth: "64rem" }}
         >
           <Column
             field="transactionCode"
@@ -396,27 +395,6 @@ const PremiumAccountingEntries = () => {
             )}
             style={{ minWidth: "120px", textAlign: "right" }}
           />
-          {/* <Column
-            field="motherPolicyNumber"
-            header="Mother Policy"
-            body={(rowData) => {
-              if (
-                rowData.motherPolicyNumber &&
-                rowData.motherPolicyNumber !== policyInfo.policyNumber
-              ) {
-                return (
-                  <button
-                    className="mother-policy-link"
-                    onClick={() => handleMotherPolicyClick(rowData.motherPolicyId)}
-                  >
-                    {rowData.motherPolicyNumber}
-                  </button>
-                );
-              }
-              return "-";
-            }}
-            style={{ minWidth: "150px" }}
-          /> */}
         </DataTable>
       </Card>
     </div>

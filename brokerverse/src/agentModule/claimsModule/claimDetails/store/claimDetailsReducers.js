@@ -24,11 +24,6 @@ const claimDetailsReducers = createSlice({
       state.policyHolderName = action.payload.policyHolderName || "";
       state.policyNumber = action.payload.policyNumber || "";
       state.claimNumber = action.payload.claimNumber || "";
-      console.log("=== REDUX POLICY HOLDER DATA STORED ===");
-      console.log("Policy Holder Name:", action.payload.policyHolderName);
-      console.log("Policy Number:", action.payload.policyNumber);
-      console.log("Claim Number:", action.payload.claimNumber);
-      console.log("=== END REDUX POLICY HOLDER DATA STORED ===");
     },
     clearPolicyHolderData: (state) => {
       state.policyHolderName = "";
@@ -43,14 +38,6 @@ const claimDetailsReducers = createSlice({
     builder.addCase(getClaimDetailsViewData.fulfilled, (state, action) => {
       state.loading = false;
       state.claimDetailsViewData = action.payload;
-      console.log("=== REDUX STORE UPDATED ===");
-      console.log("Claim details view data updated in store");
-      console.log(
-        "Policy Holder Name in store:",
-        action.payload?.PolicyHolderName
-      );
-      console.log("Policy Number in store:", action.payload?.policyNumber);
-      console.log("=== END REDUX STORE UPDATED ===");
     });
     builder.addCase(getClaimDetailsViewData.rejected, (state, action) => {
       state.loading = false;

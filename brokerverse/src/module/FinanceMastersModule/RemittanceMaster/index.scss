@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__remittance__master {
@@ -15,6 +16,12 @@
     font-weight: 600;
     line-height: normal;
     font-family: "Nunito", Arial, sans-serif;
+  }
+
+  .remittance__master__note {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #6c737f;
   }
 
   .breadCrums__view__reversal {
@@ -36,7 +43,7 @@
   .main__btn__action {
     color: #fff;
     background-color: #0072d8;
-    border-radius: 30px;
+    border-radius: 6px;
     padding: 6px 10px;
     font-family: "Nunito", Arial, sans-serif;
     font-weight: 500;
@@ -179,7 +186,6 @@
           padding: 10px 8px;
           font-family: "Nunito", Arial, sans-serif;
           font-size: 13px;
-          text-transform: uppercase;
         }
       }
 
@@ -266,7 +272,7 @@
   }
 
   &.inactive {
-    background: lighten($dark-red, 40%);
-    color: $dark-red;
+    background: $color-danger-050;
+    color: $color-danger;
   }
 }

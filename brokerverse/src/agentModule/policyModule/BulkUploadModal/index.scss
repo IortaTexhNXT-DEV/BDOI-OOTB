@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 // Responsive mixins
 $mobile-sm: 480px;
 $tablet-sm: 768px;
@@ -222,29 +223,7 @@ $tablet-md: 1024px;
             border-radius: 6px;
           }
 
-          &.success {
-            border-left: 4px solid #22c55e;
-
-            @include mobile-sm {
-              border-left: 3px solid #22c55e;
-            }
-          }
-
-          &.failed {
-            border-left: 4px solid #ef4444;
-
-            @include mobile-sm {
-              border-left: 3px solid #ef4444;
-            }
-          }
-
-          &.total {
-            border-left: 4px solid #3b82f6;
-
-            @include mobile-sm {
-              border-left: 3px solid #3b82f6;
-            }
-          }
+          border: 1px solid $color-border;
 
           .result-label {
             display: block;
@@ -329,7 +308,7 @@ $tablet-md: 1024px;
             }
 
             .error-message {
-              color: #ef4444;
+              color: var(--color-danger);
               font-size: 13px;
               margin-bottom: 0.5rem;
 

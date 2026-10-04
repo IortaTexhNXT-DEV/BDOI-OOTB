@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -9,9 +9,12 @@ import { Checkbox } from "primereact/checkbox";
 import { InputNumber } from "primereact/inputnumber";
 import { useNavigate, useLocation, useParams } from "react-router-dom";
 import SvgDot from "../../../../assets/icons/SvgDot";
-import SvgSearchIcon from "../../../../assets/icons/SvgSearchIcon";
-import { Card } from "primereact/card";
+import { Toast } from "primereact/toast";
+import FieldError from "../../../../components/FieldError";
+import { MasterLookup, deleteAndReturn, saveAndReturn, useMasterOptions } from "../masterRecord";
 import "./index.scss";
+import { confirmAction } from "../../../../utility/dialogs";
+import { requiredErrors, hasErrors, errorSummary } from "../../../../utility/requiredFields";
 
 const AutomatedRemittanceMaster = () => {
   const { t } = useTranslation();
@@ -19,6 +22,8 @@ const AutomatedRemittanceMaster = () => {
   const location = useLocation();
   const { mode } = useParams();
   const { data } = location.state || {};
+  const toast = useRef(null);
+  const TYPE = "remittance-automated";
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [formData, setFormData] = useState({
@@ -41,13 +46,7 @@ const AutomatedRemittanceMaster = () => {
     { label: t("automatedRemittance.quarterly"), value: "Quarterly" },
   ];
 
-  const branchOptions = [
-    { label: t("automatedRemittance.headOffice"), value: "HO" },
-    { label: t("automatedRemittance.branch1"), value: "B1" },
-    { label: t("automatedRemittance.branch2"), value: "B2" },
-    { label: t("automatedRemittance.financeDept"), value: "FIN" },
-    { label: t("automatedRemittance.operationsDept"), value: "OPS" },
-  ];
+  const branchOptions = useMasterOptions("branch", toast);
 
   const items = [
     { label: t("automatedRemittance.remittanceMaster"), url: "/master/finance/remittance" },
@@ -61,16 +60,17 @@ const AutomatedRemittanceMaster = () => {
       // Load existing data
       if (data) {
         setFormData({
-          ruleCode: data.code || "ARM-0001",
-          ruleName: data.name || "Monthly Auto Remittance",
-          isActive: data.status || false,
-          frequency: "Monthly",
-          processingDay: 25,
-          cutoffDays: 3,
-          minTransCount: 1,
-          mainAccount: "ACC-1001",
-          subAccount: "SUB-2001",
-          branchDept: "HO",
+          ...(data.form || {}),
+          ruleCode: data.code,
+          ruleName: data.name,
+          isActive: data.status === true || data.status === "Active",
+          frequency: data.frequency || null,
+          processingDay: data.dayOfExecution ?? 1,
+          cutoffDays: data.cutoffDays ?? 0,
+          minTransCount: data.minTransactionCount ?? 1,
+          mainAccount: data.glMapping?.debit || "",
+          subAccount: data.glMapping?.credit || "",
+          branchDept: data.form?.branchDept || null,
         });
       }
     } else {
@@ -94,17 +94,49 @@ const AutomatedRemittanceMaster = () => {
     }));
   };
 
+  const [errors, setErrors] = useState({});
+
   const handleSave = () => {
-    console.log("Saving remittance rule:", formData);
-    // Add save logic here
-    navigate("/master/finance/remittance");
+    const found = requiredErrors(formData, [
+      ["ruleCode", t("automatedRemittance.ruleCode")],
+      ["ruleName", t("automatedRemittance.ruleName")],
+      ["frequency", t("automatedRemittance.frequency")],
+      ["processingDay", t("automatedRemittance.processingDay"), (v) => v.frequency !== "Monthly" || (v.processingDay >= 1 && v.processingDay <= 31)],
+      ["mainAccount", "Main Account"],
+      ["branchDept", "Branch/Department"],
+    ]);
+    setErrors(found);
+    if (hasErrors(found)) {
+      toast.current?.show({ severity: "warn", summary: "Validation", detail: errorSummary(found), life: 4000 });
+      // the GL fields are on the second tab
+      if (!found.ruleCode && !found.ruleName && !found.frequency && !found.processingDay) setActiveIndex(1);
+      else setActiveIndex(0);
+      return null;
+    }
+    return save();
   };
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this remittance rule?")) {
-      console.log("Deleting remittance rule:", formData.ruleCode);
-      // Add delete logic here
-      navigate("/master/finance/remittance");
+  const save = () => saveAndReturn({
+    type: TYPE,
+    id: data?.id,
+    toast,
+    navigate,
+    record: {
+      code: formData.ruleCode,
+      name: formData.ruleName,
+      isActive: formData.isActive,
+      frequency: formData.frequency,
+      dayOfExecution: formData.processingDay,
+      cutoffDays: formData.cutoffDays,
+      minTransactionCount: formData.minTransCount,
+      glMapping: { debit: formData.mainAccount, credit: formData.subAccount },
+      form: formData
+    }
+  });
+
+  const handleDelete = async () => {
+    if (await confirmAction("Are you sure you want to delete this remittance rule?", { danger: true })) {
+      deleteAndReturn({ type: TYPE, id: data?.id, toast, navigate });
     }
   };
 
@@ -112,24 +144,20 @@ const AutomatedRemittanceMaster = () => {
     navigate("/master/finance/remittance");
   };
 
-  const openAccountLookup = (accountType) => {
-    console.log(`Opening ${accountType} lookup`);
-    // Add lookup modal logic here
-  };
 
   const isViewMode = mode === "view";
 
   return (
     <div className="container__automated__remittance__master">
+        <Toast ref={toast} />
         <div className="grid m-0 top__container">
           <div className="col-12 p-0">
             <Button
               icon="pi pi-arrow-left"
               className="back__button"
-              onClick={handleClose}
-            />
+              onClick={handleClose} aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
             <span className="page__title">{t("automatedRemittance.pageTitle")}</span>
-            <span className="mode-badge">{mode?.toUpperCase() || "ADD"}</span>
+            <span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>
           </div>
           <div className="col-12 p-0">
             <BreadCrumb
@@ -157,6 +185,7 @@ const AutomatedRemittanceMaster = () => {
                       placeholder={t("automatedRemittance.placeholderRuleCode")}
                       className="full-width"
                     />
+                    <FieldError error={errors.ruleCode} />
                   </div>
 
                   <div className="form-field">
@@ -170,6 +199,7 @@ const AutomatedRemittanceMaster = () => {
                       className="full-width"
                       maxLength={100}
                     />
+                    <FieldError error={errors.ruleName} />
                   </div>
 
                   <div className="form-field checkbox-field">
@@ -198,6 +228,7 @@ const AutomatedRemittanceMaster = () => {
                       placeholder={t("automatedRemittance.selectFrequency")}
                       className="full-width"
                     />
+                    <FieldError error={errors.frequency} />
                   </div>
 
                   <div className="form-field">
@@ -214,6 +245,7 @@ const AutomatedRemittanceMaster = () => {
                       max={31}
                       className="full-width"
                     />
+                    <FieldError error={errors.processingDay} />
                   </div>
 
                   <div className="form-field">
@@ -253,44 +285,27 @@ const AutomatedRemittanceMaster = () => {
                 <div className="form-grid three-column">
                   <div className="form-field">
                     <label htmlFor="mainAccount" className="required">Main Account</label>
-                    <div className="input-with-button">
-                      <InputText
-                        id="mainAccount"
-                        value={formData.mainAccount}
-                        onChange={(e) => handleInputChange("mainAccount", e.target.value)}
-                        disabled={isViewMode}
-                        placeholder={t("remittance.selectMainAccount")}
-                        className="full-width"
-                      />
-                      {!isViewMode && (
-                        <Button
-                          icon={<SvgSearchIcon />}
-                          className="lookup-button"
-                          onClick={() => openAccountLookup("main")}
-                        />
-                      )}
-                    </div>
+                    <MasterLookup
+                      type="main-account"
+                      value={formData.mainAccount}
+                      onChange={(v) => handleInputChange("mainAccount", v)}
+                      disabled={isViewMode}
+                      placeholder={t("remittance.selectMainAccount")}
+                      toast={toast}
+                    />
+                    <FieldError error={errors.mainAccount} />
                   </div>
 
                   <div className="form-field">
                     <label htmlFor="subAccount">{t("automatedRemittance.subAccount")}</label>
-                    <div className="input-with-button">
-                      <InputText
-                        id="subAccount"
-                        value={formData.subAccount}
-                        onChange={(e) => handleInputChange("subAccount", e.target.value)}
-                        disabled={isViewMode}
-                        placeholder={t("automatedRemittance.selectSubAccount")}
-                        className="full-width"
-                      />
-                      {!isViewMode && (
-                        <Button
-                          icon={<SvgSearchIcon />}
-                          className="lookup-button"
-                          onClick={() => openAccountLookup("sub")}
-                        />
-                      )}
-                    </div>
+                    <MasterLookup
+                      type="sub-account"
+                      value={formData.subAccount}
+                      onChange={(v) => handleInputChange("subAccount", v)}
+                      disabled={isViewMode}
+                      placeholder={t("automatedRemittance.selectSubAccount")}
+                      toast={toast}
+                    />
                   </div>
 
                   <div className="form-field">
@@ -304,6 +319,7 @@ const AutomatedRemittanceMaster = () => {
                       placeholder={t("remittance.selectBranchDepartment")}
                       className="full-width"
                     />
+                    <FieldError error={errors.branchDept} />
                   </div>
                 </div>
               </div>

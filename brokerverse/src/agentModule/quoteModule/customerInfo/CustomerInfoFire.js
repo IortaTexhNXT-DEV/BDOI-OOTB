@@ -16,7 +16,10 @@ import { getQuotationByIdMiddleware } from "../Store/quotationMiddleware";
 import { Toast } from "primereact/toast";
 import leadService from "../../../services/leadService";
 import quotationService from "../../../services/quotationService";
+import placementService from "../../../services/placementService";
 
+import { numberLocale } from "../../../utility/currencyConverter";
+import logger from "../../../utility/logger";
 const CustomerInfoFire = ({ action }) => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
@@ -69,7 +72,7 @@ const CustomerInfoFire = ({ action }) => {
         const response = await leadService.getLeadById(quotationDetails.leadRefId);
         if (response.success) setLeadData(response.data);
       } catch (error) {
-        console.error("Error fetching lead data:", error);
+        logger.error("Error fetching lead data:", error);
       }
     };
     fetchLeadData();
@@ -138,6 +141,13 @@ const CustomerInfoFire = ({ action }) => {
         "FIRE"
       );
 
+      if (!result.success && result.code === "PLACEMENT_JOURNEY") {
+        // the line's placement journey requires a Placement Slip: place the risk with the insurer(s) first
+        const placement = await placementService.placeQuotation(quotationId, { inceptionDate: inception, expiryDate: expiry, insuredName });
+        toast.current?.show({ severity: "info", summary: t("placement.quoteJourney.created", { number: placement.placementNumber }), detail: t("placement.quoteJourney.createdDetail"), life: 2500 });
+        navigate(`/placement/placement-slips/${placement.id}`);
+        return;
+      }
       if (!result.success) {
         throw new Error(result.error || "Failed to convert quotation to policy");
       }
@@ -174,7 +184,7 @@ const CustomerInfoFire = ({ action }) => {
         });
       }, 500);
     } catch (error) {
-      console.error("Failed to convert quotation to policy:", error);
+      logger.error("Failed to convert quotation to policy:", error);
       toast.current?.show({
         severity: "error",
         summary: t("common.error"),
@@ -230,8 +240,8 @@ const CustomerInfoFire = ({ action }) => {
         <div className="customer__info__main__title">{t("agent.leads")}</div>
         <Card className="mt-4">
           <div style={{ textAlign: "center", padding: "2rem" }}>
-            <i className="pi pi-times-circle" style={{ fontSize: "2rem", color: "#f44336" }}></i>
-            <p style={{ marginTop: "1rem", color: "#f44336" }}>{quotationLoadError}</p>
+            <i className="pi pi-times-circle" style={{ fontSize: "1.25rem", color: "var(--color-danger)" }}></i>
+            <p style={{ marginTop: "1rem", color: "var(--color-danger)" }}>{quotationLoadError}</p>
             <Button label={t("agent.returnToQuoteListing")} onClick={() => navigate("/agent/quotelisting")} className="mt-3" />
           </div>
         </Card>
@@ -252,7 +262,7 @@ const CustomerInfoFire = ({ action }) => {
             {leadData
               ? `${leadData.firstName || ""} ${leadData.lastName || ""} / ${t("agent.leadIdLabel")} ${leadData.generatedLeadId || ""}`
               : quotationDetails?.leadRefId
-              ? `${t("agent.leadIdLabel")} ${quotationDetails.leadRefId}`
+              ? `${t("agent.leadIdLabel")} ${quotationDetails.lead?.generatedLeadId || ""}`
               : t("agent.loadingLeadData")}
           </div>
         </div>
@@ -363,7 +373,7 @@ const CustomerInfoFire = ({ action }) => {
               <div key={key} className="col-12 md:col-6 lg:col-6 xl:col-6 mt-2">
                 <InputTextField
                   label={label}
-                  value={sumInsured[key] != null ? Number(sumInsured[key]).toLocaleString() : "0"}
+                  value={sumInsured[key] != null ? Number(sumInsured[key]).toLocaleString(numberLocale()) : "0"}
                   disabled
                 />
               </div>

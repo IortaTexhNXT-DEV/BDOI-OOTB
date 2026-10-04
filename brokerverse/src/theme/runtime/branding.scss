@@ -1,0 +1,94 @@
+// Runtime branding: sign-in picture panel and the theme-dependent layout switches (data attributes set on <html> by
+// src/theme/runtime/themeEngine.js). Colours come from the --bv-* custom properties.
+
+.bv-login-art {
+  position: relative;
+
+  .bv-auth__art-image {
+    position: relative;
+    z-index: 0;
+  }
+
+  .bv-login-art__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+}
+
+// Phones: the panel shows as a banner above the sign-in form when the theme asks for it.
+@media (max-width: 960px) {
+  .agent__container__login.bv-auth .bv-auth__art.bv-auth__art--mobile {
+    display: block;
+    position: relative;
+    height: 160px;
+  }
+}
+
+// A preview of the panel (Theme and Branding screen): a box, not the full window height.
+.bv-auth__art.bv-login-art--preview {
+  position: relative;
+  height: 100%;
+  min-height: 120px;
+  overflow: hidden;
+
+  .bv-auth__art-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.agent__container__login.bv-auth .bv-auth__card .bv-auth__logo {
+  height: var(--bv-logo-login-height, 44px);
+  max-width: 300px;
+}
+
+.agent__container__login.bv-auth .bv-auth__card .bv-auth__tagline {
+  margin: 6px 0 0;
+  color: #656565;
+  font-size: 14px;
+  line-height: 20px;
+}
+
+// Dark side bar themes: the menu search field and the icons follow the side bar text colour.
+[data-bv-sidebar="dark"] .sidebar__overall__container {
+  .menu-search-container .menu-search-input {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    color: var(--bv-sidebar-text) !important;
+  }
+
+  .menu-search-container i,
+  .bdoi-brand .bdoi-brand-product {
+    color: var(--bv-sidebar-muted) !important;
+  }
+}
+
+// Coloured header themes: the controls in the top bar take the header text colour.
+[data-bv-header="brand"] .protected__layout__header .Agentnavbar__container {
+  .pi,
+  .notification__title,
+  .notification-button-hover,
+  .p-breadcrumb .p-menuitem-text {
+    color: var(--bv-header-text) !important;
+  }
+}
+
+// Compact density: smaller form controls as well as table rows.
+[data-bv-density="compact"] .protected__layout__container .main__content {
+  .p-inputtext,
+  .p-dropdown,
+  .p-multiselect,
+  .p-calendar .p-inputtext {
+    min-height: 34px;
+    padding-top: 6px;
+    padding-bottom: 6px;
+  }
+
+  .p-card .p-card-body {
+    padding: 14px 18px;
+  }
+}

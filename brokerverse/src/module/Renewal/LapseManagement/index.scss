@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__lapse__management__master {
@@ -129,14 +130,15 @@
           gap: 16px;
 
           .card-icon {
-            font-size: 32px;
+            font-size: 1.25rem;
+            color: var(--color-text-muted);
 
             &.red {
-              color: $dark-red;
+              color: $color-danger;
             }
 
             &.orange {
-              color: #F59E0B;
+              color: $color-warning;
             }
 
             &.blue {
@@ -171,7 +173,6 @@
           transition: transform 0.2s;
 
           &:hover {
-            transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
           }
         }
@@ -301,7 +302,7 @@
                       font-size: 14px;
 
                       &.warning {
-                        color: #F59E0B;
+                        color: $color-warning;
                       }
 
                       &.info {
@@ -309,7 +310,7 @@
                       }
 
                       &.danger {
-                        color: $dark-red;
+                        color: $color-danger;
                       }
                     }
 
@@ -317,7 +318,7 @@
                       font-weight: 500;
 
                       &.warning {
-                        color: #F59E0B;
+                        color: $color-warning;
                       }
 
                       &.info {
@@ -325,7 +326,7 @@
                       }
 
                       &.danger {
-                        color: $dark-red;
+                        color: $color-danger;
                       }
                     }
                   }
@@ -366,13 +367,13 @@
                     }
 
                     &.p-tag-warning {
-                      background: lighten(#F59E0B, 40%);
-                      color: darken(#F59E0B, 20%);
+                      background: $color-warning-050;
+                      color: $color-warning;
                     }
 
                     &.p-tag-danger {
-                      background: lighten($dark-red, 40%);
-                      color: $dark-red;
+                      background: $color-danger-050;
+                      color: $color-danger;
                     }
                   }
 
@@ -389,7 +390,7 @@
                     }
 
                     &.p-badge-danger {
-                      background: $dark-red;
+                      background: $color-danger;
                     }
                   }
 
@@ -527,7 +528,6 @@
                     .stat-label {
                       font-size: 12px;
                       color: $grey;
-                      text-transform: uppercase;
                     }
                   }
                 }
@@ -563,7 +563,6 @@
         label {
           font-size: 12px;
           color: $grey;
-          text-transform: uppercase;
           font-weight: 600;
         }
 
@@ -744,3 +743,4 @@
     }
   }
 }
+@import "../renewalPages";

@@ -1,6 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { getReceiptsListMiddleware, getReceiptsListByIdMiddleware, getReceiptsReceivableMiddleware, postAddReceiptsMiddleware, postPaymentDetailsMiddleware, patchReceipEditMiddleware, getReceiptsListBySearchMiddleware, getReceiptsListByFilterMiddleware, getPaymentDetails, createReceiptMiddleware, bulkPrintReceiptsMiddleware, getDraftReceiptsMiddleware, updateReceiptMiddleware, getReceiptByIdMiddleware } from "./receiptsMiddleware";
-import SvgIconeye from "../../../assets/icons/SvgIconeye";
 const initialState = {
   loading: false,
   error: "",
@@ -17,7 +16,6 @@ const initialState = {
   bulkPrintData: null,
   bulkPrintLoading: false
 };
-let nextId = 3
 const receiptsReducer = createSlice({
   name: "receipts",
   initialState,
@@ -101,6 +99,8 @@ const receiptsReducer = createSlice({
         ...(state.currentReceiptDetails || {}),
         receiptId: action.payload.receiptId || null,
         receiptNumber: action.payload.receiptNumber || null,
+        clientEmail: action.payload.clientEmail || null,
+        receiptStatus: action.payload.receiptStatus || null,
       };
       state.receiptDetailList = (action.payload.receiptDetailList || []).map((item) => ({
         ...item,
@@ -141,8 +141,7 @@ const receiptsReducer = createSlice({
     });
     builder.addCase(postAddReceiptsMiddleware.fulfilled, (state, action) => {
       state.loading = false;
-      const newItem2 = { ...action.payload, id: nextId++ };
-      state.receiptsTableList = [...state.receiptsTableList, newItem2];
+      state.receiptsTableList = [action.payload, ...state.receiptsTableList];
     });
     builder.addCase(postAddReceiptsMiddleware.rejected, (state, action) => {
       state.loading = false;

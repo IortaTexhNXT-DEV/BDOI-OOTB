@@ -2,7 +2,6 @@
 
 export const IAR_PRODUCT_TYPE = "Industrial All Risks";
 export const IAR_PRODUCT_CODE = "2009";
-export const IAR_VAT_PERCENT = 12;
 
 export const IAR_SECTION_CATALOG = [
   { sectionCode: "MOTOR", sectionLabel: "Motor Commercial" },
@@ -122,7 +121,7 @@ export function recalculateIarPremiumDetails(premiumDetails = {}) {
   const vatPercent =
     premiumDetails.vatPercent != null
       ? Number(premiumDetails.vatPercent)
-      : IAR_VAT_PERCENT;
+      : 0; // callers pass the VAT of the premium tax and charge engine
   const valueAddedTax = Number(
     ((totalPremiumPreLevy * vatPercent) / 100).toFixed(2)
   );
@@ -146,12 +145,27 @@ export function recalculateIarPremiumDetails(premiumDetails = {}) {
   };
 }
 
-export function buildPremiumSectionsFromRisks(iarSections) {
+/**
+ * Section catalog of the IAR product from Product Configurator > Risk Mapping (the active sections of the active IAR
+ * risk-sections mapping with their default rates); the built-in catalog when none is configured.
+ */
+export function iarCatalogFromMappings(mappings) {
+  const iar = (mappings || []).find((m) => m.definitionType === "RISK_SECTIONS" && String(m.lobCode).toUpperCase() === "IAR" && m.status === "Active");
+  const sections = (iar?.sections || []).filter((x) => x.isActive !== false);
+  if (!sections.length) return { mapped: false, sections: IAR_SECTION_CATALOG.map((x) => ({ ...x, defaultRatePercent: IAR_DEFAULT_SECTION_RATES[x.sectionCode] ?? null })) };
+  return { mapped: true, sections: sections.map((x) => ({ sectionCode: x.sectionCode, sectionLabel: x.sectionLabel, defaultRatePercent: x.defaultRatePercent ?? null })) };
+}
+
+export function buildPremiumSectionsFromRisks(iarSections, catalog = null) {
+  const rateOf = (code) => {
+    const configured = catalog?.find((x) => x.sectionCode === code)?.defaultRatePercent;
+    return configured !== null && configured !== undefined ? Number(configured) : IAR_DEFAULT_SECTION_RATES[code] ?? 0.25;
+  };
   return (iarSections || []).map((sec) => ({
     sectionId: sec.id,
     sectionCode: sec.sectionCode,
     sectionLabel: sec.sectionLabel,
-    ratePercent: IAR_DEFAULT_SECTION_RATES[sec.sectionCode] ?? 0.25,
+    ratePercent: rateOf(sec.sectionCode),
     sectionSumInsured: 0,
     sectionPremium: 0,
     items: [],

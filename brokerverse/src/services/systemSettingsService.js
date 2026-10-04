@@ -23,6 +23,19 @@ class SystemSettingsService {
     return json.data || json;
   }
 
+  /** Configuration values of a group (GET /settings?group=tax) as [{ key, value, label, type }]. */
+  async getConfiguration(group) {
+    const response = await fetch(`${BASE_URL}/settings?group=${encodeURIComponent(group)}`, {
+      method: "GET",
+      headers: { Accept: "application/json", ...authService.getAuthHeader() },
+    });
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      throw new Error(json.message || `Failed to load configuration (${response.status})`);
+    }
+    return json.data || [];
+  }
+
   async updateSettings(payload) {
     const response = await fetch(this.baseURL, {
       method: "PUT",

@@ -1,0 +1,413 @@
+name: Deploy
+
+# Deploys the artefacts CI built for one commit (web-<sha>, backend-<sha>) to one environment. Nothing is rebuilt:
+# the build tested in CI is the build that runs in dev, SIT, UAT, Pre-Prod and Production; only the
+# environment's variables differ. See deploy/RELEASE_PIPELINE.md.
+#
+# Started by:
+#   - ci.yml after a successful build (push to brokerverse-platform -> dev, tag vX.Y.Z-rc.N -> uat, tag vX.Y.Z -> production)
+#   - Actions > Deploy > Run workflow: pick the commit or tag in "Use workflow from" and the environment
+#     (promotion of an earlier build, SIT, Pre-Prod, re-deploy)
+#   - rollback.yml (mode rollback: no backup, no migrations)
+#
+# Per GitHub Environment (Settings > Environments > dev | sit | uat | preprod | production):
+#   variables  DEPLOY_ENABLED=true (else the deployment is skipped with a notice), BACKEND_TARGET (ec2 | none),
+#              FRONTEND_TARGET (s3 | ec2 | none), APP_URL, API_URL (default APP_URL/api), API_BASE_URL (empty =
+#              same-origin /api), ENVIRONMENT_NAME (DEV, SIT, UAT, PREPROD; empty in production), ENVIRONMENT_COLOR,
+#              BROKERVERSE_ROOT, BROKERVERSE_PORT, WEB_SERVER_NAME, BACKUP_BEFORE_DEPLOY, BACKUP_S3_URI, AWS_REGION,
+#              AWS_ROLE_ARN (OIDC, instead of access keys)
+#   secrets    EC2_HOST, EC2_USER, EC2_SSH_KEY, EC2_KNOWN_HOSTS (recommended), AWS_ACCESS_KEY_ID,
+#              AWS_SECRET_ACCESS_KEY, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID
+#   protection required reviewers on uat, preprod and production; production limited to tags v*.*.*
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: dev, sit, uat, preprod or production
+        type: string
+        required: true
+      sha:
+        description: "Commit to deploy (default: the commit of the calling run)"
+        type: string
+        required: false
+        default: ""
+      mode:
+        description: deploy (backup, migrations, seeds, switch) or rollback (switch only)
+        type: string
+        required: false
+        default: deploy
+      same_run:
+        description: The artefacts were built by the calling run
+        type: boolean
+        required: false
+        default: false
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [dev, sit, uat, preprod, production]
+        required: true
+      sha:
+        description: Commit SHA to deploy (empty = the commit or tag chosen in "Use workflow from"; production only from a vX.Y.Z tag)
+        type: string
+        required: false
+        default: ""
+      mode:
+        description: deploy (backup, migrations, seeds, switch) or rollback (switch only, no migrations)
+        type: choice
+        options: [deploy, rollback]
+        default: deploy
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+jobs:
+  prepare:
+    name: Resolve the build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      sha: ${{ steps.resolve.outputs.sha }}
+      run_id: ${{ steps.resolve.outputs.run_id }}
+    steps:
+      - name: Check the request and find the CI artefacts
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TARGET_ENV: ${{ inputs.environment }}
+          INPUT_SHA: ${{ inputs.sha }}
+          MODE: ${{ inputs.mode }}
+          SAME_RUN: ${{ inputs.same_run }}
+        run: |
+          set -euo pipefail
+          case "$TARGET_ENV" in dev|sit|uat|preprod|production) ;; *) echo "::error::unknown environment '$TARGET_ENV'"; exit 1 ;; esac
+          case "$MODE" in deploy|rollback) ;; *) echo "::error::mode must be deploy or rollback"; exit 1 ;; esac
+          sha="${INPUT_SHA:-$GITHUB_SHA}"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full 40-character commit SHA (got '$sha')"; exit 1; }
+
+          # Production runs only a released version: a vX.Y.Z tag, chosen in "Use workflow from".
+          if [ "$TARGET_ENV" = production ]; then
+            if [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "::error::production is deployed only from a release tag vX.Y.Z (this run is on $GITHUB_REF). Choose the tag in 'Use workflow from'."
+              exit 1
+            fi
+            if [ "$sha" != "$GITHUB_SHA" ]; then
+              echo "::error::production deploys the tag's own commit; leave sha empty."
+              exit 1
+            fi
+          fi
+
+          if [ "$SAME_RUN" = true ]; then
+            run_id="$GITHUB_RUN_ID"
+          else
+            # newest successful CI run of this commit that still holds both artefacts (kept 90 days)
+            run_id=""
+            for id in $(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$sha&status=success&per_page=20" --jq '.workflow_runs[].id'); do
+              names="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$id/artifacts?per_page=100" --jq '.artifacts[] | select(.expired == false) | .name')"
+              if grep -qx "web-$sha" <<<"$names" && grep -qx "backend-$sha" <<<"$names"; then run_id="$id"; break; fi
+            done
+            if [ -z "$run_id" ]; then
+              echo "::error::no successful CI run with artefacts web-$sha and backend-$sha. Run CI on this commit first (Actions > CI > Run workflow); expired artefacts need a new CI run."
+              exit 1
+            fi
+          fi
+          echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
+          {
+            echo "### $MODE of \`${sha:0:12}\` to **$TARGET_ENV**"
+            echo "Artefacts from CI run [$run_id]($GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$run_id), ref \`$GITHUB_REF_NAME\`."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  deploy:
+    name: ${{ inputs.mode == 'rollback' && 'Roll back' || 'Deploy' }} ${{ inputs.environment }}
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ steps.cfg.outputs.app_url }}
+    concurrency:
+      group: deploy-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      TARGET_ENV: ${{ inputs.environment }}
+      MODE: ${{ inputs.mode }}
+      SHA: ${{ needs.prepare.outputs.sha }}
+      RUN_ID: ${{ needs.prepare.outputs.run_id }}
+      AWS_REGION: ${{ vars.AWS_REGION || 'ap-southeast-1' }}
+      BROKERVERSE_ROOT: ${{ vars.BROKERVERSE_ROOT || '/home/ubuntu/appdata/brokerverse' }}
+      BROKERVERSE_PORT: ${{ vars.BROKERVERSE_PORT || '8001' }}
+    steps:
+      - name: Check the environment is configured
+        id: cfg
+        env:
+          DEPLOY_ENABLED: ${{ vars.DEPLOY_ENABLED }}
+          BACKEND_TARGET: ${{ vars.BACKEND_TARGET || 'ec2' }}
+          FRONTEND_TARGET: ${{ vars.FRONTEND_TARGET || 's3' }}
+          APP_URL: ${{ vars.APP_URL }}
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_ROLE_ARN: ${{ vars.AWS_ROLE_ARN }}
+        run: |
+          set -euo pipefail
+          skip() {
+            echo "::notice title=Deployment to $TARGET_ENV skipped::$1"
+            echo "Deployment to **$TARGET_ENV** skipped: $1" >> "$GITHUB_STEP_SUMMARY"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+          [ "$DEPLOY_ENABLED" = true ] || skip "the '$TARGET_ENV' environment is not set up for automatic deployment (variable DEPLOY_ENABLED is not 'true'). The build is tested and its artefacts are kept; see deploy/RELEASE_PIPELINE.md, section 'GitHub settings'."
+          missing=()
+          case "$BACKEND_TARGET" in
+            ec2) for s in EC2_HOST EC2_USER EC2_SSH_KEY; do [ -n "${!s}" ] || missing+=("secret $s"); done ;;
+            none) ;;
+            *) echo "::error::BACKEND_TARGET must be ec2 or none"; exit 1 ;;
+          esac
+          case "$FRONTEND_TARGET" in
+            s3)
+              for s in S3_BUCKET CLOUDFRONT_DISTRIBUTION_ID; do [ -n "${!s}" ] || missing+=("secret $s"); done
+              [ -n "$AWS_ACCESS_KEY_ID" ] || [ -n "$AWS_ROLE_ARN" ] || missing+=("secret AWS_ACCESS_KEY_ID or variable AWS_ROLE_ARN") ;;
+            ec2) for s in EC2_HOST EC2_USER EC2_SSH_KEY; do [ -n "${!s}" ] || missing+=("secret $s"); done ;;
+            none) ;;
+            *) echo "::error::FRONTEND_TARGET must be s3, ec2 or none"; exit 1 ;;
+          esac
+          [ -n "$APP_URL" ] || missing+=("variable APP_URL")
+          if [ "${#missing[@]}" -gt 0 ]; then
+            skip "the '$TARGET_ENV' environment is missing: $(IFS=', '; echo "${missing[*]}")."
+          fi
+          backup=false
+          if [ "$MODE" = deploy ] && [ "$BACKEND_TARGET" = ec2 ]; then
+            case "$TARGET_ENV" in preprod|production) backup=true ;; esac
+            [ "${{ vars.BACKUP_BEFORE_DEPLOY }}" = true ] && backup=true
+          fi
+          {
+            echo "enabled=true"
+            echo "backend=$BACKEND_TARGET"
+            echo "frontend=$FRONTEND_TARGET"
+            echo "ssh=$([ "$BACKEND_TARGET" = ec2 ] || [ "$FRONTEND_TARGET" = ec2 ] && echo true || echo false)"
+            echo "backup=$backup"
+            echo "app_url=$APP_URL"
+          } >> "$GITHUB_OUTPUT"
+          echo "Deploying $SHA to $TARGET_ENV: backend $BACKEND_TARGET, front end $FRONTEND_TARGET, pre-deploy backup $backup, mode $MODE"
+
+      - name: Checkout the deployed commit (deployment scripts)
+        if: steps.cfg.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.SHA }}
+
+      - name: Download the front-end artefact
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.frontend != 'none'
+        uses: actions/download-artifact@v4
+        with:
+          name: web-${{ env.SHA }}
+          path: artefacts/web
+          # artefacts of another run (promotion, rollback) need its id; those of the calling CI run do not
+          run-id: ${{ !inputs.same_run && env.RUN_ID || '' }}
+          github-token: ${{ !inputs.same_run && github.token || '' }}
+
+      - name: Download the backend artefact
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.backend != 'none'
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-${{ env.SHA }}
+          path: artefacts
+          run-id: ${{ !inputs.same_run && env.RUN_ID || '' }}
+          github-token: ${{ !inputs.same_run && github.token || '' }}
+
+      - name: Connect to the server
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.ssh == 'true'
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+          EC2_KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+        run: |
+          set -euo pipefail
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/deploy_key && chmod 600 ~/.ssh/deploy_key
+          if [ -n "$EC2_KNOWN_HOSTS" ]; then
+            printf '%s\n' "$EC2_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            echo "::warning::secret EC2_KNOWN_HOSTS is not set; trusting the host key presented now (set it to pin the key)."
+            ssh-keyscan -T 15 "$EC2_HOST" > ~/.ssh/known_hosts 2>/dev/null || true
+          fi
+          cat > ~/.ssh/config <<EOF
+          Host target
+            HostName $EC2_HOST
+            User $EC2_USER
+            IdentityFile ~/.ssh/deploy_key
+            ConnectTimeout 20
+            ServerAliveInterval 30
+            StrictHostKeyChecking yes
+            BatchMode yes
+          EOF
+          if ! ssh target true; then
+            echo "::error title=Server not reachable::SSH to the $TARGET_ENV server timed out or was refused. Check that the instance is running, its security group allows SSH (port 22) from GitHub Actions runners (or use a self-hosted runner / SSM), and EC2_HOST, EC2_USER and EC2_SSH_KEY. Nothing was changed."
+            exit 1
+          fi
+          ssh target 'mkdir -p /tmp/brokerverse-deploy'
+          scp -q deploy/ec2/release.sh target:/tmp/brokerverse-deploy/release.sh
+          # every remote call: root (the apps run under root's PM2), with this deployment's settings
+          cat > remote.sh <<'EOF'
+          #!/usr/bin/env bash
+          # remote.sh <release.sh arguments...>: run release.sh on the server as root with the deployment settings
+          set -euo pipefail
+          vars=(BROKERVERSE_ROOT BROKERVERSE_PORT BACKUP_S3_URI API_BASE_URL API_UPSTREAM ENVIRONMENT_NAME ENVIRONMENT_COLOR ANALYTICS_ENABLED WEB_SERVER_NAME)
+          envs=""
+          for v in "${vars[@]}"; do [ -n "${!v:-}" ] && envs+=" $v=$(printf '%q' "${!v}")"; done
+          args=""
+          for a in "$@"; do args+=" $(printf '%q' "$a")"; done
+          ssh target "sudo -n -H env$envs bash /tmp/brokerverse-deploy/release.sh$args"
+          EOF
+          chmod +x remote.sh
+
+      - name: Pre-deploy database backup
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.backup == 'true'
+        env:
+          BACKUP_S3_URI: ${{ vars.BACKUP_S3_URI }}
+        run: ./remote.sh backup "$TARGET_ENV-pre-${SHA:0:12}"
+
+      - name: Record the release now running
+        id: before
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.backend == 'ec2'
+        run: |
+          prev="$(./remote.sh status | sed -n 's/^current: *//p' || true)"
+          echo "Running before this deployment: ${prev:-none}"
+          echo "sha=$prev" >> "$GITHUB_OUTPUT"
+
+      - name: Install the backend release
+        id: backend_install
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.backend == 'ec2'
+        run: |
+          set -euo pipefail
+          scp -q "artefacts/backend-$SHA.tar.gz" "target:/tmp/brokerverse-deploy/backend-$SHA.tar.gz"
+          ./remote.sh install "/tmp/brokerverse-deploy/backend-$SHA.tar.gz" "$SHA"
+
+      - name: Database migrations (forward-only), then seeds
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.backend == 'ec2' && env.MODE == 'deploy'
+        run: ./remote.sh migrate "$SHA"
+
+      - name: Switch the API to the new release
+        id: backend
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.backend == 'ec2'
+        run: ./remote.sh activate "$SHA"
+
+      - name: AWS credentials
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.frontend == 's3'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-access-key-id: ${{ vars.AWS_ROLE_ARN == '' && secrets.AWS_ACCESS_KEY_ID || '' }}
+          aws-secret-access-key: ${{ vars.AWS_ROLE_ARN == '' && secrets.AWS_SECRET_ACCESS_KEY || '' }}
+
+      - name: Publish the front end to S3 and CloudFront
+        id: frontend_s3
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.frontend == 's3'
+        env:
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          ENVIRONMENT_NAME: ${{ vars.ENVIRONMENT_NAME }}
+          ENVIRONMENT_COLOR: ${{ vars.ENVIRONMENT_COLOR }}
+          ANALYTICS_ENABLED: ${{ vars.ANALYTICS_ENABLED }}
+        run: |
+          set -euo pipefail
+          # keep what is live now, to put it back if the smoke test fails
+          mkdir -p previous-web
+          aws s3 sync --only-show-errors "s3://$S3_BUCKET" previous-web
+          echo "restorable=true" >> "$GITHUB_OUTPUT"
+          sh brokerverse/scripts/env-config.sh artefacts/web/env-config.js
+          # hashed bundles first (immutable), then everything else (revalidated), index.html and env-config.js last
+          aws s3 sync --only-show-errors artefacts/web/static "s3://$S3_BUCKET/static" \
+            --cache-control "public,max-age=31536000,immutable"
+          aws s3 sync --only-show-errors artefacts/web "s3://$S3_BUCKET" --delete \
+            --exclude "static/*" --exclude "index.html" --exclude "env-config.js" \
+            --cache-control "no-cache"
+          aws s3 cp --only-show-errors artefacts/web/env-config.js "s3://$S3_BUCKET/env-config.js" \
+            --cache-control "no-store,max-age=0" --content-type "application/javascript"
+          aws s3 cp --only-show-errors artefacts/web/index.html "s3://$S3_BUCKET/index.html" \
+            --cache-control "no-cache" --content-type "text/html"
+          # old hashed bundles go last, so a page still loading the previous index.html finds its files
+          aws s3 sync --only-show-errors artefacts/web/static "s3://$S3_BUCKET/static" --delete \
+            --cache-control "public,max-age=31536000,immutable"
+          aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" \
+            --paths "/index.html" "/env-config.js" "/" "/login" > /dev/null
+
+      - name: Publish the front end on the server
+        id: frontend_ec2
+        if: steps.cfg.outputs.enabled == 'true' && steps.cfg.outputs.frontend == 'ec2'
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL }}
+          ENVIRONMENT_NAME: ${{ vars.ENVIRONMENT_NAME }}
+          ENVIRONMENT_COLOR: ${{ vars.ENVIRONMENT_COLOR }}
+          ANALYTICS_ENABLED: ${{ vars.ANALYTICS_ENABLED }}
+          WEB_SERVER_NAME: ${{ vars.WEB_SERVER_NAME }}
+        run: |
+          set -euo pipefail
+          tar -C artefacts/web -czf "web-$SHA.tar.gz" .
+          scp -q "web-$SHA.tar.gz" "target:/tmp/brokerverse-deploy/web-$SHA.tar.gz"
+          if [ "${{ steps.cfg.outputs.backend }}" != ec2 ]; then
+            scp -q "artefacts/backend-$SHA.tar.gz" "target:/tmp/brokerverse-deploy/backend-$SHA.tar.gz" 2>/dev/null || true
+          fi
+          ./remote.sh web "/tmp/brokerverse-deploy/web-$SHA.tar.gz" "$SHA"
+
+      - name: Smoke test
+        id: smoke
+        if: steps.cfg.outputs.enabled == 'true'
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+          API_URL: ${{ vars.API_URL }}
+          ENVIRONMENT_NAME: ${{ vars.ENVIRONMENT_NAME }}
+          EXPECTED_SHA: ${{ steps.cfg.outputs.backend == 'ec2' && env.SHA || '' }}
+          SKIP_WEB: ${{ steps.cfg.outputs.frontend == 'none' }}
+        run: bash deploy/smoke-test.sh
+
+      - name: Automatic rollback (smoke test failed)
+        if: failure() && env.MODE == 'deploy' && steps.cfg.outputs.enabled == 'true' && (steps.backend.outcome != 'skipped' || steps.frontend_s3.outcome != 'skipped' || steps.frontend_ec2.outcome != 'skipped')
+        env:
+          PREVIOUS: ${{ steps.before.outputs.sha }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          set -uo pipefail
+          status=0
+          if [ "${{ steps.backend.outcome }}" != skipped ] && [ "${{ steps.backend.outcome }}" != '' ] && [ -n "$PREVIOUS" ] && [ "$PREVIOUS" != "$SHA" ]; then
+            echo "Rolling the API back to $PREVIOUS (the database keeps the forward-only migrations)"
+            ./remote.sh rollback "$PREVIOUS" || status=1
+          fi
+          if [ "${{ steps.frontend_s3.outputs.restorable }}" = true ]; then
+            echo "Restoring the previous front end in S3"
+            aws s3 sync --only-show-errors previous-web "s3://$S3_BUCKET" --delete --cache-control "no-cache" || status=1
+            aws cloudfront create-invalidation --distribution-id "$CLOUDFRONT_DISTRIBUTION_ID" --paths "/*" > /dev/null || status=1
+          fi
+          if [ "${{ steps.frontend_ec2.outcome }}" != skipped ] && [ "${{ steps.frontend_ec2.outcome }}" != '' ]; then
+            ./remote.sh web-rollback || status=1
+          fi
+          echo "### Automatic rollback ran: $( [ $status = 0 ] && echo 'previous release restored' || echo 'ROLLBACK INCOMPLETE, act now' )" >> "$GITHUB_STEP_SUMMARY"
+          exit $status
+
+      - name: Summary
+        if: always() && steps.cfg.outputs.enabled == 'true'
+        run: |
+          {
+            echo "| | |"
+            echo "|---|---|"
+            echo "| Environment | $TARGET_ENV |"
+            echo "| Commit | \`$SHA\` |"
+            echo "| Mode | $MODE |"
+            echo "| Backend | ${{ steps.cfg.outputs.backend }}: ${{ steps.backend.outcome || 'skipped' }} |"
+            echo "| Front end | ${{ steps.cfg.outputs.frontend }}: ${{ steps.cfg.outputs.frontend == 'ec2' && steps.frontend_ec2.outcome || steps.frontend_s3.outcome || 'skipped' }} |"
+            echo "| Pre-deploy backup | ${{ steps.cfg.outputs.backup }} |"
+            echo "| Smoke test | ${{ steps.smoke.outcome }} |"
+            echo "| Previous release | ${{ steps.before.outputs.sha || 'n/a' }} |"
+          } >> "$GITHUB_STEP_SUMMARY"

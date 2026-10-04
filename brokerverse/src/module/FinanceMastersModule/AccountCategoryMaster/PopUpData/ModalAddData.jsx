@@ -1,13 +1,12 @@
-import React, { useState } from "react";
+import { useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Dialog } from "primereact/dialog";
+import { Toast } from "primereact/toast";
 import "./index.scss";
 import { useFormik } from "formik";
-import DropDowns from "../../../../components/DropDowns";
 import InputField from "../../../../components/InputField";
 import { Button } from "primereact/button";
-import SvgDropdown from "../../../../assets/icons/SvgDropdown";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { getAddAccountCategoryMiddleWare } from "../store/accountCategoryMeddleware";
 
 const ModalAddData = ({
@@ -19,14 +18,6 @@ const ModalAddData = ({
 }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
-  const { AccountCategoryList, loading } = useSelector(
-    ({ accountCategoryReducer }) => {
-      return {
-        loading: accountCategoryReducer?.loading,
-        AccountCategoryList: accountCategoryReducer?.AccountCategoryList,
-      };
-    }
-  );
 
   const customValidation = (values) => {
     const errors = {};
@@ -43,14 +34,17 @@ const ModalAddData = ({
 
     return errors;
   };
-  const handleSubmit = (values) => {
-    // Handle form submission
-    console.log(values, "find values");
-    const valueWithId = {
-      ...values,
-      id: AccountCategoryList?.length + 1,
-    };
-    dispatch(getAddAccountCategoryMiddleWare(valueWithId));
+  const toastRef = useRef(null);
+  const handleSubmit = async (values) => {
+    try {
+      await dispatch(getAddAccountCategoryMiddleWare(values)).unwrap();
+      formik.resetForm();
+      handleSave(values);
+      handleEdit(values);
+      setVisible(false);
+    } catch (error) {
+      toastRef.current?.show({ severity: "error", detail: error });
+    }
   };
   const formik = useFormik({
     initialValues: {
@@ -59,13 +53,7 @@ const ModalAddData = ({
       description: "",
     },
     validate: customValidation,
-    onSubmit: (values) => {
-      handleSubmit(values);
-      formik.resetForm();
-      handleSave(values);
-      handleEdit(values);
-      setVisible(false);
-    },
+    onSubmit: handleSubmit,
   });
   return (
     <Dialog
@@ -76,6 +64,7 @@ const ModalAddData = ({
       dismissableMask={true}
       style={{ boxShadow: "none" }} 
     >
+      <Toast ref={toastRef} />
       <div className="form__container">
         <div className="grid m-0 p-0">
           <div className="col-12 md:col-12 lg:col-4 xl:col-4 ">
@@ -90,7 +79,7 @@ const ModalAddData = ({
               }
             />
             {formik.touched.categoryCode && formik.errors.categoryCode && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.categoryCode}
               </div>
             )}
@@ -107,7 +96,7 @@ const ModalAddData = ({
               }
             />
             {formik.touched.categoryName && formik.errors.categoryName && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.categoryName}
               </div>
             )}
@@ -124,7 +113,7 @@ const ModalAddData = ({
               }
             />
             {formik.touched.description && formik.errors.description && (
-              <div style={{ fontSize: 12, color: "red" }}>
+              <div style={{ fontSize: 12, color: "var(--color-danger)" }}>
                 {formik.errors.description}
               </div>
             )}

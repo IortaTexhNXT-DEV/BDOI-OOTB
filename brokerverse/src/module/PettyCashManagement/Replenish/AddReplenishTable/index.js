@@ -1,4 +1,6 @@
 import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
+import { showSuccessMessage } from "../../../../utility/toastUtils";
 import "./index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import SvgDot from "../../../../assets/icons/SvgDot";
@@ -12,40 +14,41 @@ import { Column } from "primereact/column";
 import InputField from "../../../../components/InputField";
 import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { postAddReplenishMiddleware } from "../store/pettyCashReplenishMiddleware";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 
 const AddReplenishTable = () => {
-  const [visible, setVisible] = useState(false);
-  const [totalAmounts, setTotalAmounts] = useState(0);
+  const { t } = useTranslation();
   const toastRef = useRef(null);
   const navigate = useNavigate();
 
   const [selectedRows, setSelectedRows] = useState([]);
-  const { AddReplenishTable, loading } = useSelector(
+  const dispatch = useDispatch();
+  const { AddReplenishTable, ReplenishFund } = useSelector(
     ({ pettyCashReplenishReducer }) => {
       return {
         loading: pettyCashReplenishReducer?.loading,
-        AddReplenishTable: pettyCashReplenishReducer?.AddReplenishTable,
+        AddReplenishTable: pettyCashReplenishReducer?.AddReplenishTable || [],
+        ReplenishFund: pettyCashReplenishReducer?.ReplenishFund || {},
       };
     }
   );
 
-  const isEmpty = AddReplenishTable.length === 0;
-  console.log(AddReplenishTable.Transactioncode, "AddReceiptTable");
+  const isEmpty = !AddReplenishTable.length;
   const totalAmount = selectedRows.reduce((total, item) => {
     const Amount = parseFloat(item.Amount);
     return !isNaN(Amount) ? total + Amount : total;
   }, 0);
-  console.log(totalAmount, "totalAmount");
-  const handleSubmit = () => {
-    toastRef.current.showToast();
-    {
-      setTimeout(() => {
-        navigate("/accounts/pettycash/replenish");
-      }, 2000);
+  const handleSubmit = async () => {
+    const result = await dispatch(postAddReplenishMiddleware(totalAmount));
+    if (postAddReplenishMiddleware.rejected.match(result)) {
+      toastRef.current.showToast({ severity: "error", detail: result.payload });
+      return;
     }
+    showSuccessMessage(t("pettyCash.replenishmentRecorded"));
+    navigate("/accounts/pettycash/replenish");
   };
-  const [selectedProducts, setSelectedProducts] = useState([]);
   const emptyTableIcon = (
     <div className="empty-table-icon">
       <SvgTable />
@@ -64,11 +67,6 @@ const AddReplenishTable = () => {
   ];
   const Initiate = { label: "Accounts" };
 
-  const handleClick = (rowData) => {
-    setVisible(true);
-    const clickedAmount = parseInt(rowData.Amount);
-    setTotalAmounts((prevTotalAmounts) => prevTotalAmounts + clickedAmount);
-  };
 
   const handleBack = () => {
     navigate("/accounts/pettycash/addreplenish");
@@ -88,10 +86,9 @@ const AddReplenishTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -152,9 +149,8 @@ const AddReplenishTable = () => {
             scrollable={true}
             scrollHeight="40vh"
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             selectionMode="checkbox"
@@ -162,7 +158,6 @@ const AddReplenishTable = () => {
             selection={selectedRows}
             onSelectionChange={(e) => setSelectedRows(e.value)}
 
-            // rowClassName={(rowData) => getStatusClassName(rowData.status)}
           >
             <Column
               selectionMode="multiple"
@@ -187,7 +182,7 @@ const AddReplenishTable = () => {
               headerStyle={headerStyle}
             ></Column>
 
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}
@@ -212,7 +207,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Disbursed Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -224,7 +218,6 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Reimbursement Amount"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
@@ -236,12 +229,11 @@ const AddReplenishTable = () => {
           <InputField
             classNames="input__filed"
             label="Current balance"
-            // placeholder="Enter"
             disabled={true}
             textColor={"#111927"}
             textSize={"16"}
             textWeight={500}
-            value={"1000"}
+            value={ReplenishFund.availableCash ?? ""}
           />
         </div>
       </div>

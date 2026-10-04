@@ -1,15 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate, useParams } from "react-router-dom";
-import { Card } from "primereact/card";
 import { Button } from "primereact/button";
-import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { Message } from "primereact/message";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
 import productConfiguratorService from "../../../services/productConfiguratorService";
 import IarRiskSectionsEditor from "./IarRiskSectionsEditor";
 import GenericRiskConfigPlaceholder from "./GenericRiskConfigPlaceholder";
+import { ConfiguratorPage, StatusTag } from "../shared/ConfiguratorPage";
 import "./RiskMapping.scss";
 
 const RiskMappingDetail = () => {
@@ -61,73 +60,36 @@ const RiskMappingDetail = () => {
     }
   };
 
-  if (!mapping && loading) {
-    return (
-      <div className="risk-mapping-detail p-3">
-        <Card>{t("productRiskMapping.loading", "Loading...")}</Card>
-      </div>
-    );
-  }
+  const back = <Button label={t("productRiskMapping.back")} icon="pi pi-arrow-left" className="p-button-text" onClick={() => navigate("/product-configurator/risk-mapping")} />;
 
   if (!mapping) {
     return (
-      <div className="risk-mapping-detail p-3">
+      <ConfiguratorPage screen="riskMapping" actions={back}>
         <Toast ref={toast} />
-        <Card>
-          <Button
-            label={t("productRiskMapping.back", "← Products")}
-            className="p-button-text mb-3"
-            onClick={() => navigate("/product-configurator/risk-mapping")}
-          />
-          <Message
-            severity="warn"
-            text={t("productRiskMapping.notFound", "Product not found")}
-          />
-        </Card>
-      </div>
+        {loading ? <p>{t("productRiskMapping.loading")}</p> : <Message severity="warn" text={t("productRiskMapping.notFound")} />}
+      </ConfiguratorPage>
     );
   }
 
   const isIar = mapping.definitionType === "RISK_SECTIONS";
 
   return (
-    <div className="risk-mapping-detail p-3">
+    <ConfiguratorPage screen="riskMapping" actions={back}>
       <Toast ref={toast} />
       <ConfirmDialog />
-      <Card>
-        <Button
-          label={t("productRiskMapping.back", "← Products")}
-          className="p-button-text mb-3"
-          onClick={() => navigate("/product-configurator/risk-mapping")}
-        />
-        <div className="flex align-items-center gap-2 mb-2 flex-wrap">
-          <h2 className="m-0">{mapping.productName}</h2>
-          <Tag
-            value={mapping.status}
-            severity={mapping.status === "Active" ? "success" : "warning"}
-          />
-        </div>
-        <p className="text-color-secondary mb-4">
-          {mapping.productCode} · {mapping.lineOfBusiness} ·{" "}
-          {t("productRiskMapping.definedBy", "defined by")}{" "}
-          {(mapping.definitionLabel || "").toLowerCase()}.
-        </p>
-
-        {isIar ? (
-          <IarRiskSectionsEditor
-            mapping={mapping}
-            onReload={load}
-            toastRef={toast}
-            confirmDialog={confirmDialog}
-          />
-        ) : (
-          <GenericRiskConfigPlaceholder
-            mapping={mapping}
-            onSave={handleUpdateMapping}
-          />
-        )}
-      </Card>
-    </div>
+      <div className="flex align-items-center gap-2 mb-2 flex-wrap">
+        <h2 className="m-0">{mapping.productCode} · {mapping.productName}</h2>
+        <StatusTag status={mapping.status} />
+      </div>
+      <p className="pc-muted mb-4">
+        {mapping.lineOfBusiness || mapping.lobCode} · {t("productRiskMapping.definedBy")} {(mapping.definitionLabel || "").toLowerCase()}.
+      </p>
+      {isIar ? (
+        <IarRiskSectionsEditor mapping={mapping} onReload={load} toastRef={toast} confirmDialog={confirmDialog} />
+      ) : (
+        <GenericRiskConfigPlaceholder mapping={mapping} onSave={handleUpdateMapping} />
+      )}
+    </ConfiguratorPage>
   );
 };
 

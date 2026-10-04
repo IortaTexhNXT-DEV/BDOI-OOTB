@@ -8,49 +8,7 @@ import {
 const initialState = {
   loading: false,
   error: "",
-  InsuranceSignatoriesList: [
-    {
-      id: 1,
-      modifiedby: "John",
-      modifiedOn: "12/12/2023",
-      Status: "ACTIVE",
-      signatoriesCode: "SIGN001",
-      signatoryName: "Chona M. Jacinto",
-      signatoryDescription: "NULL",
-      action: 4,
-    },
-    {
-      id: 2,
-      modifiedby: "John",
-      modifiedOn: "12/12/2023",
-      Status: "ACTIVE",
-      signatoriesCode: "SIGN002",
-      signatoryName: "Jesus D. Gomez",
-      signatoryDescription: "NULL",
-      action: 1,
-    },
-    {
-      id: 3,
-      modifiedby: "John",
-      modifiedOn: "12/12/2023",
-      Status: "ACTIVE",
-      signatoriesCode: "SIGN003",
-      signatoryName: "Rina G. Bautista",
-      signatoryDescription: "NULL",
-      action: 2,
-    },
-    {
-      id: 4,
-      modifiedby: "John",
-      modifiedOn: "12/12/2023",
-      Status: "ACTIVE",
-      signatoriesCode: "SIGN004",
-      signatoryName: "Noel B. Tolete",
-      signatoryDescription: "NULL",
-      action: 3,
-    },
-
-  ],
+  InsuranceSignatoriesList: [],
   SearchTableList: [],
 };
 const insuranceManagementSignatoriesMasterReducer = createSlice({
@@ -73,7 +31,7 @@ const insuranceManagementSignatoriesMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.InsuranceSignatoriesList = {};
+        state.InsuranceSignatoriesList = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );
@@ -140,7 +98,7 @@ const insuranceManagementSignatoriesMasterReducer = createSlice({
       (state, action) => {
         state.loading = false;
 
-        state.SearchTableList = {};
+        state.SearchTableList = [];
         state.error = typeof action.payload === "string" ? action.payload : "";
       }
     );

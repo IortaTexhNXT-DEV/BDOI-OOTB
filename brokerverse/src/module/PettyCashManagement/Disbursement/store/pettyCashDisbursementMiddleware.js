@@ -12,274 +12,180 @@ import {
   POST_DISBURSMENT_REQUEST,
   GET_DISBURSMENT_VIEW_DATA,
 } from "../../../../redux/actionTypes";
-import { getRequest } from "../../../../utility/commonServices";
-import { APIROUTES } from "../../../../routes/apiRoutes";
+import pettyCashService from "../../../../services/pettyCashService";
+import { formatDisplayDate, optionCode, toApiDate } from "../../pettyCashFormat";
+
+const errorMessage = (error) => error?.message || "Something went wrong";
+const amount = (value) => parseFloat(value) || 0;
+
+/** A saved petty cash disbursement as a row of the Disbursement screens (with its single line). */
+export const toDisbursementRow = (d) => ({
+  id: d.id,
+  PettyCashCode: d.pettyCashCode,
+  Date: formatDisplayDate(d.date),
+  TransactionCode: d.transactionCode || "",
+  TransactionNumber: d.transactionNumber,
+  Criteria: d.criteria || "",
+  VATMainAccount: d.vatAccount || "",
+  VATSubAccount: "",
+  WHTMainAccount: d.whtAccount || "",
+  WHTSubAccount: "",
+  Remarks: d.remarks || "",
+  line: {
+    id: d.id,
+    RequestNumber: d.requestNumber || "",
+    ExpenseCode: d.expenseAccount,
+    SubAc: "",
+    Purpose: "",
+    Remarks: d.remarks || "",
+    Amount: d.amount,
+    VAT: d.vat,
+    WHT: d.wht,
+    NetAmount: d.netAmount,
+  },
+});
+
+/** Line entered on the Add Disbursement table. */
+const toLine = (values, id) => ({
+  id,
+  RequestNumber: optionCode(values.RequestNumber) || "",
+  requestLabel: values.RequestNumber?.label || optionCode(values.RequestNumber) || "",
+  ExpenseCode: optionCode(values.ExpenseCode) || "",
+  SubAc: optionCode(values.SubAc) || "",
+  Purpose: values.Purpose || "",
+  Remarks: values.Remarks || "",
+  Amount: values.Amount,
+  VAT: values.VAT || "0",
+  WHT: values.WHT || "0",
+  NetAmount: (amount(values.Amount) - amount(values.WHT)).toFixed(2),
+});
 
 export const getDisbursmentListMiddleware = createAsyncThunk(
   GET_DISBURSMENT_VOUCHER_LIST,
-  async (payload, { rejectWithValue }) => {
+  async (params, { rejectWithValue }) => {
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
+      const { data } = await pettyCashService.list("disbursements", params || {});
+      return (data || []).map(toDisbursementRow);
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
-
-// export const getDisbursmentSearchMiddleware = createAsyncThunk(
-//   GET_DISBURSMENT_VOUCHER_SEARCH,
-//   async ({ field, value }, { rejectWithValue, getState }) => {
-//     const { pettyCashDisbursementReducers } = getState();
-//     const { DisbursmentList } = pettyCashDisbursementReducers;
-//     function filterReceiptsByField(receipts, field, value) {
-//       const lowercasedValue = value.toLowerCase();
-//       return receipts.filter((receipt) =>
-//         receipt[field].toLowerCase().startsWith(lowercasedValue)
-//       );
-//     }
-//     try {
-//       const filteredReceipts = filterReceiptsByField(
-//         DisbursmentList,
-//         field,
-//         value
-//       );
-
-//       // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-//       return filteredReceipts;
-//     } catch (error) {
-//       return rejectWithValue(error?.response.data.error.message);
-//     }
-//   }
-// );
 
 export const getDisbursmentSearchMiddleware = createAsyncThunk(
   GET_DISBURSMENT_VOUCHER_SEARCH,
-  async ({ field, value }, { rejectWithValue, getState }) => {
-    console.log(field, value, "kkkk");
-    const { pettyCashDisbursementReducers } = getState();
-    const { DisbursmentList } = pettyCashDisbursementReducers;
-    function filterPaymentsByField(data, field, value) {
-      const lowercasedValue = value.toLowerCase();
-      const outputData = data.filter(item => {
-        if (field === "Pettycash Code") {
-
-          return item?.PettyCashCode.toLowerCase().includes(lowercasedValue);
-        }
-        if (field === "Transaction code") {
-          return item.TransactionCode.toLowerCase().includes(lowercasedValue);
-        }
-          if (field === "Transaction Number") {
-          return item.TransactionCode.toLowerCase().includes(lowercasedValue);
-        }
-        return (
-          (item?.PettyCashCode.toLowerCase().includes(lowercasedValue)
-            ||
-            item.TransactionCode.toLowerCase().includes(lowercasedValue)||
-            item.TransactionNumber.toLowerCase().includes(lowercasedValue)
-            )
-        );
-
-
-      });
-      return outputData
-    }
+  async ({ value }, { rejectWithValue }) => {
     try {
-      const filteredPayments = filterPaymentsByField(DisbursmentList, field, value);
-      console.log(filteredPayments, "filteredPayments");
-      return filteredPayments;
+      const { data } = await pettyCashService.list("disbursements", { search: value });
+      return (data || []).map(toDisbursementRow);
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.error?.message);
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
 
+/** Header of a new disbursement (fund, criteria, VAT / WHT accounts); lines follow on the next screen. */
 export const postAddDisbursmentMiddleware = createAsyncThunk(
   POST_ADD_DISBURSMENT_VOUCHER,
-  async (payload, { rejectWithValue }) => {
-
-
-    const currentDate = new Date();
-    const formattedDate = `${currentDate.getDate()}/${currentDate.getMonth() + 1
-      }/${currentDate.getFullYear()}`;
-    const randomTotalAmount = Math.floor(Math.random() * 50000) + 10000;
-    console.log(formattedDate, "postdisbursment");
-    const TableData = {
-      id: payload?.id,
-      PettyCashCode: payload?.PettyCashCode,
-      Date: formattedDate,
-      TransactionCode: randomTotalAmount.toString(),
-      TransactionNumber: randomTotalAmount.toString(),
-      Criteria: payload?.Criteria,
-      VATMainAccount: payload?.VATMainAccount,
-      VATSubAccount: payload?.VATSubAccount,
-      WHTMainAccount: payload?.WHTMainAccount,
-      WHTSubAccount: payload?.WHTSubAccount,
-      Remarks: payload?.Remarks,
-    };
-
-    try {
-      console.log(TableData, "TableData");
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return TableData;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (values) => values
 );
 
-export const getAddDisbursmentTableMiddleware = createAsyncThunk(
-  GET_ADD_DISBURSMENT_TABLE_VOUCHER,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-
-
-export const getAddDisbursmentRequestListTableMiddleware = createAsyncThunk(
-  GET_ADD_DISBURSMENT_REQUEST_TABLE_VOUCHER,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
-);
-
+/** Posts one disbursement per line (each journalised and paid from the fund). */
 export const postEditDisbursmentMiddleware = createAsyncThunk(
   POST_EDIT_DISBURSMENT_VOUCHER,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
-    const VATin = (payload.VAT / 100) * 100;
-    const EWTin = (payload.EWT / 100) * 100;
-    const TotalAmount = parseFloat(payload?.TotalAmount) || 0;
-    const EWTinAdd = parseFloat(EWTin) || 0;
-    const VATinAdd = parseFloat(VATin) || 0;
-    const Totalin = TotalAmount + EWTinAdd + VATinAdd;
-    const TableData = {
-      id: payload?.id,
-      RequestNumber: payload.RequestNumber,
-      RequesterName: payload.Requester,
-      Amount: payload.Amount,
-      VAT: VATin,
-      EWT: EWTin,
-      MainAccount: payload.MainAccountCode.Maincode,
-      SubAccount: payload?.SubAccountCode?.SubAccount,
-      TotalAmount: Totalin,
-      Remarks: payload.Remarks,
-    };
-    console.log(TableData, "TableData");
+  async (lines, { getState, rejectWithValue }) => {
+    const { AddDisbursment: header = {} } = getState().pettyCashDisbursementReducers || {};
+    const created = [];
     try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return TableData;
+      for (const line of lines) {
+        const saved = await pettyCashService.create("disbursements", {
+          pettyCashCode: optionCode(header.PettyCashCode),
+          criteria: optionCode(header.Criteria),
+          date: toApiDate(header.Date),
+          vatAccount: optionCode(header.VATSubAccount) || optionCode(header.VATMainAccount),
+          whtAccount: optionCode(header.WHTSubAccount) || optionCode(header.WHTMainAccount),
+          requestId: line.RequestNumber || undefined,
+          expenseAccount: line.SubAc || line.ExpenseCode,
+          amount: line.Amount,
+          vat: line.VAT,
+          wht: line.WHT,
+          remarks: line.Remarks || line.Purpose || header.Remarks || undefined,
+        });
+        created.push(toDisbursementRow(saved));
+      }
+      return created;
     } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
+      return rejectWithValue(
+        created.length
+          ? `${created.length} line(s) saved; ${errorMessage(error)}`
+          : errorMessage(error)
+      );
+    }
+  }
+);
+
+/** Lines pre-filled from the approved requests selected on the Add Disbursement screen. */
+export const getAddDisbursmentTableMiddleware = createAsyncThunk(
+  GET_ADD_DISBURSMENT_TABLE_VOUCHER,
+  async (requests = []) =>
+    requests.map((request) =>
+      toLine(
+        {
+          RequestNumber: request,
+          Amount: String(request.totalAmount),
+          Purpose: request.purpose,
+        },
+        `line-${request.id}`
+      )
+    )
+);
+
+/** Approved requests of the selected fund, for the "Requested By" dropdown. */
+export const getAddDisbursmentRequestListTableMiddleware = createAsyncThunk(
+  GET_ADD_DISBURSMENT_REQUEST_TABLE_VOUCHER,
+  async (pettyCashCode, { rejectWithValue }) => {
+    try {
+      const { data } = await pettyCashService.list("requests", {
+        pettyCashCode,
+        status: "approved",
+      });
+      return (data || []).map((r) => ({
+        id: r.id,
+        TransactionCode: r.pettyCashCode,
+        DocumentNumber: r.requestNumber,
+        RequesterName: r.requesterName,
+        label: `${r.requestNumber} - ${r.requesterName}`,
+        value: r.requestNumber,
+        totalAmount: r.totalAmount,
+        purpose: r.purpose || "",
+      }));
+    } catch (error) {
+      return rejectWithValue(errorMessage(error));
     }
   }
 );
 
 export const getViewDisbursmentMiddleware = createAsyncThunk(
   GET_VIEW_DISBURSMENT_VOUCHER,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (row) => row
 );
-
 
 export const getPatchDisbursementData = createAsyncThunk(
   GET_DISBURSMENT_REQUEST_PATCH_DATA,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (row) => row
 );
 
 export const postDisbursementData = createAsyncThunk(
   POST_DISBURSMENT_REQUEST,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
-    const data = {
-      id: payload?.id,
-      PettycashCode: payload?.PettycashCode,
-      RequestNumber: payload?.RequestNumber,
-      RequesterName: payload?.RequesterName,
-      SubAc: payload?.SubAc,
-      ExpenseCode: payload?.ExpenseCode,
-      Purpose: payload?.Purpose,
-      Remarks: payload?.Remarks,
-      Amount: payload?.Amount,
-      VAT: payload?.VAT,
-      WHT: payload?.WHT,
-      NetAmount: payload?.NetAmount,
-      Branchcode: payload?.Branchcode,
-      Departmentcode: payload?.Departmentcode,
-      TotalAmount: payload?.TotalAmount,
-      Date: payload?.Date,
-    }
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (values) => toLine(values, `line-${Date.now()}`)
 );
 
 export const postPatchDisbursementData = createAsyncThunk(
   POST_DISBURSMENT_REQUEST_PATCH_DATA,
-  async (payload, { rejectWithValue }) => {
-    console.log(payload, "payload");
-    const data = {
-      id: payload?.id,
-      PettycashCode: payload?.PettycashCode,
-      RequestNumber: payload?.RequestNumber,
-      RequesterName: payload?.RequesterName,
-      SubAc: payload?.SubAc,
-      ExpenseCode: payload?.ExpenseCode,
-      Purpose: payload?.Purpose,
-      Remarks: payload?.Remarks,
-      Amount: payload?.Amount,
-      VAT: payload?.VAT,
-      WHT: payload?.WHT,
-      NetAmount: payload?.NetAmount,
-      Branchcode: payload?.Branchcode,
-      Departmentcode: payload?.Departmentcode,
-      TotalAmount: payload?.TotalAmount,
-      Date: payload?.Date,
-    }
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return data;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (values) => toLine(values, values.id)
 );
 
 export const getDisbursmentViewMiddleware = createAsyncThunk(
   GET_DISBURSMENT_VIEW_DATA,
-  async (payload, { rejectWithValue }) => {
-    try {
-      // const { data } = await getRequest(APIROUTES.DASHBOARD.GET_DETAILS);
-      return payload;
-    } catch (error) {
-      return rejectWithValue(error?.response.data.error.message);
-    }
-  }
+  async (row) => row
 );

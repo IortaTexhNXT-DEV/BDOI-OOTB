@@ -1,11 +1,10 @@
 import { BreadCrumb } from 'primereact/breadcrumb'
-import React, { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from "react-i18next";
 import SvgDot from '../../../../assets/icons/SvgDot';
 import "../AddCurrency/index.scss"
 import DropDowns from '../../../../components/DropDowns';
 import InputField from '../../../../components/InputField';
-import { Button } from 'primereact/button';
 import SvgDropdown from '../../../../assets/icons/SvgDropdown';
 import CustomToast from '../../../../components/Toast';
 import { useNavigate } from 'react-router-dom';
@@ -17,7 +16,7 @@ const ViewCurrency = () => {
     const toastRef = useRef(null);
     const navigate = useNavigate();
 
-    const { CurrencyDetailView, loading } = useSelector(({ currencyMasterReducer }) => {
+    const { CurrencyDetailView } = useSelector(({ currencyMasterReducer }) => {
         return {
           loading: currencyMasterReducer?.loading,
           CurrencyDetailView: currencyMasterReducer?.CurrencyDetailView,
@@ -58,7 +57,7 @@ const ViewCurrency = () => {
                             className='label__sub__add'
                             placeholder={t("financeMasters.enter")}
                             disabled={true}
-                            value={CurrencyDetailView?.Currencycode}
+                            value={CurrencyDetailView?.CurrencyCode}
                         />
                     </div>
                     <div className='col-12 md:col-3 lg:col-3'>

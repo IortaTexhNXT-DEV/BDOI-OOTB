@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
@@ -6,29 +6,29 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router";
 import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import SvgFilters from "../../../../assets/icons/SvgFilter";
 import SvgTable from "../../../../assets/icons/SvgTable";
-import SvgEyeIcon from "../../../../assets/icons/SvgEyeIcon";
 import "./index.scss";
-import { TieredMenu } from "primereact/tieredmenu";
 import SvgDropdownicon from "../../../../assets/icons/SvgDropdownicon";
 import { useDispatch, useSelector } from "react-redux";
 import {
+  getRequestListMiddleware,
   getRequestSearchMiddleware,
   geteditrequestMiddleware,
 } from "../store/pettyCashRequestMiddleware";
 import SvgIconeye from "../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../assets/icons/SvgEdits";
+import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
+import { useFormatCurrency } from "../../../../hooks/useFormatCurrency";
 
 const RequestTable = () => {
+  const { formatCurrency } = useFormatCurrency();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [globalFilter, setGlobalFilter] = useState("ReceiptNo");
 
-  const { RequestList, loading, RequestSearch } = useSelector(
+  const { RequestList, RequestSearch } = useSelector(
     ({ pettyCashRequestReducer }) => {
       return {
         loading: pettyCashRequestReducer?.loading,
@@ -37,7 +37,10 @@ const RequestTable = () => {
       };
     }
   );
-  console.log("first9", RequestList);
+
+  useEffect(() => {
+    dispatch(getRequestListMiddleware());
+  }, [dispatch]);
   const searchs = [
     { name: t("pettyCash.receiptNo"), code: "ReceiptNo" },
     { name: t("pettyCash.requestNumber"), code: "RequestNumber" },
@@ -48,17 +51,13 @@ const RequestTable = () => {
     { name: t("pettyCash.date"), code: "Date" },
   ];
 
-  const isEmpty = RequestList.length === 0;
+  const isEmpty = !RequestList?.length;
 
   const handleViewer = (columnData) => {
-    console.log("columnData", columnData);
-    // dispatch(getAccountDetailsView(columnData));
     dispatch(geteditrequestMiddleware(columnData));
     navigate(`/accounts/pettycash/editrequestform/view/${columnData?.id}`);
   };
   const handleEdit = (rowData) => {
-    console.log(rowData?.id, "rowData");
-    // dispatch(getPatchAccountDetailsView(columnData));
     dispatch(geteditrequestMiddleware(rowData));
     navigate(`/accounts/pettycash/editrequestform/edit/${rowData?.id}`);
   };
@@ -73,10 +72,9 @@ const RequestTable = () => {
       "RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink",
     RowsPerPageDropdown: (options) => {
       const dropdownOptions = [
-        { label: 5, value: 5 },
-        { label: 10, value: 10 },
         { label: 20, value: 20 },
-        { label: 120, value: 120 },
+        { label: 50, value: 50 },
+        { label: 100, value: 100 },
       ];
 
       return (
@@ -100,24 +98,7 @@ const RequestTable = () => {
     },
   };
 
-  // const renderViewButton = (rowData) => {
-  //   return (
-  //     <div className="center-content">
-  //       <Button
-  //         icon={<SvgEyeIcon />}
-  //         className="eye__btn"
-  //         onClick={() => handleView(rowData)}
-  //       />
-  //     </div>
-  //   );
-  // };
 
-  const menu = useRef(null);
-
-  const handleView = (rowData) => {
-    console.log("View clicked:", rowData);
-    navigate("/accounts/pettycash/PettyCashCodeDetails");
-  };
   const headerStyle = {
     // width: "10rem",
     fontSize: 16,
@@ -141,7 +122,6 @@ const RequestTable = () => {
   };
 
   useEffect(() => {
-    console.log(globalFilter, "as");
     if (globalFilter?.length > 0) {
       if (search?.length > 0) {
         dispatch(
@@ -193,20 +173,12 @@ const RequestTable = () => {
             scrollable={true}
             scrollHeight="40vh"
             paginator
-            rows={5}
-            rowsPerPageOptions={[5, 10, 25, 50]}
-            // paginatorTemplate="RowsPerPageDropdown  FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            rows={20}
+            rowsPerPageOptions={[20, 50, 100]}
             currentPageReportTemplate="{first} - {last} of {totalRecords}"
             paginatorTemplate={template2}
             emptyMessage={isEmpty ? emptyTableIcon : null}
           >
-            {/* <Column
-              field="PettycashCode"
-              header="Petty cash Code"
-              headerStyle={headerStyle}
-              className="fieldvalue_container"
-              
-            ></Column> */}
 
             <Column
               field="RequesterName"
@@ -214,7 +186,7 @@ const RequestTable = () => {
               headerStyle={headerStyle}
               className="fieldvalue_container"
               sortable
-              body={(rowData) => rowData.RequesterName?.toUpperCase()}
+              body={(rowData) => rowData.RequesterName}
             ></Column>
             <Column
               field="RequestDate"
@@ -230,7 +202,7 @@ const RequestTable = () => {
               className="fieldvalue_container"
               body={(rowData) => rowData.TransactionNumber?.toUpperCase()}
             ></Column>
-            <Column
+            <Column body={(row) => formatAppDate(row.Date)}
               field="Date"
               header="Date"
               headerStyle={headerStyle}
@@ -241,7 +213,10 @@ const RequestTable = () => {
               field="TotalAmount"
               header="Total Amount"
               headerStyle={headerStyle}
-              className="fieldvalue_container"
+              className="fieldvalue_container bv-nowrap"
+              alignHeader="right"
+              bodyStyle={{ textAlign: "right" }}
+              body={(row) => formatCurrency(row.TotalAmount)}
               sortable
             ></Column>
             <Column

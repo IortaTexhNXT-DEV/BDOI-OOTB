@@ -10,6 +10,7 @@ import { Message } from "primereact/message";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { Toast } from "primereact/toast";
 import { getClaimDetails } from "../../claimsModule/adjusterSubmission/store/adjusterSubmissionMiddleWare";
+import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
 
 const ClaimDetail = () => {
@@ -41,11 +42,7 @@ const ClaimDetail = () => {
   const formatDate = (dateString) => {
     if (!dateString) return t("policyDetail.nA");
     try {
-      return new Date(dateString).toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      });
+      return formatAppDate(dateString, { empty: t("policyDetail.nA") });
     } catch {
       return "N/A";
     }
@@ -54,13 +51,7 @@ const ClaimDetail = () => {
   const formatDateTime = (dateString) => {
     if (!dateString) return t("policyDetail.nA");
     try {
-      return new Date(dateString).toLocaleString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      return formatAppDate(dateString, { withTime: true, empty: "N/A" });
     } catch {
       return "N/A";
     }
@@ -231,6 +222,15 @@ const ClaimDetail = () => {
             className="p-button-outlined"
             onClick={handleBack}
           />
+          {claimData.lifecycleStatus === "pending-approval" && (
+            // settlement waiting for a second claims user (maker-checker)
+            <Button
+              label={t("claims.reviewSettlement", "Review settlement")}
+              icon="pi pi-check-square"
+              className="ml-2"
+              onClick={() => navigate(`/agent/claimrequest/settlementapproval/${claimData.id || claimData.claimId}`)}
+            />
+          )}
         </div>
       </div>
 
@@ -392,18 +392,25 @@ const ClaimDetail = () => {
               <span className="label">{t("claims.insuredName")}</span>
               <span className="value">{policyData.insuredName || t("policyDetail.nA")}</span>
             </div>
-            <div className="detail-row">
-              <span className="label">{t("claims.leadRefId")}</span>
-              <span className="value">{claimData.leadRefId || t("policyDetail.nA")}</span>
-            </div>
-            <div className="detail-row">
-              <span className="label">{t("claims.quoteRefId")}</span>
-              <span className="value">{claimData.quoteRefId || t("policyDetail.nA")}</span>
-            </div>
-            <div className="detail-row">
-              <span className="label">{t("claims.policyRefId")}</span>
-              <span className="value">{claimData.policyRefId || t("policyDetail.nA")}</span>
-            </div>
+            {/* business numbers (lead no., quotation no.), never the internal lead / quote / policy ids */}
+            {claimData.clientCode && (
+              <div className="detail-row">
+                <span className="label">{t("followUps.clientCode", "Client code")}</span>
+                <span className="value">{claimData.clientCode}</span>
+              </div>
+            )}
+            {claimData.leadNumber && (
+              <div className="detail-row">
+                <span className="label">{t("followUps.leadNumber", "Lead number")}</span>
+                <span className="value">{claimData.leadNumber}</span>
+              </div>
+            )}
+            {claimData.quoteNumber && (
+              <div className="detail-row">
+                <span className="label">{t("followUps.quotationNumber", "Quotation number")}</span>
+                <span className="value">{claimData.quoteNumber}</span>
+              </div>
+            )}
             {(claimData.country ||
               claimData.houseNo ||
               claimData.roadThanon ||

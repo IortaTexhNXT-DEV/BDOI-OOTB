@@ -11,7 +11,7 @@
 
     h2 {
       margin: 0;
-      color: #333;
+      color: var(--bv-heading-text, #2e2e2e);
     }
 
     .header-actions {
@@ -34,14 +34,14 @@
 
         .metric-label {
           font-size: 0.875rem;
-          color: #666;
+          color: var(--color-text-muted, #656565);
           font-weight: 500;
         }
 
         .metric-value {
           font-size: 1.75rem;
           font-weight: bold;
-          color: #333;
+          color: var(--bv-heading-text, #2e2e2e);
         }
 
         .metric-change {
@@ -51,28 +51,23 @@
           gap: 0.25rem;
 
           &.positive {
-            color: #4caf50;
+            color: var(--color-success, #1d7f4e);
           }
 
           &.warning {
-            color: #ff9800;
+            color: var(--color-warning, #8a5a00);
           }
         }
 
-        .knob-container {
-          display: flex;
-          justify-content: center;
-          margin-top: 0.5rem;
+        // average utilisation: the figure as text with a thin meter under it (components/ProgressMeter), no dial
+        .bv-meter {
+          margin-top: 0.25rem;
         }
       }
     }
   }
 
   .treaty-table {
-    .utilization-cell {
-      min-width: 150px;
-    }
-
     .action-buttons {
       display: flex;
       gap: 0.25rem;
@@ -91,16 +86,16 @@
     .timeline-card {
       h5 {
         margin: 0 0 0.5rem 0;
-        color: #333;
+        color: var(--bv-heading-text, #2e2e2e);
       }
 
       p {
         margin: 0.25rem 0;
-        color: #666;
+        color: var(--color-text-muted, #656565);
       }
 
       small {
-        color: #999;
+        color: var(--color-text-muted, #656565);
       }
     }
   }
@@ -119,11 +114,11 @@
         border-bottom: 1px solid #f0f0f0;
 
         span {
-          color: #666;
+          color: var(--color-text-muted, #656565);
         }
 
         strong {
-          color: #333;
+          color: var(--bv-heading-text, #2e2e2e);
         }
       }
 
