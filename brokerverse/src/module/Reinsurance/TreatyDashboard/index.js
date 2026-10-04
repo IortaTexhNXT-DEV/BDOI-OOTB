@@ -18,6 +18,20 @@ import { canOpen } from "../../../utils/canOpen";
 import './style.scss';
 import ProgressMeter, { meterLabel } from "../../../components/ProgressMeter";
 
+// Chart colours come from the theme tokens (a canvas cannot read CSS variables by itself).
+const cssColor = (name, fallback) => {
+  if (typeof window === 'undefined' || !window.getComputedStyle) return fallback;
+  const v = window.getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return v || fallback;
+};
+const TONE = {
+  primary: () => cssColor('--bv-primary', '#0072d8'),
+  success: () => cssColor('--color-success', '#1d7f4e'),
+  warning: () => cssColor('--color-warning', '#8a5a00'),
+  danger: () => cssColor('--color-danger', '#b42318'),
+  muted: () => cssColor('--color-text-muted', '#656565'),
+};
+
 const RENEWAL_WINDOW_DAYS = 90;
 
 const TreatyDashboard = () => {
@@ -60,8 +74,8 @@ const TreatyDashboard = () => {
       label: t('reinsurance.treatyUtilization'),
       data: treaties.map(tr => tr.utilization),
       backgroundColor: treaties.map(tr =>
-        tr.utilization > 80 ? '#f44336' :
-        tr.utilization > 60 ? '#ff9800' : '#4caf50'
+        tr.utilization > 100 ? TONE.danger() :
+        tr.utilization > 80 ? TONE.warning() : TONE.primary()
       )
     }]
   };
@@ -88,16 +102,16 @@ const TreatyDashboard = () => {
       {
         label: 'Gross Loss Ratio',
         data: analytics?.lossRatioTrend?.map(d => d.gross) || [],
-        borderColor: '#ff9800',
+        borderColor: TONE.warning(),
         fill: false,
-        tension: 0.4
+        tension: 0
       },
       {
         label: 'Net Loss Ratio',
         data: analytics?.lossRatioTrend?.map(d => d.net) || [],
-        borderColor: '#4caf50',
+        borderColor: TONE.primary(),
         fill: false,
-        tension: 0.4
+        tension: 0
       }
     ]
   };
@@ -145,12 +159,12 @@ const TreatyDashboard = () => {
 
   const timelineEntry = (tr) => {
     if (tr.status === 'Pending Approval') {
-      return { status: 'In Progress', icon: 'pi pi-cog', color: '#ff9800', action: tr.status, date: tr.effectiveDate };
+      return { status: 'In Progress', icon: 'pi pi-cog', color: TONE.warning(), action: tr.status, date: tr.effectiveDate };
     }
     if (daysUntil(tr.expiryDate) < 0) {
-      return { status: 'Completed', icon: 'pi pi-check', color: '#4caf50', action: tr.status, date: tr.expiryDate };
+      return { status: 'Completed', icon: 'pi pi-check', color: TONE.success(), action: tr.status, date: tr.expiryDate };
     }
-    return { status: 'Upcoming', icon: 'pi pi-clock', color: '#9e9e9e', action: 'Renewal Due', date: tr.expiryDate };
+    return { status: 'Upcoming', icon: 'pi pi-clock', color: TONE.muted(), action: 'Renewal Due', date: tr.expiryDate };
   };
 
   const renewalTimeline = treaties
