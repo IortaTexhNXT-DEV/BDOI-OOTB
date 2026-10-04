@@ -1,0 +1,72 @@
+digraph G {
+ rankdir=TB; dpi=170; bgcolor="white"; nodesep=0.25; ranksep=0.45; ranksep=0.35; nodesep=0.35;
+ node [fontname="DejaVu Sans", fontsize=10, margin="0.10,0.06"]; edge [fontname="DejaVu Sans", arrowsize=0.7];
+ "M1" [label="Kick-off\nmilestone, W1", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "M3" [label="Data request and kits issued\n1 days, W1", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "I1" [label="Insurers, rates, products (broker)\n7 days, W1 to W2", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", penwidth=1.3];
+ "I2" [label="Chart of accounts (broker)\n7 days, W1 to W2", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", penwidth=1.3];
+ "C1" [label="Configuration kit filled\n8 days, W2 to W4", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", penwidth=1.3];
+ "C2" [label="Kit validated and loaded\n3 days, W4", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "C3" [label="On-screen configuration\n11 days, W4 to W6", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "T1" [label="System integration test\n9 days, W6 to W7", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "C5" [label="Configuration complete\nmilestone, W6", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "L1" [label="Train-the-trainer\n5 days, W7", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "T2" [label="SIT exit\nmilestone, W7", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "T3" [label="Promotion to UAT\n1 days, W7", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "T4" [label="UAT\n8 days, W8 to W9", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", penwidth=1.3];
+ "L3" [label="End-user training\n8 days, W8 to W9", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", penwidth=1.3];
+ "X3" [label="Cutover rehearsal (Pre-Prod)\n3 days, W9", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "T5" [label="UAT sign-off\nmilestone, W9", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", penwidth=1.3];
+ "X4" [label="Go/no-go 1\nmilestone, W9", shape=box, style="rounded,filled", color="#C00000", fillcolor="#FBE3E3", penwidth=2.2];
+ "X5" [label="Cutover\n2 days, W9", shape=box, style="rounded,filled", color="#548235", fillcolor="#E2EFDA", penwidth=1.3];
+ "X6" [label="GO-LIVE\nmilestone, W10", shape=box, style="rounded,filled", color="#C00000", fillcolor="#FBE3E3", penwidth=2.2];
+ "H1" [label="Hypercare\n15 days, W10 to W12", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "H3" [label="Hypercare exit\nmilestone, W12", shape=box, style="rounded,filled", color="#2E75B6", fillcolor="#DCE9F7", penwidth=1.3];
+ "M1" -> "M3" [color="#C00000", penwidth=2.4, constraint=false];
+ "M3" -> "I1" [color="#C00000", penwidth=2.4, constraint=false];
+ "M3" -> "I2" [color="#C00000", penwidth=2.4, constraint=false];
+ "I1" -> "C1" [color="#C00000", penwidth=2.4, constraint=false];
+ "I2" -> "C1" [color="#C00000", penwidth=2.4, constraint=false];
+ "C1" -> "C2" [color="#C00000", penwidth=2.4, constraint=false];
+ "C2" -> "C3" [color="#C00000", penwidth=2.4, constraint=false];
+ "C3" -> "T1" [color="#C00000", penwidth=2.4, label="SS +6d", fontsize=9, fontcolor="#C00000", constraint=false];
+ "C2" -> "T1" [color="#C00000", penwidth=2.4, constraint=false];
+ "C3" -> "C5" [color="#C00000", penwidth=2.4, constraint=false];
+ "C5" -> "L1" [color="#C00000", penwidth=2.4, constraint=false];
+ "T1" -> "T2" [color="#C00000", penwidth=2.4, constraint=false];
+ "C5" -> "T2" [color="#C00000", penwidth=2.4, constraint=false];
+ "T2" -> "T3" [color="#C00000", penwidth=2.4, constraint=false];
+ "T3" -> "T4" [color="#C00000", penwidth=2.4, constraint=false];
+ "L1" -> "L3" [color="#C00000", penwidth=2.4, constraint=false];
+ "T3" -> "L3" [color="#C00000", penwidth=2.4, constraint=false];
+ "T4" -> "X3" [color="#C00000", penwidth=2.4, label="SS +5d", fontsize=9, fontcolor="#C00000", constraint=false];
+ "T4" -> "T5" [color="#C00000", penwidth=2.4, constraint=false];
+ "X3" -> "X4" [color="#C00000", penwidth=2.4, constraint=false];
+ "T5" -> "X4" [color="#C00000", penwidth=2.4, constraint=false];
+ "L3" -> "X4" [color="#C00000", penwidth=2.4, constraint=false];
+ "X4" -> "X5" [color="#C00000", penwidth=2.4, constraint=false];
+ "X5" -> "X6" [color="#C00000", penwidth=2.4, constraint=false];
+ "X6" -> "H1" [color="#C00000", penwidth=2.4, constraint=false];
+ "H1" -> "H3" [color="#C00000", penwidth=2.4, constraint=false];
+ { rank=same; "M1" -> "M3" -> "I1" -> "I2" -> "C1" [style=invis, weight=10]; }
+ { rank=same; "C2" -> "C3" -> "T1" -> "C5" -> "L1" [style=invis, weight=10]; }
+ { rank=same; "T2" -> "T3" -> "T4" -> "L3" -> "X3" [style=invis, weight=10]; }
+ { rank=same; "T5" -> "X4" -> "X5" -> "X6" -> "H1" [style=invis, weight=10]; }
+ { rank=same; "H3" [style=invis, weight=10]; }
+ "M1" -> "C2" [style=invis, weight=20];
+ "M3" -> "C3" [style=invis, weight=20];
+ "I1" -> "T1" [style=invis, weight=20];
+ "I2" -> "C5" [style=invis, weight=20];
+ "C1" -> "L1" [style=invis, weight=20];
+ "C2" -> "T2" [style=invis, weight=20];
+ "C3" -> "T3" [style=invis, weight=20];
+ "T1" -> "T4" [style=invis, weight=20];
+ "C5" -> "L3" [style=invis, weight=20];
+ "L1" -> "X3" [style=invis, weight=20];
+ "T2" -> "T5" [style=invis, weight=20];
+ "T3" -> "X4" [style=invis, weight=20];
+ "T4" -> "X5" [style=invis, weight=20];
+ "L3" -> "X6" [style=invis, weight=20];
+ "X3" -> "H1" [style=invis, weight=20];
+ "T5" -> "H3" [style=invis, weight=20];
+}

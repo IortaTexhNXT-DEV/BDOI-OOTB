@@ -84,10 +84,10 @@ DOCS = [
     ('05_Delivery', 'BrokerVerse_Business_Requirements_Document', 'docx, pdf', 'Business requirements of the OOTB product by module, with business rules and regulatory references (BRD)', [B, Q, D, V], True, [PRE, IMP]),
     ('05_Delivery', 'BrokerVerse_Process_Flow_Document', 'docx, pdf', 'End-to-end process flows of the broker with the screens, roles and postings of each step (PFD)', [B, U, Q, D], True, [IMP]),
     ('05_Delivery', 'BrokerVerse_Implementation_Approach_and_Plan', 'docx, pdf', 'Method, phases, plans by size, roles, governance and risks', [D, M], True, [PRE, IMP]),
-    ('05_Delivery', 'BrokerVerse_Implementation_Plan', 'xlsx', 'Gantt plans for the three sizes and the RACI matrix', [D], True, [IMP]),
+    ('05_Delivery', 'BrokerVerse_Implementation_Plan', 'xlsx', 'Task-level plans for the four sizes with owners, predecessors, float and critical path; milestones; RACI', [D], True, [IMP]),
     ('05_Delivery', 'BrokerVerse_Dependency_Map_and_Critical_Path', 'docx, pdf', 'Dependencies between work streams, partners and decisions, and the critical path to go-live', [D, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Fit_Gap_Register', 'xlsx', 'Register of requirements classed Fit, Configure, Procedure or Gap, with the product gaps closed in this release', [B, D, M], True, [IMP]),
-    ('05_Delivery', 'BrokerVerse_RAID_Log_Template', 'xlsx', 'Risks, assumptions, issues and dependencies with scoring and summary', [D, M], True, [IMP, GO]),
+    ('05_Delivery', 'BrokerVerse_RAID_Log_Template', 'xlsx', 'Risks, assumptions, issues and dependencies, pre-filled for an implementation, with scoring and summary', [D, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Project_Status_Report_Template', 'docx, pdf', 'Weekly or fortnightly status and steering committee report', [D, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Training_Plan', 'docx, pdf', 'Training and change management by role', [D, U], True, [IMP]),
     ('05_Delivery', 'BrokerVerse_User_Manual', 'docx, pdf', 'User manual by role, also opened per screen from the Help panel (F1)', [U, B, Q, P], True, [IMP, GO, SUP]),
@@ -120,11 +120,7 @@ DOCS = [
 ]
 
 # Documents of packages being merged in parallel: listed now, checked once their files arrive.
-PENDING = {
-    ('05_Delivery', 'BrokerVerse_Business_Requirements_Document'),
-    ('05_Delivery', 'BrokerVerse_Process_Flow_Document'),
-    ('05_Delivery', 'BrokerVerse_Dependency_Map_and_Critical_Path'),
-}
+PENDING = set()
 
 # Folders of docs/package in lifecycle order: (folder, title, what it holds)
 FOLDERS = [
