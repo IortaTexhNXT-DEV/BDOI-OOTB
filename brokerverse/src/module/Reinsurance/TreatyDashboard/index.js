@@ -8,17 +8,15 @@ import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Chart } from 'primereact/chart';
-import { ProgressBar } from 'primereact/progressbar';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
-import { Knob } from 'primereact/knob';
 import { Panel } from 'primereact/panel';
 import { Timeline } from 'primereact/timeline';
 import reinsuranceService from '../../../services/reinsuranceService';
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { canOpen } from "../../../utils/canOpen";
 import './style.scss';
-import { progressValue } from "../../../utility/numberFormat";
+import ProgressMeter, { meterLabel } from "../../../components/ProgressMeter";
 
 const RENEWAL_WINDOW_DAYS = 90;
 
@@ -109,20 +107,7 @@ const TreatyDashboard = () => {
     return <Tag value={rowData.status} severity={severity} />;
   };
 
-  const utilizationBodyTemplate = (rowData) => {
-    const color = rowData.utilization > 80 ? '#f44336' :
-                  rowData.utilization > 60 ? '#ff9800' : '#4caf50';
-    return (
-      <div className="utilization-cell">
-        <ProgressBar
-          value={progressValue(rowData.utilization, 1)}
-          color={color}
-          showValue={true}
-          style={{ height: '20px' }}
-        />
-      </div>
-    );
-  };
+  const utilizationBodyTemplate = (rowData) => <ProgressMeter value={rowData.utilization} width="9rem" />;
 
   const actionBodyTemplate = (rowData) => {
     return (
@@ -253,16 +238,8 @@ const TreatyDashboard = () => {
         <Card className="metric-card">
           <div className="metric-content">
             <span className="metric-label">Average Utilization</span>
-            <div className="knob-container">
-              <Knob
-                value={progressValue(averageUtilization)}
-                size={80}
-                strokeWidth={8}
-                valueColor="#4caf50"
-                rangeColor="#e0e0e0"
-                readOnly
-              />
-            </div>
+            <span className="metric-value">{meterLabel(averageUtilization)}</span>
+            <ProgressMeter value={averageUtilization} label="" />
           </div>
         </Card>
 
@@ -336,7 +313,7 @@ const TreatyDashboard = () => {
                   </div>
                   <div className="capacity-row">
                     <span>Utilization:</span>
-                    <ProgressBar value={progressValue(treaty.utilization, 1)} showValue />
+                    <ProgressMeter value={treaty.utilization} width="10rem" />
                   </div>
                   <div className="capacity-row">
                     <span>Premium Ceded:</span>

@@ -35,6 +35,19 @@ export const StateTag = ({ value }) => {
   return <Tag value={t(`compliance.state.${value}`, { defaultValue: value })} severity={SEVERITY[value] || "secondary"} />;
 };
 
+/** Years offered by the year filter of the annual reports: the last five years and the next one (plus the current value). */
+export const yearOptions = (value) => {
+  const thisYear = new Date().getFullYear();
+  const years = Array.from({ length: 6 }, (_, i) => thisYear + 1 - i);
+  if (Number.isInteger(value) && !years.includes(value)) years.push(value);
+  return years.sort((a, b) => b - a).map((y) => ({ label: String(y), value: y }));
+};
+
+/** Year filter of the annual reports: a plain drop-down, read like a filter and not a counter. */
+export const YearDropdown = ({ value, onChange, ariaLabel }) => (
+  <Dropdown value={value} options={yearOptions(value)} onChange={(e) => onChange(e.value)} aria-label={ariaLabel} className="compliance__year" />
+);
+
 /** Page frame of the Compliance screens: breadcrumb, title, one-line purpose and the actions on the right. */
 export const PageHeader = ({ section, title, intro, actions }) => {
   const { t } = useTranslation();

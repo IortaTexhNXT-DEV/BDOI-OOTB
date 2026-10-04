@@ -13,7 +13,7 @@ import { Toast } from 'primereact/toast';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { Card } from 'primereact/card';
 import { Tag } from 'primereact/tag';
-import { ProgressBar } from 'primereact/progressbar';
+import ProgressMeter from '../../../../components/ProgressMeter';
 import { MultiSelect } from 'primereact/multiselect';
 import reinsuranceService from '../../../../services/reinsuranceService';
 import mastersService from '../../../../services/mastersService';
@@ -235,21 +235,7 @@ const TreatyMaster = () => {
     return <Tag value={rowData.status} severity={severity} />;
   };
 
-  const utilizationBodyTemplate = (rowData) => {
-    const color = rowData.utilization > 80 ? '#f44336' :
-                  rowData.utilization > 60 ? '#ff9800' : '#4caf50';
-    return (
-      <div className="utilization-cell">
-        <ProgressBar
-          value={rowData.utilization}
-          color={color}
-          showValue={false}
-          style={{ height: '6px' }}
-        />
-        <span className="utilization-text">{rowData.utilization}%</span>
-      </div>
-    );
-  };
+  const utilizationBodyTemplate = (rowData) => <ProgressMeter value={rowData.utilization} width="9rem" />;
 
   const reinsurersBodyTemplate = (rowData) => {
     const reinsurerNames = rowData.reinsurers?.map(id => {

@@ -3,11 +3,10 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { InputNumber } from "primereact/inputnumber";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import complianceService, { errorMessage } from "../../services/complianceService";
-import { FormDialog, PageHeader, money } from "./icCommon";
+import { FormDialog, PageHeader, YearDropdown, money } from "./icCommon";
 import "../Administration/index.scss";
 import "../AccessControl/index.scss";
 import "./ic.scss";
@@ -84,7 +83,7 @@ const IcAnnualStatement = () => {
       <PageHeader section={t("compliance.ic")} title={t("compliance.ics.title2")} intro={t("compliance.ics.intro")}
         actions={(
           <>
-            <InputNumber value={year} onValueChange={(e) => e.value && setYear(e.value)} useGrouping={false} min={2000} max={2100} showButtons aria-label={t("compliance.ics.year")} />
+            <YearDropdown value={year} onChange={(y) => y && setYear(y)} ariaLabel={t("compliance.ics.year")} />
             <Button icon="pi pi-file-excel" label={t("compliance.ics.download")} onClick={() => complianceService.exportAnnualStatement({ year }).catch(fail)} />
           </>
         )} />

@@ -59,20 +59,15 @@
           }
         }
 
-        .knob-container {
-          display: flex;
-          justify-content: center;
-          margin-top: 0.5rem;
+        // average utilisation: the figure as text with a thin meter under it (components/ProgressMeter), no dial
+        .bv-meter {
+          margin-top: 0.25rem;
         }
       }
     }
   }
 
   .treaty-table {
-    .utilization-cell {
-      min-width: 150px;
-    }
-
     .action-buttons {
       display: flex;
       gap: 0.25rem;

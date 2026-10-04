@@ -1,12 +1,12 @@
 ---
 title: Test Plan
 subtitle: Testing of a BrokerVerse OOTB implementation for a broker
-version: 1.0
+version: 1.0.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Initial issue: scope per module, schedule by phase and broker size, test cycles from SIT to hypercare, deliverables, resourcing, suspension and resumption, sign-off
+change: Version 1.0.1: UI standard check added to the scope and to SIT cycle 1 (the Enterprise UI standard of the Technical Reference applied to every screen). Version 1.0: initial issue: scope per module, schedule by phase and broker size, test cycles from SIT to hypercare, deliverables, resourcing, suspension and resumption, sign-off
 open_item: Broker-specific scenarios, test dates and named testers are filled in at the end of discovery
 open_item_owner: iorta TechNXT project manager and broker project manager
 acronyms: OOTB=Out of the box; SIT=System integration test; UAT=User acceptance test; Pre-Prod=Pre-production environment; Dev=Development environment; QA=Quality assurance; RTM=Requirements traceability matrix; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; AMLC=Anti-Money Laundering Council; AML=Anti-money laundering; CTPL=Compulsory third party liability; COC=Certificate of cover; LOA=Letter of authority; PDC=Post-dated cheque; EOPT=Ease of Paying Taxes Act; CAS=Computerized accounting system; EIS=Electronic Invoicing System; PSGC=Philippine Standard Geographic Code; GL=General ledger; TB=Trial balance; SOW=Statement of work
@@ -73,6 +73,22 @@ The test case prefixes refer to the sheet Test Cases of the Test Cases workbook.
 | Reports and dashboards | Report catalogue, dashboards, scheduled reports, report builder | BV-RPT, BV-DSH, BV-DST | S6, S11, C5 |
 | Sales activities, product covers and risk fields, supplier BIR 2307, asset disposal | Sales activity log and report, quote wizard covers and risk fields from the Product Configurator, supplier BIR 2307 and supplier EWT in the returns, fixed asset disposal | BV-PKG | Delivered; cases run in UAT cycle 1 |
 
+## UI standard check
+
+Every screen in scope is checked once against the Enterprise UI standard of the Technical Reference (section Enterprise UI standard), as part of the screen check per role in SIT cycle 1 and again for every screen changed by a fix. The tester opens the screen as each role at a 1280px window, triggers one success and one error message and opens each dialog, and confirms:
+
+- Page header: one title, a breadcrumb, actions on the right with the primary action last.
+- Summary figures as compact strips: no dials, gauges, large icons or coloured card edges.
+- Tables: one row height, numbers and dates right-aligned on one line, status as a quiet tag, a figure out of 100 as a thin bar with the value written beside it (not inside it).
+- Forms: one input height, number spinners as quiet buttons inside the field, a year or period as a drop-down, a select button with one visibly selected segment, filters above the list and actions in the header or footer.
+- Buttons: one filled primary button per action bar, the others outlined or text; never a row of filled buttons.
+- Messages and toasts: white or neutral tint with a thin coloured rule on the left and dark text; information boxes grey with the rule in the brand colour; no pink or saturated red surface.
+- Charts: straight lines, plain captions, no gradients.
+- Colour and icons: the brand colour only for the primary action, links and the selected state; icons 16 to 18px, no decorative icons.
+- Dialogs: white, form dialogs as a side panel, confirmations centred, one primary button.
+
+A deviation is logged as a severity 4 defect (severity 3 when the selected state, the value of a meter or a message cannot be read) with the screen, the role and a screenshot; the test case prefix is BV-SCR.
+
 ## Out of scope
 
 - Retesting the product's internal code paths already covered by the automated suites; the implementation relies on the green CI run of the release tag.
@@ -103,7 +119,7 @@ The test case prefixes refer to the sheet Test Cases of the Test Cases workbook.
 
 | Cycle | Environment | Data | Content | Duration |
 |---|---|---|---|---|
-| SIT cycle 1 | Dev (small, medium) or SIT (large) | Synthetic data from `uat-scenario.js`; the broker's configuration | UAT scenario on the configured system; life-cycle plan; test cases of every in-scope module; screen check per role | 1 week |
+| SIT cycle 1 | Dev (small, medium) or SIT (large) | Synthetic data from `uat-scenario.js`; the broker's configuration | UAT scenario on the configured system; life-cycle plan; test cases of every in-scope module; screen check per role with the UI standard check | 1 week |
 | SIT cycle 2 | Same | As cycle 1; for a large broker the migrated data of mock load 2 | Re-test of cycle 1 defects; broker-specific scenarios; full UAT scenario again; SIT exit report | 1 week |
 | UAT cycle 1 | UAT | The broker's configuration and the latest mock load | UAT scripts of every role, broker scenarios | 1 week |
 | UAT cycle 2 | UAT | As cycle 1, after fixes and the next mock load | Re-test of cycle 1 defects; scripts that failed or were not run; sign-off | 1 week |

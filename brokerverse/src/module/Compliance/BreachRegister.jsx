@@ -3,12 +3,11 @@ import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
-import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import complianceService, { errorMessage } from "../../services/complianceService";
-import { FormDialog, History, PageHeader, StateTag, Stats, asOptions, showDateTime } from "./icCommon";
+import { FormDialog, History, PageHeader, StateTag, Stats, YearDropdown, asOptions, showDateTime } from "./icCommon";
 import "../Administration/index.scss";
 import "../AccessControl/index.scss";
 import "./ic.scss";
@@ -152,7 +151,7 @@ const BreachRegister = () => {
       <PageHeader section={t("compliance.npc")} title={t("compliance.br.title")} intro={t("compliance.br.intro")}
         actions={(
           <>
-            <InputNumber value={year} onValueChange={(e) => e.value && setYear(e.value)} useGrouping={false} min={2000} max={2100} showButtons aria-label={t("compliance.br.year")} />
+            <YearDropdown value={year} onChange={(y) => y && setYear(y)} ariaLabel={t("compliance.br.year")} />
             <Button icon="pi pi-file-excel" label={t("compliance.br.annualReport")} outlined onClick={() => complianceService.exportBreachAnnualReport(year).catch(fail)} />
             <Button icon="pi pi-plus" label={t("compliance.br.log")} onClick={() => setForm({ ...EMPTY, discoveredAt: new Date().toISOString() })} />
           </>

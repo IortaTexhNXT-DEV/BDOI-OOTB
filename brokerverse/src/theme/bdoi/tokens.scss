@@ -26,11 +26,14 @@ $color-text-muted: #656565; // Base Grey
 $color-placeholder: #919191; // Medium Grey
 $color-border: #e4e4e4; // dividers and borders
 $color-border-strong: #c2c2c1; // Light Grey: separators, disabled fills
+$color-surface-muted: #f5f6f7; // quiet tint for information boxes, hints and notes (a grey, never a colour)
 
-// Status colours stay semantic on every brand (not part of a theme)
+// Status colours stay semantic on every brand (not part of a theme).
+// The -050 tints are the backgrounds of messages and tags: very light, never pink or saturated. The danger tint is
+// a warm grey rather than a pale red so that an error box reads as a notice and a page of errors never turns pink.
 $color-success: #1d7f4e;
 $color-danger: #b42318; // errors: a deep red that reads as a notice, not an alarm
-$color-danger-050: #fdf3f2;
+$color-danger-050: #f7f4f3;
 $color-warning: #8a5a00;
 $color-warning-050: #fdf8ec;
 $color-success-050: #eff7f2;
@@ -104,6 +107,7 @@ $sidebar-width: 280px;
   --color-text-muted: #{$color-text-muted};
   --color-placeholder: #{$color-placeholder};
   --color-border: #{$color-border};
+  --color-surface-muted: #{$color-surface-muted};
   --color-danger: #{$color-danger};
   --color-success: #{$color-success};
   --color-warning: #{$color-warning};
