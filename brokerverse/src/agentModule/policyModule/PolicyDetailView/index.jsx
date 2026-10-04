@@ -3,6 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { useParams, useNavigate } from "react-router-dom";
+import { AuditTimeline } from "../../../components/AuditTrail";
 import { useDispatch, useSelector } from "react-redux";
 import { Button } from "primereact/button";
 import { Skeleton } from "primereact/skeleton";
@@ -2109,6 +2110,11 @@ const PolicyDetailView = () => {
                     })}
                   </div>
                 )}
+              </SectionCard>
+
+              <SectionCard title={t("policyDetail.history", { defaultValue: "History" })} className="policy-history-section"
+                subtitle={t("policyDetail.historySubtitle", { defaultValue: "Every change to this policy: who made it, when and what changed" })}>
+                <AuditTimeline entity="policy" recordId={rawPolicyData?.id || policyId} limit={10} />
               </SectionCard>
             </div>
           </div>

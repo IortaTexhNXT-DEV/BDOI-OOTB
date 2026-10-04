@@ -30,6 +30,9 @@
       "name": "Addresses"
     },
     {
+      "name": "Audit Trail"
+    },
+    {
       "name": "Auth"
     },
     {
@@ -6788,6 +6791,220 @@
           }
         },
         "x-screen": "Operations > Sales & Marketing > Prospects > Create Lead (address fields)"
+      }
+    },
+    "/audit/records/{entity}/{id}": {
+      "get": {
+        "operationId": "getAuditRecordsEntityId",
+        "summary": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number",
+        "tags": [
+          "Audit Trail"
+        ],
+        "description": "Front-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "desc"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "day": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string"
+                          },
+                          "time": {
+                            "type": "string"
+                          },
+                          "atText": {
+                            "type": "string"
+                          },
+                          "entity": {
+                            "type": "string"
+                          },
+                          "entityLabel": {
+                            "type": "string"
+                          },
+                          "entityId": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "note": {},
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "channel": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "key": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "today": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "812",
+                      "at": "2026-10-02T01:49:37.774Z",
+                      "day": "2026-10-02",
+                      "date": "02/10/2026",
+                      "time": "09:49",
+                      "atText": "02/10/2026 09:49",
+                      "entity": "claim",
+                      "entityLabel": "Claim",
+                      "entityId": "clm_0123456789abcdef",
+                      "reference": "CLM-2026-00012",
+                      "action": "Settlement Submitted",
+                      "title": "Settlement submitted",
+                      "note": null,
+                      "user": {
+                        "username": "j.claims",
+                        "displayName": "Jasmine Cruz",
+                        "roles": [
+                          "Claims Officer"
+                        ]
+                      },
+                      "source": {
+                        "channel": "screen",
+                        "label": "Screen",
+                        "name": "Operations > Claims > Request approval"
+                      },
+                      "changes": [
+                        {
+                          "key": "claimStatus",
+                          "label": "Claim status",
+                          "from": "Processing",
+                          "to": "Pending approval"
+                        },
+                        {
+                          "key": "settlement.settlementAmount",
+                          "label": "Settlement amount",
+                          "from": null,
+                          "to": "PHP 85,000.00"
+                        }
+                      ]
+                    }
+                  ],
+                  "total": 1,
+                  "today": "2026-10-04"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)"
       }
     },
     "/auth/2fa/disable": {
@@ -100666,6 +100883,384 @@
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Audit trail",
+        "x-permissions": [
+          "read:audit"
+        ]
+      }
+    },
+    "/settings/audit/events": {
+      "get": {
+        "operationId": "getSettingsAuditEvents",
+        "summary": "Audit trail as business events (one per action, newest first, paged on the server): user display name and roles, date and time in general.timezone, source (screen / API / system job), record type and number, the event and its changed fields (label, old value, new value; secrets never shown). Filters: from / to (business dates), username, entity (record type, comma-separated; \"master\" = every master), entityRef (record id or number), action. export=csv | excel downloads every matching event, one row per changed field (at most 10,000 events)",
+        "tags": [
+          "System Settings"
+        ],
+        "description": "Front-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          },
+          {
+            "name": "username",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "r.underwriter"
+          },
+          {
+            "name": "entity",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "policy"
+          },
+          {
+            "name": "entityRef",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "MC-2026-000123"
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "update"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "day": {
+                            "type": "string"
+                          },
+                          "date": {
+                            "type": "string"
+                          },
+                          "time": {
+                            "type": "string"
+                          },
+                          "atText": {
+                            "type": "string"
+                          },
+                          "entity": {
+                            "type": "string"
+                          },
+                          "entityLabel": {
+                            "type": "string"
+                          },
+                          "entityId": {
+                            "type": "string"
+                          },
+                          "reference": {
+                            "type": "string"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "note": {},
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string"
+                              },
+                              "roles": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          },
+                          "source": {
+                            "type": "object",
+                            "properties": {
+                              "channel": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "key": {
+                                  "type": "string"
+                                },
+                                "label": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "pageSize": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "812",
+                      "at": "2026-10-02T01:49:37.774Z",
+                      "day": "2026-10-02",
+                      "date": "02/10/2026",
+                      "time": "09:49",
+                      "atText": "02/10/2026 09:49",
+                      "entity": "policy",
+                      "entityLabel": "Policy",
+                      "entityId": "pol_0123456789abcdef",
+                      "reference": "MC-2026-000123",
+                      "action": "update",
+                      "title": "Policy updated",
+                      "note": null,
+                      "user": {
+                        "username": "r.underwriter",
+                        "displayName": "Ramon Reyes",
+                        "roles": [
+                          "Underwriter"
+                        ]
+                      },
+                      "source": {
+                        "channel": "screen",
+                        "label": "Screen",
+                        "name": "Operations > Policies > Edit"
+                      },
+                      "changes": [
+                        {
+                          "key": "grossPremium",
+                          "label": "Gross premium",
+                          "from": "PHP 12,500.00",
+                          "to": "PHP 13,750.00"
+                        }
+                      ]
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "pageSize": 20,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Audit trail",
+        "x-permissions": [
+          "read:audit"
+        ]
+      }
+    },
+    "/settings/audit/options": {
+      "get": {
+        "operationId": "getSettingsAuditOptions",
+        "summary": "Filter choices of the audit trail: record types and actions found in the log (with business labels) and the users who made changes",
+        "tags": [
+          "System Settings"
+        ],
+        "description": "Front-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "recordTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "actions": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "users": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "recordTypes": [
+                      {
+                        "value": "policy",
+                        "label": "Policy",
+                        "count": 120
+                      }
+                    ],
+                    "actions": [
+                      {
+                        "value": "update",
+                        "label": "Updated"
+                      }
+                    ],
+                    "users": [
+                      {
+                        "value": "r.underwriter",
+                        "label": "Ramon Reyes"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"

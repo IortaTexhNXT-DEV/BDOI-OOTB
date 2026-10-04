@@ -19,6 +19,7 @@ import {
 } from "../store/insuranceCompanyMiddleware";
 import { useSelector, useDispatch } from "react-redux";
 import useMasterOptions from "../../../common/useMasterOptions";
+import { AuditTimeline } from "../../../../../components/AuditTrail";
 
 const InsuranceDetailsAction = ({ action }) => {
   const { t } = useTranslation();
@@ -616,6 +617,12 @@ const InsuranceDetailsAction = ({ action }) => {
           </>)}
         </div>
       </div>
+      {action === "view" && id ? (
+        <section className="master-history">
+          <h3 className="master-history__title">{t("generalMasters.history", { defaultValue: "History" })}</h3>
+          <AuditTimeline entity="master:insurance-company" recordId={id} limit={10} />
+        </section>
+      ) : null}
       <div className="flex justify-content-end mt-5">
         {action === "add" && (
           <Button

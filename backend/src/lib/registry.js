@@ -25,7 +25,10 @@ export function moduleRouter(module, prefix = '') {
     const auth = r.auth !== false;
     const given = (r.middleware || []).flat();
     const mws = auth ? [requireAuth, ...given.filter((m) => m !== requireAuth)] : given;
-    router[method](r.path, ...mws, wrap(r.handler));
+    // The route's screen and path travel on the request, so the audit trail can say where a change came from.
+    const routeInfo = { screen: r.screen || '', method: r.method.toUpperCase(), path: prefix + r.path };
+    const tag = (req, _res, next) => { req.routeInfo = routeInfo; next(); };
+    router[method](r.path, tag, ...mws, wrap(r.handler));
     const entry = { module, method: r.method.toUpperCase(), path: prefix + r.path, summary: r.summary || '',
       auth, roles: unique([...(r.roles || []), ...given.flatMap((m) => m.roles || [])]),
       permissions: unique([...(r.permissions || []), ...given.flatMap((m) => m.permissions || [])]),
