@@ -41,6 +41,10 @@ export const EVENT_FLOW = {
   'ri.recovery': { trigger: 'Reinsurance: claim recovery settled', approval: 'None' },
   'incentive.accrual': { trigger: 'Incentive: calculated incentives approved', approval: 'Maker-checker (not the calculating user)' },
   'incentive.payout': { trigger: 'Incentive: approved incentives paid', approval: 'None' },
+  'sales_invoice.issue': { trigger: 'Accounts > Tax > Sales Invoices: manual service invoice issued (cancellation reverses it)', approval: 'None: the invoice is issued by Accounting (write:period-end)' },
+  'sales_invoice.payment': { trigger: 'Accounts > Tax > Sales Invoices: payment recorded on a manual invoice (payment acknowledgement)', approval: 'None' },
+  'override_commission.accrual': { trigger: 'Commission > Insurer Overrides > Computations: computation approved', approval: 'Maker-checker (commission.override_requires_approval): not the preparer' },
+  'override_commission.settlement': { trigger: 'Commission > Insurer Overrides > Computations: settlement recorded against the insurer statement', approval: 'None (the computation was approved)' },
 };
 
 function describeAccount(l, roles, gl, taxGl) {

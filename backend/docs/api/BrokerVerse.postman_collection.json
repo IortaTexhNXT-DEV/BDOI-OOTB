@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (889 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (943 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -9519,6 +9519,1624 @@
               ],
               "cookie": [],
               "body": "(application/pdf)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "BIR Forms and Invoicing",
+      "item": [
+        {
+          "name": "Audit trail extract for a date range (Excel or PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/audit-extract?from=2026-09-01&to=2026-09-30&format=xlsx",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "audit-extract"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                }
+              ]
+            },
+            "description": "Audit trail extract for a date range (Excel or PDF)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Entries of a book of accounts for a month (on screen)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/books/:book/preview?period=2026-09",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "books",
+                ":book",
+                "preview"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2026-09"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "book",
+                  "value": "",
+                  "description": "book (path parameter)"
+                }
+              ]
+            },
+            "description": "Entries of a book of accounts for a month (on screen)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Print a loose-leaf book for a month (PDF): the next page numbers of the book's year, recorded",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/books/:book/print",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "books",
+                ":book",
+                "print"
+              ],
+              "variable": [
+                {
+                  "key": "book",
+                  "value": "",
+                  "description": "book (path parameter)"
+                }
+              ]
+            },
+            "description": "Print a loose-leaf book for a month (PDF): the next page numbers of the book's year, recorded\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents > Print\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"period\": \"2026-09\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Excel of a book of accounts for a month",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/books/:book/xlsx?period=2026-09",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "books",
+                ":book",
+                "xlsx"
+              ],
+              "query": [
+                {
+                  "key": "period",
+                  "value": "2026-09"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "book",
+                  "value": "",
+                  "description": "book (path parameter)"
+                }
+              ]
+            },
+            "description": "Excel of a book of accounts for a month\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Readiness of the CAS registration pack (taxpayer details, permit numbers, custodian, books printed)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/checklist",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "checklist"
+              ]
+            },
+            "description": "Readiness of the CAS registration pack (taxpayer details, permit numbers, custodian, books printed)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Backup and restore procedure (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/backup-procedure",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                "backup-procedure"
+              ]
+            },
+            "description": "Backup and restore procedure (PDF)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "CAS system description and controls (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/documents/system-description",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "documents",
+                "system-description"
+              ]
+            },
+            "description": "CAS system description and controls (PDF)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Register of loose-leaf book prints (filter year, book)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/prints?year=2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "prints"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ]
+            },
+            "description": "Register of loose-leaf book prints (filter year, book)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Reprint a book print with its original page numbers (marked REPRINT)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/prints/:id/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "prints",
+                ":id",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reprint a book print with its original page numbers (marked REPRINT)\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: write:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Void the latest print of a book (with a reason); its pages are used again",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/cas/prints/:id/void",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "cas",
+                "prints",
+                ":id",
+                "void"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Void the latest print of a book (with a reason); its pages are used again\n\nFront-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Printer jam: pages damaged\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Preview of a DAT file (QAP, SAWT, SLSP sales / purchases per quarter; 1604-E per year): file name, records, totals, warnings and content",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/dat-files/:type?year=2026&quarter=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "dat-files",
+                ":type"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "quarter",
+                  "value": "3"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Preview of a DAT file (QAP, SAWT, SLSP sales / purchases per quarter; 1604-E per year): file name, records, totals, warnings and content\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/dat-files/:type?year=2026&quarter=3",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "dat-files",
+                    ":type"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2026"
+                    },
+                    {
+                      "key": "quarter",
+                      "value": "3"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "type",
+                      "value": "",
+                      "description": "type (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Preview of a DAT file (QAP, SAWT, SLSP sales / purchases per quarter; 1604-E per year): file name, records, totals, warnings and content\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"type\": \"qap\",\n    \"fileName\": \"12345678900000920261601EQ.DAT\",\n    \"records\": 4,\n    \"rows\": 2,\n    \"totals\": {\n      \"taxWithheld\": 1335.6\n    },\n    \"warnings\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download a DAT file for validation with the BIR module and submission",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/dat-files/:type/download?year=2026&quarter=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "dat-files",
+                ":type",
+                "download"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "quarter",
+                  "value": "3"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "type",
+                  "value": "",
+                  "description": "type (path parameter)"
+                }
+              ]
+            },
+            "description": "Download a DAT file for validation with the BIR module and submission\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files > Download\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Record layouts and version of the BIR DAT files the system produces",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/dat-files/layout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "dat-files",
+                "layout"
+              ]
+            },
+            "description": "Record layouts and version of the BIR DAT files the system produces\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/dat-files/layout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "dat-files",
+                    "layout"
+                  ]
+                },
+                "description": "Record layouts and version of the BIR DAT files the system produces\n\nFront-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"version\": \"BIR Alphalist Data Entry and Validation Module v7.x (QAP 1601-EQ, SAWT, 1604-E schedules 3 and 4); RELIEF data file layout (SLSP sales and purchases)\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Manual fallback: the queued and failed e-invoice payloads as one JSON file",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "export"
+              ]
+            },
+            "description": "Manual fallback: the queued and failed e-invoice payloads as one JSON file\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Send the queued and due e-invoices now (what the eis-outbox job does)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/process",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "process"
+              ]
+            },
+            "description": "Send the queued and due e-invoices now (what the eis-outbox job does)\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Queue the issued invoices of a date range that are not in the outbox yet",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/queue-backlog",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "queue-backlog"
+              ]
+            },
+            "description": "Queue the issued invoices of a date range that are not in the outbox yet\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"2026-10-01\",\n  \"to\": \"2026-10-31\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "EIS connector status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, what remains with the BIR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "status"
+              ]
+            },
+            "description": "EIS connector status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, what remains with the BIR\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "EIS outbox (filter status, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/submissions?status=failed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "submissions"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "failed"
+                }
+              ]
+            },
+            "description": "EIS outbox (filter status, search)\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "One EIS submission with its payload and the response",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/submissions/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "submissions",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One EIS submission with its payload and the response\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Manual fallback: record the EIS reference of a payload uploaded outside the system",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/submissions/:id/manual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "submissions",
+                ":id",
+                "manual"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Manual fallback: record the EIS reference of a payload uploaded outside the system\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reference\": \"EIS-ACK-000123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Put a failed or rejected submission back in the queue",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/eis/submissions/:id/retry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "eis",
+                "submissions",
+                ":id",
+                "retry"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Put a failed or rejected submission back in the queue\n\nFront-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Filing records of BIR returns (filter year, form)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/filings?year=2026&form=0619-E",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "filings"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "form",
+                  "value": "0619-E"
+                }
+              ]
+            },
+            "description": "Filing records of BIR returns (filter year, form)\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/filings?year=2026&form=0619-E",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "filings"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2026"
+                    },
+                    {
+                      "key": "form",
+                      "value": "0619-E"
+                    }
+                  ]
+                },
+                "description": "Filing records of BIR returns (filter year, form)\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"brf_1a2b\",\n      \"form\": \"0619-E\",\n      \"periodKey\": \"2026-07\",\n      \"dateFiled\": \"2026-08-10\",\n      \"amountPaid\": 445.2,\n      \"status\": \"filed\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Correct the references of a filing record (date filed, references, amount paid, penalties)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/filings/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "filings",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Correct the references of a filing record (date filed, references, amount paid, penalties)\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns > Filing record\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentReference\": \"LBP-778900\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel a filing record entered in error (with a reason)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/filings/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "filings",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a filing record entered in error (with a reason)\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns > Filing record\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Recorded against the wrong month\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Sales invoices (filter from, to, status, sourceType, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices?from=2026-10-01&to=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Sales invoices (filter from, to, status, sourceType, search)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/invoices?from=2026-10-01&to=2026-10-31",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "invoices"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31"
+                    }
+                  ]
+                },
+                "description": "Sales invoices (filter from, to, status, sourceType, search)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"sin_1a2b\",\n      \"invoiceNumber\": \"SI-0000000001\",\n      \"invoiceDate\": \"2026-10-04\",\n      \"buyerName\": \"Malayan Insurance Co., Inc.\",\n      \"vatableSales\": 10000,\n      \"vatAmount\": 1200,\n      \"totalAmount\": 11200,\n      \"status\": \"issued\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Issue a sales invoice: for a commission debit note, an overriding commission computation, a broker-billed policy's commission, or a manual service invoice (posts sales_invoice.issue)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices"
+              ]
+            },
+            "description": "Issue a sales invoice: for a commission debit note, an overriding commission computation, a broker-billed policy's commission, or a manual service invoice (posts sales_invoice.issue)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > New\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceType\": \"debit_note\",\n  \"sourceId\": \"DN-2026-00001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/invoices",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "invoices"
+                  ]
+                },
+                "description": "Issue a sales invoice: for a commission debit note, an overriding commission computation, a broker-billed policy's commission, or a manual service invoice (posts sales_invoice.issue)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > New\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sourceType\": \"debit_note\",\n  \"sourceId\": \"DN-2026-00001\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"sin_1a2b\",\n    \"invoiceNumber\": \"SI-0000000001\",\n    \"invoiceDate\": \"2026-10-04\",\n    \"buyerName\": \"Malayan Insurance Co., Inc.\",\n    \"vatableSales\": 10000,\n    \"vatAmount\": 1200,\n    \"totalAmount\": 11200,\n    \"status\": \"issued\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A sales invoice with its lines and payments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A sales invoice with its lines and payments\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/invoices/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "invoices",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A sales invoice with its lines and payments\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"sin_1a2b\",\n    \"invoiceNumber\": \"SI-0000000001\",\n    \"invoiceDate\": \"2026-10-04\",\n    \"buyerName\": \"Malayan Insurance Co., Inc.\",\n    \"vatableSales\": 10000,\n    \"vatAmount\": 1200,\n    \"totalAmount\": 11200,\n    \"status\": \"issued\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a sales invoice with a reason (kept with its number; a manual invoice's journal is reversed; the EIS is told)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a sales invoice with a reason (kept with its number; a manual invoice's journal is reversed; the EIS is told)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong buyer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Record a payment on a manual sales invoice: payment acknowledgement (supplementary document) and journal sales_invoice.payment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/:id/payments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                ":id",
+                "payments"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record a payment on a manual sales invoice: payment acknowledgement (supplementary document) and journal sales_invoice.payment\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 10200,\n  \"ewtAmount\": 1000,\n  \"paymentMode\": \"bank-transfer\",\n  \"referenceNo\": \"BDO-123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Print of a sales invoice (every field RR 7-2024 lists)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/:id/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                ":id",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Print of a sales invoice (every field RR 7-2024 lists)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > Print\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Approved commission debit notes or overriding commission computations not yet invoiced",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/candidates?type=debit_note",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                "candidates"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "debit_note"
+                }
+              ]
+            },
+            "description": "Approved commission debit notes or overriding commission computations not yet invoiced\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > New\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel a payment acknowledgement (journal reversed, invoice balance restored)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/payments/:paymentId/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                "payments",
+                ":paymentId",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "paymentId",
+                  "value": "",
+                  "description": "paymentId (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a payment acknowledgement (journal reversed, invoice balance restored)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Cheque returned\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Print of a payment acknowledgement (supplementary document)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/payments/:paymentId/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                "payments",
+                ":paymentId",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "paymentId",
+                  "value": "",
+                  "description": "paymentId (path parameter)"
+                }
+              ]
+            },
+            "description": "Print of a payment acknowledgement (supplementary document)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/invoices/seller",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "invoices",
+                "seller"
+              ]
+            },
+            "description": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range)\n\nFront-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "A BIR return computed from the books, laid out as the form (items, schedules per ATC, alphalist, reconciliation with the QAP and the ledger, filing record)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/returns/:form?year=2026&quarter=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "returns",
+                ":form"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "quarter",
+                  "value": "3"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "form",
+                  "value": "",
+                  "description": "form (path parameter)"
+                }
+              ]
+            },
+            "description": "A BIR return computed from the books, laid out as the form (items, schedules per ATC, alphalist, reconciliation with the QAP and the ledger, filing record)\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/returns/:form?year=2026&quarter=3",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "returns",
+                    ":form"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2026"
+                    },
+                    {
+                      "key": "quarter",
+                      "value": "3"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "form",
+                      "value": "",
+                      "description": "form (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A BIR return computed from the books, laid out as the form (items, schedules per ATC, alphalist, reconciliation with the QAP and the ledger, filing record)\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"form\": \"1601-EQ\",\n    \"title\": \"Quarterly Remittance Return of Creditable Income Taxes Withheld (Expanded)\",\n    \"period\": {\n      \"key\": \"2026-Q3\",\n      \"from\": \"2026-07-01\",\n      \"to\": \"2026-09-30\"\n    },\n    \"header\": [\n      [\n        \"TIN\",\n        \"123-456-789-00000\"\n      ]\n    ],\n    \"items\": [\n      {\n        \"no\": \"19\",\n        \"label\": \"Total taxes withheld for the quarter\",\n        \"amount\": 1335.6\n      }\n    ],\n    \"schedules\": [],\n    \"reconciliation\": {\n      \"reconciled\": true,\n      \"checks\": []\n    },\n    \"taxDue\": 445.2,\n    \"filing\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the filing of a return: date filed, eFPS / eBIRForms reference, amount paid, payment reference; keeps the figures as filed. amended: true supersedes the active filing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bir/returns/:form/filings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "returns",
+                ":form",
+                "filings"
+              ],
+              "variable": [
+                {
+                  "key": "form",
+                  "value": "",
+                  "description": "form (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the filing of a return: date filed, eFPS / eBIRForms reference, amount paid, payment reference; keeps the figures as filed. amended: true supersedes the active filing\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns > Record filing\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3,\n  \"dateFiled\": \"2026-10-28\",\n  \"filingReference\": \"EFPS-1601EQ-0001\",\n  \"amountPaid\": 445.2,\n  \"paymentReference\": \"LBP-778899\",\n  \"paymentChannel\": \"eFPS\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/returns/:form/filings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "returns",
+                    ":form",
+                    "filings"
+                  ],
+                  "variable": [
+                    {
+                      "key": "form",
+                      "value": "",
+                      "description": "form (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the filing of a return: date filed, eFPS / eBIRForms reference, amount paid, payment reference; keeps the figures as filed. amended: true supersedes the active filing\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns > Record filing\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3,\n  \"dateFiled\": \"2026-10-28\",\n  \"filingReference\": \"EFPS-1601EQ-0001\",\n  \"amountPaid\": 445.2,\n  \"paymentReference\": \"LBP-778899\",\n  \"paymentChannel\": \"eFPS\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"brf_1a2b\",\n    \"form\": \"1601-EQ\",\n    \"periodKey\": \"2026-Q3\",\n    \"status\": \"filed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Print of a BIR return (PDF on the letterhead, BIR item order)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/returns/:form/pdf?year=2026&quarter=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "returns",
+                ":form",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "quarter",
+                  "value": "3"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "form",
+                  "value": "",
+                  "description": "form (path parameter)"
+                }
+              ]
+            },
+            "description": "Print of a BIR return (PDF on the letterhead, BIR item order)\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns > Print\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "Excel of a BIR return: the form, each schedule on a sheet, the reconciliation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/returns/:form/xlsx?year=2026&quarter=3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "returns",
+                ":form",
+                "xlsx"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "quarter",
+                  "value": "3"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "form",
+                  "value": "",
+                  "description": "form (path parameter)"
+                }
+              ]
+            },
+            "description": "Excel of a BIR return: the form, each schedule on a sheet, the reconciliation\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns > Excel\n\nAccess: read:period-end"
+          },
+          "response": []
+        },
+        {
+          "name": "BIR returns of a year (0619-E, 1601-EQ, 1604-E, 2551Q for a non-VAT broker) with due date and filing status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bir/returns/calendar?year=2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bir",
+                "returns",
+                "calendar"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ]
+            },
+            "description": "BIR returns of a year (0619-E, 1601-EQ, 1604-E, 2551Q for a non-VAT broker) with due date and filing status\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bir/returns/calendar?year=2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bir",
+                    "returns",
+                    "calendar"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2026"
+                    }
+                  ]
+                },
+                "description": "BIR returns of a year (0619-E, 1601-EQ, 1604-E, 2551Q for a non-VAT broker) with due date and filing status\n\nFront-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"form\": \"0619-E\",\n      \"periodKey\": \"2026-07\",\n      \"dueDate\": \"2026-08-10\",\n      \"status\": \"filed\",\n      \"amountPaid\": 445.2\n    }\n  ]\n}"
             }
           ]
         }
@@ -24843,6 +26461,646 @@
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"agentName\": \"Juan Dela Cruz\",\n    \"period\": \"August 2026\",\n    \"totalEarnings\": 13500,\n    \"ytdEarnings\": 38500,\n    \"pendingPayment\": 13500,\n    \"pendingPeriods\": [\n      \"August 2026\"\n    ],\n    \"lastPaymentPeriods\": [\n      \"July 2026\"\n    ],\n    \"contact\": {\n      \"companyName\": \"BrokerVerse Insurance Brokerage\",\n      \"email\": \"info@brokerverse.ph\",\n      \"phone\": \"+63 2 8888 0000\"\n    },\n    \"programBreakdown\": [],\n    \"monthlyTrend\": []\n  }\n}"
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Insurer Overriding Commission",
+      "item": [
+        {
+          "name": "Overriding / profit / contingent commission agreements with insurers (filter status, insurerId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/agreements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "agreements"
+              ]
+            },
+            "description": "Overriding / profit / contingent commission agreements with insurers (filter status, insurerId)\n\nFront-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-overrides/agreements",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-overrides",
+                    "agreements"
+                  ]
+                },
+                "description": "Overriding / profit / contingent commission agreements with insurers (filter status, insurerId)\n\nFront-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"ova_1a2b\",\n      \"agreementCode\": \"MAL-OVR-2026\",\n      \"name\": \"Malayan production override 2026\",\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"basis\": \"production\",\n      \"periodType\": \"quarterly\",\n      \"tiers\": [\n        {\n          \"tierNo\": 1,\n          \"fromValue\": 0,\n          \"toValue\": 1000000,\n          \"rate\": 1\n        },\n        {\n          \"tierNo\": 2,\n          \"fromValue\": 1000000,\n          \"toValue\": null,\n          \"rate\": 2\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create an agreement: insurer, type, basis (production, loss ratio, growth), period, lines of business, tiers",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/agreements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "agreements"
+              ]
+            },
+            "description": "Create an agreement: insurer, type, basis (production, loss ratio, growth), period, lines of business, tiers\n\nFront-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: write:commission",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"agreementCode\": \"MAL-OVR-2026\",\n  \"name\": \"Malayan production override 2026\",\n  \"insurerId\": 1,\n  \"basis\": \"production\",\n  \"periodType\": \"quarterly\",\n  \"effectiveFrom\": \"2026-01-01\",\n  \"tiers\": [\n    {\n      \"fromValue\": 0,\n      \"toValue\": 1000000,\n      \"rate\": 1\n    },\n    {\n      \"fromValue\": 1000000,\n      \"toValue\": null,\n      \"rate\": 2\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "One agreement with its tiers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/agreements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "agreements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One agreement with its tiers\n\nFront-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-overrides/agreements/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-overrides",
+                    "agreements",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One agreement with its tiers\n\nFront-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"ova_1a2b\",\n    \"agreementCode\": \"MAL-OVR-2026\",\n    \"name\": \"Malayan production override 2026\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"basis\": \"production\",\n    \"periodType\": \"quarterly\",\n    \"tiers\": [\n      {\n        \"tierNo\": 1,\n        \"fromValue\": 0,\n        \"toValue\": 1000000,\n        \"rate\": 1\n      },\n      {\n        \"tierNo\": 2,\n        \"fromValue\": 1000000,\n        \"toValue\": null,\n        \"rate\": 2\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update an agreement and its tiers",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/agreements/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "agreements",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update an agreement and its tiers\n\nFront-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: write:commission",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"inactive\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Compute (or recompute a draft) the commission of an agreement for a period; claimsIncurred replaces the system figure with the insurer's",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/agreements/:id/compute",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "agreements",
+                ":id",
+                "compute"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Compute (or recompute a draft) the commission of an agreement for a period; claimsIncurred replaces the system figure with the insurer's\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": 2026,\n  \"periodLabel\": \"2026-Q3\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-overrides/agreements/:id/compute",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-overrides",
+                    "agreements",
+                    ":id",
+                    "compute"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Compute (or recompute a draft) the commission of an agreement for a period; claimsIncurred replaces the system figure with the insurer's\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"year\": 2026,\n  \"periodLabel\": \"2026-Q3\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"ovc_1a2b\",\n    \"computationNumber\": \"OVC-2026-00001\",\n    \"periodLabel\": \"2026-Q3\",\n    \"production\": 1250000,\n    \"rate\": 2,\n    \"commission\": 25000,\n    \"vat\": 3000,\n    \"receivable\": 28000,\n    \"status\": \"draft\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Periods of an agreement in a year with the computation of each (if any)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/agreements/:id/periods?year=2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "agreements",
+                ":id",
+                "periods"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Periods of an agreement in a year with the computation of each (if any)\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission"
+          },
+          "response": []
+        },
+        {
+          "name": "Figures of an agreement for a period without saving (production, claims, loss ratio, growth, tier, commission)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/agreements/:id/preview?year=2026&periodLabel=2026-Q3",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "agreements",
+                ":id",
+                "preview"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                },
+                {
+                  "key": "periodLabel",
+                  "value": "2026-Q3"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Figures of an agreement for a period without saving (production, claims, loss ratio, growth, tier, commission)\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission"
+          },
+          "response": []
+        },
+        {
+          "name": "Computations (filter status, agreementId, insurerId, year)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations"
+              ]
+            },
+            "description": "Computations (filter status, agreementId, insurerId, year)\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-overrides/computations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-overrides",
+                    "computations"
+                  ]
+                },
+                "description": "Computations (filter status, agreementId, insurerId, year)\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"ovc_1a2b\",\n      \"computationNumber\": \"OVC-2026-00001\",\n      \"periodLabel\": \"2026-Q3\",\n      \"production\": 1250000,\n      \"rate\": 2,\n      \"commission\": 25000,\n      \"vat\": 3000,\n      \"receivable\": 28000,\n      \"status\": \"draft\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "One computation with its settlements",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One computation with its settlements\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-overrides/computations/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-overrides",
+                    "computations",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One computation with its settlements\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"ovc_1a2b\",\n    \"computationNumber\": \"OVC-2026-00001\",\n    \"periodLabel\": \"2026-Q3\",\n    \"production\": 1250000,\n    \"rate\": 2,\n    \"commission\": 25000,\n    \"vat\": 3000,\n    \"receivable\": 28000,\n    \"status\": \"draft\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a computation (not its preparer): posts the receivable, commission income and output VAT (override_commission.accrual)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a computation (not its preparer): posts the receivable, commission income and output VAT (override_commission.accrual)\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission"
+          },
+          "response": []
+        },
+        {
+          "name": "Cancel a computation (an approved one without settlements has its journal reversed)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a computation (an approved one without settlements has its journal reversed)\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission"
+          },
+          "response": []
+        },
+        {
+          "name": "Reject a submitted computation with a reason",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reject a submitted computation with a reason\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission"
+          },
+          "response": []
+        },
+        {
+          "name": "Settle against the insurer's statement: cash, creditable tax withheld (2307), difference left open or taken to income (override_commission.settlement)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations/:id/settlements",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations",
+                ":id",
+                "settlements"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Settle against the insurer's statement: cash, creditable tax withheld (2307), difference left open or taken to income (override_commission.settlement)\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission"
+          },
+          "response": []
+        },
+        {
+          "name": "Submit a draft computation for approval",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a draft computation for approval\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission"
+          },
+          "response": []
+        },
+        {
+          "name": "Excel of the computations of a year",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-overrides/computations/export?year=2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-overrides",
+                "computations",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2026"
+                }
+              ]
+            },
+            "description": "Excel of the computations of a year\n\nFront-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission"
+          },
+          "response": []
         }
       ]
     },

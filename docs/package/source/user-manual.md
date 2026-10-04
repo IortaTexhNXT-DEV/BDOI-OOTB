@@ -1715,6 +1715,30 @@ A referrer without a bank account on file cannot be approved or paid (`commissio
 | Paid | The payout voucher is approved; commission payable, cash and withholding tax are posted. |
 | Reversed | The line is reversed; return premium claws back the comsub on the returned part. |
 
+### Overriding, profit and contingent commission from insurers
+
+Commission > Insurer Overrides has two screens: **Agreements** and **Computations**. Accounting maintains and computes them (read:commission, write:commission).
+
+Set up an agreement:
+
+1. Choose Commission > Insurer Overrides > Agreements and select **New agreement**.
+2. Enter the **Agreement code**, **Name**, **Insurer**, **Type** (Overriding, Profit or Contingent) and **Status**.
+3. Choose the **Basis**: **Production volume** (premium of the period), **Loss ratio** (claims incurred divided by the production) or **Growth** (production against the same period one year earlier).
+4. Choose the **Period** (monthly, quarterly, semi-annual or annual), the **Premium measure** (net or gross premium), the **Tier method** (slab: the tier reached applies to the whole production; banded: each band of production at its own rate, production basis only), the **Lines of business** (empty for all), the **Minimum production**, the **Expected withholding** (the insurer's creditable withholding, 10% by default) and whether **Output VAT on the commission** applies.
+5. Enter the tiers: **From**, **To** (empty for the last, open-ended tier) and the **Rate on production**. Production tiers are amounts; loss ratio and growth tiers are percentages. Each tier starts where the previous one ends.
+6. Select **Save**.
+
+Compute, approve and settle:
+
+1. Choose Commission > Insurer Overrides > Computations, the agreement and the year. The periods of the year are listed with their computation.
+2. Select **Compute** on a period. The dialog shows the production, the number of policies, the claims incurred, the loss ratio, the growth, the tier and rate, the commission, the VAT and the receivable. When the insurer's loss figure differs from the claims recorded in the system, enter **Insurer's claims figure** and a **Claims note**. Select **Compute**: the computation gets its number (OVC-YYYY-NNNNN) as a draft. A draft can be recomputed.
+3. Open the computation and select **Submit for approval**. Another Accounting user selects **Approve** (`commission.override_requires_approval`): the receivable is posted (posting rule `override_commission.accrual`: Dr Overriding and Contingent Commission Receivable 1203006, Cr Contingent and Profit Commission Income 3201002, Cr Output VAT).
+4. Select **Issue invoice** to make out the sales invoice of the commission to the insurer (Accounts > Tax > Sales Invoices).
+5. When the insurer pays, select **Settle**: enter the **Insurer statement** reference, the **Statement date**, the **Amount on the statement**, the **Amount received**, the **Tax withheld (2307)**, the **BIR Form 2307 no.** and how to treat a **Difference**: **Leave the balance open** (a part payment) or **Take the difference to commission income** (accept the insurer's figure). The settlement posts `override_commission.settlement` (Dr cash, Dr Creditable Withholding Tax, Cr the receivable, any difference to the income). The message says when the statement differs from the computation by more than `commission.override_settlement_tolerance`.
+6. A draft, submitted or approved computation without settlements can be cancelled with a reason (an approved one has its journal reversed); a submitted one can be rejected. **Excel** exports the computations of the year.
+
+Production is the premium of the insurer's policies issued in the period (issued date, else inception), cancelled policies excluded. Claims incurred are the claims with a loss date in the period on those policies, at the settled amount, else the approved amount, else the estimate, for the statuses in `commission.override_claims_statuses`.
+
 ## Journal vouchers
 
 ![Accounts > Journal Voucher](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-jv.png)
@@ -1823,10 +1847,76 @@ Insurers send statements of account: premium remittance confirmations (broker-bi
 | SAWT | Summary Alphalist of Withholding Taxes: tax withheld from the broker, for the income tax return. |
 | QAP | Quarterly Alphalist of Payees: tax the broker withheld from its payees, for BIR 1601EQ. |
 | SLSP Sales, SLSP Purchases | Summary List of Sales and of Purchases. |
+| Withholding Returns | The filing calendar of a year: BIR Form 0619-E (first and second month of each quarter), 1601-EQ (each quarter), 2551Q (non-VAT broker) and 1604-E, each laid out as the BIR form, reconciled, printed (PDF) and exported (Excel), with its filing record. |
+| Annual Alphalist 1604-E | The annual information return with the remittances per month and the alphalist of payees (schedules 3 and 4); Excel, print and DAT file. |
+| Percentage Tax 2551Q | The percentage tax working paper of a non-VAT registered broker or agent. |
+| BIR DAT Files | The validation data files of the QAP, the SAWT, the SLSP sales and purchases and the 1604-E alphalist. |
+| Sales Invoices | The broker's sales invoices under the EOPT Act, with payment acknowledgements. |
+| E-Invoicing (EIS) | The outbox of e-invoices for the BIR Electronic Invoicing System. |
+| CAS Books and Documents | The loose-leaf books of accounts, the system description, the backup procedure and the audit trail extract for the CAS registration. |
 
 For BIR Form 2307, choose **Issued by us** or **Received**, the year and the quarter. The list shows each payee with **Taxpayer Identification Number (TIN)**, **ATC**, **Transactions**, **Income payments subject to expanded withholding tax**, **Tax withheld for the quarter** and **Certificate no.**. Select **View** to see the certificate and issue it: it takes a number from the BIR Form 2307 series (CWT-) and prints on the BIR layout with the broker's details. The ATC per payee type comes from `bir.atc_by_payee` (for example WI515 for agents and sub-agents, WC515 for external referrers). Before the first filing, fill in `bir.withholding_agent_tin`, `bir.registered_name`, `bir.registered_address` and `bir.zip_code` (Master > Configuration, area Accounting & Tax).
 
 The other tax reports work like every report: choose the criteria and dates, **Preview**, then the file format and **Generate**.
+
+### Withholding returns: 0619-E, 1601-EQ and their filing records
+
+1. Choose Accounts > Tax > Withholding Returns and the year. The list shows each return with its **Period**, **Due date** (0619-E: day `bir.withholding_due_day` of the next month, default 10; quarterly returns: the last day of the month after the quarter), **Status** (Filed or Not filed), **Date filed**, **Filing reference** and **Amount paid**.
+2. Select **Open** on a return. It shows Part I (TIN with branch code, RDO, name, address, category of withholding agent from Master > Company and the `bir.*` settings) and Part II with the BIR item numbers: for 1601-EQ one line per ATC (tax base, rate, tax withheld), the total for the quarter, less the 0619-E remittances of the first and second month (from their filing records), the tax still due and the penalties. The schedules show the tax per ATC and, for 1601-EQ, the QAP attached.
+3. Read **Reconciliation**. The return total is compared with the QAP report and with the tax withheld credited in the ledger to the withholding accounts (`bir.withholding_ledger_accounts`, else Expanded Withholding Tax Payable 2204001). A difference means a withholding booked outside a payment voucher (for example a journal voucher or petty cash) or a voucher without a journal: explain it before filing.
+4. Select **Print** (PDF in the BIR item order) or **Excel** (the form, each schedule on a sheet, the reconciliation) and transfer the figures to eBIRForms or eFPS.
+5. After filing and paying, select **Record filing** and enter the **Date filed**, the **Filing reference** (eFPS / eBIRForms confirmation), the **Amount paid**, the **Penalties**, the **Payment date**, the **Payment reference** and the **Payment channel**. The figures as computed are kept with the record. **Edit filing** corrects the references; **Amended return** records a new filing that supersedes the earlier one; a record entered in error is cancelled with a reason.
+
+### Annual information return 1604-E and alphalist of payees
+
+Choose Accounts > Tax > Annual Alphalist 1604-E and the year. The return shows the remittances per month (from the 0619-E and 1601-EQ filing records), schedule 3 (each payee subject to expanded withholding per ATC: TIN, branch, registered name or last, first and middle name, nature of income payment, rate, income payments and tax withheld for the year) and schedule 4 (payees whose income payments are exempt). **Excel**, **Print** and **DAT file** produce the outputs; **Record filing** works as for the other returns. The reconciliation compares the tax in schedule 3 with the tax remitted on the filing records.
+
+### Percentage tax 2551Q (non-VAT broker or agent)
+
+A broker or agent that is not VAT registered (`direct_bill.broker_vat_registered` off) pays percentage tax on its gross sales. Choose Accounts > Tax > Percentage Tax 2551Q, the year and the quarter. The working paper shows the gross sales of each month from the revenue accounts of the ledger, per account, the rate (`bir.percentage_tax_rate`, default 3%), the ATC (`bir.percentage_tax_atc`, default PT010), the tax due and the penalties. Print, Excel and the filing record work as for the other returns. For a VAT-registered broker the screen says so: confirm with the tax adviser before filing a 2551Q.
+
+### BIR DAT files
+
+Choose Accounts > Tax > BIR DAT Files, the file (**QAP (1601-EQ)**, **SAWT**, **SLSP sales**, **SLSP purchases** or **1604-E alphalist**), the year and the quarter (for the SAWT also the return it is attached to, `bir.sawt_form`, default 1702Q). The screen shows the layout version, the file name, the number of records, the totals, the record layout, the content and the warnings (for example a payee without TIN). Select **Download** and validate the file with the current BIR validation module before submitting it.
+
+The files follow the record layouts of the BIR Alphalist Data Entry and Validation Module version 7.x (QAP, SAWT, 1604-E) and the RELIEF data file layout (SLSP): a header record, one detail record per payee, customer or supplier, and a control record with the totals; text in capitals between double quotes, amounts with two decimals, CR LF line ends. The broker's TIN must be filled in on Master > Company first.
+
+### Sales invoices (EOPT Act)
+
+Under the Ease of Paying Taxes Act (RA 11976) and RR 7-2024 the sales invoice is the primary document of the broker's sale of services. Before the first invoice, fill in the **Sales invoices (EOPT)** group in Master > Configuration (area Accounting & Tax): `invoice.atp_number` or `invoice.cas_permit_number` and their dates, the registered serial range `invoice.serial_from` / `invoice.serial_to`, `invoice.printer_details` and `invoice.buyer_details_threshold`; and the TIN branch code `bir.tin_branch_code` and trade name `bir.trade_name` in the BIR forms group.
+
+1. Choose Accounts > Tax > Sales Invoices and select **New invoice**.
+2. Choose **Invoice for**: **Commission debit note** or **Overriding commission** (pick the approved document from the list), **Broker-billed policy commission** (type the policy number) or **Fees and other services (manual)**.
+3. For a manual invoice enter the **Buyer type**, **Buyer**, **Buyer TIN (with branch code)**, **Buyer business style** and **Buyer address**, then the lines: **Description**, **Qty**, **Unit price** and **VAT class** (VATable, VAT-exempt or zero-rated), and the **Expected withholding** rate.
+4. Select **Issue invoice**. The invoice takes the next number of the sales invoice series (SI-, sequential, never reset; the issue stops when the number would pass `invoice.serial_to`). It carries the seller's registered name, trade name, TIN with branch code, address and VAT status, the ATP or CAS acknowledgement and the serial range, the buyer's name, TIN and address (required for an insurer or a business buyer and from the threshold amount), the VATable, VAT-exempt and zero-rated sales and the VAT shown separately. A non-VAT broker's invoice shows the total sales and NON-VAT REGISTERED.
+5. Select the invoice number to open it; **Print** produces the PDF. An invoice made out for a debit note, a computation or a policy does not post again (its revenue is already booked); a manual invoice posts `sales_invoice.issue` (Dr Service Fees Receivable 1205003, Cr service fee income, Cr Output VAT).
+6. For a manual invoice select **Record payment**: the **Payment date**, **Payment mode**, **Amount received**, **Tax withheld (2307)**, **BIR Form 2307 no.** and **Reference**. The payment acknowledgement (PAR-YYYY-NNNNN, title `invoice.payment_document_title`) is a supplementary document printed with `invoice.supplementary_note` ("not valid for claim of input tax"); it posts `sales_invoice.payment`.
+7. **Cancel invoice** asks for a reason; the invoice keeps its number and prints CANCELLED; a manual invoice's journal is reversed. Cancel its payments first.
+
+Premium collection receipts (Accounts > Receipts) print the title in `receipts.document_title` (Official Receipt by default; for example Collection Receipt once the tax adviser confirms), with the supplementary statement once the title is changed.
+
+> What the system does and what the tax adviser confirms: the system issues the sales invoice for commission and fees and treats receipts as supplementary documents. The tax adviser confirms which documents are registered as the broker's invoices, the wording of the supplementary documents, the VAT treatment of each commission stream, the buyer details threshold, and whether the invoices are registered as system-generated (CAS) or printed under an ATP.
+
+### E-invoicing (EIS)
+
+The connector to the BIR Electronic Invoicing System is switched off by default (`eis.enabled`). When the broker is enrolled with the EIS, set the **E-invoicing (EIS)** group in Master > Configuration: `eis.mode` (test: the built-in fake provider, nothing leaves the system; live: the configured endpoint), `eis.endpoint`, `eis.token_endpoint`, `eis.accreditation_id`, and the names of the environment variables that hold the client id, the client secret and the signing key (`eis.client_id_env`, `eis.client_secret_env`, `eis.signing_key_env`; the values are set on the server by IT, never in the system).
+
+1. Choose Accounts > Tax > E-Invoicing (EIS). The banner shows whether the connector is on, the mode, the endpoint and whether the credentials are set; the counters show the queued, accepted, failed, rejected and manually uploaded submissions.
+2. Each invoice issued (and each cancellation of an invoice already sent) is queued with its payload, a SHA-256 hash and the signature. The eis-outbox job (Master > Configuration > Schedules, every 15 minutes, switched off by default) or **Send now** sends what is due. A failure is retried after `eis.retry_minutes`, doubled at each attempt, up to `eis.max_attempts`; a rejection is final (cancel and reissue the invoice).
+3. **Retry** puts a failed or rejected submission back in the queue. **Queue earlier invoices** queues the invoices of a date range issued before the connector was switched on.
+4. Fallback: **Export payloads** downloads the queued and failed payloads as one JSON file for a manual upload; then **Uploaded manually** records the reference the BIR gave.
+
+The EIS enrolment and certification of the broker, the final field list and signing certificate, the production endpoint and credentials stay with the BIR.
+
+### CAS books and documents
+
+Choose Accounts > Tax > CAS Books and Documents.
+
+1. **Readiness** lists what the registration pack needs: the taxpayer details and RDO (Master > Company), the CAS permit number (`cas.permit_number`), the invoice ATP or acknowledgement, the backup custodian (`cas.backup_custodian`), the system contact (`cas.system_contact`) and at least one book printed.
+2. Choose the **Book** (General Journal, General Ledger, Cash Receipts Book, Cash Disbursements Book, Sales Book or Purchase Book) and the month. The entries show on screen; **Excel** exports them.
+3. Select **Print book**. The PDF carries the taxpayer, TIN, period and CAS permit, and page numbers that run on through the year ("General Journal 2026 page 13"). With `cas.enforce_print_order` on, a month is printed only after the previous month of the same book. A month is printed once; the **Print register** lists every print with its pages, entries and date.
+4. **Reprint** produces the same pages again, marked REPRINT. **Void print** (the latest print of a book only, with a reason) frees its pages for the next print.
+5. **System description** and **Backup procedure** produce the documents of the registration file from the system and the `cas.*` settings. **Audit trail extract** downloads the audit trail of a date range in Excel or PDF.
 
 > The reports give the figures and the alphalists in the BIR column order. Check them against the current BIR format and the eFPS or eBIRForms validation before filing, and confirm the ATCs and rates with your tax adviser.
 

@@ -67,7 +67,7 @@ export const quarterRange = (year, quarter) => {
 };
 
 /** Withholding lines of a quarter: [{ key, name, tin, address, date, atc, income, tax, reference }]. */
-async function withholdingLines(db, direction, from, to) {
+export async function withholdingLines(db, direction, from, to) {
   if (direction === 'issued') {
     const map = (await getSetting('bir.atc_by_payee', {})) || {};
     const rows = (await db.query(`SELECT d.voucher_number, d.voucher_date, d.payee_type, d.payee_name, d.gross_amount, d.amount, d.wht_amount,

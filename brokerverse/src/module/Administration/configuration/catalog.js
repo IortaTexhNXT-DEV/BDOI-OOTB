@@ -80,12 +80,14 @@ export const AREAS = [
     title: "Accounting & Tax",
     icon: "pi pi-calculator",
     summary: "Fiscal year, posting, GL accounts, premium taxes (VAT, DST, FST, LGT), BIR forms and month-end.",
-    groups: ["accounting", "finance", "tax", "bir", "period_end"],
+    groups: ["accounting", "finance", "tax", "bir", "invoice", "eis", "cas", "period_end"],
     links: [
       { label: "Account determination", path: "/master/finance/account-determination" },
       { label: "Posting rules", path: "/master/finance/posting-rules" },
       { label: "Premium taxes & LGU rates", path: "/master/finance/premium-taxes" },
       { label: "Accounting flow", path: "/master/finance/accounting-flow" },
+      { label: "Sales invoices", path: "/accounts/tax/sales-invoices" },
+      { label: "E-invoicing (EIS) outbox", path: "/accounts/tax/eis" },
     ],
   },
   {
@@ -140,7 +142,7 @@ export const GROUP_TITLES = {
   receipts: "Receipts", remittance: "Remittance to insurers", direct_bill: "Direct bill", disbursements: "Disbursements",
   bank_reconciliation: "Bank reconciliation", insurer_reconciliation: "Insurer statement reconciliation", reinsurance: "Reinsurance",
   commission: "Commission", incentive: "Incentives", accounting: "Accounting", finance: "Finance", tax: "Taxes",
-  bir: "BIR forms", period_end: "Month-end close", notification: "Notifications", email: "E-mail templates",
+  bir: "BIR forms", invoice: "Sales invoices (EOPT)", eis: "E-invoicing (EIS)", cas: "CAS books and documents", period_end: "Month-end close", notification: "Notifications", email: "E-mail templates",
   security: "Security", access: "Approval authority and accounts", limits: "Limits and validity",
   reports: "Reports", dashboard: "Dashboard", housekeeping: "Data retention", privacy: "Data privacy", uploads: "Uploads", golive: "Go-live",
 };
@@ -153,6 +155,9 @@ export const areaOfGroup = (group) => AREAS.find((a) => a.groups.includes(group)
 
 /** Choices of settings stored as text with a fixed set of values. */
 export const CHOICES = {
+  "bir.withholding_agent_category": [["private", "Private"], ["government", "Government"]],
+  "cas.books_form": [["loose-leaf", "Loose-leaf (printed and bound per period)"], ["computerized", "Computerized (kept in the system, submitted on storage media)"]],
+  "eis.mode": [["test", "Test (built-in fake provider)"], ["live", "Live (the configured endpoint)"]],
   "access.authority_without_limit": [["allow", "Allow the approval"], ["refuse", "Refuse the approval"]],
   "direct_bill.client_payment_required": [["none", "Not required"], ["any", "Any payment recorded"], ["full", "Paid in full"]],
   "direct_bill.default_billing_mode": [["broker", "Broker collects the premium"], ["direct", "Client pays the insurer (direct bill)"]],

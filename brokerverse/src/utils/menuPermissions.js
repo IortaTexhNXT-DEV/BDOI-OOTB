@@ -127,7 +127,9 @@ export const roleMenuPermissions = {
       "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways"],
-    commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
+    commission: ["Commission Dashboard", "Agents/Referrer Accounts",
+      // overriding, profit and contingent commission from insurers (read:commission / write:commission)
+      "Insurer Overrides"],
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],
     // the production, claims and renewal registers are not accounting reports (report catalogue roles)

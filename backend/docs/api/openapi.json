@@ -42,6 +42,9 @@
       "name": "Billing statements"
     },
     {
+      "name": "BIR Forms and Invoicing"
+    },
+    {
       "name": "Broker Slips"
     },
     {
@@ -94,6 +97,9 @@
     },
     {
       "name": "Incentive"
+    },
+    {
+      "name": "Insurer Overriding Commission"
     },
     {
       "name": "Insurer Reconciliation"
@@ -12588,6 +12594,2413 @@
         "x-permissions": [
           "read:policies",
           "read:receipts"
+        ]
+      }
+    },
+    "/bir/cas/audit-extract": {
+      "get": {
+        "operationId": "getBirCasAuditExtract",
+        "summary": "Audit trail extract for a date range (Excel or PDF)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "xlsx"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/cas/books/{book}/preview": {
+      "get": {
+        "operationId": "getBirCasBooksBookPreview",
+        "summary": "Entries of a book of accounts for a month (on screen)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "book",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/cas/books/{book}/print": {
+      "post": {
+        "operationId": "postBirCasBooksBookPrint",
+        "summary": "Print a loose-leaf book for a month (PDF): the next page numbers of the book's year, recorded",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents > Print\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "book",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents > Print",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "period": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "period": "2026-09"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/cas/books/{book}/xlsx": {
+      "get": {
+        "operationId": "getBirCasBooksBookXlsx",
+        "summary": "Excel of a book of accounts for a month",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "book",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/cas/checklist": {
+      "get": {
+        "operationId": "getBirCasChecklist",
+        "summary": "Readiness of the CAS registration pack (taxpayer details, permit numbers, custodian, books printed)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/cas/documents/backup-procedure": {
+      "get": {
+        "operationId": "getBirCasDocumentsBackupProcedure",
+        "summary": "Backup and restore procedure (PDF)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/cas/documents/system-description": {
+      "get": {
+        "operationId": "getBirCasDocumentsSystemDescription",
+        "summary": "CAS system description and controls (PDF)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/cas/prints": {
+      "get": {
+        "operationId": "getBirCasPrints",
+        "summary": "Register of loose-leaf book prints (filter year, book)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/cas/prints/{id}/pdf": {
+      "get": {
+        "operationId": "getBirCasPrintsIdPdf",
+        "summary": "Reprint a book print with its original page numbers (marked REPRINT)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "write:period-end"
+        ]
+      }
+    },
+    "/bir/cas/prints/{id}/void": {
+      "post": {
+        "operationId": "postBirCasPrintsIdVoid",
+        "summary": "Void the latest print of a book (with a reason); its pages are used again",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > CAS Books and Documents\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > CAS Books and Documents",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Printer jam: pages damaged"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/dat-files/{type}": {
+      "get": {
+        "operationId": "getBirDatFilesType",
+        "summary": "Preview of a DAT file (QAP, SAWT, SLSP sales / purchases per quarter; 1604-E per year): file name, records, totals, warnings and content",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "records": {
+                          "type": "integer"
+                        },
+                        "rows": {
+                          "type": "integer"
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "taxWithheld": {
+                              "type": "number"
+                            }
+                          }
+                        },
+                        "warnings": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "type": "qap",
+                    "fileName": "12345678900000920261601EQ.DAT",
+                    "records": 4,
+                    "rows": 2,
+                    "totals": {
+                      "taxWithheld": 1335.6
+                    },
+                    "warnings": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR DAT Files",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/dat-files/{type}/download": {
+      "get": {
+        "operationId": "getBirDatFilesTypeDownload",
+        "summary": "Download a DAT file for validation with the BIR module and submission",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR DAT Files > Download\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR DAT Files > Download",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/dat-files/layout": {
+      "get": {
+        "operationId": "getBirDatFilesLayout",
+        "summary": "Record layouts and version of the BIR DAT files the system produces",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > BIR DAT Files\n\nAccess: read:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "version": "BIR Alphalist Data Entry and Validation Module v7.x (QAP 1601-EQ, SAWT, 1604-E schedules 3 and 4); RELIEF data file layout (SLSP sales and purchases)"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > BIR DAT Files",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/eis/export": {
+      "get": {
+        "operationId": "getBirEisExport",
+        "summary": "Manual fallback: the queued and failed e-invoice payloads as one JSON file",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/eis/process": {
+      "post": {
+        "operationId": "postBirEisProcess",
+        "summary": "Send the queued and due e-invoices now (what the eis-outbox job does)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "write:period-end"
+        ]
+      }
+    },
+    "/bir/eis/queue-backlog": {
+      "post": {
+        "operationId": "postBirEisQueueBacklog",
+        "summary": "Queue the issued invoices of a date range that are not in the outbox yet",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "from": "2026-10-01",
+                "to": "2026-10-31"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/eis/status": {
+      "get": {
+        "operationId": "getBirEisStatus",
+        "summary": "EIS connector status: switched on, mode, endpoint, whether the credential variables are set (never their values), outbox counts, what remains with the BIR",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/eis/submissions": {
+      "get": {
+        "operationId": "getBirEisSubmissions",
+        "summary": "EIS outbox (filter status, search)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "failed"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/eis/submissions/{id}": {
+      "get": {
+        "operationId": "getBirEisSubmissionsId",
+        "summary": "One EIS submission with its payload and the response",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/eis/submissions/{id}/manual": {
+      "post": {
+        "operationId": "postBirEisSubmissionsIdManual",
+        "summary": "Manual fallback: record the EIS reference of a payload uploaded outside the system",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reference": "EIS-ACK-000123"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/eis/submissions/{id}/retry": {
+      "post": {
+        "operationId": "postBirEisSubmissionsIdRetry",
+        "summary": "Put a failed or rejected submission back in the queue",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > E-Invoicing (EIS)\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > E-Invoicing (EIS)",
+        "x-permissions": [
+          "write:period-end"
+        ]
+      }
+    },
+    "/bir/filings": {
+      "get": {
+        "operationId": "getBirFilings",
+        "summary": "Filing records of BIR returns (filter year, form)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "form",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "0619-E"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "form": {
+                            "type": "string"
+                          },
+                          "periodKey": {
+                            "type": "string"
+                          },
+                          "dateFiled": {
+                            "type": "string"
+                          },
+                          "amountPaid": {
+                            "type": "number"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "brf_1a2b",
+                      "form": "0619-E",
+                      "periodKey": "2026-07",
+                      "dateFiled": "2026-08-10",
+                      "amountPaid": 445.2,
+                      "status": "filed"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/filings/{id}": {
+      "put": {
+        "operationId": "putBirFilingsId",
+        "summary": "Correct the references of a filing record (date filed, references, amount paid, penalties)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns > Filing record\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns > Filing record",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "paymentReference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "paymentReference": "LBP-778900"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/filings/{id}/cancel": {
+      "post": {
+        "operationId": "postBirFilingsIdCancel",
+        "summary": "Cancel a filing record entered in error (with a reason)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns > Filing record\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns > Filing record",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Recorded against the wrong month"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/invoices": {
+      "get": {
+        "operationId": "getBirInvoices",
+        "summary": "Sales invoices (filter from, to, status, sourceType, search)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-31"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "invoiceNumber": {
+                            "type": "string"
+                          },
+                          "invoiceDate": {
+                            "type": "string"
+                          },
+                          "buyerName": {
+                            "type": "string"
+                          },
+                          "vatableSales": {
+                            "type": "integer"
+                          },
+                          "vatAmount": {
+                            "type": "integer"
+                          },
+                          "totalAmount": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "sin_1a2b",
+                      "invoiceNumber": "SI-0000000001",
+                      "invoiceDate": "2026-10-04",
+                      "buyerName": "Malayan Insurance Co., Inc.",
+                      "vatableSales": 10000,
+                      "vatAmount": 1200,
+                      "totalAmount": 11200,
+                      "status": "issued"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      },
+      "post": {
+        "operationId": "postBirInvoices",
+        "summary": "Issue a sales invoice: for a commission debit note, an overriding commission computation, a broker-billed policy's commission, or a manual service invoice (posts sales_invoice.issue)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > New\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "invoiceNumber": {
+                          "type": "string"
+                        },
+                        "invoiceDate": {
+                          "type": "string"
+                        },
+                        "buyerName": {
+                          "type": "string"
+                        },
+                        "vatableSales": {
+                          "type": "integer"
+                        },
+                        "vatAmount": {
+                          "type": "integer"
+                        },
+                        "totalAmount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "sin_1a2b",
+                    "invoiceNumber": "SI-0000000001",
+                    "invoiceDate": "2026-10-04",
+                    "buyerName": "Malayan Insurance Co., Inc.",
+                    "vatableSales": 10000,
+                    "vatAmount": 1200,
+                    "totalAmount": 11200,
+                    "status": "issued"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices > New",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sourceType": {
+                    "type": "string"
+                  },
+                  "sourceId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "sourceType": "debit_note",
+                "sourceId": "DN-2026-00001"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/invoices/{id}": {
+      "get": {
+        "operationId": "getBirInvoicesId",
+        "summary": "A sales invoice with its lines and payments",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "invoiceNumber": {
+                          "type": "string"
+                        },
+                        "invoiceDate": {
+                          "type": "string"
+                        },
+                        "buyerName": {
+                          "type": "string"
+                        },
+                        "vatableSales": {
+                          "type": "integer"
+                        },
+                        "vatAmount": {
+                          "type": "integer"
+                        },
+                        "totalAmount": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "sin_1a2b",
+                    "invoiceNumber": "SI-0000000001",
+                    "invoiceDate": "2026-10-04",
+                    "buyerName": "Malayan Insurance Co., Inc.",
+                    "vatableSales": 10000,
+                    "vatAmount": 1200,
+                    "totalAmount": 11200,
+                    "status": "issued"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/invoices/{id}/cancel": {
+      "post": {
+        "operationId": "postBirInvoicesIdCancel",
+        "summary": "Cancel a sales invoice with a reason (kept with its number; a manual invoice's journal is reversed; the EIS is told)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Wrong buyer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/invoices/{id}/payments": {
+      "post": {
+        "operationId": "postBirInvoicesIdPayments",
+        "summary": "Record a payment on a manual sales invoice: payment acknowledgement (supplementary document) and journal sales_invoice.payment",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices > Payment",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "integer"
+                  },
+                  "ewtAmount": {
+                    "type": "integer"
+                  },
+                  "paymentMode": {
+                    "type": "string"
+                  },
+                  "referenceNo": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "amount": 10200,
+                "ewtAmount": 1000,
+                "paymentMode": "bank-transfer",
+                "referenceNo": "BDO-123"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/invoices/{id}/pdf": {
+      "get": {
+        "operationId": "getBirInvoicesIdPdf",
+        "summary": "Print of a sales invoice (every field RR 7-2024 lists)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > Print\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices > Print",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/invoices/candidates": {
+      "get": {
+        "operationId": "getBirInvoicesCandidates",
+        "summary": "Approved commission debit notes or overriding commission computations not yet invoiced",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > New\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "debit_note"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices > New",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/invoices/payments/{paymentId}/cancel": {
+      "post": {
+        "operationId": "postBirInvoicesPaymentsPaymentIdCancel",
+        "summary": "Cancel a payment acknowledgement (journal reversed, invoice balance restored)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices > Payment",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Cheque returned"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/invoices/payments/{paymentId}/pdf": {
+      "get": {
+        "operationId": "getBirInvoicesPaymentsPaymentIdPdf",
+        "summary": "Print of a payment acknowledgement (supplementary document)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices > Payment\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "paymentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices > Payment",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/invoices/seller": {
+      "get": {
+        "operationId": "getBirInvoicesSeller",
+        "summary": "Seller details printed on the invoices (Company master and invoice.* settings: TIN with branch, ATP / CAS permit, serial range)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Sales Invoices\n\nAccess: read:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Sales Invoices",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/returns/{form}": {
+      "get": {
+        "operationId": "getBirReturnsForm",
+        "summary": "A BIR return computed from the books, laid out as the form (items, schedules per ATC, alphalist, reconciliation with the QAP and the ledger, filing record)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "form",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "form": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "period": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string"
+                            },
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "header": {
+                          "type": "array",
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "no": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "number"
+                              }
+                            }
+                          }
+                        },
+                        "schedules": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "reconciliation": {
+                          "type": "object",
+                          "properties": {
+                            "reconciled": {
+                              "type": "boolean"
+                            },
+                            "checks": {
+                              "type": "array",
+                              "items": {}
+                            }
+                          }
+                        },
+                        "taxDue": {
+                          "type": "number"
+                        },
+                        "filing": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "form": "1601-EQ",
+                    "title": "Quarterly Remittance Return of Creditable Income Taxes Withheld (Expanded)",
+                    "period": {
+                      "key": "2026-Q3",
+                      "from": "2026-07-01",
+                      "to": "2026-09-30"
+                    },
+                    "header": [
+                      [
+                        "TIN",
+                        "123-456-789-00000"
+                      ]
+                    ],
+                    "items": [
+                      {
+                        "no": "19",
+                        "label": "Total taxes withheld for the quarter",
+                        "amount": 1335.6
+                      }
+                    ],
+                    "schedules": [],
+                    "reconciliation": {
+                      "reconciled": true,
+                      "checks": []
+                    },
+                    "taxDue": 445.2,
+                    "filing": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/returns/{form}/filings": {
+      "post": {
+        "operationId": "postBirReturnsFormFilings",
+        "summary": "Record the filing of a return: date filed, eFPS / eBIRForms reference, amount paid, payment reference; keeps the figures as filed. amended: true supersedes the active filing",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns > Record filing\n\nAccess: write:period-end",
+        "parameters": [
+          {
+            "name": "form",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "form": {
+                          "type": "string"
+                        },
+                        "periodKey": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "brf_1a2b",
+                    "form": "1601-EQ",
+                    "periodKey": "2026-Q3",
+                    "status": "filed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns > Record filing",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "integer"
+                  },
+                  "quarter": {
+                    "type": "integer"
+                  },
+                  "dateFiled": {
+                    "type": "string"
+                  },
+                  "filingReference": {
+                    "type": "string"
+                  },
+                  "amountPaid": {
+                    "type": "number"
+                  },
+                  "paymentReference": {
+                    "type": "string"
+                  },
+                  "paymentChannel": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "year": 2026,
+                "quarter": 3,
+                "dateFiled": "2026-10-28",
+                "filingReference": "EFPS-1601EQ-0001",
+                "amountPaid": 445.2,
+                "paymentReference": "LBP-778899",
+                "paymentChannel": "eFPS"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/bir/returns/{form}/pdf": {
+      "get": {
+        "operationId": "getBirReturnsFormPdf",
+        "summary": "Print of a BIR return (PDF on the letterhead, BIR item order)",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns > Print\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "form",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns > Print",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/returns/{form}/xlsx": {
+      "get": {
+        "operationId": "getBirReturnsFormXlsx",
+        "summary": "Excel of a BIR return: the form, each schedule on a sheet, the reconciliation",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns > Excel\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "form",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "quarter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 3
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns > Excel",
+        "x-permissions": [
+          "read:period-end"
+        ]
+      }
+    },
+    "/bir/returns/calendar": {
+      "get": {
+        "operationId": "getBirReturnsCalendar",
+        "summary": "BIR returns of a year (0619-E, 1601-EQ, 1604-E, 2551Q for a non-VAT broker) with due date and filing status",
+        "tags": [
+          "BIR Forms and Invoicing"
+        ],
+        "description": "Front-end touchpoint: Accounts > Tax > Withholding Returns\n\nAccess: read:period-end",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "form": {
+                            "type": "string"
+                          },
+                          "periodKey": {
+                            "type": "string"
+                          },
+                          "dueDate": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "amountPaid": {
+                            "type": "number"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "form": "0619-E",
+                      "periodKey": "2026-07",
+                      "dueDate": "2026-08-10",
+                      "status": "filed",
+                      "amountPaid": 445.2
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Tax > Withholding Returns",
+        "x-permissions": [
+          "read:period-end"
         ]
       }
     },
@@ -39331,6 +41744,1068 @@
           "read:incentive",
           "write:incentive",
           "read:profile"
+        ]
+      }
+    },
+    "/insurer-overrides/agreements": {
+      "get": {
+        "operationId": "getInsurerOverridesAgreements",
+        "summary": "Overriding / profit / contingent commission agreements with insurers (filter status, insurerId)",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: read:commission",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "agreementCode": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "insurerName": {
+                            "type": "string"
+                          },
+                          "basis": {
+                            "type": "string"
+                          },
+                          "periodType": {
+                            "type": "string"
+                          },
+                          "tiers": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "tierNo": {
+                                  "type": "integer"
+                                },
+                                "fromValue": {
+                                  "type": "integer"
+                                },
+                                "toValue": {
+                                  "type": "integer"
+                                },
+                                "rate": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "ova_1a2b",
+                      "agreementCode": "MAL-OVR-2026",
+                      "name": "Malayan production override 2026",
+                      "insurerName": "Malayan Insurance Co., Inc.",
+                      "basis": "production",
+                      "periodType": "quarterly",
+                      "tiers": [
+                        {
+                          "tierNo": 1,
+                          "fromValue": 0,
+                          "toValue": 1000000,
+                          "rate": 1
+                        },
+                        {
+                          "tierNo": 2,
+                          "fromValue": 1000000,
+                          "toValue": null,
+                          "rate": 2
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Agreements",
+        "x-permissions": [
+          "read:commission"
+        ]
+      },
+      "post": {
+        "operationId": "postInsurerOverridesAgreements",
+        "summary": "Create an agreement: insurer, type, basis (production, loss ratio, growth), period, lines of business, tiers",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: write:commission",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Agreements",
+        "x-permissions": [
+          "write:commission"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "agreementCode": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "insurerId": {
+                    "type": "integer"
+                  },
+                  "basis": {
+                    "type": "string"
+                  },
+                  "periodType": {
+                    "type": "string"
+                  },
+                  "effectiveFrom": {
+                    "type": "string"
+                  },
+                  "tiers": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "fromValue": {
+                          "type": "integer"
+                        },
+                        "toValue": {
+                          "type": "integer"
+                        },
+                        "rate": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "agreementCode": "MAL-OVR-2026",
+                "name": "Malayan production override 2026",
+                "insurerId": 1,
+                "basis": "production",
+                "periodType": "quarterly",
+                "effectiveFrom": "2026-01-01",
+                "tiers": [
+                  {
+                    "fromValue": 0,
+                    "toValue": 1000000,
+                    "rate": 1
+                  },
+                  {
+                    "fromValue": 1000000,
+                    "toValue": null,
+                    "rate": 2
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-overrides/agreements/{id}": {
+      "get": {
+        "operationId": "getInsurerOverridesAgreementsId",
+        "summary": "One agreement with its tiers",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: read:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "agreementCode": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "insurerName": {
+                          "type": "string"
+                        },
+                        "basis": {
+                          "type": "string"
+                        },
+                        "periodType": {
+                          "type": "string"
+                        },
+                        "tiers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "tierNo": {
+                                "type": "integer"
+                              },
+                              "fromValue": {
+                                "type": "integer"
+                              },
+                              "toValue": {
+                                "type": "integer"
+                              },
+                              "rate": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "ova_1a2b",
+                    "agreementCode": "MAL-OVR-2026",
+                    "name": "Malayan production override 2026",
+                    "insurerName": "Malayan Insurance Co., Inc.",
+                    "basis": "production",
+                    "periodType": "quarterly",
+                    "tiers": [
+                      {
+                        "tierNo": 1,
+                        "fromValue": 0,
+                        "toValue": 1000000,
+                        "rate": 1
+                      },
+                      {
+                        "tierNo": 2,
+                        "fromValue": 1000000,
+                        "toValue": null,
+                        "rate": 2
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Agreements",
+        "x-permissions": [
+          "read:commission"
+        ]
+      },
+      "put": {
+        "operationId": "putInsurerOverridesAgreementsId",
+        "summary": "Update an agreement and its tiers",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Agreements\n\nAccess: write:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Agreements",
+        "x-permissions": [
+          "write:commission"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "inactive"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-overrides/agreements/{id}/compute": {
+      "post": {
+        "operationId": "postInsurerOverridesAgreementsIdCompute",
+        "summary": "Compute (or recompute a draft) the commission of an agreement for a period; claimsIncurred replaces the system figure with the insurer's",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "computationNumber": {
+                          "type": "string"
+                        },
+                        "periodLabel": {
+                          "type": "string"
+                        },
+                        "production": {
+                          "type": "integer"
+                        },
+                        "rate": {
+                          "type": "integer"
+                        },
+                        "commission": {
+                          "type": "integer"
+                        },
+                        "vat": {
+                          "type": "integer"
+                        },
+                        "receivable": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "ovc_1a2b",
+                    "computationNumber": "OVC-2026-00001",
+                    "periodLabel": "2026-Q3",
+                    "production": 1250000,
+                    "rate": 2,
+                    "commission": 25000,
+                    "vat": 3000,
+                    "receivable": 28000,
+                    "status": "draft"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "write:commission"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "integer"
+                  },
+                  "periodLabel": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "year": 2026,
+                "periodLabel": "2026-Q3"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insurer-overrides/agreements/{id}/periods": {
+      "get": {
+        "operationId": "getInsurerOverridesAgreementsIdPeriods",
+        "summary": "Periods of an agreement in a year with the computation of each (if any)",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "read:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/agreements/{id}/preview": {
+      "get": {
+        "operationId": "getInsurerOverridesAgreementsIdPreview",
+        "summary": "Figures of an agreement for a period without saving (production, claims, loss ratio, growth, tier, commission)",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          },
+          {
+            "name": "periodLabel",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-Q3"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "read:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations": {
+      "get": {
+        "operationId": "getInsurerOverridesComputations",
+        "summary": "Computations (filter status, agreementId, insurerId, year)",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "computationNumber": {
+                            "type": "string"
+                          },
+                          "periodLabel": {
+                            "type": "string"
+                          },
+                          "production": {
+                            "type": "integer"
+                          },
+                          "rate": {
+                            "type": "integer"
+                          },
+                          "commission": {
+                            "type": "integer"
+                          },
+                          "vat": {
+                            "type": "integer"
+                          },
+                          "receivable": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "ovc_1a2b",
+                      "computationNumber": "OVC-2026-00001",
+                      "periodLabel": "2026-Q3",
+                      "production": 1250000,
+                      "rate": 2,
+                      "commission": 25000,
+                      "vat": 3000,
+                      "receivable": 28000,
+                      "status": "draft"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "read:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations/{id}": {
+      "get": {
+        "operationId": "getInsurerOverridesComputationsId",
+        "summary": "One computation with its settlements",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "computationNumber": {
+                          "type": "string"
+                        },
+                        "periodLabel": {
+                          "type": "string"
+                        },
+                        "production": {
+                          "type": "integer"
+                        },
+                        "rate": {
+                          "type": "integer"
+                        },
+                        "commission": {
+                          "type": "integer"
+                        },
+                        "vat": {
+                          "type": "integer"
+                        },
+                        "receivable": {
+                          "type": "integer"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "ovc_1a2b",
+                    "computationNumber": "OVC-2026-00001",
+                    "periodLabel": "2026-Q3",
+                    "production": 1250000,
+                    "rate": 2,
+                    "commission": 25000,
+                    "vat": 3000,
+                    "receivable": 28000,
+                    "status": "draft"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "read:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations/{id}/approve": {
+      "post": {
+        "operationId": "postInsurerOverridesComputationsIdApprove",
+        "summary": "Approve a computation (not its preparer): posts the receivable, commission income and output VAT (override_commission.accrual)",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "write:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations/{id}/cancel": {
+      "post": {
+        "operationId": "postInsurerOverridesComputationsIdCancel",
+        "summary": "Cancel a computation (an approved one without settlements has its journal reversed)",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "write:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations/{id}/reject": {
+      "post": {
+        "operationId": "postInsurerOverridesComputationsIdReject",
+        "summary": "Reject a submitted computation with a reason",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "write:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations/{id}/settlements": {
+      "post": {
+        "operationId": "postInsurerOverridesComputationsIdSettlements",
+        "summary": "Settle against the insurer's statement: cash, creditable tax withheld (2307), difference left open or taken to income (override_commission.settlement)",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "write:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations/{id}/submit": {
+      "post": {
+        "operationId": "postInsurerOverridesComputationsIdSubmit",
+        "summary": "Submit a draft computation for approval",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: write:commission",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "write:commission"
+        ]
+      }
+    },
+    "/insurer-overrides/computations/export": {
+      "get": {
+        "operationId": "getInsurerOverridesComputationsExport",
+        "summary": "Excel of the computations of a year",
+        "tags": [
+          "Insurer Overriding Commission"
+        ],
+        "description": "Front-end touchpoint: Commission > Insurer Overrides > Computations\n\nAccess: read:commission",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2026
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Commission > Insurer Overrides > Computations",
+        "x-permissions": [
+          "read:commission"
         ]
       }
     },

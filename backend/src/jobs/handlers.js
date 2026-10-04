@@ -106,3 +106,9 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/items.js')).runDueSchedules();
 }
+
+/** EIS outbox (Accounts > Tax > E-Invoicing): send queued e-invoices to the BIR EIS and retry failures. Disabled by default. */
+export async function eisOutbox() {
+  if (!(await tableExists('eis_submissions'))) return { skipped: 'eis_submissions table missing' };
+  return (await import('../modules/bir/eis.js')).processOutbox();
+}

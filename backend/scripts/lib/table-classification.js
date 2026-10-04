@@ -52,6 +52,10 @@ export const TRANSACTION_TABLES = [
   'access_review_items', 'access_reviews', 'agent_events',
   // data privacy: consents and data subject requests belong to the clients and leads that go
   'data_subject_requests', 'privacy_consents',
+  // BIR forms and invoicing: return filing records, sales invoices and their payments, EIS outbox, loose-leaf book prints
+  'bir_return_filings', 'sales_invoices', 'sales_invoice_lines', 'sales_invoice_payments', 'eis_submissions', 'cas_book_prints',
+  // overriding commission from insurers: computations and settlements (the agreements are configuration)
+  'override_computations', 'override_settlements',
 ];
 
 /**
@@ -100,6 +104,8 @@ export const MASTER_CONFIG_TABLES = [
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
   // reports and scheduled jobs
   'report_definitions', 'report_schedules', 'scheduled_jobs',
+  // overriding / contingent commission agreements with insurers and their tiers
+  'override_agreements', 'override_agreement_tiers',
 ];
 
 /**

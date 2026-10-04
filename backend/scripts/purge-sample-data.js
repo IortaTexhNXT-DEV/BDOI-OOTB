@@ -47,6 +47,7 @@ export const AUDIT_TABLES = ['audit_log', 'login_history'];
 
 /** Sample master rows (seeds/sample/*.sql), by natural key. */
 export const SAMPLE_MASTERS = [
+  { table: 'override_agreements', label: 'sample overriding commission agreements', where: "agreement_code IN ('MERC-OVR-SAMPLE','PIONEER-LR-SAMPLE')" },
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
   { table: 'branches', label: 'demo branches', where: "code IN ('CEB','DAV')" },
   { table: 'signatories', label: 'fictional signatories', where: "name IN ('Maria Regina Cruz','Jose Antonio Reyes','Ana Patricia Lim')" },

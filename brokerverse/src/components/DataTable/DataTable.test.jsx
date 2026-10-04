@@ -1,3 +1,5 @@
+/* The skeleton rows and the loading class are presentational (no role or text to query), so this test reads the DOM. */
+/* eslint-disable testing-library/no-container, testing-library/no-node-access */
 import React from "react";
 import { act, render } from "@testing-library/react";
 import { DataTable } from "primereact/datatable";

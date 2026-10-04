@@ -267,13 +267,17 @@ export const paymentModeLabel = (m) => (present(m) ? PAYMENT_MODE_LABELS[String(
  * signature and the configurable footer text (documents.receipt_footer). `h` lets bulk prints reuse one header.
  */
 export async function receiptDoc(r, lines, h0 = null) {
-  const h = h0 ? { ...h0, title: 'Official Receipt', number: r.receipt_number } : await header('Official Receipt', r.receipt_number);
+  // Under the EOPT Act the receipt is a supplementary document: its title is receipts.document_title (for example
+  // Collection Receipt) and, once renamed, it carries invoice.supplementary_note ("not valid for claim of input tax")
+  const title = (await getSetting('receipts.document_title', 'Official Receipt')) || 'Official Receipt';
+  const h = h0 ? { ...h0, title, number: r.receipt_number } : await header(title, r.receipt_number);
   const f = formatters(h);
   const currency = r.currency_code || h.format?.currency || 'PHP';
   const applied = lines.length ? lines.map((l) => [l.policy_number, money(l.net_premium), money(l.vat), money(l.dst), money(l.lgt), money(l.paid)])
     : [[r.policy_number || '-', '', '', '', '', money(r.amount)]];
   const totals = ['TOTAL', ...[1, 2, 3, 4, 5].map((i) => (lines.length || i === 5 ? round2(applied.reduce((s, x) => s + num(x[i]), 0)) : ''))];
-  const footer = (await getSetting('documents.receipt_footer', '')) || '';
+  const supplementary = title !== 'Official Receipt' ? (await getSetting('invoice.supplementary_note', 'THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX.')) || '' : '';
+  const footer = [(await getSetting('documents.receipt_footer', '')) || '', supplementary].filter(Boolean).join(' ');
   return { ...h, footerNote: footer,
     meta: kv([['Date', f.date(r.received_date)], ['Received from', r.customer_name || r.client_name], ['Customer code', r.customer_code],
       ['Amount', f.ccy(r.amount, currency), { bold: true }], ['Payment mode', paymentModeLabel(r.payment_mode)], ['Reference', r.reference_no],

@@ -647,6 +647,14 @@ export const menuList = [
           { id: 4, name: "QAP", path: "/accounts/tax/reports/bir-qap", includes: ["/accounts/tax/reports/bir-qap"] },
           { id: 5, name: "SLSP Sales", path: "/accounts/tax/reports/bir-slsp-sales", includes: ["/accounts/tax/reports/bir-slsp-sales"] },
           { id: 6, name: "SLSP Purchases", path: "/accounts/tax/reports/bir-slsp-purchases", includes: ["/accounts/tax/reports/bir-slsp-purchases"] },
+          // BIR forms, invoicing and tax: returns with filing records, DAT files, EOPT invoices, EIS, CAS pack
+          { id: 7, name: "Withholding Returns", path: "/accounts/tax/withholding-returns", includes: ["/accounts/tax/withholding-returns"] },
+          { id: 8, name: "Annual Alphalist 1604-E", path: "/accounts/tax/alphalist-1604e", includes: ["/accounts/tax/alphalist-1604e"] },
+          { id: 9, name: "Percentage Tax 2551Q", path: "/accounts/tax/percentage-tax", includes: ["/accounts/tax/percentage-tax"] },
+          { id: 10, name: "BIR DAT Files", path: "/accounts/tax/dat-files", includes: ["/accounts/tax/dat-files"] },
+          { id: 11, name: "Sales Invoices", path: "/accounts/tax/sales-invoices", includes: ["/accounts/tax/sales-invoices"] },
+          { id: 12, name: "E-Invoicing (EIS)", path: "/accounts/tax/eis", includes: ["/accounts/tax/eis"] },
+          { id: 13, name: "CAS Books and Documents", path: "/accounts/tax/cas", includes: ["/accounts/tax/cas"] },
         ],
       },
   {
@@ -709,6 +717,15 @@ export const menuList = [
         includes: [
           "/commission/referrer-accounts",
           "/commission/referrer-accounts/",
+        ],
+      },
+      // overriding, profit and contingent commission from insurers
+      {
+        id: 3,
+        name: "Insurer Overrides",
+        submenu: [
+          { id: 1, name: "Agreements", path: "/commission/insurer-overrides/agreements", includes: ["/commission/insurer-overrides/agreements"] },
+          { id: 2, name: "Computations", path: "/commission/insurer-overrides/computations", includes: ["/commission/insurer-overrides/computations"] },
         ],
       },
     ],
