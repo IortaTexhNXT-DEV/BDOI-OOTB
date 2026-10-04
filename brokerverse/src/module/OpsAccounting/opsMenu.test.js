@@ -28,6 +28,6 @@ describe("operations and accounting screens: menu grants match the API permissio
   it("every new screen has its user manual section", () => {
     expect(helpSectionFor("/accounts/payables/ageing").id).toBe("accounts-payable");
     expect(helpSectionFor("/operations/cover-notes").id).toBe("cover-notes-binders");
-    expect(helpSectionFor("/master/insurance/repair-shops").id).toBe("operational-masters");
+    expect(helpSectionFor("/master/insurance/repair-shops").id).toBe("motor-claim-repairs-and-letters-of-authority");
   });
 });
