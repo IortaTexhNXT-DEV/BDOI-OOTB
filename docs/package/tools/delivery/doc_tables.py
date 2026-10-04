@@ -20,7 +20,7 @@ SHORT = {
     'I5': 'Bank accounts and statement samples', 'I6': 'Partner contracts and credentials', 'I7': 'COC series', 'I8': 'Logo, pictures, signatories',
     'I9': 'Training rooms and attendees', 'I10': 'UAT testers named', 'R1': 'BIR ATP or CAS, invoice serials', 'R2': 'BIR EIS enrolment',
     'R3': 'AMLC registration', 'R4': 'IC licence data', 'R5': 'NPC registration', 'R6': 'Tax adviser confirmation', 'R7': 'Screening lists and licence',
-    'R8': 'Permission for client marks', 'C1': 'Configuration kit filled', 'C2': 'Configuration kit loaded', 'C3': 'On-screen configuration',
+    'R8': 'Contract reference for client marks', 'C1': 'Configuration kit filled', 'C2': 'Configuration kit loaded', 'C3': 'On-screen configuration',
     'C4': 'Configuration to UAT for mock 1', 'C5': 'Configuration complete', 'K1': 'Compliance set-up', 'K2': 'Screening lists loaded',
     'K3': 'AMLC report file test', 'B1': 'Branding and brand pack', 'B2': 'Client brand pack applied', 'N1': 'E-mail tested',
     'N2': 'Bank statement imports', 'N3': 'Bank payment files certified', 'N4': 'SMS or Viber live', 'N5': 'CTPL authentication live',

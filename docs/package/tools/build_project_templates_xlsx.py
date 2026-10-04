@@ -312,8 +312,8 @@ def raid():
          'mask:data before anyone signs in; DPO approves each refresh; Pre-Prod removed after hypercare'),
         ('Release pipeline cannot reach a server', 'Network rule or deploy key (SSH from the GitHub runners)', 'Deployments skipped or failing; release to Production late', 'Hosting', 3, 3,
          'GitHub Environments and reachability tested with the first deployment; self-hosted runner or SSM as alternative'),
-        ('Client marks used without permission', 'Client brand pack applied before permission is on file', 'Trademark exposure', 'Compliance', 2, 3,
-         'Client brand pack applied only with written permission on the engagement file'),
+        ('Client marks used outside the client\'s engagement', 'Client brand pack enabled in an environment that is not the client\'s', 'Trademark exposure', 'Compliance', 2, 3,
+         'Client brand pack applied only in that client\'s environments under its contract with iorta TechNXT; contract reference on the engagement file'),
         ('Users not ready at go-live', 'Training too early or skipped', 'Errors and slow work', 'People', 2, 3,
          'Role-based training, assessment before production access, floor walkers in the first week'),
         ('Book larger than one import file', 'More than 20,000 rows of a sheet', 'Longer loads; cutover window too short', 'Data', 2, 3,
@@ -352,7 +352,7 @@ def raid():
         ('A-007', 'The broker provides its SMTP mailbox before the integrations phase.', 'Dependencies on the broker', 'E-mails stay queued in the outbox; go-live held', '[IT head]', None, '', 'Open', ''),
         ('A-008', 'One legal entity and one fiscal year are migrated, at a single cutover date.', 'Statement of Work', 'Migration scope and plan re-baselined', '[PM]', None, '', 'Open', ''),
         ('A-009', 'Users work with the delivered roles, including Compliance Officer (AML/CFT); view:pii is granted only to the roles that need it.', 'Delivered roles', 'Role design and training redone', '[System Administrator]', None, '', 'Open', ''),
-        ('A-010', 'The broker\'s own brand (or a delivered preset) is used; a client brand pack is used only with written permission.', 'Branding workshop', 'Branding delayed until permission', '[Sponsor]', None, '', 'Open', ''),
+        ('A-010', 'The broker\'s own brand (or a delivered preset) is used; a client brand pack is applied only in that client\'s environments under its contract with iorta TechNXT.', 'Branding workshop', 'Branding delayed until the contract reference is on the engagement file', '[Sponsor]', None, '', 'Open', ''),
     ]
     table(asn, ah, aw, arows)
     boxes(asn, 2, ROWS + 1, len(ah))
@@ -403,7 +403,7 @@ def raid():
         ('Bank acceptance of each payment file layout (test file)', 'Banks', 'Bank payment files live', 'W5 / W7 / W10 / W13', 'Feature only', 'Cheques and manual transfers'),
         ('CTPL authentication provider: accreditation and live test', 'CTPL authentication provider', 'Authentication at issue; LTO feed', 'W4 / W6 / W9 / W11', 'Feature only', 'Enter code from the provider portal'),
         ('Insurer API test cycles', 'Insurers', 'Insurer API connectors', 'W5 / W8 / W11 / W13', 'Feature only', 'Record Issued Policy; claim status file'),
-        ('Written permission to use client marks (client brand pack only)', 'Broker; mark owner', 'Client brand pack', 'W1 / W2 / W2 / W2', 'Feature only', 'Broker theme or delivered preset'),
+        ('Contract reference covering the use of the client\'s marks on the engagement file (client brand pack only)', 'Broker sponsor', 'Client brand pack', 'W1 / W2 / W2 / W2', 'Feature only', 'Broker theme or delivered preset'),
         ('Migration extracts of clients, in-force policies, open items, open claims and trial balance, cleansed', 'Broker', 'Each mock load and cutover', 'W2 / W3 / W5 / W6', '10 / 20 / 31 / 47', 'Mock loads and rehearsal late'),
         ('User list for training, training rooms and devices', 'Broker', 'End-user training', 'W2 / W2 / W2 / W2', '17 / 28 / 52 / 75', 'Training late; production access held'),
         ('UAT testers and sign-off authority', 'Broker', 'UAT', 'W1 / W1 / W2 / W2', '18 / 31 / 53 / 72', 'UAT late'),

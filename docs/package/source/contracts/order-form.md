@@ -1,12 +1,12 @@
 ---
 title: Order Form
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Optional modules and partner services (16 lines of the Service Catalogue and Rate Annex, S08) added as an order table; template for discussion; subject to review by the parties' legal counsel
+change: Version 1.1.1: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1: Optional modules and partner services (16 lines of the Service Catalogue and Rate Annex, S08) added as an order table; template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
 acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; Dev=Development environment; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SIT=System integration test; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
@@ -82,7 +82,7 @@ All amounts in PHP, excluding VAT. VAT at 12% is added on each invoice.
 
 ## Optional modules and partner services
 
-Every module of the Software is included in the licence or subscription fee. The lines below are optional, add-on services of the Service Catalogue and Rate Annex (S08), priced at the stated man-days at PHP 16,100.00 a day, rounded to PHP 10,000.00, and invoiced on delivery. The fees of the regulator or the partner are not included; every filing, registration and enrolment with a regulator is made by the Client in its own name. A Client brand pack carries third-party marks only with the written permission of their owner. Enter the quantity ordered, or delete the rows that do not apply.
+Every module of the Software is included in the licence or subscription fee. The lines below are optional, add-on services of the Service Catalogue and Rate Annex (S08), priced at the stated man-days at PHP 16,100.00 a day, rounded to PHP 10,000.00, and invoiced on delivery. The fees of the regulator or the partner are not included; every filing, registration and enrolment with a regulator is made by the Client in its own name. A Client brand pack carries the Client's marks and is applied only in the environments of this engagement; the Client's contract with iorta TechNXT covers the use of its marks there. Enter the quantity ordered, or delete the rows that do not apply.
 
 | Item | Basis | Quantity | Price |
 |---|---|---|---|

@@ -1,12 +1,12 @@
 ---
 title: Responsibilities and RACI
 subtitle: Customer responsibilities annex
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Client roles, responsibilities and RACI aligned with the current product; template for discussion; subject to review by the parties' legal counsel
+change: Version 1.1.1: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1: Client roles, responsibilities and RACI aligned with the current product; template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
 acronyms: AMC=Annual Maintenance Contract; AML/CFT=Anti-money laundering and countering the financing of terrorism; AMLC=Anti-Money Laundering Council; ATP=Authority to Print; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; COC=Certificate of cover; CTPL=Compulsory Third Party Liability; EIS=Electronic Invoicing System; PEP=Politically exposed person; CAB=Change advisory board; DPO=Data protection officer; IC=Insurance Commission; L1/L2/L3=Support levels 1, 2 and 3; MSA=Master Services Agreement; NPC=National Privacy Commission; OOTB=Out of the box; RACI=Responsible, Accountable, Consulted, Informed; RAID=Risks, assumptions, issues and dependencies; SIT=System integration test; SLA=Service level agreement; SMTP=Simple Mail Transfer Protocol; SOW=Statement of work; UAT=User acceptance testing
 ---
@@ -28,6 +28,7 @@ It is an annex to the Order Form under the Master Services Agreement (the **MSA*
 |---|---|---|
 | 1.0 | 03 October 2026 | Template for discussion |
 | 1.1 | 04 October 2026 | Compliance officer, data protection officer, tax adviser and the Client's partners as roles; Client responsibilities for regulatory registrations, screening lists, partner contracts and certification, permission for third-party marks and custody of the encryption keys; implementation RACI extended to compliance set-up, branding, integrations, environments and keys; production support RACI extended to compliance operations, key rotation and masked copies |
+| 1.1.1 | 04 October 2026 | Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026) |
 
 ## RACI codes
 
@@ -91,7 +92,7 @@ It is an annex to the Order Form under the Master Services Agreement (the **MSA*
 | 13 | Provide the SMTP mailbox; contract its partners (banks for payment files, SMS provider, CTPL authentication provider, insurers, payment gateway) and have their credentials placed in the secret store; provide the COC number series | Integrations phase |
 | 14 | Arrange the certification of each partner interface with the partner, and decide the fallback at the go/no-go for any interface not certified | Integrations phase; go/no-go |
 | 15 | Provide one recent statement export per bank account | Integrations phase |
-| 16 | Provide the logo, the sign-in picture, its signatories and their consent to e-signatures; provide the written permission of the owner of any third-party marks before a client brand pack is applied | Branding phase |
+| 16 | Provide the logo, the sign-in picture, its signatories and their consent to e-signatures; for a client brand pack, confirm the contract reference covering the use of the Client's marks on the engagement file before the pack is applied | Branding phase |
 | 17 | Hold the escrow copy of the production encryption keys jointly with iorta TechNXT, as stated in the key custody record; where the Client hosts, hold the keys with its backups | Before Production is provisioned |
 | 18 | Extract and cleanse the in-force policy, open receivable, open claim and trial balance data, in the Migration Kit | Each mock load and cutover |
 | 19 | Approve, through its data protection officer, every copy of production data used outside production, after masking | Each refresh or rehearsal copy |
@@ -118,7 +119,7 @@ It is an annex to the Order Form under the Master Services Agreement (the **MSA*
 | 11 | Where the Client hosts: run the infrastructure, operating system, database, backups and monitoring, and deploy releases under iorta TechNXT's guidance |
 | 12 | Keep the screening lists current (load each new version) and decide screening hits, EDD reviews and AML cases through its compliance officer |
 | 13 | Keep the custody of the encryption keys as stated in the key custody record and take part in each key rotation |
-| 14 | Keep the permission for any third-party marks in force while a client brand pack is used |
+| 14 | Keep the contract with iorta TechNXT that covers the use of the Client's marks in force while a client brand pack is used |
 
 # RACI
 
@@ -136,7 +137,7 @@ It is an annex to the Order Form under the Master Services Agreement (the **MSA*
 | Regulatory registrations (BIR, AMLC, NPC, IC) | I | C | Sponsor A<br>PM R | Accounting Manager R<br>Compliance R |
 | Compliance set-up and screening lists | I | R | PM C | Compliance A |
 | Branding, e-signatures, brand pack | A | R | Sponsor C<br>PM C | IT R |
-| Permission for third-party marks | C | I | Sponsor A<br>PM R | I |
+| Contract reference covering the Client's marks (client brand pack) | C | I | Sponsor A<br>PM R | I |
 | Data cleansing | I | C | PM A | R |
 | Mock loads and reconciliation | A | R | PM C | Key users R<br>IT C |
 | E-mail and bank statement formats | A | R | PM C | Key users C<br>IT R |
@@ -192,7 +193,7 @@ It is an annex to the Order Form under the Master Services Agreement (the **MSA*
 | Release not applied by the Client | Support only for the current and the two previous planned releases | Support Agreement, Maintenance |
 | A regulatory registration is not in place by the date of the plan | Treated as a late Client dependency; the go-live date may move | SOW, Special conditions |
 | A partner has not certified its interface by the go/no-go | Go-live proceeds with the recorded fallback; the connector is switched to live later | SOW, Special conditions |
-| Permission for third-party marks not provided | The client brand pack is not applied | SOW, Special conditions |
+| Contract reference covering the Client's marks not on the engagement file | The client brand pack is not applied | SOW, Special conditions |
 | Encryption key custody record not signed | Production is not provisioned; the timeline moves | SOW, Special conditions |
 
 # Acceptance of this annex

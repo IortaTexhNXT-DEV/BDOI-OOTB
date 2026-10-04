@@ -1,12 +1,12 @@
 ---
 title: Go/No-Go Recommendation and Management Register
 subtitle: iNXT BrokerVerse OOTB Release 1.0
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (Test Summary Report 1.3); C9 and P2 record the merge of the IC and NPC compliance package. Version 1.1: conditions, notes, plans, risks and decisions for the modules merged since the release test (AML/CFT, BIR, IC and NPC registers, integrations, branding, distribution, operations and accounting, go-live tools and release pipeline)
+change: Version 1.1.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (Test Summary Report 1.3); C9 and P2 record the merge of the IC and NPC compliance package. Version 1.1: conditions, notes, plans, risks and decisions for the modules merged since the release test (AML/CFT, BIR, IC and NPC registers, integrations, branding, distribution, operations and accounting, go-live tools and release pipeline)
 open_item: Conditions C1 to C14 of the chapter Recommendation; decisions D1 to D20
 open_item_status: Open
 acronyms: OOTB=Out of the box; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; AMC=Annual maintenance contract; SOW=Statement of work; MSA=Master services agreement; DPA=Data processing agreement; DPO=Data protection officer; NPC=National Privacy Commission; IC=Insurance Commission; SMTP=Simple Mail Transfer Protocol; CI=Continuous integration; RAID=Risks, assumptions, issues and dependencies; RTO=Recovery time objective; RPO=Recovery point objective; AML/CFT=Anti-money laundering and countering the financing of terrorism; AMLC=Anti-Money Laundering Council; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; CTPL=Compulsory Third Party Liability; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes; PEP=Politically exposed person
@@ -31,6 +31,7 @@ It brings together the evidence from the Test Summary Report, the documentation 
 | 1.0 | 03 October 2026 | Recommendation for Release 1.0 after the release test |
 | 1.1 | 04 October 2026 | Conditions C9 to C14, notes N12 to N20, actions A6 to A11, plans P13 to P20, risks R13 to R20 and decisions D15 to D20 for the modules merged since the release test; C1 restated for the release pipeline; P2 and P9 to P12 moved to the chapter Delivered since the release test |
 | 1.1.1 | 04 October 2026 | Release figures aligned with the release verification on the merged release (Test Summary Report 1.3): Evidence chapter, condition C9 and item P2 record the merge of the IC and NPC compliance package and the green regression run |
+| 1.1.2 | 04 October 2026 | Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026) |
 
 # Recommendation
 
@@ -55,7 +56,7 @@ The product is functionally complete for the broking cycle of a Philippine non-l
 | C10 | The client's compliance officer confirms the delivered AML/CFT values against the AMLC's current issuances, loads the screening lists (no list content is delivered) and validates a CTR test file in the AMLC portal; the BV-AMLC-TXN 1.0 layout is checked against the AMLC's current reporting format; complaints deadlines and fit and proper declarations are confirmed against the IC rules in force | Client compliance officer; delivery lead |
 | C11 | The client's tax adviser confirms the tax codes, ATC, EOPT invoice and receipt wording and the ATP or CAS details; the DAT files of the first filing are validated with the current BIR validation module; the EIS connector stays off until the client's enrolment | Client Accounting Manager and tax adviser |
 | C12 | Each connector used live at go-live is certified by its partner (bank payment file layouts, which are delivered as examples; CTPL authentication provider; insurer APIs; SMS provider), or its fallback is recorded in the go/no-go minutes | Delivery lead; client IT head |
-| C13 | A client brand pack carrying third-party marks (the Toyota Insurance Services pack) is applied only in that client's environments with its written permission on file, and is not used in demonstrations to other prospects | Delivery lead; Sales head |
+| C13 | A client brand pack (the Toyota Insurance Services pack) carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there; it is not used in demonstrations to other prospects | Delivery lead; Sales head |
 | C14 | `npm run mask:data -- --register-production` is run once in the client's Production at go-live; every copy of production data used outside production is masked first and approved by the client's DPO | DevOps lead; client DPO |
 
 # Evidence
@@ -120,7 +121,7 @@ Merged on 04 October 2026, after the release test:
 | N13 | Compliance checks are delivered as: referrer licence check **block**, insurer authority check **warn**, AML screening blocks issue, refunds and claim payments on an open hit, EDD required before issue to a High-risk client. Switch the insurer authority check to block only once the certificates are entered | Delivery, Support |
 | N14 | No screening list content is delivered; the client loads the lists it is entitled to use (UN and AMLC public lists; a PEP list under licence) | Delivery, Sales |
 | N15 | Implementation plans now cover four sizes: Small 8 weeks, Medium 12, Large 20 (16-week variant), Enterprise 26; the critical path runs through the client data for the configuration kit, configuration, SIT, UAT and the rehearsal (Dependency Map and Critical Path) | Sales, Delivery |
-| N16 | The Toyota Insurance Services brand pack is a client pack: not the default, not in the generic seed, applied only with the client's written permission (C13) | Sales, Delivery |
+| N16 | The Toyota Insurance Services brand pack is a client pack: not the default, not in the generic seed, applied only in that client's environments under its contract with iorta TechNXT (C13) | Sales, Delivery |
 | N17 | The masking tool refuses to run on the registered production database and on a database with the go-live lock unless `--remark-copy` re-marks a copy after its own checks; run `--register-production` once at each go-live (C14) | DevOps, Support |
 | N18 | `PII_ENCRYPTION_KEY` is a third application secret, different from `JWT_SECRET` and `DATA_ENCRYPTION_KEY`; a backup cannot be read without the key it was written with. Rotation keeps the previous key until the dry run reports nothing left (`deploy/REFERENCE.md`) | DevOps, Support |
 | N19 | There is no role deck for the Compliance Officer yet; training uses the user manual chapters (Training Plan 1.1) | Delivery |
@@ -197,7 +198,7 @@ Likelihood and impact are rated Low, Medium or High.
 | R15 | Screening incomplete at go-live because list licences are missing | Medium | High | UN and AMLC lists first; PEP licence started after the compliance workshop (C10) | Client compliance officer |
 | R16 | Loss of an encryption key makes backups unreadable | Low | High | Custody record, escrow copy under dual control, rotation procedure (C9) | DevOps lead |
 | R17 | Personal data exposed in a non-production copy | Low | High | Masking before use, DPO approval, Pre-Prod removed after hypercare (C14) | DevOps lead |
-| R18 | Use of third-party marks without permission | Low | High | Client packs only with written permission (C13) | Sales head |
+| R18 | Client marks used outside the client's engagement | Low | High | Client brand pack applied only in that client's environments under its contract with iorta TechNXT (C13) | Sales head |
 | R19 | BIR or AMLC formats change or differ from the delivered layouts | Medium | Medium | Validation with the current BIR module and the AMLC portal at each client; formats are configuration or a minor release (C10, C11) | Product manager |
 | R20 | Small-broker plans have little float: an input late by a week moves the go-live | High | Medium | Kits at kick-off; weekly dependency review; escalation after 3 days (Dependency Map) | Delivery lead |
 
@@ -224,7 +225,7 @@ Likelihood and impact are rated Low, Medium or High.
 | D17 | Whether to resell or recommend a PEP list provider | Recommend, do not resell, until P19 | CEO |
 | D18 | Default of the insurer authority check at go-live (warn or block) | Warn, block once every certificate is entered | Head of delivery |
 | D19 | Enterprise plan length: 26 weeks as the reference in proposals | Confirm | Head of delivery |
-| D20 | Approval process for client brand packs carrying third-party marks | Written permission on the engagement file before any use (C13) | Legal counsel |
+| D20 | Basis for client brand packs carrying a client's marks | The client's contract with iorta TechNXT covers the use of its marks in the environments of the engagement; the contract reference is in the pack manifest and on the engagement file (C13) | Legal counsel |
 
 # Sign-off
 

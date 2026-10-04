@@ -1,12 +1,12 @@
 ---
 title: Contract Pack Index
 subtitle: With cover letter
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Sales checklist names the optional modules and partner services of the Rate Annex (S08); template for discussion; subject to review by iorta TechNXT legal counsel
+change: Version 1.1.1: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1: Sales checklist names the optional modules and partner services of the Rate Annex (S08); template for discussion; subject to review by iorta TechNXT legal counsel
 open_item: Review by iorta TechNXT legal counsel; owner decisions listed in the last chapter
 acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; DPA=Data Processing Agreement; DPO=Data protection officer; DST=Documentary stamp tax; IC=Insurance Commission; LoA=Letter of Award; MSA=Master Services Agreement; NDA=Non-disclosure agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; SaaS=Software as a service; SEC=Securities and Exchange Commission; SLA=Service level agreement; SOW=Statement of work; TIN=Taxpayer identification number; UAT=User acceptance testing; VAT=Value-added tax
 ---
@@ -209,7 +209,7 @@ Complete before the contract set leaves iorta TechNXT. Keep the completed checkl
 | 10 | Lines of business to configure and training days included | [ ] |
 | 11 | Hosting option and data location; environments; DR | [ ] |
 | 12 | Optional services: 24x7 Severity 1 support, extra training days, legacy sources, integrations, environments, on-site days | [ ] |
-| 12a | Optional modules and partner services ordered, each as its own Order Form line at the Rate Annex (S08) rate, invoiced on delivery: connector go-live with a partner; activation of the AML/CFT toolkit; activation of the IC compliance registers; activation of the BIR pack; dealer programme set-up; Client brand pack (written permission of the mark's owner on file); AMLC reporting file validation and portal test; IC annual statement form alignment; EOPT invoicing review with the Client's tax adviser; BIR CAS registration support; BIR EIS enrolment and certification; CTPL authentication and LTO interface certification; insurer API onboarding; bank payment file certification; SMS or Viber gateway activation; screening list provider onboarding. Regulator and partner fees excluded; filings in the Client's name | [ ] |
+| 12a | Optional modules and partner services ordered, each as its own Order Form line at the Rate Annex (S08) rate, invoiced on delivery: connector go-live with a partner; activation of the AML/CFT toolkit; activation of the IC compliance registers; activation of the BIR pack; dealer programme set-up; Client brand pack (the Client's marks, applied only in the Client's environments under its contract with iorta TechNXT, which covers their use there); AMLC reporting file validation and portal test; IC annual statement form alignment; EOPT invoicing review with the Client's tax adviser; BIR CAS registration support; BIR EIS enrolment and certification; CTPL authentication and LTO interface certification; insurer API onboarding; bank payment file certification; SMS or Viber gateway activation; screening list provider onboarding. Regulator and partner fees excluded; filings in the Client's name | [ ] |
 | 13 | Term, renewal and early termination right; source code escrow (perpetual only) | [ ] |
 | 14 | Payment schedule: 40/40/20 for implementation or onboarding; licence fee 100% on Go-Live; recurring fees as in the Rate Annex | [ ] |
 | 15 | Withholding agent status of the Client and the tax treatment of the licence fee confirmed by both tax advisers | [ ] |

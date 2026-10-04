@@ -1,12 +1,12 @@
 ---
 title: Rate Card
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-change: Version 1.1.1: optional services confirmed by management on 04 October 2026: the activation and connector go-live lines are standard optional services, and the regulator and partner items are added under "Optional modules and partner services"; package totals unchanged. Version 1.1: software list completed with the AML/CFT toolkit, IC compliance registers, BIR pack, integration connectors, dealer programmes and branding, all included; optional lines for their activation and for connector go-live
+change: Version 1.1.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.1: optional services confirmed by management on 04 October 2026: the activation and connector go-live lines are standard optional services, and the regulator and partner items are added under "Optional modules and partner services"; package totals unchanged. Version 1.1: software list completed with the AML/CFT toolkit, IC compliance registers, BIR pack, integration connectors, dealer programmes and branding, all included; optional lines for their activation and for connector go-live
 acronyms: AMC=Annual Maintenance Contract; AML=Anti-money laundering; CFT=Countering the financing of terrorism; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; CTPL=Compulsory third party liability; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
@@ -297,7 +297,7 @@ Every module is included in the software price and in every package. The service
 | Screening list provider onboarding | 2 | 30,000.00 one-time | 478 | Provider contract data, API key, adapter test and first screening run |
 
 - The compliance officer, the accountant and the tax adviser confirm the settings and the treatment; every filing, registration and enrolment with a regulator stays with the broker, in its name.
-- A client brand pack that carries another company's marks is built and applied only with that company's written permission.
+- A client brand pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there.
 - These services do not change any package price. They are quoted on the Order Form as separate one-time lines and are invoiced on delivery.
 
 # Change requests

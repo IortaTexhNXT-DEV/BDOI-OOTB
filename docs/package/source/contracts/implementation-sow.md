@@ -1,12 +1,12 @@
 ---
 title: Statement of Work
 subtitle: OOTB implementation
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Optional modules and partner services of the Rate Annex named in the payments and exclusions; template for discussion; subject to review by the parties' legal counsel
+change: Version 1.1.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.1: Optional modules and partner services of the Rate Annex named in the payments and exclusions; template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
 acronyms: AMLC=Anti-Money Laundering Council; ATP=Authority to Print; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; COC=Certificate of cover; CR=Change request; CTPL=Compulsory Third Party Liability; DPO=Data protection officer; EIS=Electronic Invoicing System; LTO=Land Transportation Office; NPC=National Privacy Commission; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; RAID=Risks, assumptions, issues and dependencies; SIT=System integration test; SOW=Statement of work; UAT=User acceptance testing; VAT=Value-added tax
 ---
@@ -24,6 +24,7 @@ This Implementation Statement of Work (the **SOW**) describes the one-time imple
 | 1.0 | 03 October 2026 | Template for discussion |
 | 1.1 | 04 October 2026 | Scope aligned with the current product: go-live configuration and migration kits; compliance set-up (AML/CFT, Insurance Commission and National Privacy Commission registers, masking of personal data); branding and brand packs, with the permission required for client marks; integrations with partners through the delivered connectors; environments, release pipeline and encryption key custody; regulatory registrations as Client dependencies; enterprise size and the 20 and 26-week timelines; Deliverables, acceptance criteria and Client responsibilities updated accordingly |
 | 1.1.1 | 04 October 2026 | The sixteen optional modules and partner services of the Service Catalogue and Rate Annex (S08), confirmed by management on 04 October 2026, named in the milestone payments and the exclusions |
+| 1.1.2 | 04 October 2026 | Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026) |
 
 # Scope
 
@@ -140,7 +141,7 @@ The Customer Responsibilities and RACI Annex gives the full list of Client respo
 | Written confirmation by the Client's tax adviser of tax codes, rates, ATC and the wording of invoices and receipts | Before UAT sign-off |
 | SMTP mailbox and credentials; contracts and credentials of the partners (banks for payment files, SMS provider, CTPL authentication provider, insurers, payment gateway); COC number series | Integrations phase |
 | One recent statement export per bank account | Integrations phase |
-| Logo, sign-in picture, signatories and their consent to e-signatures; written permission for any third-party marks | Branding phase |
+| Logo, sign-in picture, signatories and their consent to e-signatures; for a client brand pack, the contract reference covering the use of the Client's marks on the engagement file | Branding phase |
 | Joint custody of the encryption keys with iorta TechNXT, as stated in the chapter Special conditions | Before Production is provisioned |
 | In-force policy, open receivable, open claim and trial balance extracts in the Migration Kit | Each mock load and cutover |
 | User list for training, training rooms, devices and attendance | Training phase |
@@ -254,7 +255,7 @@ The fee is fixed for the scope, size and assumptions of this SOW. Under the subs
 
 # Special conditions
 
-1. **Third-party marks.** iorta TechNXT applies a brand pack that carries the name, logo or other marks of a third party (for example the Toyota Insurance Services brand pack) only in the Client's own environments, and only after the Client has given iorta TechNXT a copy of the written permission of the owner of those marks. The Client warrants that the permission covers the use made in iNXT BrokerVerse and indemnifies iorta TechNXT against any claim arising from the use of marks supplied by the Client.
+1. **Client marks.** A client brand pack carries the name, logo or other marks of the Client (for example the Toyota Insurance Services brand pack). The Client's contract with iorta TechNXT covers the use of those marks in the environments of this engagement; iorta TechNXT applies the pack, and uses the marks, only in those environments. The Client warrants that it owns, or is licensed to use, the marks it supplies, and indemnifies iorta TechNXT against any claim arising from the use of marks supplied by the Client.
 2. **Encryption keys.** Each environment has its own application secrets and encryption keys, including the key that encrypts tax identification, government identification and bank account numbers at rest. Before Production is provisioned, the Parties sign a key custody record that states who holds the escrow copy of each production key under dual control, where it is kept with the backups, and how a key is rotated. A key is never sent by e-mail, ticket or chat. Where the Client hosts, the Client holds the keys and is responsible for keeping them with its backups.
 3. **Partner certification.** Each delivered connector is configured and tested in test mode. Its certification with the Client's partner depends on that partner. If a partner has not certified its interface by the go/no-go, go-live proceeds with the fallback recorded in the go/no-go minutes, and the connector is switched to live during hypercare or under the Support Agreement, without a Change Request where the effort stays within the configuration of the delivered connector.
 4. **Regulatory registrations.** The registrations listed in Client responsibilities are obligations of the Client towards the regulators. A registration that is not in place by the date of the plan is a late Client dependency under the chapter Change control.

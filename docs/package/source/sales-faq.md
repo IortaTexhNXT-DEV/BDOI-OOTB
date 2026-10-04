@@ -1,12 +1,12 @@
 ---
 title: FAQ and Objection Handling
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1.2
+version: 1.1.3
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-change: Version 1.1.2: answer on add-on modules and optional services added (optional modules and partner services confirmed by management on 04 October 2026). Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (test cases, automated tests, UAT cycle, go-live rehearsal). Version 1.1: answers updated for AML/CFT, the IC and NPC compliance registers, BIR forms and EOPT invoices, integrations, dealer programmes, branding, My Work and the Report Builder; known limits revised
+change: Version 1.1.3: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.2: answer on add-on modules and optional services added (optional modules and partner services confirmed by management on 04 October 2026). Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (test cases, automated tests, UAT cycle, go-live rehearsal). Version 1.1: answers updated for AML/CFT, the IC and NPC compliance registers, BIR forms and EOPT invoices, integrations, dealer programmes, branding, My Work and the Report Builder; known limits revised
 acronyms: AMC=Annual Maintenance Contract; AMLA=Anti-Money Laundering Act; AMLC=Anti-Money Laundering Council; CTR=Covered transaction report; STR=Suspicious transaction report; EDD=Enhanced due diligence; PEP=Politically exposed person; EIS=Electronic Invoicing System; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; SMS=Short message service; API=Application programming interface; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; CR=Change request; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EOPT=Ease of Paying Taxes Act; EWT=Expanded withholding tax; IC=Insurance Commission; NPC=National Privacy Commission; OOTB=Out of the box; SoD=Segregation of duties; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; VAT=Value-added tax
 ---
 
@@ -64,7 +64,7 @@ The catalogue reports in Reports > All Reports, grouped as production and placem
 
 ## Can it carry our brand?
 
-Yes. The System Administrator sets the theme (colours, header and side bar style, font, density), the logo, the sign-in page picture and texts, the branding of printed documents, report files and e-mails on Master > System Settings > Theme and Branding, with a contrast check before saving. Signatories and approvers capture an e-signature once; it is mapped to the documents it signs (policy schedule, official receipt, payment voucher and others) and prints only once the document is issued or approved. A brand pack file moves the whole branding from UAT to Production. A brand pack carrying another company's marks is used only with that company's written permission.
+Yes. The System Administrator sets the theme (colours, header and side bar style, font, density), the logo, the sign-in page picture and texts, the branding of printed documents, report files and e-mails on Master > System Settings > Theme and Branding, with a contrast check before saving. Signatories and approvers capture an e-signature once; it is mapped to the documents it signs (policy schedule, official receipt, payment voucher and others) and prints only once the document is issued or approved. A brand pack file moves the whole branding from UAT to Production. A client brand pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there.
 
 ## Does it handle dealer programmes for brand-new vehicles?
 

@@ -1,12 +1,12 @@
 ---
 title: BrokerVerse OOTB Commercial Proposal Note
 subtitle: Pricing rationale, market positioning and commercial terms
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-change: Version 1.1.1: optional services confirmed by management on 04 October 2026: activation and connector go-live lines are standard optional services; regulator and partner items added as optional modules and partner services; package totals unchanged. Version 1.1: review of the new modules against the price list: all included in the software; optional lines for their activation and for connector go-live
+change: Version 1.1.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.1: optional services confirmed by management on 04 October 2026: activation and connector go-live lines are standard optional services; regulator and partner items added as optional modules and partner services; package totals unchanged. Version 1.1: review of the new modules against the price list: all included in the software; optional lines for their activation and for connector go-live
 acronyms: AMC=Annual Maintenance Contract; AML=Anti-money laundering; CFT=Countering the financing of terrorism; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; CTPL=Compulsory third party liability; BIR=Bureau of Internal Revenue; BSP=Bangko Sentral ng Pilipinas; CR=Change request; Dev=Development environment; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; TCO=Total cost of ownership; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
@@ -257,7 +257,7 @@ Confirmed by management on 04 October 2026 as optional, add-on items. Every modu
 | Activation of the IC compliance registers | 6 | PHP 100,000.00 |
 | Activation of the BIR pack | 8 | PHP 130,000.00 |
 | Dealer programme set-up | 3 | PHP 50,000.00 per programme |
-| Client brand pack (third-party marks only with the owner's written permission) | 2 | PHP 30,000.00 per pack |
+| Client brand pack (applied only in that client's environments under its contract with iorta TechNXT) | 2 | PHP 30,000.00 per pack |
 | AMLC reporting file validation and portal test | 3 | PHP 50,000.00 |
 | IC annual statement form alignment | 3 | PHP 50,000.00 |
 | EOPT invoicing review with the broker's tax adviser | 2 | PHP 30,000.00 |

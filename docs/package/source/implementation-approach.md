@@ -1,12 +1,12 @@
 ---
 title: Implementation Approach
 subtitle: and Plan for BrokerVerse OOTB
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Four broker sizes with the environment model; go-live configuration and migration kits; compliance set-up, branding, partner integrations and regulatory registrations as phases; task-level plan from one model
+change: Version 1.1.1: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1: Four broker sizes with the environment model; go-live configuration and migration kits; compliance set-up, branding, partner integrations and regulatory registrations as phases; task-level plan from one model
 acronyms: OOTB=Out of the box; AMLC=Anti-Money Laundering Council; ATP=Authority to Print; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; COC=Certificate of cover; CoA=Chart of accounts; CR=Change request; CTPL=Compulsory Third Party Liability; Dev=Development environment; DPO=Data protection officer; EIS=Electronic Invoicing System; GL=General ledger; IC=Insurance Commission; LTO=Land Transportation Office; NPC=National Privacy Commission; PM=Project manager; Pre-Prod=Pre-production environment; RACI=Responsible, Accountable, Consulted, Informed; RAID=Risks, Assumptions, Issues, Dependencies; SIT=System integration test; SMTP=Simple Mail Transfer Protocol; SteerCo=Steering committee; TTT=Train the trainer; UAT=User acceptance test
 ---
 
@@ -43,6 +43,7 @@ The broker's management (sponsor and steering committee), the broker's project m
 |---|---|---|
 | 1.0 | 03 October 2026 | Initial issue: three sizes, twelve phases, RACI, governance, deliverables |
 | 1.1 | 04 October 2026 | Four sizes (enterprise added) with the environment model; configuration through the go-live configuration kit and migration through the migration kit; new phases for compliance set-up (AML/CFT, IC and NPC registers, masking), branding and the brand pack, integrations with partners (banks, SMS, CTPL authentication and LTO, insurers, BIR EIS, AMLC reporting) and regulatory registrations; GitHub Environments and encryption keys in the environment phase; task-level plan with owners, predecessors and milestones; dependencies and risks aligned with the Dependency Map and the RAID log |
+| 1.1.1 | 04 October 2026 | Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026) |
 
 # Implementation approach
 
@@ -159,7 +160,7 @@ Discovery is limited to configuration. Each workshop shows the delivered screens
 | Ledger, close and tax | Accounting Manager, tax adviser | Chart of accounts, account determination, posting rules, payables, fixed assets, close checklist, tax codes and ATC, BIR forms, EOPT invoices, CAS books, EIS |
 | Compliance | Compliance officer, DPO | AML/CFT risk factors, thresholds, monitoring rules, screening lists and provider; licence register; insurer authority check (warn or block); complaints deadlines; breach procedure |
 | Integrations | IT head, Accounting, Operations | Banks and their file layouts, SMS or Viber provider, CTPL authentication provider and LTO feed, insurer APIs, payment gateway, EIS, AMLC reporting |
-| Branding | Sponsor, marketing | Theme, logo, sign-in picture, document and e-mail branding, signatories and their e-signatures, brand pack, permission for any client marks |
+| Branding | Sponsor, marketing | Theme, logo, sign-in picture, document and e-mail branding, signatories and their e-signatures, brand pack, contract reference covering the client's marks for a client brand pack |
 
 Output: the configuration workbook and the fit-gap register. Each register line is classed as Fit (delivered), Configure (setting or master data), Procedure (the broker changes how it works) or Gap (needs a change request).
 
@@ -206,7 +207,7 @@ The delivered data already holds the PSGC addresses, ZIP codes, banks, ID types,
 
 ## Branding and brand pack
 
-The System Administrator brands UAT on Theme and Branding (theme, sign-in page, documents and reports, e-mail, name and images), captures the signatories' e-signatures with their consent and maps signatures to documents. The brand pack is exported and imported in Production with the configuration kit. A client brand pack that carries a third party's marks (for example the Toyota Insurance Services pack) is applied only in that client's environments and only with its written permission on file.
+The System Administrator brands UAT on Theme and Branding (theme, sign-in page, documents and reports, e-mail, name and images), captures the signatories' e-signatures with their consent and maps signatures to documents. The brand pack is exported and imported in Production with the configuration kit. A client brand pack (for example the Toyota Insurance Services pack) carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there.
 
 ## Data migration
 
@@ -383,10 +384,10 @@ The workbook holds the task-level plan of each size: 77 tasks in 14 phases (fewe
 | E1 to E7 | Dev, SIT, UAT provisioned; GitHub Environments; secrets and keys with custody; first pipeline deployment; Production with backups and restore test | iorta TechNXT | DevOps lead | Go-live |
 | D1 to D5 | Process, compliance, integration and branding workshops; fit-gap signed | iorta TechNXT; broker | Consultants; process owners | Go-live |
 | I1 to I10 | Insurers and rates; chart of accounts; user list; SMTP; banks; partner contracts; COC series; images and signatories; training rooms; UAT testers | Broker | Key users, Accounting Manager, System Administrator, IT head, PM | Go-live, except partner contracts and COC series (feature only) |
-| R1 to R8 | ATP or CAS; EIS enrolment; AMLC registration; IC licence data; NPC registration; tax adviser confirmation; screening lists; permission for client marks | Broker | Accounting Manager, compliance officer, DPO, tax adviser, sponsor | Go-live, except EIS and client marks (feature only) |
+| R1 to R8 | ATP or CAS; EIS enrolment; AMLC registration; IC licence data; NPC registration; tax adviser confirmation; screening lists; contract reference for client marks | Broker | Accounting Manager, compliance officer, DPO, tax adviser, sponsor | Go-live, except EIS and client marks (feature only) |
 | C1 to C5 | Configuration kit filled and loaded; on-screen configuration; promotion to UAT for mock 1; configuration complete | Broker; iorta TechNXT | Key users; consultants | Go-live (critical path) |
 | K1 to K3 | Compliance set-up; screening lists loaded; AMLC report file test | iorta TechNXT; broker | Consultant; compliance officer | Go-live |
-| B1, B2 | Branding, e-signatures and brand pack; client brand pack with permission | iorta TechNXT | Consultant | Go-live; client pack feature only |
+| B1, B2 | Branding, e-signatures and brand pack; client brand pack under the client's contract with iorta TechNXT | iorta TechNXT | Consultant | Go-live; client pack feature only |
 | N1 to N9 | E-mail; bank statements; bank payment files; SMS; CTPL and LTO; insurer APIs; payment gateway; EIS test and live | iorta TechNXT; partner | DevOps lead, consultants; banks, providers, insurers | E-mail and statements: go-live; the others feature only |
 | G1 to G6 | Extraction and cleansing; mapping; mock loads 1 to 4 | Broker; iorta TechNXT | Data owners; migration lead | Go-live |
 | L1 to L3 | Train-the-trainer; compliance officer and DPO training; end-user training | iorta TechNXT; broker | Consultants; key users | Go-live |
@@ -402,7 +403,7 @@ The critical path is the same for every size: client data for the configuration 
 
 | Role | Party | Responsibilities |
 |---|---|---|
-| Project sponsor | Broker | Chairs the steering committee; approves scope, change requests, go/no-go; permission for any client marks |
+| Project sponsor | Broker | Chairs the steering committee; approves scope, change requests, go/no-go; confirms the contract reference covering the client's marks for a client brand pack |
 | Project manager | Broker | Plans the broker's work, obtains data, decisions and registrations, runs UAT and training logistics |
 | Process owners and key users | Broker | One per team; take part in discovery, fill the configuration kit, test, train their team |
 | System Administrator | Broker | Users, roles, masters, settings, branding and loads after go-live; second line of support |
@@ -482,7 +483,7 @@ High items go to the steering committee. A dependency on the critical path late 
 | Discovery and fit-gap | Configuration workbook, fit-gap register | Every process walked through; every register line classed and owned; signed by the process owners |
 | Configuration | Configuration kit loaded in Dev or SIT and promoted to UAT; configuration workbook updated | Batches Loaded without errors; each item of `GO_LIVE_DATA_SETUP.md` set; test quotation premiums and taxes agree with manual calculations; comparison report shows UAT mirrors the source |
 | Compliance set-up | AML settings, risk factors, rules, screening lists; licence register, fit and proper, insurer authority; complaints and breach settings; role masking | Compliance officer and DPO confirm the settings in writing; every client screened; CTR test file generated |
-| Branding | Theme, documents, e-mails, e-signatures, brand pack | Sample documents and e-mails approved by the sponsor; permission on file for any client marks |
+| Branding | Theme, documents, e-mails, e-signatures, brand pack | Sample documents and e-mails approved by the sponsor; contract reference on the engagement file for a client brand pack |
 | Data migration | Mapping sheets, filled migration kits, load history, reconciliation workbooks of each mock load | Counts and totals agree within the agreed tolerance (default: exact); trial balance as at the cutover date agrees with the old system |
 | Integrations | E-mail, bank statement formats, and each partner integration in scope | Password reset e-mail received; one statement per account imported; for each partner in scope, the certification of the Dependency Map passed or its fallback agreed at go/no-go |
 | Training | Training schedule, attendance lists, assessment results | Every user trained in the role before go-live; key users pass at 90% |
@@ -559,7 +560,7 @@ The RAID log template is pre-filled with these risks and with their scoring; the
 | Screening list licence not obtained | Screening incomplete at go-live | UN and AMLC lists loaded first; PEP list licence started after the compliance workshop |
 | Tax adviser confirmation late | VAT, withholding or invoice wording wrong | Review booked in the configuration phase; UAT sign-off depends on it |
 | Encryption key lost or not escrowed | Backups unreadable; personal identifiers lost | Key custody record before Production is provisioned; key kept with the backups; rotation procedure |
-| Client marks used without permission | Trademark exposure | Client brand pack applied only with written permission on file |
+| Client marks used outside the client's engagement | Trademark exposure | Client brand pack applied only in that client's environments under its contract with iorta TechNXT |
 | Requests for customisation | Scope and timeline grow | Configure-first; fit-gap classes; change request process |
 | Key users unavailable | Decisions late; weak UAT and training | Named key users with committed time; backups named |
 | Opening balances and open items do not agree | Ledger wrong from day one | Reconciliation in every load; Accounting Manager signs off |

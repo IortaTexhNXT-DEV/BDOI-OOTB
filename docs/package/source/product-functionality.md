@@ -1,10 +1,10 @@
 ---
 title: Product Functionality
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT
-change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (Test Summary Report 1.3). Version 1.1: compliance (IC, NPC, AML), BIR returns, operations and accounting, distribution, integrations, branding and e-signatures, go-live and environment tools, My Work, Philippine masters
+change: Version 1.1.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (Test Summary Report 1.3). Version 1.1: compliance (IC, NPC, AML), BIR returns, operations and accounting, distribution, integrations, branding and e-signatures, go-live and environment tools, My Work, Philippine masters
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; AMLC=Anti-Money Laundering Council; PSGC=Philippine Standard Geographic Code; EDD=Enhanced due diligence; PEP=Politically exposed person; COC=Certificate of cover; EIS=Electronic Invoicing System; CAS=Computerized accounting system; PDC=Post-dated cheque; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); CTPL=Compulsory Third Party Liability; APPA=Auto Passenger Personal Accident; LTO=Land Transportation Office; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial All Risks; KYC=Know your customer; RFQ=Request for quotation; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DSR=Data subject request; SoD=Segregation of duties; TOTP=Time-based one-time password; UAT=User acceptance test; SIT=System integration test; API=Application programming interface; RPO=Recovery point objective; RTO=Recovery time objective
@@ -33,6 +33,7 @@ For each module it gives what the module does, its key features, the Philippine 
 | 1.0 | 03 October 2026 | Issue for the release test |
 | 1.1 | 04 October 2026 | Added: Compliance Officer role; IC compliance (licence register and commission block, fit and proper, insurer authority, complaints, IC annual statement and production report); NPC breach register, masking by role and field encryption; My Work, the enterprise menu and the Help panel; Philippine reference masters (PSGC); Product Configurator rules in the business flow; audit trail screen; go-live data workbench, environment comparison, transaction reset, data masking and the release pipeline; branding and e-signatures; sales activities, quote wizard covers and risk fields from the Product Configurator, BIR Form 2307 for supplier payments, fixed asset disposals. Updated the integrations, disbursement, data privacy, administration, feature checklist and points to note |
 | 1.1.1 | 04 October 2026 | Release figures aligned with the release verification on the merged release (Test Summary Report 1.3): product at a glance (API routes, jobs, number series, release test, user manual), upload templates, performance observations |
+| 1.1.2 | 04 October 2026 | Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026) |
 
 ## The product at a glance
 
@@ -742,7 +743,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 **What it does.** Presents the broker's brand on screens, documents, reports and e-mails, and signs documents with captured signatures.
 
 - Theme and Branding (Master > System Settings): theme presets or custom colours with a contrast check, sign-in picture, document and report colours and footer, branded e-mail layout, logo and favicon; changes apply without a rebuild.
-- Brand packs export and import the whole branding between environments; a client brand pack (for example the Toyota Insurance Services pack) is applied only with the client's written permission.
+- Brand packs export and import the whole branding between environments; a client brand pack (for example the Toyota Insurance Services pack) carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there.
 - E-signatures of company signatories and of users (captured by the user), versioned, with consent recorded and revocation; mapped per document type (quotation slip, policy schedule, endorsement, official receipt, payment voucher, debit note, statement, journal voucher, claim letter); drafts print UNSIGNED DRAFT.
 
 ## Administration, security and configuration

@@ -269,7 +269,7 @@ RACI = [
     ('Compliance set-up', 'IC licence register, fit and proper records, insurer certificates of authority', 'I', 'R', 'I', 'I', 'C', 'C', 'C', 'I', 'A', 'I'),
     ('Compliance set-up', 'Complaints and breach register settings; DPO and NPC registration confirmed', 'I', 'R', 'I', 'C', 'C', 'C', 'C', 'I', 'A', 'I'),
     ('Branding and brand pack', 'Theme, letterhead, branded documents and e-mails, e-signatures mapped, brand pack', 'A', 'R', 'C', 'C', 'C', 'C', 'R', 'I', 'I', 'I'),
-    ('Branding and brand pack', 'Permission to use client marks (client brand pack)', 'C', 'I', 'I', 'A', 'R', 'I', 'I', 'I', 'I', 'C'),
+    ('Branding and brand pack', 'Contract reference covering the use of client marks (client brand pack)', 'C', 'I', 'I', 'A', 'R', 'I', 'I', 'I', 'I', 'C'),
     ('Data migration', 'Extraction and cleansing of the old system data', 'I', 'C', 'I', 'I', 'A', 'R', 'R', 'R', 'I', 'I'),
     ('Data migration', 'Mapping to the migration kit', 'A', 'R', 'C', 'I', 'C', 'R', 'C', 'C', 'I', 'I'),
     ('Data migration', 'Mock loads and reconciliation', 'A', 'R', 'R', 'I', 'C', 'R', 'C', 'R', 'I', 'I'),

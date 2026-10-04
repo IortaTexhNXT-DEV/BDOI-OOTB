@@ -1,12 +1,12 @@
 ---
 title: Production Support
 subtitle: Approach and Standards
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Support procedures for the integrations outbox, the EIS outbox, the compliance deadline jobs, encryption key custody and rotation, brand pack import and e-signature revocation; monitoring, backups and references updated
+change: Version 1.1.1: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1: Support procedures for the integrations outbox, the EIS outbox, the compliance deadline jobs, encryption key custody and rotation, brand pack import and e-signature revocation; monitoring, backups and references updated
 acronyms: OOTB=Out of the box; AML=Anti-money laundering; AMLC=Anti-Money Laundering Council; EIS=Electronic Invoicing System; EDD=Enhanced due diligence; PII=Personal identifiable information; SMS=Short message service; CTPL=Compulsory third party liability; COC=Certificate of cover; L1, L2, L3=Support levels 1, 2 and 3; PHT=Philippine time (UTC+8); SLA=Service level agreement; KPI=Key performance indicator; RCA=Root-cause analysis; CAB=Change advisory board; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; NPC=National Privacy Commission; DPO=Data protection officer; PITR=Point-in-time restore; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; ITIL=IT Infrastructure Library; PR=Pull request
 ---
 
@@ -298,7 +298,7 @@ A brand pack carries the theme, application name, logo, favicon, sign-in picture
 2. Import the new pack. The check runs before anything is saved (theme rules, contrast of text on buttons, header and table headers to WCAG AA, image types, SVG safety) and shows the colours and the contents.
 3. Choose the options (also set the print logo of the primary company; also set the application name), then Apply. The import is in the audit trail (entity branding, action import).
 4. Check a printed document (Sample document), a sample e-mail and the sign-in page.
-5. A client brand pack that carries a third party's marks (for example the Toyota Insurance Services pack) is applied only in that client's environments and only with the client's written permission on file. Support refuses the change without it.
+5. A client brand pack (for example the Toyota Insurance Services pack) carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there; the contract reference is in the pack manifest and on the engagement file. Support refuses to enable it in any environment outside that engagement.
 
 Rollback: import the pack exported in step 1.
 

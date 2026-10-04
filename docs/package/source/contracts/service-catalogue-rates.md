@@ -1,12 +1,12 @@
 ---
 title: Service Catalogue
 subtitle: And rate annex
-version: 1.0.1
+version: 1.0.2
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Version 1.0.1: optional services confirmed by management on 04 October 2026: optional modules and partner services (module activation, connector go-live, dealer programme set-up, client brand pack, regulator and partner items) added to S08 with their man-days and rates; package totals unchanged. Version 1.0: template for discussion; subject to review by the parties' legal counsel
+change: Version 1.0.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.0.1: optional services confirmed by management on 04 October 2026: optional modules and partner services (module activation, connector go-live, dealer programme set-up, client brand pack, regulator and partner items) added to S08 with their man-days and rates; package totals unchanged. Version 1.0: template for discussion; subject to review by the parties' legal counsel
 open_item: Rates to be confirmed against the price book at each issue; review by the parties' legal counsel before signature
 acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; DR=Disaster recovery; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
@@ -178,7 +178,7 @@ Every module of the Software is included in the licence or subscription fee and 
 | Activation of the IC compliance registers | 6 | 100,000.00 one-time | Licence and fit and proper register load, insurer certificates, complaints and breach settings, mapping of the IC statement to the Client's chart of accounts | On delivery |
 | Activation of the BIR pack | 8 | 130,000.00 one-time | BIR and EOPT invoice settings with the tax adviser, ATC mapping, DAT file dry run, CAS books pack | On delivery |
 | Dealer programme set-up | 3 | 50,000.00 per programme | Channels, rates, subsidy, bank letter and the first upload of one programme | On delivery |
-| Client brand pack | 2 | 30,000.00 per pack | Theme, sign-in picture, document and e-mail branding, e-signature mapping and the exported pack; third-party marks only with the owner's written permission | On delivery |
+| Client brand pack | 2 | 30,000.00 per pack | Theme, sign-in picture, document and e-mail branding, e-signature mapping and the exported pack; a client pack carries the Client's marks and is applied only in the Client's environments, under the Client's contract with iorta TechNXT, which covers the use of its marks there | On delivery |
 | AMLC reporting file validation and portal test | 3 | 50,000.00 one-time | CTR and STR layout, institution and transaction codes confirmed with the AMLC, test file accepted in the AMLC portal | On delivery |
 | IC annual statement form alignment | 3 | 50,000.00 one-time | The accountant's working paper mapped to the IC form set in force for the year | On delivery |
 | EOPT invoicing review with the Client's tax adviser | 2 | 30,000.00 one-time | Registered invoice documents, supplementary wording, VAT treatment, ATP or CAS | On delivery |

@@ -1,12 +1,12 @@
 ---
 title: Dependency Map and Critical Path
 subtitle: BrokerVerse OOTB implementation, by broker size
-version: 1.0
+version: 1.0.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Initial issue: dependencies, lead times, critical path by size and the effect of each late dependency
+change: Version 1.0.1: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.0: Initial issue: dependencies, lead times, critical path by size and the effect of each late dependency
 acronyms: OOTB=Out of the box; AMLC=Anti-Money Laundering Council; ATP=Authority to Print; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; COC=Certificate of cover; CTPL=Compulsory Third Party Liability; CTR=Covered transaction report; DPO=Data protection officer; EIS=Electronic Invoicing System; GNG=Go/no-go; IC=Insurance Commission; LTO=Land Transportation Office; NPC=National Privacy Commission; PEP=Politically exposed person; PM=Project manager; RAID=Risks, assumptions, issues and dependencies; SIT=System integration test; STR=Suspicious transaction report; UAT=User acceptance test
 ---
 
@@ -42,6 +42,7 @@ Every figure in this document comes from one plan model kept with the documentat
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 04 October 2026 | Initial issue: dependency diagrams, client inputs, partner certifications, regulatory registrations, environments and keys, critical path by size, lead times, effect of a late dependency |
+| 1.0.1 | 04 October 2026 | Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026) |
 
 ## Related documents
 
@@ -163,7 +164,7 @@ The registrations are the broker's own obligations; iorta TechNXT plans around t
 | R5 | NPC: registration of the DPO and the data processing systems; privacy notice version | DPO | 20 / 25 / 30 / 30 days | `privacy.notice_version`; breach register owner | Go/no-go |
 | R6 | Tax adviser confirmation of tax codes, ATC, rates, invoice and receipt wording, VAT treatment of commission | Tax adviser | 5 / 5 / 8 / 10 days | Taxation, `bir.*`, `invoice.*`, `receipts.document_title` | UAT sign-off |
 | R7 | Screening lists: UN and AMLC lists obtained; PEP list licence from a provider when used | Compliance officer | 10 / 12 / 15 / 15 days | Compliance > Screening Lists (no list content is delivered with BrokerVerse); `aml.screening_provider` | Go/no-go |
-| R8 | Written permission to use client marks, only with a client brand pack | Sponsor | 3 / 5 / 5 / 5 days | Theme and Branding > Brand packs | Feature only |
+| R8 | Contract reference covering the use of the client's marks on the engagement file (client brand pack only) | Sponsor | 3 / 5 / 5 / 5 days | Theme and Branding > Brand packs | Feature only |
 
 Points that matter to the plan:
 
@@ -270,7 +271,7 @@ Discovery workshops, environments and the regulatory registrations run beside it
 | R5 | NPC registration | Broker DPO | 20 days | 25 days | 30 days | 30 days |
 | R6 | Tax adviser confirmation | Broker tax adviser | 5 days | 5 days | 8 days | 10 days |
 | R7 | Screening lists and licence | Broker compliance officer | 10 days | 12 days | 15 days | 15 days |
-| R8 | Permission for client marks | Broker sponsor | 3 days | 5 days | 5 days | 5 days |
+| R8 | Contract reference for client marks | Broker sponsor | 3 days | 5 days | 5 days | 5 days |
 | I6 | Partner contracts and credentials | Broker IT head and sponsor | 8 days | 10 days | 15 days | 20 days |
 | N3 | Bank payment files certified | Bank, with Accounting and iorta TechNXT | 10 days | 15 days | 20 days | 25 days |
 | N4 | SMS or Viber live | SMS provider, with the broker IT head | 5 days | 8 days | 10 days | 10 days |
@@ -366,7 +367,7 @@ The table gives the float to go-live in working days. A dependency that finishes
 | Insurer APIs (N6) | **Record Issued Policy**; claim status file | Each insurer accepts the test requests; insurer by insurer |
 | Payment gateway (N7) | Bank transfer, cheque, cash | A live test payment is receipted |
 | BIR EIS (R2, N8, N9) | Connector off; invoices issued and kept | Enrolment; then **Queue earlier invoices** sends the invoices issued since go-live |
-| Client brand pack (R8, B2) | The broker's own theme or the delivered preset | Written permission is on file |
+| Client brand pack (R8, B2) | The broker's own theme or the delivered preset | The contract reference covering the client's marks is on the engagement file |
 
 # Managing the dependencies
 

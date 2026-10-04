@@ -1,12 +1,12 @@
 ---
 title: Business Requirements Document
 subtitle: BrokerVerse OOTB for Philippine non-life brokers
-version: 1.0
+version: 1.0.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Initial issue: requirements of the 15 process areas, non-functional requirements and the functional specification by module
+change: Version 1.0.1: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.0: Initial issue: requirements of the 15 process areas, non-functional requirements and the functional specification by module
 acronyms: OOTB=Out of the box; BRD=Business requirements document; BR=Business requirement; NFR=Non-functional requirement; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; AMLC=Anti-Money Laundering Council; AMLA=Anti-Money Laundering Act (RA 9160, as amended); DPA=Data Privacy Act of 2012 (RA 10173); EOPT=Ease of Paying Taxes Act (RA 11976); LTO=Land Transportation Office; PSGC=Philippine Standard Geographic Code; KYC=Know your customer; CDD=Customer due diligence; EDD=Enhanced due diligence; PEP=Politically exposed person; CTR=Covered transaction report; STR=Suspicious transaction report; RFQ=Request for quotation; CTPL=Compulsory third party liability; COC=Certificate of cover; LOA=Letter of authority; PDC=Post-dated cheque; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; DN=Debit note; GL=General ledger; TB=Trial balance; VAT=Value-added tax; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; QAP=Quarterly Alphalist of Payees; SAWT=Summary Alphalist of Withholding Taxes; SLSP=Summary List of Sales and Purchases; CAS=Computerized accounting system; EIS=Electronic Invoicing System; SoD=Segregation of duties; DPO=Data protection officer; UAT=User acceptance test
 ---
 
@@ -55,6 +55,7 @@ The requirements are those of a typical broker (one to many branches, retail and
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 04 October 2026 | Initial issue. Requirements of the 15 process areas, with the modules of the current release (AML/CFT, IC and NPC compliance, BIR returns, cover notes, computed cancellation, post-dated cheques, instalment invoices, claim documents, motor repairs, accounts payable, fixed assets, distribution channels, dealer programmes, fleets, marine open covers, facultative reinsurance, campaigns, Report Builder, integrations, branding and e-signatures, go-live data workbench, environment comparison and data masking). The chapter Functional specification by module. |
+| 1.0.1 | 04 October 2026 | Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026) |
 
 # Business context
 
@@ -626,7 +627,7 @@ No separate functional specification is issued for BrokerVerse OOTB: this chapte
 | My Work | Tabs My Items, My Team, My Tasks, Calendar; `myWork.due_soon_days`; `myWork.auto_tasks`; `myWork.overdue_task_alert` |
 | Integrations | Connectors SMS_SEMAPHORE, SMS_GLOBE_LABS, SMS_GENERIC, VIBER_BUSINESS, CTPL_AUTH, LTO_FEED, INSURER_API, BANK_FILES; mode test or live (live refused without endpoint and credential variables); retry with backoff; signed inbound messages; job integration-outbox every 2 minutes; templates RENEWAL_NOTICE, PAYMENT_REMINDER, CLAIM_UPDATE, CTPL_AUTHENTICATED, RENEWAL_NOTICE_VIBER with consent check |
 | Reports | 39 catalogue reports; `reports.max_rows` 50,000; links 72 hours; files kept 90 days; Report Builder datasets Policies, Clients, Bills, Claims, Commissions with `report_builder.preview_rows`, `report_builder.max_rows`; BI extract `bi.extract_datasets`, `bi.extract_folder`, `bi.extract_keep_runs` |
-| Branding | Theme presets and custom colours; WCAG AA contrast refused below 4.5:1 for the main pairs; safe font list; images uploaded (SVG without scripts); brand packs .zip or .json; client brand packs only with the client's written permission |
+| Branding | Theme presets and custom colours; WCAG AA contrast refused below 4.5:1 for the main pairs; safe font list; images uploaded (SVG without scripts); brand packs .zip or .json; a client brand pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT, which covers the use of its marks there |
 | Go-live data | Configuration and migration workbooks with Instructions and Lists sheets; row 2 sample; natural keys; trial run in a rolled-back transaction; load in one transaction; migration refused without `golive.cutover_date` and after `golive.locked`; reconciliation workbook; comparison of environments with environment-specific fields excluded |
 | Release and masking | Pipeline ci, deploy, rollback; environments Dev, SIT, UAT, Pre-Prod, Production; transaction reset `npm run reset:transactions` refused after the go-live lock; masking `npm run mask:data` with the safety guards of the masking procedure |
 

@@ -1,12 +1,12 @@
 ---
 title: OOTB Strategy and Playbook
 subtitle: iNXT BrokerVerse
-version: 1.1.2
+version: 1.1.3
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-change: Version 1.1.2: optional services confirmed by management on 04 October 2026 (decisions 11 and 12 taken): module activation and connector go-live are standard optional services and the regulator and partner items are optional modules and partner services; package totals unchanged. Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (product at a glance). Version 1.1: product at a glance, boundary, standard integrations, modules, optional services and roadmap updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, the integration framework, dealer programmes, branding, My Work and the Report Builder; new decisions on pricing of the new modules
+change: Version 1.1.3: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.2: optional services confirmed by management on 04 October 2026 (decisions 11 and 12 taken): module activation and connector go-live are standard optional services and the regulator and partner items are optional modules and partner services; package totals unchanged. Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (product at a glance). Version 1.1: product at a glance, boundary, standard integrations, modules, optional services and roadmap updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, the integration framework, dealer programmes, branding, My Work and the Report Builder; new decisions on pricing of the new modules
 open_item: Owner decisions listed in the last chapter
 acronyms: AM=Account manager; AMLC=Anti-Money Laundering Council; CTPL=Compulsory third party liability; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; LTO=Land Transportation Office; AMC=Annual Maintenance Contract; AML=Anti-money laundering; API=Application programming interface; ARR=Annual recurring revenue; BIR=Bureau of Internal Revenue; CAB=Change advisory board; CEO=Chief executive officer; CR=Change request; DPA=Data Processing Agreement; Dev=Development environment; DPO=Data protection officer; DSO=Days sales outstanding; eFPS=Electronic Filing and Payment System; IC=Insurance Commission; KPI=Key performance indicator; L1/L2/L3=Support levels 1, 2 and 3; LOB=Line of business; LoA=Letter of Award; MSA=Master Services Agreement; NDA=Non-disclosure agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PM=Project manager; RACI=Responsible, Accountable, Consulted, Informed; RCA=Root-cause analysis; SaaS=Software as a service; SH=Sales head; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SMS=Short message service; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
@@ -589,7 +589,7 @@ The plan starts on the date management approves this playbook (Day 1). Owners ar
 | No load test yet | Performance risk for Large clients | Load test before the first Large go-live |
 | Partner certification takes longer than the project | Connectors stay in test mode at go-live | Start partner contracts at kick-off (welcome e-mail); go live without the connector and switch it on after |
 | Regulatory settings taken as advice | Liability if a threshold, code or tax treatment is wrong | Every delivered value is marked for the compliance officer, DPO or tax adviser to confirm; the documents say so |
-| Client brand packs with third-party marks | Trademark exposure | Use only in that client's environments with written permission; never in demos |
+| Client brand packs carrying a client's marks | Trademark exposure | Client brand pack applied only in that client's environments under its contract with iorta TechNXT; never in demonstrations to other prospects |
 
 # Decisions for the owner
 

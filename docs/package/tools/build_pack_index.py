@@ -136,7 +136,7 @@ FOLDERS = [
 
 # Sub-folders listed as one entry when they exist: (folder, sub-folder, purpose, audiences, client-facing, stages)
 SUBFOLDERS = [
-    ('04_Onboarding_and_Go_Live', 'Brand_Packs', 'Brand packs to import in Theme and Branding; a client pack carrying a third party\'s marks is used only in that client\'s environments, with its written permission', [D, P], False, [IMP, GO]),
+    ('04_Onboarding_and_Go_Live', 'Brand_Packs', 'Brand packs to import in Theme and Branding; a client pack carries the marks of a client of iorta TechNXT and is applied only in that client\'s environments, under the client\'s contract with iorta TechNXT', [D, P], False, [IMP, GO]),
     ('05_Delivery', 'Upload_Templates', 'Standard upload templates for the go-live data, one per master or opening balance, and the go-live configuration and migration workbooks', [D, B, U], True, [IMP, GO]),
 ]
 

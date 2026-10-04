@@ -83,7 +83,7 @@ TASKS = [
     ('D3', 'DIS', 'Integration workshop: banks, SMS or Viber, CTPL authentication and LTO, insurers, payment gateway, BIR EIS, AMLC reporting',
      IORTA, 'iorta TechNXT technical lead', 'Integration list with partner contacts', [1, 2, 2, 3], [('M4', 'FS', 0)], GOLIVE, N),
     ('D4', 'DIS', 'Branding workshop: theme, logo, sign-in picture, documents, e-signatures, brand pack choice', IORTA,
-     'iorta TechNXT consultant', 'Branding decisions; client marks permission needed or not', [1, 1, 1, 2], [('M4', 'FS', 0)], GOLIVE, N),
+     'iorta TechNXT consultant', 'Branding decisions; client brand pack needed or not, with its contract reference', [1, 1, 1, 2], [('M4', 'FS', 0)], GOLIVE, N),
     ('D5', 'DIS', 'Configuration decisions and fit-gap register signed', BROKER, 'Broker process owners', 'Signed fit-gap register',
      [0, 0, 0, 0], [('D1', 'FS', 0), ('D2', 'FS', 0), ('D3', 'FS', 0), ('D4', 'FS', 0), ('M2', 'FS', 0)], GOLIVE, N),
     # ------------------------------------------------------------------ client inputs
@@ -118,8 +118,8 @@ TASKS = [
      'Broker tax adviser', 'Written confirmation', [5, 5, 8, 10], [('C3', 'SS', [3, 5, 8, 10])], GOLIVE, N),
     ('R7', 'REG', 'Screening lists: UN and AMLC lists obtained; PEP list licence from a provider (when used)', BROKER,
      'Broker compliance officer', 'List files and licence', [10, 12, 15, 15], [('D2', 'FS', 0)], GOLIVE, N),
-    ('R8', 'REG', 'Written permission to use client marks (only with a client brand pack)', BROKER, 'Broker sponsor',
-     'Permission letter on the engagement file', [3, 5, 5, 5], [('D4', 'FS', 0)], FEATURE, N),
+    ('R8', 'REG', 'Contract reference covering the use of the client\'s marks on the engagement file (client brand pack only)', BROKER, 'Broker sponsor',
+     'Contract reference on the engagement file', [3, 5, 5, 5], [('D4', 'FS', 0)], FEATURE, N),
     # ------------------------------------------------------------------ configuration
     ('C1', 'CFG', 'Configuration kit filled: company, settings, PSGC addresses, branches, users, chart of accounts, banks, insurers, products, commission, taxes, authority limits, numbering',
      BROKER, 'Broker key users with iorta TechNXT consultants', 'Filled configuration workbook', [5, 8, 12, 15],
@@ -144,8 +144,8 @@ TASKS = [
     ('B1', 'BRD', 'Theme and Branding, letterhead, sign-in page, branded documents and e-mails; e-signatures captured and mapped; brand pack exported',
      IORTA, 'iorta TechNXT consultant with the broker System Administrator', 'Brand pack file; sample documents approved', [3, 4, 5, 6],
      [('C2', 'FS', 0), ('I8', 'FS', 0)], GOLIVE, N),
-    ('B2', 'BRD', 'Client brand pack applied (only with written permission, for example the Toyota Insurance Services pack)', IORTA,
-     'iorta TechNXT consultant', 'Pack applied; permission on file', [1, 1, 1, 1], [('B1', 'FS', 0), ('R8', 'FS', 0)], FEATURE, N),
+    ('B2', 'BRD', 'Client brand pack applied only in that client\'s environments under its contract with iorta TechNXT (for example the Toyota Insurance Services pack)', IORTA,
+     'iorta TechNXT consultant', 'Pack enabled with the engagement confirmation; contract reference on file', [1, 1, 1, 1], [('B1', 'FS', 0), ('R8', 'FS', 0)], FEATURE, N),
     # ------------------------------------------------------------------ integrations with partners
     ('N1', 'INT', 'E-mail: SMTP set, password reset and approval link tested', IORTA, 'iorta TechNXT DevOps lead',
      'Test e-mails received', [1, 1, 2, 2], [('E6', 'FS', 0), ('I4', 'FS', 0)], GOLIVE, N),

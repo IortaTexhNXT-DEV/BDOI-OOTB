@@ -167,7 +167,7 @@ The delivery head, project managers and implementation consultants.
 | Go No Go and Management Register (INTERNAL) | `08_Management` | Release recommendation, go-live conditions, risks, plans and decisions needed |
 | OOTB Strategy and Playbook INTERNAL (INTERNAL) | `08_Management` | How iorta TechNXT sells, delivers, supports and evolves the OOTB product |
 | OOTB Documentation Pack Index | `08_Management` | This index |
-| Brand Packs (INTERNAL) | `04_Onboarding_and_Go_Live` | Brand packs to import in Theme and Branding; a client pack carrying a third party's marks is used only in that client's environments, with its written permission |
+| Brand Packs (INTERNAL) | `04_Onboarding_and_Go_Live` | Brand packs to import in Theme and Branding; a client pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT |
 | Upload Templates | `05_Delivery` | Standard upload templates for the go-live data, one per master or opening balance, and the go-live configuration and migration workbooks |
 | `docs/onboarding/GO_LIVE_DATA_SETUP.md` | Code repository | Order of set-up from company to opening balances |
 | `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md` | Code repository | Configuration and migration workbooks, validation, load, reconciliation, environment comparison |
@@ -237,7 +237,7 @@ L2 application support, L3 engineering on call and DevOps.
 | Go No Go and Management Register (INTERNAL) | `08_Management` | Release recommendation, go-live conditions, risks, plans and decisions needed |
 | OOTB Strategy and Playbook INTERNAL (INTERNAL) | `08_Management` | How iorta TechNXT sells, delivers, supports and evolves the OOTB product |
 | OOTB Documentation Pack Index | `08_Management` | This index |
-| Brand Packs (INTERNAL) | `04_Onboarding_and_Go_Live` | Brand packs to import in Theme and Branding; a client pack carrying a third party's marks is used only in that client's environments, with its written permission |
+| Brand Packs (INTERNAL) | `04_Onboarding_and_Go_Live` | Brand packs to import in Theme and Branding; a client pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT |
 | `docs/onboarding/SUPPORT_AND_ESCALATION.md` | Code repository | How to report an issue, severities, support procedures by area |
 | `docs/onboarding/GO_LIVE_DATA_WORKBENCH.md` | Code repository | Configuration and migration workbooks, validation, load, reconciliation, environment comparison |
 | `docs/onboarding/BRANDING_AND_SIGNATURES.md` | Code repository | Theme, brand packs, e-signatures and their support procedures |
@@ -368,7 +368,7 @@ iorta TechNXT management, and the broker's management for client-facing files.
 | `BrokerVerse_Data_Migration_and_Cutover_Plan`<br>docx, pdf | Go-live data, workbench, mock loads, reconciliation and cutover | Delivery and PM, Business analysts, QA<br>Client-facing | Implementation, Go-live |
 | `BrokerVerse_Environment_Strategy_and_Production_Rollout`<br>docx, pdf | Environments, promotion of code, scripts and configuration, release pipeline, cutover runbook and RACI | Delivery and PM, Developers, Support, Management<br>Client-facing | Implementation, Go-live |
 | `BrokerVerse_Privacy_Impact_Assessment_and_Records_of_Processing_Templates`<br>docx, pdf | PIA and records of processing pre-filled for the broker DPO | Business analysts, Delivery and PM, Management<br>Client-facing | Implementation, Go-live |
-| `Brand_Packs/`<br>folder | Brand packs to import in Theme and Branding; a client pack carrying a third party's marks is used only in that client's environments, with its written permission | Delivery and PM, Support<br>**INTERNAL** | Implementation, Go-live |
+| `Brand_Packs/`<br>folder | Brand packs to import in Theme and Branding; a client pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT | Delivery and PM, Support<br>**INTERNAL** | Implementation, Go-live |
 
 ## Delivery (05_Delivery)
 
@@ -436,7 +436,7 @@ These files never leave iorta TechNXT:
 - `08_Management/BrokerVerse_Go_No_Go_and_Management_Register` (docx, pdf): Release recommendation, go-live conditions, risks, plans and decisions needed.
 - `08_Management/iNXT_BrokerVerse_OOTB_Strategy_and_Playbook_INTERNAL` (docx, pdf): How iorta TechNXT sells, delivers, supports and evolves the OOTB product.
 - `08_Management/BrokerVerse_PH_Fit_and_ASEAN_Rollout_Assessment` (docx, pdf, xlsx): Philippine process fit by area with evidence, gaps ranked, and the change needed for each ASEAN country.
-- `04_Onboarding_and_Go_Live/Brand_Packs/` (folder): Brand packs to import in Theme and Branding; a client pack carrying a third party's marks is used only in that client's environments, with its written permission.
+- `04_Onboarding_and_Go_Live/Brand_Packs/` (folder): Brand packs to import in Theme and Branding; a client pack carries the marks of a client of iorta TechNXT and is applied only in that client's environments, under the client's contract with iorta TechNXT.
 
 # Building the documents
 

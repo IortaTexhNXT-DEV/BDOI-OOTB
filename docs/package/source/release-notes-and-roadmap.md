@@ -1,12 +1,12 @@
 ---
 title: Release Notes and Product Roadmap
 subtitle: BrokerVerse OOTB Release 1.1
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (packages B and G merged, migrations to 0331, 1,113 backend tests in 104 files, 175 front-end tests in 33 suites, UAT cycle of 433 steps, rehearsal of 52 checks, defects BV-DEF-009 to 014 closed). Version 1.1: release 1.1 entry (migrations 0243 to 0329): Philippine masters, enterprise menu and help, My Work, Product Configurator in the flow, audit trail, go-live workbench, release pipeline, AML/CFT, IC and NPC compliance, BIR, operations and accounting, distribution, integrations, branding and e-signatures; upgrade notes; roadmap of partner certifications
+change: Version 1.1.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (packages B and G merged, migrations to 0331, 1,113 backend tests in 104 files, 175 front-end tests in 33 suites, UAT cycle of 433 steps, rehearsal of 52 checks, defects BV-DEF-009 to 014 closed). Version 1.1: release 1.1 entry (migrations 0243 to 0329): Philippine masters, enterprise menu and help, My Work, Product Configurator in the flow, audit trail, go-live workbench, release pipeline, AML/CFT, IC and NPC compliance, BIR, operations and accounting, distribution, integrations, branding and e-signatures; upgrade notes; roadmap of partner certifications
 open_item: Release tag of the 1.1 build to be confirmed; partner certifications per broker; roadmap dates indicative
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); EOPT=Ease of Paying Taxes Act (RA 11976); EIS=Electronic Invoicing System; CAS=Computerized accounting system; CTPL=Compulsory Third Party Liability; COC=Certificate of cover; LTO=Land Transportation Office; LOA=Letter of authority; PDC=Post-dated cheque; PSGC=Philippine Standard Geographic Code; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; CTR=Covered transaction report; STR=Suspicious transaction report; EDD=Enhanced due diligence; PEP=Politically exposed person; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; ATC=Alphanumeric tax code; DAT=Data file format of the BIR alphalists; KYC=Know your customer; OR=Official receipt; JV=Journal voucher; GL=General ledger; SoD=Segregation of duties; TOTP=Time-based one-time password; API=Application programming interface; BI=Business intelligence; AMC=Annual Maintenance Contract; CAB=Change advisory board; CR=Change request; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test
 ---
@@ -55,7 +55,7 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | My Work: My Items, My Team by reporting line, My Tasks with reminders, Calendar; reassignment where the module allows it (migration 0253) | Operations > My Work |
 | Product Configurator in the business flow: acceptance rules (refer, decline, loading) with authority, rating factors, document templates with merge fields, market mapping and the governing template applied to quotations (migration 0252) | Product Configurator; quotations |
 | Audit trail as business events: who, when, from which screen, each changed field with old and new value; History panel on records; filters and Excel export (migration 0247) | Master > System Configuration > Audit Trail |
-| Theme and Branding: themes, logo, favicon, sign-in picture, brand packs (the optional Toyota Insurance Services pack only with the client's written permission); branded documents, report files and e-mails; e-signatures captured with consent and mapped to document slots (migration 0254) | Master > System Configuration > System Settings > Theme and Branding; Master > Insurance Management > Signatories; My Profile |
+| Theme and Branding: themes, logo, favicon, sign-in picture, brand packs (the optional Toyota Insurance Services pack is a client pack, applied only in that client's environments under its contract with iorta TechNXT); branded documents, report files and e-mails; e-signatures captured with consent and mapped to document slots (migration 0254) | Master > System Configuration > System Settings > Theme and Branding; Master > Insurance Management > Signatories; My Profile |
 
 ## Go-live and release tooling
 
