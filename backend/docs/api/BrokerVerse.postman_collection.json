@@ -5507,7 +5507,7 @@
           ]
         },
         {
-          "name": "Current user profile",
+          "name": "Own profile (My Profile): identity and access (read-only), contact, personal details and Philippine address",
           "request": {
             "method": "GET",
             "header": [],
@@ -5521,7 +5521,7 @@
                 "profile"
               ]
             },
-            "description": "Current user profile\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user"
+            "description": "Own profile (My Profile): identity and access (read-only), contact, personal details and Philippine address\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -5539,7 +5539,7 @@
                     "profile"
                   ]
                 },
-                "description": "Current user profile\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user"
+                "description": "Own profile (My Profile): identity and access (read-only), contact, personal details and Philippine address\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -5551,12 +5551,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"roles\": [\n      \"system-admin\"\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"juan.santos\",\n    \"displayName\": \"Juan Santos\",\n    \"roles\": [\n      \"underwriting\"\n    ],\n    \"roleNames\": [\n      \"Underwriter\"\n    ],\n    \"branchCode\": \"MNL\",\n    \"branchName\": \"Manila Head Office\",\n    \"designation\": \"Underwriter\",\n    \"reportingToName\": \"Maria Reyes\",\n    \"email\": \"juan@example.com\",\n    \"phone\": \"09171234567\",\n    \"dateOfBirth\": \"1990-05-14\",\n    \"gender\": \"male\",\n    \"addressLine\": \"12 Rizal St.\",\n    \"barangay\": \"San Antonio\",\n    \"city\": \"Makati City\",\n    \"province\": \"Metro Manila\",\n    \"zipCode\": \"1203\",\n    \"country\": \"Philippines\",\n    \"status\": \"active\",\n    \"lastLoginAt\": \"2026-10-01T01:00:00Z\",\n    \"previousLoginAt\": \"2026-09-30T01:00:00Z\",\n    \"emailEditable\": false\n  }\n}"
             }
           ]
         },
         {
-          "name": "Update own profile",
+          "name": "Update own profile: name, contact number (Philippine format), date of birth, gender and address. The e-mail address only when security.profile_email_editable is on; user ID, roles, branch, designation and reporting line are changed in User Management",
           "request": {
             "method": "PUT",
             "header": [
@@ -5575,10 +5575,10 @@
                 "profile"
               ]
             },
-            "description": "Update own profile\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user",
+            "description": "Update own profile: name, contact number (Philippine format), date of birth, gender and address. The e-mail address only when security.profile_email_editable is on; user ID, roles, branch, designation and reporting line are changed in User Management\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"displayName\": \"Juan Santos\",\n  \"email\": \"juan@example.com\",\n  \"phone\": \"+63 900 000 0000\"\n}",
+              "raw": "{\n  \"displayName\": \"Juan Santos\",\n  \"phone\": \"0917 123 4567\",\n  \"dateOfBirth\": \"1990-05-14\",\n  \"gender\": \"male\",\n  \"addressLine\": \"12 Rizal St.\",\n  \"barangay\": \"San Antonio\",\n  \"city\": \"Makati City\",\n  \"province\": \"Metro Manila\",\n  \"zipCode\": \"1203\",\n  \"country\": \"Philippines\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5607,10 +5607,10 @@
                     "profile"
                   ]
                 },
-                "description": "Update own profile\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user",
+                "description": "Update own profile: name, contact number (Philippine format), date of birth, gender and address. The e-mail address only when security.profile_email_editable is on; user ID, roles, branch, designation and reporting line are changed in User Management\n\nFront-end touchpoint: Profile\n\nAccess: Any authenticated user",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"displayName\": \"Juan Santos\",\n  \"email\": \"juan@example.com\",\n  \"phone\": \"+63 900 000 0000\"\n}",
+                  "raw": "{\n  \"displayName\": \"Juan Santos\",\n  \"phone\": \"0917 123 4567\",\n  \"dateOfBirth\": \"1990-05-14\",\n  \"gender\": \"male\",\n  \"addressLine\": \"12 Rizal St.\",\n  \"barangay\": \"San Antonio\",\n  \"city\": \"Makati City\",\n  \"province\": \"Metro Manila\",\n  \"zipCode\": \"1203\",\n  \"country\": \"Philippines\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -5628,7 +5628,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Profile updated\"\n}"
             }
           ]
         },

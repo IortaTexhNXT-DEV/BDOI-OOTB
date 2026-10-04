@@ -1165,22 +1165,52 @@
     ""maxAgeDays"": 90
   }
 }"
-76,Auth,GET,/api/auth/profile,Current user profile,Profile,Bearer JWT,Any authenticated user,,"{
+76,Auth,GET,/api/auth/profile,"Own profile (My Profile): identity and access (read-only), contact, personal details and Philippine address",Profile,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": {
     ""userId"": ""usr_1"",
-    ""username"": ""BrokerVerse"",
+    ""username"": ""juan.santos"",
+    ""displayName"": ""Juan Santos"",
     ""roles"": [
-      ""system-admin""
-    ]
+      ""underwriting""
+    ],
+    ""roleNames"": [
+      ""Underwriter""
+    ],
+    ""branchCode"": ""MNL"",
+    ""branchName"": ""Manila Head Office"",
+    ""designation"": ""Underwriter"",
+    ""reportingToName"": ""Maria Reyes"",
+    ""email"": ""juan@example.com"",
+    ""phone"": ""09171234567"",
+    ""dateOfBirth"": ""1990-05-14"",
+    ""gender"": ""male"",
+    ""addressLine"": ""12 Rizal St."",
+    ""barangay"": ""San Antonio"",
+    ""city"": ""Makati City"",
+    ""province"": ""Metro Manila"",
+    ""zipCode"": ""1203"",
+    ""country"": ""Philippines"",
+    ""status"": ""active"",
+    ""lastLoginAt"": ""2026-10-01T01:00:00Z"",
+    ""previousLoginAt"": ""2026-09-30T01:00:00Z"",
+    ""emailEditable"": false
   }
 }"
-77,Auth,PUT,/api/auth/profile,Update own profile,Profile,Bearer JWT,Any authenticated user,"{
+77,Auth,PUT,/api/auth/profile,"Update own profile: name, contact number (Philippine format), date of birth, gender and address. The e-mail address only when security.profile_email_editable is on; user ID, roles, branch, designation and reporting line are changed in User Management",Profile,Bearer JWT,Any authenticated user,"{
   ""displayName"": ""Juan Santos"",
-  ""email"": ""juan@example.com"",
-  ""phone"": ""+63 900 000 0000""
+  ""phone"": ""0917 123 4567"",
+  ""dateOfBirth"": ""1990-05-14"",
+  ""gender"": ""male"",
+  ""addressLine"": ""12 Rizal St."",
+  ""barangay"": ""San Antonio"",
+  ""city"": ""Makati City"",
+  ""province"": ""Metro Manila"",
+  ""zipCode"": ""1203"",
+  ""country"": ""Philippines""
 }","{
-  ""success"": true
+  ""success"": true,
+  ""message"": ""Profile updated""
 }"
 78,Auth,POST,/api/auth/refresh,Exchange a refresh token for a new access and refresh token (rotation). A rotated token used again revokes the whole sign-in; a password change or reset requires signing in again,Session,Public,Public,"{
   ""refreshToken"": ""<jwt>""

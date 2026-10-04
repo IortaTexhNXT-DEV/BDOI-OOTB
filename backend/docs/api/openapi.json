@@ -7702,7 +7702,7 @@
     "/auth/profile": {
       "get": {
         "operationId": "getAuthProfile",
-        "summary": "Current user profile",
+        "summary": "Own profile (My Profile): identity and access (read-only), contact, personal details and Philippine address",
         "tags": [
           "Auth"
         ],
@@ -7728,11 +7728,74 @@
                         "username": {
                           "type": "string"
                         },
+                        "displayName": {
+                          "type": "string"
+                        },
                         "roles": {
                           "type": "array",
                           "items": {
                             "type": "string"
                           }
+                        },
+                        "roleNames": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "branchCode": {
+                          "type": "string"
+                        },
+                        "branchName": {
+                          "type": "string"
+                        },
+                        "designation": {
+                          "type": "string"
+                        },
+                        "reportingToName": {
+                          "type": "string"
+                        },
+                        "email": {
+                          "type": "string"
+                        },
+                        "phone": {
+                          "type": "string"
+                        },
+                        "dateOfBirth": {
+                          "type": "string"
+                        },
+                        "gender": {
+                          "type": "string"
+                        },
+                        "addressLine": {
+                          "type": "string"
+                        },
+                        "barangay": {
+                          "type": "string"
+                        },
+                        "city": {
+                          "type": "string"
+                        },
+                        "province": {
+                          "type": "string"
+                        },
+                        "zipCode": {
+                          "type": "string"
+                        },
+                        "country": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "lastLoginAt": {
+                          "type": "string"
+                        },
+                        "previousLoginAt": {
+                          "type": "string"
+                        },
+                        "emailEditable": {
+                          "type": "boolean"
                         }
                       }
                     }
@@ -7742,10 +7805,32 @@
                   "success": true,
                   "data": {
                     "userId": "usr_1",
-                    "username": "BrokerVerse",
+                    "username": "juan.santos",
+                    "displayName": "Juan Santos",
                     "roles": [
-                      "system-admin"
-                    ]
+                      "underwriting"
+                    ],
+                    "roleNames": [
+                      "Underwriter"
+                    ],
+                    "branchCode": "MNL",
+                    "branchName": "Manila Head Office",
+                    "designation": "Underwriter",
+                    "reportingToName": "Maria Reyes",
+                    "email": "juan@example.com",
+                    "phone": "09171234567",
+                    "dateOfBirth": "1990-05-14",
+                    "gender": "male",
+                    "addressLine": "12 Rizal St.",
+                    "barangay": "San Antonio",
+                    "city": "Makati City",
+                    "province": "Metro Manila",
+                    "zipCode": "1203",
+                    "country": "Philippines",
+                    "status": "active",
+                    "lastLoginAt": "2026-10-01T01:00:00Z",
+                    "previousLoginAt": "2026-09-30T01:00:00Z",
+                    "emailEditable": false
                   }
                 }
               }
@@ -7762,7 +7847,7 @@
       },
       "put": {
         "operationId": "putAuthProfile",
-        "summary": "Update own profile",
+        "summary": "Update own profile: name, contact number (Philippine format), date of birth, gender and address. The e-mail address only when security.profile_email_editable is on; user ID, roles, branch, designation and reporting line are changed in User Management",
         "tags": [
           "Auth"
         ],
@@ -7778,11 +7863,15 @@
                   "properties": {
                     "success": {
                       "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
                     }
                   }
                 },
                 "example": {
-                  "success": true
+                  "success": true,
+                  "message": "Profile updated"
                 }
               }
             }
@@ -7808,18 +7897,46 @@
                   "displayName": {
                     "type": "string"
                   },
-                  "email": {
+                  "phone": {
                     "type": "string"
                   },
-                  "phone": {
+                  "dateOfBirth": {
+                    "type": "string"
+                  },
+                  "gender": {
+                    "type": "string"
+                  },
+                  "addressLine": {
+                    "type": "string"
+                  },
+                  "barangay": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "province": {
+                    "type": "string"
+                  },
+                  "zipCode": {
+                    "type": "string"
+                  },
+                  "country": {
                     "type": "string"
                   }
                 }
               },
               "example": {
                 "displayName": "Juan Santos",
-                "email": "juan@example.com",
-                "phone": "+63 900 000 0000"
+                "phone": "0917 123 4567",
+                "dateOfBirth": "1990-05-14",
+                "gender": "male",
+                "addressLine": "12 Rizal St.",
+                "barangay": "San Antonio",
+                "city": "Makati City",
+                "province": "Metro Manila",
+                "zipCode": "1203",
+                "country": "Philippines"
               }
             }
           }
