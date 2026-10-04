@@ -46,7 +46,7 @@ import {
 } from './lib/pseudonyms.js';
 import { SYSTEM_TABLES, TRANSACTION_FILE_FOLDERS, TRANSACTION_TABLES } from './lib/table-classification.js';
 import {
-  ENVIRONMENTS, MASKED_AT_KEY, NON_PRODUCTION_ENVIRONMENTS, SYSTEM_ENVIRONMENT_KEY, systemEnvironment,
+  ENVIRONMENTS, MASKED_AT_KEY, NON_PRODUCTION_ENVIRONMENTS, PRODUCTION_IDENTITY_KEY, RESTORED_FROM_KEY, SYSTEM_ENVIRONMENT_KEY, systemEnvironment,
 } from '../src/lib/environment.js';
 import { GO_LIVE_LOCK_KEY, isGoLiveLocked } from '../src/lib/goLiveLock.js';
 
@@ -293,6 +293,45 @@ async function upsertSetting(client, key, value, { group = 'system', label = key
     ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = now()`, [key, JSON.stringify(value), group, label, type, editable]);
 }
 
+/** Where this connection points: database, server address and port, and the cluster identifier (null where not readable). */
+export async function databaseIdentity(client) {
+  const r = (await client.query('SELECT current_database() AS database, host(inet_server_addr()) AS host, inet_server_port() AS port')).rows[0];
+  let systemIdentifier = null;
+  try { systemIdentifier = String((await client.query('SELECT system_identifier FROM pg_control_system()')).rows[0].system_identifier); } catch { /* not granted */ }
+  return { database: r.database, host: r.host || 'local', port: r.port ?? null, systemIdentifier };
+}
+
+const sameIdentity = (a, b) => a && b && a.database === b.database && String(a.host) === String(b.host)
+  && String(a.port) === String(b.port) && (a.systemIdentifier ?? null) === (b.systemIdentifier ?? null);
+
+async function readSetting(client, key) {
+  const r = await client.query('SELECT value FROM app_settings WHERE key = $1', [key]);
+  return r.rows.length ? r.rows[0].value : null;
+}
+
+/**
+ * Register the production database (run once in Production, after go-live): records where production lives
+ * (system.production_identity). A copy restored from it carries this record, so --remark-copy can tell the copy
+ * (different server, port, database or cluster) from production itself.
+ */
+export async function registerProduction(client, { actor = 'system', now = new Date() } = {}) {
+  const marker = await systemEnvironment(client);
+  if (marker !== 'production') {
+    throw new MaskRefused(`Refusing to register: ${SYSTEM_ENVIRONMENT_KEY} is ${marker === null ? 'missing' : `"${marker}"`}; register only the database marked production`, 'NOT_PRODUCTION');
+  }
+  const identity = { ...(await databaseIdentity(client)), registeredAt: now.toISOString(), registeredBy: actor };
+  await client.query('BEGIN');
+  try {
+    await upsertSetting(client, PRODUCTION_IDENTITY_KEY, identity, { label: 'Where the production database lives (set by the masking tool)', type: 'json', editable: false });
+    await client.query(`INSERT INTO audit_log(username, entity, entity_id, action, after_data) VALUES ($1, 'database', 'masking', 'register-production', $2)`, [actor, JSON.stringify(identity)]);
+    await client.query('COMMIT');
+  } catch (e) {
+    await client.query('ROLLBACK').catch(() => {});
+    throw e;
+  }
+  return identity;
+}
+
 async function readPolicy(client) {
   const rows = (await client.query("SELECT key, value FROM app_settings WHERE key LIKE 'security.password_%' OR key = 'limits.password_min_length'")).rows;
   const s = Object.fromEntries(rows.map((r) => [r.key, r.value]));
@@ -338,6 +377,37 @@ async function maskUsers(client, cols, { adminUsername, adminPassword, staffPass
 }
 
 /**
+ * --remark-copy: re-mark a copy restored from production, inside the masking transaction (so a dry run, a refusal or a
+ * failed masking leaves the copy marked production). Guards: the operator typed the name of this database, production
+ * was registered (system.production_identity, carried by the copy) and this connection is not it. Recorded in the audit
+ * trail with the restore source and who ran it.
+ */
+async function remarkRestoredCopy(client, { marker, environment, confirmDatabase, restoreSource, actor, now }) {
+  const here = await databaseIdentity(client);
+  if (!confirmDatabase || confirmDatabase !== here.database) {
+    throw new MaskRefused(`Refusing to re-mark: type the name of the database to re-mark with --confirm-database=<name> (this connection is to "${here.database}")`, 'CONFIRM_DATABASE');
+  }
+  const production = await readSetting(client, PRODUCTION_IDENTITY_KEY);
+  if (!production || typeof production !== 'object') {
+    throw new MaskRefused(`Refusing to re-mark: production was never registered (${PRODUCTION_IDENTITY_KEY} is missing), so this copy cannot be told from production. `
+      + 'Register production once (npm run mask:data -- --register-production, in Production) and restore a new copy, or have the DBA mark this copy by hand (docs/onboarding/DATA_MASKING.md, refresh procedure step 2).', 'NO_PRODUCTION_IDENTITY');
+  }
+  if (sameIdentity(here, production)) {
+    throw new MaskRefused(`Refusing to re-mark: this connection is the registered production database (${here.database} on ${here.host}:${here.port})`, 'PRODUCTION');
+  }
+  const remark = {
+    from: marker, to: environment, database: here.database, host: here.host, port: here.port,
+    restoreSource: String(restoreSource).trim(), productionDatabase: production.database, productionHost: production.host,
+    by: actor, at: now.toISOString(),
+  };
+  await upsertSetting(client, SYSTEM_ENVIRONMENT_KEY, environment, { label: 'Environment of this database' });
+  await upsertSetting(client, RESTORED_FROM_KEY, remark, { label: 'Restore this copy was made from (set by the masking tool)', type: 'json', editable: false });
+  await client.query(`INSERT INTO audit_log(username, entity, entity_id, action, before_data, after_data) VALUES ($1, 'database', 'masking', 'remark', $2, $3)`,
+    [actor, JSON.stringify({ environment: marker }), JSON.stringify(remark)]);
+  return remark;
+}
+
+/**
  * Mask the personal data of the database of `client`, in one transaction. Options: environment (target), salt,
  * execute, maskStaff, keepLocality, adminUsername, adminPassword, staffPassword, actor, now (masking date).
  * Returns { executed, environment, columns, tables, users, settings, verification }. Throws MaskRefused without
@@ -345,19 +415,27 @@ async function maskUsers(client, cols, { adminUsername, adminPassword, staffPass
  */
 export async function maskData(client, {
   environment, salt, execute = false, maskStaff = false, keepLocality = true, adminUsername = 'BrokerVerse', adminPassword = null,
-  staffPassword = null, actor = 'system', now = new Date(), log = () => {},
+  staffPassword = null, actor = 'system', now = new Date(), log = () => {}, remarkCopy = false, confirmDatabase = null, restoreSource = null,
 } = {}) {
   if (!salt || String(salt).length < 16) throw new MaskRefused('Refusing to mask: MASK_SALT is required (a secret of 16 characters or more, kept only for the run)', 'MISSING_SALT');
   if (!environment || !NON_PRODUCTION_ENVIRONMENTS.includes(environment)) {
     throw new MaskRefused(`Refusing to mask: --environment must name the target, one of ${NON_PRODUCTION_ENVIRONMENTS.join(', ')}`, 'BAD_ENVIRONMENT');
   }
   if (execute && !adminPassword) throw new MaskRefused('Refusing to mask: MASK_ADMIN_PASSWORD is required (the password of the administrator who keeps sign-in)', 'MISSING_ADMIN_PASSWORD');
+  if (remarkCopy && !String(restoreSource || '').trim()) {
+    throw new MaskRefused('Refusing to re-mark: --restore-source is required (the backup or snapshot the copy was restored from)', 'MISSING_RESTORE_SOURCE');
+  }
   const m = new Masker({ salt, maskStaff, keepLocality, referenceDate: now, fileFolders: TRANSACTION_FILE_FOLDERS });
 
   await client.query('BEGIN');
   try {
-    const marker = await systemEnvironment(client);
+    let marker = await systemEnvironment(client);
     const locked = await isGoLiveLocked(client);
+    let remark = null;
+    if (remarkCopy && (marker === 'production' || (marker === null && locked))) {
+      remark = await remarkRestoredCopy(client, { marker, environment, confirmDatabase, restoreSource, actor, now });
+      marker = environment;
+    }
     if (marker === 'production' || (marker === null && locked)) {
       throw new MaskRefused(`Refusing to mask: this database is marked production (${marker === null ? `${GO_LIVE_LOCK_KEY} is on and ${SYSTEM_ENVIRONMENT_KEY} is missing` : `${SYSTEM_ENVIRONMENT_KEY} = production`}). `
         + 'Mask only a restored copy: the DBA marks the copy first (docs/onboarding/DATA_MASKING.md, refresh procedure step 2).', 'PRODUCTION');
@@ -401,7 +479,7 @@ export async function maskData(client, {
       await upsertSetting(client, EMAIL_SENDING_KEY, false, { group: 'notification', label: 'Send queued e-mail', type: 'boolean' });
       if (columns.has('audit_log')) {
         await client.query(`INSERT INTO audit_log(username, entity, entity_id, action, after_data) VALUES ($1, 'database', 'masking', 'mask', $2)`, [actor, JSON.stringify({
-          environment, maskedAt, previousEnvironment: marker, maskStaff, keepLocality, admin: adminUsername, users,
+          environment, maskedAt, previousEnvironment: remark ? remark.from : marker, remark, maskStaff, keepLocality, admin: adminUsername, users,
           columns: report.map((r) => ({ table: r.table, column: r.column, rule: r.rule, changed: r.changed })),
           tables: tables.map((t) => ({ table: t.table, rows: t.rows })),
         })]);
@@ -411,7 +489,7 @@ export async function maskData(client, {
     const verification = execute ? await verifyMasked(client, { keptEmails: m.keptEmails, inTransaction: true }) : null;
     if (execute) await client.query('COMMIT');
     else await client.query('ROLLBACK');
-    return { executed: execute, environment, previousEnvironment: marker, columns: report, tables, users, settings, verification, masker: m };
+    return { executed: execute, environment, previousEnvironment: remark ? remark.from : marker, remark, columns: report, tables, users, settings, verification, masker: m };
   } catch (e) {
     await client.query('ROLLBACK').catch(() => {});
     throw e;
@@ -522,7 +600,10 @@ export function maskStorage(storageDir, m, { purge = false, execute = false } = 
 // ------------------------------------------------------------------------------------------------ command line
 
 export function parseArgs(argv) {
-  const opts = { execute: false, environment: null, maskStaff: false, keepLocality: true, adminUsername: 'BrokerVerse', purgeFiles: false, storage: null, verifyOnly: false, help: false };
+  const opts = {
+    execute: false, environment: null, maskStaff: false, keepLocality: true, adminUsername: 'BrokerVerse', purgeFiles: false, storage: null, verifyOnly: false, help: false,
+    remarkCopy: false, confirmDatabase: null, restoreSource: null, registerProduction: false,
+  };
   for (const a of argv) {
     if (a === '--execute') opts.execute = true;
     else if (a === '--dry-run') opts.execute = false;
@@ -533,16 +614,23 @@ export function parseArgs(argv) {
     else if (a === '--purge-files') opts.purgeFiles = true;
     else if (a.startsWith('--storage=')) opts.storage = a.slice(10).trim();
     else if (a === '--verify-only') opts.verifyOnly = true;
+    else if (a === '--remark-copy') opts.remarkCopy = true;
+    else if (a.startsWith('--confirm-database=')) opts.confirmDatabase = a.slice(19).trim();
+    else if (a.startsWith('--restore-source=')) opts.restoreSource = a.slice(17).trim();
+    else if (a === '--register-production') opts.registerProduction = true;
     else if (a === '-h' || a === '--help') opts.help = true;
     else throw new Error(`unknown option ${a}`);
   }
   if (opts.purgeFiles && !opts.storage) throw new Error('--purge-files needs --storage=<upload folder of the copy>');
+  if (opts.remarkCopy && (!opts.confirmDatabase || !opts.restoreSource)) throw new Error('--remark-copy needs --confirm-database=<name of the copy> and --restore-source=<backup or snapshot>');
   return opts;
 }
 
 const USAGE = `Usage: CONFIRM_MASK=yes MASK_SALT=<secret> [MASK_ADMIN_PASSWORD=<pw>] [MASK_STAFF_PASSWORD=<pw>] npm run mask:data -- --environment=<${NON_PRODUCTION_ENVIRONMENTS.join('|')}>
          [--dry-run | --execute] [--admin=<username>] [--mask-staff] [--mask-locality] [--storage=<upload folder of the copy> [--purge-files]]
-       npm run mask:data -- --verify-only`;
+         [--remark-copy --confirm-database=<name of the copy> --restore-source=<backup or snapshot>]
+       npm run mask:data -- --verify-only
+       npm run mask:data -- --register-production   (once, in Production)`;
 
 function printVerification(v, out) {
   for (const k of v.kept) out(`  kept: ${k.table}.${k.column} ${k.count} ${k.kind}`);
@@ -558,6 +646,21 @@ export async function main(argv = process.argv.slice(2), env = process.env, { ou
   let opts;
   try { opts = parseArgs(argv); } catch (e) { err(e.message); err(USAGE); return 2; }
   if (opts.help) { out(USAGE); return 0; }
+  if (opts.registerProduction) {
+    const { pool } = await import('../src/db/pool.js');
+    const client = await pool.connect();
+    try {
+      const id = await registerProduction(client, { actor: env.MASK_ACTOR || env.USER || 'system' });
+      out(`Registered production: ${id.database} on ${id.host}:${id.port}${id.systemIdentifier ? ` (cluster ${id.systemIdentifier})` : ''}`);
+      return 0;
+    } catch (e) {
+      if (e instanceof MaskRefused) { err(e.message); return 3; }
+      throw e;
+    } finally {
+      client.release();
+      await pool.end();
+    }
+  }
   if (!opts.verifyOnly && env.CONFIRM_MASK !== 'yes') {
     err('Refusing to run: set CONFIRM_MASK=yes to confirm that DATABASE_URL is a restored COPY whose personal data is to be masked (dry run by default, --execute to mask).');
     return 2;
@@ -582,11 +685,13 @@ export async function main(argv = process.argv.slice(2), env = process.env, { ou
         environment: opts.environment, salt: env.MASK_SALT, execute: opts.execute, maskStaff: opts.maskStaff, keepLocality: opts.keepLocality,
         adminUsername: opts.adminUsername, adminPassword: env.MASK_ADMIN_PASSWORD || null, staffPassword: env.MASK_STAFF_PASSWORD || null,
         actor: env.MASK_ACTOR || env.USER || 'system', log: () => {},
+        remarkCopy: opts.remarkCopy, confirmDatabase: opts.confirmDatabase, restoreSource: opts.restoreSource,
       });
     } catch (e) {
       if (e instanceof MaskRefused) { err(e.message); return 3; }
       throw e;
     }
+    if (r.remark) out(`${r.executed ? 'Re-marked' : 'DRY RUN: would re-mark'} copy ${r.remark.database} from production to ${r.remark.to} (restored from ${r.remark.restoreSource})`);
     out(`${r.executed ? 'Masked' : 'DRY RUN: would mask'} database ${db} (${r.previousEnvironment ?? 'no environment marker'} -> ${r.environment}):`);
     for (const c of r.columns) out(`  ${`${c.table}.${c.column}`.padEnd(48)} ${c.rule.padEnd(12)} ${String(c.changed).padStart(8)} of ${c.values}`);
     for (const t of r.tables) out(`  ${t.table.padEnd(48)} ${'emptied'.padEnd(12)} ${String(t.rows).padStart(8)} row(s)`);

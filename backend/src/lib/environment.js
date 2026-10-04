@@ -9,6 +9,8 @@
  */
 export const SYSTEM_ENVIRONMENT_KEY = 'system.environment';
 export const MASKED_AT_KEY = 'system.masked_at';
+export const PRODUCTION_IDENTITY_KEY = 'system.production_identity';
+export const RESTORED_FROM_KEY = 'system.restored_from';
 export const ENVIRONMENTS = ['dev', 'sit', 'uat', 'preprod', 'training', 'production'];
 export const NON_PRODUCTION_ENVIRONMENTS = ENVIRONMENTS.filter((e) => e !== 'production');
 

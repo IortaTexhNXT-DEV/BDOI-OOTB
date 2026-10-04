@@ -58,19 +58,34 @@ Rules:
 
 1. **Backup.** Take a production backup (`pg_dump -Fc`) with the normal backup procedure. Note its time.
 2. **Restore to the copy.** Restore it into the target database (a new, empty database on the non-production server;
-   never into production). Keep the API of the target **stopped**. Then mark the copy as what it is; a restored
-   database carries the production marker and the tool refuses to run until this is done:
-   ```sql
-   -- connected to the COPY (check: SELECT current_database();)
-   UPDATE app_settings SET value = '"uat"' WHERE key = 'system.environment';
-   ```
+   never into production). Keep the API of the target **stopped**. A restored database carries the production marker
+   and the tool refuses to run until the copy is re-marked. There are two ways:
+   - **Automatic (recommended): `--remark-copy`** in steps 3 and 4. The tool re-marks the copy and masks it in the same
+     transaction, so a dry run, a refusal or a failed masking leaves the copy marked production. It needs the name of
+     the copy typed again (`--confirm-database=<name>`, checked against `current_database()`) and the backup it was
+     restored from (`--restore-source=<file or snapshot>`). It refuses on production itself: production is registered
+     once after go-live (below), the copy carries that record, and the tool refuses when the server, port, database and
+     cluster of the connection are the registered ones. The re-mark is kept in `system.restored_from` (from, to,
+     copy, restore source, production server, who and when) and in the audit trail (entity `database`, action
+     `remark`).
+   - **By hand (the DBA):**
+     ```sql
+     -- connected to the COPY (check: SELECT current_database();)
+     UPDATE app_settings SET value = '"uat"' WHERE key = 'system.environment';
+     ```
    Restore the client file storage of the copy only if the testers need files; otherwise start it empty.
+
+   **Register production once** (System Administrator or DBA, in Production, after the marker is set to `production`
+   at go-live): `npm run mask:data -- --register-production`. It records server, port, database and cluster identifier
+   in `system.production_identity` (audit action `register-production`). Without it `--remark-copy` refuses
+   (`NO_PRODUCTION_IDENTITY`) and the copy is re-marked by hand.
 3. **Dry run.** Check what will change:
    ```bash
    cd backend
    export DATABASE_URL=postgres://...copy...
    export MASK_SALT="$(openssl rand -base64 32)"        # a new secret per refresh; never stored, never reused
-   CONFIRM_MASK=yes npm run mask:data -- --environment=uat
+   CONFIRM_MASK=yes npm run mask:data -- --environment=uat \
+       --remark-copy --confirm-database=bv_uat --restore-source=prod-2026-10-01.dump   # only for a copy still marked production
    ```
    It prints, per table and column, the number of values that would change, the tables that would be emptied and what
    happens to the users.
@@ -79,7 +94,8 @@ Rules:
    export MASK_ADMIN_PASSWORD='...'                      # the administrator who keeps sign-in
    export MASK_STAFF_PASSWORD='...'                      # optional: shared password for the other users
    CONFIRM_MASK=yes npm run mask:data -- --environment=uat --execute \
-       --admin=BrokerVerse --storage=/srv/brokerverse-uat/uploads [--purge-files] [--mask-staff] [--mask-locality]
+       --admin=BrokerVerse --storage=/srv/brokerverse-uat/uploads [--purge-files] [--mask-staff] [--mask-locality] \
+       [--remark-copy --confirm-database=bv_uat --restore-source=prod-2026-10-01.dump]
    unset MASK_SALT MASK_ADMIN_PASSWORD MASK_STAFF_PASSWORD
    ```
    Everything in the database is done in one transaction: on any error nothing is changed.
@@ -106,6 +122,10 @@ Options:
 | `--storage=<folder>` | The upload folder **of the copy**: the client files there are replaced by a placeholder (a one-page PDF or a blank image) saved under the masked storage key |
 | `--purge-files` | With `--storage`: delete the client files instead |
 | `--verify-only` | Only scan for personal data left |
+| `--remark-copy` | Re-mark a copy still marked production as the `--environment` target, in the masking transaction. Needs `--confirm-database` and `--restore-source`; refuses on the registered production |
+| `--confirm-database=<name>` | The name of the copy, typed again; must equal `current_database()` |
+| `--restore-source=<backup>` | The backup file or snapshot the copy was restored from (recorded) |
+| `--register-production` | Run once in Production: records where production lives, so a copy can be told from it |
 
 Safety guards:
 
@@ -113,7 +133,8 @@ Safety guards:
 - refuses without `MASK_SALT` (16 characters or more), and on `--execute` without `MASK_ADMIN_PASSWORD` (which must meet
   the password policy of the database) or with an unknown `--admin`;
 - refuses on a database marked production: `system.environment = production`, an unknown value, or no marker while the
-  go-live lock (`golive.locked`) is on;
+  go-live lock (`golive.locked`) is on, unless `--remark-copy` re-marks it after its own checks (typed database name,
+  restore source, connection not the registered production);
 - dry run by default; one transaction; the run is recorded in the audit trail (entity `database`, action `mask`: target,
   previous environment, options, counts per column; never the salt).
 

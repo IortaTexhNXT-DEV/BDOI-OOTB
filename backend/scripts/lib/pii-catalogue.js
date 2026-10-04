@@ -308,6 +308,7 @@ export const ALLOW_LIST = {
   'petty_cash_funds.*': 'petty cash fund configuration',
   'insurer_statements.file_name': 'insurer statement file name (insurer and period)',
   'data_load_batches.file_name': 'go-live workbook file name chosen by the project team',
+  'data_load_comparisons.file_name': 'comparison workbook file name chosen by the project team (environment and date)',
   'generated_reports.file_name': 'system-generated report file name (report and period)',
   'generated_reports.name': 'report name',
   'commissions.receipt_no': 'document number',

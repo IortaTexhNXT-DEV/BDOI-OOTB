@@ -19,7 +19,7 @@ import {
 } from '../scripts/lib/pii-catalogue.js';
 import { Masker, isMaskedMobile } from '../scripts/lib/pseudonyms.js';
 import {
-  MaskRefused, main, maskData, maskStorage, parseArgs, verifyMasked,
+  MaskRefused, databaseIdentity, main, maskData, maskStorage, parseArgs, registerProduction, verifyMasked,
 } from '../scripts/mask-data.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -440,3 +440,66 @@ describe('masking a copy', () => {
     expect(await tables()).toContain('documents');
   });
 });
+
+describe('re-marking a restored copy (--remark-copy)', () => {
+  const setEnv = (v) => query("UPDATE app_settings SET value = $1::jsonb WHERE key = 'system.environment'", [JSON.stringify(v)]);
+  const clientEmail = async () => (await query('SELECT email FROM clients WHERE id = $1', [ids.client])).rows[0].email;
+
+  beforeAll(async () => {
+    // the suite above masked this database: put back one original value to follow
+    await query("UPDATE clients SET email = 'xandrelle.q@realmail.ph' WHERE id = $1", [ids.client]);
+  });
+
+  it('reads the options: database name and restore source are required', () => {
+    expect(parseArgs(['--environment=uat', '--remark-copy', '--confirm-database=bv_uat', '--restore-source=prod-2026-10-01.dump']))
+      .toMatchObject({ remarkCopy: true, confirmDatabase: 'bv_uat', restoreSource: 'prod-2026-10-01.dump' });
+    expect(() => parseArgs(['--environment=uat', '--remark-copy'])).toThrow('--confirm-database');
+    expect(parseArgs(['--register-production'])).toMatchObject({ registerProduction: true });
+  });
+
+  it('registers only a database marked production', async () => {
+    await setEnv('uat');
+    await withClient(async (c) => {
+      await expect(registerProduction(c)).rejects.toMatchObject({ code: 'NOT_PRODUCTION' });
+    });
+  });
+
+  it('refuses without the typed database name, without a registered production, and on production itself', async () => {
+    await setEnv('production');
+    await query("DELETE FROM app_settings WHERE key = 'system.production_identity'");
+    await withClient(async (c) => {
+      const db = (await databaseIdentity(c)).database;
+      const opts = { environment: 'uat', salt: SALT, remarkCopy: true, restoreSource: 'prod.dump' };
+      await expect(maskData(c, { ...opts, confirmDatabase: 'wrong_db' })).rejects.toMatchObject({ code: 'CONFIRM_DATABASE' });
+      await expect(maskData(c, { ...opts, confirmDatabase: db, restoreSource: '' })).rejects.toMatchObject({ code: 'MISSING_RESTORE_SOURCE' });
+      await expect(maskData(c, { ...opts, confirmDatabase: db })).rejects.toMatchObject({ code: 'NO_PRODUCTION_IDENTITY' });
+      // registered here: this connection is production, so it is never re-marked
+      await registerProduction(c, { actor: 'dba' });
+      await expect(maskData(c, { ...opts, confirmDatabase: db })).rejects.toMatchObject({ code: 'PRODUCTION' });
+    });
+    expect((await query("SELECT value FROM app_settings WHERE key = 'system.environment'")).rows[0].value).toBe('production');
+    expect(await clientEmail()).toBe('xandrelle.q@realmail.ph');
+  });
+
+  it('a dry run re-marks nothing; --execute re-marks the copy, records the restore and masks in the same step', async () => {
+    // a copy restored elsewhere: the production record it carries names another server
+    await query(`UPDATE app_settings SET value = jsonb_set(value, '{host}', '"10.20.0.5"') WHERE key = 'system.production_identity'`);
+    await withClient(async (c) => {
+      const db = (await databaseIdentity(c)).database;
+      const opts = { environment: 'uat', salt: SALT, remarkCopy: true, confirmDatabase: db, restoreSource: 'prod-2026-10-01.dump', actor: 'dba' };
+      const dry = await maskData(c, opts);
+      expect(dry).toMatchObject({ executed: false, previousEnvironment: 'production', remark: { from: 'production', to: 'uat' } });
+      expect((await query("SELECT value FROM app_settings WHERE key = 'system.environment'")).rows[0].value).toBe('production');
+      const r = await maskData(c, { ...opts, execute: true, adminPassword: ADMIN_PASSWORD });
+      expect(r.executed).toBe(true);
+      expect(r.verification.clean).toBe(true);
+    });
+    expect((await query("SELECT value FROM app_settings WHERE key = 'system.environment'")).rows[0].value).toBe('uat');
+    expect((await query("SELECT value FROM app_settings WHERE key = 'system.restored_from'")).rows[0].value)
+      .toMatchObject({ from: 'production', to: 'uat', restoreSource: 'prod-2026-10-01.dump', by: 'dba', productionHost: '10.20.0.5' });
+    const audit = (await query("SELECT action, username FROM audit_log WHERE entity = 'database' AND action IN ('remark', 'register-production', 'mask') ORDER BY id")).rows;
+    expect(audit.map((a) => a.action).slice(-3)).toEqual(['register-production', 'remark', 'mask']);
+    expect(await clientEmail()).not.toBe('xandrelle.q@realmail.ph');
+  });
+});
+
