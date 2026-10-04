@@ -17,7 +17,9 @@ docker compose up --build -d
 ```
 
 Open the public address (the web container listens on port 8080). The web container serves the front end and
-forwards `/api` to the API container; PostgreSQL data and uploads are kept in Docker volumes. Put a TLS proxy (for
+forwards `/api` to the API container; PostgreSQL data and uploads are kept in Docker volumes. Add
+`export ENVIRONMENT_NAME=UAT` (or `DEV`, `SIT`, `TRAINING`) before `docker compose up` to show the environment's label
+next to the logo; leave it unset in production. Put a TLS proxy (for
 example Caddy or an AWS/Azure load balancer) in front of port 8080 for the public HTTPS URL.
 
 For a trial on one machine without a public address, run the API in development mode instead:
@@ -80,7 +82,7 @@ job that is running elsewhere answers `Job skipped`.
 |---|---|---|
 | `GET /api/health` | load balancer / readiness check (Docker `HEALTHCHECK`) | `200` with `{"status":"ok","ready":true,"database":{"reachable":true,"latencyMs":1},"pendingMigrations":0,...}` when start-up (migrations and seed) has finished, PostgreSQL answers and no migration is pending; otherwise `503` with `ready: false` and `status` `starting` or `unavailable` (e.g. `database.reachable: false`). It also answers `503` once the instance starts shutting down, so traffic drains. |
 | `GET /api/health/live` | liveness (restart) probe | `200` while the process serves HTTP; no database check |
-| `GET /api/version` | monitoring | version, commit, database reachability, pending migrations |
+| `GET /api/version` | monitoring, post-deploy smoke test | version, `commit` and `buildTime` (from `GIT_COMMIT` / `BUILD_TIME`, else the release artefact's `build-info.json`), `ref`, `appEnvironment` (`APP_ENVIRONMENT`), start time, database reachability, pending migrations |
 
 Health endpoints need no sign-in, are not rate limited and are not logged. The database check times out after
 `HEALTH_DB_TIMEOUT_MS` (default 2000 ms).
@@ -124,9 +126,30 @@ to every file URL it returns; records keep the unsigned URL. Files are sent with
 content-security policy, and anything other than images and PDF is downloaded rather than displayed. The rate
 limits are kept in memory per API process; with several API instances each keeps its own counters.
 
+## Front-end runtime configuration
+
+One front-end build serves every environment. The web server publishes `/env-config.js`, written when it starts or
+when the pipeline publishes the build (`brokerverse/scripts/env-config.sh`), and index.html loads it before the app.
+
+| Variable | Default | Meaning |
+|---|---|---|
+| `API_BASE_URL` | empty: same origin `/api` | API address for the browser when it is on another origin, e.g. `https://api.broker.example.ph/api` |
+| `API_UPSTREAM` | `http://api:8000` in Docker Compose | where the web container forwards `/api` (same-origin set-up); Railway `http://api.railway.internal:8000` |
+| `ENVIRONMENT_NAME` | empty | `DEV`, `SIT`, `UAT`, `PREPROD`, `TRAINING`: a small coloured label next to the logo and the browser tab title. Empty or `PRODUCTION`: none |
+| `ENVIRONMENT_COLOR` | per name | label colour, `#rrggbb` |
+| `ANALYTICS_ENABLED` | `false` | allow analytics |
+
+The web server sends `Cache-Control: no-store` for `env-config.js`, `no-cache` for `index.html` and one year
+`immutable` for the hashed files under `static/`, plus a Content-Security-Policy (`script-src 'self'`, `connect-src`
+limited to the site and the API origin). A build from before this change, with `REACT_APP_BASE_URL` compiled in,
+keeps using that address when `/env-config.js` names none.
+
 ## Upgrading
 
-Deploy the new image; on start the API applies any new migrations (they only add) and the idempotent seed, then
+The release pipeline ([RELEASE_PIPELINE.md](RELEASE_PIPELINE.md)) deploys the artefacts CI built for a commit: it
+takes a backup (pre-production and production), runs the migrations (they only add) and the idempotent seed before it
+switches the API, then checks `/api/health`, `/api/version` and the sign-in page and rolls back automatically if they
+fail. Without the pipeline: deploy the new image; on start the API applies any new migrations and the seed, then
 reports ready on `/api/health`. Run one instance first when a release contains migrations, then scale out. Release
 notes list anything an administrator must do by hand.
 

@@ -1,4 +1,5 @@
 import React, { useRef, useState } from "react";
+import EnvironmentBadge from "../../../components/EnvironmentBadge";
 import "../Login/index.scss";
 import "../security/security.scss";
 import { Button } from "primereact/button";
@@ -283,7 +284,10 @@ const Login = () => {
         )}
         <div className="bv-auth__center">
           <div className="bv-auth__card" data-step={step}>
-            <img src={logoUrl} alt={systemName} className="bv-auth__logo" />
+            <div className="bv-auth__brand">
+              <img src={logoUrl} alt={systemName} className="bv-auth__logo" />
+              <EnvironmentBadge />
+            </div>
             <h1 className="bv-auth__title">{title}</h1>
             {subtitle && <p className="bv-auth__subtitle">{subtitle}</p>}
             <div className="bv-auth__body">{step === "signin" ? signInForm : stepBody}</div>

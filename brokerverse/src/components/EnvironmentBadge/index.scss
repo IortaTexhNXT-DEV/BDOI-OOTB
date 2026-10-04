@@ -1,0 +1,17 @@
+// Environment label next to the logo (non-production only): small, flat, enterprise style.
+.bv-env-badge {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 4px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+}

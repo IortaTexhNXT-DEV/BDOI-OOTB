@@ -1,4 +1,7 @@
-export const BASE_URL = process.env.REACT_APP_BASE_URL;
+import runtimeConfig from "../config/runtimeConfig";
+
+// API base: /env-config.js at run time, else the build-time REACT_APP_BASE_URL, else "/api" (src/config/runtimeConfig.js)
+export const BASE_URL = runtimeConfig.apiBaseUrl;
 
 export const TOKEN = "token";
 export const DEFAULT_TOKEN_EXPIRY_DAY = 1;

@@ -59,7 +59,7 @@ BrokerVerse is one repository with two applications and their deployment files.
 | `brokerverse/src/` | Screens (`module/`, `agentModule/`), services, routes, menu, theme, translations |
 | `deploy/` | Runtime reference, EC2 deployment script, PM2 and nginx configuration, environment examples |
 | `docker-compose.yml` | PostgreSQL 16, API and web on one server (test system or trial) |
-| `.github/workflows/` | CI for pull requests (`ci.yml`) and the front-end deployment (`deploy-frontend.yml`) |
+| `.github/workflows/` | CI and release artefacts (`ci.yml`), deployment to an environment (`deploy.yml`), rollback (`rollback.yml`); see `deploy/RELEASE_PIPELINE.md` |
 
 Main run-time libraries of the back end: express 4.21, pg 8.13, zod 3.24, jsonwebtoken 9, bcryptjs 2.4, helmet 8, cors 2.8, multer 1.4, pino 9 with pino-http 10, node-cron 4, nodemailer. Main libraries of the front end: react 18.2, react-router-dom 6.30, primereact 10.3 with primeflex, @reduxjs/toolkit 2, axios 1.20, formik 2, i18next 25 with react-i18next, chart.js 4, moment.
 
@@ -179,7 +179,7 @@ The database is PostgreSQL 16 (the version in `docker-compose.yml` and in CI). A
 | `locales/` | `en.json` (7,523 keys) and `th.json` |
 | `theme/bdoi/` | PrimeReact theme and application styles (`tokens.scss`, `bdoi.scss`, `enterprise.scss`) |
 
-The front end reaches the API in two ways. Most services call `fetch` with the bearer header from `authService.getAuthHeader()`; a few use the axios instance in `utility/interceptor.js` through `getRequest`, `postRequest`, `putRequest`, `patchRequest` and `deleteRequest`. Both paths renew an expired access token once: axios through its response interceptor, `fetch` through the wrapper installed by `utility/sessionRefresh.js`. The API base address comes from `REACT_APP_BASE_URL` at build time (`utility/constant.js`).
+The front end reaches the API in two ways. Most services call `fetch` with the bearer header from `authService.getAuthHeader()`; a few use the axios instance in `utility/interceptor.js` through `getRequest`, `postRequest`, `putRequest`, `patchRequest` and `deleteRequest`. Both paths renew an expired access token once: axios through its response interceptor, `fetch` through the wrapper installed by `utility/sessionRefresh.js`. The API base address comes from `config/runtimeConfig.js` (`utility/constant.js`): `/env-config.js` at run time, else `REACT_APP_BASE_URL` of the build, else the same-origin `/api`.
 
 ## How a request flows from a screen to the database and back
 
@@ -363,7 +363,7 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 
 ## Continuous integration
 
-`.github/workflows/ci.yml` runs on every pull request. The back-end job starts PostgreSQL 16, installs with `npm ci`, runs `npm run lint` and `npm test`. The front-end job installs with `npm ci --legacy-peer-deps` and runs the jest suite. `deploy-frontend.yml` builds and publishes the front end. The back end on EC2 is installed by `deploy/ec2/deploy.sh` and run by PM2 (`deploy/ec2/ecosystem.config.cjs`).
+`.github/workflows/ci.yml` runs on every pull request. The back-end job starts PostgreSQL 16, installs with `npm ci`, runs `npm run lint` and `npm test`. The front-end job installs with `npm ci --legacy-peer-deps` and runs the jest suite. It also builds the environment-neutral front end and the backend artefact named by commit; `deploy.yml` deploys them to an environment (the back end on EC2 through `deploy/ec2/release.sh`, run by PM2 with `deploy/ec2/ecosystem.config.cjs`) and `rollback.yml` rolls back.
 
 # Security controls in code
 

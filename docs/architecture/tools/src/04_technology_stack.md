@@ -4,7 +4,7 @@
 
 This document lists the technologies used by BrokerVerse OOTB, with the versions resolved in the lock files of the baseline, their purpose and their licence type, together with the runtime, infrastructure, build and test tooling. It is the reference for dependency management, security patching and licence review.
 
-Sources: `backend/package.json` and `backend/package-lock.json`, `brokerverse/package.json` and `brokerverse/package-lock.json` (licences read from the installed packages), `backend/Dockerfile`, `brokerverse/Dockerfile`, `brokerverse/nginx.conf`, `docker-compose.yml`, `.github/workflows/ci.yml`, `brokerverse/.github/workflows/deploy.yml` and `deploy/README.md`. Versions are the exact versions in the lock files; the manifests use caret ranges and `npm ci` installs the locked versions.
+Sources: `backend/package.json` and `backend/package-lock.json`, `brokerverse/package.json` and `brokerverse/package-lock.json` (licences read from the installed packages), `backend/Dockerfile`, `brokerverse/Dockerfile`, `brokerverse/nginx/default.conf.template`, `docker-compose.yml`, `.github/workflows/ci.yml`, `brokerverse/.github/workflows/deploy.yml` and `deploy/README.md`. Versions are the exact versions in the lock files; the manifests use caret ranges and `npm ci` installs the locked versions.
 
 ## Stack overview
 

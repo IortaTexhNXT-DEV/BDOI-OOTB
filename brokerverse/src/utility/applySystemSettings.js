@@ -1,4 +1,5 @@
 import i18n from "../i18n";
+import runtimeConfig from "../config/runtimeConfig";
 import { setDisplayCurrency } from "./currencyConverter";
 import { DEFAULT_SYSTEM_SETTINGS } from "./systemCurrencies";
 import { setActiveDefaultCurrency } from "./currencyOptions";
@@ -37,7 +38,9 @@ export function applyFavicon(faviconUrl) {
  * Authenticated pages may append more in App.js.
  */
 export function applyAppTitle(appTitle, { authenticated, userName } = {}) {
-  const base = appTitle || DEFAULT_SYSTEM_SETTINGS.systemName;
+  const name = appTitle || DEFAULT_SYSTEM_SETTINGS.systemName;
+  // non-production environments put their name first in the browser tab, e.g. "[UAT] BrokerVerse - Login"
+  const base = runtimeConfig.showEnvironmentBanner ? `[${runtimeConfig.environmentName}] ${name}` : name;
   if (authenticated) {
     document.title = `${base} - Dashboard | ${userName || "User"}`;
   } else {

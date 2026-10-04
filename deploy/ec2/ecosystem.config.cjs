@@ -1,12 +1,14 @@
 const path = require("path");
 
 const root = process.env.BROKERVERSE_ROOT || "/home/ubuntu/appdata/brokerverse";
+// release.sh points this at <root>/current/backend (the artefact built by CI); deploy.sh (git checkout) at <root>/backend
+const appDir = process.env.BROKERVERSE_APP_DIR || path.join(root, "backend");
 
 module.exports = {
   apps: [
     {
       name: "brokerverse-api",
-      cwd: path.join(root, "backend"),
+      cwd: appDir,
       script: "src/server.js",
       interpreter: process.env.BROKERVERSE_NODE || "node",
       instances: 1,

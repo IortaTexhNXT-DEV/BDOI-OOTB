@@ -46,6 +46,8 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
+    "lint": "eslint --ext .js,.jsx src",
+    "serve": "node scripts/serve-build.js",
     "eject": "react-scripts eject",
     "theme:bdoi": "node scripts/build-bdoi-theme.js",
     "theme:palette": "node scripts/apply-bdoi-palette.js",

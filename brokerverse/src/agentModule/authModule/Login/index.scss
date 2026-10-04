@@ -82,6 +82,17 @@
     max-width: 400px;
   }
 
+  .bv-auth__brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+
+    .bv-auth__logo {
+      margin-bottom: 0;
+    }
+  }
+
   .bv-auth__logo {
     display: block;
     height: 44px;

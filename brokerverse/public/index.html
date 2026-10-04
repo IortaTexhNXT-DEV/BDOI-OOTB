@@ -59,6 +59,9 @@
 
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
     <title>BrokerVerse</title>
+    <!-- Environment settings (API address, environment name), written by the web server at start-up.
+         Loaded before the app bundle; an external file so the content security policy needs no inline script. -->
+    <script src="%PUBLIC_URL%/env-config.js"></script>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>

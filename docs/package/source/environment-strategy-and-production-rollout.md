@@ -64,13 +64,13 @@ The Implementation Approach plans each project with a test environment and a pro
 
 | Role | Small broker | Medium broker | Large broker |
 |---|---|---|---|
-| Dev | iorta TechNXT shared development environment | Shared development environment | Shared development environment |
-| SIT | Combined with UAT in one test environment | Own environment, or combined with UAT | Own environment |
-| UAT | The test environment | Own environment | Own environment |
-| Pre-Prod | Not separate: smoke test in Production before go-live, followed by the transaction reset (chapter 8) | Temporary, from about T-30 to T+30 | Permanent, used for every release after go-live |
+| Dev | Build and integration (iorta TechNXT); SIT testing is done here | Build and integration; SIT testing is done here | Shared development environment |
+| SIT | Not separate (done in Dev) | Not separate (done in Dev) | Own environment |
+| UAT | Own environment | Own environment | Own environment |
+| Pre-Prod | Temporary | Temporary | Temporary |
 | Production | Own environment | Own environment | Own environment |
 
-**Recommended:** the broker's choice is recorded in the Order Form and the environment sheet **[to confirm]**. A Pre-Prod environment is the preferred place for the smoke test, because Production then never holds test records.
+Decision of the product owner: small and medium brokers run Dev, UAT and Production; large brokers run Dev, SIT and UAT separately, then Production. For every size Pre-Prod is temporary: it is restored from a production backup (masked where required) for the go-live rehearsal and for major releases, then removed. The release pipeline that deploys to these environments is described in `deploy/RELEASE_PIPELINE.md`. The broker's choice is recorded in the Order Form and the environment sheet **[to confirm]**. A Pre-Prod environment is the preferred place for the smoke test, because Production then never holds test records.
 
 ## Hosting by option
 
@@ -84,7 +84,7 @@ Every environment needs the same building blocks: the web build, the API (contai
 | Pre-Prod | Same topology as Production: two API tasks behind a load balancer, RDS Multi-AZ, EFS, CloudFront | Same topology as Production | Same topology as Production | Not suitable |
 | Production | Two or more API tasks, ALB, RDS Multi-AZ, EFS, CloudFront and WAF | Two or more replicas across zones, zone-redundant Flexible Server | Two API VMs, primary and standby PostgreSQL, redundant NFS | Not suitable: one API instance, volume attached to one instance |
 
-The demo deployment of the repository (`.github/workflows/deploy-frontend.yml` with `deploy/ec2/deploy.sh`: one PM2 process on port 8001 behind nginx) is a single instance without redundancy. It is fit for Dev, SIT or a demonstration, not for Production.
+The demo deployment of the repository (`.github/workflows/deploy.yml` with `deploy/ec2/release.sh`: one PM2 process on port 8001 behind nginx) is a single instance without redundancy. It is fit for Dev, SIT or a demonstration, not for Production.
 
 ## Sizing
 
@@ -142,7 +142,7 @@ The transaction reset refuses to run while `golive.locked` is on. Lower environm
 | Document numbering series (prefix, pattern, reset rule) | Numbers look as they will in Production |
 | Migration list of the database (`schema_migrations`) | No pending migration on either side before a release |
 
-What differs, by design: secrets (`JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `ADMIN_PASSWORD`, database password, SMTP password), addresses (`CORS_ORIGINS`, `PUBLIC_BASE_URL`, `REACT_APP_BASE_URL`), payment gateway credentials (sandbox), e-mail recipients, and `APP_ENVIRONMENT`, which names the environment on the Instructions sheet of an exported workbook.
+What differs, by design: secrets (`JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `ADMIN_PASSWORD`, database password, SMTP password), addresses (`CORS_ORIGINS`, `PUBLIC_BASE_URL`, the front end's runtime `API_BASE_URL` when the API is on another origin), payment gateway credentials (sandbox), e-mail recipients, and `APP_ENVIRONMENT`, which names the environment on the Instructions sheet of an exported workbook.
 
 When Pre-Prod is restored from a Production backup:
 
@@ -174,20 +174,20 @@ Every change reaches `brokerverse-platform` through a pull request reviewed by a
 
 The backend tests build the schema from the migrations, so a migration that does not apply on an empty database fails CI.
 
-`.github/workflows/deploy-frontend.yml` (CI/CD Pipeline) runs on a push to `brokerverse-platform`: it builds the front end, publishes it to S3 and CloudFront, and reloads the API on the EC2 host through `deploy/ec2/deploy.sh`, which waits for `/api/health` to answer 200. Its lint and test jobs are commented out, so a push deploys without tests, and it serves one environment.
+Since the release pipeline change, `ci.yml` runs on every pull request and push: backend lint and the full test suite, front-end lint, tests and an environment-neutral build, a dependency audit, and the release artefacts `web-<sha>` and `backend-<sha>`. `deploy.yml` deploys those artefacts to one GitHub Environment (dev, sit, uat, preprod, production) with required reviewers, a pre-deploy backup for Pre-Prod and Production, migrations and seeds before the switch, a smoke test (`/api/health`, `/api/version` equal to the deployed commit, the sign-in page) and an automatic rollback; `rollback.yml` rolls back by hand. Production deploys only from a `vX.Y.Z` tag. Details and the GitHub settings: `deploy/RELEASE_PIPELINE.md`.
 
-> **Recommended:** Protect `brokerverse-platform` so that changes arrive only by pull request with a green CI run, restore the test jobs as a dependency of both deploy jobs, and give each environment its own deployment job started from a tag, with an approval gate for Pre-Prod and Production (GitHub environments). Until then each deployment to SIT, UAT, Pre-Prod and Production is started by the DevOps lead from the approved tag.
+> **Recommended:** Protect `brokerverse-platform` so that changes arrive only by pull request with a green CI run (required checks listed in `deploy/RELEASE_PIPELINE.md` section 7).
 
 ## Build once, promote the same artefact
 
 | Part | Built | Promoted |
 |---|---|---|
 | Backend | **Recommended:** one container image from `backend/Dockerfile` per tag, with `GIT_COMMIT` set so `GET /api/version` shows it; pushed to the registry (ECR, Azure Container Registry or the partner registry) | The same image digest is deployed to SIT, UAT, Pre-Prod and Production. Only environment variables differ |
-| Front end | `npm run build` of the same tag. `REACT_APP_BASE_URL` is compiled into the build, so each environment gets its own build of the same commit | Rebuilt per environment from the tag; the build log and file hashes kept with the release record |
+| Front end | One `npm run build` per commit in CI, with no API address or environment name compiled in (artefact `web-<sha>`) | The same files in every environment; `/env-config.js` (API address, environment name) is written per environment at publication, and the web server forwards `/api` to that environment's backend |
 | Database | Migration files inside the image (`backend/src/db/migrations`) | Applied by the image itself on start (section 5.4) |
 | Configuration | Configuration workbook (chapter 6) | Downloaded from the source environment, loaded into the target |
 
-Today the EC2 script deploys a Git checkout (`npm ci --omit=dev`) rather than an image. Deploying a tag, not a branch head, gives the same result: every environment runs the same commit. Whether the front end can use a relative API address (one build for all environments) is **[to confirm]**.
+On EC2 the pipeline installs the backend artefact `backend-<sha>` (code with its production dependencies and `build-info.json`) beside the running release and switches to it (`deploy/ec2/release.sh`); the earlier git-checkout script `deploy/ec2/deploy.sh` remains for manual use. The front end uses the relative API address `/api` by default, so one build serves all environments (decided by the product owner).
 
 ## Schema migrations
 
@@ -233,7 +233,8 @@ Secrets are never in the repository, a ticket or a chat: they live in the secret
 | `SMTP_URL` | Test mailbox or none | Test mailbox | Test mailbox | Production mailbox |
 | Payment gateway (`<prefix>_SECRET_KEY` and others) | None | Sandbox | Sandbox | Live |
 | `APP_ENVIRONMENT` | `Dev` | `SIT` / `UAT` | `Pre-Prod` | `Production` |
-| `REACT_APP_BASE_URL` (front-end build) | Local API | Environment API | Environment API | Production API |
+| `API_BASE_URL` (front-end runtime, `/env-config.js`) | Empty (same origin `/api`) or the API address | Empty or the environment's API | Empty or the environment's API | Empty or the production API |
+| `ENVIRONMENT_NAME` (front-end runtime: label next to the logo) | `DEV` | `SIT` / `UAT` | `PREPROD` | empty (no label) |
 
 With `NODE_ENV=production` the API refuses to start when `JWT_SECRET` or `DATA_ENCRYPTION_KEY` is missing, short or a placeholder, when the two are equal, when `CORS_ORIGINS` is `*`, or when `PUBLIC_BASE_URL` is localhost (`deploy/REFERENCE.md`).
 
@@ -266,8 +267,8 @@ The release notes use the Release Notes Template: release identification (tag, c
 
 | What | How |
 |---|---|
-| Front end | Re-run the build of the previous tag, or restore the previous S3 object versions (bucket versioning on), then invalidate CloudFront |
-| Backend | Redeploy the previous image or tag. Migrations only add, so the previous version runs on the newer schema |
+| Front end | Automatic when the post-deploy smoke test fails; otherwise Actions > Rollback with the previous tag, which republishes that build (or restore the previous S3 object versions), then invalidate CloudFront |
+| Backend | Automatic when the release does not start or the smoke test fails; otherwise Actions > Rollback (the previous release kept on the server, or the CI artefact). Migrations only add, so the previous version runs on the newer schema |
 | Database | Restore the pre-release snapshot only when data written by the new release must be undone; transactions entered since the snapshot are re-entered |
 | Configuration | Load the configuration workbook downloaded before the change (Current data). The workbook updates and creates but never deletes: records created by the change are set inactive on their screen |
 | Go-live data | Before go-live: restore the snapshot taken before the loads. After go-live: rollback window and procedure of the Data Migration and Cutover Plan |

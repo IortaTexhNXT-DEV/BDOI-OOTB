@@ -10,8 +10,10 @@ each item. The runtime details (every environment variable, seed data, health ch
 | `README.md` | this checklist |
 | `REFERENCE.md` | environment variables, seed data, scheduled jobs, health checks, production start-up rules |
 | `backend.env.example` | the backend environment with placeholders; copy the names into the secret store |
-| `frontend.env.example` | the one build variable of the front end |
+| `frontend.env.example` | the front end's runtime settings (`/env-config.js`): one build serves every environment |
 | `RAILWAY.md` | the same deployment on Railway (database, API and web services from this repository) |
+| `RELEASE_PIPELINE.md` | CI and deployment workflows: environments per broker size, promotion and approvals, GitHub settings, migrations, rollback, hotfix |
+| `ec2/` | the EC2 host: `release.sh` (releases installed by the pipeline), `deploy.sh` (older git-checkout route), nginx and PM2 files |
 
 | Part | Folder in this branch | Where it goes |
 |---|---|---|
@@ -26,12 +28,15 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 
 ## 1. Before you start
 
-- [ ] Decide the API address. Two options:
+- [ ] Decide the API address. The front end is built once for every environment and finds the API at run time
+  (`/env-config.js`, [RELEASE_PIPELINE.md](RELEASE_PIPELINE.md) section 4). Two options:
   - **Same domain (recommended):** add a CloudFront behaviour `/api/*` on the existing distribution that forwards to
-    the backend (load balancer origin, all methods, all headers including `Authorization`, no caching). The front end
-    then uses `https://<brokerverse-url>/api` and no cross-origin set-up is needed.
+    the backend (load balancer origin, all methods, all headers including `Authorization`, no caching), or let the web
+    server forward `/api` (nginx on EC2, the Railway or Docker web container). The front end then needs no API
+    setting at all and no cross-origin set-up is needed.
   - **Separate domain:** e.g. `https://api.<brokerverse-domain>` with its own TLS certificate; set `CORS_ORIGINS` to
-    the front-end URL.
+    the front-end URL and `API_BASE_URL=https://api.<brokerverse-domain>/api` for the front end's runtime
+    configuration (GitHub Environment variable, or container variable).
 - [ ] Create the PostgreSQL database and a login with rights to create tables in it (the backend runs its own
   migrations on start).
 - [ ] Set the database time zone to `Asia/Manila` (RDS parameter group `timezone`, or
@@ -101,22 +106,26 @@ only. Users, insurers, agents and opening balances are set up in the new system 
 - [ ] Replace the contents of the private front-end repository with `brokerverse/` from this branch (it already
   contains `.github/workflows/deploy.yml`, `package.json`, `package-lock.json`, `craco.config.js`, `public/`, `src/`,
   `scripts/`). Do not copy `node_modules`, `build/` or `.env`. Review that no environment file with secrets is added.
-- [ ] **Set the API address for the build.** The app reads `REACT_APP_BASE_URL` at build time. The workflow
-  (`brokerverse/.github/workflows/deploy.yml`) takes it from the repository variable `REACT_APP_BASE_URL`: create that
-  variable (Settings > Secrets and variables > Actions > Variables), e.g. `https://<brokerverse-url>/api`. The build
-  stops with an error if it is missing, so an app without an API address can never be published.
+- [ ] **No API address in the build.** The same build runs in every environment. At publish time the workflow writes
+  `/env-config.js` from the variables `API_BASE_URL` (empty for the same-domain option, else
+  `https://api.<domain>/api`), `ENVIRONMENT_NAME` (`DEV`, `UAT`... shown as a small label next to the logo; empty in
+  production) and `ENVIRONMENT_COLOR`. A build made earlier with `REACT_APP_BASE_URL` still works: the runtime file
+  wins when it names an address, the build-time value is used otherwise.
 - [ ] Keep the existing GitHub secrets (`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `S3_BUCKET`,
   `CLOUDFRONT_DISTRIBUTION_ID`). The workflow deploys on a push to `dev`.
-- [ ] The workflow builds with Node 22 and runs the front-end tests before it deploys; a failing test stops the deployment.
+- [ ] The workflow builds with Node 22 and runs the front-end lint and tests before it deploys; a failing test stops
+  the deployment. Hashed files under `static/` are cached for a year; `index.html` and `env-config.js` are never cached.
 - [ ] CloudFront: the app is a single-page application. Keep (or add) custom error responses so 403 and 404 from S3
   return `/index.html` with status 200; otherwise refreshing a deep link (e.g. `/agent/policy`) shows an S3 error.
 - [ ] If you use the same-domain option, add the `/api/*` behaviour before the default behaviour and do not cache it.
 - [ ] Push to `dev` (or merge the prepared branch into `dev`) to run the deployment; check the workflow run is green
   and the CloudFront invalidation completed.
 - [ ] **If this whole repository is connected instead** (the front end sits in the `brokerverse/` folder), the
-  workflow inside `brokerverse/.github/` never runs, because GitHub only reads workflows at the repository root. Use
-  `.github/workflows/deploy-frontend.yml` at the root instead: it builds inside `brokerverse/` and publishes
-  `brokerverse/build/`. It needs the same secrets and the `REACT_APP_BASE_URL` variable.
+  workflow inside `brokerverse/.github/` never runs, because GitHub only reads workflows at the repository root. The
+  root workflows are used instead: `.github/workflows/ci.yml` (lint, tests, audit, one build, artefacts) and
+  `.github/workflows/deploy.yml` (deploys that build to dev, SIT, UAT, Pre-Prod and Production through GitHub
+  Environments with approvals, backups, migrations, smoke test and automatic rollback). Set them up as described in
+  [RELEASE_PIPELINE.md](RELEASE_PIPELINE.md) section 7; the secrets move into the GitHub Environments.
 
 ### Blank page with `%PUBLIC_URL%` errors
 
@@ -124,17 +133,22 @@ If the login page is blank and the browser console shows `400` for `%PUBLIC_URL%
 `manifest.json`, the bucket holds the **unbuilt** `public/index.html` from the source code, not the build. The
 unbuilt page has no script tags, so nothing loads. To fix it:
 
-1. Build: in the front-end folder run `npm ci --legacy-peer-deps`, then `npm run build` with `REACT_APP_BASE_URL`
-   set. Check `build/index.html`: it must not contain `%PUBLIC_URL%` and must load `/static/js/main.<hash>.js`.
+1. Build: in the front-end folder run `npm ci --legacy-peer-deps`, then `npm run build`. Check `build/index.html`:
+   it must not contain `%PUBLIC_URL%` and must load `/env-config.js` and `/static/js/main.<hash>.js`. Write the
+   environment's `build/env-config.js` with `API_BASE_URL=... ENVIRONMENT_NAME=... sh scripts/env-config.sh build/env-config.js`.
 2. Publish the **contents of `build/`** to the bucket root (`aws s3 sync build/ s3://<bucket> --delete`), not the
    repository, the `public/` folder or the `build` folder itself.
 3. Invalidate CloudFront (`/*`) and reload the page with the cache cleared.
 
-Both workflows now refuse to publish a page that still holds `%PUBLIC_URL%`.
+The CI build, the Dockerfiles and the deploy workflows refuse to publish a page that still holds `%PUBLIC_URL%`.
 
 ## 4. Smoke test after deployment
 
-- [ ] `https://<api>/api/health` returns `{"status":"ok", ...}`.
+- [ ] `https://<api>/api/health` returns `{"status":"ok", ...}` and `https://<api>/api/version` shows the deployed
+  commit. `APP_URL=https://<brokerverse-url> EXPECTED_SHA=<commit> bash deploy/smoke-test.sh` runs the automated part
+  of these checks (the deploy workflow runs it after every deployment).
+- [ ] Outside production the environment name (e.g. `UAT`) shows as a small coloured label next to the logo and in the
+  browser tab; production shows none.
 - [ ] The sign-in page shows "Welcome to BrokerVerse" with the iorta TechNXT logo (or the customer's own name and logo
   once set in System Settings); the password field is masked; "Forgot password?" opens the reset form.
 - [ ] Sign in as `BrokerVerse` with `ADMIN_PASSWORD`, then change the password at once (profile menu > Change password)
@@ -146,7 +160,8 @@ Both workflows now refuse to publish a page that still holds `%PUBLIC_URL%`.
   letterhead on the PDF.
 - [ ] Upload a test document (e.g. a user photo or an ID card on a test client) and open it; copy its link into a
   private browser window without the `sig` part: it must be refused.
-- [ ] Browser developer tools: no calls to `localhost`, all API calls go to the production API; no mixed-content warnings.
+- [ ] Browser developer tools: no calls to `localhost`, all API calls go to the production API (same origin `/api`, or
+  the `API_BASE_URL` of `/env-config.js`); no mixed-content or Content-Security-Policy warnings.
 - [ ] Check the API log shows no `Authorization` header values (they are redacted).
 
 ## 5. Security settings to review before go-live
@@ -219,10 +234,13 @@ dry run unless `--execute`; refused once `golive.locked` is on). See
 
 ## 8. Rollback
 
-- Front end: re-run the workflow on the previous commit of `dev` (or restore the previous S3 object versions if bucket
-  versioning is on) and invalidate CloudFront.
-- Backend: redeploy the previous image tag. Migrations only add; restore the pre-go-live database snapshot if data must
-  be rolled back.
+- With the release pipeline: a failed smoke test rolls the application back automatically; later problems use
+  **Actions > Rollback** (the earlier tag, the environment, a reason). See [RELEASE_PIPELINE.md](RELEASE_PIPELINE.md)
+  section 9.
+- Front end by hand: republish the previous build (restore the previous S3 object versions if bucket versioning is on)
+  and invalidate CloudFront.
+- Backend by hand: redeploy the previous image tag, or `release.sh rollback` on the EC2 host. Migrations only add;
+  restore the pre-deploy backup (or the pre-go-live snapshot) if data must be rolled back.
 - Keep the old `brokerverse-api` running until the new system is accepted if anything still depends on it.
 
 ## 9. Known limitations (accepted for go-live, planned later)
