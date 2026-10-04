@@ -1,12 +1,12 @@
 ---
 title: Order Form
 subtitle: iNXT BrokerVerse OOTB
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Template for discussion; subject to review by the parties' legal counsel
+change: Optional modules and partner services (16 lines of the Service Catalogue and Rate Annex, S08) added as an order table; template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
 acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; Dev=Development environment; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SIT=System integration test; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
@@ -80,6 +80,30 @@ All amounts in PHP, excluding VAT. VAT at 12% is added on each invoice.
 | On-site days | [number] x PHP 20,000.00 | [amount] | | [amount] |
 | Total one-time | | [amount] | [amount] | [amount] |
 
+## Optional modules and partner services
+
+Every module of the Software is included in the licence or subscription fee. The lines below are optional, add-on services of the Service Catalogue and Rate Annex (S08), priced at the stated man-days at PHP 16,100.00 a day, rounded to PHP 10,000.00, and invoiced on delivery. The fees of the regulator or the partner are not included; every filing, registration and enrolment with a regulator is made by the Client in its own name. A Client brand pack carries third-party marks only with the written permission of their owner. Enter the quantity ordered, or delete the rows that do not apply.
+
+| Item | Basis | Quantity | Price |
+|---|---|---|---|
+| Connector go-live with a partner | 5 man-days; PHP 80,000.00 per connector | [number] | [amount] |
+| Activation of the AML/CFT toolkit | 8 man-days; PHP 130,000.00 one-time | [0 / 1] | [amount] |
+| Activation of the IC compliance registers | 6 man-days; PHP 100,000.00 one-time | [0 / 1] | [amount] |
+| Activation of the BIR pack | 8 man-days; PHP 130,000.00 one-time | [0 / 1] | [amount] |
+| Dealer programme set-up | 3 man-days; PHP 50,000.00 per programme | [number] | [amount] |
+| Client brand pack | 2 man-days; PHP 30,000.00 per pack | [number] | [amount] |
+| AMLC reporting file validation and portal test | 3 man-days; PHP 50,000.00 one-time | [0 / 1] | [amount] |
+| IC annual statement form alignment | 3 man-days; PHP 50,000.00 one-time | [0 / 1] | [amount] |
+| EOPT invoicing review with the Client's tax adviser | 2 man-days; PHP 30,000.00 one-time | [0 / 1] | [amount] |
+| BIR CAS registration support | 4 man-days; PHP 60,000.00 one-time | [0 / 1] | [amount] |
+| BIR EIS enrolment and certification | 5 man-days; PHP 80,000.00 one-time | [0 / 1] | [amount] |
+| CTPL authentication and LTO interface certification | 4 man-days; PHP 60,000.00 one-time | [0 / 1] | [amount] |
+| Insurer API onboarding | 3 man-days; PHP 50,000.00 per insurer | [number] | [amount] |
+| Bank payment file certification | 2 man-days; PHP 30,000.00 per bank | [number] | [amount] |
+| SMS or Viber gateway activation | 1 man-days; PHP 20,000.00 one-time | [0 / 1] | [amount] |
+| Screening list provider onboarding | 2 man-days; PHP 30,000.00 one-time | [0 / 1] | [amount] |
+| Total optional modules and partner services | | | [amount] |
+
 ## Recurring fees
 
 | Item | Basis | Year 1 list | Discount (lever) | Year 1 price | Increase |
@@ -107,7 +131,8 @@ All amounts in PHP, excluding VAT. VAT at 12% is added on each invoice.
 | Implementation or onboarding, 40% | [amount] | On UAT sign-off |
 | Implementation or onboarding, 20% | [amount] | On go-live |
 | Perpetual licence fee, 100% | [amount] | On go-live |
-| One-time optional services | [amount] | On delivery |
+| One-time optional services (extra training days, legacy data sources, additional integrations, environment set-up, on-site days) | [amount] | On delivery |
+| Optional modules and partner services (each line ordered in the table of that name above) | [amount] | On delivery of each service |
 | Subscription | [amount] a month | Monthly in advance from go-live |
 | Hosting | [amount] a month | Monthly in advance from the handover of each environment |
 | Pre-Prod | [amount] a month of use | Monthly in advance for each month of use |

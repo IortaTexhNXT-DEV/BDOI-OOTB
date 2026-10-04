@@ -1,12 +1,12 @@
 ---
 title: Statement of Work
 subtitle: OOTB implementation
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Scope, Deliverables, Client responsibilities and timeline aligned with the current product; template for discussion; subject to review by the parties' legal counsel
+change: Optional modules and partner services of the Rate Annex named in the payments and exclusions; template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
 acronyms: AMLC=Anti-Money Laundering Council; ATP=Authority to Print; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; COC=Certificate of cover; CR=Change request; CTPL=Compulsory Third Party Liability; DPO=Data protection officer; EIS=Electronic Invoicing System; LTO=Land Transportation Office; NPC=National Privacy Commission; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; RAID=Risks, assumptions, issues and dependencies; SIT=System integration test; SOW=Statement of work; UAT=User acceptance testing; VAT=Value-added tax
 ---
@@ -23,6 +23,7 @@ This Implementation Statement of Work (the **SOW**) describes the one-time imple
 |---|---|---|
 | 1.0 | 03 October 2026 | Template for discussion |
 | 1.1 | 04 October 2026 | Scope aligned with the current product: go-live configuration and migration kits; compliance set-up (AML/CFT, Insurance Commission and National Privacy Commission registers, masking of personal data); branding and brand packs, with the permission required for client marks; integrations with partners through the delivered connectors; environments, release pipeline and encryption key custody; regulatory registrations as Client dependencies; enterprise size and the 20 and 26-week timelines; Deliverables, acceptance criteria and Client responsibilities updated accordingly |
+| 1.1.1 | 04 October 2026 | The sixteen optional modules and partner services of the Service Catalogue and Rate Annex (S08), confirmed by management on 04 October 2026, named in the milestone payments and the exclusions |
 
 # Scope
 
@@ -168,12 +169,12 @@ The week by which each dependency is needed, for each size, and the effect of a 
 The following are outside this SOW and can be quoted through a Change Request:
 
 1. Customisation of screens, workflows, reports, printed documents or the database, and new reports.
-2. Integrations other than the delivered connectors, for example with core banking, accounting packages, BIR eFPS or eBIRForms, an IC system, or payment gateways other than PayMongo and Dragonpay; and the partners' own work, certification and fees.
+2. Integrations other than the delivered connectors, for example with core banking, accounting packages, BIR eFPS or eBIRForms, an IC system, or payment gateways other than PayMongo and Dragonpay; and the partners' own work, certification and fees. The go-live of a delivered connector with its partner (SMS or Viber gateway, CTPL provider and LTO, an insurer's API, a bank's payment file, the BIR EIS, a screening list provider) is an optional module or partner service of the Rate Annex (S08) that the Client may order on the Order Form.
 3. Data cleansing, de-duplication and enrichment of the Client's data, and extraction from the old system (data migration beyond the standard templates is an optional service).
 4. Migration of closed or expired policies, settled claims, paid receivables, transaction history and documents, and more than one fiscal year of balances.
 5. Hardware, end-user devices, networks, browsers and office software.
 6. Third-party licences and fees: cloud subscriptions beyond the agreed hosting, mailboxes, payment gateway merchant fees, certificates for Client-owned domains.
-7. Regulatory filings and registrations: BIR returns, alphalists and data files, Computerized Accounting System registration, Authority to Print, EIS enrolment, IC reports and licences, NPC registration and breach notifications, AMLC registration and reports. The system prepares them; filing remains with the Client.
+7. Regulatory filings and registrations: BIR returns, alphalists and data files, Computerized Accounting System registration, Authority to Print, EIS enrolment, IC reports and licences, NPC registration and breach notifications, AMLC registration and reports. The system prepares them; filing remains with the Client. Support for these steps (AMLC reporting file validation and portal test, IC annual statement form alignment, EOPT invoicing review with the Client's tax adviser, BIR CAS registration support, BIR EIS enrolment and certification, activation of the AML/CFT toolkit, the IC compliance registers and the BIR pack) is an optional module or partner service of the Rate Annex (S08) that the Client may order on the Order Form; the regulator's fees and the filing in the Client's name stay with the Client.
 12. The content of screening lists and any licence of a list of politically exposed persons; no list content is delivered with iNXT BrokerVerse.
 8. Tax, legal, actuarial or audit advice.
 9. Translation of the screens.
@@ -240,8 +241,9 @@ The fee is fixed for the scope, size and assumptions of this SOW. Under the subs
 
 1. iorta TechNXT invoices on each milestone. Invoices are payable within 30 days, with VAT added and withholding tax handled under the MSA.
 2. If a milestone is delayed by more than 30 days for reasons attributable to the Client, iorta TechNXT may invoice the milestone payment on the planned date of the milestone.
-3. Optional services in the Order Form (extra training days, legacy data sources, integrations, environments, on-site days) are invoiced on delivery or as quoted.
-4. Travel, lodging and meals outside Metro Manila are billed at cost with receipts, if approved in advance by the Client.
+3. Optional services in the Order Form (extra training days, legacy data sources, additional integrations, environment set-up, on-site days) are invoiced on delivery or as quoted.
+4. Optional modules and partner services in the Order Form are invoiced on delivery of each service at the rates of the Service Catalogue and Rate Annex (S08): connector go-live with a partner (PHP 80,000.00 per connector); activation of the AML/CFT toolkit (PHP 130,000.00); activation of the IC compliance registers (PHP 100,000.00); activation of the BIR pack (PHP 130,000.00); dealer programme set-up (PHP 50,000.00 per programme); Client brand pack (PHP 30,000.00 per pack); AMLC reporting file validation and portal test (PHP 50,000.00); IC annual statement form alignment (PHP 50,000.00); EOPT invoicing review with the Client's tax adviser (PHP 30,000.00); BIR CAS registration support (PHP 60,000.00); BIR EIS enrolment and certification (PHP 80,000.00); CTPL authentication and LTO interface certification (PHP 60,000.00); insurer API onboarding (PHP 50,000.00 per insurer); bank payment file certification (PHP 30,000.00 per bank); SMS or Viber gateway activation (PHP 20,000.00); screening list provider onboarding (PHP 30,000.00). The fees of the regulator or the partner are not included and are paid by the Client directly.
+5. Travel, lodging and meals outside Metro Manila are billed at cost with receipts, if approved in advance by the Client.
 
 # Change control
 
