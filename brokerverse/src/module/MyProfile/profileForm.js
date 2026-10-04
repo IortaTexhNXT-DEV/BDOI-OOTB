@@ -29,7 +29,7 @@ export const GENDERS = ["male", "female", "other", "undisclosed"];
 
 export const FIELDS = [
   "firstName", "lastName", "displayName", "dateOfBirth", "gender", "email", "phone",
-  "addressLine", "barangay", "city", "province", "zipCode", "country",
+  "addressLine", "barangay", "city", "province", "region", "zipCode", "country",
 ];
 
 /** API profile -> form values (strings; the date as a Date for the calendar). */
@@ -45,6 +45,7 @@ export const toFormValues = (profile = {}) => ({
   barangay: profile.barangay || "",
   city: profile.city || "",
   province: profile.province || "",
+  region: profile.region || "",
   zipCode: profile.zipCode || "",
   country: profile.country || DEFAULT_COUNTRY,
 });
@@ -62,6 +63,7 @@ export const toPayload = (values, { emailEditable = false } = {}) => {
     barangay: values.barangay.trim(),
     city: values.city.trim(),
     province: values.province.trim(),
+    region: (values.region || "").trim(),
     zipCode: values.zipCode.trim(),
     country: values.country.trim(),
   };

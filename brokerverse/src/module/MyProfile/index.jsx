@@ -66,6 +66,7 @@ const MyProfile = () => {
   const [saving, setSaving] = useState(false);
   const [dialog, setDialog] = useState("");
   const [countries, setCountries] = useState([]);
+  const [regions, setRegions] = useState([]);
   const [provinces, setProvinces] = useState([]);
   const [cities, setCities] = useState([]);
   const [barangays, setBarangays] = useState([]);
@@ -86,11 +87,15 @@ const MyProfile = () => {
     load();
   }, [load]);
 
-  // Address pickers (edit mode): country -> province -> city / municipality -> barangay
+  // Address pickers (edit mode): country -> region -> province -> city / municipality -> barangay
   useEffect(() => {
     if (!editing) return;
     addressService.getCountries().then((r) => setCountries(namesOf(r)));
   }, [editing]);
+  useEffect(() => {
+    if (!editing) return;
+    addressService.getRegionsByCountry(values.country || DEFAULT_COUNTRY).then((r) => setRegions(namesOf(r)));
+  }, [editing, values.country]);
   useEffect(() => {
     if (!editing) return;
     addressService.getProvincesByCountry(values.country || DEFAULT_COUNTRY).then((r) => setProvinces(namesOf(r)));
@@ -102,7 +107,7 @@ const MyProfile = () => {
   }, [editing, values.province]);
   useEffect(() => {
     if (!editing || !values.city) return setBarangays([]);
-    addressService.getDistrictsByCity(values.city).then((r) => setBarangays(namesOf(r)));
+    addressService.getBarangaysByCity(values.city).then((r) => setBarangays(namesOf(r)));
     return undefined;
   }, [editing, values.city]);
 
@@ -110,6 +115,18 @@ const MyProfile = () => {
     const value = e && e.target !== undefined ? e.target.value : e?.value !== undefined ? e.value : e;
     setValues((v) => ({ ...v, [field]: value ?? "" }));
     if (errors[field]) setErrors((x) => ({ ...x, [field]: undefined }));
+  };
+
+  // choosing a province fills its region; choosing a city fills its region (Isabela City: Region IX) and suggests its ZIP code
+  const onProvince = (e) => {
+    const name = e.value ?? "";
+    const match = provinces.find((p) => p.name === name);
+    setValues((v) => ({ ...v, province: name, region: match?.regionName || v.region }));
+  };
+  const onCity = (e) => {
+    const name = e.value ?? "";
+    const match = cities.find((c) => c.name === name);
+    setValues((v) => ({ ...v, city: name, region: match?.regionName || v.region, zipCode: match?.zipCode && !v.zipCode ? match.zipCode : v.zipCode }));
   };
 
   const onBarangay = (e) => {
@@ -393,8 +410,9 @@ const MyProfile = () => {
             <div className="myprofile__grid">
               {text("addressLine", t("myProfile.houseNoStreet"), { inputProps: { autoComplete: "address-line1", maxLength: 200 } })}
               {picker("barangay", t("myProfile.barangay"), barangays, { onChange: onBarangay })}
-              {picker("city", t("myProfile.city"), cities)}
-              {picker("province", t("myProfile.province"), provinces)}
+              {picker("city", t("myProfile.city"), cities, { onChange: onCity })}
+              {picker("province", t("myProfile.province"), provinces, { onChange: onProvince })}
+              {picker("region", t("myProfile.region"), regions)}
               {text("zipCode", t("myProfile.zipCode"), {
                 inputProps: { inputMode: isPhilippines(values.country) ? "numeric" : "text", autoComplete: "postal-code", maxLength: isPhilippines(values.country) ? 4 : 10 },
               })}

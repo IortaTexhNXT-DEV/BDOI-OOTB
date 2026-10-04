@@ -3,11 +3,54 @@ import authService from "./authService";
 
 /**
  * Address Service
- * Address masters: countries, provinces, cities, districts, and postal code lookup (Thailand).
+ * Philippine address masters (PSGC): countries, regions, provinces, cities / municipalities, barangays, the ZIP codes
+ * of a city and the ZIP code look-up.
  */
 class AddressService {
   constructor() {
     this.baseURL = BASE_URL;
+  }
+
+  /** GET a list from /addresses/...; { success, data } or { success: false, error }. */
+  async getList(path, failure) {
+    try {
+      const response = await fetch(`${this.baseURL}/addresses/${path}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
+      });
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || err.error || failure);
+      }
+      const data = await response.json();
+      return { success: true, data: Array.isArray(data) ? data : data?.data ?? [] };
+    } catch (error) {
+      return { success: false, error: error.message || failure };
+    }
+  }
+
+  /** Regions of a country (id, code or name), in the PSA order. */
+  async getRegionsByCountry(countryId) {
+    if (!countryId) return { success: true, data: [] };
+    return this.getList(`countries/${encodeURIComponent(countryId)}/regions`, "Failed to fetch regions");
+  }
+
+  /** Provinces of a region (id, code or name). */
+  async getProvincesByRegion(regionId) {
+    if (!regionId) return { success: true, data: [] };
+    return this.getList(`regions/${encodeURIComponent(regionId)}/provinces`, "Failed to fetch provinces");
+  }
+
+  /** Barangays of a city / municipality (id, PSGC code or name); empty when not loaded. */
+  async getBarangaysByCity(cityId) {
+    if (!cityId) return { success: true, data: [] };
+    return this.getList(`cities/${encodeURIComponent(cityId)}/barangays`, "Failed to fetch barangays");
+  }
+
+  /** ZIP codes of a city / municipality: its main ZIP code first. */
+  async getPostalCodesByCity(cityId) {
+    if (!cityId) return { success: true, data: [] };
+    return this.getList(`cities/${encodeURIComponent(cityId)}/postal-codes`, "Failed to fetch ZIP codes");
   }
 
   /**
@@ -122,8 +165,8 @@ class AddressService {
   }
 
   /**
-   * Postal code lookup (e.g. Thailand). Returns [{ province, city, district }] for auto-fill.
-   * @param {string} countryCode - e.g. "TH"
+   * ZIP / postal code look-up. Returns [{ region, province, city, district }] for auto-fill.
+   * @param {string} countryCode - e.g. "PH"
    * @param {string} code - postal/zip code
    * @returns {Promise<Object>} { success, data: Array<{ province, city, district }> }
    */

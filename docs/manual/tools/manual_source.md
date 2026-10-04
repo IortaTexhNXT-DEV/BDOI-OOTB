@@ -1773,7 +1773,7 @@ The masters hold the reference data the other screens offer in their lists. Each
 | Insurance Management > Line of Business, Product, Cover | Lines, products and covers. |
 | Insurance Management > Signatories | Authorised signatories of quotations and documents. |
 | Insurance Management > Vehicle | Vehicle brands, models, variants and seating. |
-| Location > Country, State, City Master | Address lists (province is State). |
+| Location > Country, Province, City / Municipality | Philippine address lists of the PSGC: regions, provinces, cities and municipalities with ZIP codes, barangays. |
 | Commission | Commission sharing with referrers by insurer, product and cover. |
 | Employee Management > Hierarchy, Designation, Employee | Staff structure. |
 | User Management > User, Role | Users and roles. |
@@ -1828,7 +1828,7 @@ The result shows how many rows were created or updated and lists each failed row
 |---|---|
 | Insurance Company | `Insurance_Company_Upload_Template.xlsx` |
 | Vehicle (brands, models, variants, vehicles) | `Vehicle_Brand_...`, `Vehicle_Model_...`, `Vehicle_Variant_...`, `Vehicle_Upload_Template.xlsx` |
-| Country, State, City Master | `Country_...`, `State_...`, `City_Upload_Template.xlsx` |
+| Country, Province, City / Municipality | `Country_...`, `Region_...`, `Province_...`, `City_Municipality_...`, `Barangay_Upload_Template.xlsx` |
 | Bank (banks and bank accounts) | `Bank_Upload_Template.xlsx`, `Bank_Account_Upload_Template.xlsx` |
 | Currency, Transaction code | `Currency_...`, `Transaction_Code_Upload_Template.xlsx` (petty cash funds are set up in Accounts > Petty Cash > Initiate) |
 | Main Account and Sub Account (chart of accounts) | `Chart_of_Accounts_Upload_Template.xlsx` |

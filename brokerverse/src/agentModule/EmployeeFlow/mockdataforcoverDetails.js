@@ -1,4 +1,4 @@
-// Thailand Employee Benefits Cover Details Mock Data
+// Employee Benefits Cover Details Mock Data
 
 export const CountryOptions = [
   {label: "PHILIPPINES",value: "PHILIPPINES"}

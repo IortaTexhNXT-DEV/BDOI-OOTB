@@ -18,6 +18,83 @@ a whole before anything is saved. See `GO_LIVE_DATA_WORKBENCH.md`.
 Agree a **go-live date** with Accounting before you start: the first day on which transactions are entered in
 BrokerVerse. Balances and open items are taken from the old system at the close of the day before.
 
+## Philippine settings delivered with BrokerVerse
+
+BrokerVerse is delivered with Philippine reference data and practice in its masters. Check them, activate what you use
+and correct what differs in your company; do not enter them again. The items in **To confirm before go-live** below
+are the ones the broker (with its tax adviser where noted) must confirm.
+
+**Address masters (Master > Generals > Location).** The Philippine address format is used on every address form
+(leads, clients, claims, endorsements, My Profile): House / Unit No., Street, Barangay, City / Municipality, Province,
+Region, ZIP code, with the cascade Region -> Province -> City / Municipality -> Barangay. Choosing a province fills its
+region, choosing a city suggests its ZIP code, and a ZIP code typed first fills the city, province and region. The
+barangay is picked from a list where the city's barangays are loaded, otherwise typed.
+
+| Master | Delivered | Source |
+|---|---|---|
+| Region (shown with the provinces; `Region_Upload_Template.xlsx`) | 18 regions in the PSA order: NCR, CAR, Region I to XIII, MIMAROPA, NIR (Negros Island Region, Republic Act No. 12000 of 2024) and BARMM | PSGC |
+| Province (formerly called State; `Province_Upload_Template.xlsx`) | 82 provinces with their ISO 3166-2:PH code (e.g. CEB) and PSGC code, plus Metro Manila (the 17 local government units of NCR) and the BARMM Special Geographic Area | PSGC |
+| City / Municipality (`City_Municipality_Upload_Template.xlsx`) | 1,642 cities and municipalities (149 cities: 33 highly urbanised, 5 independent component, 111 component; 1,493 municipalities) with PSGC code, class, main ZIP code and, for Metro Manila, its district. A highly urbanised city is listed under the province it lies in (Cebu City under Cebu); Isabela City is listed under Basilan and keeps Region IX | PSGC; ZIP codes from PHLPost |
+| Barangay (`Barangay_Upload_Template.xlsx`) | the 1,715 barangays of Metro Manila. The 42,010 barangays of the whole country are an optional load (below) | PSGC |
+| ZIP codes | 1,855 PHLPost ZIP codes with the place they serve (ZIP code look-up on the address forms) | PHLPost list |
+
+Release: **PSGC 2Q 2026** of the Philippine Statistics Authority (as of 30 June 2026), the edition with 18 regions and
+82 provinces; ZIP codes from the PHLPost ZIP code list (GeoNames, CC BY 4.0, mappings reviewed against the PHLPost ZIP
+Code Locator). The release is recorded in `backend/src/db/reference/psgc/VERSION` and on the Philippines record of the
+Country master (`PsgcRelease`). PSA data is published under CC BY 4.0. The files were taken from the npm packages
+`@ianlabicani/geoph-lite` 2.0.0 (hierarchy, city / municipality class, barangays) and `@aivangogh/ph-address` 2026.2.3
+(ZIP codes), both built from the PSA publication of the same quarter; the PSA site itself could not be reached from
+the build environment, so compare the counts above with the PSA summary of the quarter when you receive the
+official file.
+
+To load **all barangays** (about 42,000) on the server, after the API has started once:
+
+    cd backend
+    node scripts/load-barangays.js                       # dry run: what would be added
+    node scripts/load-barangays.js --execute             # load (one transaction; run again at any time)
+    node scripts/load-barangays.js --execute --region=VII,NCR   # only some regions
+
+It adds what is missing, gives the PSGC code to barangays entered by hand with the same name, and never deletes or
+renames. A newer PSGC release: replace the CSV files of `backend/src/db/reference/psgc` (same columns), update
+`VERSION`, run `node scripts/build-ph-geography.js` to regenerate `src/db/seeds/12_ph_geography.sql` and deploy; the
+seed adds the new cities and attaches PSGC codes to records entered before. A single record can also be added with
+the upload templates above (up to 1,000 rows per file) or on the screen. The full province / city list is in the
+configuration workbook (sheets Regions, Provinces, Cities and Municipalities; Barangays carries only the barangays
+you added, not the PSGC list).
+
+**Practice masters (reference lists, API `/api/masters/<type>`, upload templates in the same folder).**
+
+| Master | Delivered |
+|---|---|
+| Salutation | Mr., Ms., Mrs., Miss, Dr., Atty., Engr., Arch., Hon., Rev. |
+| Civil Status | Single, Married, Widowed, Legally Separated, Annulled, Divorced |
+| Gender | Male, Female |
+| Nationality | Filipino (default) and 16 other nationalities |
+| Government ID Type | PhilSys National ID (PhilID / ePhilID), UMID, SSS ID, GSIS eCard, TIN ID, Passport, Driver's License, PRC ID, Postal ID, Voter's ID / Certification, Senior Citizen ID, PWD ID, with the issuing agency and an example of the number format. The KYC list of the policy screen is the setting `policy.kyc_id_types` |
+| Customer Type | Individual; Sole Proprietorship (DTI business name registration); Partnership, Stock Corporation, One Person Corporation, Non-stock Corporation / Foundation, Branch of a Foreign Corporation (SEC registration or licence); Cooperative (CDA); Homeowners' Association (DHSUD); Government Agency / GOCC; each with its registration authority and the label of its registration number |
+| Payment Mode (Master > Finance) | Cash, Check, Post-dated Check, Bank Deposit, InstaPay, PESONet, GCash, Maya, Credit Card, Debit Card, each with the way it is captured (cash, check, bank transfer, online, card) |
+| Holiday | The regular holidays and special non-working days of 2026 and 2027 (42 dates) |
+| Bank (Master > Finance > Bank) | BDO, BPI, Metrobank, Land Bank, PNB, Security Bank, UnionBank, RCBC, China Bank, EastWest, DBP, PSBank, AUB, Maybank Philippines, PBCom, Bank of Commerce, Veterans Bank, with their head-office SWIFT code and category |
+| Insurance Company | The non-life insurers licensed by the Insurance Commission (51), **inactive** except the starter set MAPFRE, Malayan, Pioneer, FPG, Standard and Mercantile. Activate the insurers you place with (Master > Generals > Insurance Management > Insurance Company) and fill their IC Certificate of Authority number and validity, TIN, address and remittance e-mail |
+| Currency | PHP (₱) as the base currency |
+| Taxes and charges (Master > Finance > Premium Taxes & LGU Rates) | VAT 12%; Documentary Stamp Tax PHP 0.50 on each PHP 4.00 of premium (NIRC s.184, 12.5%); Fire Service Tax 2% of fire premium (Fire Code); premium tax 2% for the premium-tax regime; Local Government Tax at the rate of the city / municipality in LGU Tax Rates, else 0.75%; the CTPL premiums of the motor tariff |
+| LGU Tax Rates | 10 Metro Manila cities at 0.2%, linked to their City / Municipality record. Every city and municipality of the City / Municipality master can be given its rate (the LGU list for the LGT) |
+
+The holiday list is a reference list: no due date is computed from it yet (BrokerVerse counts calendar days for
+warranties, renewals and reminders).
+
+**To confirm before go-live** (by the broker; the tax items with its tax adviser):
+
+| Item | What to confirm |
+|---|---|
+| Insurance Company list | The names, the "as of" date and the licence status against the Insurance Commission's current list of non-life insurance companies with a valid Certificate of Authority. The delivered list was compiled from the IC list known in 2025, not downloaded from the IC site; add any licensed insurer missing, deactivate any that lost its licence. Enter the IC certificate number and validity of each insurer you activate |
+| Holidays | The 2026 dates against the proclamation of the 2026 holidays, and the 2027 dates when the 2027 proclamation is issued; the dates of Eid'l Fitr and Eid'l Adha (declared each year by a separate proclamation) and whether 25 February (EDSA anniversary) is a special non-working or working day. Add the local special days of the cities where you have offices |
+| Banks | The SWIFT codes of the banks you remit through (the delivered codes are the head-office BIC) and add the banks missing |
+| LGU Tax Rates | The local government tax rate of each city / municipality where you place business (the 10 delivered Metro Manila rates of 0.2% and the 0.75% default are examples to confirm against each city's revenue code) |
+| Taxes | VAT, DST, FST, premium tax rates and their GL accounts (Step 5) |
+| Government ID number formats | The number formats are examples for the users, not validation rules |
+| Customer types | The registration authorities and labels used in your KYC process |
+
 ## Step 1. Company and letterhead
 
 - **Screen:** Master > Generals > Organization > Company.
@@ -59,6 +136,8 @@ BrokerVerse. Balances and open items are taken from the old system at the close 
 - **Enter:** every insurer you place with: code, name, TIN, address, e-mail for remittances and debit notes, default
   commission rate (a fraction: 0.20 for 20%), premium payment warranty days, remittance terms in days, default billing
   (broker or direct). Then the commission rates per insurer, product or line of business.
+- **Delivered:** the non-life insurers licensed by the Insurance Commission, inactive except the starter set (see
+  Philippine settings above): activate yours instead of adding them, and fill the IC Certificate of Authority number.
 - **Template:** `Insurance_Company_Upload_Template.xlsx`. The Commission Rate Matrix (Master > Finance) is the only
   commission source pricing reads; it has no upload, enter it on the screen.
 - **Check:** create a test quotation for each main insurer and compare the commission with the insurer's agreement.
@@ -91,7 +170,8 @@ BrokerVerse. Balances and open items are taken from the old system at the close 
 
 - **Screen:** Master > Finance > Bank (Upload button: choose Banks or Bank accounts); then Accounts > Bank
   Reconciliation to check each account's GL link and statement format.
-- **Enter:** the banks you deal with, then each company bank account: account code, bank, account number, type,
+- **Enter:** the banks you deal with that are not delivered (the main Philippine banks are, with their SWIFT codes),
+  then each company bank account: account code, bank, account number, type,
   currency, the GL cash account it reconciles to, the statement format (BDO-SAMPLE, BPI-SAMPLE, MBT-SAMPLE or GENERIC)
   and the reconcile-from date (normally the go-live date). Signatories in Master > Generals > Insurance Management >
   Signatories.

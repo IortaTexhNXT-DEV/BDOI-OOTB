@@ -317,7 +317,7 @@ function AddBankMaster() {
 
             <DropDowns
               className="dropdown__container"
-              label="City"
+              label="City / Municipality"
               value={formik.values.City}
               onChange={(e) =>
                 formik.setFieldValue("City", e.value)
@@ -340,7 +340,7 @@ function AddBankMaster() {
           <div class="col-3 md:col-3 lg-col-3">
             <DropDowns
               className="dropdown__container"
-              label="state"
+              label="Province"
               value={formik.values.state}
               onChange={(e) =>
                 formik.setFieldValue("state", e.value)

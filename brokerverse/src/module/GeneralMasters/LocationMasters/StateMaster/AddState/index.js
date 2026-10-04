@@ -20,7 +20,10 @@ const initialValues = {
   StateCode: "",
   StateName: "",
   Description: "",
-  Country: "",
+  Region: "",
+  Country: "Philippines",
+  Level: "",
+  PsgcCode: "",
   Modifiedby: "",
   ModifiedOn: ""
 }
@@ -41,6 +44,7 @@ function AddState({ action }) {
     }
   );
   const Country = useMasterOptions("country");
+  const Region = useMasterOptions("region");
 
   const home = { label: t("generalMasters.master") };
   const items = [
@@ -57,7 +61,10 @@ function AddState({ action }) {
       StateCode: getStateListById?.StateCode,
       StateName: getStateListById?.StateName,
       Description:getStateListById?.Description,
+      Region: getStateListById?.Region || "",
       Country: Country,
+      Level: getStateListById?.Level || "",
+      PsgcCode: getStateListById?.PsgcCode || "",
       Modifiedby: getStateListById?.Modifiedby,
       ModifiedOn: getStateListById?.ModifiedOn
     };
@@ -121,9 +128,6 @@ function AddState({ action }) {
     if (!values.StateName) {
       errors.StateName = "This field is required";
     }
-    if (!values.Description) {
-      errors.Description = "This field is required";
-    }
     if (!values.Country) {
       errors.Country = "This field is required";
     }
@@ -144,16 +148,16 @@ function AddState({ action }) {
   return (
     <div className='overall__addstate__container'>
 
-      <CustomToast ref={toastRef} message="State added" />
+      <CustomToast ref={toastRef} message={t("generalMasters.provinceAdded")} />
       <div>
         <span onClick={() => Navigate(-1)}>
           <SvgBackicon /></span>
         <label className='label_header'>
           {action === "add"
-            ? "Add State"
+            ? t("generalMasters.addState")
             : action === "edit"
-              ? "Edit State"
-              : "Details State"}
+              ? t("generalMasters.editState")
+              : t("generalMasters.detailsState")}
         </label>
       </div>
       <BreadCrumb
@@ -272,6 +276,36 @@ function AddState({ action }) {
             </div>
 
           </div>
+          <div class="col-3 md:col-3 lg-col-3">
+            <div>
+              <DropDowns
+                className="dropdown__container"
+                label={t("generalMasters.region")}
+                value={formik.values.Region}
+                onChange={(e) => formik.setFieldValue("Region", e.value)}
+                options={Region}
+                optionLabel="label"
+                placeholder={t("generalMasters.select")}
+                dropdownIcon={<SvgDropdown color={"#000"} />}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
+          <div class="sm-col-12 col-12 md:col-3 lg-col-3">
+            <div>
+              <InputField
+                classNames="field__container"
+                label={t("generalMasters.psgcCode")}
+                placeholder={t("generalMasters.enter")}
+                value={formik.values.PsgcCode}
+                onChange={formik.handleChange("PsgcCode")}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField

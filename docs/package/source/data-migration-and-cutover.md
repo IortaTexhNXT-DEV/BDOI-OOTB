@@ -46,7 +46,7 @@ It applies the step-by-step set-up of `docs/onboarding/GO_LIVE_DATA_SETUP.md` to
 | Organisation | Company, branches, departments | Company records | Master > Generals > Organization |
 | Organisation | Employee hierarchy and designations; staff branch, designation and reporting line | HR list | Master > Generals > Employee Management; Master > Generals > User Management > User |
 | Access | Users with one role each | User list | Master > Generals > User Management > User, or the provisioning script |
-| Reference | Countries, states (provinces), cities | Address tables (delivered data covers the Philippines; load only what is missing) | Master > Generals > Location |
+| Reference | Countries, regions, provinces, cities / municipalities, barangays | Address tables: the Philippine Standard Geographic Code (PSGC 2Q 2026) is delivered (18 regions, 82 provinces, 1,642 cities and municipalities with ZIP codes, Metro Manila barangays; the other barangays with `backend/scripts/load-barangays.js`); load only what is missing | Master > Generals > Location |
 | Reference | Currencies, exchange rates | Finance | Master > Finance > Currency, Exchange Rate |
 | Insurance | Insurers with commission rate, premium payment warranty, remittance terms, billing mode | Insurer master and agreements | Master > Generals > Insurance Management > Insurance Company |
 | Insurance | Lines of business, products, policy types, covers | Product list (delivered data covers Philippine non-life; load only what is missing) | Master > Generals > Insurance Management |
@@ -91,8 +91,10 @@ All templates were verified against the importers: each was loaded unchanged thr
 | `Hierarchy_Upload_Template.xlsx` | Ranks of the employee hierarchy | Employee Management > Hierarchy (API route) |
 | `Designation_Upload_Template.xlsx` | Designations | Employee Management > Designation (API route) |
 | `Country_Upload_Template.xlsx` | Countries | Master > Generals > Location > Country |
-| `State_Upload_Template.xlsx` | States or provinces | Location > State |
-| `City_Upload_Template.xlsx` | Cities with postal code | Location > City Master |
+| `Region_Upload_Template.xlsx` | Regions (only for another country: the 18 Philippine regions are delivered) | Location > Province (API route) |
+| `Province_Upload_Template.xlsx` | Provinces (formerly State; the Philippine provinces are delivered) | Location > Province |
+| `City_Municipality_Upload_Template.xlsx` | Cities and municipalities with ZIP code, class and PSGC code | Location > City / Municipality |
+| `Barangay_Upload_Template.xlsx` | Barangays missing from the PSGC list | Location > City / Municipality (API route) |
 | `Currency_Upload_Template.xlsx` | Currencies | Master > Finance > Currency |
 | `Exchange_Rate_Upload_Template.xlsx` | Exchange rates with effective dates | Master > Finance > Exchange Rate (API route) |
 | `Insurance_Company_Upload_Template.xlsx` | Insurers, default commission rate, premium payment warranty days, remittance terms, billing mode | Insurance Management > Insurance Company |

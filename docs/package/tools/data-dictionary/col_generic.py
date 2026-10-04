@@ -33,7 +33,7 @@ NOUN = {
     'claim_settlement_movements': 'settlement movement', 'products': 'product', 'policy_types': 'policy type', 'coverages': 'cover option',
     'vehicle_brands': 'vehicle make', 'vehicle_models': 'vehicle model', 'vehicle_variants': 'vehicle variant', 'product_templates': 'product template',
     'product_components': 'template component', 'product_risk_mappings': 'risk mapping', 'product_risk_sections': 'risk section',
-    'banks': 'bank', 'branches': 'branch', 'signatories': 'signatory', 'countries': 'country', 'states': 'province', 'cities': 'city',
+    'banks': 'bank', 'branches': 'branch', 'signatories': 'signatory', 'countries': 'country', 'regions': 'region', 'states': 'province', 'cities': 'city',
     'districts': 'district', 'postal_codes': 'postal code', 'currencies': 'currency', 'write_off_reasons': 'write-off reason',
     'posting_rules': 'posting rule version', 'posting_rule_lines': 'posting rule line', 'entry_matches': 'open-item match',
     'opening_balances': 'opening balance', 'period_close_checklist': 'checklist item', 'period_close_run_checks': 'checklist result',

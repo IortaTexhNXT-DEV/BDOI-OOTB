@@ -162,7 +162,7 @@ Some tables refer to more than one kind of parent, so the reference is a pair of
 
 ## Party and client
 
-The client is the insured party. A client is created from a lead when a quotation is converted, by bulk upload or directly on the client screen. Individual and corporate clients share one table (`client_type`); identity, contact and address fields are columns, further screen fields are in `extra`. Insurers (principals) carry the commission rate used when the rate matrix has no rate, the premium payment warranty days, the remittance terms and the default billing mode. The address masters (`countries` → `states` → `cities` → `districts`, and `postal_codes`) feed the address fields. Branches and signatories are printed on documents.
+The client is the insured party. A client is created from a lead when a quotation is converted, by bulk upload or directly on the client screen. Individual and corporate clients share one table (`client_type`); identity, contact and address fields are columns, further screen fields are in `extra`. Insurers (principals) carry the commission rate used when the rate matrix has no rate, the premium payment warranty days, the remittance terms and the default billing mode. The address masters (`countries` → `regions` → `states` (provinces) → `cities` (cities and municipalities) → `districts` (barangays), and `postal_codes`, from the Philippine Standard Geographic Code) feed the address fields. Branches and signatories are printed on documents.
 
 | Table | Holds |
 |---|---|
@@ -170,7 +170,7 @@ The client is the insured party. A client is created from a lead when a quotatio
 | `insurance_companies` | Insurers: code, name, TIN, contact, default commission rate, premium warranty days, remittance terms days, default billing mode. |
 | `banks` | Banks and mortgagees. Bank accounts of the broker are master records of type `bank-account`. |
 | `branches`, `signatories` | Broker branches and the persons who sign documents. |
-| `countries`, `states`, `cities`, `districts`, `postal_codes` | Address masters. |
+| `countries`, `regions`, `states`, `cities`, `districts`, `postal_codes` | Address masters (PSGC codes on regions, provinces, cities / municipalities and barangays). |
 
 | From | To | Meaning |
 |---|---|---|
@@ -664,16 +664,17 @@ This appendix lists every table and view with a one-line description and the num
 
 | Table | Description | Rows |
 |---|---|---|
-| `banks` | Banks and mortgagees | 6 |
+| `banks` | Banks and mortgagees | 17 |
 | `branches` | Broker branches | 1 |
-| `cities` | Cities and municipalities | 49 |
+| `cities` | Cities and municipalities (PSGC code, class, ZIP code, region) | 1642 |
 | `clients` | Clients (insured parties) with KYC fields and owner | 68 |
 | `countries` | Countries | 5 |
-| `districts` | Districts / barangays with postal code | 26 |
-| `insurance_companies` | Insurers (principals): contact, default commission rate, credit terms, billing mode | 13 |
-| `postal_codes` | Postal code lookup (province, city, district) | 26 |
+| `districts` | Barangays with PSGC code and ZIP code (Metro Manila delivered; the rest loaded by script) | 1715 |
+| `insurance_companies` | Insurers (principals): contact, default commission rate, credit terms, billing mode | 58 |
+| `postal_codes` | ZIP code look-up (province, city, place) | 1855 |
+| `regions` | Regions of a country (PSGC) | 18 |
 | `signatories` | Authorised signatories for documents | 0 |
-| `states` | Provinces / states | 17 |
+| `states` | Provinces (formerly called State), with region and PSGC code | 84 |
 
 ## Product and rating
 

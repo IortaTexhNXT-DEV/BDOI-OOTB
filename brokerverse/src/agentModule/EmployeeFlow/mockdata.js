@@ -1,4 +1,4 @@
-// Thailand Employee Benefits Mock Data
+// Employee Benefits Mock Data
 
 const data = {
  countries:[

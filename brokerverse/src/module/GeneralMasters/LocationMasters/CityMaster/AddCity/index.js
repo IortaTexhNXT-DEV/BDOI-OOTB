@@ -24,6 +24,10 @@ const initialValues = {
   CityName: "",
   Description: "",
   State: "",
+  Region: "",
+  CityClass: "",
+  PostalCode: "",
+  PsgcCode: "",
   Modifiedby: "",
   ModifiedOn: "",
 };
@@ -55,6 +59,8 @@ function AddCity({ action }) {
   const minDate = new Date();
   minDate.setDate(minDate.getDate() + 1);
   const State = useMasterOptions("state");
+  const Region = useMasterOptions("region");
+  const CITY_CLASSES = ["Highly Urbanized City", "Independent Component City", "Component City", "Municipality"].map((c) => ({ label: c, value: c }));
   const setFormikValues = () => {
     const statedatas = CityListById?.State;
     const updatedValues = {
@@ -63,6 +69,10 @@ function AddCity({ action }) {
       CityName: CityListById?.CityName || "",
       Description: CityListById?.Description || "",
       State: statedatas || "",
+      Region: CityListById?.Region || "",
+      CityClass: CityListById?.CityClass || "",
+      PostalCode: CityListById?.PostalCode || "",
+      PsgcCode: CityListById?.PsgcCode || "",
       Modifiedby: CityListById?.Modifiedby || "",
       ModifiedOn: CityListById?.ModifiedOn || "",
     };
@@ -119,9 +129,6 @@ function AddCity({ action }) {
     }
     if (!values.CityName) {
       errors.CityName = t("validation.fieldRequired");
-    }
-    if (!values.Description) {
-      errors.Description = t("validation.fieldRequired");
     }
     if (!values.State) {
       errors.State = t("validation.fieldRequired");
@@ -248,6 +255,65 @@ function AddCity({ action }) {
             </div>
           </div>
 
+          <div class="col-3 md:col-3 lg-col-3">
+            <div>
+              <DropDowns
+                className="dropdown__container"
+                label={t("generalMasters.region")}
+                value={formik.values.Region}
+                onChange={(e) => formik.setFieldValue("Region", e.value)}
+                options={Region}
+                optionLabel="label"
+                optionValue="label"
+                placeholder={t("generalMasters.regionFromProvince")}
+                dropdownIcon={<SvgDropdown color={"#000"} />}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
+          <div class="col-3 md:col-3 lg-col-3">
+            <div>
+              <DropDowns
+                className="dropdown__container"
+                label={t("generalMasters.cityClass")}
+                value={formik.values.CityClass}
+                onChange={(e) => formik.setFieldValue("CityClass", e.value)}
+                options={CITY_CLASSES}
+                optionLabel="label"
+                optionValue="value"
+                placeholder={t("generalMasters.select")}
+                dropdownIcon={<SvgDropdown color={"#000"} />}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
+          <div class="sm-col-12 col-12 md:col-3 lg-col-3">
+            <div>
+              <InputField
+                classNames="field__container"
+                label={t("generalMasters.zipCode")}
+                placeholder={t("generalMasters.enter")}
+                value={formik.values.PostalCode}
+                onChange={formik.handleChange("PostalCode")}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="sm-col-12 col-12 md:col-3 lg-col-3">
+            <div>
+              <InputField
+                classNames="field__container"
+                label={t("generalMasters.psgcCode")}
+                placeholder={t("generalMasters.enter")}
+                value={formik.values.PsgcCode}
+                onChange={formik.handleChange("PsgcCode")}
+                disabled={action === "view"}
+              />
+            </div>
+          </div>
           <div class="sm-col-12 col-12 md:col-3 lg-col-3">
             <div>
               <InputField
