@@ -55,6 +55,9 @@ export const SAMPLE_MASTERS = [
   { table: 'lead_assignment_rules', label: 'sample lead assignment rules', where: "created_by = 'seed'" },
   { table: 'motor_programmes', label: 'sample vehicle programmes', where: "created_by = 'seed'" },
   { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
+  // sample licences and fit and proper records (seeds/sample/71_compliance.sql) go before the referrers they belong to
+  { table: 'compliance_licences', label: 'sample licences', where: "created_by = 'seed'" },
+  { table: 'compliance_fit_proper', label: 'sample fit and proper records', where: "created_by = 'seed'" },
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
   { table: 'branches', label: 'demo branches', where: "code IN ('CEB','DAV')" },
   { table: 'signatories', label: 'fictional signatories', where: "name IN ('Maria Regina Cruz','Jose Antonio Reyes','Ana Patricia Lim')" },

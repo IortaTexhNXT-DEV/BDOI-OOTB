@@ -13,6 +13,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { setup } from './helpers.js';
 import { pool, query } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
+import { isPiiCipher, revealPii } from '../src/lib/pii.js';
 import { sendQueuedEmails, queueEmail } from '../src/lib/mailer.js';
 import {
   ALLOW_LIST, CATALOGUE, PERSONAL_NAME_RE, RULES, TABLE_ACTIONS, allowReason, catalogueEntry, jsonKeyRule,
@@ -316,6 +317,9 @@ describe('masking a copy', () => {
 
   it('is deterministic: the same original gives the same masked value in every table', async () => {
     const client = (await query('SELECT * FROM clients WHERE id = $1', [ids.client])).rows[0];
+    // the TIN is stored encrypted (migration 0277): the masked value is read in clear
+    expect(isPiiCipher(client.tin)).toBe(true);
+    client.tin = revealPii(client.tin);
     const lead = (await query('SELECT * FROM leads WHERE id = $1', [ids.lead])).rows[0];
     const policy = (await query('SELECT * FROM policies WHERE id = $1', [ids.policy])).rows[0];
     const claim = (await query('SELECT * FROM claims WHERE id = $1', [ids.claim])).rows[0];

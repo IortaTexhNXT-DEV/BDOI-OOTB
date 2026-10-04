@@ -1498,6 +1498,54 @@
    "chapter": "Distribution, programmes and products"
   },
   {
+   "id": "compliance",
+   "title": "Compliance",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "licence-register",
+   "title": "Licence register",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "fit-and-proper-records",
+   "title": "Fit and proper records",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "insurer-authority",
+   "title": "Insurer authority",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "complaints-register",
+   "title": "Complaints register",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "ic-annual-statement",
+   "title": "IC annual statement",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "ic-production-report",
+   "title": "IC production report",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
+   "id": "personal-data-breach-register",
+   "title": "Personal data breach register",
+   "level": 2,
+   "chapter": "Compliance"
+  },
+  {
    "id": "module-reference",
    "title": "Module reference",
    "level": 1,

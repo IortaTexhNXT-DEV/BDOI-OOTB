@@ -35,16 +35,23 @@ const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endor
 // payments through read:policies. Claims officers read the lead through the policy, not the lead register.
 // The System Administrator holds every permission (granted below), so it has no entry here.
 const ROLE_PERMS = {
-  sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read'],
+  sales: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reports', 'notifications', 'products:read', 'masters:read', 'claims:read',
+    // full personal identifiers: account executives call and write to their clients (migration 0276); complaints
+    // register read only (complaints are logged and handled by Operations and Claims, migration 0272)
+    'pii:view', 'complaints:read'],
   processing: ['profile', 'leads:read', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'reinsurance', 'products', 'reports', 'notifications', 'masters:read', 'claims:read'],
   operations: ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'renewals', 'claims:read', 'reports', 'notifications', 'masters:read', 'products:read',
     // data privacy: data subject requests, consent register, personal data export and anonymisation (permissions of migration 0221)
-    'privacy:read', 'privacy:write'],
-  claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
+    'privacy:read', 'privacy:write',
+    // full personal identifiers (migration 0276), Insurance Commission registers (0270) and the complaints register (0272)
+    'pii:view', 'compliance', 'complaints'],
+  claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read', 'complaints'],
   // Accounting calculates, approves (maker-checker) and pays incentives; program set-up stays with the system administrator.
   accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read',
     // accounts payable sub-ledger and fixed asset register (permissions of migration 0298)
-    'payables', 'fixed-assets'],
+    'payables', 'fixed-assets',
+    // full personal identifiers for BIR forms and payees' bank accounts (migration 0276); licence register and IC reports (0270)
+    'pii:view', 'compliance:read'],
   // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
   // and the bank reconciliation approval (approve:bank-reconciliation: approve / reopen a reconciliation; not its preparer),
   // the insurer statement reconciliation approval (approve:insurer-reconciliation, permission added by migration 0172) and

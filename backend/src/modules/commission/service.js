@@ -12,6 +12,9 @@ import { assertChecker, round2, num } from '../accounting/lib/http.js';
 import { formatMoney } from '../../lib/money.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { taxCodeRate } from '../accounting/lib/commissionTax.js';
+import { revealPii } from '../../lib/pii.js';
+import { addComplianceWarning } from '../../lib/complianceWarnings.js';
+import { referrerLicenceIssue } from '../ic-compliance/licences.js';
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const cycleLabel = (d) => { const x = new Date(d); return `${MONTHS[x.getUTCMonth()]} ${x.getUTCFullYear()}`; };
@@ -45,20 +48,34 @@ async function eligibleSql(alias, params) {
   return `(${alias}.user_id IS NULL OR EXISTS (SELECT 1 FROM user_roles ur JOIN roles ro ON ro.id = ur.role_id WHERE ur.user_id = ${alias}.user_id AND lower(ro.code) = ANY($${params.length})))`;
 }
 
-/** Why a referrer cannot be approved / paid (null when payable): no bank account on file (commission.require_bank_account). */
+/**
+ * Why a referrer cannot be approved / paid (null when payable): no bank account on file (commission.require_bank_account),
+ * or, for a referrer type that must be licensed (compliance.licence_required_referrer_types), no licence in force on the
+ * licence register while compliance.referrer_licence_check is "block" (Insurance Commission: commission is shared only
+ * with licensed agents).
+ */
 export async function payoutBlockReason(ref) {
-  if (!(await getSetting('commission.require_bank_account', true))) return null;
-  if (!ref.bank_account_no || !String(ref.bank_account_no).trim()) {
+  if ((await getSetting('commission.require_bank_account', true)) && (!ref.bank_account_no || !String(ref.bank_account_no).trim())) {
     return `${ref.name} has no bank account on file. Add the bank name and account number to the referrer before approving or paying commission.`;
   }
+  const licence = await referrerLicenceIssue(ref);
+  if (licence?.mode === 'block') return licence.message;
   return null;
+}
+/** The licence warning of a referrer when compliance.referrer_licence_check is "warn" (null otherwise). */
+export async function payoutWarning(ref) {
+  const licence = await referrerLicenceIssue(ref);
+  return licence?.mode === 'warn' ? licence.message : null;
 }
 export async function assertPayable(ref) {
   const reason = await payoutBlockReason(ref);
   if (reason) throw conflict(reason);
+  // warn mode: the approval or payment goes ahead; the warning is returned and recorded in the audit trail
+  const warning = await payoutWarning(ref);
+  if (warning) await addComplianceWarning(warning, { kind: 'referrer-licence', entity: 'commission_referrer', entityId: ref.id });
 }
 
-const maskAccount = (ref) => (ref.bank_account_no ? `${ref.bank_name || 'Bank'} ***${String(ref.bank_account_no).slice(-4)}` : null);
+const maskAccount = (ref) => (ref.bank_account_no ? `${ref.bank_name || 'Bank'} ***${String(revealPii(ref.bank_account_no)).slice(-4)}` : null);
 
 /** comsub = fixed + net premium x pct; WHT on comsub when applicable; net margin = brokerage - comsub. */
 export function computeLine({ netPremium, comsubFixed = 0, comsubPct = 0, whtPct = 0, whtApplicable = true, brokeragePct = 0 }) {
@@ -117,7 +134,7 @@ export async function referrerSummaryRow(db, ref) {
   return {
     id: ref.id, name: ref.name, type: ref.referrer_type, level: ref.level, policies: new Set(lines.filter((l) => l.status !== 'Reversed').map((l) => l.policy_id)).size,
     netPayable: sumNet(cur), whtType: `${payee} ${whtPct}%`, whtApplicable: ref.wht_applicable, whtPct, whtCode: wht.code,
-    bankAccount: maskAccount(ref), bankAccountMissing: !ref.bank_account_no, payoutBlockedReason: await payoutBlockReason(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
+    bankAccount: maskAccount(ref), bankAccountMissing: !ref.bank_account_no, payoutBlockedReason: await payoutBlockReason(ref), payoutWarning: await payoutWarning(ref), status: ref.status, userId: ref.user_id, parentReferrerId: ref.parent_referrer_id,
   };
 }
 
@@ -143,7 +160,7 @@ export async function buildAccount(db, id) {
   const row = await referrerSummaryRow(db, ref);
   return {
     referrer: { id: ref.id, name: ref.name, status: ref.status, type: ref.referrer_type, level: ref.level, whtType: row.whtType, whtApplicable: ref.wht_applicable,
-      whtPct: row.whtPct, bankAccount: row.bankAccount, bankAccountMissing: row.bankAccountMissing, payoutBlockedReason: row.payoutBlockedReason, policiesCount: row.policies, email: ref.email, phone: ref.phone, tin: ref.tin },
+      whtPct: row.whtPct, bankAccount: row.bankAccount, bankAccountMissing: row.bankAccountMissing, payoutBlockedReason: row.payoutBlockedReason, payoutWarning: row.payoutWarning, policiesCount: row.policies, email: ref.email, phone: ref.phone, tin: ref.tin },
     summary: { cycleLabel: cycleLabel(monthStart()), dueThisCycle: sumNet(cur), upcoming: sumNet(future), paidToDate: sumNet(past.filter((l) => l.status === 'Paid')) },
     currentCycle: { label: cycleLabel(monthStart()), totalNet: sumNet(cur), lines: await view(cur) },
     futureCycles: { totalNet: sumNet(future), lines: await view(future) },

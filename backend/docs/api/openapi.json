@@ -87,6 +87,9 @@
       "name": "Comparison reports"
     },
     {
+      "name": "Compliance (Insurance Commission)"
+    },
+    {
       "name": "Cover Notes"
     },
     {
@@ -100,6 +103,9 @@
     },
     {
       "name": "Data Privacy"
+    },
+    {
+      "name": "Data Privacy: Breach Register"
     },
     {
       "name": "Dealer programmes"
@@ -41933,6 +41939,4276 @@
         ]
       }
     },
+    "/compliance/complaints": {
+      "get": {
+        "operationId": "getComplianceComplaints",
+        "summary": "Complaints register (filters: status, category, channel, overdue=true, assignedTo, clientId, policyId, from, to, search) with counts",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "received,acknowledged,in-progress,escalated"
+          },
+          {
+            "name": "overdue",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "complaintNumber": {
+                                "type": "string"
+                              },
+                              "receivedOn": {
+                                "type": "string"
+                              },
+                              "channel": {
+                                "type": "string"
+                              },
+                              "complainantName": {
+                                "type": "string"
+                              },
+                              "category": {
+                                "type": "string"
+                              },
+                              "complexity": {
+                                "type": "string"
+                              },
+                              "subject": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "ackDueOn": {
+                                "type": "string"
+                              },
+                              "resolutionDueOn": {
+                                "type": "string"
+                              },
+                              "ageDays": {
+                                "type": "integer"
+                              },
+                              "ackOverdue": {
+                                "type": "boolean"
+                              },
+                              "resolutionOverdue": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "open": {
+                              "type": "integer"
+                            },
+                            "ackOverdue": {
+                              "type": "integer"
+                            },
+                            "resolutionOverdue": {
+                              "type": "integer"
+                            },
+                            "escalated": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "today": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "id": "cmp_1",
+                        "complaintNumber": "CPT-2026-00001",
+                        "receivedOn": "2026-10-01",
+                        "channel": "E-mail",
+                        "complainantName": "Juan Dela Cruz",
+                        "category": "Claims handling",
+                        "complexity": "simple",
+                        "subject": "Delay in claim payment",
+                        "status": "acknowledged",
+                        "ackDueOn": "2026-10-03",
+                        "resolutionDueOn": "2026-10-08",
+                        "ageDays": 3,
+                        "ackOverdue": false,
+                        "resolutionOverdue": false
+                      }
+                    ],
+                    "summary": {
+                      "open": 1,
+                      "ackOverdue": 0,
+                      "resolutionOverdue": 0,
+                      "escalated": 0
+                    },
+                    "today": "2026-10-04"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints",
+        "x-permissions": [
+          "read:complaints"
+        ]
+      },
+      "post": {
+        "operationId": "postComplianceComplaints",
+        "summary": "Log a complaint: numbered from the CMP series; acknowledgement and resolution deadlines from the complaints.* settings; a policy or claim fills the client",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Log complaint\n\nAccess: write:complaints",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Log complaint",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "channel": {
+                    "type": "string"
+                  },
+                  "complainantName": {
+                    "type": "string"
+                  },
+                  "complainantContact": {
+                    "type": "string"
+                  },
+                  "policyId": {
+                    "type": "string"
+                  },
+                  "category": {
+                    "type": "string"
+                  },
+                  "subject": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "channel": "E-mail",
+                "complainantName": "Juan Dela Cruz",
+                "complainantContact": "juan@example.ph",
+                "policyId": "POL-2026-00012",
+                "category": "Claims handling",
+                "subject": "Delay in claim payment"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}": {
+      "get": {
+        "operationId": "getComplianceComplaintsId",
+        "summary": "One complaint with its history",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints",
+        "x-permissions": [
+          "read:complaints"
+        ]
+      },
+      "put": {
+        "operationId": "putComplianceComplaintsId",
+        "summary": "Edit an open complaint: details, links, complexity (the resolution deadline follows), assignment (the assignee is notified), documents",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Edit\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Edit",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "assignedTo": {
+                    "type": "string"
+                  },
+                  "complexity": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "assignedTo": "usr_1",
+                "complexity": "complex"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}/acknowledge": {
+      "post": {
+        "operationId": "postComplianceComplaintsIdAcknowledge",
+        "summary": "Acknowledge the complaint (the acknowledgement letter can then be printed)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Actions",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}/close": {
+      "post": {
+        "operationId": "postComplianceComplaintsIdClose",
+        "summary": "Close a resolved complaint",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Actions",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}/escalate": {
+      "post": {
+        "operationId": "postComplianceComplaintsIdEscalate",
+        "summary": "Escalate the complaint (reason); the complaints officers (approve:complaints) are notified",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Actions",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "No answer from the insurer"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}/letter/acknowledgement": {
+      "get": {
+        "operationId": "getComplianceComplaintsIdLetterAcknowledgement",
+        "summary": "Acknowledgement letter of a complaint (PDF on the letterhead; text from complaints.ack_letter_text)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Letters\n\nAccess: read:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Letters",
+        "x-permissions": [
+          "read:complaints"
+        ]
+      }
+    },
+    "/compliance/complaints/{id}/letter/resolution": {
+      "get": {
+        "operationId": "getComplianceComplaintsIdLetterResolution",
+        "summary": "Resolution letter of a complaint (PDF on the letterhead; text from complaints.resolution_letter_text)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Letters\n\nAccess: read:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Letters",
+        "x-permissions": [
+          "read:complaints"
+        ]
+      }
+    },
+    "/compliance/complaints/{id}/refer": {
+      "post": {
+        "operationId": "postComplianceComplaintsIdRefer",
+        "summary": "Record that the complaint was elevated to the Insurance Commission (reference, date)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Actions",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}/reopen": {
+      "post": {
+        "operationId": "postComplianceComplaintsIdReopen",
+        "summary": "Reopen a resolved or closed complaint the complainant contests (reason)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Actions",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}/resolve": {
+      "post": {
+        "operationId": "postComplianceComplaintsIdResolve",
+        "summary": "Resolve the complaint: outcome, resolution given, redress amount",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "resolved",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Actions",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string"
+                  },
+                  "resolution": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "outcome": "upheld",
+                "resolution": "The insurer released the claim payment on 07 October 2026"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/{id}/start": {
+      "post": {
+        "operationId": "postComplianceComplaintsIdStart",
+        "summary": "Start work on the complaint (acknowledges it when not yet done)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "complaintNumber": {
+                          "type": "string"
+                        },
+                        "receivedOn": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "complainantName": {
+                          "type": "string"
+                        },
+                        "category": {
+                          "type": "string"
+                        },
+                        "complexity": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "ackDueOn": {
+                          "type": "string"
+                        },
+                        "resolutionDueOn": {
+                          "type": "string"
+                        },
+                        "ageDays": {
+                          "type": "integer"
+                        },
+                        "ackOverdue": {
+                          "type": "boolean"
+                        },
+                        "resolutionOverdue": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "cmp_1",
+                    "complaintNumber": "CPT-2026-00001",
+                    "receivedOn": "2026-10-01",
+                    "channel": "E-mail",
+                    "complainantName": "Juan Dela Cruz",
+                    "category": "Claims handling",
+                    "complexity": "simple",
+                    "subject": "Delay in claim payment",
+                    "status": "acknowledged",
+                    "ackDueOn": "2026-10-03",
+                    "resolutionDueOn": "2026-10-08",
+                    "ageDays": 3,
+                    "ackOverdue": false,
+                    "resolutionOverdue": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Actions",
+        "x-permissions": [
+          "write:complaints"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/compliance/complaints/options": {
+      "get": {
+        "operationId": "getComplianceComplaintsOptions",
+        "summary": "Channels, categories (settings), complainant types, outcomes, deadlines in days and the users complaints can be assigned to",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "channels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "outcomes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "assignees": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "channels": [
+                      "E-mail"
+                    ],
+                    "categories": [
+                      "Claims handling"
+                    ],
+                    "outcomes": [
+                      "upheld",
+                      "partially-upheld",
+                      "not-upheld",
+                      "withdrawn"
+                    ],
+                    "assignees": [
+                      {
+                        "id": "usr_1",
+                        "name": "Ana Reyes"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints",
+        "x-permissions": [
+          "read:complaints"
+        ]
+      }
+    },
+    "/compliance/complaints/regulator-report": {
+      "get": {
+        "operationId": "getComplianceComplaintsRegulatorReport",
+        "summary": "Complaints report for the regulator for a period (?from=&to=): counts by category, channel, status and outcome, ageing, the register",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Regulator report\n\nAccess: read:complaints",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-06-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "total": {
+                          "type": "integer"
+                        },
+                        "resolved": {
+                          "type": "integer"
+                        },
+                        "resolvedWithinDeadline": {
+                          "type": "integer"
+                        },
+                        "byCategory": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "from": "2026-01-01",
+                    "to": "2026-06-30",
+                    "total": 4,
+                    "resolved": 3,
+                    "resolvedWithinDeadline": 3,
+                    "byCategory": [
+                      {
+                        "value": "Claims handling",
+                        "count": 2
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Regulator report",
+        "x-permissions": [
+          "read:complaints"
+        ]
+      }
+    },
+    "/compliance/complaints/regulator-report/export": {
+      "get": {
+        "operationId": "getComplianceComplaintsRegulatorReportExport",
+        "summary": "Complaints report for the regulator as Excel",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Complaints > Regulator report > Download\n\nAccess: read:complaints",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-06-30"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "xlsx",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Complaints > Regulator report > Download",
+        "x-permissions": [
+          "read:complaints"
+        ]
+      }
+    },
+    "/compliance/fit-proper": {
+      "get": {
+        "operationId": "getComplianceFitProper",
+        "summary": "Fit and proper records of directors and officers (filters: roleCategory, outcome, reviewState overdue / due / current / not-reviewed, includeCeased, search) with counts and the declaration items",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Fit and Proper\n\nAccess: read:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "personName": {
+                                "type": "string"
+                              },
+                              "roleCategory": {
+                                "type": "string"
+                              },
+                              "position": {
+                                "type": "string"
+                              },
+                              "declarations": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "item": {
+                                      "type": "string"
+                                    },
+                                    "answer": {
+                                      "type": "string"
+                                    },
+                                    "remarks": {}
+                                  }
+                                }
+                              },
+                              "lastReviewOn": {
+                                "type": "string"
+                              },
+                              "nextReviewOn": {
+                                "type": "string"
+                              },
+                              "reviewOutcome": {
+                                "type": "string"
+                              },
+                              "reviewState": {
+                                "type": "string"
+                              },
+                              "documents": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "active": {
+                              "type": "integer"
+                            },
+                            "overdue": {
+                              "type": "integer"
+                            },
+                            "due": {
+                              "type": "integer"
+                            },
+                            "notReviewed": {
+                              "type": "integer"
+                            },
+                            "notFit": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "declarationItems": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "reviewMonths": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "id": "fp_1",
+                        "personName": "Maria Santos",
+                        "roleCategory": "director",
+                        "position": "Chairman of the Board",
+                        "declarations": [
+                          {
+                            "item": "Has not been convicted ...",
+                            "answer": "yes",
+                            "remarks": null
+                          }
+                        ],
+                        "lastReviewOn": "2026-03-01",
+                        "nextReviewOn": "2027-03-01",
+                        "reviewOutcome": "fit",
+                        "reviewState": "current",
+                        "documents": []
+                      }
+                    ],
+                    "summary": {
+                      "active": 1,
+                      "overdue": 0,
+                      "due": 0,
+                      "notReviewed": 0,
+                      "notFit": 0
+                    },
+                    "declarationItems": [
+                      "..."
+                    ],
+                    "reviewMonths": 12
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Fit and Proper",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      },
+      "post": {
+        "operationId": "postComplianceFitProper",
+        "summary": "Add the fit and proper record of a director or officer (the declarations default to compliance.fit_proper_declarations)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Add\n\nAccess: write:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "personName": {
+                          "type": "string"
+                        },
+                        "roleCategory": {
+                          "type": "string"
+                        },
+                        "position": {
+                          "type": "string"
+                        },
+                        "declarations": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "type": "string"
+                              },
+                              "answer": {
+                                "type": "string"
+                              },
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "lastReviewOn": {
+                          "type": "string"
+                        },
+                        "nextReviewOn": {
+                          "type": "string"
+                        },
+                        "reviewOutcome": {
+                          "type": "string"
+                        },
+                        "reviewState": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "fp_1",
+                    "personName": "Maria Santos",
+                    "roleCategory": "director",
+                    "position": "Chairman of the Board",
+                    "declarations": [
+                      {
+                        "item": "Has not been convicted ...",
+                        "answer": "yes",
+                        "remarks": null
+                      }
+                    ],
+                    "lastReviewOn": "2026-03-01",
+                    "nextReviewOn": "2027-03-01",
+                    "reviewOutcome": "fit",
+                    "reviewState": "current",
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Fit and Proper > Add",
+        "x-permissions": [
+          "write:compliance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "personName": {
+                    "type": "string"
+                  },
+                  "roleCategory": {
+                    "type": "string"
+                  },
+                  "position": {
+                    "type": "string"
+                  },
+                  "appointedOn": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "personName": "Maria Santos",
+                "roleCategory": "director",
+                "position": "Chairman of the Board",
+                "appointedOn": "2025-06-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/fit-proper/{id}": {
+      "get": {
+        "operationId": "getComplianceFitProperId",
+        "summary": "One fit and proper record",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Fit and Proper\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "personName": {
+                          "type": "string"
+                        },
+                        "roleCategory": {
+                          "type": "string"
+                        },
+                        "position": {
+                          "type": "string"
+                        },
+                        "declarations": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "type": "string"
+                              },
+                              "answer": {
+                                "type": "string"
+                              },
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "lastReviewOn": {
+                          "type": "string"
+                        },
+                        "nextReviewOn": {
+                          "type": "string"
+                        },
+                        "reviewOutcome": {
+                          "type": "string"
+                        },
+                        "reviewState": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "fp_1",
+                    "personName": "Maria Santos",
+                    "roleCategory": "director",
+                    "position": "Chairman of the Board",
+                    "declarations": [
+                      {
+                        "item": "Has not been convicted ...",
+                        "answer": "yes",
+                        "remarks": null
+                      }
+                    ],
+                    "lastReviewOn": "2026-03-01",
+                    "nextReviewOn": "2027-03-01",
+                    "reviewOutcome": "fit",
+                    "reviewState": "current",
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Fit and Proper",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      },
+      "put": {
+        "operationId": "putComplianceFitProperId",
+        "summary": "Update a fit and proper record: declarations answered (a \"no\" needs remarks), documents, ceased",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Edit\n\nAccess: write:compliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "personName": {
+                          "type": "string"
+                        },
+                        "roleCategory": {
+                          "type": "string"
+                        },
+                        "position": {
+                          "type": "string"
+                        },
+                        "declarations": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "type": "string"
+                              },
+                              "answer": {
+                                "type": "string"
+                              },
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "lastReviewOn": {
+                          "type": "string"
+                        },
+                        "nextReviewOn": {
+                          "type": "string"
+                        },
+                        "reviewOutcome": {
+                          "type": "string"
+                        },
+                        "reviewState": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "fp_1",
+                    "personName": "Maria Santos",
+                    "roleCategory": "director",
+                    "position": "Chairman of the Board",
+                    "declarations": [
+                      {
+                        "item": "Has not been convicted ...",
+                        "answer": "yes",
+                        "remarks": null
+                      }
+                    ],
+                    "lastReviewOn": "2026-03-01",
+                    "nextReviewOn": "2027-03-01",
+                    "reviewOutcome": "fit",
+                    "reviewState": "current",
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Fit and Proper > Edit",
+        "x-permissions": [
+          "write:compliance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "declarationSignedOn": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "declarationSignedOn": "2026-09-30"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/fit-proper/{id}/review": {
+      "post": {
+        "operationId": "postComplianceFitProperIdReview",
+        "summary": "Record a fit and proper review: outcome, date, notes; the next review is due compliance.fit_proper_review_months later",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Review\n\nAccess: write:compliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "personName": {
+                          "type": "string"
+                        },
+                        "roleCategory": {
+                          "type": "string"
+                        },
+                        "position": {
+                          "type": "string"
+                        },
+                        "declarations": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "item": {
+                                "type": "string"
+                              },
+                              "answer": {
+                                "type": "string"
+                              },
+                              "remarks": {}
+                            }
+                          }
+                        },
+                        "lastReviewOn": {
+                          "type": "string"
+                        },
+                        "nextReviewOn": {
+                          "type": "string"
+                        },
+                        "reviewOutcome": {
+                          "type": "string"
+                        },
+                        "reviewState": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "fp_1",
+                    "personName": "Maria Santos",
+                    "roleCategory": "director",
+                    "position": "Chairman of the Board",
+                    "declarations": [
+                      {
+                        "item": "Has not been convicted ...",
+                        "answer": "yes",
+                        "remarks": null
+                      }
+                    ],
+                    "lastReviewOn": "2026-03-01",
+                    "nextReviewOn": "2027-03-01",
+                    "reviewOutcome": "fit",
+                    "reviewState": "current",
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Fit and Proper > Review",
+        "x-permissions": [
+          "write:compliance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string"
+                  },
+                  "reviewedOn": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "outcome": "fit",
+                "reviewedOn": "2026-10-01",
+                "notes": "Clearances received"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/fit-proper/export": {
+      "get": {
+        "operationId": "getComplianceFitProperExport",
+        "summary": "Fit and proper register as Excel",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Export\n\nAccess: read:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "xlsx",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Fit and Proper > Export",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/ic-reports/annual-statement": {
+      "get": {
+        "operationId": "getComplianceIcReportsAnnualStatement",
+        "summary": "IC annual statement of the broker for a year (?year= or ?from=&to=): balance sheet and income statement on the IC lines, premiums and commissions by insurer and line, premiums held in trust, checks and lines to confirm",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > IC Annual Statement\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2025"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "period": {
+                          "type": "object",
+                          "properties": {
+                            "from": {
+                              "type": "string"
+                            },
+                            "to": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "balanceSheet": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "current": {
+                                "type": "integer"
+                              },
+                              "prior": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "checks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "check": {
+                                "type": "string"
+                              },
+                              "ok": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "period": {
+                      "from": "2025-01-01",
+                      "to": "2025-12-31"
+                    },
+                    "balanceSheet": [
+                      {
+                        "code": "BS-A01",
+                        "label": "Cash on hand and in banks (own funds)",
+                        "current": 1250000,
+                        "prior": 980000
+                      }
+                    ],
+                    "checks": [
+                      {
+                        "check": "The balance sheet balances",
+                        "ok": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > IC Annual Statement",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/ic-reports/annual-statement/export": {
+      "get": {
+        "operationId": "getComplianceIcReportsAnnualStatementExport",
+        "summary": "IC annual statement workbook (Excel): cover, schedules 1 to 4, accountant confirmation, unmapped accounts",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Download\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2025"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "xlsx",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > IC Annual Statement > Download",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/ic-reports/mapping": {
+      "get": {
+        "operationId": "getComplianceIcReportsMapping",
+        "summary": "Lines of the IC annual statement and the ledger account prefixes mapped to each",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Account mapping\n\nAccess: read:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "schedule": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "accountPrefixes": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "schedule": "balance-sheet",
+                      "code": "BS-A01",
+                      "label": "Cash on hand and in banks (own funds)",
+                      "accountPrefixes": [
+                        "1101",
+                        "1102001"
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > IC Annual Statement > Account mapping",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/ic-reports/mapping/{id}": {
+      "put": {
+        "operationId": "putComplianceIcReportsMappingId",
+        "summary": "Change a line of the IC statement mapping (label, section, order, account prefixes, what the accountant must confirm, active)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Account mapping\n\nAccess: write:compliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "code": {
+                          "type": "string"
+                        },
+                        "accountPrefixes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "code": "BS-A01",
+                    "accountPrefixes": [
+                      "1101",
+                      "1102001",
+                      "1102002"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > IC Annual Statement > Account mapping",
+        "x-permissions": [
+          "write:compliance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "accountPrefixes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "accountPrefixes": [
+                  "1101",
+                  "1102001",
+                  "1102002"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/ic-reports/production": {
+      "get": {
+        "operationId": "getComplianceIcReportsProduction",
+        "summary": "IC production report: premiums placed by insurer and IC line of business (?from=&to=&groupBy=month|quarter|year), with the policy detail",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > IC Production Report\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "quarter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "groupBy": {
+                          "type": "string"
+                        },
+                        "lines": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "insurer": {
+                                "type": "string"
+                              },
+                              "premium": {
+                                "type": "object",
+                                "properties": {
+                                  "Fire": {
+                                    "type": "integer"
+                                  },
+                                  "Motor Car": {
+                                    "type": "integer"
+                                  }
+                                }
+                              },
+                              "totalPremium": {
+                                "type": "integer"
+                              },
+                              "commission": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "from": "2026-01-01",
+                    "to": "2026-09-30",
+                    "groupBy": "quarter",
+                    "lines": [
+                      "Fire",
+                      "Motor Car"
+                    ],
+                    "rows": [
+                      {
+                        "insurer": "MAPFRE Insular",
+                        "premium": {
+                          "Fire": 106400,
+                          "Motor Car": 23200
+                        },
+                        "totalPremium": 129600,
+                        "commission": 20504
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > IC Production Report",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/ic-reports/production/export": {
+      "get": {
+        "operationId": "getComplianceIcReportsProductionExport",
+        "summary": "IC production report workbook (Excel): by insurer and line, by period, detail",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > IC Production Report > Download\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-30"
+          },
+          {
+            "name": "groupBy",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "quarter"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "xlsx",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > IC Production Report > Download",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/insurer-authority": {
+      "get": {
+        "operationId": "getComplianceInsurerAuthority",
+        "summary": "Insurers with the state of their IC certificate of authority (valid, expiring, expired, missing, no-validity); filters state, status=all, search",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Insurer Authority\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "expiring,expired,missing"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "certificateNumber": {
+                                "type": "string"
+                              },
+                              "validUntil": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "daysLeft": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "valid": {
+                              "type": "integer"
+                            },
+                            "expiring": {
+                              "type": "integer"
+                            },
+                            "expired": {
+                              "type": "integer"
+                            },
+                            "missing": {
+                              "type": "integer"
+                            },
+                            "noValidity": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "today": {
+                          "type": "string"
+                        },
+                        "expiringDays": {
+                          "type": "integer"
+                        },
+                        "mode": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "id": 3,
+                        "code": "MAPFRE",
+                        "name": "MAPFRE Insular Insurance Corporation",
+                        "certificateNumber": "2025/12-R",
+                        "validUntil": "2027-12-31",
+                        "state": "valid",
+                        "daysLeft": 453
+                      }
+                    ],
+                    "summary": {
+                      "total": 1,
+                      "valid": 1,
+                      "expiring": 0,
+                      "expired": 0,
+                      "missing": 0,
+                      "noValidity": 0
+                    },
+                    "today": "2026-10-04",
+                    "expiringDays": 60,
+                    "mode": "warn"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Insurer Authority",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/insurer-authority/export": {
+      "get": {
+        "operationId": "getComplianceInsurerAuthorityExport",
+        "summary": "Insurers and their certificates of authority as Excel (same filters)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Insurer Authority > Export\n\nAccess: read:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "xlsx",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Insurer Authority > Export",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/licences": {
+      "get": {
+        "operationId": "getComplianceLicences",
+        "summary": "Licence register (filters: holderType, state valid / expiring / expired / no-expiry, renewalStatus, referrerId, includeInactive, search) with counts",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "state",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "expiring,expired"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "holderType": {
+                                "type": "string"
+                              },
+                              "referrerId": {
+                                "type": "string"
+                              },
+                              "holderName": {
+                                "type": "string"
+                              },
+                              "licenceType": {
+                                "type": "string"
+                              },
+                              "licenceNumber": {
+                                "type": "string"
+                              },
+                              "issuingAuthority": {
+                                "type": "string"
+                              },
+                              "issueDate": {
+                                "type": "string"
+                              },
+                              "expiryDate": {
+                                "type": "string"
+                              },
+                              "renewalStatus": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "state": {
+                                "type": "string"
+                              },
+                              "daysToExpiry": {
+                                "type": "integer"
+                              },
+                              "documents": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            },
+                            "valid": {
+                              "type": "integer"
+                            },
+                            "expiring": {
+                              "type": "integer"
+                            },
+                            "expired": {
+                              "type": "integer"
+                            },
+                            "noExpiry": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "today": {
+                          "type": "string"
+                        },
+                        "expiringDays": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "id": "lic_1",
+                        "holderType": "referrer",
+                        "referrerId": "ref-jdelacruz",
+                        "holderName": "Juan Dela Cruz",
+                        "licenceType": "Non-life Insurance Agent",
+                        "licenceNumber": "NL-2026-012345",
+                        "issuingAuthority": "Insurance Commission",
+                        "issueDate": "2026-01-15",
+                        "expiryDate": "2027-01-14",
+                        "renewalStatus": "not-due",
+                        "status": "active",
+                        "state": "valid",
+                        "daysToExpiry": 102,
+                        "documents": []
+                      }
+                    ],
+                    "summary": {
+                      "total": 1,
+                      "valid": 1,
+                      "expiring": 0,
+                      "expired": 0,
+                      "noExpiry": 0
+                    },
+                    "today": "2026-10-04",
+                    "expiringDays": 90
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      },
+      "post": {
+        "operationId": "postComplianceLicences",
+        "summary": "Record a licence of the firm, an officer, a licensed individual or a referrer (number, type, issue and expiry dates, documents)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register > Add\n\nAccess: write:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "holderType": {
+                          "type": "string"
+                        },
+                        "referrerId": {
+                          "type": "string"
+                        },
+                        "holderName": {
+                          "type": "string"
+                        },
+                        "licenceType": {
+                          "type": "string"
+                        },
+                        "licenceNumber": {
+                          "type": "string"
+                        },
+                        "issuingAuthority": {
+                          "type": "string"
+                        },
+                        "issueDate": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "renewalStatus": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "daysToExpiry": {
+                          "type": "integer"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "lic_1",
+                    "holderType": "referrer",
+                    "referrerId": "ref-jdelacruz",
+                    "holderName": "Juan Dela Cruz",
+                    "licenceType": "Non-life Insurance Agent",
+                    "licenceNumber": "NL-2026-012345",
+                    "issuingAuthority": "Insurance Commission",
+                    "issueDate": "2026-01-15",
+                    "expiryDate": "2027-01-14",
+                    "renewalStatus": "not-due",
+                    "status": "active",
+                    "state": "valid",
+                    "daysToExpiry": 102,
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register > Add",
+        "x-permissions": [
+          "write:compliance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "holderType": {
+                    "type": "string"
+                  },
+                  "referrerId": {
+                    "type": "string"
+                  },
+                  "licenceType": {
+                    "type": "string"
+                  },
+                  "licenceNumber": {
+                    "type": "string"
+                  },
+                  "issueDate": {
+                    "type": "string"
+                  },
+                  "expiryDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "holderType": "referrer",
+                "referrerId": "ref-jdelacruz",
+                "licenceType": "Non-life Insurance Agent",
+                "licenceNumber": "NL-2026-012345",
+                "issueDate": "2026-01-15",
+                "expiryDate": "2027-01-14"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/licences/{id}": {
+      "get": {
+        "operationId": "getComplianceLicencesId",
+        "summary": "One licence",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "holderType": {
+                          "type": "string"
+                        },
+                        "referrerId": {
+                          "type": "string"
+                        },
+                        "holderName": {
+                          "type": "string"
+                        },
+                        "licenceType": {
+                          "type": "string"
+                        },
+                        "licenceNumber": {
+                          "type": "string"
+                        },
+                        "issuingAuthority": {
+                          "type": "string"
+                        },
+                        "issueDate": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "renewalStatus": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "daysToExpiry": {
+                          "type": "integer"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "lic_1",
+                    "holderType": "referrer",
+                    "referrerId": "ref-jdelacruz",
+                    "holderName": "Juan Dela Cruz",
+                    "licenceType": "Non-life Insurance Agent",
+                    "licenceNumber": "NL-2026-012345",
+                    "issuingAuthority": "Insurance Commission",
+                    "issueDate": "2026-01-15",
+                    "expiryDate": "2027-01-14",
+                    "renewalStatus": "not-due",
+                    "status": "active",
+                    "state": "valid",
+                    "daysToExpiry": 102,
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      },
+      "put": {
+        "operationId": "putComplianceLicencesId",
+        "summary": "Update a licence (renewal status, filing date, documents, status revoked / surrendered)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register > Edit\n\nAccess: write:compliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "holderType": {
+                          "type": "string"
+                        },
+                        "referrerId": {
+                          "type": "string"
+                        },
+                        "holderName": {
+                          "type": "string"
+                        },
+                        "licenceType": {
+                          "type": "string"
+                        },
+                        "licenceNumber": {
+                          "type": "string"
+                        },
+                        "issuingAuthority": {
+                          "type": "string"
+                        },
+                        "issueDate": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "renewalStatus": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "daysToExpiry": {
+                          "type": "integer"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "lic_1",
+                    "holderType": "referrer",
+                    "referrerId": "ref-jdelacruz",
+                    "holderName": "Juan Dela Cruz",
+                    "licenceType": "Non-life Insurance Agent",
+                    "licenceNumber": "NL-2026-012345",
+                    "issuingAuthority": "Insurance Commission",
+                    "issueDate": "2026-01-15",
+                    "expiryDate": "2027-01-14",
+                    "renewalStatus": "not-due",
+                    "status": "active",
+                    "state": "valid",
+                    "daysToExpiry": 102,
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register > Edit",
+        "x-permissions": [
+          "write:compliance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "renewalStatus": {
+                    "type": "string"
+                  },
+                  "renewalFiledOn": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "renewalStatus": "filed",
+                "renewalFiledOn": "2026-12-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/licences/{id}/renew": {
+      "post": {
+        "operationId": "postComplianceLicencesIdRenew",
+        "summary": "Record the renewed licence: a new licence term for the same holder; the current one is marked renewed and superseded",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register > Renew\n\nAccess: write:compliance",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "holderType": {
+                          "type": "string"
+                        },
+                        "referrerId": {
+                          "type": "string"
+                        },
+                        "holderName": {
+                          "type": "string"
+                        },
+                        "licenceType": {
+                          "type": "string"
+                        },
+                        "licenceNumber": {
+                          "type": "string"
+                        },
+                        "issuingAuthority": {
+                          "type": "string"
+                        },
+                        "issueDate": {
+                          "type": "string"
+                        },
+                        "expiryDate": {
+                          "type": "string"
+                        },
+                        "renewalStatus": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "daysToExpiry": {
+                          "type": "integer"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "lic_1",
+                    "holderType": "referrer",
+                    "referrerId": "ref-jdelacruz",
+                    "holderName": "Juan Dela Cruz",
+                    "licenceType": "Non-life Insurance Agent",
+                    "licenceNumber": "NL-2026-012345",
+                    "issuingAuthority": "Insurance Commission",
+                    "issueDate": "2026-01-15",
+                    "expiryDate": "2027-01-14",
+                    "renewalStatus": "not-due",
+                    "status": "active",
+                    "state": "valid",
+                    "daysToExpiry": 102,
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register > Renew",
+        "x-permissions": [
+          "write:compliance"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "licenceNumber": {
+                    "type": "string"
+                  },
+                  "issueDate": {
+                    "type": "string"
+                  },
+                  "expiryDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "licenceNumber": "NL-2027-012345",
+                "issueDate": "2027-01-10",
+                "expiryDate": "2028-01-14"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/compliance/licences/dashboard": {
+      "get": {
+        "operationId": "getComplianceLicencesDashboard",
+        "summary": "Licence expiry calendar: counts, expired and expiring licences, licences by month of expiry (12 months), the firm's licence, referrers without a licence in force",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register > Expiry calendar\n\nAccess: read:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "today": {
+                          "type": "string"
+                        },
+                        "expiringDays": {
+                          "type": "integer"
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "total": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "expired": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "expiring": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "calendar": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "month": {
+                                "type": "string"
+                              },
+                              "licences": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        },
+                        "firmLicenceInForce": {
+                          "type": "boolean"
+                        },
+                        "referrersWithoutLicence": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "checkMode": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "today": "2026-10-04",
+                    "expiringDays": 90,
+                    "summary": {
+                      "total": 1
+                    },
+                    "expired": [],
+                    "expiring": [],
+                    "calendar": [
+                      {
+                        "month": "2026-10",
+                        "licences": []
+                      }
+                    ],
+                    "firmLicenceInForce": true,
+                    "referrersWithoutLicence": [],
+                    "checkMode": "block"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register > Expiry calendar",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/licences/export": {
+      "get": {
+        "operationId": "getComplianceLicencesExport",
+        "summary": "Licence register as Excel (same filters as the list)",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register > Export\n\nAccess: read:compliance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "xlsx",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register > Export",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
+    "/compliance/licences/holders": {
+      "get": {
+        "operationId": "getComplianceLicencesHolders",
+        "summary": "Holders and options for the licence form: referrers (agents, sub-agents, referrers), users, licence types (compliance.licence_types) and the referrer types that need a licence",
+        "tags": [
+          "Compliance (Insurance Commission)"
+        ],
+        "description": "Front-end touchpoint: Compliance > Insurance Commission > Licence Register > Add\n\nAccess: read:compliance",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cruz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "referrers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "users": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "licenceTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "requiredReferrerTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "referrers": [
+                      {
+                        "id": "ref-jdelacruz",
+                        "name": "Juan Dela Cruz",
+                        "type": "Agent"
+                      }
+                    ],
+                    "users": [
+                      {
+                        "id": "usr_1",
+                        "name": "Ana Reyes"
+                      }
+                    ],
+                    "licenceTypes": [
+                      "Non-life Insurance Agent"
+                    ],
+                    "requiredReferrerTypes": [
+                      "Agent",
+                      "Sub-agent"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Insurance Commission > Licence Register > Add",
+        "x-permissions": [
+          "read:compliance"
+        ]
+      }
+    },
     "/cover-notes": {
       "get": {
         "operationId": "getCoverNotes",
@@ -48642,6 +52918,1205 @@
             }
           }
         }
+      }
+    },
+    "/privacy/breaches": {
+      "get": {
+        "operationId": "getPrivacyBreaches",
+        "summary": "Breach register (filters: status, incidentType, year, pendingNpc=true, search) with counts and the notification hours",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "pendingNpc",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "breachNumber": {
+                                "type": "string"
+                              },
+                              "incidentType": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "discoveredAt": {
+                                "type": "string"
+                              },
+                              "npcDueAt": {
+                                "type": "string"
+                              },
+                              "hoursLeft": {
+                                "type": "integer"
+                              },
+                              "npcOverdue": {
+                                "type": "boolean"
+                              },
+                              "notifiable": {
+                                "type": "boolean"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "notifyHours": {
+                          "type": "integer"
+                        },
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "open": {
+                              "type": "integer"
+                            },
+                            "pendingNpc": {
+                              "type": "integer"
+                            },
+                            "npcOverdue": {
+                              "type": "integer"
+                            },
+                            "notAssessed": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "items": [
+                      {
+                        "id": "pdb_1",
+                        "breachNumber": "PDB-2026-00001",
+                        "incidentType": "personal-data-breach",
+                        "title": "Policy schedules e-mailed to the wrong client",
+                        "discoveredAt": "2026-10-03T01:00:00.000Z",
+                        "npcDueAt": "2026-10-06T01:00:00.000Z",
+                        "hoursLeft": 46,
+                        "npcOverdue": false,
+                        "notifiable": true,
+                        "status": "assessed"
+                      }
+                    ],
+                    "notifyHours": 72,
+                    "summary": {
+                      "open": 1,
+                      "pendingNpc": 1,
+                      "npcOverdue": 0,
+                      "notAssessed": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      },
+      "post": {
+        "operationId": "postPrivacyBreaches",
+        "summary": "Log a security incident or personal data breach when discovered (PDB series); the NPC deadline is privacy.breach_notify_hours after discovery and the data privacy team is notified",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Log incident\n\nAccess: write:privacy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "breachNumber": {
+                          "type": "string"
+                        },
+                        "incidentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "discoveredAt": {
+                          "type": "string"
+                        },
+                        "npcDueAt": {
+                          "type": "string"
+                        },
+                        "hoursLeft": {
+                          "type": "integer"
+                        },
+                        "npcOverdue": {
+                          "type": "boolean"
+                        },
+                        "notifiable": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pdb_1",
+                    "breachNumber": "PDB-2026-00001",
+                    "incidentType": "personal-data-breach",
+                    "title": "Policy schedules e-mailed to the wrong client",
+                    "discoveredAt": "2026-10-03T01:00:00.000Z",
+                    "npcDueAt": "2026-10-06T01:00:00.000Z",
+                    "hoursLeft": 46,
+                    "npcOverdue": false,
+                    "notifiable": true,
+                    "status": "assessed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Log incident",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "discoveredAt": {
+                    "type": "string"
+                  },
+                  "nature": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "dataCategories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "subjectsAffected": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "title": "Policy schedules e-mailed to the wrong client",
+                "discoveredAt": "2026-10-03T09:00:00+08:00",
+                "nature": [
+                  "confidentiality"
+                ],
+                "dataCategories": [
+                  "Names and contact details"
+                ],
+                "subjectsAffected": 1
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/breaches/{id}": {
+      "get": {
+        "operationId": "getPrivacyBreachesId",
+        "summary": "One incident with its history",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "breachNumber": {
+                          "type": "string"
+                        },
+                        "incidentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "discoveredAt": {
+                          "type": "string"
+                        },
+                        "npcDueAt": {
+                          "type": "string"
+                        },
+                        "hoursLeft": {
+                          "type": "integer"
+                        },
+                        "npcOverdue": {
+                          "type": "boolean"
+                        },
+                        "notifiable": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pdb_1",
+                    "breachNumber": "PDB-2026-00001",
+                    "incidentType": "personal-data-breach",
+                    "title": "Policy schedules e-mailed to the wrong client",
+                    "discoveredAt": "2026-10-03T01:00:00.000Z",
+                    "npcDueAt": "2026-10-06T01:00:00.000Z",
+                    "hoursLeft": 46,
+                    "npcOverdue": false,
+                    "notifiable": true,
+                    "status": "assessed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      },
+      "put": {
+        "operationId": "putPrivacyBreachesId",
+        "summary": "Update the facts of an open incident (description, data involved, numbers, cause, containment, remediation, DPO, documents)",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Edit\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "breachNumber": {
+                          "type": "string"
+                        },
+                        "incidentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "discoveredAt": {
+                          "type": "string"
+                        },
+                        "npcDueAt": {
+                          "type": "string"
+                        },
+                        "hoursLeft": {
+                          "type": "integer"
+                        },
+                        "npcOverdue": {
+                          "type": "boolean"
+                        },
+                        "notifiable": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pdb_1",
+                    "breachNumber": "PDB-2026-00001",
+                    "incidentType": "personal-data-breach",
+                    "title": "Policy schedules e-mailed to the wrong client",
+                    "discoveredAt": "2026-10-03T01:00:00.000Z",
+                    "npcDueAt": "2026-10-06T01:00:00.000Z",
+                    "hoursLeft": 46,
+                    "npcOverdue": false,
+                    "notifiable": true,
+                    "status": "assessed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Edit",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "containment": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "containment": "Recipient asked to delete the e-mail; confirmation received"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/breaches/{id}/assess": {
+      "post": {
+        "operationId": "postPrivacyBreachesIdAssess",
+        "summary": "Assess the incident against the NPC criteria; notifiable follows the criteria unless decided otherwise with a reason",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "breachNumber": {
+                          "type": "string"
+                        },
+                        "incidentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "discoveredAt": {
+                          "type": "string"
+                        },
+                        "npcDueAt": {
+                          "type": "string"
+                        },
+                        "hoursLeft": {
+                          "type": "integer"
+                        },
+                        "npcOverdue": {
+                          "type": "boolean"
+                        },
+                        "notifiable": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pdb_1",
+                    "breachNumber": "PDB-2026-00001",
+                    "incidentType": "personal-data-breach",
+                    "title": "Policy schedules e-mailed to the wrong client",
+                    "discoveredAt": "2026-10-03T01:00:00.000Z",
+                    "npcDueAt": "2026-10-06T01:00:00.000Z",
+                    "hoursLeft": 46,
+                    "npcOverdue": false,
+                    "notifiable": true,
+                    "status": "assessed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Actions",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sensitiveData": {
+                    "type": "boolean"
+                  },
+                  "unauthorisedAcquisition": {
+                    "type": "boolean"
+                  },
+                  "realRiskOfHarm": {
+                    "type": "boolean"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "sensitiveData": true,
+                "unauthorisedAcquisition": true,
+                "realRiskOfHarm": true,
+                "notes": "Government ID images were attached"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/breaches/{id}/close": {
+      "post": {
+        "operationId": "postPrivacyBreachesIdClose",
+        "summary": "Close the incident with the outcome and the measures taken (a notifiable breach must have been notified to the NPC)",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "breachNumber": {
+                          "type": "string"
+                        },
+                        "incidentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "discoveredAt": {
+                          "type": "string"
+                        },
+                        "npcDueAt": {
+                          "type": "string"
+                        },
+                        "hoursLeft": {
+                          "type": "integer"
+                        },
+                        "npcOverdue": {
+                          "type": "boolean"
+                        },
+                        "notifiable": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pdb_1",
+                    "breachNumber": "PDB-2026-00001",
+                    "incidentType": "personal-data-breach",
+                    "title": "Policy schedules e-mailed to the wrong client",
+                    "discoveredAt": "2026-10-03T01:00:00.000Z",
+                    "npcDueAt": "2026-10-06T01:00:00.000Z",
+                    "hoursLeft": 46,
+                    "npcOverdue": false,
+                    "notifiable": true,
+                    "status": "closed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Actions",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/privacy/breaches/{id}/notify-npc": {
+      "post": {
+        "operationId": "postPrivacyBreachesIdNotifyNpc",
+        "summary": "Record the notification to the NPC: time, reference, method; the reason for the delay when after the deadline",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "breachNumber": {
+                          "type": "string"
+                        },
+                        "incidentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "discoveredAt": {
+                          "type": "string"
+                        },
+                        "npcDueAt": {
+                          "type": "string"
+                        },
+                        "hoursLeft": {
+                          "type": "integer"
+                        },
+                        "npcOverdue": {
+                          "type": "boolean"
+                        },
+                        "notifiable": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pdb_1",
+                    "breachNumber": "PDB-2026-00001",
+                    "incidentType": "personal-data-breach",
+                    "title": "Policy schedules e-mailed to the wrong client",
+                    "discoveredAt": "2026-10-03T01:00:00.000Z",
+                    "npcDueAt": "2026-10-06T01:00:00.000Z",
+                    "hoursLeft": 46,
+                    "npcOverdue": false,
+                    "notifiable": true,
+                    "status": "assessed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Actions",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notifiedAt": {
+                    "type": "string"
+                  },
+                  "reference": {
+                    "type": "string"
+                  },
+                  "method": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "notifiedAt": "2026-10-04T10:00:00+08:00",
+                "reference": "NPC-BN-2026-0001",
+                "method": "NPC breach notification portal"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/privacy/breaches/{id}/notify-subjects": {
+      "post": {
+        "operationId": "postPrivacyBreachesIdNotifySubjects",
+        "summary": "Record the notification of the data subjects (time, number, method) or the reason they are not notified",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "breachNumber": {
+                          "type": "string"
+                        },
+                        "incidentType": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "discoveredAt": {
+                          "type": "string"
+                        },
+                        "npcDueAt": {
+                          "type": "string"
+                        },
+                        "hoursLeft": {
+                          "type": "integer"
+                        },
+                        "npcOverdue": {
+                          "type": "boolean"
+                        },
+                        "notifiable": {
+                          "type": "boolean"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "pdb_1",
+                    "breachNumber": "PDB-2026-00001",
+                    "incidentType": "personal-data-breach",
+                    "title": "Policy schedules e-mailed to the wrong client",
+                    "discoveredAt": "2026-10-03T01:00:00.000Z",
+                    "npcDueAt": "2026-10-06T01:00:00.000Z",
+                    "hoursLeft": 46,
+                    "npcOverdue": false,
+                    "notifiable": true,
+                    "status": "assessed"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Actions",
+        "x-permissions": [
+          "write:privacy"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/privacy/breaches/annual-report": {
+      "get": {
+        "operationId": "getPrivacyBreachesAnnualReport",
+        "summary": "Annual security incident report of a calendar year (?year=): counts of incidents, breaches, notifiable breaches, notifications on time and late, by nature and data category",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Annual report\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2025"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "year": {
+                          "type": "integer"
+                        },
+                        "incidents": {
+                          "type": "integer"
+                        },
+                        "breaches": {
+                          "type": "integer"
+                        },
+                        "notifiable": {
+                          "type": "integer"
+                        },
+                        "notifiedToNpc": {
+                          "type": "integer"
+                        },
+                        "notifiedLate": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "year": 2025,
+                    "incidents": 3,
+                    "breaches": 2,
+                    "notifiable": 1,
+                    "notifiedToNpc": 1,
+                    "notifiedLate": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Annual report",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      }
+    },
+    "/privacy/breaches/annual-report/export": {
+      "get": {
+        "operationId": "getPrivacyBreachesAnnualReportExport",
+        "summary": "Annual security incident report as Excel",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register > Annual report > Download\n\nAccess: read:privacy",
+        "parameters": [
+          {
+            "name": "year",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2025"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "xlsx",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register > Annual report > Download",
+        "x-permissions": [
+          "read:privacy"
+        ]
+      }
+    },
+    "/privacy/breaches/options": {
+      "get": {
+        "operationId": "getPrivacyBreachesOptions",
+        "summary": "Options of the breach form: incident types, natures, data categories (privacy.breach_data_categories), the data privacy team",
+        "tags": [
+          "Data Privacy: Breach Register"
+        ],
+        "description": "Front-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "incidentTypes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "natures": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "dataCategories": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "team": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "incidentTypes": [
+                      "personal-data-breach",
+                      "security-incident"
+                    ],
+                    "natures": [
+                      "confidentiality",
+                      "integrity",
+                      "availability"
+                    ],
+                    "dataCategories": [
+                      "Names and contact details"
+                    ],
+                    "team": [
+                      {
+                        "id": "usr_1",
+                        "name": "Ana Reyes"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Data Privacy > Breach Register",
+        "x-permissions": [
+          "read:privacy"
+        ]
       }
     },
     "/motor-programmes": {

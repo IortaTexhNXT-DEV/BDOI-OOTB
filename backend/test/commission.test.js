@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { setupFinance, makePolicy, ledgerIntegrity } from './accounting.fixtures.js';
+import { setupFinance, makePolicy, ledgerIntegrity, licenseReferrer } from './accounting.fixtures.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -27,6 +27,7 @@ describe('commission', () => {
     const c = await ctx.as('maker')('post', '/commission/referrer-accounts').send({ name: 'Teodoro Lim', type: 'Agent', level: 'L1', bankName: 'BDO', bankAccountNo: '001122334455' });
     expect(c.status).toBe(201);
     ref = c.body.data.referrer.id;
+    await licenseReferrer(ctx.api, ref);
     expect(c.body.data.referrer.bankAccount).toBe('BDO ***4455');
     expect((await ctx.as('maker')('post', '/commission/referrer-accounts').send({ name: 'Teodoro Lim' })).status).toBe(409);
     pol = await makePolicy({ net: 50000, details: details(ref, 'ref-mreyes') });

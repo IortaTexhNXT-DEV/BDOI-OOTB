@@ -73,7 +73,7 @@ describe('production start on a fresh database', () => {
     const uploads = fs.mkdtempSync(path.join(os.tmpdir(), 'bv-golive-'));
     const env = { ...process.env, NODE_ENV: 'production', PORT: String(port), LOG_LEVEL: 'info', UPLOAD_DIR: uploads, SCHEDULER_ENABLED: 'false',
       JWT_SECRET: crypto.randomBytes(32).toString('hex'), DATA_ENCRYPTION_KEY: crypto.randomBytes(32).toString('hex'),
-      CORS_ORIGINS: 'https://brokerverse.example.ph', PUBLIC_BASE_URL: 'https://api.brokerverse.example.ph' };
+      PII_ENCRYPTION_KEY: crypto.randomBytes(32).toString('hex'), CORS_ORIGINS: 'https://brokerverse.example.ph', PUBLIC_BASE_URL: 'https://api.brokerverse.example.ph' };
     delete env.SEED_SAMPLE_DATA;
     delete env.VITEST;
     const child = spawn(process.execPath, ['src/server.js'], { cwd: backend, env, stdio: ['ignore', 'pipe', 'pipe'] });

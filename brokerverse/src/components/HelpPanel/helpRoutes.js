@@ -139,6 +139,13 @@ export const HELP_ROUTES = [
   ["/compliance/aml/cases", "aml-cases"],
   ["/compliance/aml/reports", "amlc-reports"],
   ["/compliance/aml/settings", "aml-settings"],
+  ["/compliance/licences", "licence-register"],
+  ["/compliance/fit-and-proper", "fit-and-proper-records"],
+  ["/compliance/insurer-authority", "insurer-authority"],
+  ["/compliance/complaints", "complaints-register"],
+  ["/compliance/ic-annual-statement", "ic-annual-statement"],
+  ["/compliance/ic-production-report", "ic-production-report"],
+  ["/compliance/breaches", "personal-data-breach-register"],
   ["/master/go-live-data-load", "go-live-data-load"],
   ["/product-configurator", "module-reference-product-configurator"],
   // distribution, programmes and products

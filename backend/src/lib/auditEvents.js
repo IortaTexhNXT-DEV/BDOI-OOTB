@@ -16,6 +16,8 @@ import { hasPermission } from './auth.js';
 import { DEFAULT_FORMAT, applyDatePattern, formatAmount } from './pdf/format.js';
 import { printFormat } from './pdf/index.js';
 import { actionTitle, entityLabel, pathLabel, sentenceCase, statusText } from './auditLabels.js';
+import { revealPii } from './pii.js';
+import { VIEW_PII } from './piiPolicy.js';
 
 export const EMPTY = null;
 export const MASK = '••••••';
@@ -79,7 +81,7 @@ const TECH_ID = /^[a-z]{1,8}_[0-9a-f]{8,}$/;
 /** Format context: settings read once per request. */
 export async function formatContext({ viewer = null, statusLabels = {}, refs = new Map(), fieldLabels = {}, masterLabels = {}, anonymised = false } = {}) {
   const fmt = await printFormat().catch(() => DEFAULT_FORMAT);
-  return { fmt, viewer, canSeePersonal: !viewer || hasPermission(viewer, 'read:privacy'), statusLabels, refs, fieldLabels, masterLabels, anonymised };
+  return { fmt, viewer, canSeePersonal: !viewer || hasPermission(viewer, 'read:privacy') || hasPermission(viewer, VIEW_PII), statusLabels, refs, fieldLabels, masterLabels, anonymised };
 }
 
 const timeIn = (d, timeZone) => {
@@ -121,6 +123,8 @@ const maskTail = (v) => {
  * `ctx` from formatContext, `currency` the record's currency when it has one.
  */
 export function formatValue(path, value, ctx, currency) {
+  // identifiers are kept encrypted in the trail (migration 0277)
+  if (typeof value === 'string') value = revealPii(value);
   if (value === null || value === undefined || value === '' || (Array.isArray(value) && !value.length)) return EMPTY;
   if (isSecretKey(path)) return MASK;
   if (ctx.anonymised && isPersonalKey(path)) return ANONYMISED;

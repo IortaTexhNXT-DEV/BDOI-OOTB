@@ -76,6 +76,8 @@ export const TRANSACTION_TABLES = [
   'comparison_reports', 'campaigns', 'campaign_recipients',
   // sales activities of account executives and fixed asset disposals (migrations 0320 and 0321)
   'sales_activities', 'fixed_asset_disposals',
+  // compliance: complaints (they belong to the clients, policies and claims that go) and the breach register of a test run
+  'complaints', 'complaint_reminders', 'personal_data_breaches', 'personal_data_breach_reminders',
 ];
 
 /**
@@ -137,6 +139,9 @@ export const MASTER_CONFIG_TABLES = [
   // distribution and reporting configuration: lead assignment rules, distribution channels, brand-new vehicle
   // programmes, campaign segments and templates, Report Builder saved reports
   'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
+  // Insurance Commission compliance: licences of the firm, its officers and referrers, fit and proper records, the
+  // reminders already sent for them, and the mapping of the ledger to the IC annual statement
+  'compliance_licences', 'compliance_licence_reminders', 'compliance_fit_proper', 'ic_statement_lines',
 ];
 
 /**

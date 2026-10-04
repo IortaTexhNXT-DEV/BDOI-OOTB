@@ -26,6 +26,7 @@ import { assertNotDeclined, assertReferralCleared } from '../product-configurato
 import { journeyFor, resolveLob, assertStep } from './journey.js';
 import { normaliseParticipants, writeParticipants, participantsOf, participantInputs, leadOf, legacyParticipantDetails } from './participants.js';
 import { getSlipRow, participantsFromOffers, riskFromSlip, assertParty, partyName } from './brokerSlips.js';
+import { assertInsurersAuthorised } from '../ic-compliance/insurerAuthority.js';
 
 export const PLACEMENT_STATUSES = ['draft', 'sent', 'bound', 'declined', 'cancelled', 'issued'];
 const LABELS = { draft: 'Draft', sent: 'SentToInsurer', bound: 'Bound', declined: 'Declined', cancelled: 'Cancelled', issued: 'PolicyIssued' };
@@ -263,6 +264,8 @@ export async function updatePlacement(id, body, user) {
 export async function sendPlacement(id, user, { insurerIds = null } = {}) {
   const p = await placementById(id);
   if (!['draft', 'sent'].includes(p.status)) throw conflict(`A ${p.placementStatus} placement slip cannot be sent`);
+  const toSend = p.participants.filter((r) => r.status !== 'confirmed' && (!insurerIds || insurerIds.map(Number).includes(Number(r.insuranceCompanyId))));
+  await assertInsurersAuthorised(toSend.map((r) => r.insuranceCompanyId), 'order', { entity: 'placement', entityId: p.id });
   const t = await emailTemplate('placement_order');
   const company = await companyName();
   const sent = [];
@@ -349,6 +352,8 @@ async function issueInTx(db, placementId, body, user) {
 
 export async function issueFromPlacement(id, body, user) {
   const p = await getPlacementRow(id);
+  const insurers = (await participantsOf('placement', p.id)).map((x) => x.insuranceCompanyId);
+  await assertInsurersAuthorised(insurers.length ? insurers : [p.insurance_company_id], 'issue', { entity: 'placement', entityId: p.id });
   if (p.source !== 'direct-policy') {
     const quote = p.quote_id ? await one('SELECT doc FROM quotes WHERE id = $1', [p.quote_id]) : null;
     const extra = body.additionalPolicyData && typeof body.additionalPolicyData === 'object' ? body.additionalPolicyData : body;
@@ -367,6 +372,8 @@ export async function issueFromPlacement(id, body, user) {
  * one transaction.
  */
 export async function recordIssuedPolicy(body, user) {
+  const named = (Array.isArray(body.participants) ? body.participants : []).map((x) => x.insuranceCompanyId ?? x.insurerId);
+  await assertInsurersAuthorised(named.length ? named : [body.insuranceCompanyId], 'issue', { entity: 'placement' });
   const r = await withTransaction(async (db) => {
     const productId = body.productId ? Number(body.productId) : null;
     const lob = await resolveLob({ lob: body.lob, productId, productType: body.productType }, db);

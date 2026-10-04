@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1307 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1356 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -26980,6 +26980,2845 @@
       ]
     },
     {
+      "name": "Compliance (Insurance Commission)",
+      "item": [
+        {
+          "name": "Complaints register (filters: status, category, channel, overdue=true, assignedTo, clientId, policyId, from, to, search) with counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints?status=received,acknowledged,in-progress,escalated&overdue=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "received,acknowledged,in-progress,escalated"
+                },
+                {
+                  "key": "overdue",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Complaints register (filters: status, category, channel, overdue=true, assignedTo, clientId, policyId, from, to, search) with counts\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints?status=received,acknowledged,in-progress,escalated&overdue=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "received,acknowledged,in-progress,escalated"
+                    },
+                    {
+                      "key": "overdue",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Complaints register (filters: status, category, channel, overdue=true, assignedTo, clientId, policyId, from, to, search) with counts\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": \"cmp_1\",\n        \"complaintNumber\": \"CPT-2026-00001\",\n        \"receivedOn\": \"2026-10-01\",\n        \"channel\": \"E-mail\",\n        \"complainantName\": \"Juan Dela Cruz\",\n        \"category\": \"Claims handling\",\n        \"complexity\": \"simple\",\n        \"subject\": \"Delay in claim payment\",\n        \"status\": \"acknowledged\",\n        \"ackDueOn\": \"2026-10-03\",\n        \"resolutionDueOn\": \"2026-10-08\",\n        \"ageDays\": 3,\n        \"ackOverdue\": false,\n        \"resolutionOverdue\": false\n      }\n    ],\n    \"summary\": {\n      \"open\": 1,\n      \"ackOverdue\": 0,\n      \"resolutionOverdue\": 0,\n      \"escalated\": 0\n    },\n    \"today\": \"2026-10-04\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Log a complaint: numbered from the CMP series; acknowledgement and resolution deadlines from the complaints.* settings; a policy or claim fills the client",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints"
+              ]
+            },
+            "description": "Log a complaint: numbered from the CMP series; acknowledgement and resolution deadlines from the complaints.* settings; a policy or claim fills the client\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Log complaint\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"channel\": \"E-mail\",\n  \"complainantName\": \"Juan Dela Cruz\",\n  \"complainantContact\": \"juan@example.ph\",\n  \"policyId\": \"POL-2026-00012\",\n  \"category\": \"Claims handling\",\n  \"subject\": \"Delay in claim payment\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints"
+                  ]
+                },
+                "description": "Log a complaint: numbered from the CMP series; acknowledgement and resolution deadlines from the complaints.* settings; a policy or claim fills the client\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Log complaint\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"channel\": \"E-mail\",\n  \"complainantName\": \"Juan Dela Cruz\",\n  \"complainantContact\": \"juan@example.ph\",\n  \"policyId\": \"POL-2026-00012\",\n  \"category\": \"Claims handling\",\n  \"subject\": \"Delay in claim payment\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One complaint with its history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One complaint with its history\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One complaint with its history\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Edit an open complaint: details, links, complexity (the resolution deadline follows), assignment (the assignee is notified), documents",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Edit an open complaint: details, links, complexity (the resolution deadline follows), assignment (the assignee is notified), documents\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Edit\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"assignedTo\": \"usr_1\",\n  \"complexity\": \"complex\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Edit an open complaint: details, links, complexity (the resolution deadline follows), assignment (the assignee is notified), documents\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Edit\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"assignedTo\": \"usr_1\",\n  \"complexity\": \"complex\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Acknowledge the complaint (the acknowledgement letter can then be printed)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/acknowledge",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "acknowledge"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Acknowledge the complaint (the acknowledgement letter can then be printed)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/acknowledge",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "acknowledge"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Acknowledge the complaint (the acknowledgement letter can then be printed)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close a resolved complaint",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close a resolved complaint\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close a resolved complaint\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Escalate the complaint (reason); the complaints officers (approve:complaints) are notified",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/escalate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "escalate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Escalate the complaint (reason); the complaints officers (approve:complaints) are notified\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"No answer from the insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/escalate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "escalate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Escalate the complaint (reason); the complaints officers (approve:complaints) are notified\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"No answer from the insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Acknowledgement letter of a complaint (PDF on the letterhead; text from complaints.ack_letter_text)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/letter/acknowledgement",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "letter",
+                "acknowledgement"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Acknowledgement letter of a complaint (PDF on the letterhead; text from complaints.ack_letter_text)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Letters\n\nAccess: read:complaints"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/letter/acknowledgement",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "letter",
+                    "acknowledgement"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Acknowledgement letter of a complaint (PDF on the letterhead; text from complaints.ack_letter_text)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Letters\n\nAccess: read:complaints"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Resolution letter of a complaint (PDF on the letterhead; text from complaints.resolution_letter_text)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/letter/resolution",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "letter",
+                "resolution"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Resolution letter of a complaint (PDF on the letterhead; text from complaints.resolution_letter_text)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Letters\n\nAccess: read:complaints"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/letter/resolution",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "letter",
+                    "resolution"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Resolution letter of a complaint (PDF on the letterhead; text from complaints.resolution_letter_text)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Letters\n\nAccess: read:complaints"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Record that the complaint was elevated to the Insurance Commission (reference, date)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/refer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "refer"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record that the complaint was elevated to the Insurance Commission (reference, date)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/refer",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "refer"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record that the complaint was elevated to the Insurance Commission (reference, date)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reopen a resolved or closed complaint the complainant contests (reason)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/reopen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "reopen"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reopen a resolved or closed complaint the complainant contests (reason)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/reopen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "reopen"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reopen a resolved or closed complaint the complainant contests (reason)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Resolve the complaint: outcome, resolution given, redress amount",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/resolve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "resolve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Resolve the complaint: outcome, resolution given, redress amount\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"upheld\",\n  \"resolution\": \"The insurer released the claim payment on 07 October 2026\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/resolve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "resolve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Resolve the complaint: outcome, resolution given, redress amount\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outcome\": \"upheld\",\n  \"resolution\": \"The insurer released the claim payment on 07 October 2026\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"resolved\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start work on the complaint (acknowledges it when not yet done)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/:id/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                ":id",
+                "start"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Start work on the complaint (acknowledges it when not yet done)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/:id/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    ":id",
+                    "start"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Start work on the complaint (acknowledges it when not yet done)\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Actions\n\nAccess: write:complaints",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cmp_1\",\n    \"complaintNumber\": \"CPT-2026-00001\",\n    \"receivedOn\": \"2026-10-01\",\n    \"channel\": \"E-mail\",\n    \"complainantName\": \"Juan Dela Cruz\",\n    \"category\": \"Claims handling\",\n    \"complexity\": \"simple\",\n    \"subject\": \"Delay in claim payment\",\n    \"status\": \"acknowledged\",\n    \"ackDueOn\": \"2026-10-03\",\n    \"resolutionDueOn\": \"2026-10-08\",\n    \"ageDays\": 3,\n    \"ackOverdue\": false,\n    \"resolutionOverdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Channels, categories (settings), complainant types, outcomes, deadlines in days and the users complaints can be assigned to",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                "options"
+              ]
+            },
+            "description": "Channels, categories (settings), complainant types, outcomes, deadlines in days and the users complaints can be assigned to\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    "options"
+                  ]
+                },
+                "description": "Channels, categories (settings), complainant types, outcomes, deadlines in days and the users complaints can be assigned to\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints\n\nAccess: read:complaints"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"channels\": [\n      \"E-mail\"\n    ],\n    \"categories\": [\n      \"Claims handling\"\n    ],\n    \"outcomes\": [\n      \"upheld\",\n      \"partially-upheld\",\n      \"not-upheld\",\n      \"withdrawn\"\n    ],\n    \"assignees\": [\n      {\n        \"id\": \"usr_1\",\n        \"name\": \"Ana Reyes\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Complaints report for the regulator for a period (?from=&to=): counts by category, channel, status and outcome, ageing, the register",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/regulator-report?from=2026-01-01&to=2026-06-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                "regulator-report"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-06-30"
+                }
+              ]
+            },
+            "description": "Complaints report for the regulator for a period (?from=&to=): counts by category, channel, status and outcome, ageing, the register\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Regulator report\n\nAccess: read:complaints"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/regulator-report?from=2026-01-01&to=2026-06-30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    "regulator-report"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-06-30"
+                    }
+                  ]
+                },
+                "description": "Complaints report for the regulator for a period (?from=&to=): counts by category, channel, status and outcome, ageing, the register\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Regulator report\n\nAccess: read:complaints"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"from\": \"2026-01-01\",\n    \"to\": \"2026-06-30\",\n    \"total\": 4,\n    \"resolved\": 3,\n    \"resolvedWithinDeadline\": 3,\n    \"byCategory\": [\n      {\n        \"value\": \"Claims handling\",\n        \"count\": 2\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Complaints report for the regulator as Excel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/complaints/regulator-report/export?from=2026-01-01&to=2026-06-30",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "complaints",
+                "regulator-report",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-06-30"
+                }
+              ]
+            },
+            "description": "Complaints report for the regulator as Excel\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Regulator report > Download\n\nAccess: read:complaints"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/complaints/regulator-report/export?from=2026-01-01&to=2026-06-30",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "complaints",
+                    "regulator-report",
+                    "export"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-06-30"
+                    }
+                  ]
+                },
+                "description": "Complaints report for the regulator as Excel\n\nFront-end touchpoint: Compliance > Insurance Commission > Complaints > Regulator report > Download\n\nAccess: read:complaints"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "xlsx"
+            }
+          ]
+        },
+        {
+          "name": "Fit and proper records of directors and officers (filters: roleCategory, outcome, reviewState overdue / due / current / not-reviewed, includeCeased, search) with counts and the declaration items",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/fit-proper",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "fit-proper"
+              ]
+            },
+            "description": "Fit and proper records of directors and officers (filters: roleCategory, outcome, reviewState overdue / due / current / not-reviewed, includeCeased, search) with counts and the declaration items\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/fit-proper",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "fit-proper"
+                  ]
+                },
+                "description": "Fit and proper records of directors and officers (filters: roleCategory, outcome, reviewState overdue / due / current / not-reviewed, includeCeased, search) with counts and the declaration items\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": \"fp_1\",\n        \"personName\": \"Maria Santos\",\n        \"roleCategory\": \"director\",\n        \"position\": \"Chairman of the Board\",\n        \"declarations\": [\n          {\n            \"item\": \"Has not been convicted ...\",\n            \"answer\": \"yes\",\n            \"remarks\": null\n          }\n        ],\n        \"lastReviewOn\": \"2026-03-01\",\n        \"nextReviewOn\": \"2027-03-01\",\n        \"reviewOutcome\": \"fit\",\n        \"reviewState\": \"current\",\n        \"documents\": []\n      }\n    ],\n    \"summary\": {\n      \"active\": 1,\n      \"overdue\": 0,\n      \"due\": 0,\n      \"notReviewed\": 0,\n      \"notFit\": 0\n    },\n    \"declarationItems\": [\n      \"...\"\n    ],\n    \"reviewMonths\": 12\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add the fit and proper record of a director or officer (the declarations default to compliance.fit_proper_declarations)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/fit-proper",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "fit-proper"
+              ]
+            },
+            "description": "Add the fit and proper record of a director or officer (the declarations default to compliance.fit_proper_declarations)\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Add\n\nAccess: write:compliance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"personName\": \"Maria Santos\",\n  \"roleCategory\": \"director\",\n  \"position\": \"Chairman of the Board\",\n  \"appointedOn\": \"2025-06-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/fit-proper",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "fit-proper"
+                  ]
+                },
+                "description": "Add the fit and proper record of a director or officer (the declarations default to compliance.fit_proper_declarations)\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Add\n\nAccess: write:compliance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"personName\": \"Maria Santos\",\n  \"roleCategory\": \"director\",\n  \"position\": \"Chairman of the Board\",\n  \"appointedOn\": \"2025-06-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"fp_1\",\n    \"personName\": \"Maria Santos\",\n    \"roleCategory\": \"director\",\n    \"position\": \"Chairman of the Board\",\n    \"declarations\": [\n      {\n        \"item\": \"Has not been convicted ...\",\n        \"answer\": \"yes\",\n        \"remarks\": null\n      }\n    ],\n    \"lastReviewOn\": \"2026-03-01\",\n    \"nextReviewOn\": \"2027-03-01\",\n    \"reviewOutcome\": \"fit\",\n    \"reviewState\": \"current\",\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One fit and proper record",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/fit-proper/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "fit-proper",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One fit and proper record\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/fit-proper/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "fit-proper",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One fit and proper record\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"fp_1\",\n    \"personName\": \"Maria Santos\",\n    \"roleCategory\": \"director\",\n    \"position\": \"Chairman of the Board\",\n    \"declarations\": [\n      {\n        \"item\": \"Has not been convicted ...\",\n        \"answer\": \"yes\",\n        \"remarks\": null\n      }\n    ],\n    \"lastReviewOn\": \"2026-03-01\",\n    \"nextReviewOn\": \"2027-03-01\",\n    \"reviewOutcome\": \"fit\",\n    \"reviewState\": \"current\",\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a fit and proper record: declarations answered (a \"no\" needs remarks), documents, ceased",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/fit-proper/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "fit-proper",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a fit and proper record: declarations answered (a \"no\" needs remarks), documents, ceased\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Edit\n\nAccess: write:compliance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"declarationSignedOn\": \"2026-09-30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/fit-proper/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "fit-proper",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a fit and proper record: declarations answered (a \"no\" needs remarks), documents, ceased\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Edit\n\nAccess: write:compliance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"declarationSignedOn\": \"2026-09-30\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"fp_1\",\n    \"personName\": \"Maria Santos\",\n    \"roleCategory\": \"director\",\n    \"position\": \"Chairman of the Board\",\n    \"declarations\": [\n      {\n        \"item\": \"Has not been convicted ...\",\n        \"answer\": \"yes\",\n        \"remarks\": null\n      }\n    ],\n    \"lastReviewOn\": \"2026-03-01\",\n    \"nextReviewOn\": \"2027-03-01\",\n    \"reviewOutcome\": \"fit\",\n    \"reviewState\": \"current\",\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a fit and proper review: outcome, date, notes; the next review is due compliance.fit_proper_review_months later",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/fit-proper/:id/review",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "fit-proper",
+                ":id",
+                "review"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record a fit and proper review: outcome, date, notes; the next review is due compliance.fit_proper_review_months later\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Review\n\nAccess: write:compliance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"fit\",\n  \"reviewedOn\": \"2026-10-01\",\n  \"notes\": \"Clearances received\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/fit-proper/:id/review",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "fit-proper",
+                    ":id",
+                    "review"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record a fit and proper review: outcome, date, notes; the next review is due compliance.fit_proper_review_months later\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Review\n\nAccess: write:compliance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outcome\": \"fit\",\n  \"reviewedOn\": \"2026-10-01\",\n  \"notes\": \"Clearances received\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"fp_1\",\n    \"personName\": \"Maria Santos\",\n    \"roleCategory\": \"director\",\n    \"position\": \"Chairman of the Board\",\n    \"declarations\": [\n      {\n        \"item\": \"Has not been convicted ...\",\n        \"answer\": \"yes\",\n        \"remarks\": null\n      }\n    ],\n    \"lastReviewOn\": \"2026-03-01\",\n    \"nextReviewOn\": \"2027-03-01\",\n    \"reviewOutcome\": \"fit\",\n    \"reviewState\": \"current\",\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Fit and proper register as Excel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/fit-proper/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "fit-proper",
+                "export"
+              ]
+            },
+            "description": "Fit and proper register as Excel\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Export\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/fit-proper/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "fit-proper",
+                    "export"
+                  ]
+                },
+                "description": "Fit and proper register as Excel\n\nFront-end touchpoint: Compliance > Insurance Commission > Fit and Proper > Export\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "xlsx"
+            }
+          ]
+        },
+        {
+          "name": "IC annual statement of the broker for a year (?year= or ?from=&to=): balance sheet and income statement on the IC lines, premiums and commissions by insurer and line, premiums held in trust, checks and lines to confirm",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/ic-reports/annual-statement?year=2025",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "ic-reports",
+                "annual-statement"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2025"
+                }
+              ]
+            },
+            "description": "IC annual statement of the broker for a year (?year= or ?from=&to=): balance sheet and income statement on the IC lines, premiums and commissions by insurer and line, premiums held in trust, checks and lines to confirm\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/ic-reports/annual-statement?year=2025",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "ic-reports",
+                    "annual-statement"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2025"
+                    }
+                  ]
+                },
+                "description": "IC annual statement of the broker for a year (?year= or ?from=&to=): balance sheet and income statement on the IC lines, premiums and commissions by insurer and line, premiums held in trust, checks and lines to confirm\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": {\n      \"from\": \"2025-01-01\",\n      \"to\": \"2025-12-31\"\n    },\n    \"balanceSheet\": [\n      {\n        \"code\": \"BS-A01\",\n        \"label\": \"Cash on hand and in banks (own funds)\",\n        \"current\": 1250000,\n        \"prior\": 980000\n      }\n    ],\n    \"checks\": [\n      {\n        \"check\": \"The balance sheet balances\",\n        \"ok\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "IC annual statement workbook (Excel): cover, schedules 1 to 4, accountant confirmation, unmapped accounts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/ic-reports/annual-statement/export?year=2025",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "ic-reports",
+                "annual-statement",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2025"
+                }
+              ]
+            },
+            "description": "IC annual statement workbook (Excel): cover, schedules 1 to 4, accountant confirmation, unmapped accounts\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Download\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/ic-reports/annual-statement/export?year=2025",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "ic-reports",
+                    "annual-statement",
+                    "export"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2025"
+                    }
+                  ]
+                },
+                "description": "IC annual statement workbook (Excel): cover, schedules 1 to 4, accountant confirmation, unmapped accounts\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Download\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "xlsx"
+            }
+          ]
+        },
+        {
+          "name": "Lines of the IC annual statement and the ledger account prefixes mapped to each",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/ic-reports/mapping",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "ic-reports",
+                "mapping"
+              ]
+            },
+            "description": "Lines of the IC annual statement and the ledger account prefixes mapped to each\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Account mapping\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/ic-reports/mapping",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "ic-reports",
+                    "mapping"
+                  ]
+                },
+                "description": "Lines of the IC annual statement and the ledger account prefixes mapped to each\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Account mapping\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"schedule\": \"balance-sheet\",\n      \"code\": \"BS-A01\",\n      \"label\": \"Cash on hand and in banks (own funds)\",\n      \"accountPrefixes\": [\n        \"1101\",\n        \"1102001\"\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a line of the IC statement mapping (label, section, order, account prefixes, what the accountant must confirm, active)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/ic-reports/mapping/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "ic-reports",
+                "mapping",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a line of the IC statement mapping (label, section, order, account prefixes, what the accountant must confirm, active)\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Account mapping\n\nAccess: write:compliance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accountPrefixes\": [\n    \"1101\",\n    \"1102001\",\n    \"1102002\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/ic-reports/mapping/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "ic-reports",
+                    "mapping",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a line of the IC statement mapping (label, section, order, account prefixes, what the accountant must confirm, active)\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Annual Statement > Account mapping\n\nAccess: write:compliance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"accountPrefixes\": [\n    \"1101\",\n    \"1102001\",\n    \"1102002\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"code\": \"BS-A01\",\n    \"accountPrefixes\": [\n      \"1101\",\n      \"1102001\",\n      \"1102002\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "IC production report: premiums placed by insurer and IC line of business (?from=&to=&groupBy=month|quarter|year), with the policy detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/ic-reports/production?from=2026-01-01&to=2026-09-30&groupBy=quarter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "ic-reports",
+                "production"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "quarter"
+                }
+              ]
+            },
+            "description": "IC production report: premiums placed by insurer and IC line of business (?from=&to=&groupBy=month|quarter|year), with the policy detail\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Production Report\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/ic-reports/production?from=2026-01-01&to=2026-09-30&groupBy=quarter",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "ic-reports",
+                    "production"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-09-30"
+                    },
+                    {
+                      "key": "groupBy",
+                      "value": "quarter"
+                    }
+                  ]
+                },
+                "description": "IC production report: premiums placed by insurer and IC line of business (?from=&to=&groupBy=month|quarter|year), with the policy detail\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Production Report\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"from\": \"2026-01-01\",\n    \"to\": \"2026-09-30\",\n    \"groupBy\": \"quarter\",\n    \"lines\": [\n      \"Fire\",\n      \"Motor Car\"\n    ],\n    \"rows\": [\n      {\n        \"insurer\": \"MAPFRE Insular\",\n        \"premium\": {\n          \"Fire\": 106400,\n          \"Motor Car\": 23200\n        },\n        \"totalPremium\": 129600,\n        \"commission\": 20504\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "IC production report workbook (Excel): by insurer and line, by period, detail",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/ic-reports/production/export?from=2026-01-01&to=2026-09-30&groupBy=quarter",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "ic-reports",
+                "production",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "groupBy",
+                  "value": "quarter"
+                }
+              ]
+            },
+            "description": "IC production report workbook (Excel): by insurer and line, by period, detail\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Production Report > Download\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/ic-reports/production/export?from=2026-01-01&to=2026-09-30&groupBy=quarter",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "ic-reports",
+                    "production",
+                    "export"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-09-30"
+                    },
+                    {
+                      "key": "groupBy",
+                      "value": "quarter"
+                    }
+                  ]
+                },
+                "description": "IC production report workbook (Excel): by insurer and line, by period, detail\n\nFront-end touchpoint: Compliance > Insurance Commission > IC Production Report > Download\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "xlsx"
+            }
+          ]
+        },
+        {
+          "name": "Insurers with the state of their IC certificate of authority (valid, expiring, expired, missing, no-validity); filters state, status=all, search",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/insurer-authority?state=expiring,expired,missing",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "insurer-authority"
+              ],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "expiring,expired,missing"
+                }
+              ]
+            },
+            "description": "Insurers with the state of their IC certificate of authority (valid, expiring, expired, missing, no-validity); filters state, status=all, search\n\nFront-end touchpoint: Compliance > Insurance Commission > Insurer Authority\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/insurer-authority?state=expiring,expired,missing",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "insurer-authority"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "expiring,expired,missing"
+                    }
+                  ]
+                },
+                "description": "Insurers with the state of their IC certificate of authority (valid, expiring, expired, missing, no-validity); filters state, status=all, search\n\nFront-end touchpoint: Compliance > Insurance Commission > Insurer Authority\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": 3,\n        \"code\": \"MAPFRE\",\n        \"name\": \"MAPFRE Insular Insurance Corporation\",\n        \"certificateNumber\": \"2025/12-R\",\n        \"validUntil\": \"2027-12-31\",\n        \"state\": \"valid\",\n        \"daysLeft\": 453\n      }\n    ],\n    \"summary\": {\n      \"total\": 1,\n      \"valid\": 1,\n      \"expiring\": 0,\n      \"expired\": 0,\n      \"missing\": 0,\n      \"noValidity\": 0\n    },\n    \"today\": \"2026-10-04\",\n    \"expiringDays\": 60,\n    \"mode\": \"warn\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Insurers and their certificates of authority as Excel (same filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/insurer-authority/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "insurer-authority",
+                "export"
+              ]
+            },
+            "description": "Insurers and their certificates of authority as Excel (same filters)\n\nFront-end touchpoint: Compliance > Insurance Commission > Insurer Authority > Export\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/insurer-authority/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "insurer-authority",
+                    "export"
+                  ]
+                },
+                "description": "Insurers and their certificates of authority as Excel (same filters)\n\nFront-end touchpoint: Compliance > Insurance Commission > Insurer Authority > Export\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "xlsx"
+            }
+          ]
+        },
+        {
+          "name": "Licence register (filters: holderType, state valid / expiring / expired / no-expiry, renewalStatus, referrerId, includeInactive, search) with counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences?state=expiring,expired",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences"
+              ],
+              "query": [
+                {
+                  "key": "state",
+                  "value": "expiring,expired"
+                }
+              ]
+            },
+            "description": "Licence register (filters: holderType, state valid / expiring / expired / no-expiry, renewalStatus, referrerId, includeInactive, search) with counts\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences?state=expiring,expired",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences"
+                  ],
+                  "query": [
+                    {
+                      "key": "state",
+                      "value": "expiring,expired"
+                    }
+                  ]
+                },
+                "description": "Licence register (filters: holderType, state valid / expiring / expired / no-expiry, renewalStatus, referrerId, includeInactive, search) with counts\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": \"lic_1\",\n        \"holderType\": \"referrer\",\n        \"referrerId\": \"ref-jdelacruz\",\n        \"holderName\": \"Juan Dela Cruz\",\n        \"licenceType\": \"Non-life Insurance Agent\",\n        \"licenceNumber\": \"NL-2026-012345\",\n        \"issuingAuthority\": \"Insurance Commission\",\n        \"issueDate\": \"2026-01-15\",\n        \"expiryDate\": \"2027-01-14\",\n        \"renewalStatus\": \"not-due\",\n        \"status\": \"active\",\n        \"state\": \"valid\",\n        \"daysToExpiry\": 102,\n        \"documents\": []\n      }\n    ],\n    \"summary\": {\n      \"total\": 1,\n      \"valid\": 1,\n      \"expiring\": 0,\n      \"expired\": 0,\n      \"noExpiry\": 0\n    },\n    \"today\": \"2026-10-04\",\n    \"expiringDays\": 90\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a licence of the firm, an officer, a licensed individual or a referrer (number, type, issue and expiry dates, documents)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences"
+              ]
+            },
+            "description": "Record a licence of the firm, an officer, a licensed individual or a referrer (number, type, issue and expiry dates, documents)\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Add\n\nAccess: write:compliance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"holderType\": \"referrer\",\n  \"referrerId\": \"ref-jdelacruz\",\n  \"licenceType\": \"Non-life Insurance Agent\",\n  \"licenceNumber\": \"NL-2026-012345\",\n  \"issueDate\": \"2026-01-15\",\n  \"expiryDate\": \"2027-01-14\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences"
+                  ]
+                },
+                "description": "Record a licence of the firm, an officer, a licensed individual or a referrer (number, type, issue and expiry dates, documents)\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Add\n\nAccess: write:compliance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"holderType\": \"referrer\",\n  \"referrerId\": \"ref-jdelacruz\",\n  \"licenceType\": \"Non-life Insurance Agent\",\n  \"licenceNumber\": \"NL-2026-012345\",\n  \"issueDate\": \"2026-01-15\",\n  \"expiryDate\": \"2027-01-14\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"lic_1\",\n    \"holderType\": \"referrer\",\n    \"referrerId\": \"ref-jdelacruz\",\n    \"holderName\": \"Juan Dela Cruz\",\n    \"licenceType\": \"Non-life Insurance Agent\",\n    \"licenceNumber\": \"NL-2026-012345\",\n    \"issuingAuthority\": \"Insurance Commission\",\n    \"issueDate\": \"2026-01-15\",\n    \"expiryDate\": \"2027-01-14\",\n    \"renewalStatus\": \"not-due\",\n    \"status\": \"active\",\n    \"state\": \"valid\",\n    \"daysToExpiry\": 102,\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One licence",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One licence\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One licence\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"lic_1\",\n    \"holderType\": \"referrer\",\n    \"referrerId\": \"ref-jdelacruz\",\n    \"holderName\": \"Juan Dela Cruz\",\n    \"licenceType\": \"Non-life Insurance Agent\",\n    \"licenceNumber\": \"NL-2026-012345\",\n    \"issuingAuthority\": \"Insurance Commission\",\n    \"issueDate\": \"2026-01-15\",\n    \"expiryDate\": \"2027-01-14\",\n    \"renewalStatus\": \"not-due\",\n    \"status\": \"active\",\n    \"state\": \"valid\",\n    \"daysToExpiry\": 102,\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update a licence (renewal status, filing date, documents, status revoked / surrendered)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update a licence (renewal status, filing date, documents, status revoked / surrendered)\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Edit\n\nAccess: write:compliance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"renewalStatus\": \"filed\",\n  \"renewalFiledOn\": \"2026-12-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update a licence (renewal status, filing date, documents, status revoked / surrendered)\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Edit\n\nAccess: write:compliance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"renewalStatus\": \"filed\",\n  \"renewalFiledOn\": \"2026-12-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"lic_1\",\n    \"holderType\": \"referrer\",\n    \"referrerId\": \"ref-jdelacruz\",\n    \"holderName\": \"Juan Dela Cruz\",\n    \"licenceType\": \"Non-life Insurance Agent\",\n    \"licenceNumber\": \"NL-2026-012345\",\n    \"issuingAuthority\": \"Insurance Commission\",\n    \"issueDate\": \"2026-01-15\",\n    \"expiryDate\": \"2027-01-14\",\n    \"renewalStatus\": \"not-due\",\n    \"status\": \"active\",\n    \"state\": \"valid\",\n    \"daysToExpiry\": 102,\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the renewed licence: a new licence term for the same holder; the current one is marked renewed and superseded",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences/:id/renew",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences",
+                ":id",
+                "renew"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the renewed licence: a new licence term for the same holder; the current one is marked renewed and superseded\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Renew\n\nAccess: write:compliance",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"licenceNumber\": \"NL-2027-012345\",\n  \"issueDate\": \"2027-01-10\",\n  \"expiryDate\": \"2028-01-14\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences/:id/renew",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences",
+                    ":id",
+                    "renew"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the renewed licence: a new licence term for the same holder; the current one is marked renewed and superseded\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Renew\n\nAccess: write:compliance",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"licenceNumber\": \"NL-2027-012345\",\n  \"issueDate\": \"2027-01-10\",\n  \"expiryDate\": \"2028-01-14\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"lic_1\",\n    \"holderType\": \"referrer\",\n    \"referrerId\": \"ref-jdelacruz\",\n    \"holderName\": \"Juan Dela Cruz\",\n    \"licenceType\": \"Non-life Insurance Agent\",\n    \"licenceNumber\": \"NL-2026-012345\",\n    \"issuingAuthority\": \"Insurance Commission\",\n    \"issueDate\": \"2026-01-15\",\n    \"expiryDate\": \"2027-01-14\",\n    \"renewalStatus\": \"not-due\",\n    \"status\": \"active\",\n    \"state\": \"valid\",\n    \"daysToExpiry\": 102,\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Licence expiry calendar: counts, expired and expiring licences, licences by month of expiry (12 months), the firm's licence, referrers without a licence in force",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences",
+                "dashboard"
+              ]
+            },
+            "description": "Licence expiry calendar: counts, expired and expiring licences, licences by month of expiry (12 months), the firm's licence, referrers without a licence in force\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Expiry calendar\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences/dashboard",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences",
+                    "dashboard"
+                  ]
+                },
+                "description": "Licence expiry calendar: counts, expired and expiring licences, licences by month of expiry (12 months), the firm's licence, referrers without a licence in force\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Expiry calendar\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"today\": \"2026-10-04\",\n    \"expiringDays\": 90,\n    \"summary\": {\n      \"total\": 1\n    },\n    \"expired\": [],\n    \"expiring\": [],\n    \"calendar\": [\n      {\n        \"month\": \"2026-10\",\n        \"licences\": []\n      }\n    ],\n    \"firmLicenceInForce\": true,\n    \"referrersWithoutLicence\": [],\n    \"checkMode\": \"block\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Licence register as Excel (same filters as the list)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences/export",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences",
+                "export"
+              ]
+            },
+            "description": "Licence register as Excel (same filters as the list)\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Export\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences/export",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences",
+                    "export"
+                  ]
+                },
+                "description": "Licence register as Excel (same filters as the list)\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Export\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "xlsx"
+            }
+          ]
+        },
+        {
+          "name": "Holders and options for the licence form: referrers (agents, sub-agents, referrers), users, licence types (compliance.licence_types) and the referrer types that need a licence",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/compliance/licences/holders?search=cruz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "compliance",
+                "licences",
+                "holders"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "cruz"
+                }
+              ]
+            },
+            "description": "Holders and options for the licence form: referrers (agents, sub-agents, referrers), users, licence types (compliance.licence_types) and the referrer types that need a licence\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Add\n\nAccess: read:compliance"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/compliance/licences/holders?search=cruz",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "compliance",
+                    "licences",
+                    "holders"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "cruz"
+                    }
+                  ]
+                },
+                "description": "Holders and options for the licence form: referrers (agents, sub-agents, referrers), users, licence types (compliance.licence_types) and the referrer types that need a licence\n\nFront-end touchpoint: Compliance > Insurance Commission > Licence Register > Add\n\nAccess: read:compliance"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"referrers\": [\n      {\n        \"id\": \"ref-jdelacruz\",\n        \"name\": \"Juan Dela Cruz\",\n        \"type\": \"Agent\"\n      }\n    ],\n    \"users\": [\n      {\n        \"id\": \"usr_1\",\n        \"name\": \"Ana Reyes\"\n      }\n    ],\n    \"licenceTypes\": [\n      \"Non-life Insurance Agent\"\n    ],\n    \"requiredReferrerTypes\": [\n      \"Agent\",\n      \"Sub-agent\"\n    ]\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Cover Notes",
       "item": [
         {
@@ -31453,6 +34292,866 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"dsr_1\",\n    \"requestNumber\": \"DSR-2026-00001\",\n    \"partyType\": \"client\",\n    \"partyId\": \"cl_1\",\n    \"partyName\": \"Juan Dela Cruz\",\n    \"requesterName\": \"Juan Dela Cruz\",\n    \"requesterContact\": \"juan@example.com\",\n    \"requestType\": \"access\",\n    \"receivedOn\": \"2026-10-01\",\n    \"dueOn\": \"2026-10-16\",\n    \"status\": \"completed\",\n    \"overdue\": false,\n    \"assignedTo\": null,\n    \"outcome\": null,\n    \"closedOn\": \"2026-10-05\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Data Privacy: Breach Register",
+      "item": [
+        {
+          "name": "Breach register (filters: status, incidentType, year, pendingNpc=true, search) with counts and the notification hours",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches?pendingNpc=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches"
+              ],
+              "query": [
+                {
+                  "key": "pendingNpc",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Breach register (filters: status, incidentType, year, pendingNpc=true, search) with counts and the notification hours\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches?pendingNpc=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches"
+                  ],
+                  "query": [
+                    {
+                      "key": "pendingNpc",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Breach register (filters: status, incidentType, year, pendingNpc=true, search) with counts and the notification hours\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"items\": [\n      {\n        \"id\": \"pdb_1\",\n        \"breachNumber\": \"PDB-2026-00001\",\n        \"incidentType\": \"personal-data-breach\",\n        \"title\": \"Policy schedules e-mailed to the wrong client\",\n        \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n        \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n        \"hoursLeft\": 46,\n        \"npcOverdue\": false,\n        \"notifiable\": true,\n        \"status\": \"assessed\"\n      }\n    ],\n    \"notifyHours\": 72,\n    \"summary\": {\n      \"open\": 1,\n      \"pendingNpc\": 1,\n      \"npcOverdue\": 0,\n      \"notAssessed\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Log a security incident or personal data breach when discovered (PDB series); the NPC deadline is privacy.breach_notify_hours after discovery and the data privacy team is notified",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches"
+              ]
+            },
+            "description": "Log a security incident or personal data breach when discovered (PDB series); the NPC deadline is privacy.breach_notify_hours after discovery and the data privacy team is notified\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Log incident\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Policy schedules e-mailed to the wrong client\",\n  \"discoveredAt\": \"2026-10-03T09:00:00+08:00\",\n  \"nature\": [\n    \"confidentiality\"\n  ],\n  \"dataCategories\": [\n    \"Names and contact details\"\n  ],\n  \"subjectsAffected\": 1\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches"
+                  ]
+                },
+                "description": "Log a security incident or personal data breach when discovered (PDB series); the NPC deadline is privacy.breach_notify_hours after discovery and the data privacy team is notified\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Log incident\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Policy schedules e-mailed to the wrong client\",\n  \"discoveredAt\": \"2026-10-03T09:00:00+08:00\",\n  \"nature\": [\n    \"confidentiality\"\n  ],\n  \"dataCategories\": [\n    \"Names and contact details\"\n  ],\n  \"subjectsAffected\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdb_1\",\n    \"breachNumber\": \"PDB-2026-00001\",\n    \"incidentType\": \"personal-data-breach\",\n    \"title\": \"Policy schedules e-mailed to the wrong client\",\n    \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n    \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n    \"hoursLeft\": 46,\n    \"npcOverdue\": false,\n    \"notifiable\": true,\n    \"status\": \"assessed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One incident with its history",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One incident with its history\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One incident with its history\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdb_1\",\n    \"breachNumber\": \"PDB-2026-00001\",\n    \"incidentType\": \"personal-data-breach\",\n    \"title\": \"Policy schedules e-mailed to the wrong client\",\n    \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n    \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n    \"hoursLeft\": 46,\n    \"npcOverdue\": false,\n    \"notifiable\": true,\n    \"status\": \"assessed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Update the facts of an open incident (description, data involved, numbers, cause, containment, remediation, DPO, documents)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update the facts of an open incident (description, data involved, numbers, cause, containment, remediation, DPO, documents)\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Edit\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"containment\": \"Recipient asked to delete the e-mail; confirmation received\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update the facts of an open incident (description, data involved, numbers, cause, containment, remediation, DPO, documents)\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Edit\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"containment\": \"Recipient asked to delete the e-mail; confirmation received\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdb_1\",\n    \"breachNumber\": \"PDB-2026-00001\",\n    \"incidentType\": \"personal-data-breach\",\n    \"title\": \"Policy schedules e-mailed to the wrong client\",\n    \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n    \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n    \"hoursLeft\": 46,\n    \"npcOverdue\": false,\n    \"notifiable\": true,\n    \"status\": \"assessed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Assess the incident against the NPC criteria; notifiable follows the criteria unless decided otherwise with a reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/:id/assess",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                ":id",
+                "assess"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Assess the incident against the NPC criteria; notifiable follows the criteria unless decided otherwise with a reason\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sensitiveData\": true,\n  \"unauthorisedAcquisition\": true,\n  \"realRiskOfHarm\": true,\n  \"notes\": \"Government ID images were attached\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/:id/assess",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    ":id",
+                    "assess"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Assess the incident against the NPC criteria; notifiable follows the criteria unless decided otherwise with a reason\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sensitiveData\": true,\n  \"unauthorisedAcquisition\": true,\n  \"realRiskOfHarm\": true,\n  \"notes\": \"Government ID images were attached\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdb_1\",\n    \"breachNumber\": \"PDB-2026-00001\",\n    \"incidentType\": \"personal-data-breach\",\n    \"title\": \"Policy schedules e-mailed to the wrong client\",\n    \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n    \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n    \"hoursLeft\": 46,\n    \"npcOverdue\": false,\n    \"notifiable\": true,\n    \"status\": \"assessed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close the incident with the outcome and the measures taken (a notifiable breach must have been notified to the NPC)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close the incident with the outcome and the measures taken (a notifiable breach must have been notified to the NPC)\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close the incident with the outcome and the measures taken (a notifiable breach must have been notified to the NPC)\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdb_1\",\n    \"breachNumber\": \"PDB-2026-00001\",\n    \"incidentType\": \"personal-data-breach\",\n    \"title\": \"Policy schedules e-mailed to the wrong client\",\n    \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n    \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n    \"hoursLeft\": 46,\n    \"npcOverdue\": false,\n    \"notifiable\": true,\n    \"status\": \"closed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the notification to the NPC: time, reference, method; the reason for the delay when after the deadline",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/:id/notify-npc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                ":id",
+                "notify-npc"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the notification to the NPC: time, reference, method; the reason for the delay when after the deadline\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notifiedAt\": \"2026-10-04T10:00:00+08:00\",\n  \"reference\": \"NPC-BN-2026-0001\",\n  \"method\": \"NPC breach notification portal\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/:id/notify-npc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    ":id",
+                    "notify-npc"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the notification to the NPC: time, reference, method; the reason for the delay when after the deadline\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notifiedAt\": \"2026-10-04T10:00:00+08:00\",\n  \"reference\": \"NPC-BN-2026-0001\",\n  \"method\": \"NPC breach notification portal\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdb_1\",\n    \"breachNumber\": \"PDB-2026-00001\",\n    \"incidentType\": \"personal-data-breach\",\n    \"title\": \"Policy schedules e-mailed to the wrong client\",\n    \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n    \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n    \"hoursLeft\": 46,\n    \"npcOverdue\": false,\n    \"notifiable\": true,\n    \"status\": \"assessed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the notification of the data subjects (time, number, method) or the reason they are not notified",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/:id/notify-subjects",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                ":id",
+                "notify-subjects"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the notification of the data subjects (time, number, method) or the reason they are not notified\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/:id/notify-subjects",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    ":id",
+                    "notify-subjects"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the notification of the data subjects (time, number, method) or the reason they are not notified\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Actions\n\nAccess: write:privacy",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"pdb_1\",\n    \"breachNumber\": \"PDB-2026-00001\",\n    \"incidentType\": \"personal-data-breach\",\n    \"title\": \"Policy schedules e-mailed to the wrong client\",\n    \"discoveredAt\": \"2026-10-03T01:00:00.000Z\",\n    \"npcDueAt\": \"2026-10-06T01:00:00.000Z\",\n    \"hoursLeft\": 46,\n    \"npcOverdue\": false,\n    \"notifiable\": true,\n    \"status\": \"assessed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Annual security incident report of a calendar year (?year=): counts of incidents, breaches, notifiable breaches, notifications on time and late, by nature and data category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/annual-report?year=2025",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                "annual-report"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2025"
+                }
+              ]
+            },
+            "description": "Annual security incident report of a calendar year (?year=): counts of incidents, breaches, notifiable breaches, notifications on time and late, by nature and data category\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Annual report\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/annual-report?year=2025",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    "annual-report"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2025"
+                    }
+                  ]
+                },
+                "description": "Annual security incident report of a calendar year (?year=): counts of incidents, breaches, notifiable breaches, notifications on time and late, by nature and data category\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Annual report\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"year\": 2025,\n    \"incidents\": 3,\n    \"breaches\": 2,\n    \"notifiable\": 1,\n    \"notifiedToNpc\": 1,\n    \"notifiedLate\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Annual security incident report as Excel",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/annual-report/export?year=2025",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                "annual-report",
+                "export"
+              ],
+              "query": [
+                {
+                  "key": "year",
+                  "value": "2025"
+                }
+              ]
+            },
+            "description": "Annual security incident report as Excel\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Annual report > Download\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/annual-report/export?year=2025",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    "annual-report",
+                    "export"
+                  ],
+                  "query": [
+                    {
+                      "key": "year",
+                      "value": "2025"
+                    }
+                  ]
+                },
+                "description": "Annual security incident report as Excel\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register > Annual report > Download\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "xlsx"
+            }
+          ]
+        },
+        {
+          "name": "Options of the breach form: incident types, natures, data categories (privacy.breach_data_categories), the data privacy team",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/privacy/breaches/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "privacy",
+                "breaches",
+                "options"
+              ]
+            },
+            "description": "Options of the breach form: incident types, natures, data categories (privacy.breach_data_categories), the data privacy team\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/privacy/breaches/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "privacy",
+                    "breaches",
+                    "options"
+                  ]
+                },
+                "description": "Options of the breach form: incident types, natures, data categories (privacy.breach_data_categories), the data privacy team\n\nFront-end touchpoint: Compliance > Data Privacy > Breach Register\n\nAccess: read:privacy"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"incidentTypes\": [\n      \"personal-data-breach\",\n      \"security-incident\"\n    ],\n    \"natures\": [\n      \"confidentiality\",\n      \"integrity\",\n      \"availability\"\n    ],\n    \"dataCategories\": [\n      \"Names and contact details\"\n    ],\n    \"team\": [\n      {\n        \"id\": \"usr_1\",\n        \"name\": \"Ana Reyes\"\n      }\n    ]\n  }\n}"
             }
           ]
         }

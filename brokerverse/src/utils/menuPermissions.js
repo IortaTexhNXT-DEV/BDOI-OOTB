@@ -61,6 +61,8 @@ export const roleMenuPermissions = {
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     master: ["Insurance Management > Distribution Channels"],
+    // the complaints register, read only (read:complaints)
+    compliance: ["Insurance Commission > Complaints"],
   },
   // Processing Team (Placement & Policy Processing): broker slips, offer comparison, quotation / placement slips,
   // insurer confirmation, policy checking and issuance, endorsement processing, reinsurance, product templates
@@ -109,6 +111,8 @@ export const roleMenuPermissions = {
     compliance: true,
     operations: ["Clients", "Policy", "Claims"],
     reports: ["All Reports", "Operational Reports"],
+    // data subject requests and the consent register (read:privacy / write:privacy)
+    master: ["Data Privacy"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],
@@ -119,6 +123,8 @@ export const roleMenuPermissions = {
     master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
+    // complaints about claims are logged and handled by the Claims team (write:complaints)
+    compliance: ["Insurance Commission > Complaints"],
   },
   // Accounting: billing, collection, official receipts, remittance, commission, period end, BIR. The Accounting Manager
   // inherits Accounting (the server returns both roles), so it needs no entry of its own.
@@ -174,6 +180,8 @@ export const roleMenuPermissions = {
     reinsurance: ["Reconciliation"],
     // the production, claims and renewal registers are not accounting reports (report catalogue roles)
     reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission", "Report Builder"],
+    // licence register (commission payout check), IC annual statement and production report (read:compliance)
+    compliance: ["Insurance Commission > Licence Register", "Insurance Commission > Insurer Authority", "Insurance Commission > IC Annual Statement", "Insurance Commission > IC Production Report"],
   },
 };
 

@@ -195,6 +195,8 @@ const ReferrerAccountDetail = () => {
       ? `${referrer.whtPct}%`
       : String(referrer.whtType || "").match(/[\d.]+%/)?.[0] || "";
   const payoutBlocked = referrer.payoutBlockedReason || null;
+  // licence missing or expired while compliance.referrer_licence_check is "warn": allowed, shown as a warning
+  const payoutWarning = referrer.payoutWarning || null;
 
   return (
     <div className="referrer-detail-page">
@@ -239,6 +241,13 @@ const ReferrerAccountDetail = () => {
             severity="warn"
             className="mt-2 w-full justify-content-start"
             text={payoutBlocked}
+          />
+        )}
+        {!payoutBlocked && payoutWarning && (
+          <Message
+            severity="info"
+            className="mt-2 w-full justify-content-start"
+            text={payoutWarning}
           />
         )}
       </div>

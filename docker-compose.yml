@@ -1,6 +1,6 @@
 # BrokerVerse: PostgreSQL + API + web. `docker compose up --build`, then open http://localhost:8080
 # Sign in as BrokerVerse / the ADMIN_PASSWORD below, then create persona users under Master > User Management.
-# Required: JWT_SECRET, DATA_ENCRYPTION_KEY, ADMIN_PASSWORD, CORS_ORIGINS, PUBLIC_BASE_URL (see deploy/REFERENCE.md).
+# Required: JWT_SECRET, DATA_ENCRYPTION_KEY, PII_ENCRYPTION_KEY, ADMIN_PASSWORD, CORS_ORIGINS, PUBLIC_BASE_URL (see deploy/REFERENCE.md).
 services:
   db:
     image: postgres:16-alpine
@@ -23,6 +23,7 @@ services:
       DATABASE_URL: postgres://brokerverse:${DB_PASSWORD:-brokerverse}@db:5432/brokerverse
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET to a random string of at least 32 characters}
       DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:?set DATA_ENCRYPTION_KEY to a different random string of at least 32 characters}
+      PII_ENCRYPTION_KEY: ${PII_ENCRYPTION_KEY:?set PII_ENCRYPTION_KEY to a third random string of at least 32 characters}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD to the first administrator password}
       CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS to the public web address, e.g. https://brokerverse.example.ph}
       PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?set PUBLIC_BASE_URL to the public address, e.g. https://brokerverse.example.ph}

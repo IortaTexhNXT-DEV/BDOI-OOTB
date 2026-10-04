@@ -4,6 +4,8 @@ import { getAccessToken } from "./tokenManager";
 import { logout } from "./logout";
 import { refreshAccessToken } from "./sessionRefresh";
 import logger from "./logger";
+import { revealHeaders } from "./piiReveal";
+import { showComplianceWarnings } from "./toastUtils";
 
 const request = axios.create({
     baseURL: BASE_URL,
@@ -20,6 +22,7 @@ request.interceptors.request.use((config) => {
             ...config,
             headers: {
                 ...config.headers,
+                ...revealHeaders(),
                 Authorization: `Bearer ${token}`,
             },
         };
@@ -36,7 +39,13 @@ request.interceptors.request.use((config) => {
 
 // handle 401 and logout
 request.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        // a compliance control set to warn (insurer authority, referrer licence) let the action through
+        if (Array.isArray(response?.data?.complianceWarnings) && response.data.complianceWarnings.length) {
+            showComplianceWarnings(response.data.complianceWarnings);
+        }
+        return response;
+    },
     async (err) => {
         const original = err.config;
         if (err.response?.status === 401 && original && !original.__bvRetried) {

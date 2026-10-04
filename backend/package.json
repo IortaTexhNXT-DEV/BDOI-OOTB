@@ -21,6 +21,7 @@
     "check:settings": "node scripts/check-settings.js",
     "compare:environments": "node scripts/compare-environments.js",
     "mask:data": "node scripts/mask-data.js",
+    "pii:rotate": "node scripts/rotate-pii-key.js",
     "test": "vitest run",
     "lint": "eslint src test scripts"
   },

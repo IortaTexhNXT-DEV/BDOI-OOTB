@@ -47,6 +47,8 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   - `DATA_ENCRYPTION_KEY`: random, at least 32 characters, **different** from `JWT_SECRET`. It encrypts two-factor
     secrets: back it up together with the database; without it users with two-factor sign-in cannot sign in until an
     administrator turns their two-factor off.
+  - `PII_ENCRYPTION_KEY`: random, at least 32 characters, different from both. It encrypts TIN, government ID and bank
+    account numbers at rest: back it up together with the database; without it those identifiers cannot be read.
   - `ADMIN_PASSWORD`: the first password of the `BrokerVerse` administrator (must meet the password rules: 8+
     characters, upper and lower case, digit, symbol). **Do not reuse any password used during development or shared
     in chats or documents.**
@@ -77,6 +79,7 @@ only. Users, insurers, agents and opening balances are set up in the new system 
   | `DATABASE_URL` | `postgres://<user>:<password>@<host>:5432/<db>` (with `?sslmode=require` on RDS) | yes |
   | `JWT_SECRET` | secret from section 1 | yes |
   | `DATA_ENCRYPTION_KEY` | secret from section 1 | yes |
+  | `PII_ENCRYPTION_KEY` | secret from section 1 | yes |
   | `ADMIN_PASSWORD` | secret from section 1 (used only when the administrator is first created) | yes |
   | `CORS_ORIGINS` | the front-end URL, e.g. `https://<brokerverse-url>` (never `*`) | yes |
   | `PUBLIC_BASE_URL` | the API's public base, e.g. `https://<brokerverse-url>` (same-domain option) or `https://api.<domain>` | yes |

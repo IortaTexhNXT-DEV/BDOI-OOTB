@@ -31,6 +31,7 @@ Do the steps in order. Put secrets only in Railway's variables, never in the rep
    DATABASE_URL=${{Postgres.DATABASE_URL}}?options=-c%20TimeZone%3DAsia%2FManila
    JWT_SECRET=<random, at least 32 characters>
    DATA_ENCRYPTION_KEY=<a different random value, at least 32 characters>
+   PII_ENCRYPTION_KEY=<a third random value, at least 32 characters>
    ADMIN_PASSWORD=<first password of the BrokerVerse administrator>
    CORS_ORIGINS=https://<web address>
    PUBLIC_BASE_URL=https://<api address>
@@ -141,7 +142,7 @@ repository; no Dockerfile is added. Run it once, on a UAT environment only, neve
 
 | What you see | Cause and fix |
 |---|---|
-| `api` deploy stays on "health check" and fails | Look at the deploy logs. Usually a missing variable (the API refuses to start in production without `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `CORS_ORIGINS`, `PUBLIC_BASE_URL`) or `DATABASE_URL` not pointing at the Postgres service. |
+| `api` deploy stays on "health check" and fails | Look at the deploy logs. Usually a missing variable (the API refuses to start in production without `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY`, `CORS_ORIGINS`, `PUBLIC_BASE_URL`) or `DATABASE_URL` not pointing at the Postgres service. |
 | `EACCES` on `/app/uploads` in the logs | `RAILWAY_RUN_UID=0` is missing on `api`. |
 | Blank page, `%PUBLIC_URL%` errors in the browser console | The unbuilt source is served. Check the `web` service has Dockerfile path `Dockerfile.railway` and root directory `/brokerverse`, not a Railpack or static build of the folder. |
 | Login page shows but sign-in fails with a network or CORS error | With `API_UPSTREAM`: the API service name or port is wrong (`http://<api service>.railway.internal:<PORT>`); the `web` log shows the proxy error. With `API_BASE_URL`: it must end in `/api` and the web address must be in `CORS_ORIGINS` on `api`. Open `<web address>/env-config.js` to see what the app uses. |

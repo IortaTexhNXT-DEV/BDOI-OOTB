@@ -1,0 +1,92 @@
+// Compliance screens (Compliance > Insurance Commission, Compliance > Data Privacy): forms and small parts on top of
+// the Administration and Access Control page styles.
+.compliance__form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.compliance__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-color-secondary);
+  }
+
+  .p-dropdown,
+  .p-multiselect,
+  .p-calendar,
+  .p-inputnumber,
+  .p-inputtext,
+  .p-inputtextarea {
+    width: 100%;
+  }
+}
+
+.compliance__field--wide {
+  grid-column: 1 / -1;
+}
+
+.compliance__docs {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.25rem;
+}
+
+.compliance__doc {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.compliance__history {
+  ul {
+    margin: 0.25rem 0 0;
+    padding-left: 1.1rem;
+    font-size: 0.85rem;
+  }
+
+  h4 {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+  }
+}
+
+.compliance__declaration {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.compliance__row-actions {
+  display: flex;
+  gap: 0.15rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.compliance__table-scroll {
+  overflow-x: auto;
+}
+
+.compliance__checks li.is-bad {
+  color: var(--red-600);
+}
+
+.compliance__checks li.is-ok {
+  color: var(--green-700);
+}
+
+@media (max-width: 768px) {
+  .compliance__form {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

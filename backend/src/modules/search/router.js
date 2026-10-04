@@ -18,14 +18,14 @@ const TYPES = [
   {
     type: 'lead', module: 'leads', alias: 'l',
     sql: (own) => `SELECT l.id, l.lead_number AS number, l.display_name AS name, l.email, l.phone, l.status, l.lob AS extra, l.created_at
-      FROM leads l WHERE l.deleted_at IS NULL AND ${own} AND (l.lead_number ILIKE $1 OR l.display_name ILIKE $1 OR l.company_name ILIKE $1 OR l.email ILIKE $1 OR l.phone ILIKE $1)
+      FROM leads l WHERE l.deleted_at IS NULL AND ${own} AND (l.lead_number ILIKE $1 OR l.display_name ILIKE $1 OR l.company_name ILIKE $1 OR l.email ILIKE $1 OR l.phone ILIKE $1 OR l.tax_number_bidx = pii_blind_index($2::text))
       ORDER BY (l.lead_number = $2) DESC, l.created_at DESC LIMIT $3`,
     shape: (r) => ({ title: r.name, subtitle: [r.number, r.email || r.phone, r.extra].filter(Boolean).join(' · '), status: r.status, link: `/agent/leaddetail/${r.id}` }),
   },
   {
     type: 'client', module: 'clients', alias: 'c',
     sql: (own) => `SELECT c.id, c.client_code AS number, c.display_name AS name, c.email, c.phone, c.status, c.created_at
-      FROM clients c WHERE c.status <> 'deleted' AND ${own} AND (c.client_code ILIKE $1 OR c.display_name ILIKE $1 OR c.email ILIKE $1 OR c.phone ILIKE $1 OR c.tin ILIKE $1)
+      FROM clients c WHERE c.status <> 'deleted' AND ${own} AND (c.client_code ILIKE $1 OR c.display_name ILIKE $1 OR c.email ILIKE $1 OR c.phone ILIKE $1 OR c.tin_bidx = pii_blind_index($2::text))
       ORDER BY (c.client_code = $2) DESC, c.created_at DESC LIMIT $3`,
     shape: (r) => ({ title: r.name, subtitle: [r.number, r.email || r.phone].filter(Boolean).join(' · '), status: r.status, link: `/agent/clientview/${r.id}` }),
   },

@@ -9,6 +9,7 @@ The front end is in `brokerverse/`, the Node.js + PostgreSQL backend in `backend
 ```
 export JWT_SECRET=$(openssl rand -hex 32)
 export DATA_ENCRYPTION_KEY=$(openssl rand -hex 32)
+export PII_ENCRYPTION_KEY=$(openssl rand -hex 32)
 export ADMIN_PASSWORD='<first administrator password>'
 export DB_PASSWORD='<database password>'
 export PUBLIC_BASE_URL=https://brokerverse.example.ph      # the public HTTPS address (the web container forwards /api)
@@ -95,12 +96,30 @@ With `NODE_ENV=production` (the Docker image sets it) the API refuses to start, 
 |---|---|
 | `JWT_SECRET` | set, at least 32 characters, not a placeholder (signs every session token and signed file link) |
 | `DATA_ENCRYPTION_KEY` | set, at least 32 characters, different from `JWT_SECRET` (encrypts two-factor secrets at rest and keys the reset-code hashes) |
+| `PII_ENCRYPTION_KEY` | set, at least 32 characters, different from `JWT_SECRET` and `DATA_ENCRYPTION_KEY` (encrypts TIN, government ID and bank account numbers at rest and keys their blind indexes) |
 | `CORS_ORIGINS` | set to the web application origin(s), comma separated; `*` is refused |
 | `PUBLIC_BASE_URL` | set to the public address of the API (file links are built from it); `localhost` / `127.0.0.1` are refused |
 
 Keep `DATA_ENCRYPTION_KEY` with the database backups: without the same key, users with two-factor authentication
 cannot sign in (an administrator can turn their two-factor off under User Management and they enrol again).
 Changing `JWT_SECRET` signs every user out and invalidates file links already handed out.
+
+Keep `PII_ENCRYPTION_KEY` with the database backups too: TIN, government ID and bank account numbers of clients,
+prospects and referrers are stored encrypted with it (migration 0277) and cannot be read without it.
+
+### Rotating the personal data key
+
+1. Generate a new key: `openssl rand -hex 32`.
+2. Set `PII_ENCRYPTION_KEY` to the new key and `PII_ENCRYPTION_KEY_PREVIOUS` to the old one, and restart the API. From
+   then on every new or changed identifier is written with the new key, and values written with the old key stay readable.
+3. Run `npm run pii:rotate` (a dry run that counts the values still encrypted with the old key), then
+   `npm run pii:rotate -- --execute`: every such value is decrypted and encrypted again with the new key and its blind
+   index (exact-value search) recomputed. The script works in batches and can be run again safely.
+4. When the dry run reports 0 for every column, remove `PII_ENCRYPTION_KEY_PREVIOUS` and restart.
+5. Keep the old key with the backups taken before the rotation: those backups can only be read with it.
+
+The masking tool (`npm run mask:data`) runs with the key of the database it masks (the restored copy's key, normally
+production's); after masking, rotate the copy to the key of its own environment with the steps above.
 
 ## Security settings
 

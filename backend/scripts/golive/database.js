@@ -5,6 +5,7 @@
  */
 import pg from 'pg';
 import { resetTransactions } from '../reset-transactions.js';
+import { revealPii } from '../../src/lib/pii.js';
 import { MASTER_CONFIG_TABLES } from '../lib/table-classification.js';
 
 /** Columns that change by using the system, not by configuring it (sign-ins, password changes, timestamps). */
@@ -109,7 +110,7 @@ export function sourceSnapshot(url, { cutover, receivableAccount = '1202001' }) 
         rows: {
           clients: clients.map((c) => ({
             'Client Code': c.client_code, 'Client Type': c.client_type, 'First Name': S(c.first_name), 'Last Name': S(c.last_name), 'Company Name': S(c.company_name),
-            Email: S(c.email), Phone: S(c.phone), TIN: S(c.tin), 'Birth Date': S(c.birth_date), Gender: S(c.gender), Address: S(c.address), City: S(c.city),
+            Email: S(c.email), Phone: S(c.phone), TIN: S(revealPii(c.tin)), 'Birth Date': S(c.birth_date), Gender: S(c.gender), Address: S(c.address), City: S(c.city),
             Province: S(c.state), Country: S(c.country), 'Postal Code': S(c.postal_code),
           })),
           policies: policies.map((p) => {

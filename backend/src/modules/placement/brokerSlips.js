@@ -18,6 +18,7 @@ import { quotationCharges } from '../premium-charges/service.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
 import { createLead } from '../leads/service.js';
 import { assertOnMarket, evaluate, assertNotDeclined } from '../product-configurator/underwriting.js';
+import { assertInsurersAuthorised } from '../ic-compliance/insurerAuthority.js';
 
 export const SLIP_STATUSES = ['draft', 'submitted', 'responses-in', 'closed', 'cancelled'];
 const OPEN = ['draft', 'submitted', 'responses-in'];
@@ -256,6 +257,9 @@ export async function submitSlip(id, user) {
   const before = await getSlipRow(id);
   if (before.status !== 'draft') throw conflict(`Only a draft broker slip can be submitted (current: ${before.status})`);
   if (!Number(before.offers_total)) throw badRequest('Add at least one insurer to approach before submitting the broker slip');
+  // the request for quotation goes only to insurers with an IC certificate of authority in force (compliance.insurer_authority_check)
+  const approached = await many('SELECT insurance_company_id FROM insurer_offers WHERE broker_slip_id = $1', [before.id]);
+  await assertInsurersAuthorised(approached.map((o) => o.insurance_company_id), 'rfq', { entity: 'broker_slip', entityId: before.id });
   const date = await today();
   const due = before.response_due_date || addDays(date, Number(await getSetting('broker_slips.response_days', 7)));
   await query("UPDATE broker_slips SET status = 'submitted', submission_date = $2, response_due_date = $3, updated_by = $4, updated_at = now() WHERE id = $1", [before.id, date, due, user.id]);
@@ -268,6 +272,7 @@ export async function addInsurer(id, ref, user) {
   const slip = await getSlipRow(id);
   if (!OPEN.includes(slip.status)) throw conflict(`Insurers cannot be added to a ${slip.status} broker slip`);
   const [ic] = await resolveInsurers(null, [ref]);
+  if (slip.status !== 'draft') await assertInsurersAuthorised([ic.id], 'rfq', { entity: 'broker_slip', entityId: slip.id });
   await withTransaction((db) => addOffers(db, slip.id, [ic], user.id));
   let mail = null;
   if (slip.status !== 'draft') {

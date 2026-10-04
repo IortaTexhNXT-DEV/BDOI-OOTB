@@ -197,7 +197,7 @@ describe('passwords', () => {
 
 // ------------------------------------------------------------------------------------------------ 3. production config
 describe('production start-up check', () => {
-  const good = { NODE_ENV: 'production', JWT_SECRET: 'a'.repeat(48), DATA_ENCRYPTION_KEY: 'b'.repeat(48), CORS_ORIGINS: 'https://app.example.ph', PUBLIC_BASE_URL: 'https://api.example.ph' };
+  const good = { NODE_ENV: 'production', JWT_SECRET: 'a'.repeat(48), DATA_ENCRYPTION_KEY: 'b'.repeat(48), PII_ENCRYPTION_KEY: 'c'.repeat(48), CORS_ORIGINS: 'https://app.example.ph', PUBLIC_BASE_URL: 'https://api.example.ph' };
   const problems = (env) => productionConfigProblems(buildConfig(env), env);
   it('refuses missing or default secrets, CORS * and a localhost base URL in production only', () => {
     expect(problems(good)).toEqual([]);
@@ -206,6 +206,8 @@ describe('production start-up check', () => {
     expect(problems({ ...good, JWT_SECRET: 'short-secret' }).join()).toMatch(/at least 32/);
     expect(problems({ ...good, DATA_ENCRYPTION_KEY: undefined }).join()).toMatch(/DATA_ENCRYPTION_KEY is not set/);
     expect(problems({ ...good, DATA_ENCRYPTION_KEY: good.JWT_SECRET }).join()).toMatch(/differ/);
+    expect(problems({ ...good, PII_ENCRYPTION_KEY: undefined }).join()).toMatch(/PII_ENCRYPTION_KEY is not set/);
+    expect(problems({ ...good, PII_ENCRYPTION_KEY: good.DATA_ENCRYPTION_KEY }).join()).toMatch(/PII_ENCRYPTION_KEY must differ/);
     expect(problems({ ...good, CORS_ORIGINS: '*' }).join()).toMatch(/CORS_ORIGINS/);
     expect(problems({ ...good, CORS_ORIGINS: undefined }).join()).toMatch(/CORS_ORIGINS/);
     expect(problems({ ...good, PUBLIC_BASE_URL: 'http://localhost:8000' }).join()).toMatch(/not localhost/);

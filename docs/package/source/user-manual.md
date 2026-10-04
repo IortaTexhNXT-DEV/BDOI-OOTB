@@ -728,6 +728,10 @@ The Data Privacy menu supports the broker's Data Protection Officer under the Da
 
 The job `privacy-requests-due` (Master > Schedules, delivered switched off) notifies the privacy team every morning of open requests past their due date.
 
+**Masking of personal identifiers.** A user whose role does not hold **View full personal identifiers** (`view:pii`) sees TIN, government ID numbers, mobile numbers, e-mail addresses, bank account numbers and birth dates partially masked on every list and view, for example ***-***-**9-000, j***@example.ph or 1984-**-**, and in every Excel, CSV and PDF listing. Delivered to the System Administrator, Sales, Operations, Accounting and the Accounting Manager; Processing and Claims see masked values unless the role is given the permission (Master > Users and Access > Roles). A form opened with masked values keeps the stored values when it is saved. Which fields are personal comes from the personal data catalogue of the masking tool. Settings: `privacy.masking_enabled`, `privacy.masking_exempt_paths` and `privacy.pii_reveal_mode`. With **on-request**, holders of the permission also see masked values until they choose **Show full identifiers** in the user menu (top right; **Hide full identifiers** turns it off); each screen opened with full identifiers is recorded in the audit trail (record type personal_data, action unmask).
+
+**Encryption at rest.** TIN, government ID numbers and bank account numbers of clients, prospects and referrers, the ID numbers captured when a policy is issued and the payee TIN of BIR Form 2307 are stored encrypted with the key of the environment (`PII_ENCRYPTION_KEY`). Search by an exact TIN still works (global search and the client list, in any format, with or without dashes). The key rotation is described in deploy/REFERENCE.md.
+
 ## Finance set-up shared with the Accounting Manager
 
 The System Administrator can open every Master > Finance screen. The Accounting chapters describe them: Commission Rate Matrix, Posting Rules, Account Determination, Configuration Approvals and Accounting Flow (Accounting Manager chapter), Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types and Insurer Statement Formats (Accounting chapter), and Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates and Payment Gateways (Module reference). Changes to posting rules and account determination wait for a second user on Configuration Approvals.
@@ -2834,6 +2838,114 @@ Choose Reports > Report Builder. The Report Builder answers ad hoc questions ove
 ### BI extract
 
 The administrator's **BI extract** tab lists the runs of the **bi-extract** job, which writes one CSV file per dataset listed in **bi.extract_datasets** to the storage folder **bi.extract_folder**, dated, for the BI tool to pick up. **Run now** runs it immediately. The job keeps the last **bi.extract_keep_runs** runs.
+# Compliance
+
+The Compliance menu holds the registers and reports the broker keeps for its regulators: the Insurance Commission (licences, fit and proper records, insurer certificates of authority, complaints, the annual statement and the production report) and the National Privacy Commission (breach register). Who sees what:
+
+| Screen | Read | Change |
+|---|---|---|
+| Licence Register, Fit and Proper, Insurer Authority, IC Annual Statement, IC Production Report | System Administrator, Operations, Accounting, Accounting Manager (`read:compliance`) | System Administrator, Operations (`write:compliance`) |
+| Complaints | System Administrator, Operations, Claims, Sales (`read:complaints`) | System Administrator, Operations, Claims (`write:complaints`); escalations go to `approve:complaints` |
+| Breach Register | System Administrator, Operations (`read:privacy`) | System Administrator, Operations (`write:privacy`) |
+
+The settings named below are in Master > Configuration (groups **compliance**, **complaints** and **privacy**).
+
+## Licence register
+
+Compliance > Insurance Commission > Licence Register keeps the licences of the firm (the broker's licence), of its officers and licensed individuals, and of the agents, sub-agents and referrers paid commission.
+
+1. Select **Add licence**. Choose the **Holder type**: **The firm**, **Officer**, **Licensed individual** or **Agent / referrer**. For an agent choose the referrer account; for an officer or individual the user (optional) and the position.
+2. Choose the **Licence type** (list in `compliance.licence_types`), enter the **Licence number**, **Issued by** (Insurance Commission by default), the lines authorised, the **Issued** and **Expires** dates, and attach the licence and the official receipt of the fees with **Attach documents**.
+3. Save. The register shows each licence with its **State**: **Valid**, **Expiring** (within `compliance.licence_expiring_days`, 90), **Expired** or **No expiry date**. The cards count each state; select a card to filter.
+4. When the renewal is filed with the IC, edit the licence and set **Renewal** to **Filed with the IC** with the date and reference.
+5. When the renewed licence is received, select **Record renewal**, enter the new number and dates and attach the licence. The renewed licence becomes the licence in force and the old one is kept as **Superseded**.
+
+The tab **Expiry calendar** shows the licences expiring in each of the next twelve months and the expired licences. The page warns when the firm has no licence in force and lists the agents whose commission is held because they have no licence in force. **Export to Excel** downloads the register.
+
+The daily job `compliance-reminders` (Master > Schedules) reminds the compliance team (`read:compliance`) of each licence at each threshold of `compliance.licence_reminder_days` (90, 60, 30, 15 and 7 days before expiry, and when it has expired), once per threshold, and the user who holds the licence. A licence within 30 days of expiry is marked **Renewal due**.
+
+**Commission to unlicensed agents.** Commission to a referrer whose type is in `compliance.licence_required_referrer_types` (Agent and Sub-agent) is approved and paid only when the licence register holds a licence in force for that referrer on the day. `compliance.referrer_licence_check` decides what happens otherwise:
+
+- **block** (delivered): **Approve**, **Generate payout**, single-line payment and the approval of the payout voucher are refused with the reason, which is also shown on the referrer account (Commission > Agents/Referrer Accounts).
+- **warn**: the payout goes ahead; the warning is shown on the referrer account and after the action, and recorded in the audit trail (action Compliance warning).
+- **off**: no check.
+
+## Fit and proper records
+
+Compliance > Insurance Commission > Fit and Proper keeps the record of each director and officer.
+
+1. Select **Add director or officer**. Enter the name, the **Category** (Director, Officer, Compliance officer, Key person), the position and the date appointed.
+2. Answer each declaration **Yes** or **No**. The declarations are the list in `compliance.fit_proper_declarations` (confirm the wording with the compliance officer against the IC rules in force). A **No** needs an explanation.
+3. Enter the date the declaration was signed and attach the clearances, curriculum vitae and board resolution.
+4. Select **Record review**, choose the **Outcome** (Fit and proper, Conditional, Not fit and proper) and the date. A person is found fit and proper only when every declaration is answered. The next review is due `compliance.fit_proper_review_months` (12) months later.
+
+The cards count reviews overdue, due soon (within `compliance.fit_proper_reminder_days`, 30) and records not yet reviewed; the job `compliance-reminders` reminds the compliance team. **Export to Excel** downloads the register.
+
+## Insurer authority
+
+Business is placed only with insurers whose IC certificate of authority is in force. The certificate number and validity are the fields **IC Certificate of Authority No.** and **Certificate of Authority Valid Until** of the insurer (Master > Insurance > Insurance Company).
+
+Compliance > Insurance Commission > Insurer Authority lists every active insurer (switch **Include inactive insurers** for all) with its certificate, the validity, the days left and the **State**: **Valid**, **Expiring** (within `compliance.insurer_authority_expiring_days`, 60), **Expired**, or **No certificate** / **No validity date**. **Open insurer** opens the insurer master to update the certificate. **Export to Excel** downloads the report.
+
+The certificate is checked when a request for quotation is sent (a broker slip submitted to the market, an insurer added to a submitted slip, a quotation submitted to the insurer), when the firm order of a placement slip is sent, and when a policy is issued (from a quotation, from a placement slip, or with Record Issued Policy). `compliance.insurer_authority_check`:
+
+- **warn** (delivered): the step goes ahead; a warning appears on the screen and is recorded in the audit trail.
+- **block**: the step is refused and the message names the insurer and why. Switch to **block** once the certificate numbers of the insurers the broker works with are entered.
+- **off**: no check.
+
+The job `compliance-reminders` reminds the compliance team of certificates expiring and expired.
+
+## Complaints register
+
+Compliance > Insurance Commission > Complaints is the register of complaints of clients and claimants under RA 11765 (Financial Products and Services Consumer Protection Act) and the IC rules on complaints handling.
+
+1. Select **Log complaint**. Enter the date received, the **Channel** (list in `complaints.channels`), the complainant, the contact, the **Complainant type**, the policy number and claim number when the complaint concerns them (the policy fills the client and the insurer), the **Category** (list in `complaints.categories`), **Simple** or **Complex**, the amount disputed, the subject and the description, and attach the complainant's letter.
+2. Choose **Assigned to**: the person is notified with the deadlines.
+3. Save. The complaint takes a number from the CMP series. The deadlines are counted in calendar days from the date received: acknowledgement `complaints.ack_days` (2), resolution `complaints.resolution_days_simple` (7) or `complaints.resolution_days_complex` (45). Confirm these values against the IC rules in force. Changing the complexity moves the resolution deadline.
+4. Select **Acknowledge**, then print the **Acknowledgement letter** (print icon). The letter is on the letterhead; its text is `complaints.ack_letter_text`.
+5. When the matter is settled, select **Resolve**, choose the **Outcome** (Upheld, Partially upheld, Not upheld, Withdrawn), enter the resolution given and any redress amount, and print the **Resolution letter** (`complaints.resolution_letter_text`, which tells the complainant how to elevate the complaint to the Insurance Commission).
+6. **Close** a resolved complaint. **Reopen** one the complainant contests (with the reason).
+
+**Escalate** sends the complaint, with the reason, to the complaints officers (`approve:complaints`). **Refer to the IC** records the Insurance Commission's reference when the complainant has elevated the complaint. Every step is kept in the history of the complaint and in the audit trail.
+
+The cards count open complaints, complaints past a deadline and escalated ones; the columns **Acknowledge by** and **Resolve by** show a passed deadline in red and **Age (days)** the days since receipt. The daily job `complaints-deadlines` reminds the person assigned of each deadline that has come, and escalates complaints whose resolution is overdue when `complaints.auto_escalate` is on.
+
+**Regulator report.** Choose the period and select **Download report**: an Excel workbook with the summary (received, resolved, open, resolved within the deadline, average days to resolve, referred to the IC), the counts by category, channel, status and outcome, the ageing and the register of the period.
+
+## IC annual statement
+
+Compliance > Insurance Commission > IC Annual Statement builds the schedules of the broker's annual statement from the ledger and the production records, as a working paper for the accountant. It follows the structure of the IC annual statement of an insurance broker; the name and version of the form set it follows are in `compliance.ic_statement_form` and printed on the cover. The accountant confirms the figures and transcribes them onto the IC form set in force for the year before filing.
+
+1. Choose the **Year** (the calendar year; the previous year is shown beside every figure).
+2. The tab **Checks and confirmations** shows the system checks (the balance sheet balances, every ledger account with a balance is mapped, premiums held for insurers are covered by the premium trust account, the firm's licence is in force, and, when `compliance.ic_minimum_net_worth` is set, the net worth against it) and the lines the accountant must confirm.
+3. The tabs **Balance sheet** and **Income statement** show schedule 1 and 2 on the IC lines with the ledger accounts of each line; **Premiums held in trust** shows the premiums payable to each insurer at the year end against the premium trust account.
+4. Select **Download workbook**. The Excel workbook has the sheets **Cover**, **Sch 1 Balance sheet**, **Sch 2 Income statement**, **Sch 3 by insurer** (premiums placed and commission earned by insurer and line of business), **Sch 4 Premiums held**, **Accountant confirmation** (each check, each line to confirm, and a column for the name and date of the person who confirms) and **Unmapped accounts**.
+
+**Account mapping.** The tab **Account mapping** lists the lines of the statement and the ledger account prefixes of each. An account belongs to the line whose prefix matches it longest, so a general line (for example Other operating expenses, prefix 44) takes what the specific lines do not. A user with `write:compliance` edits a line (title, prefixes, what the accountant must confirm). The delivered mapping follows the delivered chart of accounts; a broker with its own chart adapts it before the first statement.
+
+## IC production report
+
+Compliance > Insurance Commission > IC Production Report shows the premiums placed by insurer and line of business in the layout of the Insurance Commission.
+
+1. Choose the period (**From**, **To**) and **Month**, **Quarter** or **Year**.
+2. The first table shows each insurer with the premiums of each IC line, the total premiums, the commission earned and the number of policies, and the total; the second the same by period.
+3. Select **Download Excel** for the workbook: **Report** (broker, TIN, period, basis), **Premiums by insurer**, **Premiums by period** and **Detail** (each policy and endorsement with its insurer, share, line, premium and commission).
+
+Policies count on their issue date (the inception date when not issued), endorsements on their effective date; a co-insured policy is split by the share of each insurer. The IC lines are `compliance.ic_lines_of_business` and the line of each product line is `compliance.ic_line_map` (a line not mapped goes to **Others**).
+
+## Personal data breach register
+
+Compliance > Data Privacy (NPC) > Breach Register is the log of security incidents and personal data breaches (Data Privacy Act; NPC Circular 16-03 on personal data breach management and the NPC rules that followed it).
+
+1. Select **Log incident** as soon as an incident is discovered. Choose **Personal data breach** or **Security incident**, enter the time discovered (the 72-hour clock runs from it), the title, what happened, the nature (confidentiality, integrity, availability), the personal data involved (`privacy.breach_data_categories`), the number of data subjects and records affected, the systems, the DPO, and attach the evidence. The incident takes a number from the PDB series and the data privacy team is notified.
+2. Select **Assess** and answer the criteria: sensitive personal information involved, information that may enable identity fraud, reasonably believed acquired by an unauthorised person, likely to give rise to a real risk of serious harm. The breach is notifiable when the criteria are met; a different decision needs a reason.
+3. Notify the National Privacy Commission, then select **Notify NPC** and record the time, the NPC reference and the method. A notification after the deadline needs the reason for the delay.
+4. Select **Data subjects** to record the notification of the data subjects (time, number, method), or the reason they are not notified.
+5. Record the cause, containment and remediation with **Edit**, then **Close** with the outcome and the measures taken. A notifiable breach is closed only after its notification to the NPC is recorded.
+
+The column **Clock** shows the hours left before the NPC deadline (`privacy.breach_notify_hours`, 72) of a breach not yet notified, in red within a day or once passed. The hourly job `privacy-breach-deadlines` reminds the data privacy team at each mark of `privacy.breach_reminder_hours` (48, 24 and 6 hours before the deadline) and when the deadline has passed.
+
+**Annual report.** Choose the year and select **Annual report**: an Excel workbook with the summary of the year (incidents, breaches, notifiable breaches, notified to the NPC, notified late, data subjects affected and notified), the counts by nature and by data category, and the list of incidents, for the annual security incident report to the NPC.
 
 # Module reference
 

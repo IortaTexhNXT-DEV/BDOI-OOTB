@@ -79,3 +79,14 @@ export async function ledgerIntegrity() {
     WHERE l.account_code = '1202001' AND j.status IN ('posted','reversed')) AS d`)).rows[0].d;
   return { unbalanced, diff: Number(diff) };
 }
+
+/**
+ * Record an IC licence in force for a referrer (Compliance > Licence Register): an agent or sub-agent without one cannot
+ * be approved or paid commission (compliance.referrer_licence_check, migration 0270).
+ */
+export async function licenseReferrer(api, referrerId, { expiryDate = null } = {}) {
+  const exp = expiryDate || new Date(Date.now() + 365 * 86400000).toISOString().slice(0, 10);
+  const r = await api('post', '/compliance/licences').send({ holderType: 'referrer', referrerId, licenceType: 'Non-life Insurance Agent', licenceNumber: `T-${referrerId}`, expiryDate: exp });
+  if (r.status !== 201) throw new Error(`licence of ${referrerId}: ${r.status} ${JSON.stringify(r.body)}`);
+  return r.body.data;
+}

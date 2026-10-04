@@ -10,6 +10,7 @@ const table = (props) => (
     <Column field="name" header="Name" />
   </DataTable>
 );
+const skeleton = () => screen.queryByRole("status", { name: "Loading" });
 
 describe("DataTable loading pattern", () => {
   it("draws the column headings and as many skeleton rows as the page size while the first page loads", () => {

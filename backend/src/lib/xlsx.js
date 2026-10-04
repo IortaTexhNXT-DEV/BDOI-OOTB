@@ -5,6 +5,7 @@
  * theme and, optionally, the logo and a banner (company, registration line, title) above the first sheet's table.
  */
 import { createZip } from './zip.js';
+import { protectExportRows } from './piiPolicy.js';
 
 const MAX_CELL = 32767;
 // Style indexes in styles.xml cellXfs
@@ -192,7 +193,8 @@ export function writeXlsx({ sheets, creator = 'BrokerVerse', title = '', brand =
   const img = brand?.logoImage && brand.logoImage.width && brand.logoImage.height ? brand.logoImage : null;
   // the logo is drawn 40 px high (row height in points = px * 0.75 + margin)
   const logoBox = img ? { heightPx: 40, widthPx: Math.round((40 * img.width) / img.height), rowHeight: 40 * 0.75 + 8 } : null;
-  const named = sheets.map((s) => ({ ...s, name: safeSheetName(s.name, used), logo: s.logo && logoBox ? logoBox : null }));
+  // personal identifiers: decrypted, and masked for a user without view:pii (lib/piiPolicy.js)
+  const named = sheets.map((s) => ({ ...s, rows: protectExportRows(s.columns || [], s.rows || []), name: safeSheetName(s.name, used), logo: s.logo && logoBox ? logoBox : null }));
   const sheetFiles = named.map((s, i) => ({ name: `xl/worksheets/sheet${i + 1}.xml`, data: sheetXml(s, sst) }));
   const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
   const definedNames = named.map((s, i) => (s.autoFilter === false || !s.columns.length ? ''
