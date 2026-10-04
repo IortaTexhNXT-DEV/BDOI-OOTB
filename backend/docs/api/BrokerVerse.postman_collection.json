@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1360 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1361 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -55540,6 +55540,55 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"username\": \"maria.rivera\",\n      \"displayName\": \"Maria Rivera\",\n      \"designation\": \"Account Executive\",\n      \"self\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Home: the role preset of the signed-in user, their role, branch and company for the page subtitle, and the two or three figures of the role (sales: quotes this month, conversion, renewals due; claims: open claims, average days open; accounting: overdue receivables, collections this month; compliance: deadlines, EDD reviews; administrator: active users, failed jobs)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/figures",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "figures"
+              ]
+            },
+            "description": "Home: the role preset of the signed-in user, their role, branch and company for the page subtitle, and the two or three figures of the role (sales: quotes this month, conversion, renewals due; claims: open claims, average days open; accounting: overdue receivables, collections this month; compliance: deadlines, EDD reviews; administrator: active users, failed jobs)\n\nFront-end touchpoint: Operations > My Work (Home)\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/figures",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "figures"
+                  ]
+                },
+                "description": "Home: the role preset of the signed-in user, their role, branch and company for the page subtitle, and the two or three figures of the role (sales: quotes this month, conversion, renewals due; claims: open claims, average days open; accounting: overdue receivables, collections this month; compliance: deadlines, EDD reviews; administrator: active users, failed jobs)\n\nFront-end touchpoint: Operations > My Work (Home)\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-04\",\n    \"preset\": \"sales\",\n    \"roleCode\": \"sales\",\n    \"roleName\": \"Sales & Marketing (Account Executive)\",\n    \"firstName\": \"Maria\",\n    \"branch\": \"Makati\",\n    \"company\": \"BrokerVerse\",\n    \"figures\": [\n      {\n        \"key\": \"quotesMonth\",\n        \"label\": \"Quotes this month\",\n        \"value\": 12,\n        \"format\": \"count\"\n      },\n      {\n        \"key\": \"conversion\",\n        \"label\": \"Conversion (90 days)\",\n        \"value\": 38,\n        \"format\": \"percent\"\n      },\n      {\n        \"key\": \"renewals30\",\n        \"label\": \"Renewals due in 30 days\",\n        \"value\": 7,\n        \"format\": \"count\"\n      }\n    ]\n  }\n}"
             }
           ]
         },

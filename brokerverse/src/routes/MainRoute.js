@@ -115,7 +115,6 @@ import AddBranch from "../module/GeneralMasters/OrganizationMasters/BranchMaster
 import AddCountry from "../module/GeneralMasters/LocationMasters/CountryMaster/AddCountry/index";
 import AddCity from "../module/GeneralMasters/LocationMasters/CityMaster/AddCity";
 import AddState from "../module/GeneralMasters/LocationMasters/StateMaster/AddState";
-import Dashboard from "../agentModule/dashBoardModule/home";
 import MyProfile from "../module/MyProfile";
 import Notification from "../agentModule/dashBoardModule/notification";
 import LeadCreation from "../agentModule/leadModule/leadCreation";
@@ -163,8 +162,6 @@ import Policy from "../agentModule/policyModule";
 import PolicyDetailView from "../agentModule/policyModule/PolicyDetailView";
 import ExpiredPoliciesPage from "../agentModule/policyModule/ExpiredPoliciesPage";
 import Quotation from "../agentModule/quotationModule";
-import OpenItems from "../agentModule/openItems/openItems";
-import UpcomingEvents from "../agentModule/openItems/upcomingEvents";
 import ClaimRejected from "../agentModule/claimsModule/claimRejected";
 import ClaimDocumentUpload from "../agentModule/claimsModule/claimDocumentUpload";
 import LeadEdit from "../agentModule/leadModule/leadEdit";
@@ -1360,7 +1357,8 @@ const Maincomponent = () => {
           />
 
           {/* // Dashboard Routes */}
-          <Route path="/" element={<ExecutiveDashboard />} />
+          {/* after sign-in: Home, My Work with the role preset */}
+          <Route path="/" element={<Navigate to="/agent/home" replace />} />
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           <Route path="/claims/dashboard" element={<ClaimsDashboard />} />
           <Route path="/sales/dashboard" element={<SalesDashboard />} />
@@ -1370,8 +1368,8 @@ const Maincomponent = () => {
           />
           <Route path="/underwriting/dashboard" element={<Navigate to="/processing/dashboard" replace />} />
 
-          {/* // Agent Dashboard, Notification & agent profile */}
-          <Route path="/agent/home" element={<Dashboard />} />
+          {/* Home (the landing page of every role) and Operations > My Work are one screen */}
+          <Route path="/agent/home" element={<MyWork />} />
           <Route path="/agent/notification" element={<Notification />} />
           <Route path="/account/profile" element={<MyProfile />} />
           <Route path="/agent/viewprofile" element={<Navigate to="/account/profile" replace />} />
@@ -1709,12 +1707,9 @@ const Maincomponent = () => {
             path="/agent/payments/detail/:id"
             element={<PaymentDetails />}
           />
-          {/* // Open items */}
-          <Route path="/agent/openitems" element={<OpenItems />} />
-          <Route
-            path="/agent/openitems/upcomingevents"
-            element={<UpcomingEvents />}
-          />
+          {/* the former Open Items and Upcoming Events pages: Home */}
+          <Route path="/agent/openitems" element={<Navigate to="/agent/home" replace />} />
+          <Route path="/agent/openitems/upcomingevents" element={<Navigate to="/agent/home" replace />} />
           <Route path="/agent/openitems/expiringpolicy" element={<Navigate to="/operations/my-work" replace />} />
           <Route path="/agent/openitems/quotepending" element={<Navigate to="/operations/my-work" replace />} />
 
@@ -1846,12 +1841,9 @@ const Maincomponent = () => {
             path="/agent/payments/detail/:id"
             element={<PaymentDetails />}
           />
-          {/* // Open items */}
-          <Route path="/agent/openitems" element={<OpenItems />} />
-          <Route
-            path="/agent/openitems/upcomingevents"
-            element={<UpcomingEvents />}
-          />
+          {/* the former Open Items and Upcoming Events pages: Home */}
+          <Route path="/agent/openitems" element={<Navigate to="/agent/home" replace />} />
+          <Route path="/agent/openitems/upcomingevents" element={<Navigate to="/agent/home" replace />} />
           <Route path="/agent/openitems/expiringpolicy" element={<Navigate to="/operations/my-work" replace />} />
           {/* Renewal */}
           <Route

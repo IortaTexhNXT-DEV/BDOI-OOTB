@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
@@ -6,9 +6,14 @@ import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";
 import StatCards from "../../components/StatCards";
 import { useListState } from "../../hooks/useServerList";
+import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import myWorkService, { errorMessage } from "../../services/myWorkService";
 import { notifyError } from "../../utility/dialogs";
-import { TABS, isoToday, tabFromSearch } from "./logic";
+import { formatDate } from "../../utility/dateFormat";
+import { numberLocale } from "../../utility/currencyConverter";
+import { getUserRoles } from "../../utils/menuPermissions";
+import { PRESETS, TABS, figureText, isoToday, orderCategories, presetFor, tabFromSearch } from "./logic";
+import { fetchFigures } from "./figures";
 import MyItems from "./MyItems";
 import MyTeam from "./MyTeam";
 import MyTasks from "./MyTasks";
@@ -17,19 +22,26 @@ import TaskDialog from "./TaskDialog";
 import "./index.scss";
 
 /**
- * Operations > My Work: the work management area of every user. My Items (everything waiting on the user, by
- * category, with due dates and the next action), My Team (managers: the items of the people reporting to them, per
- * person, with reassignment), My Tasks (the work diary) and Calendar (day / week agenda).
+ * My Work: the landing page of every role (Home, /agent/home) and Operations > My Work (/operations/my-work), one
+ * screen. My Items (everything waiting on the user, by category, with due dates and the next action), My Team
+ * (managers: the items of the people reporting to them, per person, with reassignment), My Tasks (the work diary)
+ * and Calendar (day / week agenda). The role preset (logic.js PRESETS) decides which categories come first, the
+ * default scope, what the agenda shows and the primary action; the role figures come from the server.
  */
 const MyWork = () => {
   const { t } = useTranslation();
   const location = useLocation();
   const navigate = useNavigate();
+  const { formatCurrency } = useFormatCurrency();
+  const presetCode = useMemo(() => presetFor(getUserRoles()), []);
+  const preset = PRESETS[presetCode] || PRESETS.general;
+  const atHome = location.pathname.startsWith("/agent/home");
   const [mine, setMine] = useState(null);
   const [scoped, setScoped] = useState(null);
+  const [home, setHome] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [dialog, setDialog] = useState({ visible: false, task: null });
-  const [items, patchItems] = useListState("my-work-items-filters", { scope: "me", category: "", due: "", priority: "", search: "", sort: "due" });
+  const [items, patchItems] = useListState("my-work-items-filters", { scope: preset.scope, category: "", due: "", priority: "", search: "", sort: "due" });
   const [team, patchTeam] = useListState("my-work-team-filters", { member: "", category: "", due: "", priority: "", search: "", sort: "due" });
   const [tasks, patchTasks] = useListState("my-work-tasks-filters", { scope: "mine", status: "open", due: "", priority: "", search: "" });
   const [calendar, patchCalendar] = useListState("my-work-calendar", { view: "week", date: "" });
@@ -47,6 +59,10 @@ const MyWork = () => {
     if (items.scope === "me") return;
     myWorkService.summary(items.scope).then(setScoped).catch(() => setScoped(null));
   }, [items.scope, reloadKey]);
+  // the role figures and the subtitle (role, branch, company); the page works without them
+  useEffect(() => {
+    fetchFigures().then(setHome).catch(() => setHome(null));
+  }, [reloadKey]);
 
   // a reminder notification links to ?tab=tasks&task=<id>: open that task
   useEffect(() => {
@@ -77,7 +93,21 @@ const MyWork = () => {
     { key: "open", label: t("myWork.kpi.open", "Open items"), value: totals?.open, note: totals ? t("myWork.kpi.high", { count: totals.high, defaultValue: "{{count}} high priority" }) : null, onClick: () => showDue(""), active: tab === "items" && !items.due },
     { key: "tasks", label: t("myWork.kpi.tasks", "Open tasks"), value: taskCat?.count, note: taskCat ? t("myWork.overdueCount", { count: taskCat.overdue, defaultValue: "{{count}} overdue" }) : null, onClick: () => goTab("tasks"), active: tab === "tasks" },
   ];
+  // the role figures: plain numbers next to the My Work figures (no filter behind them)
+  const roleCards = (home?.figures || []).map((f) => ({
+    key: `role-${f.key}`, label: t(`myWork.home.figure.${f.key}`, { defaultValue: f.label }), value: figureText(f, formatCurrency, numberLocale()),
+  }));
 
+  const roleLabel = presetCode === "general" ? home?.roleName : t(`myWork.home.role.${presetCode}`, { defaultValue: home?.roleName || presetCode });
+  const subtitle = [roleLabel, formatDate(today), home?.branch || home?.company].filter(Boolean).join(" | ");
+  const action = preset.action;
+  const runAction = () => {
+    if (!action) return;
+    if (action.path) navigate(action.path);
+    else if (action.category) { patchItems({ category: action.category, due: "" }); goTab("items"); }
+  };
+
+  const withOrder = (summary) => (summary ? { ...summary, categories: orderCategories(summary.categories, presetCode) } : summary);
   const visibleTabs = TABS.filter((x) => x !== "team" || isManager);
   const count = (n) => (n === undefined || n === null ? "" : ` (${n})`);
   const tabLabel = {
@@ -87,21 +117,24 @@ const MyWork = () => {
     calendar: t("myWork.tab.calendar", "Calendar"),
   };
   const tabIcon = { items: "pi pi-inbox", team: "pi pi-users", tasks: "pi pi-check-square", calendar: "pi pi-calendar" };
+  const crumbHome = atHome ? { label: t("sidebar.Home", "Home") } : { label: t("sidebar.Operations", "Operations") };
 
   return (
     <div className="mw-page">
       <div className="mw-head">
         <div>
           <h1 className="page__title">{t("myWork.title", "My Work")}</h1>
-          <BreadCrumb model={[{ label: t("myWork.title", "My Work") }]} home={{ label: t("sidebar.Operations", "Operations") }} className="mw-crumbs" />
+          <p className="mw-subtitle">{subtitle}</p>
+          <BreadCrumb model={[{ label: t("myWork.title", "My Work") }]} home={crumbHome} className="mw-crumbs" />
         </div>
         <div className="mw-head__actions">
           <Button icon="pi pi-refresh" text rounded aria-label={t("myWork.refresh", "Refresh")} tooltip={t("myWork.refresh", "Refresh")} tooltipOptions={{ position: "bottom" }} onClick={refresh} />
-          <Button label={t("myWork.task.new", "New task")} icon="pi pi-plus" onClick={() => setDialog({ visible: true, task: null })} />
+          <Button label={t("myWork.task.new", "New task")} icon="pi pi-plus" outlined onClick={() => setDialog({ visible: true, task: null })} />
+          {action && <Button label={t(`myWork.home.action.${action.key}`, { defaultValue: action.key })} icon={action.category ? "pi pi-check-square" : "pi pi-arrow-right"} iconPos={action.category ? "left" : "right"} onClick={runAction} />}
         </div>
       </div>
 
-      <StatCards items={cards} className="mw-kpis" />
+      <StatCards items={[...cards, ...roleCards]} className="mw-kpis" />
 
       <TabView className="bv-tabbar mw-tabs" activeIndex={Math.max(0, visibleTabs.indexOf(tab))} onTabChange={(e) => goTab(visibleTabs[e.index])}>
         {visibleTabs.map((x) => <TabPanel key={x} header={tabLabel[x]} leftIcon={`${tabIcon[x]} mr-2`} />)}
@@ -109,8 +142,8 @@ const MyWork = () => {
 
       <div className="mw-body">
         {tab === "items" && (
-          <MyItems state={items} patch={patchItems} summary={items.scope === "me" ? mine : scoped} loading={!(items.scope === "me" ? mine : scoped)}
-            today={today} soonDays={soonDays} reloadKey={reloadKey} />
+          <MyItems state={items} patch={patchItems} summary={withOrder(items.scope === "me" ? mine : scoped)} loading={!(items.scope === "me" ? mine : scoped)}
+            today={today} soonDays={soonDays} reloadKey={reloadKey} isManager={isManager} />
         )}
         {tab === "team" && isManager && <MyTeam state={team} patch={patchTeam} today={today} soonDays={soonDays} reloadKey={reloadKey} onChanged={loadSummary} />}
         {tab === "tasks" && (
@@ -118,7 +151,7 @@ const MyWork = () => {
             onEdit={(task) => setDialog({ visible: true, task })} onChanged={loadSummary} />
         )}
         {tab === "calendar" && (
-          <Agenda state={calendar} patch={patchCalendar} today={today} reloadKey={reloadKey}
+          <Agenda state={calendar} patch={patchCalendar} today={today} reloadKey={reloadKey} categories={preset.agenda}
             onEditTask={(task) => setDialog({ visible: true, task })} onNewTask={(date) => setDialog({ visible: true, task: null, date })} />
         )}
       </div>

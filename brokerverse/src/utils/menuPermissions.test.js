@@ -154,19 +154,23 @@ describe("menu structure", () => {
       for (const screen of section.submenu) expect(screen.submenu).toBeUndefined();
     }
   });
-  it("Home is a top-level entry for the roles that work from it, not inside Operations", () => {
+  it("Home is a top-level entry of every delivered role, not inside Operations", () => {
     expect(menuList.find((m) => m.name === "Operations").submenu.map((i) => i.name)).not.toContain("Home");
-    for (const role of ["sales", "processing", "operations", "claims"]) {
-      expect(filterMenuForRoles(menuList, [role]).map((m) => m.name)).toContain("Home");
-      expect(isPathAllowed("/agent/home", menuList, [role])).toBe(true);
+    // the Accounting Manager inherits Accounting: the server returns both roles
+    for (const roles of [["sales"], ["processing"], ["operations"], ["claims"], ["accounting"], ["accounting", "accounting-manager"], ["compliance-officer"], ["system-admin"]]) {
+      expect(filterMenuForRoles(menuList, roles).map((m) => m.name)).toContain("Home");
+      expect(isPathAllowed("/agent/home", menuList, roles)).toBe(true);
+      expect(isPathAllowed("/", menuList, roles)).toBe(true);
     }
-    expect(filterMenuForRoles(menuList, ["accounting"]).map((m) => m.name)).not.toContain("Home");
-    expect(isPathAllowed("/agent/home", menuList, ["accounting"])).toBe(false);
   });
-  it("a role with a dashboard still lands on it, not on Home", () => {
-    expect(firstAllowedPath(menuList, ["claims"])).toBe("/claims/dashboard");
-    const homeOnly = [{ name: "Home", path: "/agent/home", landing: false, includes: ["/agent/home"] }];
-    expect(firstAllowedPath(homeOnly, ["claims"])).toBe("/agent/home");
+  it("every role lands on Home (My Work with the role preset) after sign-in", () => {
+    for (const role of ["sales", "claims", "accounting", "compliance-officer", "system-admin"]) {
+      expect(firstAllowedPath(menuList, [role])).toBe("/agent/home");
+    }
+    // an entry marked landing: false is taken only when nothing else is open
+    const withLanding = [{ name: "Home", path: "/agent/home", landing: false, includes: ["/agent/home"] }, { name: "Dashboard", submenu: [{ name: "Claims Dashboard", path: "/claims/dashboard" }] }];
+    expect(firstAllowedPath(withLanding, ["claims"])).toBe("/claims/dashboard");
+    expect(firstAllowedPath(withLanding.slice(0, 1), ["claims"])).toBe("/agent/home");
   });
   it("the Master sections keep the grants of Accounting and Operations", () => {
     for (const p of ["/master/finance/taxation", "/master/finance/posting-rules"]) {

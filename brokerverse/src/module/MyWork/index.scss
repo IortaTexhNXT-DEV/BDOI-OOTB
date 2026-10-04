@@ -15,6 +15,13 @@
       margin: 0 0 2px;
     }
 
+    // "<Role> | <date> | <branch or company>" under the title
+    .mw-subtitle {
+      margin: 0 0 4px;
+      font-size: 13px;
+      color: $color-text-muted;
+    }
+
     .mw-crumbs {
       border: 0;
       background: transparent;

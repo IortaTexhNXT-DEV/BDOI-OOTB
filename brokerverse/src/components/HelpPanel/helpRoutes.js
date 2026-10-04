@@ -5,8 +5,8 @@
  */
 export const HELP_ROUTES = [
   // home and dashboards
-  ["/agent/home", "home-and-open-items"],
-  ["/agent/openitems", "home-and-open-items"],
+  ["/agent/home", "operations-client-servicing-home"],
+  ["/agent/openitems", "operations-client-servicing-home"],
   ["/agent/openitemslistdata", "my-work"],
   ["/operations/my-work", "my-work"],
   ["/executive/dashboard", "dashboard"],

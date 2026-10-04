@@ -1,5 +1,6 @@
 import {
-  agendaDays, daysBetween, dueInfo, dueText, groupAgenda, itemsQuery, shiftDate, tabFromSearch, taskPayload, validateTask, timeOf, dateOfTime,
+  PRESETS, PRESET_ORDER, agendaDays, daysBetween, dueInfo, dueText, figureText, groupAgenda, itemsQuery, orderCategories, presetFor, shiftDate, tabFromSearch,
+  taskPayload, validateTask, timeOf, dateOfTime,
 } from "./logic";
 
 const t = (key, opts) => {
@@ -91,5 +92,45 @@ describe("task form", () => {
     expect(timeOf(dateOfTime("07:05"))).toBe("07:05");
     expect(dateOfTime(null)).toBeNull();
     expect(timeOf(null)).toBeNull();
+  });
+});
+
+describe("role presets of Home", () => {
+  it("takes the most specific preset of the roles the user holds, else the plain My Work", () => {
+    expect(presetFor(["sales"])).toBe("sales");
+    expect(presetFor(["Accounting", "accounting-manager"])).toBe("accounting-manager");
+    expect(presetFor(["operations", "compliance-officer"])).toBe("compliance-officer");
+    expect(presetFor(["system-admin", "sales"])).toBe("system-admin");
+    expect(presetFor(["custom-role"])).toBe("general");
+    expect(presetFor(undefined)).toBe("general");
+    for (const code of PRESET_ORDER) expect(PRESETS[code]).toBeDefined();
+  });
+
+  it("puts the preset's categories first and keeps the server's order for the rest, tasks last", () => {
+    const summary = ["quotes", "renewals", "receivables", "claims", "approvals", "bankrec", "periodClose", "tasks"].map((code) => ({ code }));
+    expect(orderCategories(summary, "accounting-manager").map((c) => c.code)).toEqual(["approvals", "periodClose", "bankrec", "receivables", "quotes", "renewals", "claims", "tasks"]);
+    expect(orderCategories(summary, "sales").map((c) => c.code)).toEqual(["quotes", "renewals", "receivables", "claims", "approvals", "bankrec", "periodClose", "tasks"]);
+    expect(orderCategories(summary, "general").map((c) => c.code)).toEqual(summary.map((c) => c.code));
+    expect(orderCategories(undefined, "sales")).toEqual([]);
+  });
+
+  it("every preset names a default scope, the agenda categories and one primary action", () => {
+    for (const code of PRESET_ORDER) {
+      const p = PRESETS[code];
+      expect(["me", "all"]).toContain(p.scope);
+      expect(Array.isArray(p.agenda) && p.agenda.length > 0).toBe(true);
+      expect(p.action.key).toBeTruthy();
+      expect(!!p.action.path || !!p.action.category).toBe(true);
+    }
+    expect(PRESETS["accounting-manager"]).toMatchObject({ scope: "all", action: { category: "approvals" } });
+    expect(PRESETS.general.action).toBeNull();
+  });
+
+  it("words a role figure: percentage, amount through the currency formatter, plain number otherwise", () => {
+    const money = (v) => `PHP ${v}`;
+    expect(figureText({ value: 38, format: "percent" }, money)).toBe("38%");
+    expect(figureText({ value: 12500.5, format: "amount" }, money)).toBe("PHP 12500.5");
+    expect(figureText({ value: 1234, format: "count" }, money, "en-US")).toBe("1,234");
+    expect(figureText({ value: null, format: "days" }, money, "en-US")).toBe("0");
   });
 });

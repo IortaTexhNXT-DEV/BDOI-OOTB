@@ -1,6 +1,6 @@
 {
  "title": "BrokerVerse User Manual",
- "version": "1.2",
+ "version": "1.2.3",
  "date": "04 October 2026",
  "sections": [
   {
@@ -772,8 +772,8 @@
    "chapter": "Operations (client servicing)"
   },
   {
-   "id": "home-and-open-items",
-   "title": "Home and Open Items",
+   "id": "operations-client-servicing-home",
+   "title": "Home",
    "level": 2,
    "chapter": "Operations (client servicing)"
   },
@@ -1624,7 +1624,7 @@
    "chapter": "Module reference"
   },
   {
-   "id": "home",
+   "id": "module-reference-home",
    "title": "Home",
    "level": 3,
    "chapter": "Module reference"

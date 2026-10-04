@@ -1,10 +1,10 @@
 ---
 title: User Manual
 subtitle: BrokerVerse OOTB, by persona
-version: 1.2.2
+version: 1.2.3
 date: 04 October 2026
 prepared: iorta TechNXT
-change: Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
+change: Version 1.2.3 (04 October 2026): Home is the role-aware landing page built on My Work (presets per role, role figures, the new My Work categories of the compliance officer, accounting manager and system administrator); the Home dashboard and Open Items sections withdrawn. Version 1.2.2: Client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026). Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; PEP=Politically exposed person; NPC=National Privacy Commission; COC=Certificate of cover; PDC=Post-dated cheque; LOA=Letter of authority; EIS=Electronic Invoicing System; CAS=Computerized accounting system; WCAG=Web Content Accessibility Guidelines
@@ -1533,15 +1533,28 @@ The Insurance Commission registers and the breach register are described in the 
 | Monthly | Retention and renewal performance | Retention Analytics, Performance |
 | Monthly | Licences expiring, fit and proper reviews due, insurer certificates of authority | Compliance > Insurance Commission |
 
-## Home and Open Items
+## Home
 
-**Home** (the first item of the menu), titled Dashboard, shows **Create Quote**, the counts of prospects, clients and policies sold with **See More**, the commission chart, upcoming events from the activity monitor, and earned commission, collected premium, receivables and gross premium of the user's own book.
+**Home** (the first item of the menu, and the page every role lands on after sign-in) is **My Work** with a preset for the user's role, so that each user starts the day on what they have to do. The page is the same screen as Operations > My Work (next section): the title **My Work**, a subtitle with the role, today's date and the user's branch (or the company when no branch is set), the five My Work figures followed by two or three plain figures of the role, and the tabs My Items, My Team (managers), My Tasks and Calendar. The address `/agent/home` and the former Open Items and Upcoming Events addresses open Home.
 
-**Upcoming events** on Home lists the events of the coming days. The daily worklist is **My Work** (next section).
+The role preset decides which categories are listed first on My Items (the others follow, tasks last), whose items are shown by default (**Mine**; **Everyone** for an oversight role; a manager also has **My team**), which categories the Calendar shows, the one primary button of the page and the role figures. A user with several roles gets the most specific preset (System Administrator, then Compliance Officer, Accounting Manager, Accounting, Claims, Processing Team, Operations, Sales); a custom role gets the plain My Work.
+
+| Role | Categories first | Default scope | Calendar shows | Primary button | Role figures |
+|---|---|---|---|---|---|
+| Sales & Marketing | Quotations, Renewals, Premiums due, Missing documents, Endorsements | Mine | Quotations, renewals, premiums due, endorsements, approvals | **New quote** (Quick Quote) | Quotes this month, Conversion (90 days), Renewals due in 30 days, over the user's own book |
+| Processing Team | Requests for quotation, Placement slips, Quotations, Endorsements, Renewals, Approvals, Missing documents | Mine | Requests for quotation, placement slips, renewals, approvals | **Cover note** | Policies issued this month, Pending issuance (bound placements and approved quotations), RFQs with the insurers |
+| Operations | Endorsements, Renewals, Missing documents, Quotations, Premiums due, Approvals, Breach register, Compliance deadlines | Mine | Renewals, endorsements, approvals, breaches, compliance deadlines | **Cover note** | Endorsements in progress, Renewals due in 30 days, Open complaints |
+| Claims | Claims, Approvals | Mine | Claims, approvals | **Register claim** | Open claims, Average days open, Registered this month |
+| Accounting | Premiums due, Collection follow-ups, Approvals, Bank reconciliations, Period close | Mine | Premiums due, collections, approvals, bank reconciliations, period close | **Record receipt** | Overdue receivables, Collections this month |
+| Accounting Manager | Approvals, Period close, Bank reconciliations, Premiums due, Collection follow-ups | Everyone | Approvals, period close, bank reconciliations, premiums due | **Approvals** (shows the approvals waiting) | Overdue receivables, Collections this month, Vouchers awaiting approval |
+| Compliance Officer | EDD reviews, Compliance deadlines, Breach register, Approvals | Mine | Compliance deadlines, EDD reviews, breaches, approvals | **New EDD review** | Deadlines in 30 days, Open EDD reviews, Open AML cases |
+| System Administrator | Users and access, System health, Approvals | Mine | Users and access, system health, approvals, compliance deadlines | **New user** | Active users, Failed jobs (24 h), Awaiting first sign-in |
+
+The categories added for these presets are listed below with the other categories of My Items; every category is shown only to a role that may read its records, and the items follow the user's record scope.
 
 ## My Work
 
-**My Work** (Operations > My Work) is the one place where each user finds what is waiting for them. It replaces the former Open Items screen; its old addresses open My Work.
+**My Work** (Operations > My Work, and Home with the role preset) is the one place where each user finds what is waiting for them. It replaces the former Open Items screen; its old addresses open My Work.
 
 The header shows five figures: **Overdue**, **Due today**, **Next 7 days** (the number of days is the setting `myWork.due_soon_days`), **Open items** (with the number of high-priority items) and **Open tasks**. Select a figure to filter the list.
 
@@ -1549,14 +1562,14 @@ The screen has four tabs:
 
 | Tab | What it shows |
 |---|---|
-| My Items | Every open item you own or may act on, by category: quotations, Requests for Quotation, placement slips, renewals and expiring policies, premiums due, collection follow-ups, endorsements, claims, approvals waiting for you, missing documents and your tasks. Only the categories your role may read appear. |
+| My Items | Every open item you own or may act on, by category: quotations, Requests for Quotation, placement slips, renewals and expiring policies, premiums due, collection follow-ups, endorsements, claims, approvals waiting for you, missing documents, EDD reviews (in preparation, or submitted and waiting for the compliance officer), compliance deadlines (licences expiring, fit and proper reviews due, insurers whose IC certificate of authority runs out), the breach register (breaches not yet closed, with the NPC deadline), bank reconciliations in progress, period close (checklist items to sign off and failed checks of the open close runs), users and access (open access reviews, users who have not signed in since their account was created), system health (scheduled jobs whose last run failed, failed integration messages) and your tasks. Only the categories your role may read appear; the role preset of Home puts the categories of the role first. |
 | My Team | For managers only: one row per person reporting to you (directly or below), with open, overdue and due-today counts, and the team's items. **Reassign** moves a claim, a data subject request or a task to yourself or to someone in your team. |
 | My Tasks | Your work diary: tasks you created, tasks given to you and, for managers, tasks given to others. |
 | Calendar | The tasks and items falling due by day, for one day or the next 7 days, with an **Overdue** strip above. |
 
 To work your items:
 
-1. Choose Operations > My Work. **My Items** opens with **Mine** selected; a manager can switch to **Everyone** for the team.
+1. Choose Home or Operations > My Work. **My Items** opens with the scope of your role preset (**Mine**, or **Everyone** for the Accounting Manager); a manager can switch to **My team**, and anyone to **Everyone** within their permissions.
 2. Pick a category on the left (the red badge is the number overdue), or use **Search**, **Due**, **Priority** and **Sort**.
 3. Select a row to open the record (quotation, bill, claim, approval) and act on it there. When the record is done it leaves the list.
 
@@ -3195,7 +3208,7 @@ This chapter lists every menu screen in menu order with its purpose, its main fi
 
 ### Home
 
-The user's own book: prospects, clients, policies sold, commission chart, upcoming events, earned commission, collected premium, receivables and gross premium; **Create Quote**.
+The landing page of every role after sign-in: My Work with the role preset (categories first, default scope, Calendar categories, the one primary button and two or three role figures; chapter Home). The same screen as Operations > My Work; `/agent/home` and the former Open Items addresses open it.
 
 ### Sales & Marketing
 

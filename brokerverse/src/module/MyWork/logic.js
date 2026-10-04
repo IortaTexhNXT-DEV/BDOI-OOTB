@@ -19,7 +19,79 @@ export const CATEGORY_ICONS = {
   claims: "pi pi-shield",
   approvals: "pi pi-check-square",
   documents: "pi pi-id-card",
+  edd: "pi pi-user-edit",
+  compliance: "pi pi-calendar-times",
+  breaches: "pi pi-exclamation-triangle",
+  bankrec: "pi pi-building",
+  periodClose: "pi pi-lock",
+  access: "pi pi-users",
+  systems: "pi pi-server",
   tasks: "pi pi-calendar",
+};
+
+/**
+ * Role presets of Home (My Work is the landing page of every role). The first role of PRESET_ORDER the user holds
+ * decides: the categories listed first (the others follow in the server's order, tasks last), the default scope of
+ * My Items ("all" for an oversight role), the categories the agenda shows (null: every category) and the primary
+ * action of the page (a screen to open, or a category of My Items to show). The server picks the same preset for the
+ * role figures (backend my-work/figures.js).
+ */
+export const PRESET_ORDER = ["system-admin", "compliance-officer", "accounting-manager", "accounting", "claims", "processing", "operations", "sales"];
+
+export const PRESETS = {
+  sales: {
+    categories: ["quotes", "renewals", "receivables", "documents", "endorsements"], scope: "me",
+    agenda: ["quotes", "renewals", "receivables", "endorsements", "approvals"], action: { key: "newQuote", path: "/sales/quick-quote" },
+  },
+  processing: {
+    categories: ["rfq", "placements", "quotes", "endorsements", "renewals", "approvals", "documents"], scope: "me",
+    agenda: ["rfq", "placements", "renewals", "approvals"], action: { key: "coverNote", path: "/operations/cover-notes" },
+  },
+  operations: {
+    categories: ["endorsements", "renewals", "documents", "quotes", "receivables", "approvals", "breaches", "compliance"], scope: "me",
+    agenda: ["renewals", "endorsements", "approvals", "breaches", "compliance"], action: { key: "coverNote", path: "/operations/cover-notes" },
+  },
+  claims: {
+    categories: ["claims", "approvals"], scope: "me", agenda: ["claims", "approvals"], action: { key: "registerClaim", path: "/agent/claimrequest/claimdetails" },
+  },
+  accounting: {
+    categories: ["receivables", "collections", "approvals", "bankrec", "periodClose"], scope: "me",
+    agenda: ["receivables", "collections", "approvals", "bankrec", "periodClose"], action: { key: "recordReceipt", path: "/accounts/receipts/addreceipts" },
+  },
+  "accounting-manager": {
+    categories: ["approvals", "periodClose", "bankrec", "receivables", "collections"], scope: "all",
+    agenda: ["approvals", "periodClose", "bankrec", "receivables"], action: { key: "approvals", category: "approvals" },
+  },
+  "compliance-officer": {
+    categories: ["edd", "compliance", "breaches", "approvals"], scope: "me",
+    agenda: ["compliance", "edd", "breaches", "approvals"], action: { key: "newEdd", path: "/compliance/aml/edd" },
+  },
+  "system-admin": {
+    categories: ["access", "systems", "approvals"], scope: "me",
+    agenda: ["access", "systems", "approvals", "compliance"], action: { key: "newUser", path: "/master/generals/usermanagement/user/add" },
+  },
+  general: { categories: [], scope: "me", agenda: null, action: null },
+};
+
+/** The preset code of a user's roles: the first of PRESET_ORDER they hold, else "general". */
+export const presetFor = (roles) => {
+  const list = (roles || []).map((r) => String(r || "").trim().toLowerCase());
+  return PRESET_ORDER.find((p) => list.includes(p)) || "general";
+};
+
+/** The categories of a summary with the preset's categories first, in the preset's order; the rest keep the server's order. */
+export const orderCategories = (categories, preset) => {
+  const first = (PRESETS[preset] || PRESETS.general).categories;
+  const rank = (c) => { const i = first.indexOf(c.code); return i < 0 ? first.length : i; };
+  return [...(categories || [])].map((c, i) => [c, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(([c]) => c);
+};
+
+/** A role figure as text: a percentage, an amount (through the currency formatter) or a plain number. */
+export const figureText = (figure, formatCurrency, locale) => {
+  const v = Number(figure?.value) || 0;
+  if (figure?.format === "percent") return `${v}%`;
+  if (figure?.format === "amount") return formatCurrency ? formatCurrency(v) : String(v);
+  return v.toLocaleString(locale);
 };
 
 /** Priority: icon, Tag severity and sort rank. */
