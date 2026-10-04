@@ -67,6 +67,11 @@ export const transformToBackendFormat = (
     APPAtotalCoverage: coverageDetails?.APPAtotalCoverage || null,
     APPAcoveragePremium: coverageDetails?.APPAcoveragePremium || null,
     totalSumInsured: coverageDetails?.totalSumInsured || null,
+    // covers of the product template chosen on Coverage Details (mandatory ones always included)
+    ...(Array.isArray(coverageDetails?.selectedCovers) ? { selectedCovers: coverageDetails.selectedCovers } : {}),
+    // vehicle use and the risk details the product's acceptance rules and rating factors test
+    vehicleUse: policyDetails?.vehicleUse || undefined,
+    ...(policyDetails?.riskFacts || {}),
 
     // Accessories
     aircon: accessories?.aircon || null,
@@ -173,6 +178,9 @@ export const transformToBackendFormat = (
   return quotationData;
 };
 
+/** Risk details of the product rules kept on the quotation (Policy Details step). */
+const RISK_FACT_KEYS = ["driverDateOfBirth", "driverAge", "claimsLast3Years", "fairMarketValue", "modified", "ncbYears", "fleetSize", "memberCount", "floodProne", "constructionType"];
+
 /**
  * Transform backend quotation data to frontend form format
  * @param {Object} quotation - Quotation data from backend
@@ -212,6 +220,8 @@ export const transformToFrontendFormat = (quotation) => {
       isCoInsurance: isCoInsurance,
       primarySharePercentage: primarySharePercentage,
       participantDetails: coInsurerParticipants, // Only co-insurers, not primary
+      vehicleUse: quotation.vehicleUse || "",
+      riskFacts: RISK_FACT_KEYS.reduce((o, k) => (quotation[k] === undefined || quotation[k] === null ? o : { ...o, [k]: quotation[k] }), {}),
     },
     coverageDetails: {
       lossAndDamageCoverage: quotation.lossAndDamageCoverage || "",
@@ -235,6 +245,7 @@ export const transformToFrontendFormat = (quotation) => {
       APPAtotalCoverage: quotation.APPAtotalCoverage || "",
       APPAcoveragePremium: quotation.APPAcoveragePremium || "",
       totalSumInsured: quotation.totalSumInsured || "",
+      ...(Array.isArray(quotation.selectedCovers) ? { selectedCovers: quotation.selectedCovers } : {}),
     },
     accessories: {
       aircon: quotation.aircon || "",

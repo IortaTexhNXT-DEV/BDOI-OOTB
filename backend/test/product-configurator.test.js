@@ -20,14 +20,16 @@ describe('product templates', () => {
     expect(r.status).toBe(200);
     expect(r.body).toMatchObject({ page: 1, total: expect.any(Number) });
     const mot = r.body.data.find((t) => t.templateCode === 'MOT-003-2025');
-    expect(mot).toMatchObject({ name: 'Motor Insurance Basic Plan', status: 'Active', version: 'v3.2', baseRate: 2.5, _count: { coverages: 7, ratingFactors: 8, underwritingRules: 7 } });
+    expect(mot).toMatchObject({ name: 'Motor Insurance Basic Plan', status: 'Active', version: 'v3.2', baseRate: 2.5, _count: { coverages: 9, ratingFactors: 8, underwritingRules: 7 } });
     expect(mot.configuration.premiumRates.private_cars).toBe('2');
   });
   it('configurator returns the template at the top level and under data', async () => {
     const r = await as(salesToken, 'get', '/product-configurator/products/configurator?templateCode=MOT-003-2025');
     expect(r.status).toBe(200);
     expect(r.body.configuration.ctplSetting.private_cars).toBe('610.40');
-    expect(r.body.data.coverages).toHaveLength(7);
+    // seven seeded covers plus roadside assistance and the driver's personal accident cover (seed 76_product_quote_covers.sql):
+    // the quote wizard offers the covers of the Coverage Builder, so every cover it prices is listed there
+    expect(r.body.data.coverages).toHaveLength(9);
     expect((await ctx.api('get', '/product-configurator/products/configurator')).status).toBe(400);
     expect((await ctx.api('get', '/product-configurator/products/configurator?templateCode=NOPE')).status).toBe(404);
   });

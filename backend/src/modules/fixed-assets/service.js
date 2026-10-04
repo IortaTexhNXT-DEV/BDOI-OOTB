@@ -11,13 +11,20 @@
  * value. The monthly run posts, per asset class, one journal of posting rule fa.depreciation dated the last day of the
  * period, and records each asset's amount (fixed_asset_depreciation); an asset is never depreciated twice for a period,
  * so a rerun posts only what is missing. The run is a step of the month-end close (fixed_assets.depreciation_in_month_end).
+ *
+ * Disposal (sale or write-off, migration 0321): the asset's cost and accumulated depreciation leave the books, the
+ * proceeds (and the output VAT of a sale) come in, and the difference is the gain or loss on disposal: one journal of
+ * posting rule fa.disposal. A sale also issues its BIR sales invoice (fixed_assets.disposal_sales_invoice). The asset
+ * becomes disposed and is not depreciated again; a cancelled disposal reverses its journal and restores the asset.
  */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { isoDate, today } from '../../lib/dates.js';
+import { addDays, isoDate, today } from '../../lib/dates.js';
 import { round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
-import { postEvent } from '../accounting/lib/posting.js';
+import { bankAccountGl, postEvent } from '../accounting/lib/posting.js';
+import { reverseJournal } from '../accounting/lib/ledger.js';
+import { taxCodeRate } from '../accounting/lib/commissionTax.js';
 import { activeRecord, activeRecords } from '../ops-masters/records.js';
 
 const PERIOD = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -77,7 +84,7 @@ const assetOut = (r) => {
     acquisitionDate: isoDate(r.acquisition_date), inServiceDate: isoDate(r.in_service_date), cost: Number(r.cost), salvageValue: Number(r.salvage_value), usefulLifeMonths: r.useful_life_months,
     method: r.method, assetAccount: r.asset_account, accumulatedAccount: r.accumulated_account, expenseAccount: r.expense_account, openingAccumulated: Number(r.opening_accumulated),
     depreciateFrom: r.depreciate_from, accumulatedDepreciation: accumulated, bookValue: round2(Number(r.cost) - accumulated), lastPeriod: r.last_period || null, status: r.status,
-    createdAt: r.created_at,
+    disposalId: r.disposal_id || null, disposedOn: isoDate(r.disposed_on), createdAt: r.created_at,
   };
 };
 
@@ -217,4 +224,146 @@ export async function depreciationStep(db, periodRow, { user = null, runId = nul
   return { status: 'done', amount: done.posted ? done.posted.amount : 0, journals: r.journals.map((j) => j.journalId),
     message: r.assets ? `${r.assets} asset(s) depreciated, ${r.amount.toFixed(2)} posted` : `Nothing left to depreciate${done.posted ? ` (${done.posted.assets} asset(s) already posted, ${done.posted.amount.toFixed(2)})` : ''}`,
     detail: r.journals };
+}
+
+// ---------------------------------------------------------------- disposal
+
+const DISPOSAL_SELECT = `SELECT d.*, f.asset_number, f.name AS asset_name, f.class_code, cls.name AS class_name, j.jv_number, rj.jv_number AS reversal_jv_number,
+  si.invoice_number, si.status AS invoice_status, si.balance AS invoice_balance, u.display_name AS created_by_name
+  FROM fixed_asset_disposals d JOIN fixed_assets f ON f.id = d.asset_id
+  LEFT JOIN master_records cls ON cls.type_code = 'asset-class' AND cls.code = f.class_code
+  LEFT JOIN journal_vouchers j ON j.id = d.journal_id LEFT JOIN journal_vouchers rj ON rj.id = d.reversal_journal_id
+  LEFT JOIN sales_invoices si ON si.id = d.sales_invoice_id LEFT JOIN users u ON u.id = d.created_by`;
+
+const disposalOut = (d) => d && ({
+  id: d.id, disposalNumber: d.disposal_number, assetId: d.asset_id, assetNumber: d.asset_number, assetName: d.asset_name, classCode: d.class_code, className: d.class_name || null,
+  disposalDate: isoDate(d.disposal_date), disposalType: d.disposal_type, reason: d.reason, buyerName: d.buyer_name, buyerTin: d.buyer_tin, buyerAddress: d.buyer_address,
+  cost: Number(d.cost), accumulatedDepreciation: Number(d.accumulated_depreciation), bookValue: Number(d.book_value), proceeds: Number(d.proceeds), vatCode: d.vat_code,
+  outputVat: Number(d.output_vat), grossProceeds: Number(d.gross_proceeds), gainLoss: Number(d.gain_loss), bankAccount: d.bank_account, journalId: d.journal_id,
+  journalNumber: d.jv_number || null, salesInvoiceId: d.sales_invoice_id, salesInvoiceNumber: d.invoice_number || null, salesInvoiceStatus: d.invoice_status || null,
+  amountDue: d.invoice_balance === null || d.invoice_balance === undefined ? null : Number(d.invoice_balance), status: d.status, reversalJournalNumber: d.reversal_jv_number || null,
+  cancelReason: d.cancel_reason, cancelledAt: d.cancelled_at, createdBy: d.created_by_name || d.created_by, createdAt: d.created_at,
+});
+
+export async function getDisposal(db, ref) {
+  const d = (await db.query(`${DISPOSAL_SELECT} WHERE d.id = $1 OR d.disposal_number = $1`, [String(ref)])).rows[0];
+  if (!d) throw notFound('Disposal not found');
+  return disposalOut(d);
+}
+
+/** Disposal register: disposals of a period (from, to), type, status, class, search; with totals of the posted ones. */
+export async function listDisposals(db, q = {}) {
+  const params = [];
+  const where = ['TRUE'];
+  const add = (sql, v) => { params.push(v); where.push(sql.replaceAll('?', `$${params.length}`)); };
+  if (q.from) add('d.disposal_date >= ?::date', q.from);
+  if (q.to) add('d.disposal_date <= ?::date', q.to);
+  if (q.disposalType) add('d.disposal_type = ?', q.disposalType);
+  if (q.status && q.status !== 'all') add('d.status = ?', q.status);
+  if (q.classCode) add('f.class_code = ?', q.classCode);
+  if (q.search) add("(d.disposal_number ILIKE '%' || ? || '%' OR f.asset_number ILIKE '%' || ? || '%' OR f.name ILIKE '%' || ? || '%' OR d.buyer_name ILIKE '%' || ? || '%')", q.search);
+  const rows = (await db.query(`${DISPOSAL_SELECT} WHERE ${where.join(' AND ')} ORDER BY d.disposal_date DESC, d.disposal_number DESC LIMIT 2000`, params)).rows.map(disposalOut);
+  const posted = rows.filter((r) => r.status === 'posted');
+  const sum = (k) => round2(posted.reduce((t, r) => t + r[k], 0));
+  return { summary: { disposals: posted.length, cost: sum('cost'), accumulatedDepreciation: sum('accumulatedDepreciation'), bookValue: sum('bookValue'), proceeds: sum('proceeds'),
+    outputVat: sum('outputVat'), gain: round2(posted.filter((r) => r.gainLoss > 0).reduce((t, r) => t + r.gainLoss, 0)),
+    loss: round2(-posted.filter((r) => r.gainLoss < 0).reduce((t, r) => t + r.gainLoss, 0)) }, rows };
+}
+
+/** Periods of the asset's schedule before the disposal month that are not depreciated yet (posted or covered by the opening balance). */
+async function unpostedBefore(db, a, date) {
+  const plan = straightLine({ cost: a.cost, salvage: a.salvageValue, lifeMonths: a.usefulLifeMonths, start: await startPeriod(a.inServiceDate) });
+  const posted = new Set((await db.query('SELECT period FROM fixed_asset_depreciation WHERE asset_id = $1', [a.id])).rows.map((r) => r.period));
+  return plan.filter((p) => p.period < periodOfDate(date) && p.period >= a.depreciateFrom && !posted.has(p.period)).map((p) => p.period);
+}
+
+/**
+ * Figures of a disposal before it is posted: cost, accumulated depreciation, book value, output VAT on a sale, gain or
+ * loss, and the depreciation periods still to post. b: { disposalType, disposalDate, proceeds }.
+ */
+export async function previewDisposal(db, assetRef, b = {}) {
+  const a = await getAsset(db, assetRef);
+  const date = isoDate(b.disposalDate) || (await today());
+  const type = b.disposalType === 'write-off' ? 'write-off' : 'sale';
+  const proceeds = type === 'sale' ? round2(b.proceeds || 0) : 0;
+  const registered = (await getSetting('direct_bill.broker_vat_registered', true)) !== false;
+  const vatCode = type === 'sale' && registered && proceeds > 0 ? await getSetting('fixed_assets.disposal_vat_code', 'VAT12-OUT') : null;
+  const vat = vatCode ? await taxCodeRate(db, vatCode) : null;
+  const outputVat = vat ? round2(proceeds * vat.rate) : 0;
+  return { assetId: a.id, assetNumber: a.assetNumber, assetName: a.name, status: a.status, disposalDate: date, disposalType: type, cost: a.cost,
+    accumulatedDepreciation: a.accumulatedDepreciation, bookValue: a.bookValue, proceeds, vatCode, vatGlAccount: vat?.glAccount || null, outputVat,
+    grossProceeds: round2(proceeds + outputVat), gainLoss: round2(proceeds - a.bookValue), unpostedPeriods: a.status === 'disposed' ? [] : await unpostedBefore(db, a, date),
+    asset: a };
+}
+
+/** Dispose of an asset (sale or write-off): fa.disposal journal, the sale's sales invoice, the asset disposed. */
+export async function disposeAsset(db, assetRef, b, user) {
+  const lock = (await db.query('SELECT id FROM fixed_assets WHERE id = $1 OR asset_number = $1 FOR UPDATE', [String(assetRef)])).rows[0];
+  if (!lock) throw notFound('Fixed asset not found');
+  const p = await previewDisposal(db, lock.id, b);
+  const a = p.asset;
+  const errors = [];
+  if (a.status === 'disposed') throw conflict(`Asset ${a.assetNumber} is already disposed`);
+  const now = await today();
+  const back = Number(await getSetting('fixed_assets.disposal_backdate_days', 60)) || 0;
+  if (p.disposalDate > now) errors.push({ path: 'disposalDate', message: 'The disposal date is in the future' });
+  else if (back && p.disposalDate < addDays(now, -back)) errors.push({ path: 'disposalDate', message: `A disposal can be dated up to ${back} days back (fixed_assets.disposal_backdate_days)` });
+  if (p.disposalDate < a.acquisitionDate) errors.push({ path: 'disposalDate', message: 'The disposal date is before the asset was acquired' });
+  if (p.disposalType === 'sale') {
+    if (!(p.proceeds > 0)) errors.push({ path: 'proceeds', message: 'Enter the selling price (net of VAT); an asset given away is written off' });
+    if (!String(b.buyerName || '').trim()) errors.push({ path: 'buyerName', message: 'Enter the buyer' });
+  }
+  if (p.disposalType === 'write-off' && !String(b.reason || '').trim()) errors.push({ path: 'reason', message: 'Give the reason for the write-off (lost, damaged beyond repair, obsolete...)' });
+  if (errors.length) throw badRequest('Validation failed', errors);
+  if (p.unpostedPeriods.length && (await getSetting('fixed_assets.disposal_requires_depreciation_to_date', true)) !== false) {
+    throw conflict(`Post the depreciation of ${p.unpostedPeriods.join(', ')} first (Accounts > Fixed Assets > Depreciation Run): the asset is disposed at its book value after depreciation up to the month before the disposal`);
+  }
+  let bankGl = null;
+  if (p.disposalType === 'sale' && b.bankAccount) {
+    bankGl = await bankAccountGl(db, b.bankAccount);
+    if (!bankGl) throw badRequest('Validation failed', [{ path: 'bankAccount', message: `${b.bankAccount} is not a bank account of the Bank Account master` }]);
+  }
+  const number = await nextDocumentNumber('asset_disposal', { db, date: p.disposalDate, unique: { table: 'fixed_asset_disposals', column: 'disposal_number' } });
+  const buyer = p.disposalType === 'sale' ? String(b.buyerName).trim() : null;
+  const jv = await postEvent('fa.disposal', {
+    date: p.disposalDate, source: 'fixed-assets', entryType: 'ASSET_DISPOSAL', transactionCode: number, referenceType: 'FixedAssetDisposal', referenceId: a.id,
+    description: `${p.disposalType === 'sale' ? 'Sale' : 'Write-off'} of ${a.assetNumber} ${a.name} (${number})`,
+    amounts: { cost: a.cost, accumulated: a.accumulatedDepreciation, receivable: p.grossProceeds, vat: p.outputVat, gain: p.gainLoss > 0 ? p.gainLoss : 0, loss: p.gainLoss < 0 ? -p.gainLoss : 0 },
+    accounts: { asset: a.assetAccount, accumulated: a.accumulatedAccount, ...(bankGl ? { proceeds: bankGl } : {}), ...(p.vatGlAccount ? { vat: p.vatGlAccount } : {}) },
+    vars: { disposalNumber: number, assetNumber: a.assetNumber, assetName: a.name, buyer: buyer ? `– ${buyer}` : '' },
+  }, { db, user });
+  const d = (await db.query(`INSERT INTO fixed_asset_disposals(disposal_number, asset_id, disposal_date, disposal_type, reason, buyer_name, buyer_tin, buyer_address, cost, accumulated_depreciation,
+      book_value, proceeds, vat_code, output_vat, gross_proceeds, gain_loss, bank_account, journal_id, created_by)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19) RETURNING id`,
+  [number, a.id, p.disposalDate, p.disposalType, b.reason || null, buyer, b.buyerTin || null, b.buyerAddress || null, a.cost, a.accumulatedDepreciation, a.bookValue, p.proceeds, p.vatCode,
+    p.outputVat, p.grossProceeds, p.gainLoss, bankGl ? String(b.bankAccount) : null, jv.id, user?.id ?? null])).rows[0];
+  await db.query(`UPDATE fixed_assets SET status_before_disposal = status, status = 'disposed', disposed_on = $2, disposal_remarks = $3, disposal_id = $4, updated_by = $5, updated_at = now()
+    WHERE id = $1`, [a.id, p.disposalDate, b.reason || (buyer ? `Sold to ${buyer}` : null), d.id, user?.id ?? null]);
+  const invoiceOn = b.issueSalesInvoice ?? ((await getSetting('fixed_assets.disposal_sales_invoice', true)) !== false);
+  if (p.disposalType === 'sale' && invoiceOn) {
+    const { issueInvoice } = await import('../bir/invoices.js');
+    const inv = await issueInvoice(db, { sourceType: 'asset_disposal', sourceId: d.id, invoiceDate: p.disposalDate, remarks: b.reason || null }, user);
+    await db.query('UPDATE fixed_asset_disposals SET sales_invoice_id = $2 WHERE id = $1', [d.id, inv.id]);
+  }
+  return getDisposal(db, d.id);
+}
+
+/** Cancel a disposal: its sales invoice cancelled (refused when a payment is recorded on it), its journal reversed, the asset restored. */
+export async function cancelDisposal(db, ref, reason, user) {
+  const d = (await db.query('SELECT * FROM fixed_asset_disposals WHERE id = $1 OR disposal_number = $1 FOR UPDATE', [String(ref)])).rows[0];
+  if (!d) throw notFound('Disposal not found');
+  if (d.status !== 'posted') throw conflict(`Disposal ${d.disposal_number} is ${d.status}`);
+  if (d.sales_invoice_id) {
+    const inv = (await db.query('SELECT status FROM sales_invoices WHERE id = $1', [d.sales_invoice_id])).rows[0];
+    if (inv?.status === 'issued') {
+      const { cancelInvoice } = await import('../bir/invoices.js');
+      await cancelInvoice(db, d.sales_invoice_id, `Disposal ${d.disposal_number} cancelled: ${reason}`, user);
+    }
+  }
+  const rev = await reverseJournal(db, d.journal_id, user, { description: `Cancellation of disposal ${d.disposal_number}: ${reason}` });
+  await db.query(`UPDATE fixed_asset_disposals SET status = 'cancelled', reversal_journal_id = $2, cancelled_by = $3, cancelled_at = now(), cancel_reason = $4 WHERE id = $1`,
+    [d.id, rev.id, user?.id ?? null, reason]);
+  await db.query(`UPDATE fixed_assets SET status = COALESCE(status_before_disposal, 'active'), status_before_disposal = NULL, disposed_on = NULL, disposal_remarks = NULL, disposal_id = NULL,
+    updated_by = $2, updated_at = now() WHERE id = $1`, [d.asset_id, user?.id ?? null]);
+  return getDisposal(db, d.id);
 }

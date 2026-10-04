@@ -973,7 +973,7 @@ A motor quotation has five steps. Nothing is saved until **Completed Quote** on 
 | **Model Year**, **Vehicle Color** | Yes | Model year within the last 20 years up to next year. |
 | **Seating Capacity** | Yes | Seats including the driver, 1 to 99; used for Auto Passenger PA. |
 
-On the coverage step, own damage is priced from the sum insured (the market value) and the rate of the motor tariff; CTPL is the Insurance Commission tariff of the vehicle class, inclusive of taxes and fees; the optional covers are Acts of Nature, excess Bodily Injury and Property Damage, Personal Accident and Auto Passenger PA (limit per person x seats covered). Select **Calculate** after every change. The order summary shows:
+On the coverage step, own damage is priced from the sum insured (the market value) and the rate of the motor tariff; CTPL is the Insurance Commission tariff of the vehicle class, inclusive of taxes and fees; the optional covers are those of the product template (Acts of Nature, excess Bodily Injury and Property Damage, Roadside Assistance, Personal Accident and Auto Passenger PA, limit per person x seats covered, with the delivered template; see Covers and risk details of the product below). Select **Calculate** after every change. The order summary shows:
 
 | Line | How it is calculated |
 |---|---|
@@ -988,6 +988,24 @@ On the coverage step, own damage is priced from the sum insured (the market valu
 Under commission and referral choose the referrer or keep the broker's own lead; the comsub rate fills in from the commission rule (level L1 8%, L2 5%, `commission.comsub_rate_by_level`). The brokerage rate comes from the Commission Rate Matrix, then the insurer's default rate, then `commission.default_rate` (15%).
 
 When you select **Completed Quote**, the system prices the quotation again on the server from the configured rates and taxes, saves it as **Draft** with its number QT-YYYY-NNNNN, sets the prospect to QuoteGenerated and opens the quotation. A premium changed in the browser is refused. The quotation is valid for 30 days (`limits.quote_validity_days`).
+
+### Covers and risk details of the product
+
+The quotation follows the product template that governs it (the motor pricing template, `motor.pricing_template_code`; Product Configurator > Product Templates).
+
+**Risk details for the product rules** (step 1, below the vehicle): the wizard asks for the details the template's acceptance rules and rating factors test, so that every rule is checked when the quotation is priced. With the delivered motor template these are the **Driver's date of birth** (the driver age is computed from it), **Claims in the last 3 years**, **Fair market value of the vehicle**, **The vehicle has modifications**, and the **Claim-free years (NCB)** and **Vehicles in the fleet** the rating factors use. A field marked * is tested by an acceptance rule and must be filled in before **Next**; a group or personal accident risk asks for the **Number of members**. The vehicle use, model year and sum insured are taken from the vehicle and cover fields. When a rule or factor is added on the Product Configurator, its field is asked for on the next quotation.
+
+| Detail | Rule that uses it (delivered template) |
+|---|---|
+| Driver's date of birth | Driver under 21: 15% loading; driver age rating factor |
+| Claims in the last 3 years | Two or more claims: 20% loading |
+| Fair market value | Sum insured above the fair market value by more than 10%: referred |
+| The vehicle has modifications | Modified vehicle: referred |
+| Vehicle use (step 1) | Public utility vehicle: declined |
+
+**Covers of the product** (coverage step, at the top): the covers of the template's Coverage Builder. A **Mandatory** cover is always included and cannot be unticked; an **Optional** cover is ticked to quote it and unticked to leave it out (its fields are then hidden and its premium is zero). Each cover is priced on the quotation premium of its **Priced on quotation as** setting (own damage and theft, acts of nature, roadside assistance, personal accident, excess bodily injury, property damage, auto passenger PA, CTPL). A cover that the template does not list is not offered. A cover without a quotation premium is quoted for its terms only. Select **Calculate** after a change.
+
+When the quotation is saved the server prices it on the same covers (a mandatory cover is added if missing; a cover that is not on the template is refused) and evaluates the acceptance rules on the risk details: none is left "not evaluated". With `underwriting.require_rule_fields` on, the server also refuses a quotation that lacks a detail an acceptance rule tests (for example a quotation created by upload).
 
 ## Quotations
 
@@ -1038,6 +1056,31 @@ For motor and package lines, select **Proceed to Policy** on the accepted quotat
 At issue the system gives the policy number, creates the client from the prospect (CL-YYYY-NNNNN), copies the participants, raises the premium bill (broker billed) or books the commission due from the insurer (direct bill), posts the journal and accrues the referrer's commission. The quotation becomes **Converted to Policy**.
 
 For a line that needs a firm order, select **Create Placement Slip** instead; the Processing Team continues as described in its chapter. When the placement slip is optional, **Send to insurance company** asks which way to go: place with the insurer(s) through a placement slip, or **Issue the policy directly**.
+
+## Sales activities
+
+Account executives log every call, meeting, e-mail and visit with a prospect, a client or on a quotation. Each prospect, client and quotation shows its activities as a timeline, newest first: a prospect and a client also show the activities logged on their quotations (with the quotation number), and a client those of the prospect it came from. The open next step is shown above the timeline.
+
+To log an activity:
+
+1. Open the prospect (Prospects > **View**), the client (Clients > **View**) or the quotation (Quotations > **View Details** > **Activities** tab).
+2. In **Activities**, select **Log activity**.
+3. Choose the **Activity type** (phone call, meeting, client or site visit, e-mail, video call, SMS or chat message, proposal presentation) and the **Date and time** it took place. The subject takes the type's name unless you enter one.
+4. Enter the **Duration**, **Contact person**, **Location** and **Notes** as needed, and the **Outcome** (interested, documents requested, quotation presented, accepted, call back, no answer, not interested, placed elsewhere).
+5. Enter the **Next step** and its **Next step date** (the date proposed is the type's default days to the next step). Select **Save**.
+
+| Rule | Detail |
+|---|---|
+| Date | An activity is logged once it has taken place, up to `sales_activities.backdate_days` (30) days back. |
+| Next step | A next step with a date becomes a follow-up task in the account executive's My Work (source Sales activity next step), due on that date, with the usual reminder. A next step date needs the next step text; `sales_activities.next_step_required` makes both compulsory. |
+| Later activity | An activity logged on the same record completes the open follow-up of the earlier activity (`sales_activities.close_previous_follow_up`). |
+| Change or cancel | The pencil changes an activity (a new next step date moves its task); the cross cancels an activity logged in error with a reason, and cancels its open task. Only the account executive, who logged it or their manager can do this. |
+| Prospect status | A New prospect becomes Contacted with its first activity. |
+| Access | Sales & Marketing and Operations log activities (write:sales-activities); the Processing Team reads them; a scoped role sees only its own book. |
+
+The follow-up task priority is `sales_activities.follow_up_priority` (normal). The activity types (channel and default days to the next step) and outcomes (positive, neutral or negative, used by the report) are kept by the System Administrator on Master > Organization > **Sales Activity Types** and **Sales Activity Outcomes**.
+
+Operations > Sales & Marketing > **Sales Activities** lists the activities of a period (**From**, **To**) with filters for the account executive, type and outcome and a search; select a row to open the prospect, client or quotation. The **Activity Report** tab sums, per account executive, the activities by channel (calls, meetings, e-mails, visits), the prospects, clients and quotations worked, the positive outcomes, the next steps set and their follow-ups done, open and overdue, with the totals by activity type and by outcome. **Export to Excel** downloads the list or the report.
 
 ## Request a quotation from the market
 
@@ -2262,11 +2305,46 @@ Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registr
 4. Accounts > Payables > Supplier Payments > **New supplier payment**: the supplier, the invoices to pay (all open invoices are ticked), mode, bank account, cheque number. Posting rule ap.payment: Dr Accounts Payable - Suppliers / Cr bank. **Print** gives the payment voucher; **Cancel** reverses the payment and opens the invoices again.
 5. Accounts > Payables > AP Ageing shows the open balances by supplier and by invoice, aged on the due dates (buckets of `limits.receivable_ageing_buckets`); **Export to Excel**.
 
+### BIR Form 2307 for suppliers
+
+The expanded withholding tax withheld from a supplier on an approved supplier invoice (the supplier's EWT tax code, on the amount net of VAT) is creditable tax of the supplier: the broker issues BIR Form 2307 for it each quarter.
+
+1. Choose Accounts > Payables > **Supplier 2307**, the **Year** and the **Quarter**. The screen lists every supplier with EWT in the quarter: TIN, ATC (the ATC of the invoice's EWT tax code, for example WC160 services, WC158 goods, WI010 professional fees), the number of invoices, the income payments and the tax withheld, and the certificate number once issued. Cancelled invoices do not count; an invoice counts in the quarter of its journal date.
+2. **View** shows the certificate on the BIR layout: the payee (the supplier's registered name, TIN and address from the Supplier master), the payor (the broker, from the primary company of Master > Company), and per ATC the income of each month of the quarter, the total and the tax withheld. **Issue** numbers it from the CWT series; **Print** prints it.
+3. **Issue all certificates** numbers the certificates of every supplier of the quarter that has none yet.
+
+The same generator issues the certificates of the commission payees on Accounts > Tax > BIR Form 2307, where the suppliers are listed with the other payees. The supplier EWT is also included in the QAP (Accounts > Tax > QAP), in the 0619-E and the 1601-EQ per ATC (reconciled with the QAP and with the EWT payable account of the ledger), in the 1604-E alphalist of payees (schedule 3; a supplier with an EWT code for individuals is listed by last, first and middle name) and in the QAP and 1604-E DAT files.
+
 ## Fixed assets and depreciation
 
 Accounts > Fixed Assets > Asset Register lists the assets with their cost, accumulated depreciation and book value. **Register asset** for an asset not bought through a supplier invoice: name, asset class (Master > Finance > Asset Classes gives the useful life and the asset, accumulated depreciation and depreciation expense accounts), dates, cost, salvage value, location, custodian and serial number. For an asset carried at go-live enter the accumulated depreciation at go-live and the first period to depreciate here. Select an asset to see its straight-line schedule: each month's depreciation, accumulated depreciation and book value, and whether the month is posted.
 
 Depreciation is straight-line from the in-service month (`fixed_assets.first_month`); the last month takes the rounding so the asset ends at its salvage value. Accounts > Fixed Assets > Depreciation Run shows what a period's depreciation is and **Post depreciation** posts one journal per asset class dated the end of the period (posting rule fa.depreciation: Dr depreciation expense / Cr accumulated depreciation). An asset is never depreciated twice for a period. The month-end close runs the same step (**(e) Depreciation**, `fixed_assets.depreciation_in_month_end`).
+
+### Asset disposal
+
+An asset sold or written off (lost, stolen, damaged beyond repair, obsolete) leaves the register through a disposal.
+
+1. Post the depreciation up to the month before the disposal first (Depreciation Run): the disposal is refused while a month before it is not depreciated (`fixed_assets.disposal_requires_depreciation_to_date`). The month of the disposal is not depreciated.
+2. Accounts > Fixed Assets > Asset Register: select the asset, then **Dispose**.
+3. Choose **Sale** or **Write-off** and the **Disposal date** (up to `fixed_assets.disposal_backdate_days`, 60, days back).
+4. For a sale enter the **Selling price (net of VAT)**, the **Buyer** with **Buyer TIN** and **Buyer address**, and **Received into** (the bank account the money went to; leave it empty for a sale on credit). For a write-off enter the **Reason**.
+5. The screen shows the cost, the accumulated depreciation, the book value, the output VAT of a sale (tax code `fixed_assets.disposal_vat_code`, VAT12-OUT, when the broker is VAT registered), the total proceeds and the gain or loss. Select **Post disposal**.
+
+The disposal (FAD-YYYY-NNNNN) posts one journal (posting rule fa.disposal, Master > Finance > Posting Rules):
+
+| Line | Account | Amount |
+|---|---|---|
+| Dr | Accumulated depreciation of the asset class | Accumulated depreciation |
+| Dr | Bank account received into, else the sales invoice receivable | Selling price + output VAT |
+| Dr | Loss on disposal (`accounting.account.loss_on_disposal`, 4501004) | Book value above the selling price |
+| Cr | Asset account of the asset class | Cost |
+| Cr | Output VAT | Output VAT |
+| Cr | Gain on disposal (`accounting.account.gain_on_disposal`, 3301004) | Selling price above the book value |
+
+A sale also issues the BIR sales invoice to the buyer (Accounts > Tax > Sales Invoices, source Asset disposal; `fixed_assets.disposal_sales_invoice`). A sale received into a bank account is issued paid; a sale on credit is collected by recording the payment on the sales invoice. The asset becomes **Disposed** and is no longer depreciated.
+
+Accounts > Fixed Assets > **Disposals** is the disposal register of a period: number, date, sale or write-off, asset, buyer, book value, selling price, output VAT, gain or loss, sales invoice, journal and status, with the totals; **Export to Excel**. The printer button prints the disposal voucher with its journal. **Cancel disposal** (with a reason) reverses the journal, cancels the sales invoice and restores the asset; a disposal whose sales invoice has a payment recorded cannot be cancelled.
 
 ## Incentives
 

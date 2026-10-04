@@ -1,7 +1,9 @@
 /**
  * Tax codes master (tax_codes) and BIR Form 2307 (Certificate of Creditable Tax Withheld at Source).
  *   issued    the broker as withholding agent: expanded withholding on payment vouchers (disbursements.wht_amount,
- *             gross_amount) to agents / referrers, suppliers and others, per payee and quarter
+ *             gross_amount) to agents / referrers, suppliers and others, and on the supplier invoices of accounts
+ *             payable (supplier_invoices.ewt_amount on the amount net of VAT, ATC of the invoice's EWT tax code, dated
+ *             with the invoice's journal), per payee and quarter
  *   received  creditable tax withheld from the broker: insurers on direct-bill commission (debit-note collections,
  *             ewt_amount) and clients on receipts (receipt_lines.ewt), per payor and quarter (for reconciliation and SAWT)
  * The ATC of an issued line comes from bir.atc_by_payee (referrer type, else payee type); received lines use
@@ -76,8 +78,18 @@ export async function withholdingLines(db, direction, from, to) {
       FROM disbursements d LEFT JOIN commission_referrers cr ON cr.id = d.referrer_id LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id
       LEFT JOIN clients cl ON cl.id = d.client_id
       WHERE d.wht_amount > 0 AND d.status IN ('approved','paid') AND d.voucher_date BETWEEN $1 AND $2 ORDER BY d.voucher_date, d.voucher_number`, [from, to])).rows;
-    return rows.map((r) => ({ key: `${r.payee_type}:${r.pid}`, name: r.payee_name, tin: r.tin || '', address: r.address || '', date: iso(r.voucher_date),
-      atc: map[r.referrer_type] || map[r.payee_type] || '', income: round2(Number(r.gross_amount) || Number(r.amount) + Number(r.wht_amount)), tax: round2(r.wht_amount), reference: r.voucher_number }));
+    const ap = (await db.query(`SELECT i.voucher_number, i.supplier_invoice_no, COALESCE(j.jv_date, i.invoice_date) AS ewt_date, i.net_amount, i.ewt_amount, m.id AS supplier_id, m.name,
+        m.data->>'tin' AS tin, m.data->>'address' AS address, tc.atc, tc.payee_kind
+      FROM supplier_invoices i JOIN master_records m ON m.id = i.supplier_id LEFT JOIN journal_vouchers j ON j.id = i.journal_id LEFT JOIN tax_codes tc ON tc.code = i.ewt_code
+      WHERE i.ewt_amount > 0 AND i.status IN ('approved', 'partially-paid', 'paid') AND COALESCE(j.jv_date, i.invoice_date) BETWEEN $1 AND $2
+      ORDER BY 3, i.voucher_number`, [from, to])).rows;
+    return [
+      ...rows.map((r) => ({ key: `${r.payee_type}:${r.pid}`, payeeType: r.payee_type, name: r.payee_name, tin: r.tin || '', address: r.address || '', date: iso(r.voucher_date),
+        atc: map[r.referrer_type] || map[r.payee_type] || '', income: round2(Number(r.gross_amount) || Number(r.amount) + Number(r.wht_amount)), tax: round2(r.wht_amount), reference: r.voucher_number })),
+      ...ap.map((r) => ({ key: `Supplier:${r.supplier_id}`, payeeType: 'Supplier', name: r.name, tin: r.tin || '', address: r.address || '', date: iso(r.ewt_date),
+        atc: r.atc || map.Supplier || '', income: round2(r.net_amount), tax: round2(r.ewt_amount), reference: `${r.voucher_number} (${r.supplier_invoice_no})`,
+        individual: r.payee_kind === 'individual' })),
+    ];
   }
   const atc = (await getSetting('bir.sawt_default_atc')) || '';
   const dn = (await db.query(`SELECT c.collection_number, c.received_date, c.ewt_amount, c.form_2307_no, d.ewt_rate, d.commission, d.expected_ewt, ic.id AS insurer_id, ic.name, ic.tin, ic.address
@@ -113,15 +125,18 @@ async function natures(db) {
   return new Map((await db.query('SELECT atc, COALESCE(nature_of_payment, description) AS n FROM tax_codes WHERE atc IS NOT NULL')).rows.map((r) => [r.atc, r.n]));
 }
 
-/** Payees (issued) or payors (received) with withholding in the quarter. */
-export async function payees2307(db, { year, quarter, direction = 'issued' }) {
+/** Kind of payee of a withholding line key ('Supplier:12' -> Supplier). */
+export const payeeTypeOf = (key) => String(key || '').split(':')[0];
+
+/** Payees (issued) or payors (received) with withholding in the quarter; payeeType narrows them (Supplier: accounts payable). */
+export async function payees2307(db, { year, quarter, direction = 'issued', payeeType = null }) {
   const { from, to, months } = quarterRange(year, quarter);
-  const lines = await withholdingLines(db, direction, from, to);
+  const lines = (await withholdingLines(db, direction, from, to)).filter((l) => !payeeType || payeeTypeOf(l.key) === payeeType);
   const certs = new Map((await db.query('SELECT payee_key, cert_number, id FROM bir_2307_certificates WHERE direction = $1 AND year = $2 AND quarter = $3 AND status = \'issued\'',
     [direction, Number(year), Number(quarter)])).rows.map((c) => [c.payee_key, c]));
   const groups = new Map();
   for (const l of lines) {
-    const g = groups.get(l.key) || { payeeKey: l.key, payeeName: l.name, tin: l.tin, transactions: 0, totalIncome: 0, totalTax: 0, atcs: new Set() };
+    const g = groups.get(l.key) || { payeeKey: l.key, payeeType: payeeTypeOf(l.key), payeeName: l.name, tin: l.tin, transactions: 0, totalIncome: 0, totalTax: 0, atcs: new Set() };
     g.transactions += 1; g.totalIncome = round2(g.totalIncome + l.income); g.totalTax = round2(g.totalTax + l.tax); g.atcs.add(l.atc);
     groups.set(l.key, g);
   }
@@ -148,6 +163,20 @@ export async function certificate2307(db, { year, quarter, direction = 'issued',
     transactions: lines.map((l) => ({ date: l.date, reference: l.reference, atc: l.atc, income: l.income, tax: l.tax })),
     certificateNumber: existing?.cert_number || null, certificateId: existing?.id || null, issuedAt: existing?.created_at || null,
   };
+}
+
+/**
+ * Issue the certificates of every payee of a quarter that has none yet (payeeType narrows them, e.g. the suppliers of
+ * accounts payable): { issued: [...], alreadyIssued }.
+ */
+export async function issueAll2307(db, { year, quarter, payeeType = null }, user) {
+  const list = await payees2307(db, { year, quarter, direction: 'issued', payeeType });
+  const issued = [];
+  for (const p of list.payees.filter((x) => !x.certificateNumber && x.totalTax > 0)) {
+    const c = await issue2307(db, { year, quarter, direction: 'issued', payeeKey: p.payeeKey }, user);
+    issued.push({ payeeKey: c.payeeKey, payeeName: c.payee.name, certificateNumber: c.certificateNumber, certificateId: c.certificateId, totalTax: c.totalTax });
+  }
+  return { year: Number(year), quarter: Number(quarter), payeeType, issued, alreadyIssued: list.payees.filter((x) => x.certificateNumber).length };
 }
 
 /** Issue (number and record) the certificate; an already issued one is returned unchanged. */

@@ -502,6 +502,12 @@
    "chapter": "Sales & Marketing (Account Executive)"
   },
   {
+   "id": "covers-and-risk-details-of-the-product",
+   "title": "Covers and risk details of the product",
+   "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
    "id": "quotations",
    "title": "Quotations",
    "level": 2,
@@ -517,6 +523,12 @@
    "id": "from-the-accepted-quotation-to-the-policy",
    "title": "From the accepted quotation to the policy",
    "level": 3,
+   "chapter": "Sales & Marketing (Account Executive)"
+  },
+  {
+   "id": "sales-activities",
+   "title": "Sales activities",
+   "level": 2,
    "chapter": "Sales & Marketing (Account Executive)"
   },
   {
@@ -1138,9 +1150,21 @@
    "chapter": "Accounting"
   },
   {
+   "id": "bir-form-2307-for-suppliers",
+   "title": "BIR Form 2307 for suppliers",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
    "id": "fixed-assets-and-depreciation",
    "title": "Fixed assets and depreciation",
    "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "asset-disposal",
+   "title": "Asset disposal",
+   "level": 3,
    "chapter": "Accounting"
   },
   {

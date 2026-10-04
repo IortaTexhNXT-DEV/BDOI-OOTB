@@ -173,6 +173,14 @@ export const menuList = [
             includes: ["/sales/campaigns"],
             permissions: ["read:campaigns"],
           },
+          // calls, meetings, e-mails and visits of the account executives, and the activity report
+          {
+            id: 50,
+            name: "Sales Activities",
+            path: "/sales/activities",
+            includes: ["/sales/activities"],
+            permissions: ["read:sales-activities"],
+          },
         ],
       },
       {
@@ -397,6 +405,8 @@ export const menuList = [
           { id: 2, name: "Supplier Payments", path: "/accounts/payables/payments", includes: ["/accounts/payables/payments"] },
           { id: 3, name: "AP Ageing", path: "/accounts/payables/ageing", includes: ["/accounts/payables/ageing"] },
           { id: 4, name: "Suppliers", path: "/accounts/payables/suppliers", includes: ["/accounts/payables/suppliers"] },
+          // BIR Form 2307 of the expanded withholding tax withheld from suppliers
+          { id: 5, name: "Supplier 2307", path: "/accounts/payables/2307", includes: ["/accounts/payables/2307"] },
         ],
       },
   {
@@ -405,6 +415,8 @@ export const menuList = [
         submenu: [
           { id: 1, name: "Asset Register", path: "/accounts/fixed-assets/register", includes: ["/accounts/fixed-assets/register"] },
           { id: 2, name: "Depreciation Run", path: "/accounts/fixed-assets/depreciation", includes: ["/accounts/fixed-assets/depreciation"] },
+          // sale or write-off of an asset and the disposal register
+          { id: 3, name: "Disposals", path: "/accounts/fixed-assets/disposals", includes: ["/accounts/fixed-assets/disposals"] },
         ],
       },
   {
@@ -1059,6 +1071,9 @@ export const menuList = [
               "/master/generals/organization/branchmaster/view/",
             ],
           },
+          // the activity types and outcomes account executives choose when they log a sales activity
+          { id: 3, name: "Sales Activity Types", path: "/master/organization/sales-activity-types", includes: ["/master/organization/sales-activity-types"] },
+          { id: 4, name: "Sales Activity Outcomes", path: "/master/organization/sales-activity-outcomes", includes: ["/master/organization/sales-activity-outcomes"] },
         ],
       },
       {

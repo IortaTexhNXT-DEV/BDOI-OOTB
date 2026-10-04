@@ -15,6 +15,8 @@ import { calendarDateFormat } from "../../utility/dateFormat";
 import { CustomerPicker, PageHeader, RiskDetailsEditor, customerFields, customerName, round2, usePlacementOptions } from "./shared";
 import { isoDate } from "./dates";
 import useMasterOptions from "../GeneralMasters/common/useMasterOptions";
+import useQuoteSetup from "../../agentModule/quoteModule/utils/useQuoteSetup";
+import RiskFactsFields from "../../agentModule/quoteModule/policyDetails/policyDetailsCard/RiskFactsFields";
 import "./index.scss";
 
 const blankCover = () => ({ cover: "", sumInsured: null, deductible: "" });
@@ -78,6 +80,8 @@ const BrokerSlipCreate = () => {
   // non-package products are placed through requests for quotation; package ones are offered on request
   const productChoices = options.products.filter((p) => showPackage || p.businessType !== "package" || p.id === productId);
   const motor = product?.lob === "MOTOR";
+  // the risk details the acceptance rules and rating factors of the product's template test (number of members...)
+  const ruleSetup = useQuoteSetup(product ? { productId: product.id, lob: product.lob } : { lob: "NONE" });
   const sumInsured = useMemo(() => round2(covers.reduce((s, c) => s + (Number(c.sumInsured) || 0), 0)), [covers]);
   const setCover = (i, patch) => setCovers(covers.map((c, k) => (k === i ? { ...c, ...patch } : c)));
 
@@ -165,6 +169,7 @@ const BrokerSlipCreate = () => {
         ) : (
           <>
             <h3 className="section-title">{t("placement.sections.riskDetails")}</h3>
+            <RiskFactsFields setup={ruleSetup} value={riskDetails} onChange={setRiskDetails} />
             <RiskDetailsEditor value={riskDetails} onChange={setRiskDetails} />
           </>
         )}

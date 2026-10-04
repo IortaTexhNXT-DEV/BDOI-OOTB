@@ -66,6 +66,11 @@ export const HELP_ROUTES = [
   ["/accounts/claims-settlements", "claims-settlements-paid-through-the-broker"],
   ["/accounts/payables", "accounts-payable"],
   ["/accounts/fixed-assets", "fixed-assets-and-depreciation"],
+  // sales activities, the BIR 2307 of suppliers and asset disposal
+  ["/sales/activities", "sales-activities"],
+  ["/master/organization/sales-activity", "sales-activities"],
+  ["/accounts/payables/2307", "bir-form-2307-for-suppliers"],
+  ["/accounts/fixed-assets/disposals", "asset-disposal"],
   ["/master/insurance/", "operational-masters"],
   ["/master/finance/asset-classes", "operational-masters"],
   ["/accounts/paymentvoucher", "disbursement-payment-vouchers-and-cheques"],

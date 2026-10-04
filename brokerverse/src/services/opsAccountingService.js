@@ -132,6 +132,13 @@ const opsAccountingService = {
   downloadAssets: () => openFile("/fixed-assets/assets?format=xlsx", "fixed-asset-register.xlsx", { download: true }),
   depreciationPreview: (period) => request(`/fixed-assets/depreciation/${id(period)}`),
   runDepreciation: (period) => post(`/fixed-assets/depreciation/${id(period)}/run`, {}),
+  // fixed asset disposal (sale or write-off) and the disposal register
+  disposalPreview: (assetId, params) => request(`/fixed-assets/assets/${id(assetId)}/disposal-preview${qs(params)}`),
+  disposeAsset: (assetId, payload) => post(`/fixed-assets/assets/${id(assetId)}/dispose`, payload),
+  disposals: (params) => request(`/fixed-assets/disposals${qs(params)}`),
+  cancelDisposal: (disposalId, reason) => post(`/fixed-assets/disposals/${id(disposalId)}/cancel`, { reason }),
+  printDisposal: (disposalId) => openFile(`/fixed-assets/disposals/${id(disposalId)}/pdf`),
+  downloadDisposals: (params) => openFile(`/fixed-assets/disposals${qs({ ...params, format: "xlsx" })}`, "fixed-asset-disposals.xlsx", { download: true }),
   // bank accounts for deposits and payments
   bankAccounts: async () => {
     const body = await raw("/masters/bank-account/options?valueField=code");

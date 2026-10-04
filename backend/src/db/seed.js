@@ -67,6 +67,10 @@ const DISTRIBUTION_PERMS = {
   accounting: ['channels:read', 'fleet:read', 'marine:read'],
 };
 for (const [role, items] of Object.entries(DISTRIBUTION_PERMS)) ROLE_PERMS[role].push(...items);
+// Sales activities (permissions of migration 0320): account executives log calls, meetings, e-mails and visits; the
+// Processing Team reads the timelines of the prospects and quotations it works on.
+const SALES_ACTIVITY_PERMS = { sales: ['sales-activities'], operations: ['sales-activities'], processing: ['sales-activities:read'] };
+for (const [role, items] of Object.entries(SALES_ACTIVITY_PERMS)) ROLE_PERMS[role].push(...items);
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'] };
 

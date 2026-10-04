@@ -40,6 +40,8 @@ const OPERATIONS_PROCESSING = [
   // brand-new vehicle programmes (write:motor-programmes) and client comparison reports from the insurers' offers
   "Sales & Marketing > Dealer Programmes",
   "Sales & Marketing > Comparison Reports",
+  // the sales activity timelines and report (read:sales-activities)
+  "Sales & Marketing > Sales Activities",
 ];
 
 /** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
@@ -113,7 +115,9 @@ export const roleMenuPermissions = {
     home: true,
     operations: ["Clients", "Policy", "Claims", "My Work", "Fleet Schedules", "Marine Open Covers",
       // claim document checklist and motor claim repairs (write:claims); their masters below
-      "Claim Documents", "Motor Claim Repairs"],
+      "Claim Documents", "Motor Claim Repairs",
+      // fleet schedules and marine open covers (read:fleet / read:marine): one operations entry, the second one hid the first
+      "Fleet Schedules", "Marine Open Covers"],
     master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],

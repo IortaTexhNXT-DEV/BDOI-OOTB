@@ -74,6 +74,8 @@ export const TRANSACTION_TABLES = [
   'lead_assignment_history', 'channel_billing_accounts', 'dealer_sales_batches', 'dealer_sales', 'fleet_schedules', 'fleet_vehicles',
   'open_covers', 'open_cover_declarations', 'open_cover_certificates', 'fac_placements', 'fac_placement_shares', 'fac_settlements',
   'comparison_reports', 'campaigns', 'campaign_recipients',
+  // sales activities of account executives and fixed asset disposals (migrations 0320 and 0321)
+  'sales_activities', 'fixed_asset_disposals',
 ];
 
 /**

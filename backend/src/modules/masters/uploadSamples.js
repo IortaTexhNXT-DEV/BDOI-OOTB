@@ -280,6 +280,17 @@ export const MASTER_TEMPLATES = [
     samples: [{ code: 'RS-010', name: 'Quality Auto Repair Center', address: '88 E. Rodriguez Jr. Ave.', city: 'Quezon City', contactPerson: 'Service Advisor', phone: '+63 2 8911 2233',
       email: 'service@qualityauto.example.ph', tin: '010-222-333-000', accredited: 'Yes', accreditedInsurers: 'Malayan, Pioneer', labourRatePerHour: '650' }],
   },
+  // sales activities (seed 76_sales_activities.sql): what account executives log and its outcome
+  {
+    type: 'sales-activity-type', menu: 'Master > Organization > Sales Activity Types',
+    formats: { channel: 'call, meeting, email, visit or other', followUpDays: 'Days from the activity to the next step date proposed', sortOrder: 'Order in the list' },
+    samples: [{ code: 'TRADE-FAIR', name: 'Trade fair or motor show', channel: 'meeting', followUpDays: '7', sortOrder: '80' }],
+  },
+  {
+    type: 'sales-activity-outcome', menu: 'Master > Organization > Sales Activity Outcomes',
+    formats: { result: 'positive, neutral or negative (counted in the activity report)', sortOrder: 'Order in the list' },
+    samples: [{ code: 'REFERRAL', name: 'Gave a referral', result: 'positive', sortOrder: '90' }],
+  },
 ];
 
 export const masterTemplateInfo = (code) => MASTER_TEMPLATES.find((m) => m.type === code) || null;

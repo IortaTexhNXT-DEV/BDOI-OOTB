@@ -35,6 +35,7 @@ import { notifyError } from "../../../utility/dialogs";
 import QuoteJourneyPanel from "../../../module/Placement/QuoteJourneyPanel";
 import CustomerResponseActions from "../customerResponse/CustomerResponseActions";
 import UnderwritingReferralPanel from "../underwritingReferral/UnderwritingReferralPanel";
+import ActivityPanel from "../../../components/SalesActivities/ActivityPanel";
 import logger from "../../../utility/logger";
 // Map API coverDesc values to fireLead.opt.cover translation keys (for Fire LOB coverage names)
 const COVER_DESC_TO_I18N_KEY = {
@@ -1216,6 +1217,11 @@ const QuoteDetailView = ({ action }) => {
                 </>
               )}
             </div>
+          </TabPanel>
+          <TabPanel header={t("salesActivities.title")}>
+            {(quotationData?.quotationId || quotationIdFromParams) && (
+              <ActivityPanel entity="quote" recordId={String(quotationData?.quotationId || quotationIdFromParams)} />
+            )}
           </TabPanel>
           <TabPanel header={t("quoteDetailView.auditTrail")}>
             <QuotationAuditTrail

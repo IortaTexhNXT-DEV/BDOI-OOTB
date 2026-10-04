@@ -29,6 +29,8 @@ import { notifyError } from "../../../../utility/dialogs";
 import { amountOptions, bodilyInjuryOptions, propertyDamageOptions } from "../../../../utility/quoteOptions";
 import logger from "../../../../utility/logger";
 import coverageInputErrors from "./coverageInputErrors";
+import useQuoteSetup from "../../utils/useQuoteSetup";
+import ProductCovers from "./ProductCovers";
 
 const CoverageDetailsCard = ({
   action,
@@ -296,6 +298,13 @@ const CoverageDetailsCard = ({
   const [includeCTPL, setIncludeCTPL] = useState(() =>
     isEditMode ? Boolean(existingCoverageDetails?.ctplCoverageRate) : true
   );
+  // excess bodily injury, property damage and auto passenger PA: included unless the agent removes the cover
+  const [includeBI, setIncludeBI] = useState(() => !isEditMode || Boolean(existingCoverageDetails?.bodilyInjury));
+  const [includePD, setIncludePD] = useState(() => !isEditMode || Boolean(existingCoverageDetails?.propertyDamage));
+  const [includeAPPA, setIncludeAPPA] = useState(() => !isEditMode || Boolean(existingCoverageDetails?.autoPassengerPersonalAccident));
+  // covers of the product template (Coverage Builder) and the optional covers without a quotation premium chosen
+  const quoteSetup = useQuoteSetup({ lob: "MOTOR" });
+  const [otherCovers, setOtherCovers] = useState(() => existingCoverageDetails?.selectedCovers || []);
   useEffect(() => {
     // The renewal flow sets these from the renewal prefill.
     if (flow === "renewal") return;
@@ -359,14 +368,16 @@ const CoverageDetailsCard = ({
       personalAccidentCoverPremium: includePersonalAccident
         ? values.PersonalAccidentCoverpremium
         : "",
-      bodilyInjury: values.BodilyInjury,
-      bodilyInjuryCoveragePremium: values.BodilyInjuryCoveragePremium,
-      propertyDamage: values.PropertyDamage,
-      propertyDamageCoveragePremium: values.PropertyDamageCoveragePremium,
-      autoPassengerPersonalAccident: values.AutopassengerpersonalAccident,
-      APPAtotalCoverage: values.APPATotalCoverage,
-      APPAcoveragePremium: values.APPACoveragePremium,
+      bodilyInjury: includeBI ? values.BodilyInjury : "",
+      bodilyInjuryCoveragePremium: includeBI ? values.BodilyInjuryCoveragePremium : "",
+      propertyDamage: includePD ? values.PropertyDamage : "",
+      propertyDamageCoveragePremium: includePD ? values.PropertyDamageCoveragePremium : "",
+      autoPassengerPersonalAccident: includeAPPA ? values.AutopassengerpersonalAccident : "",
+      APPAtotalCoverage: includeAPPA ? values.APPATotalCoverage : "",
+      APPAcoveragePremium: includeAPPA ? values.APPACoveragePremium : "",
       totalSumInsured: values.TotalSumInsured,
+      // covers of the product template chosen (the server prices on the same choice)
+      ...(selectedCovers ? { selectedCovers } : {}),
       // Include premium breakdown if calculated
       ...(premiumBreakdown && {
         netPremium: premiumBreakdown.netPremium,
@@ -472,10 +483,11 @@ const CoverageDetailsCard = ({
       personalAccidentCoverRate: includePersonalAccident
         ? formik.values.PersonalAccidentCoverRate
         : "0",
-      bodilyInjury: formik.values.BodilyInjury,
-      propertyDamage: formik.values.PropertyDamage,
-      autoPassengerPersonalAccident:
-        formik.values.AutopassengerpersonalAccident,
+      bodilyInjury: includeBI ? formik.values.BodilyInjury : "",
+      propertyDamage: includePD ? formik.values.PropertyDamage : "",
+      autoPassengerPersonalAccident: includeAPPA
+        ? formik.values.AutopassengerpersonalAccident
+        : "",
       appaSeats,
       appaRatePercent: motorTariff.appa.ratePercent,
     });
@@ -541,6 +553,10 @@ const CoverageDetailsCard = ({
       includeCTPL
     );
 
+    // covers removed on this quotation stay empty
+    if (!includeBI) Object.assign(sanitizedValues, { BodilyInjury: "", BodilyInjuryCoveragePremium: "" });
+    if (!includePD) Object.assign(sanitizedValues, { PropertyDamage: "", PropertyDamageCoveragePremium: "" });
+    if (!includeAPPA) Object.assign(sanitizedValues, { AutopassengerpersonalAccident: "", APPATotalCoverage: "", APPACoveragePremium: "" });
     formik.setValues(sanitizedValues);
     formik.setTouched({});
     setTimeout(() => setshow(false), 0);
@@ -634,6 +650,55 @@ const CoverageDetailsCard = ({
       formik.setValues(sanitizedValues);
     }
   };
+
+  // ---------------------------------------------------------------- covers of the product template
+  const templateCovers = quoteSetup.covers || [];
+  const governed = templateCovers.length > 0;
+  const coversOf = (field) => templateCovers.filter((c) => c.quoteField === field);
+  // a cover is offered when the governing template lists it (every cover when no template governs the quotation)
+  const offered = (field) => !governed || coversOf(field).length > 0;
+  const mandatory = (field) => governed && coversOf(field).some((c) => c.type === "Mandatory");
+  const removeBI = (on) => {
+    setIncludeBI(on);
+    if (!on) { formik.setFieldValue("BodilyInjury", ""); formik.setFieldValue("BodilyInjuryCoveragePremium", ""); }
+    setshow(true);
+  };
+  const removePD = (on) => {
+    setIncludePD(on);
+    if (!on) { formik.setFieldValue("PropertyDamage", ""); formik.setFieldValue("PropertyDamageCoveragePremium", ""); }
+    setshow(true);
+  };
+  const removeAPPA = (on) => {
+    setIncludeAPPA(on);
+    if (!on) { formik.setFieldValue("AutopassengerpersonalAccident", ""); formik.setFieldValue("APPATotalCoverage", ""); formik.setFieldValue("APPACoveragePremium", ""); }
+    setshow(true);
+  };
+  const FIELD_STATE = {
+    lossAndDamageCoveragePremium: [true, () => {}],
+    actsOfNaturePremium: [includeActsOfNature, (on) => { handleActsOfNatureToggle(on); setshow(true); }],
+    roadsideAssistancePremium: [includeRoadsideAssistance, (on) => { handleRoadsideAssistanceToggle(on); setshow(true); }],
+    personalAccidentCoverPremium: [includePersonalAccident, (on) => { handlePersonalAccidentToggle(on); setshow(true); }],
+    ctplCoveragePremium: [includeCTPL, (on) => { handleCTPLToggle(on); setshow(true); }],
+    bodilyInjuryCoveragePremium: [includeBI, removeBI],
+    propertyDamageCoveragePremium: [includePD, removePD],
+    APPAcoveragePremium: [includeAPPA, removeAPPA],
+  };
+  const coverSelected = (c) => (c.quoteField ? (FIELD_STATE[c.quoteField] ? FIELD_STATE[c.quoteField][0] : true) : otherCovers.includes(c.code));
+  const toggleCover = (c, on) => {
+    if (c.quoteField && FIELD_STATE[c.quoteField]) FIELD_STATE[c.quoteField][1](on);
+    else if (!c.quoteField) setOtherCovers((list) => (on ? [...new Set([...list, c.code])] : list.filter((x) => x !== c.code)));
+  };
+  const selectedCovers = governed ? templateCovers.filter((c) => c.type === "Mandatory" || coverSelected(c)).map((c) => c.code) : null;
+  // when the template is known: covers it does not list are left out, its mandatory covers are included
+  useEffect(() => {
+    if (!governed) return;
+    for (const [field, [on, set]] of Object.entries(FIELD_STATE)) {
+      if (field === "lossAndDamageCoveragePremium") continue;
+      if (!offered(field) && on) set(false);
+      else if (mandatory(field) && !on) set(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [governed, quoteSetup.templateCode]);
 
   //   return errors
   // }
@@ -841,6 +906,7 @@ const CoverageDetailsCard = ({
         <div className="coverage__details__card__container__title">
           {flow === "renewal" ? t("coverageDetailsCard.renewalDetails") : t("coverageDetailsCard.createQuote")}
         </div>
+        <ProductCovers setup={quoteSetup} isSelected={coverSelected} onToggle={toggleCover} />
         <div className="coverage__details__card__container__sub__title mt-2 mb-2">
           {t("coverageDetailsCard.coveragesDetails")}
         </div>
@@ -896,12 +962,14 @@ const CoverageDetailsCard = ({
               )}
           </div>
         </div>
+        {offered("ctplCoveragePremium") && (
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <div className="flex align-items-center gap-2 mb-2">
               <Checkbox
                 inputId="include-ctpl"
                 checked={includeCTPL}
+                disabled={mandatory("ctplCoveragePremium")}
                 onChange={(e) => handleCTPLToggle(e.checked)}
               />
               <label htmlFor="include-ctpl" className="m-0">
@@ -938,12 +1006,15 @@ const CoverageDetailsCard = ({
             )}
           </div>
         </div>
+        )}
+        {offered("actsOfNaturePremium") && (
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <div className="flex align-items-center gap-2 mt-3">
               <Checkbox
                 inputId="include-acts-of-nature"
                 checked={includeActsOfNature}
+                disabled={mandatory("actsOfNaturePremium")}
                 onChange={(e) => handleActsOfNatureToggle(e.checked)}
               />
               <label htmlFor="include-acts-of-nature" className="m-0">
@@ -953,6 +1024,7 @@ const CoverageDetailsCard = ({
             <div className="flex align-items-center gap-2 mt-3"></div>
           </div>
         </div>
+        )}
         {includeActsOfNature && (
           <div className="grid m-0 mt-2">
             <div className="col-12 md:col-6 lg:col-6">
@@ -992,12 +1064,14 @@ const CoverageDetailsCard = ({
           </div>
         )}
 
+        {offered("roadsideAssistancePremium") && (
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <div className="flex align-items-center gap-2 mt-3">
               <Checkbox
                 inputId="include-roadside-assistance"
                 checked={includeRoadsideAssistance}
+                disabled={mandatory("roadsideAssistancePremium")}
                 onChange={(e) => handleRoadsideAssistanceToggle(e.checked)}
               />
               <label htmlFor="include-roadside-assistance" className="m-0">
@@ -1006,6 +1080,7 @@ const CoverageDetailsCard = ({
             </div>
           </div>
         </div>
+        )}
         {includeRoadsideAssistance && (
           <div className="grid m-0 mt-2">
             <div className="col-12 md:col-6 lg:col-6">
@@ -1044,12 +1119,14 @@ const CoverageDetailsCard = ({
             </div>
           </div>
         )}
+        {offered("personalAccidentCoverPremium") && (
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <div className="flex align-items-center gap-2 mt-3">
               <Checkbox
                 inputId="include-personal-accident"
                 checked={includePersonalAccident}
+                disabled={mandatory("personalAccidentCoverPremium")}
                 onChange={(e) => handlePersonalAccidentToggle(e.checked)}
               />
               <label htmlFor="include-personal-accident" className="m-0">
@@ -1058,6 +1135,7 @@ const CoverageDetailsCard = ({
             </div>
           </div>
         </div>
+        )}
         {includePersonalAccident && (
           <div className="grid m-0 mt-2">
             <div className="col-12 md:col-6 lg:col-6">
@@ -1096,6 +1174,7 @@ const CoverageDetailsCard = ({
             </div>
           </div>
         )}
+        {offered("bodilyInjuryCoveragePremium") && includeBI && (
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <DropdownField
@@ -1136,6 +1215,8 @@ const CoverageDetailsCard = ({
               )}
           </div>
         </div>
+        )}
+        {offered("propertyDamageCoveragePremium") && includePD && (
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-6 lg:col-6">
             <DropdownField
@@ -1176,6 +1257,9 @@ const CoverageDetailsCard = ({
               )}
           </div>
         </div>
+        )}
+        {offered("APPAcoveragePremium") && includeAPPA && (
+        <>
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-12 lg:col-12">
             <DropdownField
@@ -1219,6 +1303,8 @@ const CoverageDetailsCard = ({
             />
           </div>
         </div>
+        </>
+        )}
         <div className="grid m-0 mt-2">
           <div className="col-12 md:col-12 lg:col-12">
             {isOverRide ? (

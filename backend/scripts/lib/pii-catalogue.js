@@ -330,6 +330,18 @@ export const CATALOGUE = {
   'supplier_payments.remarks': 'freeText',
   'fixed_assets.custodian': { rule: 'personName', party: 'staff' },
   'fixed_assets.disposal_remarks': 'freeText',
+  // ---------------------------------------------------------------- sales activities and asset disposals (0320, 0321)
+  'sales_activities.subject': 'freeText',
+  'sales_activities.notes': 'freeText',
+  'sales_activities.contact_person': 'personName',
+  'sales_activities.location': 'address',
+  'sales_activities.next_step': 'freeText',
+  'sales_activities.cancel_reason': 'freeText',
+  'fixed_asset_disposals.buyer_name': 'partyName',
+  'fixed_asset_disposals.buyer_tin': 'tin',
+  'fixed_asset_disposals.buyer_address': 'address',
+  'fixed_asset_disposals.reason': 'freeText',
+  'fixed_asset_disposals.cancel_reason': 'freeText',
   // ---------------------------------------------------------------- distribution, programmes and products (0300 to 0308)
   'distribution_channels.contact_person': 'personName',
   'distribution_channels.contact_email': 'email',
@@ -509,6 +521,7 @@ export const ALLOW_LIST = {
   'distribution_channels.letter_addressee': 'a position at a bank ("The Manager, Auto Loans"), not a person',
   'motor_programmes.subsidy_payer': 'code: none, dealer or bank',
   'fac_settlements.bank_account': 'code of the broker\'s own bank account (Bank Account master)',
+  'fixed_asset_disposals.bank_account': 'code of the broker\'s own bank account the sale proceeds were received into (Bank Account master)',
 };
 
 /**

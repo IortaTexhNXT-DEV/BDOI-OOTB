@@ -116,6 +116,11 @@ export const EVENTS = {
     sample: { amounts: { amount: 11100 }, vars: { supplierName: 'Sample Supplier', paymentNumber: 'SPV-SAMPLE', memoRef: 'Cheque 000123' }, paymentMode: 'check' } },
   'fa.depreciation': { label: 'Monthly depreciation', module: 'fixed-assets', amounts: ['amount'], vars: ['period', 'assetClass'], contextAccounts: ['expense', 'accumulated'],
     sample: { amounts: { amount: 10000 }, vars: { period: '2026-09', assetClass: 'Computer equipment' }, accounts: { expense: '4406001', accumulated: '1402003' } } },
+  // fixed asset sold or written off (migration 0321): a negative gain_loss is posted as loss, a positive one as gain
+  'fa.disposal': { label: 'Fixed asset disposed', module: 'fixed-assets', amounts: ['cost', 'accumulated', 'receivable', 'vat', 'gain', 'loss'],
+    vars: ['disposalNumber', 'assetNumber', 'assetName', 'buyer'], contextAccounts: ['asset', 'accumulated', 'proceeds', 'vat'],
+    sample: { amounts: { cost: 360000, accumulated: 300000, receivable: 56000, vat: 6000, gain: 0, loss: 10000 },
+      vars: { disposalNumber: 'FAD-SAMPLE', assetNumber: 'FA-SAMPLE', assetName: 'Laptop computers', buyer: 'Sample Buyer' }, accounts: { asset: '1401003', accumulated: '1402003' } } },
 };
 for (const e of Object.values(EVENTS)) {
   if (!e.sameAs) continue;
