@@ -86,7 +86,7 @@ DOCS = [
     ('05_Delivery', 'BrokerVerse_Implementation_Approach_and_Plan', 'docx, pdf', 'Method, phases, plans by size, roles, governance and risks', [D, M], True, [PRE, IMP]),
     ('05_Delivery', 'BrokerVerse_Implementation_Plan', 'xlsx', 'Gantt plans for the three sizes and the RACI matrix', [D], True, [IMP]),
     ('05_Delivery', 'BrokerVerse_Dependency_Map_and_Critical_Path', 'docx, pdf', 'Dependencies between work streams, partners and decisions, and the critical path to go-live', [D, M], True, [IMP, GO]),
-    ('05_Delivery', 'BrokerVerse_Fit_Gap_Register', 'xlsx', 'Register of requirements classed Fit, Configure, Procedure or Gap', [B, D, M], True, [IMP]),
+    ('05_Delivery', 'BrokerVerse_Fit_Gap_Register', 'xlsx', 'Register of requirements classed Fit, Configure, Procedure or Gap, with the product gaps closed in this release', [B, D, M], True, [IMP]),
     ('05_Delivery', 'BrokerVerse_RAID_Log_Template', 'xlsx', 'Risks, assumptions, issues and dependencies with scoring and summary', [D, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Project_Status_Report_Template', 'docx, pdf', 'Weekly or fortnightly status and steering committee report', [D, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Training_Plan', 'docx, pdf', 'Training and change management by role', [D, U], True, [IMP]),
@@ -100,6 +100,8 @@ DOCS = [
     ('05_Delivery', 'BrokerVerse_Test_Cases', 'xlsx', 'Release test cases with regulatory references, the requirements traceability matrix (sheet Requirements Traceability: the 150 processes to test cases and automated tests), defects', [Q, V], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Test_Summary_Report', 'docx, pdf', 'Results of the release test', [Q, D, V, M], True, [PRE, GO]),
     ('05_Delivery', 'BrokerVerse_Philippine_Regulatory_Compliance_Matrix', 'docx, pdf', 'How the product supports IC, BIR, premium tax, CTPL, DPA and AMLA obligations', [S, B, Q, M], True, [PRE, IMP]),
+    ('05_Delivery', 'BrokerVerse_Business_Requirements_Document', 'docx, pdf', 'Business requirements by process area with acceptance criteria and the screen that meets each, non-functional requirements and the functional specification by module', [D, S, M], True, [PRE, IMP]),
+    ('05_Delivery', 'BrokerVerse_Process_Flow_Document', 'docx, pdf', 'End-to-end process flows with swimlane diagrams, numbered steps, postings, documents and controls', [D, P], True, [IMP, GO, SUP]),
     # ---------------------------------------------------------------- 06_Support
     ('06_Support', 'BrokerVerse_Production_Support_Approach_and_Standards', 'docx, pdf', 'Support model, severities, change and release management, monitoring, and the procedures for integrations, compliance deadlines, keys, brand packs and e-signatures', [P, M], True, [CON, GO, SUP]),
     ('06_Support', 'BrokerVerse_Business_Continuity_and_Disaster_Recovery_Plan', 'docx, pdf', 'Backups, keys, recovery objectives, scenarios, partner outages and DR tests', [P, M], True, [CON, SUP]),
