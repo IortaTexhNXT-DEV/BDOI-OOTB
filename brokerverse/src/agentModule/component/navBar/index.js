@@ -17,6 +17,7 @@ import { currentUser, displayNameOf, roleLineOf } from "../../../utility/userIde
 import profileService, { PROFILE_UPDATED_EVENT } from "../../../services/profileService";
 import logger from "../../../utility/logger";
 import { openHelp } from "../../../components/HelpPanel/helpEvents";
+import { canViewFullIdentifiers, isRevealOn, setRevealOn } from "../../../utility/piiReveal";
 
 export const PROFILE_PATH = "/account/profile";
 /** Notifications listed in the bell panel (the full list is on the Notifications page). */
@@ -103,6 +104,13 @@ const AgentNavBar = () => {
   };
 
   const menuItem = (label, icon, command) => ({ label, icon: `pi ${icon}`, command, className: "bv-user-menu__item" });
+  // "Show full identifiers": holders of view:pii unmask personal identifiers for this tab (recorded in the audit trail)
+  const [revealOn, setReveal] = useState(isRevealOn());
+  const toggleReveal = () => {
+    setRevealOn(!revealOn);
+    setReveal(!revealOn);
+    window.location.reload();
+  };
 
   const profileItems = [
     {
@@ -120,6 +128,9 @@ const AgentNavBar = () => {
         menuItem(t("security.changePassword"), "pi-key", () => setSecurityDialog("password")),
         menuItem(t("security.twoFactor"), "pi-shield", () => setSecurityDialog("2fa")),
         menuItem(t("header.help"), "pi-question-circle", openHelp),
+        ...(canViewFullIdentifiers()
+          ? [menuItem(revealOn ? t("header.hideFullIdentifiers") : t("header.showFullIdentifiers"), revealOn ? "pi-eye-slash" : "pi-eye", toggleReveal)]
+          : []),
       ],
     },
     { separator: true },

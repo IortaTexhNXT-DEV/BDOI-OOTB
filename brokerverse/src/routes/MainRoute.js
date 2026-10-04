@@ -280,6 +280,13 @@ import SodRules from "../module/AccessControl/SodRules";
 import AccessReviews from "../module/AccessControl/AccessReviews";
 import DataSubjectRequests from "../module/DataPrivacy/DataSubjectRequests";
 import ConsentRegister from "../module/DataPrivacy/ConsentRegister";
+import LicenceRegister from "../module/Compliance/LicenceRegister";
+import FitAndProper from "../module/Compliance/FitAndProper";
+import InsurerAuthority from "../module/Compliance/InsurerAuthority";
+import Complaints from "../module/Compliance/Complaints";
+import IcAnnualStatement from "../module/Compliance/IcAnnualStatement";
+import IcProductionReport from "../module/Compliance/IcProductionReport";
+import BreachRegister from "../module/Compliance/BreachRegister";
 import GoLiveDataLoad from "../module/GoLiveDataLoad";
 import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
@@ -1103,6 +1110,13 @@ const Maincomponent = () => {
           <Route path="/master/generals/usermanagement/access-reviews" element={<AccessReviews />} />
           <Route path="/master/data-privacy/requests" element={<DataSubjectRequests />} />
           <Route path="/master/data-privacy/consents" element={<ConsentRegister />} />
+          <Route path="/compliance/licences" element={<LicenceRegister />} />
+          <Route path="/compliance/fit-and-proper" element={<FitAndProper />} />
+          <Route path="/compliance/insurer-authority" element={<InsurerAuthority />} />
+          <Route path="/compliance/complaints" element={<Complaints />} />
+          <Route path="/compliance/ic-annual-statement" element={<IcAnnualStatement />} />
+          <Route path="/compliance/ic-production-report" element={<IcProductionReport />} />
+          <Route path="/compliance/breaches" element={<BreachRegister />} />
           <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
           <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
