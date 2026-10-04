@@ -43,11 +43,13 @@ afterAll(async () => { await pool.end(); });
 
 describe('field-level encryption (14.13)', () => {
   it('stores TIN and government ID numbers encrypted with a blind index; the API answers them in clear', async () => {
-    const row = await one('SELECT tin, tin_bidx, extra FROM clients WHERE id = $1', [clientId]);
+    const row = await one('SELECT tin, tin_bidx, id_number, extra FROM clients WHERE id = $1', [clientId]);
     expect(isPiiCipher(row.tin)).toBe(true);
     expect(row.tin).not.toContain('123');
     expect(row.tin_bidx).toBe(blindIndex('123456789000'));
-    expect(isPiiCipher(row.extra.idNumber)).toBe(true);
+    // the government ID number lives in its own column since the AML onboarding (0260); encrypted by 0331
+    expect(isPiiCipher(row.id_number)).toBe(true);
+    expect(row.id_number).not.toContain('99-123456');
     const r = await ctx.api('get', `/clients/${clientId}`);
     expect(r.body.taxNumber).toBe(TIN);
     expect(r.body.idNumber).toBe('N01-99-123456');
