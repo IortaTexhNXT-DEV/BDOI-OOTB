@@ -1,12 +1,12 @@
 ---
 title: Service Catalogue
 subtitle: And rate annex
-version: 1.0
-date: 03 October 2026
+version: 1.0.1
+date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: Legal counsel (to be completed)
 approved: To be completed
-change: Template for discussion; subject to review by the parties' legal counsel
+change: Version 1.0.1: optional services confirmed by management on 04 October 2026: optional modules and partner services (module activation, connector go-live, dealer programme set-up, client brand pack, regulator and partner items) added to S08 with their man-days and rates; package totals unchanged. Version 1.0: template for discussion; subject to review by the parties' legal counsel
 open_item: Rates to be confirmed against the price book at each issue; review by the parties' legal counsel before signature
 acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; DR=Disaster recovery; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
@@ -17,7 +17,7 @@ acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Ch
 
 This Service Catalogue and Rate Annex (the **Rate Annex**) lists the services of iNXT BrokerVerse OOTB that iorta TechNXT Corp. (**iorta TechNXT**) provides under the Master Services Agreement (the **MSA**), with their units and list rates, the optional services, and the work that is outside the OOTB scope. It is an annex to every Order Form between iorta TechNXT and [Client legal name] (the **Client**).
 
-- The rates are the list rates of the iorta TechNXT price book dated 03 October 2026 (`iNXT_BrokerVerse_Price_Book.xlsx` and the Rate Card). They are the same as the rates in the Perpetual Software Licence Agreement, the Software Subscription Agreement, the Implementation SOW, the Change Request Procedure, the Annual Maintenance and Support Agreement and SLA and the Hosting and Infrastructure Services Agreement.
+- The rates are the list rates of the iorta TechNXT price book dated 04 October 2026 (`iNXT_BrokerVerse_Price_Book.xlsx` and the Rate Card). They are the same as the rates in the Perpetual Software Licence Agreement, the Software Subscription Agreement, the Implementation SOW, the Change Request Procedure, the Annual Maintenance and Support Agreement and SLA and the Hosting and Infrastructure Services Agreement.
 - The rates of the signed Order Form, including any discount shown there as a separate line, prevail over this Rate Annex.
 - All amounts are in PHP and exclude 12% VAT. Withholding tax is handled under the Taxes clause of the MSA and does not reduce the invoice price.
 - Day rates are fixed for 12 months from the date of the Order Form and may then be reviewed once a year with 60 days' written notice.
@@ -38,7 +38,7 @@ Text in [square brackets] is a placeholder or an option. Capitalised terms have 
 | S05 | Standard support included in the subscription | Subscription | Annual Maintenance and Support Agreement and SLA |
 | S06 | 24x7 Severity 1 support (extended P1 support) | Both, optional | Annual Maintenance and Support Agreement and SLA |
 | S07 | Hosting of the environment set of the size and the temporary Pre-Prod | Both, optional | Hosting and Infrastructure Services Agreement |
-| S08 | Optional services: environments, training, data migration, integrations, lines of business, reports, on-site days | Both | Order Form and this Rate Annex |
+| S08 | Optional services: environments, training, data migration, integrations, lines of business, reports, on-site days; optional modules and partner services (module activation, connector go-live, dealer programme set-up, client brand pack, regulator and partner items) | Both | Order Form and this Rate Annex |
 | S09 | Change requests | Both | Change Request Procedure |
 | S10 | Exit and transition assistance | Subscription and hosting | Exit and Transition Plan |
 | S11 | Source code escrow | Perpetual, optional | Source Code Escrow Agreement |
@@ -167,6 +167,29 @@ The fee of each environment is in Annex A of the Hosting Agreement. Cloud and lo
 | Refresher training beyond [one] session a year (AMC exclusion) | Per trainer day | 30,000.00 | On delivery |
 | Travel, lodging and meals outside Metro Manila | At cost, with receipts, approved in advance | At cost | Monthly in arrears |
 
+### Optional modules and partner services
+
+Every module of the Software is included in the licence or subscription fee and in every package. The services in this table are optional, add-on items that the Client may order on an Order Form at any time: the set-up of a module with the Client's officers and advisers, the go-live of a delivered connector with its partner, and the validation or certification steps a regulator or a partner requires before first use. Each rate is the stated man-days at the blended day rate of S09 (PHP 16,100.00), rounded to PHP 10,000.00. The fees of the regulator or the partner (AMLC, IC, BIR, the CTPL provider, insurers, banks, gateways and screening list providers) are not included; the Client contracts with and pays the partner directly, and every filing, registration and enrolment with a regulator is made by the Client in its own name. The Client's compliance officer, accountant and tax adviser confirm the settings and the treatment. Ordering any of these services does not change the price of a package.
+
+| Item | Man-days | Rate (PHP) | Scope | Billing |
+|---|---|---|---|---|
+| Connector go-live with a partner | 5 | 80,000.00 per connector | One delivered connector (one SMS gateway, the CTPL provider and LTO feed, one insurer's API mapping, one bank's file layout, or the BIR EIS) taken live: configuration, credential check, live test and support of the partner's acceptance | On delivery |
+| Activation of the AML/CFT toolkit | 8 | 130,000.00 one-time | Risk factors and rules workshop with the compliance officer, settings, first list loads, provider set-up and a test AMLC file | On delivery |
+| Activation of the IC compliance registers | 6 | 100,000.00 one-time | Licence and fit and proper register load, insurer certificates, complaints and breach settings, mapping of the IC statement to the Client's chart of accounts | On delivery |
+| Activation of the BIR pack | 8 | 130,000.00 one-time | BIR and EOPT invoice settings with the tax adviser, ATC mapping, DAT file dry run, CAS books pack | On delivery |
+| Dealer programme set-up | 3 | 50,000.00 per programme | Channels, rates, subsidy, bank letter and the first upload of one programme | On delivery |
+| Client brand pack | 2 | 30,000.00 per pack | Theme, sign-in picture, document and e-mail branding, e-signature mapping and the exported pack; third-party marks only with the owner's written permission | On delivery |
+| AMLC reporting file validation and portal test | 3 | 50,000.00 one-time | CTR and STR layout, institution and transaction codes confirmed with the AMLC, test file accepted in the AMLC portal | On delivery |
+| IC annual statement form alignment | 3 | 50,000.00 one-time | The accountant's working paper mapped to the IC form set in force for the year | On delivery |
+| EOPT invoicing review with the Client's tax adviser | 2 | 30,000.00 one-time | Registered invoice documents, supplementary wording, VAT treatment, ATP or CAS | On delivery |
+| BIR CAS registration support | 4 | 60,000.00 one-time | Books, system description and the Permit to Use filing prepared with the Client | On delivery |
+| BIR EIS enrolment and certification | 5 | 80,000.00 one-time | EIS enrolment, signing certificate, final field list, production endpoint and certification of the connector | On delivery |
+| CTPL authentication and LTO interface certification | 4 | 60,000.00 one-time | Acceptance of the live requests by the accredited provider, COC series and the LTO interface where the provider does not transmit | On delivery |
+| Insurer API onboarding | 3 | 50,000.00 per insurer | Endpoint, credentials, field mapping and live test with one insurer | On delivery |
+| Bank payment file certification | 2 | 30,000.00 per bank | Layout validated against the bank's specification and a test file accepted by the bank | On delivery |
+| SMS or Viber gateway activation | 1 | 20,000.00 one-time | Sender name or short code, live credentials, templates and consent check tested with the gateway | On delivery |
+| Screening list provider onboarding | 2 | 30,000.00 one-time | Provider contract data, API key, adapter test and first screening run | On delivery |
+
 ## S09: change requests and day rates
 
 | Role | Day rate (PHP) |
@@ -242,11 +265,11 @@ The following are outside the OOTB scope and outside the AMC and the subscriptio
 
 1. Hardware, end-user devices, networks, browsers and office software.
 2. Infrastructure, operating system and database support where the Client hosts.
-3. Third-party licences and fees: cloud subscriptions beyond the agreed hosting, mailboxes, payment gateway merchant fees, SMS charges, certificates for Client-owned domains, escrow agent fees.
+3. Third-party licences and fees: cloud subscriptions beyond the agreed hosting, mailboxes, payment gateway merchant fees, SMS charges, certificates for Client-owned domains, escrow agent fees, and the fees of the partners whose interfaces the optional modules and partner services of S08 take live (CTPL provider, insurers, banks, gateways, screening list providers).
 
 ## Regulatory and advice
 
-1. Regulatory filings and registrations: BIR returns and alphalists, Computerized Accounting System registration, Authority to Print, IC reports, NPC registration, AMLC reports.
+1. Regulatory filings and registrations: BIR returns and alphalists, Computerized Accounting System registration, Authority to Print, IC reports, NPC registration, AMLC reports. The preparation support for some of these (CAS registration, EIS enrolment, AMLC file validation, IC statement form alignment, EOPT invoicing review) is available as an optional module or partner service of S08; the filing itself and the regulator's fees remain with the Client.
 2. Tax, legal, actuarial or audit advice.
 
 ## Training and support

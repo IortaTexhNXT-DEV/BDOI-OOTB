@@ -1,11 +1,12 @@
 ---
 title: Negotiation Playbook
 subtitle: INTERNAL: not for clients
-version: 1.0
-date: 03 October 2026
+version: 1.0.1
+date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
+change: Version 1.0.1: optional services confirmed by management on 04 October 2026: the optional modules and partner services (module activation, connector go-live, regulator and partner items) are one-time optional services under the approval matrix; regulator and partner fees are never discounted. Version 1.0: initial issue
 acronyms: AM=Account manager; AMC=Annual Maintenance Contract; CEO=Chief executive officer; CR=Change request; Dev=Development environment; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SH=Sales head; SIT=System integration test; SLA=Service level agreement; SOW=Statement of work; UAT=User acceptance test; VAT=Value-added tax
 ---
 
@@ -21,7 +22,7 @@ All figures are in PHP and exclude 12% VAT. List prices are the recommended pric
 
 - Start at list price. Show the list price in every presentation and in the first quotation.
 - Trade, do not give. Every concession is exchanged for something of value to iorta TechNXT: term, cash timing, a reference, scope or a signing date.
-- Move scope before price. A smaller scope at full rate keeps the price list intact; a discount weakens it for every later deal.
+- Move scope before price. A smaller scope at full rate keeps the price list intact; a discount weakens it for every later deal. The optional modules and partner services are the first scope to move: a broker that wants a lower first invoice can defer a module activation or a partner certification to a later Order Form at the same list price.
 - Protect the recurring line. Subscription, AMC and hosting fund support for years. One-time fees can move more easily than recurring fees.
 - Never go below the floor. The floor is the CEO limit. Nobody can approve a price below it.
 - Write it down. Every discount appears as a separate line on the quotation and the Order Form, with the lever named.
@@ -41,6 +42,7 @@ All figures are in PHP and exclude 12% VAT. List prices are the recommended pric
 | AMC rate (22%) and yearly escalation (5%) | Not discounted | Not discounted | Not discounted | 22% and 5% |
 
 - The approver is set by the highest discount on any component. A deal with 4% on subscription and 7% on implementation needs the sales head.
+- The optional modules and partner services of the Rate Card (activation of the AML/CFT toolkit, the IC compliance registers and the BIR pack, connector go-live, dealer programme set-up, client brand packs, and the regulator and partner items: AMLC file validation, IC annual statement form alignment, EOPT invoicing review, BIR CAS registration support, BIR EIS enrolment, CTPL and LTO certification, insurer API onboarding, bank file certification, SMS or Viber gateway activation, screening list provider onboarding) are one-time optional services and follow that row: 5%, 10%, 15%, floor 85% of list. They were confirmed by management on 04 October 2026 as add-on items; they are never folded into a package price, and the regulator's or partner's own fees, which are not in these prices, are never discounted or absorbed.
 - Levers that "count toward the limit" (chapter 5) add to the discretionary discount. The total may not pass the CEO limit.
 - AMC follows the quoted (net) licence fee. A discount on the licence therefore also lowers the AMC. This is why the licence discount needs care.
 - Hosting carries a 20% margin over the estimated cloud cost of each environment. At 10% off, about 8% remains for exchange rate movement and operations. Never discount hosting to win the software deal, and never drop an environment of the set (Dev, UAT, SIT for large brokers) or the Pre-Prod months to lower the price: the environment set by broker size is a product owner decision, not a lever.

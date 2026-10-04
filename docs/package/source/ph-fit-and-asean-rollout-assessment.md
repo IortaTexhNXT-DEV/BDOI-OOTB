@@ -1,12 +1,12 @@
 ---
 title: Philippine Fit and ASEAN Rollout Assessment
 subtitle: iNXT BrokerVerse OOTB (INTERNAL)
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Version 1.1.1: release figures aligned (migrations to 0331, 104 backend test files, UAT scenario of 433 steps, go-live rehearsal of 52 checks); scores unchanged. Version 1.1: re-scored on the merged release (every package A to G); what was closed and what remains; ASEAN estimates recomputed on the new baseline
+change: Version 1.1.2: the regulator and partner items of "What remains" are available as optional modules and partner services of the Rate Card (management decision of 04 October 2026); scores unchanged. Version 1.1.1: release figures aligned (migrations to 0331, 104 backend test files, UAT scenario of 433 steps, go-live rehearsal of 52 checks); scores unchanged. Version 1.1: re-scored on the merged release (every package A to G); what was closed and what remains; ASEAN estimates recomputed on the new baseline
 open_item: Two processes scored 1 pending regulator confirmation (AMLC report file layout, IC annual statement form set); partner certifications of the integrations are onboarding tasks
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; AMLC=Anti-Money Laundering Council; AMLA=Anti-Money Laundering Act; KYC=Know your customer; CDD=Customer due diligence; EDD=Enhanced due diligence; PEP=Politically exposed person; CTPL=Compulsory Third Party Liability; COC=Certificate of cover; LTO=Land Transportation Office; PSGC=Philippine Standard Geographic Code; EOPT=Ease of Paying Taxes Act (RA 11976); RR=Revenue Regulations; CAS=Computerized Accounting System; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; GST=Goods and services tax; SST=Sales and service tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; EIS=Electronic Invoicing System; DAT=BIR validation data file; RFQ=Request for quotation; L1=Level 1 process area; L2=Level 2 process; UI=User interface; MAS=Monetary Authority of Singapore; BNM=Bank Negara Malaysia; OIC=Office of Insurance Commission (Thailand); OJK=Otoritas Jasa Keuangan (Indonesia); BDCB=Brunei Darussalam Central Bank; IRC=Insurance Regulator of Cambodia; PDPA=Personal Data Protection Act
 ---
@@ -24,6 +24,7 @@ This assessment answers three questions about BrokerVerse OOTB as it is on 04 Oc
 | 1.0 | 04 October 2026 | Pre-release assessment: overall fit 80.4%, regulatory 70.7%, 54 gaps, 12 processes in development |
 | 1.1 | 04 October 2026 | Re-score on the merged release (packages A to G): every one of the 150 processes re-verified against the code and tests; "Room to improve today" replaced by "What was closed in this release and what remains"; ASEAN change percentages recomputed on the new baseline |
 | 1.1.1 | 04 October 2026 | Release figures aligned with the release verification (Test Summary Report 1.3): migrations to 0331, 104 backend test files, UAT scenario of 433 steps, go-live rehearsal of 52 checks; scores unchanged (overall 99.3%, operational 100%, regulatory 97.8%) |
+| 1.1.2 | 04 October 2026 | The regulator and partner items of "What remains" are available as optional modules and partner services of the Rate Card, confirmed by management on 04 October 2026; scores unchanged |
 
 ## The answers
 
@@ -166,7 +167,7 @@ The other 39 gaps of 1.0, by the package that closed them:
 
 ## What remains
 
-The residual list is short and is of three kinds. None of it is a feature missing from the product; each item is a confirmation or a certification that only a regulator, a partner or the broker's adviser can give.
+The residual list is short and is of three kinds. None of it is a feature missing from the product; each item is a confirmation or a certification that only a regulator, a partner or the broker's adviser can give. Since 04 October 2026 iorta TechNXT offers the support for each of them as an optional module or partner service of the Rate Card (AMLC reporting file validation and portal test, IC annual statement form alignment, EOPT invoicing review with the broker's tax adviser, BIR CAS registration support, BIR EIS enrolment and certification, CTPL authentication and LTO interface certification, insurer API onboarding per insurer, bank payment file certification per bank, SMS or Viber gateway activation, screening list provider onboarding), priced at man-days times the blended rate with the regulator's or partner's own fees excluded; the availability of these services does not change any score in this assessment.
 
 **Scored 1 (in the fit figures).**
 

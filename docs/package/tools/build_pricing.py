@@ -93,7 +93,7 @@ wb.remove(wb.active)
 
 # ------------------------------------------------------------------ Read Me
 rm = sheet('Read Me', [26, 120], 'BrokerVerse OOTB: commercials and pricing workbook',
-           'iorta TechNXT. Prepared 03 October 2026. Prices in PHP, exclusive of 12% VAT. For discussion with prospective broker customers.')
+           'iorta TechNXT. Prepared 03 October 2026, revised 04 October 2026 (optional modules and partner services confirmed). Prices in PHP, exclusive of 12% VAT. For discussion with prospective broker customers.')
 rows = [
     ('Purpose', 'Sets the commercial model for BrokerVerse OOTB (the out-of-the-box, as-is version) for Philippine non-life insurance brokers: '
      'Model A perpetual licence with Annual Maintenance Contract (AMC), Model B monthly subscription (SaaS), optional infrastructure, '
@@ -304,12 +304,22 @@ for n, lab, v, unit, fmt, basis in [
     ('Int_Std_Days', 'Additional integration, standard (documented API or file)', 20, 'man-days', '0', 'Estimate: a new kind of interface not covered by the delivered connectors, e.g. a payment gateway variant or an accounting package feed.'),
     ('Int_Cx_Days', 'Additional integration, complex (no API, two-way, or batch reconciliation)', 45, 'man-days', '0', 'Estimate.'),
     ('Report_Days', 'New report or document template (typical)', 4, 'man-days', '0', 'Estimate: falls in the Small CR band.'),
-    ('Conn_Golive_Days', 'Go-live of a delivered connector with one partner (to confirm by management)', 5, 'man-days', '0', 'Assumption: SMS gateway, CTPL provider, one insurer API mapping, one bank file layout or the BIR EIS: configuration, credentials check, live test, support of the partner acceptance. To confirm by management.'),
-    ('AML_Act_Days', 'Activation of the AML/CFT toolkit (to confirm by management)', 8, 'man-days', '0', 'Assumption: risk factors and rules workshop with the compliance officer, settings, first list loads, provider set-up, AMLC test file. To confirm by management.'),
-    ('IC_Act_Days', 'Activation of the IC compliance registers (to confirm by management)', 6, 'man-days', '0', 'Assumption: licence and fit and proper register load, insurer certificates, complaints and breach settings, IC statement account mapping to the broker chart. To confirm by management.'),
-    ('BIR_Act_Days', 'Activation of the BIR pack (to confirm by management)', 8, 'man-days', '0', 'Assumption: BIR and EOPT invoice settings with the tax adviser, ATC mapping, DAT file dry run, CAS books pack. To confirm by management.'),
-    ('Dealer_Prog_Days', 'Set-up of one dealer programme (to confirm by management)', 3, 'man-days', '0', 'Assumption: channels, rates, subsidy, bank letter and the first upload. To confirm by management.'),
-    ('Brand_Pack_Days', 'Client brand pack (to confirm by management)', 2, 'man-days', '0', 'Assumption: theme, sign-in picture, document and e-mail branding, e-signature mapping, exported pack. To confirm by management.')]:
+    ('Conn_Golive_Days', 'Go-live of a delivered connector with one partner', 5, 'man-days', '0', 'Estimate: SMS gateway, CTPL provider, one insurer API mapping, one bank file layout or the BIR EIS: configuration, credentials check, live test, support of the partner acceptance. Optional service confirmed by management on 04 October 2026.'),
+    ('AML_Act_Days', 'Activation of the AML/CFT toolkit', 8, 'man-days', '0', 'Estimate: risk factors and rules workshop with the compliance officer, settings, first list loads, provider set-up, AMLC test file. Optional service confirmed by management on 04 October 2026.'),
+    ('IC_Act_Days', 'Activation of the IC compliance registers', 6, 'man-days', '0', 'Estimate: licence and fit and proper register load, insurer certificates, complaints and breach settings, IC statement account mapping to the broker chart. Optional service confirmed by management on 04 October 2026.'),
+    ('BIR_Act_Days', 'Activation of the BIR pack', 8, 'man-days', '0', 'Estimate: BIR and EOPT invoice settings with the tax adviser, ATC mapping, DAT file dry run, CAS books pack. Optional service confirmed by management on 04 October 2026.'),
+    ('Dealer_Prog_Days', 'Set-up of one dealer programme', 3, 'man-days', '0', 'Estimate: channels, rates, subsidy, bank letter and the first upload. Optional service confirmed by management on 04 October 2026.'),
+    ('Brand_Pack_Days', 'Client brand pack', 2, 'man-days', '0', 'Estimate: theme, sign-in picture, document and e-mail branding, e-signature mapping, exported pack. Optional service confirmed by management on 04 October 2026.'),
+    ('AMLC_Val_Days', 'AMLC reporting file validation and portal test', 3, 'man-days', '0', 'Estimate: CTR and STR layout, institution and transaction codes confirmed with the AMLC, test file accepted in the AMLC portal. Optional service confirmed by management on 04 October 2026.'),
+    ('IC_Form_Days', 'IC annual statement form alignment', 3, 'man-days', '0', 'Estimate: the accountant working paper mapped to the IC form set in force for the year. Optional service confirmed by management on 04 October 2026.'),
+    ('EOPT_Rev_Days', 'EOPT invoicing review with the broker tax adviser', 2, 'man-days', '0', 'Estimate: registered invoice documents, supplementary wording, VAT treatment, ATP or CAS. Optional service confirmed by management on 04 October 2026.'),
+    ('CAS_Reg_Days', 'BIR CAS registration support', 4, 'man-days', '0', 'Estimate: books, system description, Permit to Use filing prepared with the broker. Optional service confirmed by management on 04 October 2026.'),
+    ('EIS_Enrol_Days', 'BIR EIS enrolment and certification', 5, 'man-days', '0', 'Estimate: enrolment, signing certificate, final field list, production endpoint and certification of the connector. Optional service confirmed by management on 04 October 2026.'),
+    ('CTPL_Cert_Days', 'CTPL authentication and LTO interface certification', 4, 'man-days', '0', 'Estimate: acceptance of the live requests by the accredited provider, COC series, LTO interface. Optional service confirmed by management on 04 October 2026.'),
+    ('Insurer_Onb_Days', 'Insurer API onboarding, per insurer', 3, 'man-days', '0', 'Estimate: endpoint, credentials, field mapping and live test with one insurer. Optional service confirmed by management on 04 October 2026.'),
+    ('Bank_Cert_Days', 'Bank payment file certification, per bank', 2, 'man-days', '0', 'Estimate: layout validated against the bank specification and a test file accepted. Optional service confirmed by management on 04 October 2026.'),
+    ('SMS_Act_Days', 'SMS or Viber gateway activation', 1, 'man-days', '0', 'Estimate: sender name or short code, live credentials, templates and consent check tested. Optional service confirmed by management on 04 October 2026.'),
+    ('Screen_Prov_Days', 'Screening list provider onboarding', 2, 'man-days', '0', 'Estimate: provider contract data, API key, adapter test and first screening run. Optional service confirmed by management on 04 October 2026.')]:
     r += 1
     put(ws, r, 1, lab)
     put(ws, r, 2, v, fmt, inp=True)
@@ -932,26 +942,61 @@ items = [
     ('Data migration, additional effort', 'per man-day', '=Blended', None, 'For volume or data-quality work beyond the estimate.'),
     ('Additional integration, standard', 'per integration', '=ROUND(Int_Std_Days*Blended/Round_To,0)*Round_To', 'Int_Std_Days', 'One documented API or file exchange, one direction.'),
     ('Additional integration, complex', 'per integration', '=ROUND(Int_Cx_Days*Blended/Round_To,0)*Round_To', 'Int_Cx_Days', 'Two-way, no API, or batch with reconciliation.'),
-    ('Connector go-live with a partner', 'per connector', '=ROUND(Conn_Golive_Days*Blended/Round_To,0)*Round_To', 'Conn_Golive_Days', 'To confirm by management. A delivered connector (SMS gateway, CTPL provider, one insurer, one bank file layout, BIR EIS) taken live; the partner certifies its own side.'),
-    ('Activation of the AML/CFT toolkit', 'one-time', '=ROUND(AML_Act_Days*Blended/Round_To,0)*Round_To', 'AML_Act_Days', 'To confirm by management. The toolkit is included in the software; this is the set-up effort. The compliance officer confirms the settings and loads the lists.'),
-    ('Activation of the IC compliance registers', 'one-time', '=ROUND(IC_Act_Days*Blended/Round_To,0)*Round_To', 'IC_Act_Days', 'To confirm by management. Registers included in the software; this is the set-up effort.'),
-    ('Activation of the BIR pack', 'one-time', '=ROUND(BIR_Act_Days*Blended/Round_To,0)*Round_To', 'BIR_Act_Days', 'To confirm by management. BIR forms, EOPT invoices, EIS and CAS pack included in the software; the tax adviser confirms the treatment.'),
-    ('Dealer programme set-up', 'per programme', '=ROUND(Dealer_Prog_Days*Blended/Round_To,0)*Round_To', 'Dealer_Prog_Days', 'To confirm by management. Dealer programmes are included in the software; this is the set-up of one programme.'),
-    ('Client brand pack', 'per pack', '=ROUND(Brand_Pack_Days*Blended/Round_To,0)*Round_To', 'Brand_Pack_Days', 'To confirm by management. Branding is included in the software; a pack carrying third-party marks needs the owner\'s written permission.'),
     ('Additional line of business after go-live', 'per line', '=ROUND(Days_per_LOB*Blended/Round_To,0)*Round_To', 'Days_per_LOB', 'Product set-up, rating and tax lines, templates, testing.'),
     ('New report or document template', 'per item (typical)', '=ROUND(Report_Days*Blended/Round_To,0)*Round_To', 'Report_Days', 'Small CR band; firm price after the impact note.'),
     ('On-site day (Metro Manila)', 'per consultant day', '=Rate_Onsite', None, 'Outside Metro Manila: travel, lodging and meals at cost.'),
 ]
+
+
+def md_price(driver):
+    return f'=ROUND({driver}*Blended/Round_To,0)*Round_To'
+
+
+# Optional modules and partner services: confirmed by management on 04 October 2026 as optional, add-on items of the
+# OOTB offer (no package total changes). Man-days x blended rate, rounded to Round_To. The regulator's or partner's
+# own fees are not included.
+modules = [
+    ('Connector go-live with a partner', 'per connector', md_price('Conn_Golive_Days'), 'Conn_Golive_Days', 'A delivered connector (SMS gateway, CTPL provider, one insurer, one bank file layout, BIR EIS) taken live: configuration, credential check, live test, support of the partner acceptance; the partner certifies its own side.'),
+    ('Activation of the AML/CFT toolkit', 'one-time', md_price('AML_Act_Days'), 'AML_Act_Days', 'The toolkit is included in the software; this is the set-up effort: risk factors and rules workshop, settings, first list loads, provider set-up, AMLC test file. The compliance officer confirms the settings and loads the lists.'),
+    ('Activation of the IC compliance registers', 'one-time', md_price('IC_Act_Days'), 'IC_Act_Days', 'Registers included in the software; this is the set-up effort: licence and fit and proper register load, insurer certificates, complaints and breach settings, IC statement account mapping.'),
+    ('Activation of the BIR pack', 'one-time', md_price('BIR_Act_Days'), 'BIR_Act_Days', 'BIR forms, EOPT invoices, EIS and CAS pack included in the software; this is the set-up effort: BIR and EOPT invoice settings, ATC mapping, DAT file dry run, CAS books pack. The tax adviser confirms the treatment.'),
+    ('Dealer programme set-up', 'per programme', md_price('Dealer_Prog_Days'), 'Dealer_Prog_Days', 'Dealer programmes are included in the software; this is the set-up of one programme: channels, rates, subsidy, bank letter and the first upload.'),
+    ('Client brand pack', 'per pack', md_price('Brand_Pack_Days'), 'Brand_Pack_Days', 'Branding is included in the software; this is one pack: theme, sign-in picture, document and e-mail branding, e-signature mapping, exported pack. A pack carrying third-party marks needs the owner\'s written permission.'),
+    ('AMLC reporting file validation and portal test', 'one-time', md_price('AMLC_Val_Days'), 'AMLC_Val_Days', 'CTR and STR layout, institution and transaction codes confirmed with the AMLC, test file accepted in the AMLC portal.'),
+    ('IC annual statement form alignment', 'one-time', md_price('IC_Form_Days'), 'IC_Form_Days', 'The accountant working paper mapped to the IC form set in force for the year.'),
+    ('EOPT invoicing review with the broker tax adviser', 'one-time', md_price('EOPT_Rev_Days'), 'EOPT_Rev_Days', 'Registered invoice documents, supplementary wording, VAT treatment of each commission stream, ATP or CAS.'),
+    ('BIR CAS registration support', 'one-time', md_price('CAS_Reg_Days'), 'CAS_Reg_Days', 'Books, system description and the Permit to Use filing prepared with the broker; the broker files.'),
+    ('BIR EIS enrolment and certification', 'one-time', md_price('EIS_Enrol_Days'), 'EIS_Enrol_Days', 'EIS enrolment, signing certificate, final field list, production endpoint and certification of the connector.'),
+    ('CTPL authentication and LTO interface certification', 'one-time', md_price('CTPL_Cert_Days'), 'CTPL_Cert_Days', 'Acceptance of the live requests by the accredited provider, COC series, LTO interface where the provider does not transmit.'),
+    ('Insurer API onboarding, per insurer', 'per insurer', md_price('Insurer_Onb_Days'), 'Insurer_Onb_Days', 'Endpoint, credentials, field mapping and live test with one insurer.'),
+    ('Bank payment file certification, per bank', 'per bank', md_price('Bank_Cert_Days'), 'Bank_Cert_Days', 'Layout validated against the bank specification and a test file accepted by the bank.'),
+    ('SMS or Viber gateway activation', 'one-time', md_price('SMS_Act_Days'), 'SMS_Act_Days', 'Sender name or short code, live credentials, templates and consent check tested with the gateway.'),
+    ('Screening list provider onboarding', 'one-time', md_price('Screen_Prov_Days'), 'Screen_Prov_Days', 'Provider contract data, API key, adapter test and first screening run.'),
+]
 r = 4
-for lab, unit, f, days, note in items:
-    r += 1
-    put(op, r, 1, lab)
-    put(op, r, 2, unit)
-    put(op, r, 3, f, PHP, bold=True)
-    put(op, r, 4, f'=C{r}/FX', USD)
-    put(op, r, 5, f'={days}' if days else '', '0')
-    put(op, r, 6, note, wrap=True)
-    op.row_dimensions[r].height = 30
+
+
+def opt_rows(rows):
+    global r
+    for lab, unit, f, days, note in rows:
+        r += 1
+        put(op, r, 1, lab)
+        put(op, r, 2, unit)
+        put(op, r, 3, f, PHP, bold=True)
+        put(op, r, 4, f'=C{r}/FX', USD)
+        put(op, r, 5, f'={days}' if days else '', '0')
+        put(op, r, 6, note, wrap=True)
+        op.row_dimensions[r].height = 30
+
+
+opt_rows(items)
+r += 2
+sec(op, r, 'Optional modules and partner services (confirmed by management on 04 October 2026): man-days x blended rate, rounded to PHP 10,000; the regulator\'s or partner\'s own fees are not included', 6)
+r += 1
+head(op, r, ['Item', 'Unit', 'Price (PHP)', 'Price (USD)', 'Man-days', 'Scope'])
+opt_rows(modules)
+r += 2
+sec(op, r, '24x7 Severity 1 support', 6)
 for j in range(4):
     r += 1
     put(op, r, 1, f'="24x7 Severity 1 support, "&Inputs!A{T0+j}&" tier"')
@@ -967,7 +1012,7 @@ for line in ['Configuration of the company, branches, users and roles, insurers,
              'Data load using the standard upload templates (about 50 templates in docs/package/05_Delivery/Upload_Templates), with the broker supplying clean data.',
              'Training days included for the tier (train-the-trainer), UAT support, go-live support and 4 weeks of hypercare.',
              'Set-up of the environment set of the tier (Dev, UAT and Production; SIT as well for Large and Enterprise) and of Pre-Prod for the go-live rehearsal; hosting is billed separately. Deployment guidance when the broker hosts.',
-             'Every module is included in the software price, including the AML/CFT toolkit, the IC compliance registers, the BIR pack, the integration framework with its connectors, dealer programmes and branding. Their activation and each connector go-live are the optional lines above (to confirm by management).']:
+             'Every module is included in the software price, including the AML/CFT toolkit, the IC compliance registers, the BIR pack, the integration framework with its connectors, dealer programmes and branding. Their activation, each connector go-live and the regulator and partner services are the optional modules and partner services above, confirmed by management on 04 October 2026 as add-on items; no package total changes.']:
     r += 1
     op.cell(r, 1, line).alignment = WRAP
     op.merge_cells(start_row=r, start_column=1, end_row=r, end_column=6)
