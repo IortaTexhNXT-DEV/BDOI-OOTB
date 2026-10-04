@@ -9,8 +9,8 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 export const TOKENS = ['{PREFIX}', '{YYYY}', '{YY}', '{MM}', '{FY}', '{BRANCH}', '{LOB}', '{SEQ}'];
 export const RESET_RULES = ['yearly', 'fiscal_yearly', 'monthly', 'never'];
 
-const SELECT = `SELECT d.*, k.period_key, q.value AS current_value,
-    format_document_number(d.pattern, d.prefix, d.seq_width, COALESCE(q.value + 1, d.start_number), k.today, NULL, NULL) AS next_preview,
+const SELECT = `SELECT d.*, k.period_key, q.value AS current_value, numbering_start_number(d.code, k.period_key) AS period_start,
+    format_document_number(d.pattern, d.prefix, d.seq_width, COALESCE(q.value + 1, numbering_start_number(d.code, k.period_key)), k.today, NULL, NULL) AS next_preview,
     (SELECT u.display_name FROM users u WHERE u.id::text = d.updated_by) AS updated_by_name
   FROM document_numbering d
   CROSS JOIN LATERAL (SELECT numbering_business_date() AS today, numbering_period_key(d.reset_rule, numbering_business_date()) AS period_key) k
@@ -20,7 +20,10 @@ export const toSeries = (r) => ({
   id: r.id, code: r.code, name: r.name, module: r.module, prefix: r.prefix, pattern: r.pattern, seqWidth: r.seq_width,
   resetRule: r.reset_rule, startNumber: Number(r.start_number), active: r.active, description: r.description,
   periodKey: r.period_key, currentValue: r.current_value === null || r.current_value === undefined ? 0 : Number(r.current_value),
-  nextNumber: r.current_value === null || r.current_value === undefined ? Number(r.start_number) : Number(r.current_value) + 1,
+  // configured next number of the current period (Set next number, go-live Numbering sheet): where its counter starts
+  // when it is created again (after the transaction reset)
+  periodStartNumber: r.period_start_key === r.period_key && r.period_start_number !== null ? Number(r.period_start_number) : null,
+  nextNumber: r.current_value === null || r.current_value === undefined ? Number(r.period_start ?? r.start_number) : Number(r.current_value) + 1,
   nextPreview: r.next_preview, updatedBy: r.updated_by_name || r.updated_by, updatedAt: r.updated_at,
 });
 
@@ -100,17 +103,20 @@ export async function previewSeries(code, q = {}) {
   if (q.date !== undefined && !/^\d{4}-\d{2}-\d{2}$/.test(String(q.date))) errors.push({ path: 'date', message: 'date must be YYYY-MM-DD' });
   if (errors.length) return { valid: false, errors, preview: null };
   const r = await one(`SELECT k.d AS date, numbering_period_key($3, k.d) AS period_key,
-      (SELECT value FROM sequences WHERE name = $1 AND period = numbering_period_key($3, k.d)) AS current_value
+      (SELECT value FROM sequences WHERE name = $1 AND period = numbering_period_key($3, k.d)) AS current_value,
+      numbering_start_number($1, numbering_period_key($3, k.d)) AS period_start
     FROM (SELECT COALESCE($2::date, numbering_business_date()) AS d) k`, [code, q.date || null, resetRule]);
-  // a changed reset rule starts a new counter period: preview from the start number
-  const seq = r.current_value === null || r.current_value === undefined ? Number(q.startNumber ?? s.startNumber) : Number(r.current_value) + 1;
+  // a changed reset rule starts a new counter period: preview from the start number (or the configured next number of that period)
+  const seq = r.current_value === null || r.current_value === undefined ? Number(q.startNumber ?? r.period_start ?? s.startNumber) : Number(r.current_value) + 1;
   const f = await one('SELECT format_document_number($1, $2, $3, $4, $5::date, $6, $7) AS n', [pattern, q.prefix ?? s.prefix, width, seq, r.date, q.branch || null, q.lob || null]);
   return { valid: true, errors: [], preview: f.n, periodKey: r.period_key, currentValue: Number(r.current_value || 0), nextNumber: seq };
 }
 
 /**
- * Move the next number of the current period forward (e.g. to continue after a manual series). Never backwards: the
- * counter is only raised when the new value is above the highest number issued, checked in one statement.
+ * Move the next number of the current period forward (e.g. to continue after a manual series, or the last number of the
+ * old system + 1 at go-live). Never backwards: the counter is only raised when the new value is above the highest
+ * number issued, checked in one statement. The number is also kept on the series as the start of the period
+ * (period_start_key / period_start_number): when the transaction reset deletes the counter, the series restarts there.
  */
 export async function setNextNumber(code, nextNumber, user) {
   return withTransaction(async (db) => {
@@ -123,7 +129,8 @@ export async function setNextNumber(code, nextNumber, user) {
     if (!r.rowCount) {
       throw conflict(`The next number cannot go backwards: ${before.nextNumber - 1} has already been issued in period ${before.periodKey}; enter ${before.nextNumber} or more`);
     }
-    await db.query('UPDATE document_numbering SET updated_by = $2, updated_at = now() WHERE code = $1', [code, user?.id ?? null]);
+    await db.query(`UPDATE document_numbering SET period_start_key = numbering_period_key(reset_rule, numbering_business_date()), period_start_number = $3,
+      updated_by = $2, updated_at = now() WHERE code = $1`, [code, user?.id ?? null, nextNumber]);
     return { before, after: await getSeries(code, db) };
   });
 }

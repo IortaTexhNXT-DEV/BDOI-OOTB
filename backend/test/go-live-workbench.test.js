@@ -16,6 +16,7 @@ import { clearSettingsCache, getSetting } from '../src/lib/settings.js';
 import { writeXlsx } from '../src/lib/xlsx.js';
 import { readWorkbook, readZip } from '../src/modules/documents/xlsx.js';
 import { addDays, today } from '../src/lib/dates.js';
+import { nextDocumentNumber } from '../src/lib/numbering.js';
 import { loginAs } from './helpers.js';
 
 let app;
@@ -360,7 +361,8 @@ describe('migration kit', () => {
     // the only bill is the open item, without a booking journal
     const bills = (await query('SELECT * FROM receivables WHERE policy_id = ANY($1)', [policies.map((p) => p.id)])).rows;
     expect(bills).toHaveLength(1);
-    expect(bills[0]).toMatchObject({ source: 'opening', reference: 'DN-OLD-77', booking_jv_id: null, load_batch_id: loaded.id });
+    // the open item keeps the old system's bill number
+    expect(bills[0]).toMatchObject({ source: 'opening', bill_number: 'DN-OLD-77', reference: 'DN-OLD-77', booking_jv_id: null, load_batch_id: loaded.id });
     expect(Number(bills[0].balance)).toBe(10000);
     const claim = await one("SELECT * FROM claims WHERE claim_number = 'OLD-CLM-0009'");
     expect(claim).toMatchObject({ status: 'in-review', load_batch_id: loaded.id });
@@ -448,6 +450,100 @@ describe('migration kit', () => {
     const loadedBatch = r.body.data.find((b) => b.id === loaded.id);
     expect(loadedBatch).toMatchObject({ kit: 'migration', status: 'loaded', createdBy: 'BrokerVerse Administrator', loadedBy: 'BrokerVerse Administrator', rowsRead: 10 });
     expect(loadedBatch.loadedCounts.policies.created).toBe(2);
+  });
+
+  describe('migration kit: opening balances and open item numbers', () => {
+    const base = [
+      { 'Account Code': '1102001', Debit: '500000' },
+      { 'Account Code': '1202001', Debit: '10000' },
+      { 'Account Code': '2201001', Credit: '210000' },
+      { 'Account Code': '5101001', Credit: '300000' },
+    ];
+    const ob = (rows) => book('migration', { 'Opening Balances': rows });
+    const sheetOf = (r, key) => r.body.data.batch.sheets.find((s) => s.sheet === key);
+
+    it('accepts a row with no debit or credit (zero balance) and ignores it, with an informational note', async () => {
+      const r = await upload('migration', ob([...base, { 'Account Code': '1101001', 'Account Name': 'Nets to zero' }, { 'Account Code': '4401001', Debit: '0', Credit: '0.00' }]));
+      expect(r.body.data.errors).toEqual([]);
+      expect(r.body.data.batch.status).toBe('validated');
+      expect(sheetOf(r, 'opening-balances')).toMatchObject({ read: 6, valid: 6, errors: 0, unchanged: 4, ignored: 2 });
+      expect(r.body.data.batch.message).toMatch(/Opening Balances: 2 row\(s\) with no debit or credit \(zero balance\): accepted, nothing to load \(rows 6, 7\)/);
+      expect(r.body.data.batch.reconciliation.sheets.find((s) => s.sheet === 'Opening Balances').workbook).toMatchObject({ debit: 510000, credit: 510000, zeroBalanceRows: 2 });
+      // a zero row on an account that is not in the chart is still an error
+      const unknown = await upload('migration', ob([...base, { 'Account Code': '9999998' }]));
+      expect(unknown.body.data.errors[0]).toMatchObject({ row: 6, column: 'Account Code', message: expect.stringMatching(/9999998 is not in the chart of accounts/) });
+    });
+
+    it('a failed all-or-nothing sheet shows the real errors on their rows and one message for the sheet, not a generic error on every row', async () => {
+      const r = await upload('migration', ob([...base.slice(0, 3), { 'Account Code': '9999999', Credit: '300000' }]));
+      expect(r.body.data.batch.status).toBe('failed');
+      expect(r.body.data.errors).toEqual([
+        expect.objectContaining({ sheetName: 'Opening Balances', row: 5, column: 'Account Code', message: expect.stringMatching(/9999999 is not in the chart of accounts/) }),
+        expect.objectContaining({ sheetName: 'Opening Balances', row: null, column: null, message: expect.stringMatching(/all or nothing.*row 5.*held/) }),
+      ]);
+      expect(sheetOf(r, 'opening-balances')).toMatchObject({ errors: 1, held: 3, valid: 0 });
+      expect(r.body.data.batch.rowsError).toBe(4);
+      expect((await load(r.body.data.batch.id)).status).toBe(409);
+      // the errors workbook carries the whole sheet (it is uploaded again as a whole): the real error on its row, the
+      // sheet message on the first row, nothing on the held rows
+      const e = await bin(api('get', `/data-load/batches/${r.body.data.batch.id}/errors`));
+      const sheet = readWorkbook(e.body).find((s) => s.name === 'Opening Balances');
+      const col = sheet.rows[0].indexOf('Errors');
+      expect(sheet.rows.slice(2).map((row) => row[col] || '')).toEqual([
+        expect.stringMatching(/^Whole sheet: Nothing was loaded/), '', '', expect.stringMatching(/^Row 5: Account Code: Account 9999999/),
+      ]);
+      // debits and credits that do not balance: no row error, one message for the sheet, every row held
+      const u = await upload('migration', ob([...base.slice(0, 3), { 'Account Code': '5101001', Credit: '299000' }]));
+      expect(u.body.data.errors).toEqual([expect.objectContaining({ sheetName: 'Opening Balances', row: null, message: expect.stringMatching(/^Nothing was loaded: Debits .* do not balance \(difference 1000\.00\)$/) })]);
+      expect(sheetOf(u, 'opening-balances')).toMatchObject({ errors: 0, held: 4 });
+      expect(u.body.data.batch).toMatchObject({ status: 'failed', rowsError: 4 });
+      const detail = await api('get', `/data-load/batches/${u.body.data.batch.id}`);
+      expect(detail.body.data.totalErrors).toBe(1);
+    });
+
+    it('an open item keeps the old system\'s bill number; a number in the range the invoice series has still to issue is refused', async () => {
+      const item = (billReference) => ({ 'Policy Number': 'OLD-MC-0001', 'Bill Reference': billReference, 'Due Date': addDays(cutover, 20), 'Original Amount': '5000', 'Open Balance': '5000' });
+      const legacy = `INV-${year}-00004`;
+      const refused = await upload('migration', book('migration', { 'Open Items': [item(legacy)] }));
+      expect(refused.body.data.errors).toEqual([expect.objectContaining({ column: 'Bill Reference', message: expect.stringMatching(/format of the invoice numbering series.*Next Number above 4/) })]);
+      const n = await upload('configuration', book('configuration', { Numbering: [{ 'Series Code': 'invoice', 'Next Number': '10' }] }));
+      expect((await load(n.body.data.batch.id)).status).toBe(200);
+      const okBatch = await upload('migration', book('migration', { 'Open Items': [item(legacy)] }));
+      expect(okBatch.body.data.errors).toEqual([]);
+      expect((await load(okBatch.body.data.batch.id)).status).toBe(200);
+      expect(await one('SELECT bill_number, reference FROM receivables WHERE reference = $1', [legacy])).toEqual({ bill_number: legacy, reference: legacy });
+      // a new bill takes the next number of the series, after the legacy numbers
+      expect(await nextDocumentNumber('invoice')).toBe(`INV-${year}-00010`);
+    });
+
+    it('a legacy bill number another bill already carries gets the next invoice number; the old number shows with it and finds the bill', async () => {
+      // the same debit note number on a second policy (one debit note over two policies)
+      const r = await upload('migration', book('migration', { 'Open Items': [{ 'Policy Number': 'OLD-FI-0002', 'Bill Reference': 'DN-OLD-77', 'Due Date': addDays(cutover, 20), 'Open Balance': '1500' }] }));
+      expect(r.body.data.errors).toEqual([]);
+      expect((await load(r.body.data.batch.id)).status).toBe(200);
+      const bill = await one("SELECT r.* FROM receivables r JOIN policies p ON p.id = r.policy_id WHERE p.policy_number = 'OLD-FI-0002' AND r.reference = 'DN-OLD-77'");
+      expect(bill.bill_number).toBe(`INV-${year}-00011`);
+      // receipt allocation: listed with the old number, found by it
+      const open = await api('get', '/receipts/open-receivables?search=DN-OLD-77');
+      expect(open.status).toBe(200);
+      expect(open.body.data.map((x) => [x.policyNumber, x.billNumber, x.oldBillNumber]).sort()).toEqual([
+        ['OLD-FI-0002', `INV-${year}-00011`, 'DN-OLD-77'], ['OLD-MC-0001', 'DN-OLD-77', null],
+      ]);
+      // collections list and the policy's payment screen show it too
+      const coll = await api('get', '/collections?pageSize=100');
+      expect(coll.body.data.find((x) => x.billNumber === `INV-${year}-00011`)).toMatchObject({ oldBillNumber: 'DN-OLD-77' });
+      // the bill's statement of account names the old number; the policy statement lists the migrated open item with it
+      const st = await bin(api('get', `/billing-statement/bills/${encodeURIComponent(bill.bill_number)}/generate`));
+      expect(st.status).toBe(200);
+      expect(st.body.toString('latin1')).toMatch(/Old system bill no\./);
+      const ps = await bin(api('get', `/billing-statement/policy/${bill.policy_id}/generate`));
+      expect(ps.status).toBe(200);
+      expect(ps.body.toString('latin1')).toMatch(/old system DN-OLD-77/);
+      // the policy's payment screen lists the bill with its old number
+      const pay = await api('get', `/policies/${bill.policy_id}/payments`);
+      expect(pay.status).toBe(200);
+      expect(JSON.stringify(pay.body.data)).toContain('"oldBillNumber":"DN-OLD-77"');
+    });
   });
 
   it('renews a migrated policy into a new term that is new business, not flagged as migrated', async () => {

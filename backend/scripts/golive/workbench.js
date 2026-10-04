@@ -22,14 +22,14 @@ export const kits = async (session) => dataOf(await session.get('/data-load/kits
 
 /** Totals of a batch's sheet summary: { read, valid, errors, created, updated, unchanged, proposed, skipped }. */
 export function totals(b) {
-  const t = { read: 0, valid: 0, errors: 0, created: 0, updated: 0, unchanged: 0, proposed: 0, skipped: 0 };
+  const t = { read: 0, valid: 0, errors: 0, held: 0, created: 0, updated: 0, unchanged: 0, proposed: 0, ignored: 0, skipped: 0 };
   for (const s of b.sheets || []) for (const k of Object.keys(t)) t[k] += Number(s[k] || 0);
   return t;
 }
 
 export const summaryText = (b) => {
   const t = totals(b);
-  return `batch ${b.id}: ${t.read} rows read, ${t.valid} valid, ${t.errors} with errors (${t.created} new, ${t.updated} changed, ${t.unchanged} unchanged, ${t.proposed} for approval${t.skipped ? `, ${t.skipped} skipped` : ''})`;
+  return `batch ${b.id}: ${t.read} rows read, ${t.valid} valid, ${t.errors} with errors${t.held ? `, ${t.held} held` : ''} (${t.created} new, ${t.updated} changed, ${t.unchanged} unchanged, ${t.proposed} for approval${t.ignored ? `, ${t.ignored} ignored (zero balance)` : ''}${t.skipped ? `, ${t.skipped} skipped` : ''})`;
 };
 
 /** Sheets with something to report: "Sheet: 3 new, 1 changed". */

@@ -6,7 +6,8 @@
  *     check?(ctx, v)       validation that runs on every row, before the comparison with the stored data,
  *     exportRows?(ctx)     the current data in the column keys (download with current data, and "unchanged" check),
  *     importRow?(ctx, v)   create or update one row: returns created | updated | unchanged | proposed,
- *     importSheet?(ctx, rows)  whole-sheet import (opening balances): returns [{ action } | { error }] per row,
+ *     importSheet?(ctx, rows)  whole-sheet import (opening balances): returns { rows: [{ action, note? } | { errors } |
+ *                          { held }] per row, sheetError? } (held: not loaded because of other rows, no error of its own),
  *     totals?(rows)        control totals of the rows (reconciliation) }
  * Column: { key, header, required, format, list (name of a Lists column), type: text | date | number | bool, aliases }
  */
@@ -56,9 +57,15 @@ export function cell(v) {
   return String(v);
 }
 
+/**
+ * Text of a cell as compared and loaded: trimmed, line breaks as \n (a spreadsheet program may save \r\n), Unicode in
+ * composed form (ñ typed or pasted as n + combining tilde is the same letter).
+ */
+export const cellString = (v) => String(v ?? '').normalize('NFC').replace(/\r\n?/g, '\n').trim();
+
 /** Clean a value read from a workbook for its column type (dates from Excel serial numbers, trimmed text). */
 export function cleanValue(col, v) {
-  const s = String(v ?? '').trim();
+  const s = cellString(v);
   if (!s) return '';
   if (col.type === 'date') return toIsoDate(s);
   return s;
@@ -66,7 +73,7 @@ export function cleanValue(col, v) {
 
 /** Comparable form of a value (unchanged-row check): dates, numbers, booleans and lists normalised. */
 export function comparable(col, v) {
-  const s = String(v ?? '').trim();
+  const s = cellString(v);
   if (!s) return '';
   if (col.type === 'date') return toIsoDate(s);
   if (col.type === 'number') {
@@ -88,7 +95,7 @@ export function fail(column, message) {
 }
 
 /** Natural key text of a row from some of its column values (compared without case). */
-export const keyText = (...parts) => parts.map((p) => String(p ?? '').trim().toLowerCase()).join('|');
+export const keyText = (...parts) => parts.map((p) => String(p ?? '').normalize('NFC').trim().toLowerCase()).join('|');
 
 /** Required date before the cutover date (migration rule: rows dated on or after cutover are refused). */
 export function beforeCutover(ctx, column, value, label) {

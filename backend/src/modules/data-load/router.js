@@ -31,7 +31,7 @@ const kitOf = (v) => {
   return kit;
 };
 
-const sheetExample = { sheet: 'policies', name: 'Policies', read: 120, valid: 118, errors: 2, created: 118, updated: 0, unchanged: 0, proposed: 0, skipped: 0 };
+const sheetExample = { sheet: 'policies', name: 'Policies', read: 120, valid: 118, errors: 2, held: 0, created: 118, updated: 0, unchanged: 0, proposed: 0, ignored: 0, skipped: 0, message: null };
 const batchExample = { id: 7, kit: 'migration', fileName: 'GoLive_Migration_Workbook.xlsx', status: 'failed', cutoverDate: '2026-11-01', rowsRead: 480, rowsValid: 478, rowsError: 2,
   sheets: [sheetExample], loadedCounts: null, reconciliation: null, createdBy: 'BrokerVerse Administrator', createdAt: '2026-10-28T09:00:00Z', validatedAt: '2026-10-28T09:00:05Z' };
 const errorExample = { sheet: 'policies', sheetName: 'Policies', row: 14, column: 'Issue Date', message: 'Issue Date 2026-11-02 is on or after the cutover date 2026-11-01' };

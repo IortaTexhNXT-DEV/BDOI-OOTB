@@ -216,6 +216,9 @@ describe('transaction reset', () => {
     expect(dry.code, dry.out).toBe(0);
     expect(dry.out).toContain('DRY RUN');
     expect(dry.out).toMatch(/leads\s+\d+/);
+    // the restart number of every series that restarts
+    expect(dry.out).toMatch(/numbering restarts \(\d+ transaction series\), first number after the reset:/);
+    expect(dry.out).toMatch(/\n\s+lead\s+\d+\s+\S+\s+(start number of the series|next number configured for the period)/);
     expect(await count('leads')).toBe(leads);
     await setLock(true);
     try {
@@ -231,4 +234,48 @@ describe('transaction reset', () => {
     expect(exec.out).toContain('Removed');
     expect(await count('leads')).toBe(0);
   }, 60000);
+});
+
+describe('numbering after the reset', () => {
+  const series = async (code) => (await ctx.api('get', `/document-numbering/${code}`)).body.data;
+  const setNext = (code, nextNumber) => ctx.api('put', `/document-numbering/${code}/next-number`).send({ nextNumber });
+
+  it('restarts a series at the next number configured for the period (Set next number, go-live Numbering sheet), not at 1', async () => {
+    // the broker continues the old system's quotation numbers: next number 501
+    expect((await setNext('quote', 501)).status).toBe(200);
+    expect(await series('quote')).toMatchObject({ nextNumber: 501, periodStartNumber: 501 });
+    // smoke test: numbers 501 and 502 are issued
+    expect(await nextDocumentNumber('quote')).toMatch(/00501$/);
+    expect(await nextDocumentNumber('quote')).toMatch(/00502$/);
+    await nextDocumentNumber('journal');
+    // the dry run shows where each series restarts
+    const plan = await withClient((c) => resetTransactions(c, { execute: false }));
+    const quote = plan.series.restart.find((x) => x.series === 'quote');
+    expect(quote).toMatchObject({ restartAt: 501, configured: true, preview: expect.stringMatching(/00501$/) });
+    expect(plan.series.restart.find((x) => x.series === 'journal')).toMatchObject({ restartAt: 1, configured: false });
+    // the reset deletes the counters: the quotation series restarts at 501, the others at their start number
+    await withClient((c) => resetTransactions(c, { execute: true }));
+    expect(await series('quote')).toMatchObject({ currentValue: 0, nextNumber: 501, periodStartNumber: 501 });
+    expect(await nextDocumentNumber('quote')).toMatch(/00501$/);
+    expect(await nextDocumentNumber('journal')).toMatch(/00001$/);
+  });
+
+  it('never goes below a number issued in the period; with no number issued the configured next number may be lowered', async () => {
+    // 501 was issued after the reset: 501 cannot be issued twice
+    const back = await setNext('quote', 501);
+    expect(back.status).toBe(409);
+    expect(back.body.message).toMatch(/cannot go backwards/);
+    // after another reset nothing is issued: the broker may correct the number downwards
+    await withClient((c) => resetTransactions(c, { execute: true }));
+    expect((await setNext('quote', 301)).status).toBe(200);
+    await withClient((c) => resetTransactions(c, { execute: true }));
+    expect(await nextDocumentNumber('quote')).toMatch(/00301$/);
+  });
+
+  it('applies to the period it was set for: the next period of a yearly series starts at the start number', async () => {
+    const s = await series('quote');
+    expect(s.resetRule).toBe('yearly');
+    const nextYear = `${Number(s.periodKey) + 1}-03-01`;
+    expect(await nextDocumentNumber('quote', { date: nextYear })).toMatch(new RegExp(`${String(s.startNumber).padStart(s.seqWidth, '0')}$`));
+  });
 });

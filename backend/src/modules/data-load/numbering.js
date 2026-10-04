@@ -19,14 +19,16 @@ const reEscape = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
  * Shape of the numbers a series issues in the current period: { head, tail, next, regex } where a number is
- * head + digits + tail. next: the next sequence number to be issued.
+ * head + digits + tail. next: the next sequence number to be issued (the counter + 1, or where the period's counter
+ * starts: the configured next number of the period, else the series' start number).
  */
 export async function seriesShape(code) {
-  const r = (await query(`SELECT d.pattern, d.prefix, d.seq_width, d.start_number, q.value AS current,
+  const r = (await query(`SELECT d.pattern, d.prefix, d.seq_width, numbering_start_number(d.code, q0.period) AS start_number, q.value AS current,
       format_document_number(d.pattern, d.prefix, d.seq_width, 0, numbering_business_date(), NULL, NULL) AS f0,
       format_document_number(d.pattern, d.prefix, d.seq_width, 1, numbering_business_date(), NULL, NULL) AS f1
     FROM document_numbering d
-    LEFT JOIN sequences q ON q.name = d.code AND q.period = numbering_period_key(d.reset_rule, numbering_business_date())
+    CROSS JOIN LATERAL (SELECT numbering_period_key(d.reset_rule, numbering_business_date()) AS period) q0
+    LEFT JOIN sequences q ON q.name = d.code AND q.period = q0.period
     WHERE d.code = $1`, [code])).rows[0];
   if (!r) return null;
   const { f0, f1 } = r;

@@ -16,9 +16,8 @@ import { sourceSnapshot } from './database.js';
 const save = (ctx, name, book) => fs.writeFileSync(path.join(ctx.cfg.workDir, name), book.toBuffer());
 const r2 = (n) => Math.round(Number(n || 0) * 100) / 100;
 const sum = (rows, k) => r2(rows.reduce((s, r) => s + Number(r[k] || 0), 0));
-const errorText = (e) => `${e.sheetName} row ${e.row} ${e.column || '(row)'}: ${e.message}`;
-// the real errors before the "not loaded" rows of an all-or-nothing sheet
-const firstErrors = (errors, n = 5) => [...errors].sort((a, b) => /^Not loaded/.test(a.message) - /^Not loaded/.test(b.message)).slice(0, n).map(errorText).join('; ');
+const errorText = (e) => (e.row === null ? `${e.sheetName} (whole sheet): ${e.message}` : `${e.sheetName} row ${e.row} ${e.column || '(row)'}: ${e.message}`);
+const firstErrors = (errors, n = 5) => errors.slice(0, n).map(errorText).join('; ');
 
 /** Fill the blank migration template with the SOURCE snapshot and the SOURCE trial balance at cutover - 1. */
 function fill(book, snap, tb) {
@@ -27,8 +26,8 @@ function fill(book, snap, tb) {
   for (const r of snap.rows.policies) book.append('Policies', r);
   for (const r of snap.rows.openItems) book.append('Open Items', r);
   for (const r of snap.rows.claims) book.append('Open Claims', r);
-  // accounts whose movements net to zero carry no opening balance (the import refuses a row without an amount)
-  for (const a of tb.rows.filter((x) => x.debit || x.credit)) book.append('Opening Balances', { 'Account Code': a.accountCode, 'Account Name': a.accountName, Debit: a.debit ? String(a.debit) : '', Credit: a.credit ? String(a.credit) : '' });
+  // the whole trial balance, accounts whose movements net to zero included: the load accepts and ignores those rows
+  for (const a of tb.rows) book.append('Opening Balances', { 'Account Code': a.accountCode, 'Account Name': a.accountName, Debit: a.debit ? String(a.debit) : '', Credit: a.credit ? String(a.credit) : '' });
   return book;
 }
 
@@ -69,14 +68,17 @@ export async function step4(ctx) {
   let tb;
   let book;
 
-  await log.check('Numbering raised above the legacy numbers: configuration workbook loaded again after the reset', async () => {
+  await log.check('Numbering still above the legacy numbers after the reset: the configuration workbook loaded again changes nothing', async () => {
+    // the reset restarts each series at the next number the Numbering sheet set in step 2 (kept on the series as the
+    // start of the period), so loading the workbook again is no longer needed: it is kept as a check
     const r = await wb.upload(admin, 'configuration', ctx.configBook, 'SOURCE_configuration_after_reset.xlsx');
     expect(r.batch.rowsError === 0, `${r.batch.rowsError} error(s): ${r.errors.slice(0, 3).map(errorText).join('; ')}`);
     const changed = wb.sheetLines(r.batch, { only: ['created', 'updated'] });
-    expect(changed.every((l) => l.startsWith('Numbering:')), `rows other than Numbering changed: ${changed.join('; ')}`);
-    const l = await wb.load(admin, r.batch.id);
+    expect(!changed.length, `the reload would change: ${changed.join('; ')}`);
     const policy = (dataOf(await admin.get('/document-numbering/policy')) || {});
-    return `the reset restarted the counters, so the Numbering sheet is loaded again: ${wb.sheetLines(l.batch, { only: ['updated'] }).join('; ') || 'nothing to change'}; policy series next ${policy.nextNumber}`;
+    const prev = Number(ctx.configBook.rows('Numbering').find((x) => x.values['Series Code'] === 'policy')?.values['Next Number']);
+    expect(policy.nextNumber === prev, `policy series next ${policy.nextNumber}, the workbook set ${prev}`);
+    return `${wb.totals(r.batch).unchanged} rows unchanged, 0 new, 0 changed (Numbering: ${r.batch.sheets.find((x) => x.sheet === 'numbering')?.unchanged} unchanged); policy series next ${policy.nextNumber} = the workbook's next number, without a reload`;
   }, { critical: true });
 
   await log.check(`SOURCE open book at the close of ${asAt} (SOURCE database, read only) and SOURCE trial balance (API)`, async () => {
@@ -93,7 +95,7 @@ export async function step4(ctx) {
     ctx.snapshot = snap;
     const t = ctx.sourceTotals;
     return `${t.clients} clients, ${t.policies} in-force policies (gross ${fmt(t.gross)}), ${t.openItems} open items (${fmt(t.openBalance)}), ${t.claims} open claims (reserve ${fmt(t.reserve)}), `
-      + `trial balance ${t.tbAccounts} accounts with a balance (${t.tbZero} netting to zero left out), debits ${fmt(t.tbDebit)} = credits ${fmt(t.tbCredit)}; not migrated: ${snap.notMigrated.length} policies (expired, cancelled, lapsed or issued on or after the cutover)`;
+      + `trial balance ${t.tbAccounts} accounts with a balance and ${t.tbZero} netting to zero (in the workbook, ignored by the load), debits ${fmt(t.tbDebit)} = credits ${fmt(t.tbCredit)}; not migrated: ${snap.notMigrated.length} policies (expired, cancelled, lapsed or issued on or after the cutover)`;
   }, { critical: true });
 
   await log.check('Blank migration template downloaded from TARGET and filled from SOURCE', async () => {
@@ -115,14 +117,16 @@ export async function step4(ctx) {
     const lone = at('Policies', planted.lone.row);
     const ob = e.filter((x) => x.sheetName === 'Opening Balances');
     const obRows = bad.rows('Opening Balances').length;
+    const obSheet = first.batch.sheets.find((x) => x.sheet === 'opening-balances');
     expect(late.length === 1 && late[0].column === 'Issue Date' && /cutover/.test(late[0].message), `policy ${planted.late.policy}: ${late.map(errorText).join('; ') || 'no error'}`);
     expect(lone.length === 1 && lone[0].column === 'Client Code' && lone[0].message.includes(planted.lone.client), `policy ${planted.lone.policy}: ${lone.map(errorText).join('; ') || 'no error'}`);
-    expect(new Set(ob.map((x) => x.row)).size === obRows && ob.some((x) => /do not balance/.test(x.message)), `opening balances: ${ob.length} error(s) on ${new Set(ob.map((x) => x.row)).size} of ${obRows} rows: ${ob.slice(0, 2).map(errorText).join('; ')}`);
+    // the sheet fails as a whole: one sheet-level message, no generic error repeated on every row
+    expect(ob.length === 1 && ob[0].row === null && /do not balance/.test(ob[0].message) && obSheet.held === obRows && obSheet.errors === 0,
+      `opening balances: ${ob.length} error(s) (${ob.slice(0, 3).map(errorText).join('; ')}); ${obSheet.held} of ${obRows} rows held, ${obSheet.errors} in error`);
     const others = e.filter((x) => !(x.sheetName === 'Opening Balances' || (x.sheetName === 'Policies' && [planted.late.row, planted.lone.row].includes(x.row))));
     expect(!others.length, `other errors: ${firstErrors(others)}`);
     expect(first.batch.status === 'failed', `batch status ${first.batch.status}`);
-    const obMsg = ob.find((x) => /do not balance/.test(x.message))?.message;
-    return `batch ${first.batch.id}: ${errorText(late[0])} / ${errorText(lone[0])} / Opening Balances: all ${obRows} rows refused (all or nothing): ${obMsg}`;
+    return `batch ${first.batch.id}: ${errorText(late[0])} / ${errorText(lone[0])} / Opening Balances (sheet): ${ob[0].message} (${obSheet.held} rows held, all or nothing)`;
   }, { critical: true });
 
   await log.check('Reconciliation of the failed validation is available (dry run totals)', async () => {
@@ -172,7 +176,7 @@ export async function step4(ctx) {
     expect(loaded.batch.status === 'loaded', `status ${loaded.batch.status}`);
     const t = wb.totals(loaded.batch);
     ctx.state.migrationBatch = loaded.batch;
-    return `${t.created} created (${wb.sheetLines(loaded.batch, { only: ['created'] }).join(', ')})`;
+    return `${t.created} created${t.ignored ? `, ${t.ignored} zero-balance opening balance rows ignored` : ''} (${wb.sheetLines(loaded.batch, { only: ['created'] }).join(', ')})`;
   }, { critical: true });
 
   await log.check('Reconciliation workbook and control totals compared with SOURCE', async () => {
@@ -216,12 +220,12 @@ export async function step4(ctx) {
     const again = await wb.upload(admin, 'migration', fixedBook, 'migration_corrected_again.xlsx');
     const t = wb.totals(again.batch);
     expect(again.batch.rowsError === 0, `${again.batch.rowsError} error(s): ${firstErrors(again.errors)}`);
-    expect(t.created === 0 && t.updated === 0 && t.unchanged === t.read, `${t.created} new, ${t.updated} changed, ${t.unchanged} unchanged of ${t.read}`);
+    expect(t.created === 0 && t.updated === 0 && t.unchanged + t.ignored === t.read, `${t.created} new, ${t.updated} changed, ${t.unchanged} unchanged, ${t.ignored} ignored of ${t.read}`);
     const r = await wb.load(admin, again.batch.id);
     const rec = r.reconciliation || r.batch.reconciliation;
     const pol = rec.sheets.find((s) => s.sheet === 'Policies');
     expect(pol.inBrokerVerse === ctx.sourceTotals.policies, `${pol.inBrokerVerse} migrated policies after loading again`);
-    return `${t.read} rows unchanged; loaded again: still ${pol.inBrokerVerse} policies, ${rec.sheets.find((s) => s.sheet === 'Clients').inBrokerVerse} clients`;
+    return `${t.unchanged} rows unchanged${t.ignored ? ` (+ ${t.ignored} zero-balance rows ignored)` : ''}; loaded again: still ${pol.inBrokerVerse} policies, ${rec.sheets.find((s) => s.sheet === 'Clients').inBrokerVerse} clients`;
   });
 }
 

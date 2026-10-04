@@ -17,7 +17,7 @@ import "../AccessControl/index.scss";
 import "./index.scss";
 
 const STATUS_SEVERITY = { validated: "info", failed: "danger", loaded: "success" };
-const COUNT_KEYS = ["read", "valid", "errors", "created", "updated", "unchanged", "proposed", "skipped"];
+const COUNT_KEYS = ["read", "valid", "errors", "held", "created", "updated", "unchanged", "proposed", "ignored", "skipped"];
 const money = (v) => (typeof v === "number" ? v.toLocaleString("en-PH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : v);
 const totalsText = (o) => Object.entries(o || {}).map(([k, v]) => `${k}: ${money(v)}`).join(" · ");
 
@@ -255,6 +255,7 @@ const GoLiveDataLoad = () => {
                   </div>
                 ))}
               </div>
+              {batch.message ? <p className="access__muted" style={{ whiteSpace: "pre-line" }}>{batch.message}</p> : null}
               <DataTable value={(batch.sheets || []).filter((s) => s.read)} dataKey="sheet" size="small" stripedRows className="access__table" emptyMessage={t("goLiveData.noRows")}>
                 <Column field="name" header={t("goLiveData.colSheet")} />
                 {COUNT_KEYS.map((k) => <Column key={k} header={t(`goLiveData.count.${k}`)} body={count(k)} style={{ width: "7rem" }} />)}
@@ -264,7 +265,7 @@ const GoLiveDataLoad = () => {
                   <h3 className="golive__section">{t("goLiveData.errorsTitle", { count: current.totalErrors ?? current.errors.length })}</h3>
                   <DataTable value={current.errors} size="small" stripedRows paginator rows={20} className="access__table">
                     <Column field="sheetName" header={t("goLiveData.colSheet")} style={{ width: "12rem" }} />
-                    <Column field="row" header={t("goLiveData.colRow")} style={{ width: "5rem" }} />
+                    <Column field="row" header={t("goLiveData.colRow")} style={{ width: "5rem" }} body={(r) => r.row ?? t("goLiveData.wholeSheet")} />
                     <Column field="column" header={t("goLiveData.colColumn")} style={{ width: "12rem" }} body={(r) => r.column || <span className="access__dash">-</span>} />
                     <Column field="message" header={t("goLiveData.colMessage")} />
                   </DataTable>

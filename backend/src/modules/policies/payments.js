@@ -14,6 +14,7 @@ import { getSetting } from '../../lib/settings.js';
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { round2, num, isoDate, today } from '../accounting/lib/http.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
+import { oldBillNumber } from '../receipts/opening.js';
 
 export const DEFAULT_MODES = ['bank-transfer', 'check', 'online', 'cash'];
 const MODE_LABELS = { 'bank-transfer': 'Bank transfer', check: 'Cheque', online: 'Online payment', cash: 'Cash', card: 'Card', gcash: 'GCash' };
@@ -55,7 +56,7 @@ export async function paymentSummary(db, policy, user) {
   const out = [];
   for (const b of bills) {
     const pending = await pendingOn(db, b.id);
-    out.push({ receivableId: b.id, billNumber: b.bill_number, source: b.source, amount: Number(b.amount), balance: Number(b.balance), pendingVerification: round2(pending), dueDate: b.due_date });
+    out.push({ receivableId: b.id, billNumber: b.bill_number, oldBillNumber: oldBillNumber(b), source: b.source, amount: Number(b.amount), balance: Number(b.balance), pendingVerification: round2(pending), dueDate: b.due_date });
   }
   const direct = policy.billing_mode === 'direct';
   const { directBillSummary } = await import('../remittance/directbill.js');

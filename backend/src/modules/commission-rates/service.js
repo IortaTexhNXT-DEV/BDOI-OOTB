@@ -53,6 +53,19 @@ async function assertNoOverlap(db, v, exceptId = null) {
   }
 }
 
+/**
+ * A line of business must be a code of the Line of Business master (case-insensitive; stored in lower case): a rate on
+ * an unknown code would never apply. Checked when the code is set or changed (the go-live workbook checks the same).
+ */
+async function checkLineOfBusiness(db, code) {
+  if (!code) return;
+  const hit = (await db.query(`SELECT 1 FROM master_records WHERE type_code = 'line-of-business' AND status <> 'deleted' AND lower(code) = lower($1)`, [code])).rowCount;
+  if (!hit) {
+    const message = `Line of business ${code} is not in the Line of Business master (Master > Line of Business); use one of its codes`;
+    throw badRequest(message, [{ path: 'lineOfBusiness', message }]);
+  }
+}
+
 async function checkRefs(db, v) {
   if (v.insurance_company_id && !(await db.query('SELECT 1 FROM insurance_companies WHERE id = $1', [v.insurance_company_id])).rowCount) {
     throw badRequest('Validation failed', [{ path: 'insuranceCompanyId', message: `Insurance company ${v.insurance_company_id} not found` }]);
@@ -83,6 +96,7 @@ export async function createRate(b, user) {
     await db.query('LOCK TABLE commission_rates IN SHARE ROW EXCLUSIVE MODE');
     const v = columnsOf(b);
     await checkRefs(db, v);
+    await checkLineOfBusiness(db, b.lineOfBusiness ? String(b.lineOfBusiness).trim() : null);
     await assertNoOverlap(db, v);
     const r = await db.query(`INSERT INTO commission_rates(insurance_company_id, product_id, line_of_business, policy_type, rate, effective_from, effective_to, active, remarks, created_by, updated_by)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10) RETURNING id`, [v.insurance_company_id, v.product_id, v.line_of_business, v.policy_type, v.rate, v.effective_from, v.effective_to, v.active, v.remarks, user?.id ?? null]);
@@ -96,6 +110,7 @@ export async function updateRate(id, b, user) {
     const before = await fetchRate(db, id);
     const v = columnsOf(b, before);
     await checkRefs(db, v);
+    if ((v.line_of_business || null) !== (before.lineOfBusiness ? String(before.lineOfBusiness).toLowerCase() : null)) await checkLineOfBusiness(db, b.lineOfBusiness ? String(b.lineOfBusiness).trim() : null);
     await assertNoOverlap(db, v, before.id);
     await db.query(`UPDATE commission_rates SET insurance_company_id = $2, product_id = $3, line_of_business = $4, policy_type = $5, rate = $6, effective_from = $7,
       effective_to = $8, active = $9, remarks = $10, updated_by = $11 WHERE id = $1`,

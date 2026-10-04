@@ -11,6 +11,7 @@ import { isoDate, num, round2, str, today } from '../accounting/lib/http.js';
 import { applyToPolicy, ensureBilled, findClient, findPolicy, requirePolicy, reverseReceiptApplications } from './receivables.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { autoEmailReceipt } from './email.js';
+import { oldBillNumber } from './opening.js';
 
 const money = (v) => round2(v).toFixed(2);
 const SOURCE_BY_TXN = { ENDORSEMENT_PAYMENT: 'endorsement', ENDORSEMENT: 'endorsement', RENEWAL: 'renewal', RENEWAL_PAYMENT: 'renewal' };
@@ -262,14 +263,15 @@ export async function listOpenReceivables(db, q = {}) {
   const p = []; const where = ['r.balance > 0', 'r.status IN (\'open\',\'partial\')'];
   if (q.customerCode) { p.push(String(q.customerCode)); where.push(`(c.client_code = $${p.length} OR c.id = $${p.length})`); }
   if (q.policyNumber || q.policyId) { p.push(String(q.policyNumber || q.policyId)); where.push(`(p.policy_number = $${p.length} OR p.id = $${p.length})`); }
-  if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'')) ILIKE '%' || $${p.length} || '%'`); }
+  // the search also finds a migrated open item by the old system's bill number (reference)
+  if (q.search) { p.push(String(q.search)); where.push(`(COALESCE(c.client_code,'') || ' ' || COALESCE(c.display_name,'') || ' ' || COALESCE(p.policy_number,'') || ' ' || COALESCE(r.bill_number,'') || ' ' || COALESCE(r.reference,'')) ILIKE '%' || $${p.length} || '%'`); }
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'policy', 'p', p));
   const limit = Math.min(Math.max(Number(q.limit) || 500, 1), 2000);
   const rows = (await db.query(`SELECT r.*, p.policy_number, c.client_code, c.display_name, c.first_name, c.last_name
     FROM receivables r JOIN policies p ON p.id = r.policy_id LEFT JOIN clients c ON c.id = COALESCE(r.client_id, p.client_id)
     WHERE ${where.join(' AND ')} ORDER BY c.client_code, p.policy_number, r.due_date, r.created_at LIMIT ${limit}`, p)).rows;
   return rows.map((r) => ({
-    receivableId: r.id, billNumber: r.bill_number, source: r.source, reference: r.reference, customerCode: r.client_code || r.client_id, clientId: r.client_id,
+    receivableId: r.id, billNumber: r.bill_number, oldBillNumber: oldBillNumber(r), source: r.source, reference: r.reference, customerCode: r.client_code || r.client_id, clientId: r.client_id,
     customerName: r.display_name || [r.first_name, r.last_name].filter(Boolean).join(' ') || null, policyId: r.policy_id, policyNumber: r.policy_number,
     amount: Number(r.amount), paidAmount: round2(Number(r.amount) - Number(r.balance)), balance: Number(r.balance), dueDate: r.due_date,
     status: r.status === 'partial' ? 'Partial' : 'Open', currency: r.currency,

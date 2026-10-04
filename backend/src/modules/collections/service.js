@@ -13,6 +13,7 @@ import { notify } from '../notifications/service.js';
 import { ensureBooked, findPolicy } from '../receipts/receivables.js';
 import { allocate, isCoInsured, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { companyName } from '../../lib/letterhead.js';
+import { oldBillNumber } from '../receipts/opening.js';
 
 async function thresholds() {
   const buckets = (await getSetting('limits.receivable_ageing_buckets', [30, 60, 90, 120])) || [30, 60, 90];
@@ -23,7 +24,7 @@ async function thresholds() {
 
 /** Base query; $1..$7 = b1, b2, b3, l1, l2, window, today (business date in general.timezone, not the DB current_date). */
 const BASE = `SELECT * FROM (SELECT ci.*, r.bill_number, r.amount, r.balance, r.due_date, r.status AS receivable_status, r.net_premium, r.vat, r.dst, r.lgt, r.other_charges,
-    r.discount, r.source AS receivable_source, r.currency, GREATEST($7::date - r.due_date, 0) AS dpd,
+    r.discount, r.source AS receivable_source, r.reference AS receivable_reference, r.currency, GREATEST($7::date - r.due_date, 0) AS dpd,
     p.policy_number, p.status AS policy_status, p.inception_date, p.expiry_date, p.owner_user_id, c.client_code, c.first_name, c.last_name, c.display_name, c.email, c.phone,
     ic.name AS insurer_name, pr.name AS product_name,
     (SELECT count(*)::int FROM risk_participants rp WHERE rp.entity_type = 'policy' AND rp.entity_id = p.id AND rp.status = 'active') AS participant_count,
@@ -47,7 +48,8 @@ const baseParams = (t) => [t.b1, t.b2, t.b3, t.l1, t.l2, t.window, t.today];
 const SORTS = { dueDate: 'due_date', daysPastDue: 'dpd', outstandingAmount: 'balance', overdueLevel: 'overdue_level', collectionStatus: 'collection_status', policyNumber: 'policy_number', client: 'display_name' };
 
 export const itemRow = (x) => ({
-  id: x.id, collectionId: x.id, receivableId: x.receivable_id, billNumber: x.bill_number, policyId: x.policy_id, policyNumber: x.policy_number, clientId: x.client_id,
+  id: x.id, collectionId: x.id, receivableId: x.receivable_id, billNumber: x.bill_number, oldBillNumber: oldBillNumber({ source: x.receivable_source, reference: x.receivable_reference, bill_number: x.bill_number }),
+  policyId: x.policy_id, policyNumber: x.policy_number, clientId: x.client_id,
   client: { id: x.client_id, clientId: x.client_code, firstName: x.first_name || x.display_name, lastName: x.last_name || '', displayName: x.display_name, email: x.email, phone: x.phone },
   policy: { id: x.policy_id, policyNumber: x.policy_number, status: x.policy_status, inceptionDate: x.inception_date, expiryDate: x.expiry_date, insurer: x.insurer_name, product: x.product_name, isCoInsurance: x.participant_count > 1 },
   grossPremium: Number(x.amount), netPremium: Number(x.net_premium), valueAddedTax: Number(x.vat), documentaryStampTax: Number(x.dst), localGovernmentTax: Number(x.lgt),

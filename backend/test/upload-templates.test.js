@@ -258,10 +258,12 @@ describe('go-live imports', () => {
     const unbalanced = await upload('/period-end/opening-balances/import', 'tb.csv', { goLiveDate: '2026-01-01' }, tb([['1102001', '', '100', ''], ['5101001', '', '', '90']]));
     expect(unbalanced.status).toBe(400);
     expect(unbalanced.body.message).toContain('do not balance');
-    const bad = await upload('/period-end/opening-balances/import', 'tb.csv', { goLiveDate: '2026-01-01' }, tb([['9999999', '', '100', ''], ['5101001', '', '50', '50'], ['5101001', '', '', '']]));
+    const bad = await upload('/period-end/opening-balances/import', 'tb.csv', { goLiveDate: '2026-01-01' }, tb([['9999999', '', '100', ''], ['5101001', '', '50', '50'], ['5101001', '', '', '10']]));
     expect(bad.status).toBe(400);
     expect(bad.body.errors.map((e) => e.message).join(' | ')).toMatch(/9999999 is not in the chart.*not both.*more than once/);
     expect((await upload('/period-end/opening-balances/import', 'tb.csv', {}, tb(GOOD))).status).toBe(400);
+    // only zero-balance rows: nothing to load
+    expect((await upload('/period-end/opening-balances/import', 'tb.csv', { goLiveDate: '2026-01-01' }, tb([['1102001', '', '', ''], ['5101001', '', '0', '0']]))).body.message).toMatch(/no amounts/);
     expect((await query('SELECT count(*)::int AS n FROM opening_balances')).rows[0].n).toBe(0);
   });
 
@@ -276,6 +278,14 @@ describe('go-live imports', () => {
     const list = (await api('get', '/period-end/opening-balances?fiscalYear=FY2026')).body.data;
     expect(list).toMatchObject({ source: 'go-live', goLiveDate: '2026-01-01', totalDebit: 1040000, totalCredit: 1040000 });
     expect((await query('SELECT action FROM audit_log WHERE entity = \'opening_balances\'')).rows.length).toBe(2);
+  });
+
+  it('accepts and ignores a row with no debit or credit (an account whose movements net to zero), with a note', async () => {
+    const r = await upload('/period-end/opening-balances/import', 'tb.csv', { goLiveDate: '2026-01-01' }, tb([...GOOD, ['1101001', 'Cash on hand', '', ''], ['4401001', 'Administrative expenses', '0', '0.00']]));
+    expect(r.status, JSON.stringify(r.body)).toBe(200);
+    expect(r.body.data).toMatchObject({ accounts: 4, totalDebit: 1040000, replaced: 4, ignored: [{ row: 6, accountCode: '1101001' }, { row: 7, accountCode: '4401001' }] });
+    expect(r.body.message).toMatch(/2 row\(s\) with no debit or credit \(zero balance\) ignored: 1101001, 4401001/);
+    expect((await query("SELECT count(*)::int AS n FROM opening_balances WHERE account_code IN ('1101001', '4401001')")).rows[0].n).toBe(0);
   });
 
   it('the trial balance report starts from the go-live opening balances (they are not journals)', async () => {

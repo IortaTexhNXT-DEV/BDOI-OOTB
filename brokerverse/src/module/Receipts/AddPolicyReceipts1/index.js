@@ -636,7 +636,11 @@ function BranchAdding() {
               responsiveLayout="scroll"
             >
               <Column selectionMode="single" headerStyle={{ width: "3rem" }} />
-              <Column field="billNumber" header={t("accounts.addReceipts.billNumber")} />
+              <Column
+                field="billNumber"
+                header={t("accounts.addReceipts.billNumber")}
+                body={(row) => (row.oldBillNumber ? t("accounts.addReceipts.billWithOldNumber", { bill: row.billNumber, old: row.oldBillNumber }) : row.billNumber)}
+              />
               <Column
                 field="source"
                 header={t("accounts.addReceipts.billType")}

@@ -22949,7 +22949,7 @@
       },
       "post": {
         "operationId": "postCommissionRates",
-        "summary": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)",
+        "summary": "Add a commission rate (insurer, product and / or line of business: a code of the Line of Business master, else 400; no overlap with an active row of the same keys)",
         "tags": [
           "Commission Rate Matrix"
         ],
@@ -23190,7 +23190,7 @@
       },
       "put": {
         "operationId": "putCommissionRatesId",
-        "summary": "Update a commission rate (same overlap rule)",
+        "summary": "Update a commission rate (same overlap rule; a new line of business must be a code of the Line of Business master)",
         "tags": [
           "Commission Rate Matrix"
         ],
@@ -30303,6 +30303,7 @@
                           "currentValue": {
                             "type": "integer"
                           },
+                          "periodStartNumber": {},
                           "nextNumber": {
                             "type": "integer"
                           },
@@ -30355,6 +30356,7 @@
                       "active": true,
                       "periodKey": "2026",
                       "currentValue": 41,
+                      "periodStartNumber": null,
                       "nextNumber": 42,
                       "nextPreview": "POL-2026-00042"
                     }
@@ -30467,6 +30469,7 @@
                         "currentValue": {
                           "type": "integer"
                         },
+                        "periodStartNumber": {},
                         "nextNumber": {
                           "type": "integer"
                         },
@@ -30491,6 +30494,7 @@
                     "active": true,
                     "periodKey": "2026",
                     "currentValue": 41,
+                    "periodStartNumber": null,
                     "nextNumber": 42,
                     "nextPreview": "POL-2026-00042"
                   }
@@ -30578,6 +30582,7 @@
                         "currentValue": {
                           "type": "integer"
                         },
+                        "periodStartNumber": {},
                         "nextNumber": {
                           "type": "integer"
                         },
@@ -30602,6 +30607,7 @@
                     "active": true,
                     "periodKey": "2026",
                     "currentValue": 41,
+                    "periodStartNumber": null,
                     "nextNumber": 42,
                     "nextPreview": "POL-2026-00042"
                   }
@@ -30658,7 +30664,7 @@
     "/document-numbering/{code}/next-number": {
       "put": {
         "operationId": "putDocumentNumberingCodeNextNumber",
-        "summary": "Set the next number of the current period; forward only (never at or below a number already issued)",
+        "summary": "Set the next number of the current period; forward only (never at or below a number already issued). Kept as the start of the period: after a transaction reset the series restarts there",
         "tags": [
           "Document Numbering"
         ],
@@ -30720,6 +30726,9 @@
                         "currentValue": {
                           "type": "integer"
                         },
+                        "periodStartNumber": {
+                          "type": "integer"
+                        },
                         "nextNumber": {
                           "type": "integer"
                         },
@@ -30744,6 +30753,7 @@
                     "active": true,
                     "periodKey": "2026",
                     "currentValue": 41,
+                    "periodStartNumber": 1001,
                     "nextNumber": 1001,
                     "nextPreview": "POL-2026-01001"
                   }
@@ -33566,6 +33576,9 @@
                                 "errors": {
                                   "type": "integer"
                                 },
+                                "held": {
+                                  "type": "integer"
+                                },
                                 "created": {
                                   "type": "integer"
                                 },
@@ -33578,9 +33591,13 @@
                                 "proposed": {
                                   "type": "integer"
                                 },
+                                "ignored": {
+                                  "type": "integer"
+                                },
                                 "skipped": {
                                   "type": "integer"
-                                }
+                                },
+                                "message": {}
                               }
                             }
                           },
@@ -33631,11 +33648,14 @@
                           "read": 120,
                           "valid": 118,
                           "errors": 2,
+                          "held": 0,
                           "created": 118,
                           "updated": 0,
                           "unchanged": 0,
                           "proposed": 0,
-                          "skipped": 0
+                          "ignored": 0,
+                          "skipped": 0,
+                          "message": null
                         }
                       ],
                       "loadedCounts": null,
@@ -33741,6 +33761,9 @@
                                   "errors": {
                                     "type": "integer"
                                   },
+                                  "held": {
+                                    "type": "integer"
+                                  },
                                   "created": {
                                     "type": "integer"
                                   },
@@ -33753,9 +33776,13 @@
                                   "proposed": {
                                     "type": "integer"
                                   },
+                                  "ignored": {
+                                    "type": "integer"
+                                  },
                                   "skipped": {
                                     "type": "integer"
-                                  }
+                                  },
+                                  "message": {}
                                 }
                               }
                             },
@@ -33819,11 +33846,14 @@
                           "read": 120,
                           "valid": 118,
                           "errors": 2,
+                          "held": 0,
                           "created": 118,
                           "updated": 0,
                           "unchanged": 0,
                           "proposed": 0,
-                          "skipped": 0
+                          "ignored": 0,
+                          "skipped": 0,
+                          "message": null
                         }
                       ],
                       "loadedCounts": null,
@@ -33952,6 +33982,9 @@
                                   "errors": {
                                     "type": "integer"
                                   },
+                                  "held": {
+                                    "type": "integer"
+                                  },
                                   "created": {
                                     "type": "integer"
                                   },
@@ -33964,9 +33997,13 @@
                                   "proposed": {
                                     "type": "integer"
                                   },
+                                  "ignored": {
+                                    "type": "integer"
+                                  },
                                   "skipped": {
                                     "type": "integer"
-                                  }
+                                  },
+                                  "message": {}
                                 }
                               }
                             },
@@ -34032,11 +34069,14 @@
                           "read": 120,
                           "valid": 118,
                           "errors": 2,
+                          "held": 0,
                           "created": 118,
                           "updated": 0,
                           "unchanged": 0,
                           "proposed": 0,
-                          "skipped": 0
+                          "ignored": 0,
+                          "skipped": 0,
+                          "message": null
                         }
                       ],
                       "loadedCounts": null,
@@ -34206,6 +34246,9 @@
                                   "errors": {
                                     "type": "integer"
                                   },
+                                  "held": {
+                                    "type": "integer"
+                                  },
                                   "created": {
                                     "type": "integer"
                                   },
@@ -34218,9 +34261,13 @@
                                   "proposed": {
                                     "type": "integer"
                                   },
+                                  "ignored": {
+                                    "type": "integer"
+                                  },
                                   "skipped": {
                                     "type": "integer"
-                                  }
+                                  },
+                                  "message": {}
                                 }
                               }
                             },
@@ -34279,11 +34326,14 @@
                           "read": 120,
                           "valid": 118,
                           "errors": 2,
+                          "held": 0,
                           "created": 118,
                           "updated": 0,
                           "unchanged": 0,
                           "proposed": 0,
-                          "skipped": 0
+                          "ignored": 0,
+                          "skipped": 0,
+                          "message": null
                         }
                       ],
                       "loadedCounts": null,
@@ -34465,6 +34515,9 @@
                                   "errors": {
                                     "type": "integer"
                                   },
+                                  "held": {
+                                    "type": "integer"
+                                  },
                                   "created": {
                                     "type": "integer"
                                   },
@@ -34477,9 +34530,13 @@
                                   "proposed": {
                                     "type": "integer"
                                   },
+                                  "ignored": {
+                                    "type": "integer"
+                                  },
                                   "skipped": {
                                     "type": "integer"
-                                  }
+                                  },
+                                  "message": {}
                                 }
                               }
                             },
@@ -34542,11 +34599,14 @@
                           "read": 120,
                           "valid": 118,
                           "errors": 2,
+                          "held": 0,
                           "created": 118,
                           "updated": 0,
                           "unchanged": 0,
                           "proposed": 0,
-                          "skipped": 0
+                          "ignored": 0,
+                          "skipped": 0,
+                          "message": null
                         }
                       ],
                       "loadedCounts": null,
@@ -53301,7 +53361,7 @@
     "/period-end/opening-balances/import": {
       "post": {
         "operationId": "postPeriodEndOpeningBalancesImport",
-        "summary": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it",
+        "summary": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it",
         "tags": [
           "Period End"
         ],
@@ -53341,6 +53401,20 @@
                         },
                         "replaced": {
                           "type": "integer"
+                        },
+                        "ignored": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "row": {
+                                "type": "integer"
+                              },
+                              "accountCode": {
+                                "type": "string"
+                              }
+                            }
+                          }
                         }
                       }
                     }
@@ -53355,7 +53429,13 @@
                     "accounts": 7,
                     "totalDebit": 2102400,
                     "totalCredit": 2102400,
-                    "replaced": 0
+                    "replaced": 0,
+                    "ignored": [
+                      {
+                        "row": 9,
+                        "accountCode": "1301001"
+                      }
+                    ]
                   }
                 }
               }

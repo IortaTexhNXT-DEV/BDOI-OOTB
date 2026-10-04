@@ -5,7 +5,9 @@
  *
  * Rules: every account exists and is active; each row has a debit or a credit, not both; debits equal credits; the
  * fiscal year is open, has no balances carried forward by a year-end close and no posted journal before the go-live
- * date. Loading the same go-live date again replaces the earlier load (idempotent); another date is refused.
+ * date. A row with neither a debit nor a credit (or zero), the usual line of an account whose movements net to zero in
+ * a trial balance export, is accepted and ignored (listed in `ignored`). Loading the same go-live date again replaces
+ * the earlier load (idempotent); another date is refused.
  */
 import { badRequest, conflict } from '../../lib/errors.js';
 import { round2 } from '../../lib/money.js';
@@ -17,8 +19,8 @@ export const GO_LIVE_PREFIX = 'go-live:';
 export const OPENING_BALANCE_COLUMNS = [
   { key: 'accountCode', header: 'Account Code', aliases: ['account', 'gl account', 'code'], required: true, format: 'GL account code of the chart of accounts (active)', example: '1102001' },
   { key: 'accountName', header: 'Account Name', aliases: ['name'], format: 'For your reference only; not imported', example: 'Cash in Bank – Operating Account' },
-  { key: 'debit', header: 'Debit', aliases: ['dr'], required: 'Debit or Credit', format: 'Amount in PHP, no sign; the account balance when it is a debit balance', example: '1250000.00' },
-  { key: 'credit', header: 'Credit', aliases: ['cr'], required: 'Debit or Credit', format: 'Amount in PHP, no sign; the account balance when it is a credit balance', example: '' },
+  { key: 'debit', header: 'Debit', aliases: ['dr'], format: 'Amount in PHP, no sign; the account balance when it is a debit balance. A row with no debit and no credit (zero balance) is ignored', example: '1250000.00' },
+  { key: 'credit', header: 'Credit', aliases: ['cr'], format: 'Amount in PHP, no sign; the account balance when it is a credit balance', example: '' },
 ];
 
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -36,9 +38,16 @@ async function fiscalYearOf(db, goLiveDate) {
   return fy;
 }
 
+/** True when a row carries no balance: neither a debit nor a credit, or zero (an amount that is not a number is not zero). */
+export const zeroBalanceRow = (r) => {
+  const debit = amount(r.debit);
+  const credit = amount(r.credit);
+  return debit === 0 && credit === 0;
+};
+
 /**
- * Validate and load the rows ({ accountCode, debit, credit } by column key). Returns the summary; throws 400 with
- * every row error when anything is wrong (nothing is loaded).
+ * Validate and load the rows ({ accountCode, debit, credit } by column key). Returns the summary (ignored: the rows
+ * with no balance, [{ row, accountCode }]); throws 400 with every row error when anything is wrong (nothing is loaded).
  */
 export async function importOpeningBalances(db, rows, { goLiveDate }) {
   if (!DATE.test(String(goLiveDate || ''))) throw badRequest('goLiveDate is required (YYYY-MM-DD): the first day of live transactions');
@@ -58,6 +67,7 @@ export async function importOpeningBalances(db, rows, { goLiveDate }) {
   const errors = [];
   const seen = new Set();
   const lines = [];
+  const ignored = [];
   rows.forEach((r, i) => {
     const row = i + 2;
     const fail = (message) => errors.push({ path: `row ${row}`, message: `Row ${row}: ${message}` });
@@ -66,12 +76,17 @@ export async function importOpeningBalances(db, rows, { goLiveDate }) {
     const credit = amount(r.credit);
     if (!code && !debit && !credit) return; // blank line
     const a = accounts.get(code);
+    if (debit === 0 && credit === 0) {
+      // zero balance (an account whose movements net to zero): nothing to load; an unknown code is still reported
+      if (!a) fail(`Account ${code} is not in the chart of accounts`);
+      else ignored.push({ row, accountCode: code });
+      return;
+    }
     if (!code) fail('Account Code is required');
     else if (!a) fail(`Account ${code} is not in the chart of accounts`);
     else if (a.status !== 'active') fail(`Account ${code} is inactive`);
     if (Number.isNaN(debit) || Number.isNaN(credit) || debit < 0 || credit < 0) fail('Debit and Credit must be amounts of zero or more');
     else if (debit && credit) fail('Enter the balance as a debit or a credit, not both');
-    else if (!debit && !credit) fail('The row has no amount');
     if (code && seen.has(code)) fail(`Account ${code} appears more than once`);
     seen.add(code);
     lines.push({ code, balance: round2((debit || 0) - (credit || 0)), debit: round2(debit || 0), credit: round2(credit || 0) });
@@ -87,7 +102,7 @@ export async function importOpeningBalances(db, rows, { goLiveDate }) {
   for (const l of lines) {
     await db.query('INSERT INTO opening_balances(fiscal_year, account_code, balance, source_run) VALUES ($1,$2,$3,$4)', [fy.code, l.code, l.balance, run]);
   }
-  return { fiscalYear: fy.code, goLiveDate, asAt: iso(new Date(Date.parse(`${goLiveDate}T00:00:00Z`) - 86400000)), accounts: lines.length, totalDebit, totalCredit, replaced };
+  return { fiscalYear: fy.code, goLiveDate, asAt: iso(new Date(Date.parse(`${goLiveDate}T00:00:00Z`) - 86400000)), accounts: lines.length, totalDebit, totalCredit, replaced, ignored };
 }
 
 /** Opening balances of a fiscal year (default: the latest year that has any) with account names and totals. */
