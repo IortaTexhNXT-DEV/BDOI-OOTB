@@ -143,7 +143,7 @@ export async function figures(user, { recordScope = null, db = pool } = {}) {
   const branch = me.branch_code ? (await db.query('SELECT name FROM branches WHERE code = $1', [me.branch_code])).rows[0] : null;
   return {
     asOf: c.today, preset, roleCode, roleName: role?.name || roleCode, firstName: me.first_name || String(me.display_name || user.username || '').split(' ')[0],
-    branch: branch?.name || me.branch_code || null, company: String(await getSetting('general.company_name', 'BrokerVerse')),
+    branch: branch?.name || me.branch_code || null, company: (await getSetting('general.company_name', null)) || null,
     figures: FIGURES[preset] ? await FIGURES[preset](c) : [],
   };
 }
