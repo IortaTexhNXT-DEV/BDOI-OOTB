@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .collection-detail-container {
   padding: 20px;
 
@@ -135,8 +136,8 @@
         }
 
         &.level-3 {
-          background-color: #ffcdd2;
-          color: #c62828;
+          background-color: $color-danger-050;
+          color: $color-danger;
         }
       }
     }
@@ -221,7 +222,7 @@
       padding: 15px;
       border-radius: 8px;
       background-color: #f8f9fa;
-      border-left: 4px solid #3498db;
+      border: 1px solid $color-border;
 
       label {
         font-weight: 500;
@@ -236,11 +237,10 @@
       }
 
       &.danger {
-        background-color: #ffebee;
-        border-left-color: #e74c3c;
+        background-color: $color-danger-050;
 
         span {
-          color: #e74c3c;
+          color: $color-danger;
         }
       }
     }
@@ -306,8 +306,8 @@
     .p-datatable-thead > tr > th {
       padding: 16px 12px;
       font-weight: 600;
-      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-      border-bottom: 2px solid #007ad9;
+      background: #f8f9fa;
+      border-bottom: 1px solid $color-border;
       color: #2c3e50;
       font-size: 13px;
       text-transform: uppercase;
@@ -344,11 +344,10 @@
       font-size: 12px;
       line-height: 1.4;
       padding: 10px 12px;
-      background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+      background: $color-heading;
       color: #ffffff;
       border-radius: 6px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: $shadow-md;
       font-weight: 400;
       letter-spacing: 0.2px;
     }
@@ -428,11 +427,7 @@
       top: 0;
       bottom: 0;
       width: 20px;
-      background: linear-gradient(
-        to right,
-        transparent,
-        rgba(0, 122, 217, 0.1)
-      );
+      background: transparent;
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.3s ease;

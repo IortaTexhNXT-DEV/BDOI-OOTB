@@ -99,12 +99,6 @@
               }
             }
 
-            .kpi-gauge {
-              margin: 1rem 0;
-              display: flex;
-              justify-content: center;
-            }
-
             .kpi-details {
               .kpi-value {
                 font-size: 1.5rem;
@@ -210,34 +204,6 @@
           }
         }
       }
-    }
-  }
-
-  .success-rate {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-
-    span {
-      min-width: 40px;
-      font-weight: 500;
-    }
-
-    .rate-bar {
-      flex: 1;
-      height: 8px;
-
-      .p-progressbar-value {
-        background: linear-gradient(90deg, #dc3545 0%, #ffc107 50%, #28a745 100%);
-      }
-    }
-  }
-
-  .performance-bar {
-    height: 8px;
-
-    .p-progressbar-value {
-      background: linear-gradient(90deg, #007bff, #28a745);
     }
   }
 

@@ -81,8 +81,8 @@ const SalesDashboard = () => {
     labels: trend.labels || [],
     datasets: [
       { type: "bar", label: t("salesDashboard.premium"), data: trend.premium || [], backgroundColor: BLUE, yAxisID: "y" },
-      { type: "line", label: t("salesDashboard.prospects"), data: trend.leads || [], borderColor: NAVY, backgroundColor: NAVY, tension: 0.3, yAxisID: "y1" },
-      { type: "line", label: t("salesDashboard.quotations"), data: trend.quotes || [], borderColor: LIGHT, backgroundColor: LIGHT, tension: 0.3, yAxisID: "y1" },
+      { type: "line", label: t("salesDashboard.prospects"), data: trend.leads || [], borderColor: NAVY, backgroundColor: NAVY, tension: 0, yAxisID: "y1" },
+      { type: "line", label: t("salesDashboard.quotations"), data: trend.quotes || [], borderColor: LIGHT, backgroundColor: LIGHT, tension: 0, yAxisID: "y1" },
     ],
   };
   const trendOptions = {

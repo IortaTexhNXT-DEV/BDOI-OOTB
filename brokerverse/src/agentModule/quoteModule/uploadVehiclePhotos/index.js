@@ -275,7 +275,7 @@ const UploadVehiclePhotos = () => {
             />
             {vehiclePhotos.leftSide && (
               <div className="text-sm text-green-600 mt-2">
-                ✓ {t("agent.photoUploadedSuccessfully")}
+                <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}
           </div>
@@ -294,7 +294,7 @@ const UploadVehiclePhotos = () => {
             />
             {vehiclePhotos.rightSide && (
               <div className="text-sm text-green-600 mt-2">
-                ✓ Photo uploaded successfully
+                <i className="pi pi-check-circle mr-1" aria-hidden="true" />Photo uploaded successfully
               </div>
             )}
           </div>
@@ -313,7 +313,7 @@ const UploadVehiclePhotos = () => {
             />
             {vehiclePhotos.front && (
               <div className="text-sm text-green-600 mt-2">
-                ✓ {t("agent.photoUploadedSuccessfully")}
+                <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}
           </div>
@@ -332,7 +332,7 @@ const UploadVehiclePhotos = () => {
             />
             {vehiclePhotos.rear && (
               <div className="text-sm text-green-600 mt-2">
-                ✓ {t("agent.photoUploadedSuccessfully")}
+                <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}
           </div>
@@ -351,7 +351,7 @@ const UploadVehiclePhotos = () => {
             />
             {vehiclePhotos.interior && (
               <div className="text-sm text-green-600 mt-2">
-                ✓ {t("agent.photoUploadedSuccessfully")}
+                <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.photoUploadedSuccessfully")}
               </div>
             )}
           </div>

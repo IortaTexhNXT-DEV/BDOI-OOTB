@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__remittance__master {
@@ -272,7 +273,7 @@
   }
 
   &.inactive {
-    background: lighten($dark-red, 40%);
-    color: $dark-red;
+    background: $color-danger-050;
+    color: $color-danger;
   }
 }

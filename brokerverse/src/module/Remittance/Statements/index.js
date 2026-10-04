@@ -595,7 +595,10 @@ const StatementGeneration = () => {
           <div className="generation-overlay">
             <Card className="generation-card">
               <h3>Generating Statement...</h3>
-              <ProgressBar value={generateProgress} showValue={true} />
+              <div className="bv-meter">
+                <ProgressBar value={generateProgress} showValue={false} />
+                <span className="bv-meter__value">{`${Math.round(generateProgress)}%`}</span>
+              </div>
               <p className="generation-message">
                 {generateProgress < 30 ? 'Collecting data...' :
                  generateProgress < 60 ? 'Processing policies...' :

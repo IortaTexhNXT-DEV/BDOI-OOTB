@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .container__statement {
   padding: 0;
   background: #f8f9fa;
@@ -94,8 +95,6 @@
     }
 
     .statement-header {
-      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-      color: white;
 
       .p-card-body {
         padding: 2rem;
@@ -339,7 +338,7 @@
           padding: 1.5rem;
           background: #f8f9fa;
           border-radius: 8px;
-          border-left: 4px solid #0072d8;
+          border: 1px solid $color-border;
           margin-bottom: 1rem;
 
           &:last-child {

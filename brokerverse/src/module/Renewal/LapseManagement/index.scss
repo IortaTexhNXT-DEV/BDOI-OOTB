@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__lapse__management__master {
@@ -132,7 +133,7 @@
             font-size: 32px;
 
             &.red {
-              color: $dark-red;
+              color: $color-danger;
             }
 
             &.orange {
@@ -309,7 +310,7 @@
                       }
 
                       &.danger {
-                        color: $dark-red;
+                        color: $color-danger;
                       }
                     }
 
@@ -325,7 +326,7 @@
                       }
 
                       &.danger {
-                        color: $dark-red;
+                        color: $color-danger;
                       }
                     }
                   }
@@ -371,8 +372,8 @@
                     }
 
                     &.p-tag-danger {
-                      background: lighten($dark-red, 40%);
-                      color: $dark-red;
+                      background: $color-danger-050;
+                      color: $color-danger;
                     }
                   }
 
@@ -389,7 +390,7 @@
                     }
 
                     &.p-badge-danger {
-                      background: $dark-red;
+                      background: $color-danger;
                     }
                   }
 

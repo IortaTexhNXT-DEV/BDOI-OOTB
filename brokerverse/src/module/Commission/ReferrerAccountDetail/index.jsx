@@ -272,7 +272,7 @@ const ReferrerAccountDetail = () => {
       <section className="cycle-section current">
         <div className="section-head">
           <h2>
-            • CURRENT CYCLE — {currentCycle.label?.toUpperCase()} (DUE NOW) ·{" "}
+            Current cycle: {currentCycle.label} (due now) ·{" "}
             {formatAmount(currentCycle.totalNet)}
           </h2>
           <div className="actions">
@@ -300,7 +300,7 @@ const ReferrerAccountDetail = () => {
       <section className="cycle-section future">
         <div className="section-head">
           <h2>
-            ○ FUTURE CYCLES (ACCRUED, NOT YET PAYABLE) ·{" "}
+            Future cycles (accrued, not yet payable) ·{" "}
             {formatAmount(futureCycles.totalNet)}
           </h2>
           <Button
@@ -315,7 +315,7 @@ const ReferrerAccountDetail = () => {
 
       <section className="cycle-section past">
         <div className="section-head">
-          <h2>✓ PAST (PAID HISTORY) · {formatAmount(past.totalNet)}</h2>
+          <h2>Past (paid history) · {formatAmount(past.totalNet)}</h2>
         </div>
         {past.lines?.length ? (
           renderLinesTable(past.lines, { clickable: true })

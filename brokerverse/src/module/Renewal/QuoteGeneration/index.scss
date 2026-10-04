@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__quote__generation__master {
@@ -305,7 +306,7 @@
                   font-size: 13px;
 
                   .positive {
-                    color: $dark-red;
+                    color: $color-danger;
                   }
 
                   .negative {
@@ -331,7 +332,7 @@
                   font-weight: 600;
 
                   .positive {
-                    color: $dark-red;
+                    color: $color-danger;
                   }
 
                   .negative {
@@ -516,7 +517,7 @@
                   font-weight: 700;
 
                   &.increase {
-                    color: $dark-red;
+                    color: $color-danger;
                   }
 
                   &.decrease {
@@ -691,7 +692,7 @@
 
         span {
           &.increase {
-            color: $dark-red;
+            color: $color-danger;
             font-weight: 600;
           }
 

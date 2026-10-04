@@ -453,6 +453,7 @@ const OpenEntryMatching = () => {
                 label="Pull"
                 onClick={handlePull}
                 disabled={loading}
+                outlined
                 className="action__button__open__entry__matching"
               />
               <Button

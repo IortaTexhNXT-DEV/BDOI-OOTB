@@ -450,6 +450,7 @@ const OpenEntryUnmatching = () => {
                 label={t("openEntryUnmatching.pull")}
                 onClick={handlePull}
                 disabled={loading}
+                outlined
                 className="action__button__open__entry__matching"
               />
               <Button

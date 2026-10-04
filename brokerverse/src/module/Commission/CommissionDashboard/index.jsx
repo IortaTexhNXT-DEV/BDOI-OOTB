@@ -61,7 +61,7 @@ const CommissionDashboard = () => {
           data: data.monthlyTrend.map((m) => m.brokerageIncome),
           borderColor: "#22c55e",
           backgroundColor: "#22c55e",
-          tension: 0.25,
+          tension: 0,
           fill: false,
         },
         {
@@ -69,7 +69,7 @@ const CommissionDashboard = () => {
           data: data.monthlyTrend.map((m) => m.comsubGross),
           borderColor: "#b42318",
           backgroundColor: "#b42318",
-          tension: 0.25,
+          tension: 0,
           fill: false,
         },
         {
@@ -77,7 +77,7 @@ const CommissionDashboard = () => {
           data: data.monthlyTrend.map((m) => m.netMargin),
           borderColor: "#1e3a5f",
           backgroundColor: "#1e3a5f",
-          tension: 0.25,
+          tension: 0,
           fill: false,
         },
       ],

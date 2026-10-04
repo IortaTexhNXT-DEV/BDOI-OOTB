@@ -97,10 +97,10 @@ const Statement = () => {
         {
           label: 'Monthly Earnings',
           data: statement.monthlyTrend.map(item => item.earnings),
-          fill: true,
+          fill: false,
           backgroundColor: 'rgba(102, 126, 234, 0.1)',
           borderColor: documentStyle.getPropertyValue('--primary-color') || '#0072d8',
-          tension: 0.4
+          tension: 0
         }
       ]
     };

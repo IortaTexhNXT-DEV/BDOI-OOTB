@@ -122,8 +122,8 @@ const InstalmentPlans = () => {
               <div className="col-6 md:col-2"><label>{t("creditControl.frequency")}</label>
                 <Dropdown value={terms.frequency} options={Object.keys(data.frequencies).map((f) => ({ label: t(`creditControl.freq.${f}`, { defaultValue: f }), value: f }))}
                   onChange={(e) => setTerms({ ...terms, frequency: e.value })} className="w-full" /></div>
-              <div className="col-6 md:col-2"><label>{t("creditControl.count")}</label>
-                <InputNumber value={terms.count} min={1} max={data.maxInstalments} showButtons onValueChange={(e) => setTerms({ ...terms, count: e.value })} className="w-full" /></div>
+              <div className="col-6 md:col-2"><label htmlFor="instalment-count">{t("creditControl.count")}</label>
+                <InputNumber inputId="instalment-count" value={terms.count} min={1} max={data.maxInstalments} showButtons onValueChange={(e) => setTerms({ ...terms, count: e.value })} className="w-full" /></div>
               <div className="col-6 md:col-2"><label>{t("creditControl.firstDueDate")}</label>
                 <Calendar value={terms.firstDueDate} onChange={(e) => setTerms({ ...terms, firstDueDate: e.value })} showIcon className="w-full" /></div>
               <div className="col-6 md:col-2"><label>{t("creditControl.downPayment")}</label>

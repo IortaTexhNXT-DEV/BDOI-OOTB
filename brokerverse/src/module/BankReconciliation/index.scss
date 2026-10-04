@@ -1,3 +1,4 @@
+@import "../../theme/bdoi/tokens";
 /* Bank reconciliation screens: shares the period-end page look (pe-page, pe-card, pe-kpis, pe-statement) */
 .br-tag {
   font-size: 0.72rem;
@@ -148,8 +149,9 @@
 }
 
 .br-notice {
-  border-left: 4px solid #f79009;
-  background: #fffaeb;
+  border: 1px solid $color-border;
+  border-left: 3px solid $color-warning;
+  background: $color-warning-050;
   padding: 0.6rem 0.9rem;
   border-radius: 6px;
   margin: 0.5rem 0;

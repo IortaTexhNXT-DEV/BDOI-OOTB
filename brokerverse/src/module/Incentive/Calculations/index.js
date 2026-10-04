@@ -541,7 +541,7 @@ const Calculations = () => {
                     />
                   </div>
                 </div>
-                <div className="program-info">
+                <div className="bv-info-box program-info">
                   <p>Selected {newCalculation.selectedPrograms.length} program(s)</p>
                   <p className="note">Only active programs are available for calculation.</p>
                 </div>
@@ -569,7 +569,7 @@ const Calculations = () => {
                     <span>{formatAppDate(new Date())}</span>
                   </div>
                 </div>
-                <div className="warning-note">
+                <div className="bv-note warning-note">
                   <i className="pi pi-info-circle"></i>
                   <p>This calculation will process all eligible agents for the selected programs and period. The results will require approval before payout.</p>
                 </div>

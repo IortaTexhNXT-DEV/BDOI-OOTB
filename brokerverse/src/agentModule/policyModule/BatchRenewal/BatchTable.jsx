@@ -14,6 +14,7 @@ import { Card } from "primereact/card";
 import { Divider } from "primereact/divider";
 import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
+import { percentOf } from "../../../utility/numberFormat";
 import { Toast } from "primereact/toast";
 import { useDispatch } from "react-redux";
 import BatchRenewalService from "../../../services/batchRenewalService";
@@ -582,18 +583,9 @@ export default function BatchTable() {
               header="Processed"
               sortable
               body={(rowData) => (
-                <div className="text-center">
-                  <span className="font-semibold">
-                    {rowData.processedCount}
-                  </span>
-                  <div className="mt-1">
-                    <ProgressBar
-                      value={
-                        (rowData.processedCount / rowData.totalPolicies) * 100
-                      }
-                      style={{ height: "6px" }}
-                    />
-                  </div>
+                <div className="bv-meter">
+                  <ProgressBar value={percentOf(rowData.processedCount, rowData.totalPolicies)} showValue={false} />
+                  <span className="bv-meter__value">{`${rowData.processedCount} of ${rowData.totalPolicies}`}</span>
                 </div>
               )}
             />
@@ -1087,14 +1079,10 @@ export default function BatchTable() {
                       </div>
                     </div>
                   </div>
-                  <ProgressBar
-                    value={
-                      (queueProgress.progress.processed /
-                        queueProgress.progress.total) *
-                      100
-                    }
-                    className="mt-3"
-                  />
+                  <div className="bv-meter mt-3">
+                    <ProgressBar value={percentOf(queueProgress.progress.processed, queueProgress.progress.total)} showValue={false} />
+                    <span className="bv-meter__value">{`${queueProgress.progress.processed} of ${queueProgress.progress.total}`}</span>
+                  </div>
                 </Card>
               </div>
             )}

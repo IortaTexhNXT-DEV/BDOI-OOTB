@@ -12,7 +12,6 @@ import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { TabView, TabPanel } from "primereact/tabview";
 import { ProgressBar } from "primereact/progressbar";
-import { Knob } from "primereact/knob";
 import { Avatar } from "primereact/avatar";
 import { Calendar } from "primereact/calendar";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
@@ -111,7 +110,7 @@ const PerformanceTracking = () => {
           borderColor: primaryColor,
           backgroundColor: `${primaryColor}20`,
           tension: 0,
-          fill: true
+          fill: false
         }
       ]
     };
@@ -229,14 +228,7 @@ const PerformanceTracking = () => {
   const formatPercentage = (value, decimals = 1) => formatPercent(value ?? 0, { decimals });
 
   const agentRankingTemplate = (rowData) => {
-    const getRankIcon = (rank) => {
-      switch (rank) {
-        case 1: return '🥇';
-        case 2: return '🥈';
-        case 3: return '🥉';
-        default: return `#${rank}`;
-      }
-    };
+    const getRankIcon = (rank) => `#${rank}`;
 
     const getRankColor = (rank) => {
       switch (rank) {
@@ -281,9 +273,9 @@ const PerformanceTracking = () => {
     };
 
     return (
-      <div className="rate-cell">
-        <ProgressBar value={progressValue(rate)} showValue={false} className={`rate-progress ${getColor(rate)}`} />
-        <span className={`rate-value ${getColor(rate)}`}>{formatPercentage(rate)}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(rate)} showValue={false} />
+        <span className={`bv-meter__value ${getColor(rate)}`}>{formatPercentage(rate)}</span>
       </div>
     );
   };
@@ -406,9 +398,9 @@ const PerformanceTracking = () => {
     };
 
     return (
-      <div className="kpi-achievement">
-        <ProgressBar value={progressValue(percentage)} showValue={false} className={getSeverity(percentage)} />
-        <span className="achievement-text">
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(percentage)} showValue={false} />
+        <span className={`bv-meter__value ${getSeverity(percentage)}`}>
           {percentage >= 100 ? t('renewal.targetMet') : t('renewal.ofTarget', { pct: Math.round(percentage) })}
         </span>
       </div>
@@ -503,27 +495,19 @@ const PerformanceTracking = () => {
             <div className="kpi-grid">
               {kpiData.map((kpi, index) => (
                 <div key={index} className="kpi-item">
-                  <div className="kpi-visual">
-                    <Knob
-                      value={progressValue(kpi.inverse
-                        ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
-                        : Math.min((kpi.achieved / kpi.target) * 100, 100))}
-                      size={80}
-                      readOnly
-                      valueColor={
-                        (kpi.inverse
-                          ? kpi.achieved <= kpi.target
-                          : kpi.achieved >= kpi.target)
-                        ? "#10B981" : "#EF4444"
-                      }
-                      rangeColor="#E5E7EB"
-                    />
-                  </div>
                   <div className="kpi-details">
                     <span className="kpi-category">{kpi.category}</span>
                     <div className="kpi-values">
                       <span className="achieved">{formatWithUnit(kpi.achieved, kpi.unit)}</span>
                       <span className="target">Target: {formatWithUnit(kpi.target, kpi.unit)}</span>
+                    </div>
+                    <div className="bv-meter">
+                      <ProgressBar value={progressValue(kpi.inverse
+                        ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
+                        : Math.min((kpi.achieved / kpi.target) * 100, 100))} showValue={false} />
+                      <span className="bv-meter__value">{t('renewal.ofTarget', { pct: Math.round(progressValue(kpi.inverse
+                        ? Math.max(0, 100 - ((kpi.achieved - kpi.target) / kpi.target) * 100)
+                        : Math.min((kpi.achieved / kpi.target) * 100, 100))) })}</span>
                     </div>
                   </div>
                 </div>

@@ -181,7 +181,7 @@ const SettlementParameterMaster = () => {
                   </div>
                 </div>
 
-                <div className="info-box">
+                <div className="bv-info-box info-box">
                   <i className="pi pi-info-circle"></i>
                   <div>
                     <strong>{t("remittance.approvalLimitsTitle")}</strong>
@@ -247,7 +247,7 @@ const SettlementParameterMaster = () => {
                   </div>
                 </div>
 
-                <div className="info-box">
+                <div className="bv-info-box info-box">
                   <i className="pi pi-info-circle"></i>
                   <div>
                     <strong>GL Account Configuration</strong>

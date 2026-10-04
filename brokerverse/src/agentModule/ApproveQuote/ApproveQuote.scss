@@ -166,12 +166,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: linear-gradient(135deg, $brand-blue 0%, $brand-navy 100%);
-      color: white;
+      background: $brand-blue-050;
+      color: $color-heading;
+      border: 1px solid $color-border;
       padding: 16px 20px;
       border-radius: 8px;
       margin-top: 16px;
-      box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
 
       .total-label {
         font-size: 16px;

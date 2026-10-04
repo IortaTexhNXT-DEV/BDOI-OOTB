@@ -12,7 +12,6 @@ import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Chart } from "primereact/chart";
-import { Knob } from "primereact/knob";
 import { Badge } from "primereact/badge";
 import SvgDot from "../../../assets/icons/SvgDot";
 import SvgEyeIcon from "../../../assets/icons/SvgEyeIcon";
@@ -20,7 +19,7 @@ import incentiveService from "../../../services/incentiveService";
 import { showError } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
-import { formatPercent, progressValue, roundTo } from "../../../utility/numberFormat";
+import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const MyPrograms = () => {
   const { t } = useTranslation();
@@ -150,20 +149,10 @@ const MyPrograms = () => {
   // Template functions
   const achievementBodyTemplate = (rowData) => {
     const percentage = rowData.achievementPercent;
-    const getSeverity = () => {
-      if (percentage >= 100) return "success";
-      if (percentage >= 80) return "warning";
-      return "danger";
-    };
-
     return (
-      <div className="achievement-progress">
-        <ProgressBar
-          value={progressValue(percentage)}
-          showValue={false}
-          className={`progress-${getSeverity()}`}
-        />
-        <span className="achievement-text">{formatPercent(percentage)}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(percentage)} showValue={false} />
+        <span className="bv-meter__value">{formatPercent(percentage)}</span>
       </div>
     );
   };
@@ -260,18 +249,13 @@ const MyPrograms = () => {
 
           <Card className="dashboard-card">
             <div className="card-content">
-              <div className="knob-container">
-                <Knob
-                  value={roundTo(dashboardData.avgAchievement, 0) ?? 0}
-                  size={60}
-                  strokeWidth={8}
-                  valueTemplate={"{value}%"}
-                  valueColor="#0072d8"
-                  rangeColor="#e9ecef"
-                />
-              </div>
               <div className="card-info">
+                <span className="card-value">{formatPercent(dashboardData.avgAchievement)}</span>
                 <span className="card-label">Avg Achievement</span>
+                <div className="bv-meter">
+                  <ProgressBar value={progressValue(dashboardData.avgAchievement)} showValue={false} />
+                  <span className="bv-meter__value">{formatPercent(dashboardData.avgAchievement)}</span>
+                </div>
               </div>
             </div>
           </Card>
@@ -437,15 +421,9 @@ const MyPrograms = () => {
             <TabPanel header="Progress">
               <div className="progress-section">
                 <div className="progress-chart">
-                  <div className="progress-circle">
-                    <Knob
-                      value={roundTo(selectedProgram.achievementPercent, 0) ?? 0}
-                      size={120}
-                      strokeWidth={10}
-                      valueTemplate={"{value}%"}
-                      valueColor={selectedProgram.achievementPercent >= 100 ? "#28a745" : "#0072d8"}
-                      rangeColor="#e9ecef"
-                    />
+                  <div className="bv-meter">
+                    <ProgressBar value={progressValue(selectedProgram.achievementPercent)} showValue={false} />
+                    <span className="bv-meter__value">{formatPercent(selectedProgram.achievementPercent)}</span>
                   </div>
                   <div className="progress-info">
                     <h4>Current Achievement</h4>

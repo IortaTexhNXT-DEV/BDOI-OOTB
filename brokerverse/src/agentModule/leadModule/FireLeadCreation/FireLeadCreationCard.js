@@ -8,6 +8,7 @@ import { InputNumber } from "primereact/inputnumber";
 import InputTextField from "../../component/inputText";
 import DropdownField from "../../component/DropdownField";
 import { Button } from "primereact/button";
+import { Message } from "primereact/message";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -1157,9 +1158,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
       </div>
 
       {!hasAtLeastOneSi && (
-        <div className="mt-3" style={{ padding: "12px", backgroundColor: "#fef3c7", borderRadius: "6px", color: "#92400e", fontSize: 14 }}>
-          {t("fireLead.atLeastOneSiRequired")}
-        </div>
+        <Message severity="warn" className="mt-3 w-full" text={t("fireLead.atLeastOneSiRequired")} />
       )}
       {siErrors.atLeastOneSi && (
         <div className="mt-2" style={{ fontSize: 12, color: "var(--color-danger)" }}>{siErrors.atLeastOneSi}</div>
@@ -1230,7 +1229,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
                     </div>
                   </div>
                 </div>
-                <div className="discount__action__container" style={{ color: "green" }}>
+                <div className="discount__action__container">
                   <div className="discount__action__text">{t("fireLead.min0Max15")}</div>
                   <div className="discount__action__text">{t("fireLead.max15")}</div>
                 </div>
@@ -1276,7 +1275,7 @@ const FireLeadCreationCard = ({ step, onStepChange }) => {
                     </div>
                   </div>
                 </div>
-                <div className="discount__action__container" style={{ color: "green" }}>
+                <div className="discount__action__container">
                   <div className="discount__action__text">{t("fireLead.min0Max15")}</div>
                   <div className="discount__action__text">{t("fireLead.min0Max5")}</div>
                 </div>

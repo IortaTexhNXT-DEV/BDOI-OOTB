@@ -64,6 +64,12 @@
       font-size: 18px;
       font-weight: 500 !important;
       background-color: #0072d8;
+
+      &.p-button-outlined {
+        background-color: transparent;
+        color: #0072d8;
+        border: 1px solid #0072d8;
+      }
       border-radius: 6px !important;
       padding-right: 1rem;
       padding-left: 1rem;

@@ -233,8 +233,8 @@ const SchedulingDashboard = () => {
             <MultiSelect value={form.insurers} options={insurerOptions} filter display="chip" onChange={(e) => setField("insurers", e.value)} />
           </div>
           <div className="p-field field">
-            <label>{t("remittance.cutOffDays")}</label>
-            <InputNumber value={form.cutOffDays} min={0} max={365} showButtons onValueChange={(e) => setField("cutOffDays", e.value ?? 0)} />
+            <label htmlFor="schedule-cut-off-days">{t("remittance.cutOffDays")}</label>
+            <InputNumber inputId="schedule-cut-off-days" value={form.cutOffDays} min={0} max={365} showButtons style={{ width: "10rem" }} onValueChange={(e) => setField("cutOffDays", e.value ?? 0)} />
             <small>{t("remittance.cutOffDaysHelp")}</small>
           </div>
           <div className="p-field field">

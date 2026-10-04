@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../styles/responsive.scss";
 
 .collections-list-container {
@@ -188,8 +189,8 @@
       }
 
       &.level-3 {
-        background-color: #ffcdd2;
-        color: #c62828;
+        background-color: $color-danger-050;
+        color: $color-danger;
       }
     }
   }

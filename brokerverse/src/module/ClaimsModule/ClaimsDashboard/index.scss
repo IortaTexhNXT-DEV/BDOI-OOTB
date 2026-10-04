@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../styles/responsive.scss";
 
 .claims-dashboard {
@@ -163,14 +164,11 @@
         }
 
         .kpi-icon {
-          font-size: 2.5rem;
-
-          @include tablet-sm {
-            font-size: 2rem;
-          }
+          font-size: 18px;
+          color: $color-text-muted;
 
           @include mobile-sm {
-            font-size: 1.75rem;
+            font-size: 16px;
           }
         }
 
@@ -374,9 +372,6 @@
             height: 8px;
             background: #e9ecef;
 
-            .p-progressbar-value {
-              background: linear-gradient(90deg, #0066cc 0%, #4285f4 100%);
-            }
           }
         }
       }

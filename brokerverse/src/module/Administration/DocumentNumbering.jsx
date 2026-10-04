@@ -300,7 +300,7 @@ const DocumentNumbering = () => {
             <div className="admin__grid">
               <div className="admin__field">
                 <label htmlFor="dn-width">{k("seqWidth")}</label>
-                <InputNumber inputId="dn-width" value={edit.seqWidth} min={1} max={12} showButtons onValueChange={(e) => set("seqWidth", e.value || 1)} />
+                <InputNumber inputId="dn-width" value={edit.seqWidth} min={1} max={12} showButtons style={{ width: "10rem" }} onValueChange={(e) => set("seqWidth", e.value || 1)} />
               </div>
               <div className="admin__field">
                 <label htmlFor="dn-start">{k("startNumber")}</label>

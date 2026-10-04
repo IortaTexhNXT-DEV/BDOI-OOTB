@@ -95,9 +95,9 @@ const MotorClaimRepairs = () => {
             <p className="mt-0">{file.insuredName} · {file.insurerName} · {t("opsAcc.motor.sumInsured")} {money(file.sumInsured)} · {t("opsAcc.motor.defaultParticipation")} {money(file.defaultParticipation)}</p>
             <div className="flex gap-2 mb-2">
               <Button label={t("opsAcc.motor.addEstimate")} icon="pi pi-plus" onClick={() => setEstimate({ repairShopCode: shops[0]?.code || null, shopReference: "", estimateDate: new Date() })} />
-              <Button label={t("opsAcc.motor.issueLoa")} icon="pi pi-file" disabled={!file.readyForLoa.length}
+              <Button label={t("opsAcc.motor.issueLoa")} icon="pi pi-file" outlined disabled={!file.readyForLoa.length}
                 onClick={() => setLoa({ participation: file.loas.some((l) => l.status === "issued") ? 0 : file.defaultParticipation, depreciation: null, remarks: "" })} />
-              <Button label={t("opsAcc.motor.release")} icon="pi pi-car" disabled={!file.loas.some((l) => l.status === "issued")}
+              <Button label={t("opsAcc.motor.release")} icon="pi pi-car" outlined disabled={!file.loas.some((l) => l.status === "issued")}
                 onClick={() => setRelease({ releasedTo: file.insuredName || "", releasedOn: new Date(), repairCompletedOn: null, participationCollected: null, odometer: "" })} />
             </div>
             <h4>{t("opsAcc.motor.estimates")}</h4>

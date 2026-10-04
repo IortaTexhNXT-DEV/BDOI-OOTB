@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .container__calculations {
   padding: 0;
   background: #f8f9fa;
@@ -22,19 +23,6 @@
       margin-bottom: 1rem;
 
       .main__btn__action {
-        background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        transition: all 0.3s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
         .pr-2 {
           padding-right: 0.5rem;
         }
@@ -157,20 +145,20 @@
         }
 
         .approve-button {
-          background: #e8f5e8;
-          color: #2e7d32;
+          background: $color-success-050;
+          color: $color-success;
 
           &:hover {
-            background: #c8e6c9;
+            border-color: $color-success;
           }
         }
 
         .reject-button {
-          background: #ffebee;
-          color: #c62828;
+          background: $color-danger-050;
+          color: $color-danger;
 
           &:hover {
-            background: #ffcdd2;
+            border-color: $color-danger;
           }
         }
       }
@@ -180,26 +168,9 @@
   // Dialog Styles
   .p-dialog {
     .p-dialog-header {
-      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-      color: white;
-      border-radius: 12px 12px 0 0;
-      padding: 1.5rem 2rem;
-
       .p-dialog-title {
         font-size: 1.25rem;
         font-weight: 600;
-      }
-
-      .p-dialog-header-icons {
-        .p-dialog-header-icon {
-          color: white;
-          width: 2rem;
-          height: 2rem;
-
-          &:hover {
-            background: rgba(255, 255, 255, 0.1);
-          }
-        }
       }
     }
 
@@ -293,19 +264,13 @@
             }
 
             .program-info {
-              background: #e3f2fd;
-              border: 1px solid #bbdefb;
-              border-radius: 6px;
-              padding: 1rem;
               margin-top: 1rem;
 
               p {
                 margin: 0.25rem 0;
-                color: #1565c0;
 
                 &.note {
                   font-size: 0.875rem;
-                  font-style: italic;
                 }
               }
             }
@@ -343,13 +308,9 @@
               display: flex;
               align-items: flex-start;
               gap: 0.75rem;
-              background: #fff3cd;
-              border: 1px solid #ffeaa7;
-              border-radius: 6px;
-              padding: 1rem;
 
               i {
-                color: #856404;
+                color: $color-text-muted;
                 font-size: 1.125rem;
                 margin-top: 0.125rem;
               }
@@ -529,16 +490,6 @@
             }
           }
 
-          &:not(.p-button-text):not(.p-button-secondary):not(.p-button-danger) {
-            background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-            border: none;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-
-            &:hover {
-              transform: translateY(-1px);
-              box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            }
-          }
         }
       }
     }
