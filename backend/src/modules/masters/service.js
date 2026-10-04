@@ -12,7 +12,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 
 const IDENT = /^[a-z_][a-z0-9_]*$/;
 /** Reference tables a master type may be stored in (identifiers are never taken from user input). */
-export const TABLES = new Set(['countries', 'states', 'cities', 'currencies', 'banks', 'insurance_companies', 'products',
+export const TABLES = new Set(['countries', 'regions', 'states', 'cities', 'districts', 'currencies', 'banks', 'insurance_companies', 'products',
   'policy_types', 'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'coverages', 'signatories', 'branches', 'write_off_reasons']);
 const SYSTEM_KEYS = new Set(['id', 'status', 'isActive', 'createdAt', 'updatedAt', 'createdBy', 'updatedBy']);
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -23,8 +23,11 @@ const q = (s) => {
 
 // ---------- master types ----------
 
+/** Master type codes also accepted under another name: the Province master keeps the code of its earlier name (state). */
+export const TYPE_ALIASES = { province: 'state', municipality: 'city', 'city-municipality': 'city' };
+
 export async function getType(code) {
-  const t = await one('SELECT * FROM master_types WHERE code = $1 AND status <> \'deleted\'', [code]);
+  const t = await one('SELECT * FROM master_types WHERE code = $1 AND status <> \'deleted\'', [TYPE_ALIASES[code] || code]);
   if (!t) throw notFound(`Unknown master type: ${code}`);
   if (t.storage === 'table' && !TABLES.has(t.table_name)) throw badRequest(`Master type ${code} has an invalid table`);
   return t;
@@ -590,7 +593,7 @@ const FORMAT = {
  */
 export function uploadColumns(t) {
   const cols = (t.fields || []).filter((f) => !f.auto && f.type !== 'audit-user' && f.type !== 'audit-date').map((f) => ({
-    key: f.name, header: f.label || f.name, aliases: [], required: !!f.required && !f.numbering,
+    key: f.name, header: f.label || f.name, aliases: Array.isArray(f.aliases) ? f.aliases : [], required: !!f.required && !f.numbering,
     format: f.ref ? `Name${f.ref.codeColumn ? ' or code' : ''} of an existing ${f.ref.type.replace(/-/g, ' ')} record` : FORMAT[f.type || 'string'] || 'Text',
     ...(Array.isArray(f.options) && f.options.length ? { allowed: f.options } : {}),
   }));
@@ -601,7 +604,7 @@ export function uploadColumns(t) {
 export function bodyFromRow(t, row, pickValue) {
   const body = {};
   for (const c of uploadColumns(t)) {
-    const v = pickValue(row, c.header, c.key);
+    const v = pickValue(row, c.header, c.key, ...(c.aliases || []));
     if (v === undefined) continue;
     const f = t.fields.find((x) => x.name === c.key);
     if (f?.type === 'json' && typeof v === 'string') {
@@ -613,7 +616,7 @@ export function bodyFromRow(t, row, pickValue) {
 
 /** Dropdown options: [{ id, code, label, value }]; value is the label unless valueField=id|code. */
 export async function listOptions(t, qs) {
-  const { rows } = await listRecords(t, { ...qs, status: qs.status || 'active', sortBy: qs.sortBy || t.label_field }, { limit: Math.min(1000, Number(qs.limit) || 500), offset: 0 });
+  const { rows } = await listRecords(t, { ...qs, status: qs.status || 'active', sortBy: qs.sortBy || t.label_field }, { limit: Math.min(5000, Number(qs.limit) || 2000), offset: 0 });
   return rows.map((r) => {
     const label = r[t.label_field] ?? r.name ?? String(r.id);
     const code = t.code_field ? r[t.code_field] : null;

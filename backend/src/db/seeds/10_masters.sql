@@ -1,39 +1,13 @@
 -- Reference data. Idempotent by natural key.
 INSERT INTO countries(code, name) VALUES ('PH','Philippines'),('SG','Singapore'),('MY','Malaysia'),('TH','Thailand'),('US','United States')
 ON CONFLICT (code) DO NOTHING;
-INSERT INTO states(country_id, code, name)
-SELECT c.id, v.code, v.name FROM (VALUES ('NCR','Metro Manila'),('CAV','Cavite'),('LAG','Laguna'),('CEB','Cebu'),('DAV','Davao del Sur'),('PAM','Pampanga'),('BUL','Bulacan'),('BAT','Batangas'),('ILO','Iloilo'),('NEG','Negros Occidental')) AS v(code,name)
-JOIN countries c ON c.code = 'PH'
-WHERE NOT EXISTS (SELECT 1 FROM states s WHERE s.name = v.name);
-INSERT INTO cities(state_id, name)
-SELECT s.id, v.city FROM (VALUES ('Metro Manila','Makati'),('Metro Manila','Quezon City'),('Metro Manila','Manila'),('Metro Manila','Taguig'),('Metro Manila','Pasig'),('Cavite','Bacoor'),('Laguna','Santa Rosa'),('Cebu','Cebu City'),('Cebu','Mandaue'),('Davao del Sur','Davao City'),('Pampanga','San Fernando'),('Bulacan','Malolos'),('Batangas','Batangas City'),('Iloilo','Iloilo City'),('Negros Occidental','Bacolod')) AS v(state,city)
-JOIN states s ON s.name = v.state
-WHERE NOT EXISTS (SELECT 1 FROM cities c WHERE c.name = v.city);
--- Philippine address master: all 17 local government units of Metro Manila (NCR: 16 cities + Pateros) and more
--- provinces / cities used by the claim and lead address pickers. Idempotent per (province, city).
-INSERT INTO states(country_id, code, name)
-SELECT c.id, v.code, v.name FROM (VALUES ('RIZ','Rizal'),('DAO','Davao Oriental'),('PAN','Pangasinan'),('NEC','Negros Oriental')) AS v(code,name)
-JOIN countries c ON c.code = 'PH'
-WHERE NOT EXISTS (SELECT 1 FROM states s WHERE s.country_id = c.id AND s.name = v.name);
-INSERT INTO cities(state_id, name)
-SELECT s.id, v.city FROM (VALUES
- ('Metro Manila','Caloocan'),('Metro Manila','Las Piñas'),('Metro Manila','Makati'),('Metro Manila','Malabon'),('Metro Manila','Mandaluyong'),
- ('Metro Manila','Manila'),('Metro Manila','Marikina'),('Metro Manila','Muntinlupa'),('Metro Manila','Navotas'),('Metro Manila','Parañaque'),
- ('Metro Manila','Pasay'),('Metro Manila','Pasig'),('Metro Manila','Pateros'),('Metro Manila','Quezon City'),('Metro Manila','San Juan'),
- ('Metro Manila','Taguig'),('Metro Manila','Valenzuela'),
- ('Cavite','Dasmariñas'),('Cavite','Imus'),('Cavite','General Trias'),('Cavite','Tagaytay'),
- ('Laguna','Calamba'),('Laguna','Biñan'),('Laguna','San Pedro'),
- ('Rizal','Antipolo'),('Rizal','Cainta'),('Rizal','Taytay'),
- ('Cebu','Lapu-Lapu'),('Davao del Sur','Digos'),('Davao Oriental','Mati'),
- ('Pampanga','Angeles'),('Bulacan','Meycauayan'),('Batangas','Lipa'),('Pangasinan','Dagupan'),('Negros Oriental','Dumaguete')) AS v(state, city)
-JOIN states s ON s.name = v.state JOIN countries c ON c.id = s.country_id AND c.code = 'PH'
-WHERE NOT EXISTS (SELECT 1 FROM cities ci WHERE ci.state_id = s.id AND ci.name = v.city);
+-- Provinces, cities / municipalities, ZIP codes and Metro Manila barangays: 12_ph_geography.sql (PSGC).
 -- Exchange rates are kept in the dated Exchange Rate master (master_records type exchange-rate), not here.
 INSERT INTO currencies(code, name, symbol, decimals, is_base) VALUES
  ('PHP','Philippine Peso','₱',2,true),('USD','US Dollar','$',2,false),('EUR','Euro','€',2,false),('SGD','Singapore Dollar','S$',2,false),('JPY','Japanese Yen','¥',0,false)
 ON CONFLICT (code) DO NOTHING;
 INSERT INTO banks(code, name, swift_code) VALUES
- ('BDO','Banco de Oro','BNORPHMM'),('BPI','Bank of the Philippine Islands','BOPIPHMM'),('MBT','Metrobank','MBTCPHMM'),('LBP','Land Bank of the Philippines','TLBPPHMM'),('SECB','Security Bank','SETCPHMM'),('CBC','China Banking Corporation','CHBKPHMM')
+ ('BDO','BDO Unibank, Inc.','BNORPHMM'),('BPI','Bank of the Philippine Islands','BOPIPHMM'),('MBT','Metropolitan Bank and Trust Company','MBTCPHMM'),('LBP','Land Bank of the Philippines','TLBPPHMM'),('SECB','Security Bank Corporation','SETCPHMM'),('CBC','China Banking Corporation','CHBKPHMM')
 ON CONFLICT (code) DO NOTHING;
 INSERT INTO insurance_companies(code, name, short_name, commission_rate, contact_email, status) VALUES
  ('MAPFRE','MAPFRE Insurance Corporation','MAPFRE',0.15,'uw@mapfre.example','active'),

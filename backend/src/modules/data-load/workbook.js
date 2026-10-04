@@ -179,7 +179,7 @@ export function readKitWorkbook(buffer, sheets) {
   const out = {};
   let found = 0;
   for (const sheet of sheets) {
-    const ws = byName.get(sheet.name.toLowerCase());
+    const ws = [sheet.name, ...(sheet.aliases || [])].map((n) => byName.get(n.toLowerCase())).find(Boolean);
     if (!ws) continue;
     found += 1;
     const header = (ws.rows[0] || []).map((h) => normKey(h));

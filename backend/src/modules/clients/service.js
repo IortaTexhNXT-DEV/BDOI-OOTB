@@ -4,12 +4,13 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate } from '../../lib/dates.js';
+import { fillRegion } from '../../lib/address.js';
 
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
   taxNumber: 'tin', emailId: 'email', contactNumber: 'phone', gender: 'gender', houseNo: 'house_no', barangay: 'barangay',
-  city: 'city', province: 'state', country: 'country', zipCode: 'postal_code', roadThanon: 'road', soiAlley: 'soi',
-  mooVillage: 'moo', leadCategory: 'lead_category', clientType: 'client_type', status: 'status', source: 'source',
+  city: 'city', province: 'state', region: 'region', country: 'country', zipCode: 'postal_code', roadThanon: 'road', soiAlley: 'soi',
+  mooVillage: 'moo', street: 'road', leadCategory: 'lead_category', clientType: 'client_type', status: 'status', source: 'source',
 };
 const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'email', 'phone', 'clientId', 'id', 'generatedClientId', 'policies', 'createdAt', 'updatedAt', 'leadId']);
 
@@ -21,7 +22,7 @@ export function toClient(r, policies = null) {
     firstName: r.first_name, lastName: r.last_name, preferredName: r.preferred_name, companyName: r.company_name,
     displayName: r.display_name, fullName: r.display_name, taxNumber: r.tin, emailId: r.email, email: r.email,
     contactNumber: r.phone, phone: r.phone, DOB: r.birth_date, gender: r.gender, houseNo: r.house_no, barangay: r.barangay,
-    city: r.city, province: r.state, country: r.country, zipCode: r.postal_code, roadThanon: r.road, soiAlley: r.soi,
+    city: r.city, province: r.state, region: r.region, country: r.country, zipCode: r.postal_code, street: r.road, roadThanon: r.road, soiAlley: r.soi,
     mooVillage: r.moo, leadCategory: r.lead_category, leadId: r.lead_id, status: r.status, source: r.source,
     // set on Accounts > Credit Control > Client Credit Limits (approve:credit-control), not on the client form
     creditLimit: r.credit_limit === null || r.credit_limit === undefined ? null : Number(r.credit_limit),
@@ -81,6 +82,7 @@ export async function createClient(body, userId) {
   const { cols, extra } = columnsFrom(body);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   await assertBirthDate(cols.birth_date);
+  await fillRegion(cols);
   const id = await withTransaction((c) => insertClient(c, cols, extra, userId));
   return getClient(id);
 }
@@ -90,6 +92,7 @@ export async function createClientInTx(db, body, userId) {
   const { cols, extra } = columnsFrom(body);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   await assertBirthDate(cols.birth_date);
+  await fillRegion(cols, undefined, db);
   return insertClient(db, cols, extra, userId);
 }
 
@@ -97,6 +100,7 @@ export async function updateClient(id, body, userId) {
   const before = await getClient(id);
   const { cols, extra } = columnsFrom(body);
   await assertBirthDate(cols.birth_date);
+  await fillRegion(cols);
   const next = { ...before, ...cols };
   const data = { ...cols, display_name: nameOf(next), extra: JSON.stringify({ ...(before.extra || {}), ...extra }), updated_by: userId, updated_at: new Date() };
   const keys = Object.keys(data);
@@ -119,7 +123,7 @@ export async function clientFromLead(db, leadId, overrides = {}, userId = null) 
     const cols = {
       first_name: lead.first_name, last_name: lead.last_name, preferred_name: lead.preferred_name, company_name: lead.company_name,
       tin: lead.tax_number, email: lead.email, phone: lead.phone, birth_date: lead.birth_date, gender: lead.gender, house_no: lead.house_no,
-      barangay: lead.barangay, city: lead.city, state: lead.state, country: lead.country, postal_code: lead.postal_code, road: lead.road,
+      barangay: lead.barangay, city: lead.city, state: lead.state, region: lead.region, country: lead.country, postal_code: lead.postal_code, road: lead.road,
       soi: lead.soi, moo: lead.moo, lead_category: lead.lead_category, lead_id: lead.id, source: lead.source || 'lead',
       ...columnsFrom(overrides).cols,
     };

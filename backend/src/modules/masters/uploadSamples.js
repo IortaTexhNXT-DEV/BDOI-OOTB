@@ -11,7 +11,7 @@ export const MASTER_TEMPLATES = [
     notes: ['The primary company (Is Primary = Yes) is the letterhead of every document and report; only one active company may be primary. Replace the shipped iorta TechNXT record with your own company by editing it on the screen.'],
     samples: [{ CompanyCode: 'BIB', CompanyName: 'Bayanihan Insurance Brokers Inc.', LicenseNumber: 'IC-BR-2026-0142', TIN: '008-765-432-000', EmailID: 'info@bayanihanbrokers.example.ph',
       Websitelink: 'https://bayanihanbrokers.example.ph', Description: 'Non-life insurance broker', AddressLine1: '18/F Ayala Tower One', AddressLine2: 'Ayala Avenue', PinCode: '1226',
-      City: 'Makati', State: 'Metro Manila', Country: 'Philippines', PhoneNumber: '+63 2 8812 4400', IsPrimary: 'No' }],
+      City: 'Makati City', State: 'Metro Manila', Country: 'Philippines', PhoneNumber: '+63 2 8812 4400', IsPrimary: 'No' }],
   },
   {
     type: 'branch', menu: 'Master > Generals > Organization > Branch',
@@ -26,7 +26,7 @@ export const MASTER_TEMPLATES = [
     type: 'insurance-company', button: true, menu: 'Master > Generals > Insurance Management > Insurance Company',
     formats: { commissionRate: 'Decimal fraction, e.g. 0.20 for 20%', premiumWarrantyDays: 'Days the client has to pay the premium (premium payment warranty)', remittanceTermsDays: 'Days after collection to remit to the insurer' },
     samples: [{ insuranceCompanyCode: 'CHARTER', insuranceCompanyName: 'Charter Ping An Insurance Corporation', insuranceCompanyDescription: 'Non-life insurer', shortName: 'Charter Ping An',
-      tin: '000-439-588-000', addressLine1: 'Skyland Plaza, Sen. Gil Puyat Ave.', city: 'Makati', state: 'Metro Manila', country: 'Philippines', email: 'underwriting@charterpingan.example.ph',
+      tin: '000-439-588-000', addressLine1: 'Skyland Plaza, Sen. Gil Puyat Ave.', city: 'Makati City', state: 'Metro Manila', country: 'Philippines', email: 'underwriting@charterpingan.example.ph',
       phoneNumber: '+63 2 8555 8888', contactPerson: 'Ana Cruz', commissionRate: '0.20', premiumWarrantyDays: '60', remittanceTermsDays: '30', defaultBillingMode: 'broker' }],
   },
   {
@@ -70,24 +70,40 @@ export const MASTER_TEMPLATES = [
     samples: [{ CountryName: 'Indonesia', ISOCode: 'ID', Description: 'Republic of Indonesia', PhoneCode: '+62' }],
   },
   {
-    type: 'state', button: true, menu: 'Master > Generals > Location > State',
-    samples: [{ StateCode: 'QUE', StateName: 'Quezon', Description: 'Province of Quezon, CALABARZON', Country: 'Philippines' }],
+    type: 'region', menu: 'Master > Generals > Location > Province (regions are shown with their provinces; no Region screen of its own)',
+    notes: ['The 18 Philippine regions of the PSGC (NCR, CAR, Region I to XIII, MIMAROPA, NIR, BARMM) are shipped. Add a region only for another country.'],
+    samples: [{ RegionCode: 'MY-PEN', RegionName: 'Peninsular Malaysia', Designation: 'West Malaysia', PsgcCode: '', Country: 'Malaysia', SortOrder: '100' }],
   },
   {
-    type: 'city', button: true, menu: 'Master > Generals > Location > City',
-    samples: [{ CityCode: 'CBY', CityName: 'Cabuyao', Description: 'City of Cabuyao, Laguna', State: 'Laguna', PostalCode: '4025' }],
+    type: 'state', button: true, menu: 'Master > Generals > Location > Province',
+    notes: ['The 82 Philippine provinces, Metro Manila and the BARMM Special Geographic Area are shipped with their PSGC codes (Philippine Statistics Authority). Add a province only for another country.',
+      'Province Code: the ISO 3166-2:PH code of a Philippine province (e.g. CEB for Cebu). The headers State Code and State Name of earlier templates are still read.'],
+    samples: [{ StateCode: 'MY-10', StateName: 'Selangor', Description: 'State of Selangor', Region: 'Peninsular Malaysia', Country: 'Malaysia', Level: 'Province / state outside the Philippines', PsgcCode: '' }],
+  },
+  {
+    type: 'city', button: true, file: 'City Municipality', menu: 'Master > Generals > Location > City / Municipality',
+    notes: ['The 1,642 Philippine cities and municipalities are shipped with their PSGC code, class and ZIP code. Add one only for another country, or edit a shipped record on the screen.',
+      'Province: name or code of a record of the Province master. Region is filled from the province when left empty.'],
+    samples: [{ CityCode: 'MY-10-SHA', CityName: 'Shah Alam', Description: 'City of Shah Alam, Selangor', State: 'MY-10', Region: '', CityClass: '', PostalCode: '40000', NcrDistrict: '', PsgcCode: '' }],
+  },
+  {
+    type: 'barangay', menu: 'Master > Generals > Location > City / Municipality (barangays are picked on the address forms; no Barangay screen of its own)',
+    notes: ['Metro Manila barangays are shipped; the 42,000 barangays of the whole country are loaded with backend/scripts/load-barangays.js (PSGC list). Use this template only for barangays missing from the list.',
+      'City / Municipality: PSGC code (10 digits) or name of a record of the City / Municipality master. A name shared by several cities (e.g. San Jose) needs the PSGC code.'],
+    samples: [{ BarangayCode: '0730600041', BarangayName: 'Lahug', City: '0730600000', PostalCode: '6000' }],
   },
   {
     type: 'bank', button: true, menu: 'Master > Finance > Bank',
     formats: { ifscCode: 'SWIFT / BIC code of the branch' },
-    samples: [{ bankCode: 'UBP', bankName: 'Union Bank of the Philippines', bankBranch: 'Ortigas Center', ifscCode: 'UBPHPHMM', AddressLine1: 'UnionBank Plaza, Meralco Ave.', City: 'Pasig',
-      state: 'Metro Manila', Country: 'Philippines', mobile: '+63 2 8841 8600', email: 'customer.service@unionbank.example.ph', category: 'Universal Bank' }],
+    notes: ['The main Philippine banks are shipped (BDO, BPI, Metrobank, Land Bank, PNB, Security Bank, UnionBank, RCBC, China Bank, EastWest, DBP, PSBank, AUB, Maybank, PBCom, Bank of Commerce, Veterans Bank) with their SWIFT codes. Add the others you deal with.'],
+    samples: [{ bankCode: 'CITI', bankName: 'Citibank, N.A. (Philippine Branch)', bankBranch: 'Bonifacio Global City', ifscCode: 'CITIPHMX', AddressLine1: '1 Bonifacio High Street, 5th Ave.', City: 'Taguig City',
+      state: 'Metro Manila', Country: 'Philippines', mobile: '+63 2 8995 9999', email: 'customer.service@citi.example.ph', category: 'Commercial Bank' }],
   },
   {
     type: 'bank-account', button: true, menu: 'Master > Finance > Bank (choose Bank accounts in the Upload dialog)',
     notes: ['Check the GL link and statement format of each account afterwards in Accounts > Bank Reconciliation.'],
     formats: { glAccountCode: 'GL cash account of the chart of accounts that this bank account reconciles to', statementFormat: 'Code of a bank statement format (Master > Finance > Bank Statement Formats), e.g. GENERIC, BDO-SAMPLE, BPI-SAMPLE, MBT-SAMPLE', reconcileFrom: 'Date YYYY-MM-DD from which bank reconciliation starts (normally the go-live date)' },
-    samples: [{ accountCode: 'ACC-BDO-PAY', accountName: 'Payroll Account', bankCode: 'BDO', bankName: 'Banco de Oro', accountNumber: '0012-3456-7890', accountType: 'Current Account',
+    samples: [{ accountCode: 'ACC-BDO-PAY', accountName: 'Payroll Account', bankCode: 'BDO', bankName: 'BDO Unibank, Inc.', accountNumber: '0012-3456-7890', accountType: 'Current Account',
       currency: 'PHP', glAccount: '1102004', branch: 'Makati Ayala', branchCode: 'MKT', swiftCode: 'BNORPHMM', openingDate: '2026-10-01', contactPerson: 'Carlo Dizon', contactNumber: '+63 2 8840 7000',
       email: 'makati.ayala@bdo.example.ph', glAccountCode: '1102004', statementFormat: 'BDO-SAMPLE', reconcileFrom: '2026-10-01' }],
   },
@@ -193,6 +209,39 @@ export const MASTER_TEMPLATES = [
   {
     type: 'reinsurance-report-template', menu: 'Reinsurance (reinsurance report templates; no menu screen of their own)',
     samples: [{ code: 'RPT005', name: 'Quarterly claims recovery statement', type: 'Claims', frequency: 'Quarterly', format: 'Excel, PDF', recipients: 'All Treaty Reinsurers', nextDue: '2027-01-10' }],
+  },
+  {
+    type: 'salutation', menu: 'Master > Configuration (reference list, API /api/masters/salutation; no screen of its own)',
+    samples: [{ code: 'PROF', name: 'Prof.', description: 'Professor', sortOrder: '110' }],
+  },
+  {
+    type: 'civil-status', menu: 'Master > Configuration (reference list, API /api/masters/civil-status; no screen of its own)',
+    samples: [{ code: 'LIVEIN', name: 'Living In', description: 'Not a civil status in law; for internal use only', sortOrder: '70' }],
+  },
+  {
+    type: 'gender', menu: 'Master > Configuration (reference list, API /api/masters/gender; no screen of its own)',
+    samples: [{ code: 'X', name: 'Prefer not to say', sortOrder: '30' }],
+  },
+  {
+    type: 'nationality', menu: 'Master > Configuration (reference list, API /api/masters/nationality; no screen of its own)',
+    samples: [{ code: 'NZL', name: 'New Zealander', countryCode: 'NZ', isDefault: 'No' }],
+  },
+  {
+    type: 'government-id-type', menu: 'Master > Configuration (reference list, API /api/masters/government-id-type; no screen of its own)',
+    samples: [{ code: 'NBI', name: 'NBI Clearance', issuingAgency: 'National Bureau of Investigation', numberFormat: '', sortOrder: '130' }],
+  },
+  {
+    type: 'customer-type', menu: 'Master > Configuration (reference list, API /api/masters/customer-type; no screen of its own)',
+    samples: [{ code: 'MUTUAL', name: 'Mutual Benefit Association', clientType: 'corporate', registrationAuthority: 'SEC', registrationNumberLabel: 'SEC Registration No.', tinRequired: 'Yes', description: 'Mutual benefit association' }],
+  },
+  {
+    type: 'payment-mode', menu: 'Master > Configuration (reference list, API /api/masters/payment-mode; no screen of its own)',
+    samples: [{ code: 'SHOPEEPAY', name: 'ShopeePay', channel: 'online', referenceRequired: 'Yes', description: 'E-wallet payment', sortOrder: '110' }],
+  },
+  {
+    type: 'holiday', menu: 'Master > Configuration (reference list, API /api/masters/holiday; no screen of its own)',
+    notes: ['National holidays of the current and next year are shipped (Republic Act No. 9492 and the yearly proclamation). Add local special non-working days (city or province charter days) and correct a date when a proclamation moves it.'],
+    samples: [{ code: '2026-08-19-QCDAY', name: 'Quezon City Day', date: '2026-08-19', holidayType: 'Special Non-working Day', scope: 'Local', location: 'Quezon City', legalBasis: 'Proclamation for the year', remarks: 'Confirm the date with the yearly proclamation' }],
   },
 ];
 

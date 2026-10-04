@@ -68,6 +68,10 @@ async function enterMasters() {
   await ok(api('post', '/masters/city').send({ CityCode: 'TGY', CityName: 'Tagaytay  City', Description: ' Ridge city ', State: 'CAV', PostalCode: '4120' }).catch(() => null));
   await ok(api('post', '/masters/city').send({ CityCode: 'PH-CEB-X', CityName: 'Talisay', Description: 'Cebu province', State: cebu.StateName, PostalCode: '6045' }));
   await ok(api('post', '/masters/city').send({ CityCode: 'VN-CEB-2', CityName: 'Talisay', Description: 'Same name, other state', State: 'VN-CEB' }));
+  // barangays the broker adds (the PSGC barangays are loaded by script and are not in the workbook): a city given by
+  // its PSGC code, one given by name
+  await ok(api('post', '/masters/barangay').send({ BarangayName: 'Sitio Bagong Pag-asa', City: '0730600000', PostalCode: 6000 }));
+  await ok(api('post', '/masters/barangay').send({ BarangayName: 'Phuong 2', City: 'Tan Binh' }));
 
   // Currency with numbers sent as numbers, an exchange rate with many decimals
   await ok(api('post', '/masters/currency').send({ CurrencyCode: 'AUD', ISOcode: 'AUD', SmallestUnit: 0.01, UnitDescription: 'Cent', CurrencyName: 'Australian Dollar',

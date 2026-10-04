@@ -8,13 +8,14 @@ import { quoteStatusIn } from '../documents/statuses.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate } from '../../lib/dates.js';
+import { fillRegion } from '../../lib/address.js';
 
 /** Fields the lead screens send, mapped to columns. Anything else is kept in `extra`. */
 const FIELD_MAP = {
   firstName: 'first_name', lastName: 'last_name', preferredName: 'preferred_name', companyName: 'company_name',
   gender: 'gender', emailId: 'email', contactNumber: 'phone', houseNo: 'house_no', barangay: 'barangay',
-  city: 'city', province: 'state', country: 'country', zipCode: 'postal_code', roadThanon: 'road', soiAlley: 'soi',
-  mooVillage: 'moo', leadCategory: 'lead_category', taxInformationNumber: 'tax_number', source: 'source', notes: 'notes',
+  city: 'city', province: 'state', region: 'region', country: 'country', zipCode: 'postal_code', roadThanon: 'road', soiAlley: 'soi',
+  mooVillage: 'moo', street: 'road', leadCategory: 'lead_category', taxInformationNumber: 'tax_number', source: 'source', notes: 'notes',
   productType: 'product_interest', status: 'status',
 };
 const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'lob', 'email', 'mobileNumber', 'createdBy', 'updatedBy', 'leadId', 'id',
@@ -28,8 +29,8 @@ export function toLead(r) {
     id: r.id, leadId: r.id, generatedLeadId: r.lead_number, leadNumber: r.lead_number,
     firstName: r.first_name, lastName: r.last_name, preferredName: r.preferred_name, fullName: r.display_name,
     DOB: r.birth_date, gender: r.gender, emailId: r.email, email: r.email, contactNumber: r.phone, mobileNumber: r.phone,
-    houseNo: r.house_no, barangay: r.barangay, city: r.city, province: r.state, country: r.country, zipCode: r.postal_code,
-    roadThanon: r.road, soiAlley: r.soi, mooVillage: r.moo, leadCategory: r.lead_category, companyName: r.company_name,
+    houseNo: r.house_no, barangay: r.barangay, city: r.city, province: r.state, region: r.region, country: r.country, zipCode: r.postal_code,
+    street: r.road, roadThanon: r.road, soiAlley: r.soi, mooVillage: r.moo, leadCategory: r.lead_category, companyName: r.company_name,
     taxInformationNumber: r.tax_number, lob: r.lob, productType: r.product_interest, source: r.source, notes: r.notes,
     status: r.status, clientId: r.client_id, ownerUserId: r.owner_user_id, quotationsCount: r.quotations_count ?? 0,
     createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
@@ -62,6 +63,7 @@ export async function createLead(body, userId, db = null) {
   const { cols, extra } = columnsFrom(body);
   if (!cols.first_name && !cols.company_name) throw badRequest('firstName or companyName is required');
   await assertBirthDate(cols.birth_date);
+  await fillRegion(cols, undefined, db);
   const run = async (c) => {
     // a prospect raised for an existing customer is linked to that client (no second client when it converts)
     if (body.clientId) {
@@ -85,6 +87,7 @@ export async function updateLead(id, body, userId) {
   const before = await getLead(id);
   const { cols, extra } = columnsFrom(body);
   await assertBirthDate(cols.birth_date);
+  await fillRegion(cols);
   const merged = { first_name: before.first_name, last_name: before.last_name, company_name: before.company_name, preferred_name: before.preferred_name };
   const next = { ...merged, ...cols };
   const data = { ...cols, display_name: displayName({ firstName: next.first_name, lastName: next.last_name, companyName: next.company_name, preferredName: next.preferred_name }),
@@ -183,12 +186,14 @@ export const LEAD_UPLOAD_COLUMNS = [
   { key: 'gender', header: 'Gender', aliases: ['sex'], format: 'Text', allowed: ['Male', 'Female'], example: 'Female' },
   { key: 'emailId', header: 'Email', aliases: ['email id', 'emailaddress'], format: 'E-mail address', example: 'maria.santos@example.ph' },
   { key: 'contactNumber', header: 'Contact Number', aliases: ['mobile', 'mobilenumber', 'phone'], format: 'Mobile or landline number', example: '09171234567' },
-  { key: 'houseNo', header: 'House No', aliases: ['address', 'street'], format: 'House number and street', example: '12 Mabini St.' },
+  { key: 'houseNo', header: 'House / Unit No.', aliases: ['house no', 'address'], format: 'House, unit, floor and building', example: 'Unit 1203, Tower 2' },
+  { key: 'street', header: 'Street', aliases: ['road', 'street name'], format: 'Street, subdivision or village', example: 'Mabini St.' },
   { key: 'barangay', header: 'Barangay', aliases: ['district', 'subdivision'], format: 'Text', example: 'San Antonio' },
-  { key: 'city', header: 'City', format: 'City or municipality', example: 'Pasig City' },
-  { key: 'province', header: 'Province', aliases: ['state'], format: 'Province or region', example: 'Metro Manila' },
+  { key: 'city', header: 'City / Municipality', aliases: ['city', 'municipality'], format: 'City or municipality of the City / Municipality master', example: 'Pasig City' },
+  { key: 'province', header: 'Province', aliases: ['state'], format: 'Province of the Province master (Metro Manila for NCR)', example: 'Metro Manila' },
+  { key: 'region', header: 'Region', format: 'Region of the Region master (filled from the province when empty)', example: 'National Capital Region (NCR)' },
   { key: 'country', header: 'Country', format: 'Text', example: 'Philippines' },
-  { key: 'zipCode', header: 'Zip Code', aliases: ['zip', 'postal code', 'postalcode'], format: 'Four digits', example: '1600' },
+  { key: 'zipCode', header: 'ZIP Code', aliases: ['zip', 'postal code', 'postalcode'], format: 'Four digits', example: '1600' },
   { key: 'leadCategory', header: 'Lead Category', aliases: ['category'], format: 'Text', allowed: ['Retail', 'Corporate'], example: 'Retail' },
   { key: 'taxInformationNumber', header: 'TIN', aliases: ['taxInformationNumber', 'tax number'], format: 'Tax identification number', example: '123-456-789-000' },
   { key: 'lob', header: 'LOB', aliases: ['line of business', 'product'], format: 'Line of business', allowed: ['MOTOR', 'FIRE', 'IAR'], example: 'MOTOR' },

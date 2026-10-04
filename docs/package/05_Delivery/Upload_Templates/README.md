@@ -39,8 +39,10 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Vehicle Variant master upload | Master > Generals > Insurance Management > Vehicle (choose Vehicle variants in the Upload dialog) | `POST /api/masters/vehicle-variant/upload` | `Vehicle_Variant_Upload_Template.xlsx` |
 | Vehicle master upload | Master > Generals > Insurance Management > Vehicle | `POST /api/masters/vehicle/upload` | `Vehicle_Upload_Template.xlsx` |
 | Country master upload | Master > Generals > Location > Country | `POST /api/masters/country/upload` | `Country_Upload_Template.xlsx` |
-| State master upload | Master > Generals > Location > State | `POST /api/masters/state/upload` | `State_Upload_Template.xlsx` |
-| City master upload | Master > Generals > Location > City | `POST /api/masters/city/upload` | `City_Upload_Template.xlsx` |
+| Region master upload | No Upload button: Master > Generals > Location > Province (regions are shown with their provinces; no Region screen of its own) | `POST /api/masters/region/upload` | `Region_Upload_Template.xlsx` |
+| Province master upload | Master > Generals > Location > Province | `POST /api/masters/state/upload` | `Province_Upload_Template.xlsx` |
+| City / Municipality master upload | Master > Generals > Location > City / Municipality | `POST /api/masters/city/upload` | `City_Municipality_Upload_Template.xlsx` |
+| Barangay master upload | No Upload button: Master > Generals > Location > City / Municipality (barangays are picked on the address forms; no Barangay screen of its own) | `POST /api/masters/barangay/upload` | `Barangay_Upload_Template.xlsx` |
 | Bank master upload | Master > Finance > Bank | `POST /api/masters/bank/upload` | `Bank_Upload_Template.xlsx` |
 | Bank Account master upload | Master > Finance > Bank (choose Bank accounts in the Upload dialog) | `POST /api/masters/bank-account/upload` | `Bank_Account_Upload_Template.xlsx` |
 | Currency master upload | Master > Finance > Currency | `POST /api/masters/currency/upload` | `Currency_Upload_Template.xlsx` |
@@ -64,6 +66,14 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Statement Template master upload | No Upload button: Master > Finance > Remittance Master > Statement Template | `POST /api/masters/remittance-statement-template/upload` | `Remittance_Statement_Template_Upload_Template.xlsx` |
 | Incentive Report Template master upload | No Upload button: Accounts > Incentive (incentive report templates; no menu screen of their own) | `POST /api/masters/incentive-report-template/upload` | `Incentive_Report_Template_Upload_Template.xlsx` |
 | Reinsurance Report Template master upload | No Upload button: Reinsurance (reinsurance report templates; no menu screen of their own) | `POST /api/masters/reinsurance-report-template/upload` | `Reinsurance_Report_Template_Upload_Template.xlsx` |
+| Salutation master upload | No Upload button: Master > Configuration (reference list, API /api/masters/salutation; no screen of its own) | `POST /api/masters/salutation/upload` | `Salutation_Upload_Template.xlsx` |
+| Civil Status master upload | No Upload button: Master > Configuration (reference list, API /api/masters/civil-status; no screen of its own) | `POST /api/masters/civil-status/upload` | `Civil_Status_Upload_Template.xlsx` |
+| Gender master upload | No Upload button: Master > Configuration (reference list, API /api/masters/gender; no screen of its own) | `POST /api/masters/gender/upload` | `Gender_Upload_Template.xlsx` |
+| Nationality master upload | No Upload button: Master > Configuration (reference list, API /api/masters/nationality; no screen of its own) | `POST /api/masters/nationality/upload` | `Nationality_Upload_Template.xlsx` |
+| Government ID Type master upload | No Upload button: Master > Configuration (reference list, API /api/masters/government-id-type; no screen of its own) | `POST /api/masters/government-id-type/upload` | `Government_ID_Type_Upload_Template.xlsx` |
+| Customer Type master upload | No Upload button: Master > Configuration (reference list, API /api/masters/customer-type; no screen of its own) | `POST /api/masters/customer-type/upload` | `Customer_Type_Upload_Template.xlsx` |
+| Payment Mode master upload | No Upload button: Master > Configuration (reference list, API /api/masters/payment-mode; no screen of its own) | `POST /api/masters/payment-mode/upload` | `Payment_Mode_Upload_Template.xlsx` |
+| Holiday master upload | No Upload button: Master > Configuration (reference list, API /api/masters/holiday; no screen of its own) | `POST /api/masters/holiday/upload` | `Holiday_Upload_Template.xlsx` |
 | Leads upload | Operations > Sales & Marketing > Prospects > Bulk Upload | `POST /api/leads/bulk-upload` | `Leads_Upload_Template.xlsx` |
 | Quotations upload | Operations > Sales & Marketing > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
 | Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |

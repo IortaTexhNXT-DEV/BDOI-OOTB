@@ -123,7 +123,7 @@ describe('table-backed masters', () => {
     expect(cur.body.data[0]).toMatchObject({ CurrencyCode: 'PHP', CurrencyName: 'Philippine Peso', NumberofDecimals: 2, isBase: true });
     const ins = await ctx.api('get', '/masters/insurance-company?sortBy=insuranceCompanyName');
     expect(ins.body.data[0].insuranceCompanyCode).toBeTruthy();
-    expect(ins.body.data[0].city).toBe('Makati');
+    expect(ins.body.data.find((i) => i.insuranceCompanyCode === 'MALAYAN').city).toBe('Makati');
   });
   it('the retired taxation master keeps its records for reference but refuses changes', async () => {
     const list = await ctx.api('get', '/masters/taxation?taxCode=VAT');
