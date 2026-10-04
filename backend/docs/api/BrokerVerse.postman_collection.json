@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (877 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (880 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -4681,6 +4681,100 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Makati\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Audit Trail",
+      "item": [
+        {
+          "name": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/audit/records/:entity/:id?sort=desc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "audit",
+                "records",
+                ":entity",
+                ":id"
+              ],
+              "query": [
+                {
+                  "key": "sort",
+                  "value": "desc"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "entity",
+                  "value": "",
+                  "description": "entity (path parameter)"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/audit/records/:entity/:id?sort=desc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "audit",
+                    "records",
+                    ":entity",
+                    ":id"
+                  ],
+                  "query": [
+                    {
+                      "key": "sort",
+                      "value": "desc"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "entity",
+                      "value": "",
+                      "description": "entity (path parameter)"
+                    },
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "History of one record as business events, newest first (sort=asc for oldest first): who (display name and roles), when (date and time in general.timezone, general.date_format), from where (screen / API / system job), the event and its changed fields as label, old value, new value (formatted; secrets never shown; ID numbers masked without read:privacy). :id is the id or the record number\n\nFront-end touchpoint: Detail screens > History (policy, quotation, claim, client, endorsement, receipt, master records)\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"812\",\n      \"at\": \"2026-10-02T01:49:37.774Z\",\n      \"day\": \"2026-10-02\",\n      \"date\": \"02/10/2026\",\n      \"time\": \"09:49\",\n      \"atText\": \"02/10/2026 09:49\",\n      \"entity\": \"claim\",\n      \"entityLabel\": \"Claim\",\n      \"entityId\": \"clm_0123456789abcdef\",\n      \"reference\": \"CLM-2026-00012\",\n      \"action\": \"Settlement Submitted\",\n      \"title\": \"Settlement submitted\",\n      \"note\": null,\n      \"user\": {\n        \"username\": \"j.claims\",\n        \"displayName\": \"Jasmine Cruz\",\n        \"roles\": [\n          \"Claims Officer\"\n        ]\n      },\n      \"source\": {\n        \"channel\": \"screen\",\n        \"label\": \"Screen\",\n        \"name\": \"Operations > Claims > Request approval\"\n      },\n      \"changes\": [\n        {\n          \"key\": \"claimStatus\",\n          \"label\": \"Claim status\",\n          \"from\": \"Processing\",\n          \"to\": \"Pending approval\"\n        },\n        {\n          \"key\": \"settlement.settlementAmount\",\n          \"label\": \"Settlement amount\",\n          \"from\": null,\n          \"to\": \"PHP 85,000.00\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"today\": \"2026-10-04\"\n}"
             }
           ]
         }
@@ -64796,6 +64890,176 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"username\": \"BrokerVerse\",\n      \"entity\": \"policy\",\n      \"action\": \"create\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"pageSize\": 20,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Audit trail as business events (one per action, newest first, paged on the server): user display name and roles, date and time in general.timezone, source (screen / API / system job), record type and number, the event and its changed fields (label, old value, new value; secrets never shown). Filters: from / to (business dates), username, entity (record type, comma-separated; \"master\" = every master), entityRef (record id or number), action. export=csv | excel downloads every matching event, one row per changed field (at most 10,000 events)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings/audit/events?from=2026-09-01&to=2026-09-30&username=r.underwriter&entity=policy&entityRef=MC-2026-000123&action=update&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "audit",
+                "events"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-09-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-09-30"
+                },
+                {
+                  "key": "username",
+                  "value": "r.underwriter"
+                },
+                {
+                  "key": "entity",
+                  "value": "policy"
+                },
+                {
+                  "key": "entityRef",
+                  "value": "MC-2026-000123"
+                },
+                {
+                  "key": "action",
+                  "value": "update"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Audit trail as business events (one per action, newest first, paged on the server): user display name and roles, date and time in general.timezone, source (screen / API / system job), record type and number, the event and its changed fields (label, old value, new value; secrets never shown). Filters: from / to (business dates), username, entity (record type, comma-separated; \"master\" = every master), entityRef (record id or number), action. export=csv | excel downloads every matching event, one row per changed field (at most 10,000 events)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/settings/audit/events?from=2026-09-01&to=2026-09-30&username=r.underwriter&entity=policy&entityRef=MC-2026-000123&action=update&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "settings",
+                    "audit",
+                    "events"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-09-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-09-30"
+                    },
+                    {
+                      "key": "username",
+                      "value": "r.underwriter"
+                    },
+                    {
+                      "key": "entity",
+                      "value": "policy"
+                    },
+                    {
+                      "key": "entityRef",
+                      "value": "MC-2026-000123"
+                    },
+                    {
+                      "key": "action",
+                      "value": "update"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Audit trail as business events (one per action, newest first, paged on the server): user display name and roles, date and time in general.timezone, source (screen / API / system job), record type and number, the event and its changed fields (label, old value, new value; secrets never shown). Filters: from / to (business dates), username, entity (record type, comma-separated; \"master\" = every master), entityRef (record id or number), action. export=csv | excel downloads every matching event, one row per changed field (at most 10,000 events)\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"812\",\n      \"at\": \"2026-10-02T01:49:37.774Z\",\n      \"day\": \"2026-10-02\",\n      \"date\": \"02/10/2026\",\n      \"time\": \"09:49\",\n      \"atText\": \"02/10/2026 09:49\",\n      \"entity\": \"policy\",\n      \"entityLabel\": \"Policy\",\n      \"entityId\": \"pol_0123456789abcdef\",\n      \"reference\": \"MC-2026-000123\",\n      \"action\": \"update\",\n      \"title\": \"Policy updated\",\n      \"note\": null,\n      \"user\": {\n        \"username\": \"r.underwriter\",\n        \"displayName\": \"Ramon Reyes\",\n        \"roles\": [\n          \"Underwriter\"\n        ]\n      },\n      \"source\": {\n        \"channel\": \"screen\",\n        \"label\": \"Screen\",\n        \"name\": \"Operations > Policies > Edit\"\n      },\n      \"changes\": [\n        {\n          \"key\": \"grossPremium\",\n          \"label\": \"Gross premium\",\n          \"from\": \"PHP 12,500.00\",\n          \"to\": \"PHP 13,750.00\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"pageSize\": 20,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Filter choices of the audit trail: record types and actions found in the log (with business labels) and the users who made changes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/settings/audit/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "settings",
+                "audit",
+                "options"
+              ]
+            },
+            "description": "Filter choices of the audit trail: record types and actions found in the log (with business labels) and the users who made changes\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/settings/audit/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "settings",
+                    "audit",
+                    "options"
+                  ]
+                },
+                "description": "Filter choices of the audit trail: record types and actions found in the log (with business labels) and the users who made changes\n\nFront-end touchpoint: Master > Audit trail\n\nAccess: role:system-admin, read:audit"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"recordTypes\": [\n      {\n        \"value\": \"policy\",\n        \"label\": \"Policy\",\n        \"count\": 120\n      }\n    ],\n    \"actions\": [\n      {\n        \"value\": \"update\",\n        \"label\": \"Updated\"\n      }\n    ],\n    \"users\": [\n      {\n        \"value\": \"r.underwriter\",\n        \"label\": \"Ramon Reyes\"\n      }\n    ]\n  }\n}"
             }
           ]
         },

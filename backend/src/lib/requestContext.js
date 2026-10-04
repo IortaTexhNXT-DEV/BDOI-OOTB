@@ -13,3 +13,6 @@ export function requestContext(req, _res, next) {
 
 /** The user of the current request ({ id, username, ... }) or null outside a request / when not signed in. */
 export const currentUser = () => storage.getStore()?.req?.user || null;
+
+/** The request being served (null outside a request), e.g. for the audit trail's source of a change. */
+export const currentRequest = () => storage.getStore()?.req || null;

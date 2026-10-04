@@ -6,9 +6,12 @@ import { audit } from '../../lib/audit.js';
 import { many, one, query } from '../../db/pool.js';
 import { ok, paging } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
-import { businessTimeZone } from '../../lib/dates.js';
+import { businessTimeZone, today } from '../../lib/dates.js';
 import { assertNotControlled } from '../posting-rules/service.js';
 import { assertNotOwnedElsewhere, settingOwner } from '../../lib/settingOwners.js';
+import { EXPORT_COLUMNS, exportRows } from '../../lib/auditEvents.js';
+import { sendSheet } from '../claims/docs.js';
+import * as auditSvc from '../audit/service.js';
 
 const { router, define } = moduleRouter('System Settings', '/settings');
 /** Settings with the screen that owns them (managedBy: { screen, path }; null when Master > Configuration edits it). */
@@ -73,6 +76,38 @@ define({
     const limit = Math.min(1000, Number(req.query.limit) || 200);
     return ok(res, await many(`SELECT ${columns} FROM audit_log WHERE ${where} ORDER BY id DESC LIMIT $7`, [...params, limit]));
   },
+});
+
+const auditRead = [requireAuth, requirePermission('read:audit')];
+const auditEvent = {
+  id: '812', at: '2026-10-02T01:49:37.774Z', day: '2026-10-02', date: '02/10/2026', time: '09:49', atText: '02/10/2026 09:49', entity: 'policy',
+  entityLabel: 'Policy', entityId: 'pol_0123456789abcdef', reference: 'MC-2026-000123', action: 'update', title: 'Policy updated', note: null,
+  user: { username: 'r.underwriter', displayName: 'Ramon Reyes', roles: ['Underwriter'] }, source: { channel: 'screen', label: 'Screen', name: 'Operations > Policies > Edit' },
+  changes: [{ key: 'grossPremium', label: 'Gross premium', from: 'PHP 12,500.00', to: 'PHP 13,750.00' }],
+};
+define({
+  method: 'GET', path: '/audit/events',
+  summary: 'Audit trail as business events (one per action, newest first, paged on the server): user display name and roles, date and time in general.timezone, source (screen / API / system job), record type and number, the event and its changed fields (label, old value, new value; secrets never shown). Filters: from / to (business dates), username, entity (record type, comma-separated; "master" = every master), entityRef (record id or number), action. export=csv | excel downloads every matching event, one row per changed field (at most 10,000 events)',
+  screen: 'Master > Audit trail', roles: [ADMIN_ROLE], middleware: auditRead,
+  query: { from: '2026-09-01', to: '2026-09-30', username: 'r.underwriter', entity: 'policy', entityRef: 'MC-2026-000123', action: 'update', page: 1, pageSize: 20 },
+  response: { success: true, data: [auditEvent], total: 1, page: 1, pageSize: 20, totalPages: 1 },
+  handler: async (req, res) => {
+    const format = String(req.query.export || '').toLowerCase();
+    if (format === 'csv' || format === 'excel' || format === 'xlsx') {
+      const events = await auditSvc.logExport(req.query, req.user);
+      const stamp = await today();
+      return sendSheet(res, { fileName: `audit-trail-${stamp}`, format: format === 'csv' ? 'csv' : 'excel', sheets: [{ name: 'Audit trail', columns: EXPORT_COLUMNS, rows: exportRows(events) }] });
+    }
+    const pg = paging(req.query, { page: 1, perPage: 20 });
+    const r = await auditSvc.logPage(req.query, pg, req.user);
+    return ok(res, r.events, 'OK', { total: r.total, page: pg.page, pageSize: pg.perPage, totalPages: Math.ceil(r.total / pg.perPage) });
+  },
+});
+define({
+  method: 'GET', path: '/audit/options', summary: 'Filter choices of the audit trail: record types and actions found in the log (with business labels) and the users who made changes',
+  screen: 'Master > Audit trail', roles: [ADMIN_ROLE], middleware: auditRead,
+  response: { success: true, data: { recordTypes: [{ value: 'policy', label: 'Policy', count: 120 }], actions: [{ value: 'update', label: 'Updated' }], users: [{ value: 'r.underwriter', label: 'Ramon Reyes' }] } },
+  handler: async (_req, res) => ok(res, await auditSvc.logOptions()),
 });
 
 export default router;

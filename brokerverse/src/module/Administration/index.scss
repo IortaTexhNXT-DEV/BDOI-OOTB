@@ -386,3 +386,79 @@
     margin-right: 4px;
   }
 }
+
+// ---------------------------------------------------------------- Master > Audit Trail
+.audit-log {
+  &__actions {
+    display: flex;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+
+  &__filters {
+    .audit-log__range {
+      width: 15rem;
+    }
+
+    .audit-log__ref {
+      width: 12rem;
+
+      input {
+        width: 100%;
+      }
+    }
+  }
+
+  // a cell of two lines: the value, then a muted second line (role, record type, time)
+  &__user .bv-audit-user,
+  &__user .bv-audit-user__name {
+    display: block;
+  }
+
+  &__user .bv-audit-user__role {
+    display: block;
+    margin-top: 2px;
+    font-size: 12px;
+    line-height: 16px;
+    color: #656565;
+
+    &::before {
+      content: none;
+    }
+  }
+
+  &__event {
+    font-weight: 600;
+    color: #2e2e2e;
+
+    .bv-cell-sub {
+      font-weight: 400;
+    }
+  }
+
+  &__more {
+    color: #656565;
+    white-space: nowrap;
+  }
+
+  &__source {
+    font-size: 13px;
+    color: #656565;
+  }
+
+  &__expansion {
+    padding: 4px 8px 8px 3.5rem;
+
+    .bv-audit-changes {
+      margin-top: 0;
+    }
+  }
+
+  &__table .p-datatable-tbody > tr > td {
+    vertical-align: top;
+  }
+
+  &__table .p-row-toggler {
+    color: #0072d8;
+  }
+}

@@ -1,0 +1,309 @@
+@import "../../theme/bdoi/tokens";
+
+// Audit trail: a record's history as a timeline, and the change list shared with Master > Audit Trail.
+// Quiet by design: thin rail, small markers, old values muted and struck through, no coloured boxes.
+
+.bv-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.bv-audit-timeline {
+  font-family: $font-body;
+  color: $color-text;
+
+  &__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+}
+
+.bv-audit-count {
+  font-size: 13px;
+  color: $color-text-muted;
+}
+
+.bv-audit-icon-btn.p-button.p-button-text {
+  color: $brand-blue;
+
+  &:hover {
+    background: $brand-blue-050;
+  }
+}
+
+.bv-audit-empty {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 20px 4px;
+  color: $color-text-muted;
+  font-size: 14px;
+
+  .pi {
+    font-size: 18px;
+    color: $color-placeholder;
+  }
+}
+
+.bv-audit-skeleton {
+  display: flex;
+  gap: 14px;
+  padding: 12px 0;
+}
+
+.bv-audit-day {
+  & + & {
+    margin-top: 6px;
+  }
+
+  &__label {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 12px 0 2px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid $color-border;
+    font-size: 13px;
+    font-weight: 700;
+    color: $color-heading;
+    letter-spacing: 0;
+    text-transform: none;
+  }
+
+  &__relative {
+    color: $brand-blue;
+  }
+}
+
+.bv-audit-events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bv-audit-event {
+  position: relative;
+  display: flex;
+  gap: 14px;
+  padding: 12px 0 12px 2px;
+
+  // the rail joining the markers of one day
+  &::before {
+    content: "";
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: $color-border;
+  }
+
+  &:first-child::before {
+    top: 18px;
+  }
+
+  &:last-child::before {
+    bottom: calc(100% - 18px);
+  }
+
+  &:only-child::before {
+    display: none;
+  }
+
+  &__dot {
+    position: relative;
+    flex: 0 0 12px;
+    width: 12px;
+    height: 12px;
+    margin-top: 4px;
+    border-radius: 50%;
+    background: $color-surface;
+    border: 2px solid $color-border-strong;
+  }
+
+  &--positive &__dot {
+    border-color: $color-success;
+  }
+
+  &--negative &__dot {
+    border-color: $color-danger;
+  }
+
+  &--status &__dot {
+    border-color: $brand-blue;
+  }
+
+  &__body {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  &__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  &__title {
+    font-size: 14px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  &__time {
+    flex-shrink: 0;
+    font-size: 13px;
+    font-variant-numeric: tabular-nums;
+    color: $color-text-muted;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 6px;
+    margin-top: 2px;
+    font-size: 13px;
+    color: $color-text-muted;
+  }
+
+  &__note {
+    margin: 6px 0 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: $color-text;
+  }
+}
+
+.bv-audit-user {
+  &__name {
+    color: $color-text;
+    font-weight: 600;
+  }
+
+  &__role::before {
+    content: "·";
+    margin: 0 6px;
+    color: $color-placeholder;
+  }
+}
+
+.bv-audit-sep {
+  color: $color-placeholder;
+}
+
+.bv-audit-source {
+  display: inline-flex;
+  overflow-wrap: anywhere;
+  align-items: baseline;
+  gap: 5px;
+  min-width: 0;
+
+  .pi {
+    font-size: 11px;
+    color: $color-placeholder;
+  }
+}
+
+// ---------------------------------------------------------------- changed fields
+.bv-audit-changes {
+  margin-top: 8px;
+
+  dl {
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(9rem, 13rem) 1fr;
+    column-gap: 16px;
+    row-gap: 4px;
+  }
+}
+
+.bv-audit-change {
+  display: contents;
+
+  dt {
+    font-size: 13px;
+    color: $color-text-muted;
+    line-height: 1.5;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.5;
+    color: $color-heading;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+.bv-audit-value {
+  &--old {
+    color: $color-placeholder;
+    text-decoration: line-through;
+    text-decoration-color: rgba(101, 101, 101, 0.5);
+  }
+
+  &--empty {
+    color: $color-placeholder;
+  }
+
+  &--hidden {
+    color: $color-text-muted;
+    font-style: italic;
+
+    .pi {
+      font-size: 11px;
+    }
+  }
+}
+
+.bv-audit-arrow {
+  margin: 0 8px;
+  font-size: 10px;
+  color: $color-placeholder;
+}
+
+.bv-audit-more {
+  margin-left: 6px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 12px;
+  color: $brand-blue;
+  cursor: pointer;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+
+  &--block {
+    display: inline-block;
+    margin: 6px 0 0;
+  }
+}
+
+.bv-audit-showall.p-button {
+  margin-top: 8px;
+  padding-left: 0;
+  color: $brand-blue;
+}
+
+@media (max-width: 767px) {
+  .bv-audit-changes dl {
+    grid-template-columns: 1fr;
+  }
+
+  .bv-audit-change dd {
+    margin-bottom: 4px;
+  }
+}
