@@ -1,7 +1,8 @@
 # Broker branding and e-signatures
 
-Version 1.1, 04 October 2026, iorta TechNXT. Changes: section 5, support procedures for brand pack import and
-e-signature revocation.
+Version 1.2, 04 October 2026, iorta TechNXT. Changes: bundled brand packs (shipped with the product, enabled on the
+screen with the trademark acknowledgement, Back to default), their support procedure in section 5. Version 1.1:
+section 5, support procedures for brand pack import and e-signature revocation.
 
 How to brand a broker's BrokerVerse environment, what changes automatically, how signatures are captured and mapped
 to documents, how brand packs move branding between environments, and the trademark rule for client brand packs.
@@ -127,6 +128,33 @@ the logo, the favicon, the sign-in picture and the print logo.
 
 Brand packs live in `docs/package/04_Onboarding_and_Go_Live/Brand_Packs/`.
 
+### Bundled packs (shipped with the product)
+
+A bundled pack is a brand pack folder delivered with the product under `backend/assets/brand-packs/<id>/`: the usual
+`theme.json` and images, plus `manifest.json` with the pack's identity and trademark terms (`id`, `name`,
+`description`, `trademarkOwner`, `requiresWrittenPermission`, `permissionNote`, `version`). The documentation copy in
+`Brand_Packs/<id>/` and the bundled copy must be byte-identical (`backend/test/bundled-brand-packs.test.js` compares
+them and checks that the built zip is in step with the folder); change the docs copy, rebuild the zip with
+`build-brand-pack.js`, then copy the folder to `backend/assets/brand-packs/<id>/`.
+
+* **Nothing is enabled by default**: a fresh database runs the iorta TechNXT default theme, name and images; the
+  bundled packs are only listed. The generic seed does not name any client.
+* **Screen**: Theme and Branding > Brand packs > **Bundled packs** lists each pack with its owner, description, colour
+  preview and status (Enabled / Available), with **Sample document** and **Sample e-mail** (the pack's theme, unsaved),
+  **Enable** and, once enabled, **Enabled on <date> by <user>** and **Back to default**.
+* **Enable** = the import logic (`importBrandPack()`), preceded by a dry run and by the acknowledgement: the dialog
+  states who owns the marks and the administrator must tick **We hold the owner's written permission to use these
+  marks** before the button activates. The API refuses the call without `acknowledgedPermission: true`
+  (`POST /api/branding/packs/bundled/<id>/enable`), so the acknowledgement cannot be skipped.
+* **Record**: table `brand_pack_enablements` (pack, version, owner, the acknowledgement text, who, when, what was
+  applied, the branding before the pack; status enabled / replaced / reverted) and the audit trail (entity `branding`,
+  action `enable-pack`, entity id `bundled-pack:<id>`).
+* **Back to default** (`POST /api/branding/packs/reset-default`): the default theme, logo and favicon; when a pack is
+  enabled, also the application name and the print logo of the primary company as they were before it; the
+  enablement row becomes `reverted` and the audit trail carries `reset-default`.
+* **API**: `GET /api/branding/packs/bundled` (list with status and history), `POST .../bundled/<id>/check` (dry run),
+  `POST .../bundled/<id>/enable`, `POST /api/branding/packs/reset-default`. All need the settings permission.
+
 ## 4. Client brand packs and trademarks
 
 A client brand pack (for example `Brand_Packs/toyota-insurance-services/`) carries a third party's name and marks. It
@@ -134,6 +162,10 @@ is **not** the default, is **not** in the generic seed of every broker, and may 
 environments **with the client's written permission** to use its marks (keep it with the engagement records). Do not
 use it in demonstrations to other prospects. Do not copy photographs from a client's web site into the repository; the
 broker uploads its own sign-in picture.
+
+The Toyota Insurance Services pack is delivered as a bundled pack (section 3): it is enabled from Theme and Branding
+> Brand packs > Bundled packs, with the acknowledgement of the owner's written permission, and never by default. The
+importable zip in `Brand_Packs/` remains for an environment that cannot reach the bundled list (an older release).
 
 The Toyota Insurance Services pack: white header and side bar, near-black text and buttons, light grey backgrounds,
 Toyota red only as a small accent (active marker, document rule, e-mail line), links in a darker red that
@@ -157,6 +189,20 @@ an Insurance Agent, Licence No. {{licence}}". See its README.
 
 A client brand pack carrying third-party marks is applied only in that client's environments, with the client's
 written permission on file (section 4). Support refuses the change without it.
+
+### Enabling a bundled brand pack
+
+1. **Permission**: confirm the client's written permission is on file (section 4). The administrator who enables the
+   pack acknowledges it on the screen; the acknowledgement is stored with the enablement and in the audit trail, so
+   the record must be true.
+2. **Before**: export the current pack (Brand packs > Export .zip) and keep it with the change record, as for an
+   import. Back to default does not restore a custom theme saved before the pack (it restores the product default),
+   so the export is the way back to a custom theme.
+3. **Enable**: Brand packs > Bundled packs > the pack's **Enable**; read the check result, tick the acknowledgement,
+   choose the options (print logo, application name), **Enable**. The card shows **Enabled on <date> by <user>**.
+4. **Check** the sign-in page, one screen, Sample document and Sample e-mail, as after an import.
+5. **Rollback**: **Back to default** on the card (the product default, the name and print logo as before the pack),
+   or import the pack exported in step 2 to return to a custom theme. Both are audited.
 
 ### Revoking an e-signature
 

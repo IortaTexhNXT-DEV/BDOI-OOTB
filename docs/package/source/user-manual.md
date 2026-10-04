@@ -423,7 +423,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 | On request | Add a user, change a role, deactivate a leaver | Users and Access > User |
 | On request | Add or change insurers, products, covers, banks and other masters | Master > Insurance, Master > Finance |
 | On request | Change a business setting agreed with the process owner | Master > Configuration |
-| On request | Change the theme, the sign-in page, the document and e-mail branding, the signature mapping; import a brand pack | Master > System Settings > Theme and Branding |
+| On request | Change the theme, the sign-in page, the document and e-mail branding, the signature mapping; import a brand pack; enable a bundled brand pack (with the trademark acknowledgement) or go back to the default | Master > System Settings > Theme and Branding |
 | On request | Set up or switch on a connector (SMS, CTPL authentication, insurer API, bank files) with the server administrator | Master > Integrations |
 | Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | Users and Access > User Access Matrix |
 | Quarterly | Run an access review | Users and Access > Access Reviews |
@@ -666,7 +666,15 @@ A brand pack is the whole branding of an environment in one file: the theme (col
 - **Export .zip** or **Export .json** downloads the pack of this environment. Import it in another environment to promote the branding, for example from UAT to Production.
 - **Choose brand pack** checks the file first without changing anything: the message says that the pack is valid, what it contains (theme, logo, favicon, sign-in picture, document logo) and any contrast warnings, with swatches of its main colours. Tick **Also use the logo on printed documents (print logo of the primary company)** and **Also set the application name of the pack** as needed, then select **Apply brand pack**. The message lists what was applied, and the theme, images and name are in force at once.
 
-A pack that the application would refuse (a colour that is not a hex value, a font outside the list, text on buttons, header or table headers below WCAG AA) is refused at the check. The optional Toyota Insurance Services pack delivered with the product carries a third party's marks and may only be applied with the client's written permission; the same holds for any client pack. Every save, upload and import of this screen is in the audit trail.
+A pack that the application would refuse (a colour that is not a hex value, a font outside the list, text on buttons, header or table headers below WCAG AA) is refused at the check. Client packs carrying a third party's marks may only be applied with the client's written permission. Every save, upload, import, enablement and return to the default of this screen is in the audit trail.
+
+**Bundled packs.** The top of the tab lists the brand packs delivered with the product, so a client pack is enabled from the screen and not by uploading a file. Each card shows the pack's name, **Marks owned by** (the owner of the trademarks it carries), **Version**, a description, swatches of its main colours and the status **Enabled** or **Available**. Nothing is enabled by default: a new environment runs the iorta TechNXT default branding, and the line above the cards says **The iorta TechNXT default branding is in force.** The Toyota Insurance Services pack is delivered this way: it stays optional and is used only in that client's environments.
+
+- **Sample document** and **Sample e-mail** on a card open the sample PDF and the sample e-mail printed with the pack's theme, without saving anything.
+- **Enable** opens a confirmation. It states that the name, emblem and logo in the pack are trademarks of their owner and may only be used with the owner's written permission, kept with the engagement records; it checks the pack first (valid, what it contains, any contrast warnings); and it asks the administrator to tick **We hold the owner's written permission to use these marks**. The **Enable** button of the dialog stays disabled until the box is ticked. The options **Also use the logo on printed documents** and **Also set the application name of the pack** work as for an import. Enabling applies the theme, the application name and the images at once, like an import, and records the enablement: the card then shows **Enabled on <date> by <user>**, and the same line, with the pack's name, appears above the cards. The enablement is in the audit trail with the acknowledgement.
+- **Back to default** (on the enabled card and in the status line) asks for a confirmation, then restores the iorta TechNXT default theme, logo and favicon, returns the application name and the print logo of the primary company to what they were before the pack was enabled, and closes the enablement. **History** below the cards lists every enablement with its outcome (Enabled, Back to default, Replaced), who and when.
+
+A bundled pack needs the settings permission to be seen and enabled, like the rest of the screen. Enabling it without the acknowledgement is refused by the server as well, so the acknowledgement cannot be skipped by calling the API directly.
 
 ## Schedules
 
@@ -3604,7 +3612,7 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Billing mode | How the premium is paid: broker billed or direct bill. |
 | Bordereau | The list of policies ceded to a reinsurer in a period. |
 | Bound | All insurers of a placement slip have confirmed their shares. |
-| Brand pack | The branding of one environment in one file (theme, application name, logo, favicon, sign-in picture, print logo), exported and imported on Theme and Branding. |
+| Brand pack | The branding of one environment in one file (theme, application name, logo, favicon, sign-in picture, print logo), exported and imported on Theme and Branding. A bundled pack is delivered with the product and enabled on the same screen after the administrator acknowledges the written permission of the owner of its marks; nothing is enabled by default. |
 | Broker billed | The client pays the premium to the broker, who remits it to the insurer net of commission. |
 | Broker slip | The request for quotation that presents a risk to several insurers. |
 | Brokerage | The commission the insurer pays the broker. |

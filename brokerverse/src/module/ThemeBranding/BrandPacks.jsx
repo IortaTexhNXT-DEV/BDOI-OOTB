@@ -1,7 +1,8 @@
 /**
  * Brand packs: export this environment's branding (theme, application name, logo, favicon, sign-in picture, print
  * logo) as a .zip or .json, and import a pack (onboarding a broker, promoting UAT branding to Production, a client
- * pack such as Toyota Insurance Services). An import is checked first (dry run) and applied on confirmation.
+ * pack such as Toyota Insurance Services). An import is checked first (dry run) and applied on confirmation. The
+ * bundled packs shipped with the product are listed first (BundledPacks) and enabled with the trademark acknowledgement.
  */
 import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -9,6 +10,7 @@ import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Message } from "primereact/message";
 import brandingService from "../../services/brandingService";
+import BundledPacks from "./BundledPacks";
 
 const download = (blob, name) => {
   const url = URL.createObjectURL(blob);
@@ -70,6 +72,7 @@ const BrandPacks = ({ notify, onImported }) => {
 
   return (
     <div className="bv-tb__packs">
+      <BundledPacks notify={notify} onChanged={onImported} />
       <section className="bv-tb__section">
         <h3>{t("themeBranding.exportPack", "Export")}</h3>
         <p className="bv-tb__hint">{t("themeBranding.exportHint", "The branding of this environment: theme (colours, layout, sign-in page, documents, e-mail), application name, logo, favicon, sign-in picture and print logo. Import it in another environment to promote it (UAT to Production).")}</p>

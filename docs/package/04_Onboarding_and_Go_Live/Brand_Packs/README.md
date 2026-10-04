@@ -7,7 +7,19 @@ from UAT to Production.
 
 | Folder | Pack | Note |
 | --- | --- | --- |
-| `toyota-insurance-services/` | Toyota Insurance Services (Philippines) | Client pack: optional, for that engagement only, needs the client's written permission to use its marks |
+| `toyota-insurance-services/` | Toyota Insurance Services (Philippines) | Client pack, bundled with the product: optional, for that engagement only, needs the client's written permission to use its marks |
+
+## Bundled packs
+
+A bundled pack ships with the product (`backend/assets/brand-packs/<id>/`: the pack folder plus a `manifest.json` with
+`id`, `name`, `description`, `trademarkOwner`, `requiresWrittenPermission`, `permissionNote` and `version`) and is
+enabled from Master > System Settings > Theme and Branding > Brand packs > **Bundled packs**, not by uploading a file.
+Nothing is enabled by default: a new environment runs the iorta TechNXT default. **Enable** checks the pack, states who
+owns its marks and asks the administrator to tick "We hold the owner's written permission to use these marks" before
+it activates; the enablement is recorded (who, when, the acknowledgement) and audited, and **Back to default** returns
+to the product default. The copy in this folder and the bundled copy must stay byte-identical: edit here, rebuild the
+zip, then copy the folder to `backend/assets/brand-packs/<id>/` (`backend/test/bundled-brand-packs.test.js` compares
+them).
 
 Build an importable zip from a folder (theme.json + the image files it names):
 

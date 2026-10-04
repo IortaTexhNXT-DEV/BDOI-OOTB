@@ -23266,6 +23266,1969 @@
         }
       }
     },
+    "/branding/packs/bundled": {
+      "get": {
+        "operationId": "getBrandingPacksBundled",
+        "summary": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, written permission required, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default",
+        "tags": [
+          "Branding"
+        ],
+        "description": "Front-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs\n\nAccess: read:settings, write:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "packs": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "description": {
+                                "type": "string"
+                              },
+                              "trademarkOwner": {
+                                "type": "string"
+                              },
+                              "requiresWrittenPermission": {
+                                "type": "boolean"
+                              },
+                              "permissionNote": {
+                                "type": "string"
+                              },
+                              "version": {
+                                "type": "string"
+                              },
+                              "systemName": {
+                                "type": "string"
+                              },
+                              "assets": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "preview": {
+                                "type": "object",
+                                "properties": {
+                                  "primary": {
+                                    "type": "string"
+                                  },
+                                  "headerBg": {
+                                    "type": "string"
+                                  },
+                                  "sidebarBg": {
+                                    "type": "string"
+                                  },
+                                  "tableHeaderBg": {
+                                    "type": "string"
+                                  },
+                                  "buttonBg": {
+                                    "type": "string"
+                                  },
+                                  "accent": {
+                                    "type": "string"
+                                  }
+                                }
+                              },
+                              "theme": {
+                                "type": "object",
+                                "properties": {
+                                  "preset": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "colors": {
+                                    "type": "object",
+                                    "properties": {
+                                      "primary": {
+                                        "type": "string"
+                                      },
+                                      "headerBg": {
+                                        "type": "string"
+                                      },
+                                      "headerText": {
+                                        "type": "string"
+                                      },
+                                      "tableHeaderBg": {
+                                        "type": "string"
+                                      },
+                                      "tableHeaderText": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "layout": {
+                                    "type": "object",
+                                    "properties": {
+                                      "headerStyle": {
+                                        "type": "string"
+                                      },
+                                      "sidebarStyle": {
+                                        "type": "string"
+                                      },
+                                      "density": {
+                                        "type": "string"
+                                      },
+                                      "tableHeaderStyle": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "font": {
+                                    "type": "string"
+                                  },
+                                  "radius": {
+                                    "type": "object",
+                                    "properties": {
+                                      "sm": {
+                                        "type": "integer"
+                                      },
+                                      "md": {
+                                        "type": "integer"
+                                      },
+                                      "lg": {
+                                        "type": "integer"
+                                      },
+                                      "button": {
+                                        "type": "integer"
+                                      }
+                                    }
+                                  },
+                                  "logo": {
+                                    "type": "object",
+                                    "properties": {
+                                      "appHeight": {
+                                        "type": "integer"
+                                      },
+                                      "loginHeight": {
+                                        "type": "integer"
+                                      },
+                                      "documentHeight": {
+                                        "type": "integer"
+                                      }
+                                    }
+                                  },
+                                  "login": {
+                                    "type": "object",
+                                    "properties": {
+                                      "panel": {
+                                        "type": "string"
+                                      },
+                                      "library": {
+                                        "type": "string"
+                                      },
+                                      "panelImageUrl": {
+                                        "type": "string"
+                                      },
+                                      "focalX": {
+                                        "type": "integer"
+                                      },
+                                      "focalY": {
+                                        "type": "integer"
+                                      },
+                                      "overlay": {
+                                        "type": "integer"
+                                      },
+                                      "showOnMobile": {
+                                        "type": "boolean"
+                                      },
+                                      "headline": {
+                                        "type": "string"
+                                      },
+                                      "tagline": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "documents": {
+                                    "type": "object",
+                                    "properties": {
+                                      "accentColor": {
+                                        "type": "string"
+                                      },
+                                      "footerText": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  },
+                                  "email": {
+                                    "type": "object",
+                                    "properties": {
+                                      "enabled": {
+                                        "type": "boolean"
+                                      },
+                                      "headerBg": {
+                                        "type": "string"
+                                      },
+                                      "headerText": {
+                                        "type": "string"
+                                      },
+                                      "accentColor": {
+                                        "type": "string"
+                                      },
+                                      "showLogo": {
+                                        "type": "boolean"
+                                      },
+                                      "footerText": {
+                                        "type": "string"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "warnings": {
+                                "type": "array",
+                                "items": {}
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "enablement": {}
+                            }
+                          }
+                        },
+                        "current": {},
+                        "defaultName": {
+                          "type": "string"
+                        },
+                        "defaultInForce": {
+                          "type": "boolean"
+                        },
+                        "acknowledgementText": {
+                          "type": "string"
+                        },
+                        "history": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "packId": {
+                                "type": "string"
+                              },
+                              "packName": {
+                                "type": "string"
+                              },
+                              "acknowledgedPermission": {
+                                "type": "boolean"
+                              },
+                              "acknowledgementText": {
+                                "type": "string"
+                              },
+                              "applied": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "enabledAt": {
+                                "type": "string"
+                              },
+                              "enabledBy": {
+                                "type": "string"
+                              },
+                              "enabledByName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "packs": [
+                      {
+                        "id": "toyota-insurance-services",
+                        "name": "Toyota Insurance Services",
+                        "description": "Client brand pack ...",
+                        "trademarkOwner": "Toyota Motor Corporation and Toyota Insurance Services (Philippines)",
+                        "requiresWrittenPermission": true,
+                        "permissionNote": "The Toyota name ... trademarks of their owners",
+                        "version": "1.0.0",
+                        "systemName": "Toyota Insurance Services",
+                        "assets": [
+                          "logo",
+                          "documentLogo"
+                        ],
+                        "preview": {
+                          "primary": "#1a1a1a",
+                          "headerBg": "#ffffff",
+                          "sidebarBg": "#ffffff",
+                          "tableHeaderBg": "#eeeeee",
+                          "buttonBg": "#1a1a1a",
+                          "accent": "#eb0a1e"
+                        },
+                        "theme": {
+                          "preset": "iorta-technxt",
+                          "name": "iorta TechNXT (default)",
+                          "colors": {
+                            "primary": "#0072d8",
+                            "headerBg": "#ffffff",
+                            "headerText": "#2e2e2e",
+                            "tableHeaderBg": "#004ea8",
+                            "tableHeaderText": "#ffffff"
+                          },
+                          "layout": {
+                            "headerStyle": "light",
+                            "sidebarStyle": "light",
+                            "density": "comfortable",
+                            "tableHeaderStyle": "solid"
+                          },
+                          "font": "nunito",
+                          "radius": {
+                            "sm": 8,
+                            "md": 12,
+                            "lg": 16,
+                            "button": 8
+                          },
+                          "logo": {
+                            "appHeight": 36,
+                            "loginHeight": 56,
+                            "documentHeight": 46
+                          },
+                          "login": {
+                            "panel": "library",
+                            "library": "philippines",
+                            "panelImageUrl": "",
+                            "focalX": 50,
+                            "focalY": 50,
+                            "overlay": 0,
+                            "showOnMobile": false,
+                            "headline": "",
+                            "tagline": ""
+                          },
+                          "documents": {
+                            "accentColor": "",
+                            "footerText": "Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}"
+                          },
+                          "email": {
+                            "enabled": true,
+                            "headerBg": "#ffffff",
+                            "headerText": "#2e2e2e",
+                            "accentColor": "#0072d8",
+                            "showLogo": true,
+                            "footerText": "{{companyName}} | {{address}}"
+                          }
+                        },
+                        "warnings": [],
+                        "status": "available",
+                        "enablement": null
+                      }
+                    ],
+                    "current": null,
+                    "defaultName": "iorta TechNXT (default)",
+                    "defaultInForce": true,
+                    "acknowledgementText": "We hold the written permission of the owner of these marks to use them in this environment.",
+                    "history": [
+                      {
+                        "id": 1,
+                        "packId": "toyota-insurance-services",
+                        "packName": "Toyota Insurance Services",
+                        "acknowledgedPermission": true,
+                        "acknowledgementText": "We hold the written permission of the owner of these marks to use them in this environment.",
+                        "applied": [
+                          "theme",
+                          "logo",
+                          "documentLogo",
+                          "systemName"
+                        ],
+                        "status": "enabled",
+                        "enabledAt": "2026-10-04T08:00:00.000Z",
+                        "enabledBy": "admin",
+                        "enabledByName": "System Administrator"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Settings > Theme and Branding > Brand packs > Bundled packs",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/branding/packs/bundled/{id}/check": {
+      "post": {
+        "operationId": "postBrandingPacksBundledIdCheck",
+        "summary": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings",
+        "tags": [
+          "Branding"
+        ],
+        "description": "Front-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Check\n\nAccess: read:settings, write:settings",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "dryRun": {
+                          "type": "boolean"
+                        },
+                        "assets": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "warnings": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "theme": {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "colors": {
+                              "type": "object",
+                              "properties": {
+                                "primary": {
+                                  "type": "string"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "headerText": {
+                                  "type": "string"
+                                },
+                                "tableHeaderBg": {
+                                  "type": "string"
+                                },
+                                "tableHeaderText": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "layout": {
+                              "type": "object",
+                              "properties": {
+                                "headerStyle": {
+                                  "type": "string"
+                                },
+                                "sidebarStyle": {
+                                  "type": "string"
+                                },
+                                "density": {
+                                  "type": "string"
+                                },
+                                "tableHeaderStyle": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "font": {
+                              "type": "string"
+                            },
+                            "radius": {
+                              "type": "object",
+                              "properties": {
+                                "sm": {
+                                  "type": "integer"
+                                },
+                                "md": {
+                                  "type": "integer"
+                                },
+                                "lg": {
+                                  "type": "integer"
+                                },
+                                "button": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "logo": {
+                              "type": "object",
+                              "properties": {
+                                "appHeight": {
+                                  "type": "integer"
+                                },
+                                "loginHeight": {
+                                  "type": "integer"
+                                },
+                                "documentHeight": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "login": {
+                              "type": "object",
+                              "properties": {
+                                "panel": {
+                                  "type": "string"
+                                },
+                                "library": {
+                                  "type": "string"
+                                },
+                                "panelImageUrl": {
+                                  "type": "string"
+                                },
+                                "focalX": {
+                                  "type": "integer"
+                                },
+                                "focalY": {
+                                  "type": "integer"
+                                },
+                                "overlay": {
+                                  "type": "integer"
+                                },
+                                "showOnMobile": {
+                                  "type": "boolean"
+                                },
+                                "headline": {
+                                  "type": "string"
+                                },
+                                "tagline": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "documents": {
+                              "type": "object",
+                              "properties": {
+                                "accentColor": {
+                                  "type": "string"
+                                },
+                                "footerText": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "email": {
+                              "type": "object",
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "headerText": {
+                                  "type": "string"
+                                },
+                                "accentColor": {
+                                  "type": "string"
+                                },
+                                "showLogo": {
+                                  "type": "boolean"
+                                },
+                                "footerText": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "pack": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "trademarkOwner": {
+                              "type": "string"
+                            },
+                            "requiresWrittenPermission": {
+                              "type": "boolean"
+                            },
+                            "permissionNote": {
+                              "type": "string"
+                            },
+                            "version": {
+                              "type": "string"
+                            },
+                            "systemName": {
+                              "type": "string"
+                            },
+                            "assets": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "preview": {
+                              "type": "object",
+                              "properties": {
+                                "primary": {
+                                  "type": "string"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "sidebarBg": {
+                                  "type": "string"
+                                },
+                                "tableHeaderBg": {
+                                  "type": "string"
+                                },
+                                "buttonBg": {
+                                  "type": "string"
+                                },
+                                "accent": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "theme": {
+                              "type": "object",
+                              "properties": {
+                                "preset": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "colors": {
+                                  "type": "object",
+                                  "properties": {
+                                    "primary": {
+                                      "type": "string"
+                                    },
+                                    "headerBg": {
+                                      "type": "string"
+                                    },
+                                    "headerText": {
+                                      "type": "string"
+                                    },
+                                    "tableHeaderBg": {
+                                      "type": "string"
+                                    },
+                                    "tableHeaderText": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "layout": {
+                                  "type": "object",
+                                  "properties": {
+                                    "headerStyle": {
+                                      "type": "string"
+                                    },
+                                    "sidebarStyle": {
+                                      "type": "string"
+                                    },
+                                    "density": {
+                                      "type": "string"
+                                    },
+                                    "tableHeaderStyle": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "font": {
+                                  "type": "string"
+                                },
+                                "radius": {
+                                  "type": "object",
+                                  "properties": {
+                                    "sm": {
+                                      "type": "integer"
+                                    },
+                                    "md": {
+                                      "type": "integer"
+                                    },
+                                    "lg": {
+                                      "type": "integer"
+                                    },
+                                    "button": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "logo": {
+                                  "type": "object",
+                                  "properties": {
+                                    "appHeight": {
+                                      "type": "integer"
+                                    },
+                                    "loginHeight": {
+                                      "type": "integer"
+                                    },
+                                    "documentHeight": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "login": {
+                                  "type": "object",
+                                  "properties": {
+                                    "panel": {
+                                      "type": "string"
+                                    },
+                                    "library": {
+                                      "type": "string"
+                                    },
+                                    "panelImageUrl": {
+                                      "type": "string"
+                                    },
+                                    "focalX": {
+                                      "type": "integer"
+                                    },
+                                    "focalY": {
+                                      "type": "integer"
+                                    },
+                                    "overlay": {
+                                      "type": "integer"
+                                    },
+                                    "showOnMobile": {
+                                      "type": "boolean"
+                                    },
+                                    "headline": {
+                                      "type": "string"
+                                    },
+                                    "tagline": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "documents": {
+                                  "type": "object",
+                                  "properties": {
+                                    "accentColor": {
+                                      "type": "string"
+                                    },
+                                    "footerText": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "email": {
+                                  "type": "object",
+                                  "properties": {
+                                    "enabled": {
+                                      "type": "boolean"
+                                    },
+                                    "headerBg": {
+                                      "type": "string"
+                                    },
+                                    "headerText": {
+                                      "type": "string"
+                                    },
+                                    "accentColor": {
+                                      "type": "string"
+                                    },
+                                    "showLogo": {
+                                      "type": "boolean"
+                                    },
+                                    "footerText": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "warnings": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "enablement": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "name": "Toyota Insurance Services",
+                    "dryRun": true,
+                    "assets": [
+                      "logo",
+                      "documentLogo"
+                    ],
+                    "warnings": [],
+                    "theme": {
+                      "preset": "iorta-technxt",
+                      "name": "iorta TechNXT (default)",
+                      "colors": {
+                        "primary": "#0072d8",
+                        "headerBg": "#ffffff",
+                        "headerText": "#2e2e2e",
+                        "tableHeaderBg": "#004ea8",
+                        "tableHeaderText": "#ffffff"
+                      },
+                      "layout": {
+                        "headerStyle": "light",
+                        "sidebarStyle": "light",
+                        "density": "comfortable",
+                        "tableHeaderStyle": "solid"
+                      },
+                      "font": "nunito",
+                      "radius": {
+                        "sm": 8,
+                        "md": 12,
+                        "lg": 16,
+                        "button": 8
+                      },
+                      "logo": {
+                        "appHeight": 36,
+                        "loginHeight": 56,
+                        "documentHeight": 46
+                      },
+                      "login": {
+                        "panel": "library",
+                        "library": "philippines",
+                        "panelImageUrl": "",
+                        "focalX": 50,
+                        "focalY": 50,
+                        "overlay": 0,
+                        "showOnMobile": false,
+                        "headline": "",
+                        "tagline": ""
+                      },
+                      "documents": {
+                        "accentColor": "",
+                        "footerText": "Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}"
+                      },
+                      "email": {
+                        "enabled": true,
+                        "headerBg": "#ffffff",
+                        "headerText": "#2e2e2e",
+                        "accentColor": "#0072d8",
+                        "showLogo": true,
+                        "footerText": "{{companyName}} | {{address}}"
+                      }
+                    },
+                    "pack": {
+                      "id": "toyota-insurance-services",
+                      "name": "Toyota Insurance Services",
+                      "description": "Client brand pack ...",
+                      "trademarkOwner": "Toyota Motor Corporation and Toyota Insurance Services (Philippines)",
+                      "requiresWrittenPermission": true,
+                      "permissionNote": "The Toyota name ... trademarks of their owners",
+                      "version": "1.0.0",
+                      "systemName": "Toyota Insurance Services",
+                      "assets": [
+                        "logo",
+                        "documentLogo"
+                      ],
+                      "preview": {
+                        "primary": "#1a1a1a",
+                        "headerBg": "#ffffff",
+                        "sidebarBg": "#ffffff",
+                        "tableHeaderBg": "#eeeeee",
+                        "buttonBg": "#1a1a1a",
+                        "accent": "#eb0a1e"
+                      },
+                      "theme": {
+                        "preset": "iorta-technxt",
+                        "name": "iorta TechNXT (default)",
+                        "colors": {
+                          "primary": "#0072d8",
+                          "headerBg": "#ffffff",
+                          "headerText": "#2e2e2e",
+                          "tableHeaderBg": "#004ea8",
+                          "tableHeaderText": "#ffffff"
+                        },
+                        "layout": {
+                          "headerStyle": "light",
+                          "sidebarStyle": "light",
+                          "density": "comfortable",
+                          "tableHeaderStyle": "solid"
+                        },
+                        "font": "nunito",
+                        "radius": {
+                          "sm": 8,
+                          "md": 12,
+                          "lg": 16,
+                          "button": 8
+                        },
+                        "logo": {
+                          "appHeight": 36,
+                          "loginHeight": 56,
+                          "documentHeight": 46
+                        },
+                        "login": {
+                          "panel": "library",
+                          "library": "philippines",
+                          "panelImageUrl": "",
+                          "focalX": 50,
+                          "focalY": 50,
+                          "overlay": 0,
+                          "showOnMobile": false,
+                          "headline": "",
+                          "tagline": ""
+                        },
+                        "documents": {
+                          "accentColor": "",
+                          "footerText": "Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}"
+                        },
+                        "email": {
+                          "enabled": true,
+                          "headerBg": "#ffffff",
+                          "headerText": "#2e2e2e",
+                          "accentColor": "#0072d8",
+                          "showLogo": true,
+                          "footerText": "{{companyName}} | {{address}}"
+                        }
+                      },
+                      "warnings": [],
+                      "status": "available",
+                      "enablement": null
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Check",
+        "x-permissions": [
+          "read:settings",
+          "write:settings"
+        ]
+      }
+    },
+    "/branding/packs/bundled/{id}/enable": {
+      "post": {
+        "operationId": "postBrandingPacksBundledIdEnable",
+        "summary": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the broker holds the written permission of the owner of the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+        "tags": [
+          "Branding"
+        ],
+        "description": "Front-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Enable\n\nAccess: write:settings",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string"
+                        },
+                        "applied": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "warnings": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "theme": {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "colors": {
+                              "type": "object",
+                              "properties": {
+                                "primary": {
+                                  "type": "string"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "headerText": {
+                                  "type": "string"
+                                },
+                                "tableHeaderBg": {
+                                  "type": "string"
+                                },
+                                "tableHeaderText": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "layout": {
+                              "type": "object",
+                              "properties": {
+                                "headerStyle": {
+                                  "type": "string"
+                                },
+                                "sidebarStyle": {
+                                  "type": "string"
+                                },
+                                "density": {
+                                  "type": "string"
+                                },
+                                "tableHeaderStyle": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "font": {
+                              "type": "string"
+                            },
+                            "radius": {
+                              "type": "object",
+                              "properties": {
+                                "sm": {
+                                  "type": "integer"
+                                },
+                                "md": {
+                                  "type": "integer"
+                                },
+                                "lg": {
+                                  "type": "integer"
+                                },
+                                "button": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "logo": {
+                              "type": "object",
+                              "properties": {
+                                "appHeight": {
+                                  "type": "integer"
+                                },
+                                "loginHeight": {
+                                  "type": "integer"
+                                },
+                                "documentHeight": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "login": {
+                              "type": "object",
+                              "properties": {
+                                "panel": {
+                                  "type": "string"
+                                },
+                                "library": {
+                                  "type": "string"
+                                },
+                                "panelImageUrl": {
+                                  "type": "string"
+                                },
+                                "focalX": {
+                                  "type": "integer"
+                                },
+                                "focalY": {
+                                  "type": "integer"
+                                },
+                                "overlay": {
+                                  "type": "integer"
+                                },
+                                "showOnMobile": {
+                                  "type": "boolean"
+                                },
+                                "headline": {
+                                  "type": "string"
+                                },
+                                "tagline": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "documents": {
+                              "type": "object",
+                              "properties": {
+                                "accentColor": {
+                                  "type": "string"
+                                },
+                                "footerText": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "email": {
+                              "type": "object",
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "headerText": {
+                                  "type": "string"
+                                },
+                                "accentColor": {
+                                  "type": "string"
+                                },
+                                "showLogo": {
+                                  "type": "boolean"
+                                },
+                                "footerText": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "pack": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "description": {
+                              "type": "string"
+                            },
+                            "trademarkOwner": {
+                              "type": "string"
+                            },
+                            "requiresWrittenPermission": {
+                              "type": "boolean"
+                            },
+                            "permissionNote": {
+                              "type": "string"
+                            },
+                            "version": {
+                              "type": "string"
+                            },
+                            "systemName": {
+                              "type": "string"
+                            },
+                            "assets": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "preview": {
+                              "type": "object",
+                              "properties": {
+                                "primary": {
+                                  "type": "string"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "sidebarBg": {
+                                  "type": "string"
+                                },
+                                "tableHeaderBg": {
+                                  "type": "string"
+                                },
+                                "buttonBg": {
+                                  "type": "string"
+                                },
+                                "accent": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "theme": {
+                              "type": "object",
+                              "properties": {
+                                "preset": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "colors": {
+                                  "type": "object",
+                                  "properties": {
+                                    "primary": {
+                                      "type": "string"
+                                    },
+                                    "headerBg": {
+                                      "type": "string"
+                                    },
+                                    "headerText": {
+                                      "type": "string"
+                                    },
+                                    "tableHeaderBg": {
+                                      "type": "string"
+                                    },
+                                    "tableHeaderText": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "layout": {
+                                  "type": "object",
+                                  "properties": {
+                                    "headerStyle": {
+                                      "type": "string"
+                                    },
+                                    "sidebarStyle": {
+                                      "type": "string"
+                                    },
+                                    "density": {
+                                      "type": "string"
+                                    },
+                                    "tableHeaderStyle": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "font": {
+                                  "type": "string"
+                                },
+                                "radius": {
+                                  "type": "object",
+                                  "properties": {
+                                    "sm": {
+                                      "type": "integer"
+                                    },
+                                    "md": {
+                                      "type": "integer"
+                                    },
+                                    "lg": {
+                                      "type": "integer"
+                                    },
+                                    "button": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "logo": {
+                                  "type": "object",
+                                  "properties": {
+                                    "appHeight": {
+                                      "type": "integer"
+                                    },
+                                    "loginHeight": {
+                                      "type": "integer"
+                                    },
+                                    "documentHeight": {
+                                      "type": "integer"
+                                    }
+                                  }
+                                },
+                                "login": {
+                                  "type": "object",
+                                  "properties": {
+                                    "panel": {
+                                      "type": "string"
+                                    },
+                                    "library": {
+                                      "type": "string"
+                                    },
+                                    "panelImageUrl": {
+                                      "type": "string"
+                                    },
+                                    "focalX": {
+                                      "type": "integer"
+                                    },
+                                    "focalY": {
+                                      "type": "integer"
+                                    },
+                                    "overlay": {
+                                      "type": "integer"
+                                    },
+                                    "showOnMobile": {
+                                      "type": "boolean"
+                                    },
+                                    "headline": {
+                                      "type": "string"
+                                    },
+                                    "tagline": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "documents": {
+                                  "type": "object",
+                                  "properties": {
+                                    "accentColor": {
+                                      "type": "string"
+                                    },
+                                    "footerText": {
+                                      "type": "string"
+                                    }
+                                  }
+                                },
+                                "email": {
+                                  "type": "object",
+                                  "properties": {
+                                    "enabled": {
+                                      "type": "boolean"
+                                    },
+                                    "headerBg": {
+                                      "type": "string"
+                                    },
+                                    "headerText": {
+                                      "type": "string"
+                                    },
+                                    "accentColor": {
+                                      "type": "string"
+                                    },
+                                    "showLogo": {
+                                      "type": "boolean"
+                                    },
+                                    "footerText": {
+                                      "type": "string"
+                                    }
+                                  }
+                                }
+                              }
+                            },
+                            "warnings": {
+                              "type": "array",
+                              "items": {}
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "enablement": {}
+                          }
+                        },
+                        "enablement": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "packId": {
+                              "type": "string"
+                            },
+                            "packName": {
+                              "type": "string"
+                            },
+                            "acknowledgedPermission": {
+                              "type": "boolean"
+                            },
+                            "acknowledgementText": {
+                              "type": "string"
+                            },
+                            "applied": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "enabledAt": {
+                              "type": "string"
+                            },
+                            "enabledBy": {
+                              "type": "string"
+                            },
+                            "enabledByName": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "name": "Toyota Insurance Services",
+                    "applied": [
+                      "theme",
+                      "logo",
+                      "documentLogo",
+                      "systemName"
+                    ],
+                    "warnings": [],
+                    "theme": {
+                      "preset": "iorta-technxt",
+                      "name": "iorta TechNXT (default)",
+                      "colors": {
+                        "primary": "#0072d8",
+                        "headerBg": "#ffffff",
+                        "headerText": "#2e2e2e",
+                        "tableHeaderBg": "#004ea8",
+                        "tableHeaderText": "#ffffff"
+                      },
+                      "layout": {
+                        "headerStyle": "light",
+                        "sidebarStyle": "light",
+                        "density": "comfortable",
+                        "tableHeaderStyle": "solid"
+                      },
+                      "font": "nunito",
+                      "radius": {
+                        "sm": 8,
+                        "md": 12,
+                        "lg": 16,
+                        "button": 8
+                      },
+                      "logo": {
+                        "appHeight": 36,
+                        "loginHeight": 56,
+                        "documentHeight": 46
+                      },
+                      "login": {
+                        "panel": "library",
+                        "library": "philippines",
+                        "panelImageUrl": "",
+                        "focalX": 50,
+                        "focalY": 50,
+                        "overlay": 0,
+                        "showOnMobile": false,
+                        "headline": "",
+                        "tagline": ""
+                      },
+                      "documents": {
+                        "accentColor": "",
+                        "footerText": "Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}"
+                      },
+                      "email": {
+                        "enabled": true,
+                        "headerBg": "#ffffff",
+                        "headerText": "#2e2e2e",
+                        "accentColor": "#0072d8",
+                        "showLogo": true,
+                        "footerText": "{{companyName}} | {{address}}"
+                      }
+                    },
+                    "pack": {
+                      "id": "toyota-insurance-services",
+                      "name": "Toyota Insurance Services",
+                      "description": "Client brand pack ...",
+                      "trademarkOwner": "Toyota Motor Corporation and Toyota Insurance Services (Philippines)",
+                      "requiresWrittenPermission": true,
+                      "permissionNote": "The Toyota name ... trademarks of their owners",
+                      "version": "1.0.0",
+                      "systemName": "Toyota Insurance Services",
+                      "assets": [
+                        "logo",
+                        "documentLogo"
+                      ],
+                      "preview": {
+                        "primary": "#1a1a1a",
+                        "headerBg": "#ffffff",
+                        "sidebarBg": "#ffffff",
+                        "tableHeaderBg": "#eeeeee",
+                        "buttonBg": "#1a1a1a",
+                        "accent": "#eb0a1e"
+                      },
+                      "theme": {
+                        "preset": "iorta-technxt",
+                        "name": "iorta TechNXT (default)",
+                        "colors": {
+                          "primary": "#0072d8",
+                          "headerBg": "#ffffff",
+                          "headerText": "#2e2e2e",
+                          "tableHeaderBg": "#004ea8",
+                          "tableHeaderText": "#ffffff"
+                        },
+                        "layout": {
+                          "headerStyle": "light",
+                          "sidebarStyle": "light",
+                          "density": "comfortable",
+                          "tableHeaderStyle": "solid"
+                        },
+                        "font": "nunito",
+                        "radius": {
+                          "sm": 8,
+                          "md": 12,
+                          "lg": 16,
+                          "button": 8
+                        },
+                        "logo": {
+                          "appHeight": 36,
+                          "loginHeight": 56,
+                          "documentHeight": 46
+                        },
+                        "login": {
+                          "panel": "library",
+                          "library": "philippines",
+                          "panelImageUrl": "",
+                          "focalX": 50,
+                          "focalY": 50,
+                          "overlay": 0,
+                          "showOnMobile": false,
+                          "headline": "",
+                          "tagline": ""
+                        },
+                        "documents": {
+                          "accentColor": "",
+                          "footerText": "Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}"
+                        },
+                        "email": {
+                          "enabled": true,
+                          "headerBg": "#ffffff",
+                          "headerText": "#2e2e2e",
+                          "accentColor": "#0072d8",
+                          "showLogo": true,
+                          "footerText": "{{companyName}} | {{address}}"
+                        }
+                      },
+                      "warnings": [],
+                      "status": "available",
+                      "enablement": null
+                    },
+                    "enablement": {
+                      "id": 1,
+                      "packId": "toyota-insurance-services",
+                      "packName": "Toyota Insurance Services",
+                      "acknowledgedPermission": true,
+                      "acknowledgementText": "We hold the written permission of the owner of these marks to use them in this environment.",
+                      "applied": [
+                        "theme",
+                        "logo",
+                        "documentLogo",
+                        "systemName"
+                      ],
+                      "status": "enabled",
+                      "enabledAt": "2026-10-04T08:00:00.000Z",
+                      "enabledBy": "admin",
+                      "enabledByName": "System Administrator"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Enable",
+        "x-permissions": [
+          "write:settings"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "acknowledgedPermission": {
+                    "type": "boolean"
+                  },
+                  "applyDocumentLogo": {
+                    "type": "boolean"
+                  },
+                  "applySystemName": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "acknowledgedPermission": true,
+                "applyDocumentLogo": true,
+                "applySystemName": true
+              }
+            }
+          }
+        }
+      }
+    },
+    "/branding/packs/reset-default": {
+      "post": {
+        "operationId": "postBrandingPacksResetDefault",
+        "summary": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited",
+        "tags": [
+          "Branding"
+        ],
+        "description": "Front-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Back to default\n\nAccess: write:settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "theme": {
+                          "type": "object",
+                          "properties": {
+                            "preset": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            },
+                            "colors": {
+                              "type": "object",
+                              "properties": {
+                                "primary": {
+                                  "type": "string"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "headerText": {
+                                  "type": "string"
+                                },
+                                "tableHeaderBg": {
+                                  "type": "string"
+                                },
+                                "tableHeaderText": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "layout": {
+                              "type": "object",
+                              "properties": {
+                                "headerStyle": {
+                                  "type": "string"
+                                },
+                                "sidebarStyle": {
+                                  "type": "string"
+                                },
+                                "density": {
+                                  "type": "string"
+                                },
+                                "tableHeaderStyle": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "font": {
+                              "type": "string"
+                            },
+                            "radius": {
+                              "type": "object",
+                              "properties": {
+                                "sm": {
+                                  "type": "integer"
+                                },
+                                "md": {
+                                  "type": "integer"
+                                },
+                                "lg": {
+                                  "type": "integer"
+                                },
+                                "button": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "logo": {
+                              "type": "object",
+                              "properties": {
+                                "appHeight": {
+                                  "type": "integer"
+                                },
+                                "loginHeight": {
+                                  "type": "integer"
+                                },
+                                "documentHeight": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "login": {
+                              "type": "object",
+                              "properties": {
+                                "panel": {
+                                  "type": "string"
+                                },
+                                "library": {
+                                  "type": "string"
+                                },
+                                "panelImageUrl": {
+                                  "type": "string"
+                                },
+                                "focalX": {
+                                  "type": "integer"
+                                },
+                                "focalY": {
+                                  "type": "integer"
+                                },
+                                "overlay": {
+                                  "type": "integer"
+                                },
+                                "showOnMobile": {
+                                  "type": "boolean"
+                                },
+                                "headline": {
+                                  "type": "string"
+                                },
+                                "tagline": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "documents": {
+                              "type": "object",
+                              "properties": {
+                                "accentColor": {
+                                  "type": "string"
+                                },
+                                "footerText": {
+                                  "type": "string"
+                                }
+                              }
+                            },
+                            "email": {
+                              "type": "object",
+                              "properties": {
+                                "enabled": {
+                                  "type": "boolean"
+                                },
+                                "headerBg": {
+                                  "type": "string"
+                                },
+                                "headerText": {
+                                  "type": "string"
+                                },
+                                "accentColor": {
+                                  "type": "string"
+                                },
+                                "showLogo": {
+                                  "type": "boolean"
+                                },
+                                "footerText": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "restored": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "enablement": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "packId": {
+                              "type": "string"
+                            },
+                            "packName": {
+                              "type": "string"
+                            },
+                            "acknowledgedPermission": {
+                              "type": "boolean"
+                            },
+                            "acknowledgementText": {
+                              "type": "string"
+                            },
+                            "applied": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "enabledAt": {
+                              "type": "string"
+                            },
+                            "enabledBy": {
+                              "type": "string"
+                            },
+                            "enabledByName": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "theme": {
+                      "preset": "iorta-technxt",
+                      "name": "iorta TechNXT (default)",
+                      "colors": {
+                        "primary": "#0072d8",
+                        "headerBg": "#ffffff",
+                        "headerText": "#2e2e2e",
+                        "tableHeaderBg": "#004ea8",
+                        "tableHeaderText": "#ffffff"
+                      },
+                      "layout": {
+                        "headerStyle": "light",
+                        "sidebarStyle": "light",
+                        "density": "comfortable",
+                        "tableHeaderStyle": "solid"
+                      },
+                      "font": "nunito",
+                      "radius": {
+                        "sm": 8,
+                        "md": 12,
+                        "lg": 16,
+                        "button": 8
+                      },
+                      "logo": {
+                        "appHeight": 36,
+                        "loginHeight": 56,
+                        "documentHeight": 46
+                      },
+                      "login": {
+                        "panel": "library",
+                        "library": "philippines",
+                        "panelImageUrl": "",
+                        "focalX": 50,
+                        "focalY": 50,
+                        "overlay": 0,
+                        "showOnMobile": false,
+                        "headline": "",
+                        "tagline": ""
+                      },
+                      "documents": {
+                        "accentColor": "",
+                        "footerText": "Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}"
+                      },
+                      "email": {
+                        "enabled": true,
+                        "headerBg": "#ffffff",
+                        "headerText": "#2e2e2e",
+                        "accentColor": "#0072d8",
+                        "showLogo": true,
+                        "footerText": "{{companyName}} | {{address}}"
+                      }
+                    },
+                    "restored": [
+                      "theme",
+                      "logo",
+                      "favicon",
+                      "systemName",
+                      "documentLogo"
+                    ],
+                    "enablement": {
+                      "id": 1,
+                      "packId": "toyota-insurance-services",
+                      "packName": "Toyota Insurance Services",
+                      "acknowledgedPermission": true,
+                      "acknowledgementText": "We hold the written permission of the owner of these marks to use them in this environment.",
+                      "applied": [
+                        "theme",
+                        "logo",
+                        "documentLogo",
+                        "systemName"
+                      ],
+                      "status": "enabled",
+                      "enabledAt": "2026-10-04T08:00:00.000Z",
+                      "enabledBy": "admin",
+                      "enabledByName": "System Administrator"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > System Settings > Theme and Branding > Brand packs > Back to default",
+        "x-permissions": [
+          "write:settings"
+        ]
+      }
+    },
     "/branding/preview-document": {
       "post": {
         "operationId": "postBrandingPreviewDocument",

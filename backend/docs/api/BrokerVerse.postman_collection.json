@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1356 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1360 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -17405,6 +17405,274 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"name\": \"Toyota Insurance Services\",\n    \"applied\": [\n      \"theme\",\n      \"logo\",\n      \"documentLogo\"\n    ],\n    \"warnings\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, written permission required, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding/packs/bundled",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "packs",
+                "bundled"
+              ]
+            },
+            "description": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, written permission required, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/packs/bundled",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "packs",
+                    "bundled"
+                  ]
+                },
+                "description": "Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, written permission required, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"packs\": [\n      {\n        \"id\": \"toyota-insurance-services\",\n        \"name\": \"Toyota Insurance Services\",\n        \"description\": \"Client brand pack ...\",\n        \"trademarkOwner\": \"Toyota Motor Corporation and Toyota Insurance Services (Philippines)\",\n        \"requiresWrittenPermission\": true,\n        \"permissionNote\": \"The Toyota name ... trademarks of their owners\",\n        \"version\": \"1.0.0\",\n        \"systemName\": \"Toyota Insurance Services\",\n        \"assets\": [\n          \"logo\",\n          \"documentLogo\"\n        ],\n        \"preview\": {\n          \"primary\": \"#1a1a1a\",\n          \"headerBg\": \"#ffffff\",\n          \"sidebarBg\": \"#ffffff\",\n          \"tableHeaderBg\": \"#eeeeee\",\n          \"buttonBg\": \"#1a1a1a\",\n          \"accent\": \"#eb0a1e\"\n        },\n        \"theme\": {\n          \"preset\": \"iorta-technxt\",\n          \"name\": \"iorta TechNXT (default)\",\n          \"colors\": {\n            \"primary\": \"#0072d8\",\n            \"headerBg\": \"#ffffff\",\n            \"headerText\": \"#2e2e2e\",\n            \"tableHeaderBg\": \"#004ea8\",\n            \"tableHeaderText\": \"#ffffff\"\n          },\n          \"layout\": {\n            \"headerStyle\": \"light\",\n            \"sidebarStyle\": \"light\",\n            \"density\": \"comfortable\",\n            \"tableHeaderStyle\": \"solid\"\n          },\n          \"font\": \"nunito\",\n          \"radius\": {\n            \"sm\": 8,\n            \"md\": 12,\n            \"lg\": 16,\n            \"button\": 8\n          },\n          \"logo\": {\n            \"appHeight\": 36,\n            \"loginHeight\": 56,\n            \"documentHeight\": 46\n          },\n          \"login\": {\n            \"panel\": \"library\",\n            \"library\": \"philippines\",\n            \"panelImageUrl\": \"\",\n            \"focalX\": 50,\n            \"focalY\": 50,\n            \"overlay\": 0,\n            \"showOnMobile\": false,\n            \"headline\": \"\",\n            \"tagline\": \"\"\n          },\n          \"documents\": {\n            \"accentColor\": \"\",\n            \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n          },\n          \"email\": {\n            \"enabled\": true,\n            \"headerBg\": \"#ffffff\",\n            \"headerText\": \"#2e2e2e\",\n            \"accentColor\": \"#0072d8\",\n            \"showLogo\": true,\n            \"footerText\": \"{{companyName}} | {{address}}\"\n          }\n        },\n        \"warnings\": [],\n        \"status\": \"available\",\n        \"enablement\": null\n      }\n    ],\n    \"current\": null,\n    \"defaultName\": \"iorta TechNXT (default)\",\n    \"defaultInForce\": true,\n    \"acknowledgementText\": \"We hold the written permission of the owner of these marks to use them in this environment.\",\n    \"history\": [\n      {\n        \"id\": 1,\n        \"packId\": \"toyota-insurance-services\",\n        \"packName\": \"Toyota Insurance Services\",\n        \"acknowledgedPermission\": true,\n        \"acknowledgementText\": \"We hold the written permission of the owner of these marks to use them in this environment.\",\n        \"applied\": [\n          \"theme\",\n          \"logo\",\n          \"documentLogo\",\n          \"systemName\"\n        ],\n        \"status\": \"enabled\",\n        \"enabledAt\": \"2026-10-04T08:00:00.000Z\",\n        \"enabledBy\": \"admin\",\n        \"enabledByName\": \"System Administrator\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding/packs/bundled/:id/check",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "packs",
+                "bundled",
+                ":id",
+                "check"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Check\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/packs/bundled/:id/check",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "packs",
+                    "bundled",
+                    ":id",
+                    "check"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Check\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"name\": \"Toyota Insurance Services\",\n    \"dryRun\": true,\n    \"assets\": [\n      \"logo\",\n      \"documentLogo\"\n    ],\n    \"warnings\": [],\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    },\n    \"pack\": {\n      \"id\": \"toyota-insurance-services\",\n      \"name\": \"Toyota Insurance Services\",\n      \"description\": \"Client brand pack ...\",\n      \"trademarkOwner\": \"Toyota Motor Corporation and Toyota Insurance Services (Philippines)\",\n      \"requiresWrittenPermission\": true,\n      \"permissionNote\": \"The Toyota name ... trademarks of their owners\",\n      \"version\": \"1.0.0\",\n      \"systemName\": \"Toyota Insurance Services\",\n      \"assets\": [\n        \"logo\",\n        \"documentLogo\"\n      ],\n      \"preview\": {\n        \"primary\": \"#1a1a1a\",\n        \"headerBg\": \"#ffffff\",\n        \"sidebarBg\": \"#ffffff\",\n        \"tableHeaderBg\": \"#eeeeee\",\n        \"buttonBg\": \"#1a1a1a\",\n        \"accent\": \"#eb0a1e\"\n      },\n      \"theme\": {\n        \"preset\": \"iorta-technxt\",\n        \"name\": \"iorta TechNXT (default)\",\n        \"colors\": {\n          \"primary\": \"#0072d8\",\n          \"headerBg\": \"#ffffff\",\n          \"headerText\": \"#2e2e2e\",\n          \"tableHeaderBg\": \"#004ea8\",\n          \"tableHeaderText\": \"#ffffff\"\n        },\n        \"layout\": {\n          \"headerStyle\": \"light\",\n          \"sidebarStyle\": \"light\",\n          \"density\": \"comfortable\",\n          \"tableHeaderStyle\": \"solid\"\n        },\n        \"font\": \"nunito\",\n        \"radius\": {\n          \"sm\": 8,\n          \"md\": 12,\n          \"lg\": 16,\n          \"button\": 8\n        },\n        \"logo\": {\n          \"appHeight\": 36,\n          \"loginHeight\": 56,\n          \"documentHeight\": 46\n        },\n        \"login\": {\n          \"panel\": \"library\",\n          \"library\": \"philippines\",\n          \"panelImageUrl\": \"\",\n          \"focalX\": 50,\n          \"focalY\": 50,\n          \"overlay\": 0,\n          \"showOnMobile\": false,\n          \"headline\": \"\",\n          \"tagline\": \"\"\n        },\n        \"documents\": {\n          \"accentColor\": \"\",\n          \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n        },\n        \"email\": {\n          \"enabled\": true,\n          \"headerBg\": \"#ffffff\",\n          \"headerText\": \"#2e2e2e\",\n          \"accentColor\": \"#0072d8\",\n          \"showLogo\": true,\n          \"footerText\": \"{{companyName}} | {{address}}\"\n        }\n      },\n      \"warnings\": [],\n      \"status\": \"available\",\n      \"enablement\": null\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the broker holds the written permission of the owner of the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branding/packs/bundled/:id/enable",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "packs",
+                "bundled",
+                ":id",
+                "enable"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the broker holds the written permission of the owner of the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Enable\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/packs/bundled/:id/enable",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "packs",
+                    "bundled",
+                    ":id",
+                    "enable"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the broker holds the written permission of the owner of the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Bundled packs > Enable\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"acknowledgedPermission\": true,\n  \"applyDocumentLogo\": true,\n  \"applySystemName\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"name\": \"Toyota Insurance Services\",\n    \"applied\": [\n      \"theme\",\n      \"logo\",\n      \"documentLogo\",\n      \"systemName\"\n    ],\n    \"warnings\": [],\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    },\n    \"pack\": {\n      \"id\": \"toyota-insurance-services\",\n      \"name\": \"Toyota Insurance Services\",\n      \"description\": \"Client brand pack ...\",\n      \"trademarkOwner\": \"Toyota Motor Corporation and Toyota Insurance Services (Philippines)\",\n      \"requiresWrittenPermission\": true,\n      \"permissionNote\": \"The Toyota name ... trademarks of their owners\",\n      \"version\": \"1.0.0\",\n      \"systemName\": \"Toyota Insurance Services\",\n      \"assets\": [\n        \"logo\",\n        \"documentLogo\"\n      ],\n      \"preview\": {\n        \"primary\": \"#1a1a1a\",\n        \"headerBg\": \"#ffffff\",\n        \"sidebarBg\": \"#ffffff\",\n        \"tableHeaderBg\": \"#eeeeee\",\n        \"buttonBg\": \"#1a1a1a\",\n        \"accent\": \"#eb0a1e\"\n      },\n      \"theme\": {\n        \"preset\": \"iorta-technxt\",\n        \"name\": \"iorta TechNXT (default)\",\n        \"colors\": {\n          \"primary\": \"#0072d8\",\n          \"headerBg\": \"#ffffff\",\n          \"headerText\": \"#2e2e2e\",\n          \"tableHeaderBg\": \"#004ea8\",\n          \"tableHeaderText\": \"#ffffff\"\n        },\n        \"layout\": {\n          \"headerStyle\": \"light\",\n          \"sidebarStyle\": \"light\",\n          \"density\": \"comfortable\",\n          \"tableHeaderStyle\": \"solid\"\n        },\n        \"font\": \"nunito\",\n        \"radius\": {\n          \"sm\": 8,\n          \"md\": 12,\n          \"lg\": 16,\n          \"button\": 8\n        },\n        \"logo\": {\n          \"appHeight\": 36,\n          \"loginHeight\": 56,\n          \"documentHeight\": 46\n        },\n        \"login\": {\n          \"panel\": \"library\",\n          \"library\": \"philippines\",\n          \"panelImageUrl\": \"\",\n          \"focalX\": 50,\n          \"focalY\": 50,\n          \"overlay\": 0,\n          \"showOnMobile\": false,\n          \"headline\": \"\",\n          \"tagline\": \"\"\n        },\n        \"documents\": {\n          \"accentColor\": \"\",\n          \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n        },\n        \"email\": {\n          \"enabled\": true,\n          \"headerBg\": \"#ffffff\",\n          \"headerText\": \"#2e2e2e\",\n          \"accentColor\": \"#0072d8\",\n          \"showLogo\": true,\n          \"footerText\": \"{{companyName}} | {{address}}\"\n        }\n      },\n      \"warnings\": [],\n      \"status\": \"available\",\n      \"enablement\": null\n    },\n    \"enablement\": {\n      \"id\": 1,\n      \"packId\": \"toyota-insurance-services\",\n      \"packName\": \"Toyota Insurance Services\",\n      \"acknowledgedPermission\": true,\n      \"acknowledgementText\": \"We hold the written permission of the owner of these marks to use them in this environment.\",\n      \"applied\": [\n        \"theme\",\n        \"logo\",\n        \"documentLogo\",\n        \"systemName\"\n      ],\n      \"status\": \"enabled\",\n      \"enabledAt\": \"2026-10-04T08:00:00.000Z\",\n      \"enabledBy\": \"admin\",\n      \"enabledByName\": \"System Administrator\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding/packs/reset-default",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "packs",
+                "reset-default"
+              ]
+            },
+            "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Back to default\n\nAccess: write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/packs/reset-default",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "packs",
+                    "reset-default"
+                  ]
+                },
+                "description": "Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Brand packs > Back to default\n\nAccess: write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    },\n    \"restored\": [\n      \"theme\",\n      \"logo\",\n      \"favicon\",\n      \"systemName\",\n      \"documentLogo\"\n    ],\n    \"enablement\": {\n      \"id\": 1,\n      \"packId\": \"toyota-insurance-services\",\n      \"packName\": \"Toyota Insurance Services\",\n      \"acknowledgedPermission\": true,\n      \"acknowledgementText\": \"We hold the written permission of the owner of these marks to use them in this environment.\",\n      \"applied\": [\n        \"theme\",\n        \"logo\",\n        \"documentLogo\",\n        \"systemName\"\n      ],\n      \"status\": \"enabled\",\n      \"enabledAt\": \"2026-10-04T08:00:00.000Z\",\n      \"enabledBy\": \"admin\",\n      \"enabledByName\": \"System Administrator\"\n    }\n  }\n}"
             }
           ]
         },
