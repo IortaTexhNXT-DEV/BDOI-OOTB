@@ -47,6 +47,9 @@ describe('quote set-up of the governing template', () => {
     const fields = s.riskFields.map((f) => f.field);
     expect(fields).toEqual(expect.arrayContaining(['driverAge', 'claimsLast3Years', 'fairMarketValue', 'modified', 'vehicleUse', 'vehicleAge', 'sumInsured', 'ncbYears', 'fleetSize']));
     expect(s.riskFields.find((f) => f.field === 'driverAge').usedBy).toEqual(expect.arrayContaining([expect.stringContaining('YOUNG_DRV'), expect.stringContaining('DRV_AGE')]));
+    // fields of acceptance rules are asked for as required; those only rated on (claim-free years) are optional
+    expect(s.riskFields.find((f) => f.field === 'claimsLast3Years')).toMatchObject({ acceptanceRule: true, required: false });
+    expect(s.riskFields.find((f) => f.field === 'ncbYears')).toMatchObject({ acceptanceRule: false });
     const group = (await sales('get', '/product-configurator/quote-setup?templateCode=HEALTH-GROUP-2026')).body.data;
     expect(group.riskFields.map((f) => f.field)).toContain('memberCount');
     expect((await sales('get', '/product-configurator/quote-setup?lob=NOPE')).body.data).toMatchObject({ templateCode: null, covers: [] });
@@ -88,7 +91,7 @@ describe('risk fields captured: every acceptance rule is evaluated', () => {
       const r = await sales('post', '/quotations').send(motor({ vehicleUse: 'Private', fairMarketValue: 1000000, modified: false }));
       expect(r.status).toBe(400);
       expect(r.body.errors.map((e) => e.path).sort()).toEqual(['claimsLast3Years', 'driverAge']);
-      expect((await sales('get', '/product-configurator/quote-setup?lob=MOTOR')).body.data.riskFields.every((f) => f.required)).toBe(true);
+      expect((await sales('get', '/product-configurator/quote-setup?lob=MOTOR')).body.data.riskFields.filter((f) => f.required).map((f) => f.field)).toContain('driverAge');
       expect((await sales('post', '/quotations').send(motor(riskFields('1980-02-02')))).status).toBe(201);
     } finally {
       await query("UPDATE app_settings SET value = 'false' WHERE key = 'underwriting.require_rule_fields'");

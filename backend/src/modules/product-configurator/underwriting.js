@@ -356,7 +356,8 @@ export async function templateCovers(templateId, db = null) {
 
 /**
  * What the quote wizard needs from the governing template of a line / product: the covers to offer and the risk
- * fields its active acceptance rules and rating factors test ({ field, label, type, options, usedBy, required }).
+ * fields its active acceptance rules and rating factors test ({ field, label, type, options, usedBy, acceptanceRule: tested by an
+ * acceptance rule (the wizard requires it), required: also refused by the server (underwriting.require_rule_fields) }).
  * null when no template governs.
  */
 export async function quoteSetup({ templateCode = null, productId = null, lob = null } = {}, db = null) {
@@ -364,17 +365,19 @@ export async function quoteSetup({ templateCode = null, productId = null, lob = 
   if (!t) return null;
   const covers = await templateCovers(t.id, db);
   const used = new Map();
+  const byRule = new Set();
   const use = (field, by) => { if (field && RISK_FIELDS[field]) used.set(field, [...(used.get(field) || []), by]); };
   for (const r of (await components(db, t.id, 'underwriting-rules')).map((x) => x.data)) {
     const c = conditionOf(r);
     if (!c) continue;
     use(c.field, `${r.ruleCode} ${r.ruleName || ''}`.trim());
-    if (c.valueField) use(c.valueField, `${r.ruleCode} ${r.ruleName || ''}`.trim());
+    byRule.add(c.field);
+    if (c.valueField) { use(c.valueField, `${r.ruleCode} ${r.ruleName || ''}`.trim()); byRule.add(c.valueField); }
   }
   for (const f of (await components(db, t.id, 'rating-factors')).map((x) => x.data)) use(factorField(f), `${f.factorCode} ${f.factorName || ''}`.trim());
   const required = (await getSetting('underwriting.require_rule_fields', false)) === true;
   const riskFields = [...used.entries()].map(([field, usedBy]) => ({ field, label: RISK_FIELDS[field].label, type: RISK_FIELDS[field].type, options: RISK_FIELDS[field].options || null,
-    usedBy: [...new Set(usedBy)], required }));
+    usedBy: [...new Set(usedBy)], acceptanceRule: byRule.has(field), required: required && byRule.has(field) }));
   return { templateId: t.id, templateCode: t.template_code, templateName: t.name, lob: t.line_of_business, covers, riskFields, requireRuleFields: required };
 }
 
