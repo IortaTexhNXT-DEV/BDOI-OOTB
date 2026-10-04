@@ -88,6 +88,7 @@ DOCUMENTS = [
     # 08 Management
     ('go-live-readiness-and-management-register.md', MANAGEMENT, 'BrokerVerse_Go_No_Go_and_Management_Register', None),
     ('ootb-strategy.md', MANAGEMENT, 'iNXT_BrokerVerse_OOTB_Strategy_and_Playbook_INTERNAL', None),
+    ('ph-fit-and-asean-rollout-assessment.md', MANAGEMENT, 'BrokerVerse_PH_Fit_and_ASEAN_Rollout_Assessment', None),
     ('documentation-pack-index.md', MANAGEMENT, 'BrokerVerse_OOTB_Documentation_Pack_Index', None),
 ]
 
@@ -115,6 +116,7 @@ WORKBOOKS = [
     ['python3', 'build_project_templates_xlsx.py', os.path.join(PKG, DELIVERY)],   # Fit-Gap Register, RAID Log
     ['python3', 'build_touchpoints_xlsx.py', os.path.join(PKG, DELIVERY, 'BrokerVerse_Communication_Touchpoints.xlsx')],
     ['python3', 'build_api_catalogue.py', os.path.join(PKG, TECHNICAL, 'BrokerVerse_API_and_Dependency_Catalogue.xlsx')],
+    ['python3', 'build_fit_assessment_xlsx.py', os.path.join(PKG, MANAGEMENT, 'BrokerVerse_PH_Fit_and_ASEAN_Rollout_Assessment.xlsx')],
 ]
 
 

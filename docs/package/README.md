@@ -20,27 +20,27 @@ The files are kept in `docs/package`, one folder per purpose in the order of the
 | `05_Delivery/` | The implementation project: approach and plan, project control templates, training, user manual, reports, communications, schedules, tests and the regulatory compliance matrix. The standard upload templates are kept in the sub-folder `Upload_Templates/`. | 14 |
 | `06_Support/` | Production support, business continuity and disaster recovery, and releases. | 4 |
 | `07_Technical/` | Architecture, infrastructure, security and privacy, technical reference, API catalogue and data dictionary. | 4 |
-| `08_Management/` | Release recommendation and management register, OOTB strategy and this index. | 3 |
+| `08_Management/` | Release recommendation and management register, OOTB strategy, Philippine fit and ASEAN rollout assessment, and this index. | 4 |
 
 ## Index by audience
 
 | Audience | Start with |
 |---|---|
-| Sales (26 entries) | Product Functionality, Demo Script, FAQ and Objection Handling, Rate Card, Battlecard (INTERNAL), Negotiation Playbook (INTERNAL) |
+| Sales (27 entries) | Product Functionality, Demo Script, FAQ and Objection Handling, Rate Card, Battlecard (INTERNAL), Negotiation Playbook (INTERNAL) |
 | Delivery (33 entries) | Implementation Approach and Plan, Discovery Workbook Guide, Fit-Gap Register, RAID Log, Data Migration and Cutover Plan, User Manual |
-| Development (11 entries) | Technical Reference, API and Dependency Catalogue, Data Dictionary, Release Notes Template |
+| Development (12 entries) | Technical Reference, API and Dependency Catalogue, Data Dictionary, Release Notes Template |
 | Support (22 entries) | Production Support Approach and Standards, Schedules and Batch Jobs, Business Continuity and Disaster Recovery Plan, Communication Templates |
-| Management (39 entries) | Go/No-Go and Management Register (INTERNAL), OOTB Strategy and Playbook (INTERNAL), Commercial Proposal Note (INTERNAL), Release Notes and Roadmap |
+| Management (40 entries) | Go/No-Go and Management Register (INTERNAL), OOTB Strategy and Playbook (INTERNAL), PH Fit and ASEAN Rollout Assessment (INTERNAL), Commercial Proposal Note (INTERNAL), Release Notes and Roadmap |
 
 ## Index by lifecycle stage
 
 | Stage | Documents used |
 |---|---|
-| Pre-sales | Brochure; One Page Brochure; Client Presentation; Product Functionality; Demo Script; FAQ and Objection Handling; Prospect Email Templates; Prospect Email Templates; ROI Calculator; Competitive Battlecard INTERNAL (INTERNAL); Commercial Proposal Rate Card; Commercials and Pricing (INTERNAL); Price Book (INTERNAL); Commercial Proposal Note (INTERNAL); Mutual Non Disclosure Agreement; Security Due Diligence Questionnaire; Implementation Approach and Plan; Test Summary Report; Philippine Regulatory Compliance Matrix; Release Notes and Roadmap; Architecture Infrastructure Security and Privacy; OOTB Strategy and Playbook INTERNAL (INTERNAL); OOTB Documentation Pack Index |
+| Pre-sales | Brochure; One Page Brochure; Client Presentation; Product Functionality; Demo Script; FAQ and Objection Handling; Prospect Email Templates; Prospect Email Templates; ROI Calculator; Competitive Battlecard INTERNAL (INTERNAL); Commercial Proposal Rate Card; Commercials and Pricing (INTERNAL); Price Book (INTERNAL); Commercial Proposal Note (INTERNAL); Mutual Non Disclosure Agreement; Security Due Diligence Questionnaire; Implementation Approach and Plan; Test Summary Report; Philippine Regulatory Compliance Matrix; Release Notes and Roadmap; Architecture Infrastructure Security and Privacy; OOTB Strategy and Playbook INTERNAL (INTERNAL); PH Fit and ASEAN Rollout Assessment (INTERNAL); OOTB Documentation Pack Index |
 | Contracting | Prospect Email Templates; Prospect Email Templates; Commercial Proposal Rate Card; Commercials and Pricing (INTERNAL); Price Book (INTERNAL); Commercial Proposal Note (INTERNAL); Negotiation Playbook INTERNAL (INTERNAL); Contract Pack Index and Cover Letter; Letter of Award and Proposal Acceptance; Master Services Agreement; Order Form; Perpetual Software Licence Agreement; Software Subscription Agreement; Implementation Statement of Work; Annual Maintenance Support and SLA; Hosting and Infrastructure Services Agreement; Data Processing Agreement; Service Catalogue and Rate Annex; Customer Responsibilities and RACI Annex; Change Request Procedure and Form; Source Code Escrow Agreement; Exit and Transition Plan; Security Due Diligence Questionnaire; Production Support Approach and Standards; Business Continuity and Disaster Recovery Plan; Architecture Infrastructure Security and Privacy; OOTB Strategy and Playbook INTERNAL (INTERNAL); OOTB Documentation Pack Index |
 | Implementation | Implementation Statement of Work; Customer Responsibilities and RACI Annex; Change Request Procedure and Form; Discovery Workbook Guide; Discovery and Configuration Workbook; Data Migration and Cutover Plan; Environment Strategy and Production Rollout; Privacy Impact Assessment and Records of Processing Templates; Implementation Approach and Plan; Implementation Plan; Fit Gap Register; RAID Log Template; Project Status Report Template; Training Plan; User Manual; Reports Book; Communication Templates and Touchpoints; Communication Touchpoints; Schedules and Batch Jobs; Test Cases; Philippine Regulatory Compliance Matrix; Architecture Infrastructure Security and Privacy; Technical Reference; API and Dependency Catalogue; Data Dictionary; OOTB Strategy and Playbook INTERNAL (INTERNAL); OOTB Documentation Pack Index; Upload Templates |
 | Go-live | UAT and Go Live Acceptance Certificates; Hypercare Exit and Handover Certificate; Data Migration and Cutover Plan; Environment Strategy and Production Rollout; Privacy Impact Assessment and Records of Processing Templates; RAID Log Template; Project Status Report Template; User Manual; Schedules and Batch Jobs; Test Cases; Test Summary Report; Production Support Approach and Standards; Release Notes and Roadmap; Go No Go and Management Register (INTERNAL); OOTB Strategy and Playbook INTERNAL (INTERNAL); OOTB Documentation Pack Index; Upload Templates |
-| Support | Annual Maintenance Support and SLA; Hosting and Infrastructure Services Agreement; Service Catalogue and Rate Annex; Change Request Procedure and Form; Exit and Transition Plan; Hypercare Exit and Handover Certificate; User Manual; Reports Book; Communication Templates and Touchpoints; Communication Touchpoints; Schedules and Batch Jobs; Production Support Approach and Standards; Business Continuity and Disaster Recovery Plan; Release Notes and Roadmap; Release Notes Template; Technical Reference; API and Dependency Catalogue; Data Dictionary; OOTB Strategy and Playbook INTERNAL (INTERNAL); OOTB Documentation Pack Index |
+| Support | Annual Maintenance Support and SLA; Hosting and Infrastructure Services Agreement; Service Catalogue and Rate Annex; Change Request Procedure and Form; Exit and Transition Plan; Hypercare Exit and Handover Certificate; User Manual; Reports Book; Communication Templates and Touchpoints; Communication Touchpoints; Schedules and Batch Jobs; Production Support Approach and Standards; Business Continuity and Disaster Recovery Plan; Release Notes and Roadmap; Release Notes Template; Technical Reference; API and Dependency Catalogue; Data Dictionary; OOTB Strategy and Playbook INTERNAL (INTERNAL); PH Fit and ASEAN Rollout Assessment (INTERNAL); OOTB Documentation Pack Index |
 
 ## File list by folder
 
@@ -147,6 +147,7 @@ The files are kept in `docs/package`, one folder per purpose in the order of the
 |---|---|---|---|
 | `BrokerVerse_Go_No_Go_and_Management_Register`<br>docx, pdf | Release recommendation, go-live conditions, risks, plans and decisions needed | Management, Delivery, Development, Support, Sales<br>**INTERNAL** | Go-live |
 | `iNXT_BrokerVerse_OOTB_Strategy_and_Playbook_INTERNAL`<br>docx, pdf | How iorta TechNXT sells, delivers, supports and evolves the OOTB product | Management, Sales, Delivery, Development, Support<br>**INTERNAL** | Pre-sales, Contracting, Implementation, Go-live, Support |
+| `BrokerVerse_PH_Fit_and_ASEAN_Rollout_Assessment`<br>docx, pdf, xlsx | Philippine process fit by area with evidence, gaps ranked, and the change needed for each ASEAN country | Management, Sales, Development<br>**INTERNAL** | Pre-sales, Support |
 | `BrokerVerse_OOTB_Documentation_Pack_Index`<br>docx, pdf | This index | Sales, Delivery, Development, Support, Management<br>Client-facing | Pre-sales, Contracting, Implementation, Go-live, Support |
 
 ## INTERNAL documents
@@ -160,6 +161,7 @@ These files never leave iorta TechNXT:
 - `02_Commercials/iNXT_BrokerVerse_Negotiation_Playbook_INTERNAL` (docx, pdf): Discount limits, trade-offs and approval rules in negotiation.
 - `08_Management/BrokerVerse_Go_No_Go_and_Management_Register` (docx, pdf): Release recommendation, go-live conditions, risks, plans and decisions needed.
 - `08_Management/iNXT_BrokerVerse_OOTB_Strategy_and_Playbook_INTERNAL` (docx, pdf): How iorta TechNXT sells, delivers, supports and evolves the OOTB product.
+- `08_Management/BrokerVerse_PH_Fit_and_ASEAN_Rollout_Assessment` (docx, pdf, xlsx): Philippine process fit by area with evidence, gaps ranked, and the change needed for each ASEAN country.
 
 ## Building the documents
 
@@ -173,4 +175,4 @@ python3 build_all.py user-manual           (one document)
 python3 build_all.py --sales --workbooks   (also brochures, presentation and workbooks)
 ```
 
-`build_all.py` runs `build_doc.py` (text to .docx), the post-processing step where one is needed (`brochure/widths.py` for the Product Functionality document) and `refresh.py` (contents page and PDF with LibreOffice). The workbooks have their own builders: `build_pricing.py`, `build_price_book.py`, `build_roi.py`, `build_questionnaire_xlsx.py`, `build_discovery_workbook.py`, `build_plan_xlsx.py`, `build_project_templates_xlsx.py` (Fit-Gap Register and RAID Log), `build_touchpoints_xlsx.py`, `build_api_catalogue.py` and `data-dictionary/`. The Test Cases and Reports Book workbooks are maintained directly. Writing rules: `tools/WRITING_RULES.md`. This index is generated by `build_pack_index.py`.
+`build_all.py` runs `build_doc.py` (text to .docx), the post-processing step where one is needed (`brochure/widths.py` for the Product Functionality document) and `refresh.py` (contents page and PDF with LibreOffice). The workbooks have their own builders: `build_pricing.py`, `build_price_book.py`, `build_roi.py`, `build_questionnaire_xlsx.py`, `build_discovery_workbook.py`, `build_plan_xlsx.py`, `build_project_templates_xlsx.py` (Fit-Gap Register and RAID Log), `build_touchpoints_xlsx.py`, `build_api_catalogue.py`, `build_fit_assessment_xlsx.py` (Philippine fit and ASEAN rollout assessment) and `data-dictionary/`. The Test Cases and Reports Book workbooks are maintained directly. Writing rules: `tools/WRITING_RULES.md`. This index is generated by `build_pack_index.py`.
