@@ -247,6 +247,7 @@ Your role decides which menus you see and which screens you may open. The server
 | Claims | carlo.estrada, joy.macaraeg | Dashboard, Operations, Reinsurance, Reports |
 | Accounting | liza.quiambao, nestor.pangilinan | Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, Master |
 | Accounting Manager | teresa.villaroman, ramon.almario | The menus of Accounting |
+| Compliance Officer (AML/CFT) | (none) | Home, Operations (Clients, Policy, Claims), Compliance, Reports |
 
 Each persona chapter lists the exact items of each menu. The Accounting Manager holds the Accounting role as well, so the menus are the same; the difference is in the approvals.
 
@@ -1270,7 +1271,7 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 
 ![Operations > Clients](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-clients.png)
 
-A client is a person or company that holds or has held a policy. BrokerVerse creates the client, with its client code CL-YYYY-NNNNN, when the first policy is issued.
+A client is a person or company that holds or has held a policy, or that was onboarded before its first policy. BrokerVerse creates the client, with its client code CL-YYYY-NNNNN, on **Onboard client** (below) or, for a new insured, when the first policy is issued.
 
 1. Choose Operations > Clients.
 2. Use the tabs (**All**, **Individual**, **Corporate**) or the search box to find the client. The list shows **Client ID**, **Assured Name**, **Category**, **E-mail**, **Mobile**, **Client Since**, **Policies** and the latest policy status.
@@ -1287,6 +1288,21 @@ A client is a person or company that holds or has held a policy. BrokerVerse cre
 | **Data privacy** | Consent per purpose (Processing, Marketing, Sharing with insurers) with channel, evidence and notice version; **Record consent**, **Withdraw**, **Show history**. |
 
 To correct the name, address or contact details of a client with an issued policy, raise a Personal Details Change endorsement, so the change is recorded against the policy and sent to the insurer.
+
+### Onboard a client before the first policy
+
+A client can be created, identified and checked before any quotation or policy, as customer due diligence requires. A client created by the first policy (a prospect converted, a direct placement) is completed the same way, from **Identification and due diligence** on the client view.
+
+1. Choose Operations > Clients and select **Onboard client** (or, on a client view, **Identification and due diligence**).
+2. Choose the **Client type**: **Individual**, or **Juridical** for a company, cooperative, partnership or sole proprietorship.
+3. Individual: enter **First name**, **Middle name**, **Last name**, **Date of birth**, **Place of birth**, **Civil status**, **Nationality**, **Occupation or nature of work**, **Employer or business name**, **Source of funds** and **TIN**, then the **Government ID presented** (ID type from the Government ID Type master, **ID number**, **ID expiry date**). Juridical: enter the **Registered name**, **Trade name**, **Customer type**, **Registered with** (SEC, DTI or CDA), **Registration number**, **Date of registration**, **Nature of business**, **Country of incorporation** and **TIN**.
+4. Enter the **Mobile number** (09XXXXXXXXX or +639XXXXXXXXX), the e-mail and the Philippine address: ZIP code, region, province, city or municipality and barangay come from the PSGC masters.
+5. Under **Expected business and PEP** enter the lines of business expected, the usual payment mode and the expected annual premium (they rate the client before its first policy), and switch on **Politically exposed person** with the details when the client, a family member or a close associate holds a prominent public position.
+6. Juridical client: **Add signatory** for each authorised signatory with the board resolution or secretary's certificate that authorises him or her (number and date), and **Add beneficial owner** for each natural person who owns at least the beneficial owner threshold (25% by default, `aml.beneficial_owner_threshold`) or controls the client by other means; when no one does, record the senior managing official.
+7. Select **Onboard client**. The client gets its client code and is rated (Low, Normal or High) and screened against the sanctions, PEP and negative lists together with its owners and signatories. The rating and the KYC status show at the top. A potential match is queued for the compliance officer.
+8. Upload the ID, the registration certificate, the General Information Sheet and the board resolution or secretary's certificate under **KYC documents**: choose the document type, what it relates to (client, signatory or owner), an expiry date when there is one, the file, and **Upload**.
+
+The mobile number, TIN and the identification required for the client type are checked when you save. A High-risk client gets no policy until the compliance officer approves its EDD review, and a client with an undecided or confirmed screening match gets no policy and no refund or claim payment (`aml.screening_block_events`).
 
 ## Raise an endorsement request
 
@@ -2018,6 +2034,158 @@ The matrix holds the brokerage rates the broker earns by insurer, product, line 
 | Approve warranty extensions; set credit limits | Credit Control |
 | Approve posting configuration changes | Configuration Approvals |
 | Approve vouchers, journals, remittances, debit notes and incentive batches of other users | The approval screens of each module |
+
+# Compliance Officer (AML/CFT)
+
+## Role summary
+
+The Compliance Officer (role Compliance Officer (AML/CFT)) runs the broker's money laundering and terrorist financing prevention programme in BrokerVerse under the AMLA (RA 9160 as amended), its implementing rules, the AMLC's rules for covered persons and the IC's circulars for insurance intermediaries: customer risk rating and enhanced due diligence, sanctions, PEP and negative list screening, covered and suspicious transaction monitoring, AML cases and the report files filed with the AMLC. The decisions reserved to the compliance officer (permission approve:aml) are: clearing, escalating or confirming a screening match, approving or rejecting an EDD review, overriding a risk rating, approving a case for filing and recording a filing. Every decision asks for a reason and is kept in the audit trail.
+
+## Menus available
+
+| Menu | Items |
+|---|---|
+| Home | Home and Open Items |
+| Operations | Clients (with Onboard client), Policy, Claims (to read the client's records) |
+| Compliance | AML Dashboard, Client Due Diligence, EDD Reviews, KYC Refresh, Screening Hits, Screening Lists, Transaction Alerts, AML Cases, AMLC Reports, AML Settings |
+| Reports | All Reports, Operational Reports |
+
+Operations (client servicing) sees Compliance > EDD Reviews to prepare the reviews of its clients; the approval stays with the compliance officer. The System Administrator sees every menu.
+
+## Daily and periodic tasks
+
+| When | Task | Screen |
+|---|---|---|
+| Daily | Decide the open screening hits | Compliance > Screening Hits |
+| Daily | Review the new transaction alerts (the monitoring job runs every morning) | Compliance > Transaction Alerts |
+| Daily | Approve or reject submitted EDD reviews | Compliance > EDD Reviews |
+| Within 1 working day of suspicion (`aml.str_due_working_days`) | Approve the STR case and file the STR | AML Cases, AMLC Reports |
+| Within 5 working days (`aml.ctr_due_working_days`) | Generate and file the CTR file of the covered transactions | AMLC Reports |
+| Weekly | Work the KYC refreshes due | Compliance > KYC Refresh |
+| When a list is published | Upload the new version of the UN, AMLC, PEP or internal list | Compliance > Screening Lists |
+| Yearly and when rules change | Review the risk factors, thresholds and rules | Compliance > AML Settings |
+
+## AML dashboard
+
+Compliance > AML Dashboard shows the counts of the programme in three rows: clients by risk rating with the KYC refreshes due and overdue; the reviews to decide (screening hits open, escalated and confirmed, EDD reviews to prepare and to approve, failed requests to the screening provider); transactions and reports (covered transactions to report, suspicious alerts open, cases open and overdue, report files to file). Select a tile to open the list behind it. A warning shows when an active screening list has no version loaded.
+
+## Client due diligence and risk rating
+
+Compliance > Client Due Diligence lists every client with **Risk rating**, **Score**, **KYC status**, open hits, PEP and **Next KYC refresh**; filter by rating, KYC status and client type, or search. Select a client to open its AML profile.
+
+The rating adds, for each risk factor, the score of the client's value: client type (customer type), nationality or country of incorporation, PEP (client or beneficial owner), line of business or product (expected lines and policies), payment mode (expected and used), annual premium, and address (country, region, province, city). A value without a row of its own takes the factor's **Any other value** row. The total is Low up to `aml.risk_low_max_score` (2), High from `aml.risk_high_min_score` (8), Normal between. A PEP is always High (`aml.pep_always_high`) and a confirmed screening match always rates the client High. The client is rated at onboarding, at every policy issue (with the new policy's line, premium and payment mode), at the KYC refresh, after a screening decision and on demand.
+
+| KYC status | Meaning |
+|---|---|
+| Incomplete | Identification items missing (listed on the profile) |
+| Complete | Identified, rated and nothing due |
+| EDD required | Rated High without an approved EDD review: no policy is issued (`aml.block_issue_pending_edd`) |
+| Refresh due | The KYC refresh date has come |
+| Blocked | A screening match was confirmed |
+
+On the profile:
+
+1. **Risk rating** shows the factors that scored, the reasons (PEP, confirmed match, override) and the history of every rating with its trigger.
+2. **Screening** shows the hits of the client, its owners and signatories and every screening run (event, provider, result).
+3. **Signatories and owners** (juridical clients) and **KYC documents** show what onboarding recorded; warnings show when no owner is declared, when the shares add up to more than 100% or when an owner below the threshold is recorded as an owner.
+4. **Rate again** recomputes the rating; **Screen now** screens the client, owners and signatories; **Complete KYC refresh** records the refresh.
+5. **Override rating** (compliance officer): choose the rating and give the reason. The override holds until the next KYC refresh.
+
+## Enhanced due diligence (EDD) reviews
+
+A client rated High gets an EDD review (EDD-YYYY-NNNNN) automatically; the compliance officer can also open one. Compliance > EDD Reviews lists the reviews pending, filterable by status.
+
+1. The preparer (Operations or the compliance officer) opens the review and records the **Source of wealth**, **Source of funds**, **Purpose of the business relationship** and **Findings**, ticks **Senior management approved the relationship** when it did, and uploads the evidence (bank certificates, financial statements, title deeds).
+2. **Submit** sends it for approval; the compliance officers are notified.
+3. The compliance officer opens the submitted review and selects **Approve**, or **Reject** with the reason (the preparer completes it and submits again). The officer who submitted a review cannot decide it.
+
+An approved review is valid for the refresh months of the High rating; until then a High-risk client can be issued policies.
+
+## KYC refresh
+
+Compliance > KYC Refresh lists the clients whose refresh date is within `aml.kyc_refresh_notice_days` (30) or past, with the last review and the next date. The refresh period follows the rating: `aml.kyc_refresh_months` (Low 36, Normal 24, High 12 months). Confirm the client's identification and documents (update them on the onboarding screen), then select **Complete KYC refresh** with notes: the client is rated again and the next date set. The weekly job aml-kyc-refresh-due marks the clients that are due and notifies the compliance officer.
+
+## Screening hits
+
+Every client, beneficial owner and authorised signatory is screened at onboarding, at policy issue and after every list update; the payee and the client at a refund cheque approval and at a claim payment to the claimant. Names are compared word by word (order, accents, honorifics and legal forms such as Inc. or Corp. do not matter); a score of 1 is an exact match and matches from `aml.match_threshold` (0.85) are reported. A different year of birth lowers the score.
+
+1. Choose Compliance > Screening Hits. The queue shows the party, the matched list entry with its list, reference, birth date and nationality, the score and the event.
+2. Select **Decide**, compare the details, choose the decision and give the reason:
+   - **Clear**: false positive. The same match of the same party is cleared again automatically next time, with your earlier reason.
+   - **Escalate**: needs investigation; the hit goes to an AML case (a new review case or an open case you choose) and keeps stopping the events.
+   - **Confirm**: true match. The client is blocked and rated High. Report it as your programme requires (an STR case).
+3. **Screen a name** checks a prospect or a payee who is not a client yet.
+
+While a hit of the client or payee is open, escalated or confirmed, policy issue and payouts are refused with a message naming the match (`aml.screening_block_events`).
+
+## Screening lists and the screening provider
+
+Compliance > Screening Lists holds the lists screened against: UN Security Council Consolidated List, AMLC and ATC designations, PEP list and the internal negative list (add others with **Add list**). No list content is delivered with BrokerVerse: the broker loads the lists it is entitled to use.
+
+1. Download the list from its publisher (UN consolidated list XML from the UN website; the AMLC or ATC resolutions; the PEP list from the broker's provider).
+2. Select **Upload version** on the list, choose the file (XML in the UN format, or CSV / XLSX with the columns Name, Aliases separated by semicolons, Type, Birth Date, Nationality, Reference, Remarks), the publication date and notes, keep **Rescreen every client after loading** on, and **Upload**.
+3. The new version becomes current; the earlier versions stay with their file name, checksum, entries and loading user (**Versions**). The rescreen result (clients and parties screened, new potential matches) shows on the version.
+4. On the internal negative list use **Entries** > **Add entry** (name, aliases, reference, reason) or the bin to remove one with the reason; each change is a new version.
+
+The **Provider** tab shows the commercial screening provider set on AML Settings (`aml.screening_provider`): Uploaded lists only, Test provider (no network, for training and tests) or Provider API. The uploaded lists are always screened as well, so screening continues when the provider is down. Every call to the provider is logged with its status and attempts; a failed call is retried by the job aml-provider-retry until the attempts run out, then the compliance officer is notified. **Retry** sends a request again; **Test the connection** sends a test name. The API key is never stored: the setting holds only the name of the environment variable that holds it on the server.
+
+## Transaction alerts
+
+The job aml-transaction-monitoring runs the rules every morning over the last 3 days; **Run monitoring** runs them for any period. An alert (AMA-YYYY-NNNNNN) is raised once per rule and transaction.
+
+| Rule | Raised when |
+|---|---|
+| Covered transaction: cash above the threshold | Cash received from a client above `aml.covered_threshold` (PHP 500,000) in one banking day, or in one receipt (`aml.covered_aggregation`) |
+| Several cash payments below the threshold | At least 3 cash payments of a client within 7 days, each below the threshold, adding up to PHP 400,000 or more |
+| Early cancellation with return premium | A policy cancelled within 90 days of inception with a return premium; high when the refund went to someone else than the client |
+| Refund or claim paid to a third party | A refund voucher or a claim payment to a payee whose name does not match the client |
+| Overpayment refunded | Premium received above the premium billed by PHP 5,000 or more, refunded within 60 days |
+| Payer differs from the client | A receipt or payment link paid by someone else than the client |
+
+1. Review each alert (rule, client, amount, summary).
+2. A suspicious alert explained by the documents: **Close** with the reason.
+3. Otherwise select the alerts and **Open or add to a case**: an STR case for suspicious alerts, a CTR case or the CTR file for covered transactions. Covered transactions are always reported; they cannot be closed.
+
+## AML cases
+
+Compliance > AML Cases lists the cases (AMC-YYYY-NNNNN) with type, client, number of alerts, due date and status; overdue cases are flagged.
+
+1. Open the case. For an STR, choose the **Grounds of suspicion**, set **Suspicion established on** (the due date is `aml.str_due_working_days` working days later, weekends and national holidays of the Holiday master skipped) and write the **Narrative**: what happened, why it is suspicious, what was checked. **Save**.
+2. The compliance officer selects **Approve for filing**. A review case is not filed: close it, or open an STR or CTR case.
+3. Select **Generate report file**: the file appears under **Report files** and on AMLC Reports.
+4. A case that needs no report is closed with **Close case** and the reason (not possible for covered transactions).
+
+## AMLC reports
+
+Compliance > AMLC Reports lists the report files (AMR-YYYY-NNNNN): type, period, case, number of transactions, total, format version, status.
+
+1. **Generate CTR file** for a period: the covered transactions of the period not yet in a CTR file are included, one detail record per receipt.
+2. **Download** the file and file it in the AMLC portal.
+3. **Record filing**: the filing date, the AMLC acknowledgement reference and, later, Acknowledged or Rejected by the AMLC. The alerts become Reported and the case Filed.
+
+The file layout is BV-AMLC-TXN 1.0, a pipe-delimited text file: a header record H (institution code from `aml.amlc_institution_code`, report type, report number, date, period, number of transactions, format version), one detail record D per transaction (date, reference, AMLC transaction code from `aml.amlc_transaction_codes`, amount, currency, payment mode, subject type I or C, last, first and middle name or registered name, birth or registration date, place of birth, nationality or country of incorporation, ID type or registration authority, ID or registration number, TIN, address, occupation or nature of business, policy number, counterparty, grounds of suspicion, alert number), narrative records N for an STR, and a trailer T (number and total). Confirm before the first filing, against the AMLC's current reporting guidelines: the institution code, the transaction codes, the ID type codes and the order of the D fields; then validate a test file in the AMLC portal.
+
+## AML settings
+
+Compliance > AML Settings has three tabs.
+
+**General**: covered transaction amount and test, payment modes counted as cash, working days to file a CTR and an STR, lowest match score, the Low and High score limits, PEP always High, KYC refresh months per rating and the notice days, beneficial owner threshold, retention years of AML records (at least 5), the events stopped by a hit, the EDD block on policy issue, the AMLC institution code and transaction codes, and the screening provider (provider, mode, endpoint, environment variable of the API key, timeout, attempts). The values delivered follow the AMLA and its rules as known at delivery: the compliance officer confirms them against the AMLC's current issuances. **Save** records every change in the audit trail.
+
+**Risk factors**: the scoring table, grouped by factor. **Add factor value** (for example geography Sulu 3, or a nationality), change a score, switch a row off, or remove it. Premium size is scored by bands (from, below).
+
+**Monitoring rules**: switch each rule on or off and change its parameters and severity.
+
+AML records (identification, ratings, screenings, alerts, cases, report files) are kept for `aml.record_retention_years` (5) years after the last policy, transaction or case; Master > Data Privacy refuses to anonymise a client before then or while a case on it is open.
+
+## Approvals
+
+| Approval | Where |
+|---|---|
+| Clear, escalate or confirm a screening hit | Screening Hits > **Decide** |
+| Approve or reject an EDD review (not one you submitted) | EDD Reviews |
+| Override a risk rating | Client Due Diligence > client > **Override rating** |
+| Approve a case for filing; close a case | AML Cases |
+| Record a filing with the AMLC | AMLC Reports > **Record filing** |
 
 # Module reference
 

@@ -676,6 +676,12 @@
    "chapter": "Operations (client servicing)"
   },
   {
+   "id": "onboard-a-client-before-the-first-policy",
+   "title": "Onboard a client before the first policy",
+   "level": 3,
+   "chapter": "Operations (client servicing)"
+  },
+  {
    "id": "raise-an-endorsement-request",
    "title": "Raise an endorsement request",
    "level": 2,
@@ -1064,6 +1070,96 @@
    "title": "Approvals summary",
    "level": 2,
    "chapter": "Accounting Manager"
+  },
+  {
+   "id": "compliance-officer-aml-cft",
+   "title": "Compliance Officer (AML/CFT)",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "compliance-officer-aml-cft-role-summary",
+   "title": "Role summary",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "compliance-officer-aml-cft-menus-available",
+   "title": "Menus available",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "compliance-officer-aml-cft-daily-and-periodic-tasks",
+   "title": "Daily and periodic tasks",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "aml-dashboard",
+   "title": "AML dashboard",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "client-due-diligence-and-risk-rating",
+   "title": "Client due diligence and risk rating",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "enhanced-due-diligence-edd-reviews",
+   "title": "Enhanced due diligence (EDD) reviews",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "kyc-refresh",
+   "title": "KYC refresh",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "screening-hits",
+   "title": "Screening hits",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "screening-lists-and-the-screening-provider",
+   "title": "Screening lists and the screening provider",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "transaction-alerts",
+   "title": "Transaction alerts",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "aml-cases",
+   "title": "AML cases",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "amlc-reports",
+   "title": "AMLC reports",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "aml-settings",
+   "title": "AML settings",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
+  },
+  {
+   "id": "compliance-officer-aml-cft-approvals",
+   "title": "Approvals",
+   "level": 2,
+   "chapter": "Compliance Officer (AML/CFT)"
   },
   {
    "id": "module-reference",

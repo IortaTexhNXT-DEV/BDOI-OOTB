@@ -104,6 +104,18 @@ export const HELP_ROUTES = [
   ["/master/configuration/audit-trail", "audit-trail"],
   ["/master/configuration/email-outbox", "e-mail-outbox"],
   ["/master/data-privacy", "data-privacy"],
+  // AML/CFT (Compliance Officer chapter of the user manual)
+  ["/agent/client-onboarding", "onboard-a-client-before-the-first-policy"],
+  ["/compliance/aml/dashboard", "aml-dashboard"],
+  ["/compliance/aml/clients", "client-due-diligence-and-risk-rating"],
+  ["/compliance/aml/edd", "enhanced-due-diligence-edd-reviews"],
+  ["/compliance/aml/kyc-refresh", "kyc-refresh"],
+  ["/compliance/aml/hits", "screening-hits"],
+  ["/compliance/aml/lists", "screening-lists-and-the-screening-provider"],
+  ["/compliance/aml/alerts", "transaction-alerts"],
+  ["/compliance/aml/cases", "aml-cases"],
+  ["/compliance/aml/reports", "amlc-reports"],
+  ["/compliance/aml/settings", "aml-settings"],
   ["/master/go-live-data-load", "go-live-data-load"],
   ["/product-configurator", "module-reference-product-configurator"],
   // the user's own pages

@@ -11,7 +11,8 @@ import SvgTravel from "../../../assets/agentIcon/SvgTravel";
 import SvgHome from "../../../assets/agentIcon/SvgHome";
 import SvgFire from "../../../assets/agentIcon/SvgFire";
 import { useNavigate } from "react-router-dom";
-import { canOpen } from "../../../utils/canOpen";
+import { canOpen, hasPermission } from "../../../utils/canOpen";
+import { Button } from "primereact/button";
 
 const ClientListing = () => {
   const { t } = useTranslation();
@@ -114,6 +115,10 @@ const ClientListing = () => {
         </div>
         <div className="col-12 md:col-6 lg:col-6">
           <div className="btn_lable_save_container">
+            {/* client onboarding before the first policy (customer due diligence, write:clients) */}
+            {hasPermission("write:clients") && (
+              <Button icon="pi pi-user-plus" label={t("onboarding.onboardButton")} className="mr-2" onClick={() => navigate("/agent/client-onboarding")} />
+            )}
             {canCreateLead && (
             <Dropdown
               value={selectedOption}
