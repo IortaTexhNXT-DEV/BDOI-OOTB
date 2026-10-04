@@ -21,9 +21,10 @@ This manual tells each user how to do his or her work in BrokerVerse. It is orga
 
 | Chapter | Content |
 |---|---|
-| Getting started | Signing in, passwords, two-step verification, the screen layout, lists, forms, statuses and approvals, the audit trail. |
+| Getting started | Signing in, passwords, two-step verification, the screen layout, notifications, My Profile and account security, lists, forms, statuses and approvals, the audit trail. |
 | The business process end to end | The broking cycle from prospect to reports, with who does each step and on which screen. |
 | One chapter per persona | System Administrator; Sales & Marketing (Account Executive); Processing Team; Operations (client servicing); Claims; Accounting; Accounting Manager. |
+| Go-Live Data Load | The configuration and migration workbooks the System Administrator loads before go-live. |
 | Module reference | Every menu screen in menu order: purpose, main fields and rules. |
 | Reports, dashboards, schedules and notifications | A short guide; the Reports Book and the Schedules and Batch Jobs document hold the detail. |
 | Troubleshooting, FAQ and glossary | Common messages and what to do, and the Philippine insurance and accounting terms used on the screens. |
@@ -42,7 +43,7 @@ Read Getting started and The business process end to end first, then the chapter
 | 03/10/2026 | The screens show dates as DD/MM/YYYY (`general.date_format`) in Manila time (`general.timezone`). |
 | Maker and checker | The maker enters a transaction; a different user, the checker, approves it. |
 
-> The screenshots were taken on 03 October 2026 from a BrokerVerse OOTB test system loaded with realistic data: 61 prospects, 72 quotations, 48 requests for quotation, 23 placement slips, 82 policies, 8 claims and six months of accounting. The users in the screenshots are named staff of that test system, one or two per role. Your screens show your own data, and your menu shows only the items of your role.
+> The screenshots were taken on 03 and 04 October 2026 from a BrokerVerse OOTB test system loaded with realistic data: 61 prospects, 72 quotations, 48 requests for quotation, 23 placement slips, 82 policies, 8 claims and six months of accounting. The users in the screenshots are named staff of that test system, one or two per role. Your screens show your own data, and your menu shows only the items of your role.
 
 # Getting started
 
@@ -52,18 +53,22 @@ Every person has his or her own user ID. Never share a user ID or a password: ev
 
 ![The sign-in page](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-login.png)
 
-1. Open the BrokerVerse address given by your System Administrator in Chrome, Edge or Firefox.
+1. Open the BrokerVerse address given by your System Administrator in Chrome, Edge or Firefox. The sign-in page shows an illustration on the left and the sign-in panel on the right, with the logo and name set on Master > System Settings.
 2. In **User ID**, type your user name, for example maria.rivera.
 3. In **Password**, type your password. Select the eye icon to show the password while you type; select it again to hide it.
-4. Select **Login**.
+4. Select **Sign in**.
 
-BrokerVerse opens your landing page: the first dashboard your role may open, or the first screen of your menu. One more step can follow the password:
+A language box appears at the top of the panel only when more than one screen language is offered. The delivered system offers English, so there is no language box.
+
+BrokerVerse opens your landing page: the first dashboard your role may open, or the first screen of your menu. One more step can follow the password, in the same panel:
 
 | Screen after the password | When it appears |
 |---|---|
 | **Change password** | You signed in with a temporary password, an administrator has reset your password, or your password is older than 90 days (`security.password_max_age_days`). |
 | **Two-step verification** | Two-step verification is on for your user. |
-| Set up two-step verification | Your role must use two-step verification (`security.require_2fa_roles`) and you have not set it up yet. |
+| **Set up two-step verification** | Your role must use two-step verification (`security.require_2fa_roles`) and you have not set it up yet. |
+
+If your session ended while you were away (your password was changed, your account was updated or you signed in elsewhere), the sign-in page says so above **User ID**: sign in again.
 
 ### Password rules
 
@@ -73,84 +78,159 @@ The rules come from the security settings. With the delivered settings a passwor
 - contain an upper-case letter (A-Z), a lower-case letter (a-z), a digit (0-9) and a symbol, for example ! @ # $;
 - differ from your last 5 passwords (`security.password_history_count`).
 
-Every screen where you choose a password lists these rules under **New password** and ticks each rule as soon as the new password meets it.
+Every screen where you choose a password lists these rules under **New password** and ticks each rule as soon as the new password meets it. The last rule is checked by the server when you save.
 
-![Change password at the first sign-in, with the rules ticked as the new password meets them](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-change.png)
+### Change your password at sign-in
+
+When BrokerVerse asks for a new password after the password step, the panel shows **Change password** with the reason under the title: **You must choose a new password before you continue.** or, for an expired password, **Your password has expired. Choose a new one to continue.**
+
+![Change password at sign-in, with the rules ticked as the new password meets them](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-change.png)
 
 1. In **Current password**, type the password you signed in with.
 2. In **New password**, type the new password and check that every rule is ticked.
 3. In **Confirm new password**, type it again.
-4. Select **Change password and continue**. **Cancel** returns to the sign-in page.
+4. Select **Change password and continue**. **Back to sign in** returns to the sign-in panel without a change.
 
-To change your password at any other time, select your initials at the top right, then **Change password**. Fill in **Current password**, **New password** and **Confirm new password** and select **Change password**. Other computers and browsers where you are signed in are signed out; your current session continues.
-
-![Profile menu > Change password](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-change-pw.png)
+To change your password at any other time, see My Profile and account security below.
 
 ### Forgotten password
 
-1. On the sign-in page, select **Forgot password?**.
+1. On the sign-in page, select **Forgot password?** on the line of the **Password** label.
 2. On **Reset your password**, type your **User ID or e-mail address** and select **Send code**. If the account exists and has an e-mail address, BrokerVerse e-mails a 6-digit code to it. The message on screen is the same whether or not the account exists.
-3. Type the code, the new password and the confirmation, then reset the password.
-4. Select **Back to sign in** and sign in with the new password.
+3. On **Enter the verification code**, type the code in **Verification code (from the e-mail)**, then the **New password** and **Confirm new password**, and select **Reset password**. **Send a new code** sends another code if the first one did not arrive.
+4. BrokerVerse returns to the sign-in panel with the message **Password reset. Sign in with your new password.** Sign in with the new password.
 
 ![Forgot password: Reset your password](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-forgot.png)
 
-The code is valid for 15 minutes (`security.reset_code_minutes`) and is withdrawn after 5 wrong entries (`security.reset_code_max_attempts`). If your user has no e-mail address, or e-mail sending is not switched on, ask the System Administrator to reset your password.
+![Forgot password: Enter the verification code](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-forgot-code.png)
+
+**Back to sign in** leaves the reset at any step. The code is valid for 15 minutes (`security.reset_code_minutes`) and is withdrawn after 5 wrong entries (`security.reset_code_max_attempts`). If your user has no e-mail address, or e-mail sending is not switched on, ask the System Administrator to reset your password.
 
 ### Failed sign-ins and locked accounts
 
-A wrong user ID or password shows a message under the **Login** button. After 5 failed attempts in a row the user is locked (`limits.max_login_attempts`). The system also allows only 10 sign-in attempts in 5 minutes per computer and per user name (`security.login_rate_limit`). A locked user asks the System Administrator to unlock the account (System Administrator chapter, Users).
+A wrong user ID or password shows a message in red above the **Sign in** button. After 5 failed attempts in a row the user is locked (`limits.max_login_attempts`). The system also allows only 10 sign-in attempts in 5 minutes per computer and per user name (`security.login_rate_limit`). A locked user asks the System Administrator to unlock the account (System Administrator chapter, Users).
 
-### Two-step verification
+### Two-step verification at sign-in
 
-Two-step verification adds a 6-digit code from an authenticator app on your phone, such as Google Authenticator or Microsoft Authenticator. Any user can turn it on. The System Administrator can make it compulsory for roles with `security.require_2fa_roles`; no role requires it in the delivered set-up. iorta TechNXT recommends it for the System Administrator, Accounting and Accounting Manager roles.
-
-![Profile menu > Two-factor authentication](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-2fa-status.png)
-
-1. Select your initials at the top right, then **Two-factor authentication**. The dialog says whether two-step verification is on or off.
-2. Select **Turn on**.
-3. In the authenticator app, add an account and type the setup key shown on the screen. On a phone you can open the link to the authenticator app instead.
-4. Type the 6-digit code the app shows and confirm.
-
-From then on the sign-in page asks for the **Authentication code** after the password. Open the app, type the current code and select **Verify**. The page waits 5 minutes for the code (`security.two_factor_challenge_minutes`).
+Two-step verification adds a 6-digit code from an authenticator app on your phone, such as Google Authenticator or Microsoft Authenticator. When it is on for your user, the panel shows **Two-step verification** after the password.
 
 ![Sign-in: Two-step verification](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-2fa.png)
 
-To turn it off, open **Two-factor authentication** again and turn it off with a current code. A role that requires it cannot turn it off. If you lose your phone, the System Administrator turns it off for your user and you set it up again.
+1. Open the authenticator app and find the BrokerVerse entry.
+2. Type the current 6-digit code in **Authentication code**.
+3. Select **Verify**. A wrong or expired code shows **The code is not valid. Try the current code.**; type the code the app shows now.
+
+The page waits 5 minutes for the code (`security.two_factor_challenge_minutes`); after that, select **Back to sign in** and sign in again. If your role requires two-step verification and you have not set it up, the panel shows **Set up two-step verification** with the subtitle **Your role requires two-step verification. Set it up to continue.** and the same set-up steps as in the next section; after **Turn on** you are signed in.
 
 ### Automatic sign-out
 
-After 30 minutes without activity BrokerVerse signs you out (`limits.session_idle_minutes`). Anything not saved on the screen is lost, so save before you leave your desk. Your session also ends when your password is changed or reset, when your user is deactivated and when your role changes. To sign out yourself, select your initials, then **Logout**.
+After 30 minutes without activity BrokerVerse signs you out (`limits.session_idle_minutes`). Anything not saved on the screen is lost, so save before you leave your desk. Your session also ends when your password is changed or reset, when your user is deactivated and when your role changes. To sign out yourself, select your initials at the top right, then **Sign out**.
 
 ## The screen layout
 
-![Screen layout: sidebar on the left with the search menu; language, notification bell and profile at the top right; the work area](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-layout.png)
+![Screen layout: sidebar on the left with the search menu; the notification bell and your initials at the top right; the work area](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-layout.png)
 
 | Area | What it does |
 |---|---|
 | Logo and name | The logo and application name set on Master > System Settings. |
 | **Search menu...** | Type part of a screen name, for example quot. The list shows each matching screen of your menu with its path; select one to open it. |
 | Sidebar menu | The menus of your role, in business order: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, Master, Product Configurator. Select a menu to open its items. |
-| Language | The screen language. The delivered system offers English. |
-| Notification bell | The number of unread notifications. Select the bell to see the latest. |
-| Profile (your initials) | Your name and e-mail, then **Profile**, **Change password**, **Two-factor authentication**, **Help** and **Logout**. |
-| Work area | The screen you opened, with its title and the breadcrumb (for example Home • Prospects). |
+| Notification bell | The red badge shows the number of unread notifications, up to 99; above that it shows 99+. Select the bell to see the latest. |
+| Your initials | The initials of your display name in a circle. Select them for the account menu. |
+| Work area | The screen you opened, with its title and the breadcrumb (for example Operations • Prospects). |
+
+The top bar shows a language box only when more than one screen language is offered.
 
 ![Menu search: typing "quot" lists the quotation screens of the role](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-menu-search.png)
 
-![The profile menu](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-profile.png)
+### The account menu
+
+Select your initials at the top right. The menu shows your initials, your display name and your role, then:
+
+| Item | What it does |
+|---|---|
+| **Profile** | Opens My Profile (see My Profile and account security). |
+| **Change password** | Opens the **Change password** dialog. |
+| **Two-step verification** | Opens the **Two-step verification** dialog: see whether it is on, turn it on or off. |
+| **Help** | Has no action in the delivered system. |
+| **Sign out** | Ends your session and returns to the sign-in page. |
+
+![The account menu under your initials](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-profile.png)
 
 ### Notifications
 
 BrokerVerse notifies you when something needs your action or concerns your work: a quotation sent for approval, a premium payment to verify, a new claim, a settlement waiting for approval, a renewal notice sent, a treaty waiting for approval, a close run to approve. Approval requests go only to users who may approve them.
 
-Select the bell to see the latest notifications. Select a notification to open the record it concerns. Select **See More** for the full **Notification** page, which lists every notification with its title, message, type (Info, Task, Approval, Reminder and others) and time.
+Select the bell. The **Notifications** panel shows the number unread and your six latest notifications, newest first, each with its title, message, date and time. A blue dot marks an unread notification.
+
+- Select a notification to mark it as read.
+- Select the X on a notification to remove it.
+- Select **Mark all as read** to clear the badge.
+- Select **View all notifications** for the full **Notification** page, which lists every notification with its title, message, type (Info, Task, Approval, Reminder and others), priority and time.
+
+![The Notifications panel under the bell](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-bell.png)
 
 ![The Notification page](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-notif-page.png)
 
-### Your profile
+## My Profile and account security
 
-Select your initials, then **Profile**, to see your name, e-mail address and contact details. Select **Edit Profile** to correct them.
+### My Profile
+
+Select your initials, then **Profile**. **My Profile** (breadcrumb Home • My Account • My Profile) has two parts.
+
+![My Profile: the account summary](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-my-profile.png)
+
+The account summary at the top shows your initials, display name, status (**Active**), **User ID**, and **Role**, **Branch**, **Designation**, **Reporting to**, **E-mail address** and **Last sign-in**. The System Administrator maintains these on Master > Generals > User Management > User; you cannot change them here. The buttons **Change password** and **Two-step verification** open the same dialogs as the account menu.
+
+**Personal and contact details** shows your details in three groups:
+
+| Group | Fields |
+|---|---|
+| Personal information | **First name** (required), **Last name**, **Display name** (required; shown in the top bar, on approvals and in the audit trail), **Employee No.** (maintained by the System Administrator), **Date of birth**, **Gender** (Male, Female, Other, Prefer not to say) |
+| Contact | **E-mail address** (maintained by the System Administrator), **Contact number** |
+| Address | **House No. / Unit No. / Street**, **Barangay / Subdivision**, **City / Municipality**, **Province**, **ZIP code**, **Country** |
+
+To change them:
+
+1. Select **Edit Profile**. The fields you may change open for editing; fields marked * are required.
+2. Correct the fields. The address lists work from the top down: choose **Country** (Philippines by default), then **Province**, then **City / Municipality**, then **Barangay / Subdivision**. Each list offers the names of the address masters and also accepts a name you type. Choosing a barangay fills an empty **ZIP code** with its postal code.
+3. Select **Save changes**. BrokerVerse shows **Your profile has been updated.** and the new display name appears at once in the top bar. **Cancel** closes the form without saving.
+
+![My Profile in edit mode](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-my-profile-edit.png)
+
+| Message | Meaning |
+|---|---|
+| Enter your first name. / Enter the name to display. | **First name** or **Display name** is empty. |
+| Enter a Philippine number, for example 0917 123 4567 or (02) 8123 4567. | The contact number is not a Philippine mobile (0917 123 4567 or +63 917 123 4567) or landline with area code. |
+| Enter a valid date of birth in the past. | The date of birth is in the future or not a date. |
+| A Philippine ZIP code has 4 digits. | The ZIP code of a Philippine address does not have 4 digits. |
+
+### Change password
+
+Select your initials, then **Change password** (or **Change password** on My Profile).
+
+![Change password](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-change-pw.png)
+
+1. In **Current password**, type your present password.
+2. In **New password**, type the new password and check that every rule is ticked.
+3. In **Confirm new password**, type it again.
+4. Select **Change password**. BrokerVerse shows **Password changed. Your other sessions have been signed out.** Other computers and browsers where you are signed in are signed out; your current session continues. **Cancel** closes the dialog without a change.
+
+### Set up two-step verification
+
+Any user can turn on two-step verification. The System Administrator can make it compulsory for roles with `security.require_2fa_roles`; no role requires it in the delivered set-up. iorta TechNXT recommends it for the System Administrator, Accounting and Accounting Manager roles.
+
+1. Select your initials, then **Two-step verification** (or **Two-step verification** on My Profile). The dialog says **Two-step verification is off.**
+2. Select **Turn on**.
+3. Install an authenticator app on your phone if you do not have one.
+4. In the app, add an account and scan the QR code. If you cannot scan it, type the setup key shown under **Can't scan? Enter this key instead:** (the copy icon copies it). On the phone itself you can open the key in the authenticator app with the link under the key.
+5. Type the 6-digit code the app now shows in **Authentication code** and select **Turn on**. BrokerVerse shows **Two-step verification is on.** **Cancel** returns to the status without turning it on.
+
+![Two-step verification is off](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-2fa-status.png)
+
+![Set up two-step verification: QR code and setup key](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-2fa-enrol.png)
+
+From then on the sign-in page asks for the code after the password. To turn it off, open **Two-step verification** again, select **Turn off**, type a current code from the app and confirm with **Turn off**. A role that requires it cannot turn it off: the dialog says **Your role requires two-step verification, so it cannot be turned off.** If you lose your phone, the System Administrator turns it off for your user (Master > Generals > User Management > User, account actions) and you set it up again.
 
 ## Roles and menus
 
@@ -319,7 +399,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 
 | Menu | Items |
 |---|---|
-| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Data Privacy (Data Subject Requests, Consent Register) |
+| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Go-Live Data Load, Data Privacy (Data Subject Requests, Consent Register) |
 | Master > Generals | Organization (Company, Branch); Insurance Management (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle); Location (Country, State, City); Employee Management (Hierarchy, Designation); User Management (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
 | Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Remittance Master, Incentive Programs, Reinsurance Treaty |
 
@@ -336,6 +416,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 | Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | User Management > User Access Matrix |
 | Quarterly | Run an access review | User Management > Access Reviews |
 | Before go-live | Company and letterhead, official receipt numbering to match the Authority to Print, security settings, e-mail settings | Company, Document Numbering, Configuration |
+| Before go-live | Load the configuration and migration workbooks, reconcile, set the go-live lock | Master > Go-Live Data Load (chapter Go-Live Data Load) |
 
 ## Users
 
@@ -374,7 +455,7 @@ The eye opens the user, the pencil edits the display name, e-mail and roles (a r
 
 ### User Access Matrix
 
-The matrix lists every user with roles, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. The cards at the top count **Active users**, **Dormant (90+ days)**, **Segregation-of-duties conflicts** and **Active without two-factor**; select a card to filter the list. **Export to Excel** downloads the matrix for an access review; **Sign out everywhere** ends every session of a user.
+The matrix lists every user with roles, branch, status, last sign-in, two-step verification, password age and segregation-of-duties conflicts. The cards at the top count **Active users**, **Dormant (90+ days)**, **Segregation-of-duties conflicts** and **Active without two-step verification**; select a card to filter the list. **Export to Excel** downloads the matrix for an access review; **Sign out everywhere** ends every session of a user.
 
 ![Master > Generals > User Management > User Access Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-access-matrix.png)
 
@@ -472,13 +553,15 @@ Every number the system issues comes from a series on Master > Document Numberin
 
 ![Master > Configuration: the business areas](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config.png)
 
-Master > Configuration holds every business parameter, grouped in areas: Company & Branding; Sales, Quotations & Placement; Policies, Endorsements & Renewals; Claims; Billing, Collections & Credit; Remittance & Reconciliation; Commission & Incentives; Accounting & Tax; Notifications & E-mail; Security & Access; Reports & Dashboards; Data Retention & Uploads. The search box finds a setting by its words, for example VAT or renewal notice.
+Master > Configuration holds every business parameter, grouped in areas: Company & Branding; Sales, Quotations & Placement; Policies, Endorsements & Renewals; Claims; Billing, Collections & Credit; Remittance & Reconciliation; Commission & Incentives; Accounting & Tax; Notifications & E-mail; Security & Access; Reports & Dashboards; Data Retention, Privacy & Uploads; and Other settings for settings not yet placed in an area. The search box finds a setting by its words, for example VAT or renewal notice.
 
 1. Select the area. The list on the left switches between areas; **Related screens** link to the screens the settings affect.
 2. Change the value. Numbers and text are typed, switches switched, lists edited as values or small tables, e-mail templates in a text box where you keep the {{placeholders}}. **Show advanced settings** shows the rarely changed ones.
 3. Save. The change applies at once and is recorded in the audit trail with the old and new value.
 
 ![Configuration: the Security & Access area](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config-area.png)
+
+The group **Go-live** (area Company & Branding) holds the cutover date `golive.cutover_date`, the first day of live transactions, and the go-live lock `golive.locked`. Set them as described in the chapter Go-Live Data Load; switch the lock on only when the migration is loaded and reconciled.
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
@@ -544,6 +627,99 @@ The System Administrator can open every Master > Finance screen. The Accounting 
 ## Approvals
 
 The System Administrator approves posting rule and account determination changes of another user (Configuration Approvals), Authority Matrix changes of another administrator, and treaties created by another user. Business approvals belong to the business roles.
+
+# Go-Live Data Load
+
+This chapter is for the System Administrator and the migration lead. Master > Go-Live Data Load loads the broker's go-live data with two Excel workbooks instead of one upload per master. Only the System Administrator holds the permissions of the screen (`read:data-load` to download and see the history, `write:data-load` to upload, validate and load).
+
+## The two workbooks
+
+| Workbook | File | What it holds |
+|---|---|---|
+| **Configuration** | GoLive_Configuration_Workbook.xlsx | Everything needed to run new business: company, settings, countries, states, cities, branches, departments, hierarchy, designations, users, currencies, exchange rates, chart of accounts, banks, bank accounts, signatories, transaction codes, write-off reasons, insurers, lines of business, products, policy types, covers, vehicle brands, models, variants and vehicles, commission rates, premium taxes, LGU rates, authority limits and document numbering. |
+| **Migration** | GoLive_Migration_Workbook.xlsx | The open business of the old system at cutover: clients, in-force policies (with their old numbers), open premium receivables, open claims and the GL opening balances. |
+
+Choose the workbook with **Configuration** or **Migration** at the top right of the screen. Next to it the screen shows the cutover date (**Cutover** and the date, or **No cutover date**) and, once go-live is locked, **Go-live locked**.
+
+Each workbook has an **Instructions** sheet (load order, rules, every column), a **Lists** sheet with the allowed values, and one sheet per object in load order. Row 1 holds the headers; a required column ends with *. Row 2 is a sample row: a row whose first cell starts with SAMPLE is never loaded. Enter data from row 3. Dates are written YYYY-MM-DD.
+
+Some set-up is not in the workbooks and is entered on its own screen: roles and permissions, segregation of duties, delegations, access reviews, the approval of authority limits, tax codes, account determination and posting rules, statement formats, the close checklist, product templates and the motor tariff, package bundles, payment gateways, System Settings, schedules, fiscal years and periods, remittance masters, reinsurance, incentive programmes, referrer accounts and petty cash funds. The Instructions sheet lists them.
+
+## Download the template
+
+![Master > Go-Live Data Load, tab Download Template (configuration workbook)](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-template.png)
+
+1. Choose Master > Go-Live Data Load and the workbook (**Configuration** or **Migration**).
+2. On the tab **Download Template**, the table lists each sheet with **Sheet**, **Screen** (the screen that holds the same data), **Key** (the columns that identify a record), **Columns** and **Required columns**.
+3. Select **Blank template** for an empty workbook, or **Current data** for a workbook filled with the data already in BrokerVerse.
+
+![The migration workbook: clients, policies, open items, open claims and opening balances](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-migration.png)
+
+**Current data** is also how configuration moves from one environment to the next (test, UAT, production): download it in the source environment and upload it in the target. Rows equal to the target are reported as unchanged, differences update the target and missing records are created. The go-live lock setting is never exported or loaded.
+
+## Upload and validate
+
+1. Fill in the workbook and save it as .xlsx.
+2. On the tab **Upload and Validate**, select **Upload and validate** and choose the file.
+3. BrokerVerse reads the workbook as a new batch (**Batch 1**, **Batch 2** and so on) and validates every sheet in load order as a trial run. Nothing is saved yet. A policy may refer to a client or an insurer added by the same workbook: the trial run checks the sheets together, as they will load.
+
+![Upload and Validate: the result of a batch](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-validate.png)
+
+The result shows the batch number, the file name and the status, the cards **Rows read**, **Valid rows** and **Rows with errors**, and a line per sheet:
+
+| Column | Meaning |
+|---|---|
+| **Read**, **Valid**, **Errors** | Rows read from the sheet, rows that pass every check, rows with at least one error. |
+| **New** | Records that the load will create. |
+| **Changed** | Existing records that the load will update. |
+| **Unchanged** | Rows equal to the record in BrokerVerse; they are not written. |
+| **For approval** | Authority limits, which another System Administrator approves on Master > Generals > User Management > Authority Matrix. |
+| **Skipped** | Rows in error left out by a load with **Load valid rows only**. |
+
+Under the sheets, **Errors** lists each error with **Sheet**, **Row** (the row number in Excel), **Column** and **Message**.
+
+![Errors of a batch](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-errors.png)
+
+## Correct the errors
+
+1. Select the Excel icon next to the batch (**Download errors**). The file has the same layout with only the rows in error and an **Errors** column that gives the reason.
+2. Correct those rows in the errors file or in the full workbook.
+3. Upload the corrected file again with **Upload and validate**. A record is identified by its key (for example the branch code, the insurer code, the legacy policy number), so loading the same or a corrected workbook again updates the record and never creates a duplicate.
+
+**Validate again** (the circular arrow) runs the checks on the same batch once more, for example after a master was added on its own screen.
+
+## Load
+
+1. Open the batch on **Upload and Validate** (or with the eye on **History**).
+2. If some rows still have errors, decide whether to load the valid rows now: **Load valid rows only** is ticked by default for the configuration workbook and not for the migration workbook. Without it, a batch with errors cannot be loaded.
+3. Select **Load**. The dialog **Load the workbook** asks you to confirm the number of valid rows of the batch. Select **Load** again, or **Cancel**.
+
+The load runs in one transaction. If a row now fails because the data changed since the validation, nothing is saved and the errors are shown. The load is written to the audit trail and the batch status becomes **Loaded**.
+
+When the configuration workbook creates users, the dialog **Temporary passwords of the new users** shows each new user's temporary password once. The passwords are not stored: select **Copy**, hand each password to its user privately, then select **Done**. Each user chooses a new password at the first sign-in. A load cannot change your own account, and only a System Administrator can give the System Administrator role.
+
+## History
+
+![History of the go-live batches](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-golive-history.png)
+
+The tab **History** lists the batches of the workbook chosen with **Batch**, **File**, **Status** (**Validated**, **Errors** or **Loaded**), **Read**, **Valid**, **Errors**, **Uploaded** (user and time) and **Loaded** (user and time). The eye (**View result**) opens the result of a batch, the Excel icon downloads its errors and, for the migration workbook, the chart icon downloads its reconciliation.
+
+## Migration rules and reconciliation
+
+The migration workbook is refused until the cutover date is set: the tab **Upload and Validate** then says **Set the cutover date (golive.cutover_date) first**. The cutover date is the first day of live transactions and is set on Master > Configuration, area Company & Branding, group **Go-live**, or on the Settings sheet of the configuration workbook.
+
+![Master > Configuration: the Go-live settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config-golive.png)
+
+- Rows dated on or after the cutover date are refused: policy issue date, claim loss and reported dates, client birth date. Policies must still be in force at cutover. Open claims are registered or in review.
+- Opening balances are the trial balance of the old system at the close of the day before the cutover date. Debits must equal credits, and the fiscal year of the cutover date must have no journal posted before it.
+- Migrated records keep the numbers of the old system. New business takes the next number of its Document Numbering series, set on the Numbering sheet. Both workbooks refuse a number that the other side would also issue: raise the next number of the series above the old range first.
+- Migrated records post nothing: no bill, booking journal or commission accrual for a policy, no booking journal for an open item (the GL carries it in the opening balance), no e-mail, notification or journal for an open claim. Migrated policies count as policies in force but not as premium written or new business on the Executive Dashboard.
+
+Every validation and load of the migration workbook shows a **Reconciliation**: per sheet the **Workbook rows** and **Workbook totals** (premium, sum insured, open balance, claim estimate, debits and credits) against the records and totals **In BrokerVerse**, and the checks that the trial balance balances and that the premiums receivable control account equals the open items of the cutover date, each with **Agrees** or **Difference**. Compare these totals with the old system before go-live; **Download reconciliation** gives them as a workbook.
+
+## Go-live lock
+
+When the data is loaded and reconciled, switch on the go-live lock on Master > Configuration, group **Go-live** (`golive.locked`). From then on the migration workbook can no longer be uploaded, validated or loaded, and the reset of test transactions refuses to run. The configuration workbook stays available for new masters. Agree the moment with the project lead: the lock is the formal end of the migration.
 
 # Sales & Marketing (Account Executive)
 
@@ -1019,6 +1195,8 @@ Renewal terms submitted from Renewals > Negotiations with **Request approval** c
 | Market Mapping | Map products to insurers with the insurer's code, commission, override and target (**Map Product**). |
 | Risk Mapping | Product definitions per line; Industrial All Risks is defined by risk sections. |
 | Product Analytics | Policies, premium, loss ratio and margin by product. |
+
+The lists of Coverage Builder, Rating Engine, Acceptance Rules and Document Manager have a **Template** column: the code of the product template a cover, factor, rule or document belongs to, or **All products** for one that applies to every product. Select the column heading to sort by template.
 
 To maintain the motor tariff, open the motor template with the pencil on Product Templates and its CTPL and Auto PA tab: for each vehicle class check the name, code, default seats and the CTPL amounts for 1 and 3 years; set the Auto Passenger PA rate and the limits per person offered; save the template. The quotation screens use the new values at once. The tax rates come from Master > Configuration and are shown read-only in the template.
 
@@ -1841,7 +2019,7 @@ This chapter lists every menu screen in menu order with its purpose, its main fi
 
 | Screen | Purpose | Main content and rules | Roles |
 |---|---|---|---|
-| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Customer Satisfaction, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill); trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register). Targets from `dashboard.targets`. | All but Claims |
+| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill), each change against the same number of days of the previous period; migrated policies are not premium written; trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register). Targets from `dashboard.targets`. | All but Claims |
 | Claims Dashboard | Claims workload. | Total Open Claims, Claims Overdue (`claims.sla_days`), Today's Claims, recent claims; **Export Report**. | Claims, System Administrator |
 | Processing Dashboard | Processing Workbench. | Submissions, cycle time, open alerts, workload, submissions list, open tasks; **New Submission**. | Processing Team, System Administrator |
 | Sales Dashboard | Sales team performance. | Sales person, period; prospects, quotations, conversion, policies issued, premium, open pipeline; trend and pipelines. | Sales & Marketing, System Administrator |
@@ -1976,6 +2154,7 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Schedules | Scheduled jobs: timetable, status, next and last run; **Run now**, **Run history**, **Edit schedule**. |
 | Audit Trail | Every audited action by record type, record ID, user and dates. |
 | E-mail Outbox | Queued, sent and failed e-mails with their attachments; **Retry**. |
+| Go-Live Data Load | Configuration and migration workbooks: **Blank template**, **Current data**, **Upload and validate**, errors download, **Load**, reconciliation, history (chapter Go-Live Data Load). |
 | Data Privacy > Data Subject Requests | Requests of data subjects (DSR-) with due dates; **Log request**, **Export personal data**, **Anonymise**, **Close**. |
 | Data Privacy > Consent Register | Consents given, refused and withdrawn by clients and prospects. |
 
@@ -2029,10 +2208,10 @@ See the chapter Reports, dashboards, schedules and notifications.
 |---|---|
 | Dashboard | Products with category, line, version, status, base rate and commission; active products, total premium, average loss ratio and commission. |
 | Product Templates | Product templates (TPL-) with versions and status (Draft, Active, Retired); the motor tariff. |
-| Coverage Builder | Covers: code, name, mandatory or optional, deductible, premium impact. |
-| Rating Engine | Rating factors with rules; Test Calculator. |
-| Acceptance Rules | Acceptance, validation and loading rules. |
-| Document Manager | Document templates per stage. |
+| Coverage Builder | Covers: code, template, name, mandatory or optional, deductible, premium impact. |
+| Rating Engine | Rating factors with their template and rules; Test Calculator. |
+| Acceptance Rules | Acceptance, validation and loading rules, each with its template. |
+| Document Manager | Document templates per stage and product template. |
 | Market Mapping | Products mapped to insurers with commission, override and target. |
 | Risk Mapping | Product definitions per line; IAR risk sections. |
 | Product Analytics | Policies, premium, loss ratio and margin by product. |
@@ -2108,7 +2287,7 @@ A file holds up to 50,000 rows (`reports.max_rows`). PDF reports print on the co
 | Reinsurance dashboards | Reinsurance > Treaty Dashboard, Analytics | Processing Team |
 | Product dashboards | Product Configurator > Dashboard, Product Analytics | Processing Team (Dashboard also Sales and Operations) |
 
-Dashboards show live figures; they change as soon as a transaction is saved. The Executive Dashboard compares the period chosen (This Month, This Quarter, This Year, calendar periods in Manila time) with the whole previous period and shows the targets of `dashboard.targets`. **Export Report** downloads the Production Register for the dates chosen.
+Dashboards show live figures; they change as soon as a transaction is saved. The Executive Dashboard compares the period chosen (This Month, This Quarter, This Year, calendar periods in Manila time) with the same number of days of the previous period (on 04 October, This Month compares 1 to 4 October with 1 to 4 September), so a period that has just started is not compared with a whole one. A change above 999% shows as > +999%; no change is shown when the previous period had nothing to compare with. Policies loaded by the go-live migration count in **Active Policies** but not in premium written or **New Business**. Measures the system does not capture are not shown. The dashboard shows the targets of `dashboard.targets`. **Export Report** downloads the Production Register for the dates chosen.
 
 ## Schedules
 
@@ -2142,8 +2321,13 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Not authorised: Your role does not give access to this screen | The screen is not part of your role. Use your menu, or ask the System Administrator whether your role is right. |
 | Account locked after failed sign-ins | 5 wrong passwords in a row. Ask the System Administrator to unlock the user or reset the password. |
 | Too many sign-in attempts | More than 10 attempts in 5 minutes from one computer or for one user. Wait 5 minutes, then sign in again. |
-| The authentication code is refused | Use the current code of the app; check that the phone's clock is set automatically. |
-| You were signed out | 30 minutes without activity, or your password or role changed. Sign in again. |
+| The code is not valid. Try the current code. | Two-step verification refused the code. Type the code the app shows now; check that the phone's clock is set automatically. |
+| Your session has ended (password changed, account updated or signed in elsewhere). Please sign in again. | Your password or role changed, your account was updated, or you signed in on another computer. Sign in again. |
+| You were signed out | 30 minutes without activity. Sign in again. |
+| The new password does not meet all the rules below. | Choose a password that ticks every rule under **New password**. |
+| The two new passwords do not match. | Type the same password in **New password** and **Confirm new password**. |
+| Set the cutover date (golive.cutover_date) first | Go-Live Data Load refuses the migration workbook until the cutover date is set on Master > Configuration, group Go-live. |
+| Go-live is locked: the migration workbook can no longer be loaded | The go-live lock is on. Only the configuration workbook can still be loaded. |
 | Invalid mobile number | Use a Philippine mobile number: 0917 123 4567, +63 917 123 4567 or 9171234567. |
 | A required field is empty | Fill in every field marked with an asterisk. |
 | Shares must total exactly 100% (now ...%) | Correct the participants' shares so that they total 100%, with exactly one lead. |
@@ -2184,6 +2368,8 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 **How are co-insurance amounts split?** By each insurer's share; the rounding remainder goes to the lead. The same split applies to the bill, the remittance, claims and the reports.
 
 **Can I work on a period that is closed?** No. A soft-closed period accepts postings from the Accounting Manager only; a closed period accepts none until the Accounting Manager reopens it.
+
+**How do I correct my name or contact number?** Select your initials, then **Profile**, and **Edit Profile**. Your user ID, role, branch, designation, reporting line and e-mail address are kept by the System Administrator: ask for those changes.
 
 **How do I report a problem?** Give the menu path, the record number (for example PS-2026-00023), the time to the minute, your user ID, the message and the request ID shown in the error. Never send a password or a two-step code.
 
