@@ -133,7 +133,9 @@ export const roleMenuPermissions = {
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
       // bank payment file layouts and payee bank accounts (write:disbursements)
       "Finance > Bank File Layouts"],
-    commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
+    commission: ["Commission Dashboard", "Agents/Referrer Accounts",
+      // overriding, profit and contingent commission from insurers (read:commission / write:commission)
+      "Insurer Overrides"],
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],
     // the production, claims and renewal registers are not accounting reports (report catalogue roles)

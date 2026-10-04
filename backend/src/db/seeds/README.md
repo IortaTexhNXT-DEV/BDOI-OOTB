@@ -62,5 +62,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `70_security.sql` | reference | security configuration |
 | `75_integrations.sql` | reference | integration connectors in test mode (SMS, Viber, CTPL authentication, LTO feed, insurer API, bank files), message templates, starter bank file layouts (BDO, BPI, Metrobank, Landbank, UnionBank: examples to validate with each bank) and a generic CSV |
 | `sample/75_integrations.sql` | sample | demo COC series (Malayan, Pioneer), insurer payee bank accounts and an insurer API mapping for Malayan |
+| `72_bir_forms.sql` | reference | BIR forms and invoicing: label of the VAT-registered setting that also drives the sales invoice and the 2551Q working paper |
+| `sample/72_override_commission.sql` | sample | two fictional overriding commission agreements (Mercantile production override, Pioneer profit commission on loss ratio) |
 
 No test users are seeded: the tests and the end-to-end checks create their own users.

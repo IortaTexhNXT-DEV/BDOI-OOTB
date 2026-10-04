@@ -946,6 +946,12 @@
    "chapter": "Accounting"
   },
   {
+   "id": "overriding-profit-and-contingent-commission-from-insurers",
+   "title": "Overriding, profit and contingent commission from insurers",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
    "id": "journal-vouchers",
    "title": "Journal vouchers",
    "level": 2,
@@ -1003,6 +1009,48 @@
    "id": "tax-bir-forms-and-returns",
    "title": "Tax: BIR forms and returns",
    "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "withholding-returns-0619-e-1601-eq-and-their-filing-records",
+   "title": "Withholding returns: 0619-E, 1601-EQ and their filing records",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "annual-information-return-1604-e-and-alphalist-of-payees",
+   "title": "Annual information return 1604-E and alphalist of payees",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "percentage-tax-2551q-non-vat-broker-or-agent",
+   "title": "Percentage tax 2551Q (non-VAT broker or agent)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bir-dat-files",
+   "title": "BIR DAT files",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "sales-invoices-eopt-act",
+   "title": "Sales invoices (EOPT Act)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "e-invoicing-eis",
+   "title": "E-invoicing (EIS)",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "cas-books-and-documents",
+   "title": "CAS books and documents",
+   "level": 3,
    "chapter": "Accounting"
   },
   {

@@ -197,6 +197,15 @@ import CloseChecklist from "../module/PeriodEnd/CloseChecklist";
 import TaxCodes from "../module/PeriodEnd/TaxCodes";
 import Bir2307 from "../module/PeriodEnd/Bir2307";
 import PeriodEndReportPage from "../module/PeriodEnd/ReportPage";
+// BIR forms, invoicing and tax; overriding commission from insurers
+import WithholdingReturns from "../module/BirTax/WithholdingReturns";
+import { Alphalist1604E, PercentageTax } from "../module/BirTax/SingleReturn";
+import BirDatFiles from "../module/BirTax/DatFiles";
+import SalesInvoices from "../module/BirTax/SalesInvoices";
+import EisOutbox from "../module/BirTax/EisOutbox";
+import CasPack from "../module/BirTax/CasPack";
+import OverrideAgreements from "../module/BirTax/OverrideAgreements";
+import OverrideComputations from "../module/BirTax/OverrideComputations";
 import BankRecWorkspace from "../module/BankReconciliation/Workspace";
 import BankReconciliations from "../module/BankReconciliation/Reconciliations";
 import BankReconciliationRun from "../module/BankReconciliation/ReconciliationRun";
@@ -1656,6 +1665,17 @@ const Maincomponent = () => {
           <Route path="/accounts/period-end/statements" element={<FinancialStatements />} />
           <Route path="/accounts/tax/2307" element={<Bir2307 />} />
           <Route path="/accounts/tax/reports/:code" element={<PeriodEndReportPage area="tax" />} />
+          {/* BIR forms, invoicing and tax */}
+          <Route path="/accounts/tax/withholding-returns" element={<WithholdingReturns />} />
+          <Route path="/accounts/tax/alphalist-1604e" element={<Alphalist1604E />} />
+          <Route path="/accounts/tax/percentage-tax" element={<PercentageTax />} />
+          <Route path="/accounts/tax/dat-files" element={<BirDatFiles />} />
+          <Route path="/accounts/tax/sales-invoices" element={<SalesInvoices />} />
+          <Route path="/accounts/tax/eis" element={<EisOutbox />} />
+          <Route path="/accounts/tax/cas" element={<CasPack />} />
+          {/* Overriding commission from insurers */}
+          <Route path="/commission/insurer-overrides/agreements" element={<OverrideAgreements />} />
+          <Route path="/commission/insurer-overrides/computations" element={<OverrideComputations />} />
           {/* Bank reconciliation */}
           <Route path="/accounts/bank-reconciliation" element={<BankRecWorkspace />} />
           <Route path="/accounts/bank-reconciliation/reconciliations" element={<BankReconciliations />} />

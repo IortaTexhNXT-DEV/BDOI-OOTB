@@ -88,6 +88,17 @@ export const EVENTS = {
     sample: { amounts: { amount: 15000 }, vars: { batchId: 'INC-SAMPLE', period: '2026-09' } } },
   'incentive.payout': { label: 'Incentives paid', module: 'incentive', amounts: ['amount'], vars: ['batchId', 'period', 'memoRef'],
     sample: { amounts: { amount: 15000 }, vars: { batchId: 'INC-SAMPLE', period: '2026-09', memoRef: 'Incentive payout' } } },
+  // BIR sales invoices (EOPT Act) and overriding commission from insurers (modules/bir, modules/insurer-overrides)
+  'sales_invoice.issue': { label: 'Sales invoice issued (manual service invoice)', module: 'accounting', amounts: ['receivable', 'income', 'vat'], vars: ['invoiceNumber', 'buyer'],
+    contextAccounts: ['income'], sample: { amounts: { receivable: 11200, income: 10000, vat: 1200 }, vars: { invoiceNumber: 'SI-SAMPLE', buyer: 'Sample Client' } } },
+  'sales_invoice.payment': { label: 'Sales invoice payment received', module: 'accounting', amounts: ['cash', 'ewt', 'applied'], vars: ['ackNumber', 'invoiceNumber', 'buyer', 'form2307'],
+    sample: { amounts: { cash: 10200, ewt: 1000, applied: 11200 }, vars: { ackNumber: 'PAR-SAMPLE', invoiceNumber: 'SI-SAMPLE', buyer: 'Sample Client', form2307: '' }, paymentMode: 'bank-transfer' } },
+  'override_commission.accrual': { label: 'Overriding commission receivable booked', module: 'commission', amounts: ['receivable', 'commission', 'vat'],
+    vars: ['computationNumber', 'insurer', 'period', 'commissionType'],
+    sample: { amounts: { receivable: 56000, commission: 50000, vat: 6000 }, vars: { computationNumber: 'OVC-SAMPLE', insurer: 'Sample Insurer', period: '2026-Q3', commissionType: 'Overriding' } } },
+  'override_commission.settlement': { label: 'Overriding commission settled by the insurer', module: 'commission', amounts: ['cash', 'ewt', 'applied', 'difference'],
+    vars: ['computationNumber', 'insurer', 'statementReference', 'form2307'],
+    sample: { amounts: { cash: 51000, ewt: 5000, applied: 56000, difference: 0 }, vars: { computationNumber: 'OVC-SAMPLE', insurer: 'Sample Insurer', statementReference: 'SOA-SAMPLE', form2307: '' }, paymentMode: 'bank-transfer' } },
 };
 for (const e of Object.values(EVENTS)) {
   if (!e.sameAs) continue;

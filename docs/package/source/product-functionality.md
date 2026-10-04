@@ -352,6 +352,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Commission line statuses Accrued, Eligible, Approved, Paid, Reversed; clawback on return premium.
 - Agents/Referrer Accounts with type (Agent, Sub-agent, External), level, net payable, withholding tax type and bank account; Generate payout creates the payout voucher.
 - Commission Dashboard with accounting and management views.
+- Overriding, profit and contingent commission from insurers (Commission > Insurer Overrides): agreements per insurer with basis production volume, loss ratio or growth, period, lines of business and tiers (slab or banded); computation per period from production and claims (or the insurer's claims figure); approval by a second user posts the receivable, commission income and output VAT; sales invoice to the insurer; settlement against the insurer's statement with cash, creditable withholding and any difference.
 
 ![Commission Dashboard](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-commission-dashboard.png)
 
@@ -456,6 +457,12 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - BIR Form 2307: Issued by us (tax withheld on payments to agents, referrers and suppliers) and Received (tax withheld by insurers and clients); certificates per payee and quarter numbered from the CWT series, printed on the BIR layout; cancel with a reason.
 - VAT Summary: vatable revenue, output VAT, input VAT and net VAT payable per month or quarter, the working paper for the VAT return.
 - SAWT, QAP, SLSP Sales and SLSP Purchases in the BIR column order, as CSV, Excel or PDF.
+- Withholding Returns: 0619-E per month and 1601-EQ per quarter per ATC on the BIR layout (PDF and Excel), reconciled with the QAP and the ledger withholding accounts, with filing records (date filed, reference, amount paid, penalties, amended returns); annual 1604-E with the alphalist of payees (schedules 3 and 4).
+- Percentage Tax 2551Q working paper for a non-VAT broker or agent (rate `bir.percentage_tax_rate`, default 3%).
+- BIR DAT Files for the QAP, SAWT, SLSP sales and purchases and the 1604-E alphalist (BIR Alphalist Data Entry module v7.x and RELIEF layouts, version shown on screen).
+- Sales Invoices under the EOPT Act and RR 7-2024 for commission and fees, with every required field, sequential numbering within the registered serial range, cancellation with a reason and payment acknowledgements as supplementary documents.
+- E-Invoicing (EIS): e-invoice payloads, signing placeholder, outbox with status and retry, test mode with a fake provider, live adapter configured by settings; switched off until the broker's BIR certification.
+- CAS Books and Documents: loose-leaf books per month with running page numbers, system description and controls, backup procedure, audit trail extract.
 - Tax codes (Master > Finance > Taxation): VAT output and input 12%, zero-rated, exempt, expanded withholding with ATC (for example WI139, WC139, WI515), final withholding, DST, LGT, premium taxes, each with rate, GL account and effective date.
 
 ![BIR Form 2307](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-tax-2307.png)
@@ -464,9 +471,9 @@ Every business event posts a balanced journal through its posting rule. On a co-
 |---|---|
 | Philippine specifics | All of the above; BIR settings for the withholding agent's TIN, registered name and address |
 | Personas | Accounting, Accounting Manager |
-| Key reports | VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, BIR Form 2307 register |
+| Key reports | VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, BIR Form 2307 register, 0619-E, 1601-EQ, 1604-E, 2551Q, DAT files, sales book and the other loose-leaf books |
 | Controls | Certificates kept and cancelled with a reason, not deleted |
-| Integrations | Files for validation in the BIR tools; the system does not file returns |
+| Integrations | DAT files for validation in the BIR tools; EIS connector (switched off until certification); the system does not file returns |
 
 ## Reinsurance
 

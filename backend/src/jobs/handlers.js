@@ -131,3 +131,8 @@ export async function smsPaymentReminders() {
   if (!(await tableExists('message_templates'))) return { skipped: 'message templates missing' };
   return (await import('../modules/integrations/index.js')).smsPaymentReminders();
 }
+/** EIS outbox (Accounts > Tax > E-Invoicing): send queued e-invoices to the BIR EIS and retry failures. Disabled by default. */
+export async function eisOutbox() {
+  if (!(await tableExists('eis_submissions'))) return { skipped: 'eis_submissions table missing' };
+  return (await import('../modules/bir/eis.js')).processOutbox();
+}

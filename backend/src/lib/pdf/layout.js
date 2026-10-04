@@ -5,7 +5,7 @@
  *
  * Spec: { title, number, subtitle, params, meta: [[label, value]], sections: [...], letterhead, generatedAt,
  *   generatedBy, format, footerNote | footer, pageSize: 'A4' | 'A3' | 'LETTER', orientation: 'portrait' | 'landscape',
- *   autoFit (reports: shrink the font, then A3) }
+ *   autoFit (reports: shrink the font, then A3), pageNumbering: { label, start } (running page numbers of loose-leaf books) }
  * Sections: { heading, rows: [[label, value]], columns: 2 } | { heading, table: { columns, rows, widths?, totals?,
  *   totalRow?, fontSize? } } | { heading, text } | { heading, signatures: ['Prepared by' | { label, name, title, image }] }
  *   | { note } | { spacer: points } | { pageBreak: true }
@@ -141,7 +141,9 @@ export class DocRenderer {
       p.line(this.M, 38, this.W - this.M, 38, { color: COLORS.rule, width: 0.6 });
       if (this.company) p.text(this.M, 28, this.company, { size: 7, bold: true, color: COLORS.muted });
       if (gen) p.text(this.M, 19, gen, { size: 7, color: COLORS.muted });
-      const pg = `Page ${i + 1} of ${total}`;
+      // loose-leaf books number their pages on through the year: spec.pageNumbering = { label, start }
+      const pn = this.spec.pageNumbering;
+      const pg = pn ? `${pn.label ? `${pn.label} ` : ''}page ${pn.start + i} (${i + 1} of ${total})` : `Page ${i + 1} of ${total}`;
       p.text(this.W - this.M - textWidth(pg, 7), 28, pg, { size: 7, color: COLORS.muted });
     });
   }

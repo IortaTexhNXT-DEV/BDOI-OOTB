@@ -56,6 +56,10 @@ export const TRANSACTION_TABLES = [
   'work_tasks',
   // integrations: CTPL authentication of each cover, bank payment batches and their lines
   'ctpl_authentications', 'bank_payment_batches', 'bank_payment_batch_lines',
+  // BIR forms and invoicing: return filing records, sales invoices and their payments, EIS outbox, loose-leaf book prints
+  'bir_return_filings', 'sales_invoices', 'sales_invoice_lines', 'sales_invoice_payments', 'eis_submissions', 'cas_book_prints',
+  // overriding commission from insurers: computations and settlements (the agreements are configuration)
+  'override_computations', 'override_settlements',
 ];
 
 /**
@@ -109,6 +113,8 @@ export const MASTER_CONFIG_TABLES = [
   'report_definitions', 'report_schedules', 'scheduled_jobs',
   // integrations: connectors, message templates, insurer API mappings, COC series, bank file layouts, payee bank accounts
   'integration_connectors', 'message_templates', 'insurer_api_mappings', 'coc_series', 'bank_file_layouts', 'payee_bank_accounts',
+  // overriding / contingent commission agreements with insurers and their tiers
+  'override_agreements', 'override_agreement_tiers',
 ];
 
 /**

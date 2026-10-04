@@ -1,0 +1,2 @@
+# Expected BIR DAT files: byte for byte, CR LF line ends kept
+*.DAT -text
