@@ -2,15 +2,20 @@
 
     python3 refresh.py ../05_Delivery/*.docx
 """
-import os, subprocess, sys, time
+import os, shutil, socket, subprocess, sys, tempfile, time
 import uno
 from com.sun.star.beans import PropertyValue
 
 def prop(n, v):
     p = PropertyValue(); p.Name = n; p.Value = v; return p
 
-port = 2002
-proc = subprocess.Popen(['soffice', '--headless', '--invisible', '--norestore', f'--accept=socket,host=127.0.0.1,port={port};urp;'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+# a free port and a private LibreOffice profile, so several builds can run side by side without sharing an instance
+with socket.socket() as _s:
+    _s.bind(('127.0.0.1', 0))
+    port = _s.getsockname()[1]
+profile = tempfile.mkdtemp(prefix='bv-soffice-')
+proc = subprocess.Popen(['soffice', f'-env:UserInstallation=file://{profile}', '--headless', '--invisible', '--norestore',
+                         f'--accept=socket,host=127.0.0.1,port={port};urp;'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 ctx = None
 for _ in range(60):
     try:
@@ -36,3 +41,4 @@ try:
 except Exception:
     pass
 proc.wait(timeout=30)
+shutil.rmtree(profile, ignore_errors=True)

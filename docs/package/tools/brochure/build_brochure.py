@@ -301,7 +301,7 @@ r = par.add_run('INSURANCE BROKING PLATFORM FOR THE PHILIPPINES'); set_font(r, 9
 par = add_par(c, after=4, line=1.0)
 r = par.add_run('iNXT '); set_font(r, 40, False, WHITE)
 r = par.add_run('BrokerVerse'); set_font(r, 40, True, WHITE)
-add_par(c, 'Placement, policy servicing, broker accounting and BIR working papers in one system, '
+add_par(c, 'Placement, policy servicing, broker accounting, BIR returns and AML/CFT compliance in one system, '
            'built for Philippine non-life insurance brokers.', 15, False, WHITE, after=14, line=1.15)
 inner = table(c, 1, [0.12, 10.0])
 shade(inner.cell(0, 0), BLUE)
@@ -314,9 +314,9 @@ picture(c, os.path.join(IMG, 's-exec-dashboard.png'), CONTENT - 1.8)
 add_par(c, 'Executive Dashboard: premium, policies, new business, claims, retention and receivables against target.',
         8, False, SKY, before=4, after=0, italic=True)
 spacer(doc, 10)
-stat_tiles(doc, [('854', 'APIs'), ('39', 'reports'), ('16', 'scheduled jobs'), ('7', 'personas'), ('497', 'test cases')])
-add_par(doc, 'Figures of the OOTB release test of 03 and 04 October 2026: 480 of the 497 test cases passed, '
-             'a 23-step policy life cycle passed end to end, and every role was checked on all 173 menu screens.',
+stat_tiles(doc, [('1,291', 'APIs'), ('8', 'connectors'), ('32', 'scheduled jobs'), ('8', 'personas'), ('497', 'test cases')])
+add_par(doc, 'APIs, connectors, jobs and personas of the current build. Release test of 03 and 04 October 2026: 480 of the '
+             '497 test cases passed, a 23-step policy life cycle passed end to end, every role checked on its menu screens.',
         7.8, False, MUTED, WD_ALIGN_PARAGRAPH.CENTER, before=5, after=0)
 page_break(doc)
 
@@ -398,9 +398,9 @@ add_par(doc, 'Endorsements, claims and renewals run on the issued policy. Collec
 
 features = [
     ('Sales and quotation',
-     'Prospects with bulk upload, Quick Quote and Compare Insurers for packaged products, and a five-step motor '
-     'quotation with CTPL and Auto Passenger PA. The server re-prices every quotation from the configured rates. '
-     'The client approves online through a signed link.'),
+     'Prospects with assignment rules, dealer programmes for brand-new vehicles, Quick Quote and Compare Insurers, '
+     'and a five-step motor quotation with CTPL. The server re-prices every quotation and applies the acceptance '
+     'rules. The client approves online through a signed link.'),
     ('Placement with insurers',
      'Request for Quotation (broker slip) to several insurers, offers and declines recorded, Compare offers with the '
      'best offer and market capacity. Placement Slip firm order with each insurer’s confirmation; shares total '
@@ -414,15 +414,15 @@ features = [
      'Coverage changes are priced again; additional premium is billed and return premium is credited and netted '
      'on the insurer’s next remittance.'),
     ('Claims',
-     'Claim registration with the Preliminary Loss Advice to the insurer, adjuster follow-up, settlement by maker '
-     'and approval by a second Claims user, co-insurer shares, claims paid through the broker, claim letters on the '
-     'letterhead.'),
+     'Claim registration with the Preliminary Loss Advice to the insurer, document checklist with reminders, motor '
+     'repairs and letters of authority, settlement by maker and approval by a second Claims user, co-insurer shares, '
+     'claims paid through the broker.'),
     ('Renewals',
      'Renewal pipeline 90 days ahead, notices at 60, 30 and 15 days, renewal batches of up to 500 policies, '
      'Renewal Queue, At-Risk Policies, Negotiations, Lapse Management with win-back campaigns, Retention Analytics.'),
     ('Billing and official receipts',
-     'Premium invoices on issue, endorsement and renewal. Official receipts from the OR series, posted only by '
-     'Accounting after verifying the payment. Receipt and invoice PDFs e-mailed to the client. Payment links '
+     'Premium and instalment invoices, official receipts posted only by Accounting after verifying the payment, '
+     'EOPT sales invoices for commission and fees, post-dated cheques. PDFs e-mailed to the client. Payment links '
      'through PayMongo or Dragonpay.'),
     ('Collections and credit control',
      'Collections with ageing (current, 1-30, 31-60, 61-90, over 90 days) and daily reminders. Instalment Plans, '
@@ -450,8 +450,8 @@ features2 = [
      'settlement and insurer payment voucher. Direct bill: commission debit notes with 12% VAT, collection net of '
      '10% EWT.'),
     ('Commission',
-     'Commission Rate Matrix by insurer, product, line and policy type. Accrued at issue, payable to referrers when '
-     'the premium is fully collected, paid by voucher less withholding tax, clawed back on return premium.'),
+     'Commission Rate Matrix by insurer, product, line and policy type. Paid to licensed referrers when the premium is '
+     'fully collected, by voucher or bank file less withholding tax. Overriding commission and incentive programmes.'),
     ('General ledger and period end',
      'Posting rules turn each business event into a balanced journal. Journal, Correction and Reversal JV with '
      'approval, Recurring Journals, Month-End Close with checklist, Year-End Close and Financial Statements.'),
@@ -459,23 +459,23 @@ features2 = [
      'Bank statements imported in BDO, BPI, Metrobank or generic layout, six matching rules, adjustments, stale '
      'cheques, reconciliation approved by the Accounting Manager. Insurer statements imported with a differences report.'),
     ('BIR tax',
-     'BIR Form 2307 issued by the broker and received from insurers and clients, VAT Summary, SAWT, QAP, SLSP Sales '
-     'and SLSP Purchases. Tax codes carry rate, BIR ATC and GL account.'),
+     'BIR Form 2307, 0619-E, 1601-EQ, 1604-E and 2551Q reconciled to the ledger, VAT Summary, SAWT, QAP, SLSP and '
+     'their DAT files, EOPT sales invoices, the EIS connector and the CAS books pack.'),
     ('Reinsurance',
      'Treaties (quota share, surplus, excess of loss, stop loss) with approval, cession tracking and bordereaux, '
      'claims recovery, reinsurer statement reconciliation and treaty analytics.'),
-    ('Incentives',
-     'Incentive programmes for account executives on premium, policy count, renewal rate or conversion. '
-     'Calculations approved by a second Accounting user, statements per person, accrual and payment through posting rules.'),
+    ('AML/CFT and IC compliance',
+     'Client onboarding, risk rating and EDD, list screening, covered and suspicious transaction alerts, cases and '
+     'AMLC report files. Licence register, insurer authority check, complaints register and IC working papers.'),
     ('Reports and dashboards',
-     '39 catalogue reports on screen, in Excel, CSV or PDF on the company letterhead, with scheduled delivery by '
-     'e-mail. Executive, Sales, Processing, Claims and Commission dashboards with live figures.'),
+     'Catalogue reports in Excel, CSV or PDF on your letterhead, a Report Builder for ad hoc questions, a BI extract, '
+     'live dashboards, and My Work: each person\u2019s items, team, tasks and calendar.'),
     ('Security and control',
-     'Seven roles checked by the server on every request, two-step verification, lockout and password policy, '
-     'Authority Matrix, Delegations, Segregation of Duties, Access Reviews and an Audit Trail with before and after values.'),
+     'Eight roles checked by the server on every request, two-step verification, Authority Matrix, Segregation of '
+     'Duties, Access Reviews, masking of personal identifiers by role and an Audit Trail with before and after values.'),
     ('Data privacy',
-     'Consent Register per purpose, Data Subject Requests register with due dates, personal data export for access '
-     'and portability, and anonymisation once the retention period of the records has passed.'),
+     'Consent per purpose, Data Subject Requests with due dates, export and anonymisation, encryption of TIN, ID '
+     'and bank numbers, a breach register on the NPC 72-hour clock, and masking of test copies.'),
 ]
 grid = table(doc, 0, [(CONTENT - 0.3) / 2, 0.3, (CONTENT - 0.3) / 2])
 for i in range(0, len(features2), 2):
@@ -495,9 +495,9 @@ c = t.cell(0, 0); shade(c, NAVY); margins(c, 0.4, 0.5, 0.4, 0.5)
 par = add_par(c, first=True, after=6)
 r = par.add_run('NEW IN THIS RELEASE'); set_font(r, 8.5, True, SKY); letterspace(r, 30)
 inner = table(c, 1, [5.6, 0.3, 5.6, 0.3, 5.4])
-news = [('Approval notifications', 'Every maker-checker flow tells the people who can approve it, and the maker hears of the approval or rejection with the reason.'),
-        ('Documents by e-mail', 'Official receipts and premium invoices e-mailed to the client with the PDF attached; debit notes and policy schedules attached too.'),
-        ('Data privacy registers', 'Consent Register and Data Subject Requests under Master > Data Privacy, with personal data export and anonymisation.')]
+news = [('Integrations', 'SMS and Viber, CTPL authentication, insurer APIs and bank payment files through one monitored outbox. Delivered in test mode; each partner certifies its side.'),
+        ('Your brand everywhere', 'Theme, logo and sign-in page; branded documents, reports and e-mails; e-signatures mapped to the documents they sign.'),
+        ('Compliance built in', 'AML/CFT toolkit, IC registers and BIR returns with DAT files. Your compliance officer and tax adviser confirm the settings.')]
 for k, (title, body) in enumerate(news):
     ic = inner.cell(0, k * 2)
     add_par(ic, title, 10, True, WHITE, first=True, after=2, line=1.0)
@@ -505,7 +505,7 @@ for k, (title, body) in enumerate(news):
 page_break(doc)
 
 # ===== Page 5: personas and Philippine features =====
-section_title(doc, 'Seven personas', 'Built around the people who do the work',
+section_title(doc, 'Eight personas', 'Built around the people who do the work',
               'Each user signs in with a personal ID and sees only the menus of the role. The server applies the same '
               'permissions on every request, and the person who enters a transaction cannot approve it.')
 personas = [
@@ -516,8 +516,8 @@ personas = [
      'Request for Quotation to the market, offer comparison, Placement Slips, policy issue, endorsements, renewal '
      'approvals, motor tariff and products, reinsurance.'),
     ('Operations', 'Client servicing',
-     'Clients and their policies in one view, endorsement requests, payment capture for verification, Open Items '
-     'worklist of expiring policies and pending payments.'),
+     'Clients and their policies in one view, client onboarding, endorsement requests, cover notes, payment capture '
+     'for verification, and My Work for everything due.'),
     ('Claims', 'Claims officers',
      'Claims Dashboard, registration with the insurer notice, adjuster follow-up, settlement with a second approver, '
      'claim letters, reinsurance recoveries.'),
@@ -528,8 +528,11 @@ personas = [
      'Approves month-end and year-end close and bank reconciliations, reopens periods, posts into soft-closed '
      'periods, reviews the close status.'),
     ('System Administrator', 'IT and set-up',
-     'Users and roles, company and letterhead, insurers and credit terms, number series, posting rules, '
-     'configuration, schedules and the audit trail.'),
+     'Users and roles, theme and branding, integrations, number series, posting rules, configuration, '
+     'go-live data load, schedules and the audit trail.'),
+    ('Compliance Officer', 'AML/CFT',
+     'Client due diligence and EDD approval, screening hits and lists, transaction alerts, AML cases and the AMLC '
+     'report files.'),
 ]
 t = table(doc, 0, [4.6, CONTENT - 4.6])
 for i, (role, who, what) in enumerate(personas):
@@ -548,32 +551,32 @@ ph = [
      ['CTPL 1-year and 3-year tariff per vehicle class in the motor template',
       'CTPL inclusive of taxes and never discounted',
       'Auto Passenger PA priced per seat',
-      'Certificate number and authentication code on the policy']),
+      'CTPL authentication and COC series through the provider connector']),
     ('Taxes on premium',
      ['DST 12.5%, LGT 0.75%, VAT 12%, FST 2% on fire and IAR',
       'Taxes per line of business and LGU rates per city',
       'Premium taxes booked to their own accounts, due to insurers',
       'Return premium reverses the taxes']),
     ('BIR outputs',
-     ['BIR Form 2307 issued and received, CWT series',
-      'VAT Summary for the VAT return',
-      'SAWT, QAP, SLSP Sales and Purchases in BIR column order',
-      'EWT codes with ATC, for example WI139, WC139, WI515']),
-    ('Insurance Commission records',
-     ['Registers of slips, placements, policies, claims and renewals',
-      'Premium due to insurers kept apart from commission income',
-      'Remittance terms per insurer and Remittance Ageing',
-      'Reports in Excel, CSV and PDF for examination']),
+     ['BIR Form 2307, 0619-E, 1601-EQ, 1604-E and 2551Q',
+      'SAWT, QAP, SLSP and their BIR DAT files',
+      'EOPT sales invoices and the EIS connector',
+      'CAS books pack: loose-leaf books, system description']),
+    ('IC and AMLA',
+     ['Licence register; commission held for unlicensed agents',
+      'Insurer certificate of authority checked at placement',
+      'Complaints register (RA 11765), IC working papers',
+      'AML/CFT: risk rating, screening, CTR and STR files']),
     ('Data Privacy Act',
      ['Consent per purpose with notice version and channel',
-      'Data subject requests numbered DSR- with due dates',
-      'Personal data export and anonymisation with retention rules',
-      'Role-based access, audit trail, signed document links']),
+      'Data subject requests with due dates, export, anonymisation',
+      'Identifiers masked by role and encrypted at rest',
+      'Breach register on the NPC 72-hour clock']),
     ('Local formats',
-     ['PHP amounts and Asia/Manila business time',
-      'TIN, 4-digit ZIP code, Philippine mobile numbers',
+     ['Regions, provinces, cities and barangays (PSGC)',
+      'TIN, ZIP codes, Philippine mobile numbers, holidays',
       'PhilSys ID, UMID, passport and other KYC IDs',
-      'Bank statement layouts for BDO, BPI and Metrobank']),
+      'Bank statement and payment file layouts']),
 ]
 cw = (CONTENT - 0.5) / 3
 t = table(doc, 0, [cw, 0.25, cw, 0.25, cw])
@@ -627,8 +630,8 @@ add_par(doc, '**Configure, do not customise.** BrokerVerse is fitted to the brok
         9.2, False, TEXT, after=8, line=1.18)
 sizes = [
     ('8', 'weeks', 'Small broker', 'One office, up to 25 users, up to 10 insurers, up to 5,000 in-force policies.', 'Go-live at the start of week 7; hypercare weeks 7 and 8.'),
-    ('12', 'weeks', 'Medium broker', 'Up to 3 offices, 26 to 75 users, up to 25 insurers, up to 25,000 in-force policies.', 'Go-live at the start of week 10; hypercare weeks 10 to 12.'),
-    ('16-20', 'weeks', 'Large broker', 'More than 3 offices and 75 users, many insurers, more than 25,000 in-force policies.', 'Go-live at the start of week 15 (20-week plan); hypercare to week 20.'),
+    ('12', 'weeks', 'Medium broker', 'Up to 3 offices, 26 to 100 users, up to 25 insurers, up to 25,000 in-force policies.', 'Go-live at the start of week 10; hypercare weeks 10 to 12.'),
+    ('16-20', 'weeks', 'Large broker', 'More than 3 offices and 100 users, many insurers, more than 25,000 in-force policies.', 'Go-live at the start of week 15 (20-week plan); hypercare to week 20.'),
 ]
 cw = (CONTENT - 0.5) / 3
 t = table(doc, 1, [cw, 0.25, cw, 0.25, cw])
@@ -653,10 +656,10 @@ spacer(doc, 10)
 t = table(doc, 1, [CONTENT])
 c = t.cell(0, 0); shade(c, GREYBG); margins(c, 0.25, 0.4, 0.25, 0.4); cell_border(c, 'left', NAVY, 24)
 add_par(c, 'What OOTB means', 10, True, NAVY, first=True, after=2)
-add_par(c, 'The broker uses the delivered screens, workflows, reports and printed documents. Customisation of screens, '
-           'reports or documents and new integrations (insurer systems, core banking, bank payment files, SMS, BIR '
-           'eFPS or eBIRForms) are outside the OOTB scope and are handled as change requests, estimated and priced '
-           'before any work starts.', 8.8, False, TEXT, after=0, line=1.15)
+add_par(c, 'The broker uses the delivered screens, workflows, reports, documents and connectors. Each connector (SMS, '
+           'CTPL provider, insurer, bank, BIR EIS) goes live when its partner accepts the interface. Customisation and new '
+           'kinds of integration (core banking, eFPS) are change requests, estimated and priced before any work starts.',
+        8.8, False, TEXT, after=0, line=1.15)
 page_break(doc)
 
 # ===== Page 7: support and why iorta =====
@@ -711,12 +714,12 @@ spacer(doc, 14)
 kicker(doc, 'Why iorta TechNXT')
 heading(doc, 'A finished product, documented and tested', 15, after=6)
 why = [
-    ('Built for Philippine broking', 'CTPL tariff, premium taxes, BIR working papers, IC records and the Data Privacy Act are part of the product, not a project.'),
+    ('Built for Philippine broking', 'CTPL, premium taxes, BIR returns and EOPT invoices, AML/CFT, IC registers and the Data Privacy Act are part of the product, not a project.'),
     ('Tested before you see it', '497 test cases, a 634-test business rule regression on PostgreSQL and a full UAT cycle of 371 business steps from set-up to month-end close.'),
-    ('Documented for your team', 'A 186-page user manual, seven role decks, a reports book, architecture, compliance matrix, data migration, training and support documents.'),
+    ('Documented for your team', 'A user manual opened on each screen with F1, role decks, requirements, process flows, test plans, reports book and support runbooks.'),
     ('Configuration over code', 'Settings, masters, posting rules and the Product Configurator change the system. Upgrades stay simple because the code is the same for every broker.'),
     ('Accounting that closes', 'Every event posts through a posting rule; maker-checker, period locks, bank reconciliation and month-end checklist give the auditors their trail.'),
-    ('Open and portable', 'React, Node.js and PostgreSQL with permissively licensed components; 854 APIs documented in OpenAPI; runs on AWS, Azure or your own servers.'),
+    ('Open and portable', 'React, Node.js and PostgreSQL with permissively licensed components; 1,291 APIs documented in OpenAPI; runs on AWS, Azure or your own servers.'),
 ]
 cw = (CONTENT - 0.3) / 2
 t = table(doc, 0, [cw, 0.3, cw])
@@ -769,10 +772,11 @@ spacer(doc, 12)
 t = table(doc, 1, [7.0, CONTENT - 7.0])
 picture(t.cell(0, 0), os.path.join(IMG, 'logo.png'), 5.2, WD_ALIGN_PARAGRAPH.LEFT)
 c = t.cell(0, 1); valign(c, 'center')
-add_par(c, 'iNXT BrokerVerse, OOTB edition, version 1.0. Product facts and figures are taken from the system and its '
-           'release test of 03 October 2026. Timelines, service levels and prices are confirmed in the proposal and '
-           'the agreements. BrokerVerse produces records and working papers; filings with the BIR, the Insurance '
-           'Commission and the National Privacy Commission remain with the broker.',
+add_par(c, 'iNXT BrokerVerse, OOTB edition, brochure of 04 October 2026. Product facts are taken from the system; test '
+           'figures from the release test of 03 October 2026. Timelines, service levels and prices are confirmed in the '
+           'proposal and the agreements. BrokerVerse produces records and working papers; filings with the BIR, the '
+           'Insurance Commission, the AMLC and the National Privacy Commission, partner certifications and tax advice '
+           'remain with the broker and its partners.',
         7.3, False, MUTED, WD_ALIGN_PARAGRAPH.LEFT, first=True, after=0, line=1.15)
 
 doc.save(OUT)

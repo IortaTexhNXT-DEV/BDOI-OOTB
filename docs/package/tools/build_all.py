@@ -18,8 +18,10 @@ front-end packages, the touchpoints workbook a database built with the migration
 data dictionary its own pipeline in data-dictionary/. The test cases and the reports book workbooks have no builder.
 """
 import os
+import shutil
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PKG = os.path.dirname(HERE)
@@ -92,15 +94,19 @@ DOCUMENTS = [
     ('documentation-pack-index.md', MANAGEMENT, 'BrokerVerse_OOTB_Documentation_Pack_Index', None),
 ]
 
-# Sales material built without a text source (python-docx, python-pptx, a browser), run with --sales.
+# Sales material built without a Word source (python-docx, python-pptx, a browser), run with --sales; the plain-text
+# prospect e-mails are generated from source/prospect-emails.md.
 # The two-page brochure takes its cropped screen pictures from brochure/img.
+# soffice runs with a private profile so that it never shares an instance with another build running at the same time.
+LO_PROFILE = '-env:UserInstallation=file://' + os.path.join(tempfile.gettempdir(), f'bv-soffice-sales-{os.getpid()}')
 SALES_BUILDS = [
+    ['python3', 'build_prospect_emails_txt.py'],
     ['python3', 'brochure/build_brochure.py', os.path.join(PKG, SALES, 'iNXT_BrokerVerse_Brochure.docx')],
-    ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', os.path.join(PKG, SALES),
+    ['soffice', LO_PROFILE, '--headless', '--convert-to', 'pdf', '--outdir', os.path.join(PKG, SALES),
      os.path.join(PKG, SALES, 'iNXT_BrokerVerse_Brochure.docx')],
     ['python3', 'onepager/build_onepager.py'],
     ['python3', 'build_sales_deck.py'],
-    ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', os.path.join(PKG, SALES),
+    ['soffice', LO_PROFILE, '--headless', '--convert-to', 'pdf', '--outdir', os.path.join(PKG, SALES),
      os.path.join(PKG, SALES, 'iNXT_BrokerVerse_Client_Presentation.pptx')],
 ]
 
@@ -163,6 +169,7 @@ def main(args):
     if '--sales' in flags:
         for cmd in SALES_BUILDS:
             run(cmd)
+        shutil.rmtree(LO_PROFILE.split('file://', 1)[1], ignore_errors=True)
 
 
 if __name__ == '__main__':

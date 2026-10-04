@@ -1,19 +1,20 @@
 ---
 title: Prospect E-mail Templates
 subtitle: iNXT BrokerVerse OOTB
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CFO=Chief financial officer; DPA=Data Privacy Act of 2012; IC=Insurance Commission; OOTB=Out of the box; PHT=Philippine time (UTC+8); UAT=User acceptance test; VAT=Value-added tax
+change: New compliance-led introduction; texts updated for AML/CFT, the IC registers, BIR forms and EOPT invoices, integrations and dealer programmes; partner onboarding in the welcome e-mail; plain-text copy generated from this source
+acronyms: AMC=Annual Maintenance Contract; AML=Anti-money laundering; AMLC=Anti-Money Laundering Council; EOPT=Ease of Paying Taxes Act; CTPL=Compulsory third party liability; BIR=Bureau of Internal Revenue; CFO=Chief financial officer; DPA=Data Privacy Act of 2012; IC=Insurance Commission; OOTB=Out of the box; PHT=Philippine time (UTC+8); UAT=User acceptance test; VAT=Value-added tax
 ---
 
 # How to use these templates
 
 ## Purpose
 
-These are the e-mails the iorta TechNXT sales team sends to a Philippine non-life insurance broker, from the first introduction to the welcome after signing. Each template gives its purpose, when to send it, subject line options, the body with placeholders, and the attachments. A plain-text copy for pasting into an e-mail client is kept next to this document (`Prospect_Email_Templates.txt`).
+These are the e-mails the iorta TechNXT sales team sends to a Philippine non-life insurance broker, from the first introduction to the welcome after signing. Each template gives its purpose, when to send it, subject line options, the body with placeholders, and the attachments. A plain-text copy for pasting into an e-mail client is kept next to this document (`Prospect_Email_Templates.txt`); it is generated from this source by `tools/build_prospect_emails_txt.py`, so the two never differ.
 
 ## Placeholders
 
@@ -41,7 +42,8 @@ These are the e-mails the iorta TechNXT sales team sends to a Philippine non-lif
 
 | File | Use |
 |---|---|
-| iNXT_BrokerVerse_Brochure.pdf | Short overview for a first contact or a referral |
+| iNXT_BrokerVerse_One_Page_Brochure.pdf | One-page summary for a first e-mail or a trade event |
+| iNXT_BrokerVerse_Brochure.pdf | Two-page overview for a first contact or a referral |
 | iNXT_BrokerVerse_Product_Functionality.pdf | Module-by-module functionality, after a meeting |
 | iNXT_BrokerVerse_Client_Presentation.pdf | The deck shown in the meeting or the demo |
 | iNXT_BrokerVerse_Commercial_Proposal_Rate_Card.pdf | Commercial proposal and rate card |
@@ -53,6 +55,7 @@ These are the e-mails the iorta TechNXT sales team sends to a Philippine non-lif
 | Step | Template | When |
 |---|---|---|
 | 1 | Cold introduction (small or large broker) | Day 0 |
+| 1a | Compliance-led introduction | Day 0, instead of step 1 when the contact is the compliance officer or the CFO and a regulatory change is the trigger |
 | 2 | Follow-up 1 | Day 4 to 5 if no reply |
 | 3 | Follow-up 2 | Day 10 to 12 if no reply, then pause 60 days |
 | 4 | Meeting request | When the prospect replies with interest, or after a referral |
@@ -88,7 +91,7 @@ Subject line options:
 
 > Dear [Mr./Ms.] [Surname],
 > I am [Your name] of iorta TechNXT. We publish iNXT BrokerVerse, a broking platform built for Philippine non-life brokers.
-> Smaller brokers we speak with usually keep policies in one place, receipts and remittances in spreadsheets, and the books in a separate package. iNXT BrokerVerse keeps them in one system: quotation and placement with your insurers, the policy, the official receipt, the remittance to each insurer, commission, the month-end close and the BIR working papers (Form 2307, VAT Summary, SAWT, QAP, SLSP).
+> Smaller brokers we speak with usually keep policies in one place, receipts and remittances in spreadsheets, and the books in a separate package. iNXT BrokerVerse keeps them in one system: quotation and placement with your insurers, the policy, the official receipt and the EOPT sales invoice, the remittance to each insurer, commission, the month-end close and the BIR forms (2307, 0619-E, 1601-EQ and the alphalists with their DAT files).
 > For a broker of up to 25 users the subscription starts at PHP 3,200.00 per user per month, exclusive of VAT, and a typical implementation takes 8 weeks.
 > Would a 30-minute call in the week of [Date] be useful? I can send our two-page brochure beforehand.
 > Respectfully,
@@ -113,9 +116,34 @@ Subject line options:
 
 > Dear [Mr./Ms.] [Surname],
 > I am [Your name] of iorta TechNXT. We publish iNXT BrokerVerse, a broking platform for Philippine non-life brokers that runs the front office and the broker's accounting on one ledger.
-> For a broker of [Company]'s size, three points usually matter most. Premium collected is held per insurer and per co-insurance share, and remitted by approved remittance with approval levels by amount. Every money and configuration change goes through maker-checker, with signing limits from your Authority Matrix and a full audit trail. The month-end close runs a checklist that will not pass without approved bank reconciliations, and the BIR working papers come from the same ledger.
+> For a broker of [Company]'s size, three points usually matter most. Premium collected is held per insurer and per co-insurance share, and remitted by approved remittance with approval levels by amount. Every money and configuration change goes through maker-checker, with signing limits from your Authority Matrix and a full audit trail. The month-end close runs a checklist that will not pass without approved bank reconciliations, and the BIR returns and alphalists come from the same ledger. The same system runs your AML/CFT programme and keeps the Insurance Commission registers.
 > It can run on AWS or Azure in Singapore, with a Philippine hosting partner, or in your own data centre.
 > I would welcome 30 minutes with you and your finance lead in the week of [Date] to see whether it fits your plans.
+> Respectfully,
+> [Your name]
+> [Title], iorta TechNXT
+> [Mobile] | [E-mail]
+
+## Compliance-led introduction
+
+| Item | Detail |
+|---|---|
+| Purpose | Open a conversation through a regulatory obligation the broker must meet (AML/CFT, EOPT invoicing, IC complaints handling, data privacy) |
+| Send to | Compliance officer or CFO; copy the president when the compliance officer reports to the board |
+| When | Day 0 of the sequence, in place of the cold introduction |
+| Attachments | None |
+
+Subject line options:
+
+- AML/CFT and the policy record in one system, [Company]
+- EOPT invoices and BIR returns from your broking ledger
+- [Company]: licences, complaints and AMLC reports in one place
+
+> Dear [Mr./Ms.] [Surname],
+> I am [Your name] of iorta TechNXT. We publish iNXT BrokerVerse, a broking platform for Philippine non-life brokers.
+> Compliance teams we speak with often keep KYC, screening results and covered transaction reports apart from the policy and receipt records. In iNXT BrokerVerse they are one record: client onboarding with a risk rating and enhanced due diligence, screening against the lists you load, daily covered and suspicious transaction monitoring, cases and the AMLC report files, with every decision in the audit trail. The same system issues EOPT sales invoices and keeps the licence and complaints registers.
+> Your compliance officer and tax adviser stay in charge of the thresholds, codes and filings; the system keeps the records and the deadlines.
+> Would 30 minutes in the week of [Date] be useful to look at [Pain point]?
 > Respectfully,
 > [Your name]
 > [Title], iorta TechNXT
@@ -157,7 +185,7 @@ Subject line options:
 
 > Dear [Mr./Ms.] [Surname],
 > I have not heard back and understand this may not be a priority now. I will not follow up further this month.
-> If it helps later: iNXT BrokerVerse covers placement with several insurers, co-insurance, official receipts, remittance, commission, bank reconciliation, the month-end close and BIR Form 2307 in one system, priced per user for Philippine brokers.
+> If it helps later: iNXT BrokerVerse covers placement with several insurers, co-insurance, official receipts and sales invoices, remittance, commission, bank reconciliation, the month-end close, the BIR returns, AML/CFT and the Insurance Commission registers in one system, priced per user for Philippine brokers.
 > If the timing is better next quarter, a one-line reply with a month is enough and I will contact you then.
 > Respectfully,
 > [Your name]
@@ -387,7 +415,8 @@ Subject line options:
 > Welcome. On behalf of iorta TechNXT, thank you for your trust. I would like to introduce [Project manager name], who will lead your implementation and will be your main contact from today. I remain your account manager.
 > Kick-off: [Date], [Time], [venue or link], about 2 hours. We would like your project owner and one key user from each team (sales, placement, servicing, claims, accounting) to attend.
 > At the kick-off we will confirm the plan ([8 / 12 / 16 to 20] weeks to the end of hypercare), the steering committee and the weekly status meeting, and go through the data we need.
-> Data drives the timeline, so the data request list and the upload templates are attached now. The first items we need by [Date] are: the user list with roles and e-mail addresses, the insurer list with commission rates and remittance terms, and your chart of accounts.
+> Data drives the timeline, so the data request list and the upload templates are attached now. The first items we need by [Date] are: the user list with roles and e-mail addresses, the insurer list with commission rates, remittance terms and IC certificates of authority, and your chart of accounts.
+> Partners also take time. Please start now the contracts and contacts we will need for the connections you chose: [SMS gateway, CTPL authentication provider, insurers for the API connection, banks for the payment files, BIR EIS enrolment]. Each partner tests and accepts its side of the connection during onboarding.
 > We look forward to working with you.
 > Respectfully,
 > [Your name], Account Manager

@@ -1,12 +1,13 @@
 ---
 title: BrokerVerse OOTB Commercial Proposal Note
 subtitle: Pricing rationale, market positioning and commercial terms
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; BSP=Bangko Sentral ng Pilipinas; CR=Change request; Dev=Development environment; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; TCO=Total cost of ownership; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+change: Review of the new modules against the price list: all included in the software; proposed optional lines for their activation and for connector go-live, to confirm by management
+acronyms: AMC=Annual Maintenance Contract; AML=Anti-money laundering; CFT=Countering the financing of terrorism; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; CTPL=Compulsory third party liability; BIR=Bureau of Internal Revenue; BSP=Bangko Sentral ng Pilipinas; CR=Change request; Dev=Development environment; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; TCO=Total cost of ownership; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # Purpose and scope
@@ -17,7 +18,7 @@ The figures come from the companion workbook `BrokerVerse_Commercials_and_Pricin
 
 > All prices are in PHP and exclude 12% VAT. USD figures are for reference only, at PHP 62.75 per USD (BSP reference rate, 25 September 2026). Figures marked as estimates or assumptions must be confirmed before a binding quotation.
 
-BrokerVerse OOTB covers sales and quotation, placement with insurers, policy issuance and servicing, endorsements, claims, renewals, billing, official receipts, remittance to insurers, commission, general ledger, bank and insurer reconciliation, BIR tax reports, reinsurance and incentives. The price list prices the product as delivered. Changes to it are change requests, priced at the day rates in this note.
+BrokerVerse OOTB covers sales and quotation, placement with insurers, policy issuance and servicing, endorsements, claims, renewals, billing, official receipts and sales invoices, remittance to insurers, commission, general ledger, bank and insurer reconciliation, BIR forms and returns, the AML/CFT toolkit, the IC and NPC compliance registers, the integration connectors, dealer programmes, branding, reinsurance and incentives. The price list prices the product as delivered. Changes to it are change requests, priced at the day rates in this note.
 
 # Market context
 
@@ -87,7 +88,7 @@ The implementation fee is calculated, not quoted as a flat figure:
 
 Lines of business drive effort because each one needs products and covers in the product configurator, rating and tax lines (documentary stamp tax, VAT or premium tax, local government tax and fire service tax where they apply), policy and endorsement document templates, insurer commission rates and its own UAT test cases. A motor-only broker and a broker writing motor, fire, marine, casualty, engineering and bonds do not need the same effort.
 
-The implementation includes configuration, data load by the broker with the standard upload templates (about 40 templates are delivered with the product), the training days included for the tier, UAT support, go-live support and hypercare of 2 weeks (Small), 3 weeks (Medium) or 4 to 6 weeks (Large and Enterprise), extended to cover the first month-end close. The man-day counts are estimates for the OOTB version.
+The implementation includes configuration, data load by the broker with the go-live configuration and migration workbooks and the standard upload templates, the training days included for the tier, UAT support, go-live support and hypercare of 2 weeks (Small), 3 weeks (Medium) or 4 to 6 weeks (Large and Enterprise), extended to cover the first month-end close. The man-day counts are estimates for the OOTB version.
 
 # Model B: subscription
 
@@ -117,6 +118,21 @@ For the reference user counts, the cumulative cost of subscription passes the cu
 | Enterprise (400) | PHP 57,817,674.00 | PHP 70,118,348.00 | Year 4 |
 
 Totals include implementation or onboarding and exclude VAT and optional items. This gives the broker a clear choice: subscription for lower Year 1 cash and flexibility, perpetual for lower cost over a planning horizon of four years or more.
+
+# New modules and the price list
+
+The release adds the AML/CFT toolkit, the IC and NPC compliance registers, the BIR pack (0619-E, 1601-EQ, 1604-E, 2551Q, DAT files, EOPT sales invoices, the EIS connector, the CAS books pack, overriding commission), the integration framework with its connectors (SMS and Viber, CTPL authentication and the LTO feed, insurer API, bank payment files), dealer programmes and the other distribution functions, My Work, the Report Builder, and branding with e-signatures. The price list was checked against them:
+
+| Item | Before this review | Finding | Proposal (to confirm by management) |
+|---|---|---|---|
+| AML/CFT toolkit, IC compliance registers, BIR pack, dealer programmes, branding, My Work, Report Builder | Not named in the software list | Missing from the list, not priced as add-ons | Name them in the software list; keep them in every package at no module price |
+| Insurer API, SMS gateway | Given as examples of an "additional integration, standard" at PHP 320,000.00 | Priced as an add-on although the connectors are now delivered | Remove them from the integration examples; the integration lines cover only new kinds of interface |
+| Taking a delivered connector live with a partner | Not priced | Missing | Connector go-live, 5 man-days: PHP 80,000.00 per connector (one SMS gateway, the CTPL provider and LTO feed, one insurer, one bank layout, or the BIR EIS) |
+| Set-up of the regulatory modules | Not in the base implementation man-days, which were sized before these modules | Missing | Activation of the AML/CFT toolkit, 8 man-days: PHP 130,000.00; IC compliance registers, 6 man-days: PHP 100,000.00; BIR pack, 8 man-days: PHP 130,000.00 |
+| Dealer programme set-up | Not priced | Missing | 3 man-days: PHP 50,000.00 per programme |
+| Client brand pack | Not priced | Missing | 2 man-days: PHP 30,000.00 per pack |
+
+Each proposed line follows the existing structure: man-days times the blended rate of PHP 16,100.00, rounded to PHP 10,000.00, and its man-days are inputs of the Optional Services drivers in the workbook, marked as assumptions. The alternative is to add the same man-days to the base implementation of each tier; management decides which (OOTB Strategy and Playbook, decisions 11 and 12). Partner certification fees, screening list subscriptions and the broker's contracts with SMS, CTPL, bank and EIS partners are not part of these prices.
 
 # Positioning against the market
 
@@ -208,7 +224,10 @@ Work above 60 man-days is a separate project with its own statement of work.
 | Additional environment hosted by iorta TechNXT | PHP 11,000.00 a month |
 | Training beyond the included days | PHP 30,000.00 per trainer day |
 | Data migration beyond the standard templates | PHP 240,000.00 per legacy source |
-| Additional integration, standard or complex | PHP 320,000.00 or PHP 720,000.00 |
+| Additional integration, standard or complex (a new kind of interface) | PHP 320,000.00 or PHP 720,000.00 |
+| Connector go-live with a partner (to confirm by management) | PHP 80,000.00 per connector |
+| Activation of the AML/CFT toolkit, IC compliance registers, BIR pack (to confirm by management) | PHP 130,000.00, PHP 100,000.00, PHP 130,000.00 |
+| Dealer programme set-up; client brand pack (to confirm by management) | PHP 50,000.00 per programme; PHP 30,000.00 per pack |
 | Additional line of business after go-live | PHP 100,000.00 per line |
 | On-site day in Metro Manila | PHP 20,000.00 per consultant day |
 | 24x7 Severity 1 support, per year | Small PHP 240,000.00; Medium PHP 480,000.00; Large PHP 900,000.00; Enterprise PHP 1,500,000.00 |

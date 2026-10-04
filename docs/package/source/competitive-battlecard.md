@@ -1,13 +1,14 @@
 ---
 title: Competitive Battlecard
 subtitle: INTERNAL: not for clients
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
+change: Position, proof points and limits updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, integrations, dealer programmes, branding, My Work and the Report Builder
 open_item: Win and loss evidence, client references and any named competitor positioning to be verified before use
-acronyms: AE=Account executive; AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; CTPL=Compulsory Third Party Liability; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; OR=Official receipt; PHP=Philippine peso; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; SoD=Segregation of duties; TCO=Total cost of ownership; UAT=User acceptance test
+acronyms: AE=Account executive; AML=Anti-money laundering; AMLC=Anti-Money Laundering Council; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; KYC=Know your customer; AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; CTPL=Compulsory Third Party Liability; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; OR=Official receipt; PHP=Philippine peso; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; SoD=Segregation of duties; TCO=Total cost of ownership; UAT=User acceptance test
 ---
 
 # Purpose and handling
@@ -27,7 +28,7 @@ Rules for using it:
 
 ## Our position in one paragraph
 
-iNXT BrokerVerse OOTB keeps the broker's policy, money and books in one record, built for Philippine non-life broking: premium taxes by LGU, CTPL tariff, KYC on motor, co-insurance, remittance to insurers by share, direct bill, commission with withholding, bank and insurer reconciliation, month-end close and the BIR working papers (Form 2307, VAT Summary, SAWT, QAP, SLSP). It is delivered as a configured product, not a project, with a published price list, an 8-week plan for a small broker and hosting in Singapore or the Philippines.
+iNXT BrokerVerse OOTB keeps the broker's policy, money and books in one record, built for Philippine non-life broking: premium taxes by LGU, CTPL tariff and authentication, client onboarding with risk-based AML/CFT due diligence, screening and AMLC report files, co-insurance, remittance to insurers by share, direct bill, commission with withholding and the licence check on agents, bank and insurer reconciliation, bank payment files, month-end close, the BIR forms and DAT files (2307, 0619-E, 1601-EQ, 1604-E, 2551Q, SAWT, QAP, SLSP), EOPT sales invoices and the CAS books pack, the IC registers and working papers, and the Data Privacy Act functions with a breach register. Connectors to SMS gateways, the CTPL provider, insurers and banks run through one monitored outbox, and each broker's brand prints on every screen, document and e-mail. It is delivered as a configured product, not a project, with a published price list, an 8-week plan for a small broker and hosting in Singapore or the Philippines.
 
 ## Strong fit
 
@@ -35,11 +36,13 @@ iNXT BrokerVerse OOTB keeps the broker's policy, money and books in one record, 
 - Brokers with several insurers, co-insurance or direct bill business, where the remittance and reconciliation work is heavy.
 - Brokers preparing for an IC examination, a BIR audit or a Data Privacy Act review who need records, controls and an audit trail.
 - Brokers whose key staff hold the process in spreadsheets and who worry about a person leaving.
+- Brokers who must stand up an AML/CFT programme, IC complaints handling or EOPT invoicing and have no tool for it.
+- Captive agencies and brokers of motor dealers and banks: dealer programmes, fleets and bank endorsement letters.
 
 ## Weak fit (qualify out or set expectations early)
 
 - A broker that wants every screen to match its current process exactly: OOTB means configuration, and changes are priced change requests.
-- A broker whose main need is a direct API to each insurer: there is none in the OOTB version.
+- A broker whose main need is a live API to many insurers on day one: the insurer connector is in the product, but each insurer goes live separately with its own endpoint and acceptance during onboarding.
 - Life, pre-need or HMO business: the product is built for non-life broking.
 - A buyer who needs a native mobile application or Filipino screens now.
 - A broker that only needs a contact list and quote tracking: a CRM or spreadsheet may be enough for them.
@@ -81,6 +84,8 @@ Excel workbooks for the policy register, renewals, collections and remittance; a
 | BIR working papers from the same ledger | BIR Form 2307, VAT Summary, SAWT, QAP | 0:45 Close and tax |
 | Renewals do not depend on one person | Renewal Queue with notices at 60, 30 and 15 days | 0:29 Renewals |
 | Controls | Authority Matrix, Segregation of Duties, Audit Trail | 0:51 Controls and data privacy |
+| Compliance without a second tool | AML dashboard, client risk rating and EDD, transaction alerts; licence register with the commission hold; complaints register | Optional segments: AML/CFT; IC compliance |
+| Everyone knows what to do today | Operations > My Work: items by category, team view, tasks and calendar | Optional segment: My Work |
 
 ## Landmines to set
 
@@ -134,8 +139,8 @@ Each insurer's own portal or agent system to quote and issue motor, CTPL and sim
 
 ## Watch out
 
-- Do not position BrokerVerse as a replacement for an insurer's CTPL authentication. The insurer's or government system remains; BrokerVerse records the certificate number and authentication code.
-- There is no insurer API in the OOTB version. Exchange is by file and e-mail; an insurer API is a priced change request.
+- Do not position BrokerVerse as a replacement for the CTPL authentication provider. The IC-accredited provider authenticates; BrokerVerse sends the request through its connector, keeps the COC series and records the authentication code.
+- The insurer connector is delivered in test mode. Each insurer goes live with its own endpoint, credentials and acceptance during onboarding, priced per connector; do not promise a date for an insurer before it has agreed.
 
 # Alternative 3: regional or global broking systems
 
@@ -157,11 +162,14 @@ Compare against Philippine work the broker does every day, not against feature c
 |---|---|
 | Are DST, VAT, LGT by city or municipality and FST computed on the quotation and the bill? | Premium Taxes & LGU Rates applied on every quotation, policy, endorsement and renewal |
 | Is the CTPL tariff per vehicle class held in the system and protected from discount? | Motor template with 1-year and 3-year CTPL, read-only and never discounted |
-| Are Form 2307, VAT Summary, SAWT, QAP and SLSP produced from the ledger in BIR column order? | Accounts > Tax |
+| Are Form 2307, 0619-E, 1601-EQ, 1604-E and 2551Q, with the DAT files of the alphalists, produced from the ledger and reconciled? | Accounts > Tax > Withholding Returns, BIR DAT Files |
+| Are sales invoices issued under the EOPT Act, and is the CAS books pack produced? | Accounts > Tax > Sales Invoices, CAS Books and Documents |
+| Is there an AML/CFT programme with screening, transaction monitoring and AMLC report files? | Compliance menu |
+| Are IC licences, insurer certificates of authority and complaints tracked with deadlines? | Compliance > Insurance Commission (compliance registers) |
 | Are Philippine bank statement formats delivered for reconciliation? | BDO, BPI, Metrobank and generic formats |
 | Is the implementation priced and planned before signature? | Rate Card; 8, 12 or 16 to 20 weeks by size |
 | Can the data stay in the Philippines? | Local partner or broker-hosted options |
-| Is consent and data subject request handling in the product? | Master > Data Privacy |
+| Is consent and data subject request handling in the product, with a breach register on the 72-hour clock? | Master > Data Privacy; Breach Register |
 
 ## Discovery questions
 
@@ -175,7 +183,7 @@ Compare against Philippine work the broker does every day, not against feature c
 | Point | Show | Reference |
 |---|---|---|
 | Philippine premium taxes on a quotation | Order Summary of a quotation with VAT 12%, DST of PHP 0.50 per PHP 4.00 or fraction, LGT 0.75% and CTPL | Demo Script 0:09 Prospect and quotation |
-| BIR outputs | Form 2307, VAT Summary, SAWT, QAP | Demo Script 0:45 Close and tax |
+| BIR outputs | Form 2307, 1601-EQ with its reconciliation, DAT files, a sales invoice | Demo Script 0:45 Close and tax; optional segment BIR and EOPT |
 | Price certainty | Package totals over 5 years | Rate Card; Price Book workbook |
 | Regulatory mapping | Philippine Regulatory Compliance Matrix | Package document |
 
@@ -240,7 +248,8 @@ An in-house development team, a local software house, or a low-code platform, bu
 | Signal | Response | Proof |
 |---|---|---|
 | "Next year" | Offer the workshop now: a sized plan and a price valid 90 days | Rate Card validity |
-| An audit or IC examination is coming | Show the audit trail, registers and controls | Demo Script 0:51 Controls and data privacy |
+| An audit or IC examination is coming | Show the audit trail, the IC registers, the AML programme and the controls | Demo Script 0:51 Controls and data privacy; optional segments |
+| A new rule takes effect (EOPT invoicing, AMLC reporting, complaints handling) | Show the screen that meets it and who confirms the settings | Optional segments; FAQ |
 | A key person is leaving or retiring | Show renewals, remittance and close running without one person's files | Demo Script 0:29 Renewals; 0:45 Close and tax |
 | A system contract is ending | Plan back from the end date; small broker 8 weeks | Implementation Approach |
 
@@ -258,10 +267,11 @@ An in-house development team, a local software house, or a low-code platform, bu
 
 | Limit | Honest position |
 |---|---|
-| No insurer API | Files and e-mail; insurer API as a change request |
-| No IC-format report | Figures from financial statements and production reports |
+| Partner interfaces in test mode | SMS, CTPL, LTO, insurer, bank file and EIS connectors are delivered in test mode; each partner certifies its interface during onboarding |
+| IC reports are working papers | The accountant confirms the IC annual statement figures and transcribes them onto the IC form set; the broker files |
 | No native mobile app | Web application for desktop and laptop browsers |
-| No anti-money laundering screening | KYC data on motor; no sanctions or PEP screening |
+| AML lists not supplied | The broker loads the lists it is entitled to use or contracts a screening provider; the AMLC file layout is confirmed by the compliance officer |
+| Tax treatment | The tax adviser confirms ATCs, rates, invoice wording and VAT treatment; the system does not e-file |
 | No external penetration test yet | Recommended before go-live; committed yearly once hosted |
 | No ISO/IEC 27001 or SOC 2 certificate of iorta TechNXT | Cloud providers hold theirs; iorta TechNXT plan [to confirm] |
 | Client references | [to confirm which clients iorta TechNXT may name] |

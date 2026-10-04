@@ -1,14 +1,14 @@
 ---
 title: OOTB Strategy and Playbook
 subtitle: iNXT BrokerVerse
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-change: Initial issue for management review
+change: Product at a glance, boundary, standard integrations, modules, optional services and roadmap updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, the integration framework, dealer programmes, branding, My Work and the Report Builder; new decisions on pricing of the new modules
 open_item: Owner decisions listed in the last chapter
-acronyms: AM=Account manager; AMC=Annual Maintenance Contract; AML=Anti-money laundering; API=Application programming interface; ARR=Annual recurring revenue; BIR=Bureau of Internal Revenue; CAB=Change advisory board; CEO=Chief executive officer; CR=Change request; DPA=Data Processing Agreement; Dev=Development environment; DPO=Data protection officer; DSO=Days sales outstanding; eFPS=Electronic Filing and Payment System; IC=Insurance Commission; KPI=Key performance indicator; L1/L2/L3=Support levels 1, 2 and 3; LOB=Line of business; LoA=Letter of Award; MSA=Master Services Agreement; NDA=Non-disclosure agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PM=Project manager; RACI=Responsible, Accountable, Consulted, Informed; RCA=Root-cause analysis; SaaS=Software as a service; SH=Sales head; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SMS=Short message service; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+acronyms: AM=Account manager; AMLC=Anti-Money Laundering Council; CTPL=Compulsory third party liability; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; LTO=Land Transportation Office; AMC=Annual Maintenance Contract; AML=Anti-money laundering; API=Application programming interface; ARR=Annual recurring revenue; BIR=Bureau of Internal Revenue; CAB=Change advisory board; CEO=Chief executive officer; CR=Change request; DPA=Data Processing Agreement; Dev=Development environment; DPO=Data protection officer; DSO=Days sales outstanding; eFPS=Electronic Filing and Payment System; IC=Insurance Commission; KPI=Key performance indicator; L1/L2/L3=Support levels 1, 2 and 3; LOB=Line of business; LoA=Letter of Award; MSA=Master Services Agreement; NDA=Non-disclosure agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PM=Project manager; RACI=Responsible, Accountable, Consulted, Informed; RCA=Root-cause analysis; SaaS=Software as a service; SH=Sales head; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SMS=Short message service; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # Purpose and how to use this playbook
@@ -29,7 +29,7 @@ It is one document for five functions:
 
 ## Sources and assumptions
 
-The facts in this playbook come from the iorta TechNXT documentation package of 03 October 2026: the price book and Rate Card, the Commercial Proposal Note, the Negotiation Playbook, the contract pack, the Implementation Approach and Plan, the Data Migration and Cutover Plan, the Training Plan, the Production Support Approach and Standards, the Architecture, Infrastructure, Security and Privacy document, the Product Functionality document, the Test Summary Report and the sales collateral.
+The facts in this playbook come from the iorta TechNXT documentation package of 04 October 2026: the price book and Rate Card, the Commercial Proposal Note, the Negotiation Playbook, the contract pack, the Implementation Approach and Plan, the Data Migration and Cutover Plan, the Training Plan, the Production Support Approach and Standards, the Architecture, Infrastructure, Security and Privacy document, the Product Functionality document, the Test Summary Report and the sales collateral.
 
 > Where this playbook makes a recommendation or an assumption that is not stated in those documents, it is marked **Assumption** or **Proposed**. Targets marked Proposed are starting values for management to confirm.
 
@@ -51,38 +51,44 @@ Five rules follow from that definition:
 
 ## The product at a glance
 
-| Item | iNXT BrokerVerse OOTB release 1.0 |
+| Item | iNXT BrokerVerse OOTB, current build |
 |---|---|
-| Scope | Full broking cycle and broker accounting: prospects to renewals, billing to month-end close, BIR working papers |
-| Roles | 7: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager |
-| Screens | 173 menu screens checked per role in the release test |
-| Reports | 39 catalogue reports in Excel, CSV and PDF, plus dashboards and document outputs |
-| APIs | 868 registered API routes |
-| Scheduled jobs | 18 jobs in Asia/Manila time |
-| Number series | 61 document number series |
-| Release test | 497 test cases (486 passed, 2 failed, 3 blocked, 6 not run, after the re-test of 03 October 2026); 717 automated business rule tests; a UAT cycle of 371 business steps |
+| Scope | Full broking cycle and broker accounting: prospects to renewals, billing to month-end close; BIR forms and returns with DAT files, EOPT sales invoices and the CAS books pack; AML/CFT programme; IC and NPC compliance registers; distribution (lead assignment, channels, dealer programmes, fleets, marine open covers, facultative placements, campaigns); integrations; My Work; Report Builder and BI extract; broker branding and e-signatures |
+| Roles | 8: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager, Compliance Officer (AML/CFT) |
+| Philippine masters | Regions, provinces, cities and municipalities, barangays (PSGC 2Q 2026), ZIP codes, banks, ID types, salutations, holidays, the IC list of insurers |
+| Reports | Catalogue reports in Excel, CSV and PDF on the broker's letterhead, dashboards, the Report Builder over curated datasets, a nightly BI extract |
+| APIs | 1,291 documented API operations (OpenAPI file of the current build) |
+| Scheduled jobs | 32 jobs in Asia/Manila time, 35 with the IC and NPC compliance package |
+| Connectors | SMS (Semaphore-style, Globe Labs-style, generic), Viber business messages, CTPL authentication and COC series, LTO feed, insurer API with a mapping per insurer, bank payment files (starter layouts for BDO, BPI, Metrobank, Landbank, UnionBank and a generic CSV), BIR EIS, AML screening provider; all delivered in test mode or switched off |
+| Release test | Release 1.0: 497 test cases (486 passed, 2 failed, 3 blocked, 6 not run, after the re-test of 03 October 2026); 717 automated business rule tests; a UAT cycle of 371 business steps. The Test Strategy, Test Plan and Test Summary Report give the figures of the current build |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
-| Documentation | User manual of 186 pages, seven role decks, reports book, data dictionary, technical reference |
+| Documentation | User manual with a Help panel per screen (F1), role decks, reports book, data dictionary, technical reference, BRD, process flows, test strategy and plan, traceability matrix, dependency map, schedules and support runbooks |
+| In progress | Sales activity log, quote wizard covers and risk fields from the Product Configurator, supplier BIR Form 2307 and fixed asset disposal, being completed for the next release |
 
 ## The product boundary
 
 | Layer | What it contains | Who pays | Who supports |
 |---|---|---|---|
-| Product | All delivered modules, screens, workflows, reports, printed documents, upload templates and the standard integrations | Licence fee or subscription | iorta TechNXT, under the AMC or the subscription |
-| Configuration | Company, users and roles, insurers, products and tariff, commission, taxes, chart of accounts, posting rules, number series, approvals, schedules, e-mail texts | Implementation fee | The broker's System Administrator, with L2 support |
+| Product | All delivered modules, screens, workflows, reports, printed documents, upload templates and the standard integrations and connectors | Licence fee or subscription | iorta TechNXT, under the AMC or the subscription |
+| Configuration | Company, users and roles, insurers, products and tariff, commission, taxes, chart of accounts, posting rules, number series, approvals, schedules, e-mail and SMS texts, AML risk factors and rules, branding | Implementation fee | The broker's System Administrator, with L2 support |
+| Activation of regulatory modules and connector go-live | Workshops and set-up of the AML/CFT toolkit, the IC compliance registers and the BIR pack; going live with each SMS gateway, CTPL provider, insurer, bank or the BIR EIS | Optional service lines of the Rate Card (to confirm by management) | iorta TechNXT; the partner certifies its own side |
 | Change requests merged into the product line | Changes that iorta TechNXT decides to add to the product for all clients | Day rates, once, by the client who asked | iorta TechNXT, under the AMC or the subscription |
 | Change requests not merged | Client-specific changes | Day rates | iorta TechNXT, at day rates after the 30-day warranty |
-| Services | Implementation, data migration, training, hosting, integrations, extra environments, exit assistance | Rate Annex | iorta TechNXT |
-| Outside the offer | Regulatory filings, tax and legal advice, hardware and networks, data cleansing | Not applicable | The broker |
+| Services | Implementation, data migration, training, hosting, new integrations beyond the delivered connectors, extra environments, exit assistance | Rate Annex | iorta TechNXT |
+| Outside the offer | Regulatory filings (BIR, IC, AMLC, NPC), tax and legal advice, partner certifications, screening list subscriptions, hardware and networks, data cleansing | Not applicable | The broker and its partners |
 
 ## Standard integrations in OOTB
 
 - Outgoing e-mail through the broker's SMTP mailbox.
-- Bank statement files: formats for BDO, BPI and Metrobank and a generic layout are delivered; a new format is added in Master > Finance > Bank Statement Formats without code.
+- Bank statement files: formats for BDO, BPI and Metrobank and a generic layout; a new format is added in Master > Finance > Bank Statement Formats without code.
+- Bank payment files (bulk credit, InstaPay, PESONet) with the bank's status file read back; starter layouts for BDO, BPI, Metrobank, Landbank and UnionBank and a generic CSV, each validated with the bank during onboarding.
 - Insurer statement files in CSV or Excel, matched in Insurer Reconciliation with a column mapping per insurer.
+- The integration framework: one outbox and inbox with retries, an attempt log and signed inbound messages, with the connectors SMS, Viber, CTPL authentication, LTO feed and insurer API.
+- The BIR EIS connector for e-invoices (switched off until the broker is enrolled) and the BIR DAT files of the alphalists.
+- The AML screening provider connector, besides the screening lists the broker uploads.
 - PayMongo and Dragonpay payment links.
 
-Everything else (insurer APIs, core banking, bank payment files, SMS gateways, accounting packages, BIR eFPS or eBIRForms, LTO or IC systems, other payment gateways) is a change request or an optional integration.
+Every connector is delivered in test mode or switched off. Going live needs the partner's contract, endpoint and credentials and the partner's acceptance of the interface: iorta TechNXT configures and tests its side, the partner certifies its own. Everything else (core banking, accounting packages, eFPS or eBIRForms e-filing, IC or AMLC portals, other payment gateways, a new kind of connector) is a change request or an optional integration.
 
 # Target market and segments
 
@@ -111,9 +117,10 @@ Non-life gross premiums written reached PHP 149.11 billion in 2025, spread acros
 | Finance head or Accounting Manager | Official receipts, remittance to insurers, bank and insurer reconciliation, month-end close, BIR working papers |
 | Operations head | Quotation to policy turnaround, renewals, endorsements, claims follow-up |
 | IT head | Hosting, data location, security, support, exit |
-| Compliance officer and DPO | Data Privacy Act, audit trail, maker-checker, segregation of duties |
+| Compliance officer and DPO | AML/CFT programme and AMLC reports, IC licences and complaints, Data Privacy Act and breach notification, audit trail, maker-checker, segregation of duties |
+| Head of a captive agency or dealer channel | Dealer programmes, bank endorsement letters, fleets, lead assignment |
 
-Typical triggers (assumption): the end of a contract for the current system, a new BIR requirement, an audit finding, growth that the spreadsheets cannot carry, or a new licence.
+Typical triggers (assumption): the end of a contract for the current system, a new BIR requirement (EOPT invoicing, e-invoicing), an AMLC or IC examination finding, a complaints-handling or breach-notification obligation, growth that the spreadsheets cannot carry, a new dealer or bank partnership, or a new licence.
 
 ## Qualification
 
@@ -127,13 +134,15 @@ A prospect is qualified when the account manager can answer yes to each of these
 
 ## Positioning
 
-iNXT BrokerVerse OOTB at USD 32 to 51 per user per month sits at about 29% of the median price of the global broker systems found (USD 175), which are not localised for Philippine taxes, BIR reports or IC reporting, and at about the per-user price of a generic CRM at its top edition, while including placement, remittance, accounting, reconciliation and BIR working papers. The message is a localised, full broking and accounting platform priced for a market where most brokers earn under PHP 100 million in commission.
+iNXT BrokerVerse OOTB at USD 32 to 51 per user per month sits at about 29% of the median price of the global broker systems found (USD 175), which are not localised for Philippine taxes, BIR returns, EOPT invoicing, AMLC reporting or the IC registers, and at about the per-user price of a generic CRM at its top edition, while including placement, remittance, accounting, reconciliation and BIR working papers. The message is a localised, full broking and accounting platform priced for a market where most brokers earn under PHP 100 million in commission.
 
 # The offer
 
 ## Modules
 
-All delivered modules are included in every package: dashboards; prospects and clients; Quick Quote and Compare Insurers; motor quotation and customer approval; request for quotation and placement; policy issuance and servicing; endorsements and cancellations; claims; renewals; billing, payments and official receipts; collections and credit control; disbursement and petty cash; remittance to insurers and direct bill; commission and referrers; incentives; general ledger and journals; period end; bank reconciliation; insurer reconciliation; BIR tax working papers (Form 2307, VAT Summary, SAWT, QAP, SLSP); reinsurance; Product Configurator; reports; notifications and e-mail; data privacy; administration, security and configuration.
+All delivered modules are included in every package, with no module priced as an add-on: dashboards and My Work; prospects and clients with client onboarding; lead assignment, distribution channels, dealer programmes, fleets, marine open covers, comparison reports and campaigns; Quick Quote and Compare Insurers; motor quotation and customer approval; request for quotation and placement; cover notes; policy issuance and servicing; endorsements and computed cancellations; claims with the document checklist, motor repairs and settlements; renewals; billing, instalment invoices, post-dated cheques, payments and official receipts; collections and credit control; disbursement, accounts payable, bank payment files and petty cash; remittance to insurers and direct bill; commission, referrers and overriding commission from insurers; incentives; general ledger and journals; fixed assets; period end; bank reconciliation; insurer reconciliation; BIR forms and returns (2307, 0619-E, 1601-EQ, 1604-E, 2551Q, VAT Summary, SAWT, QAP, SLSP, DAT files), EOPT sales invoices, the EIS connector and the CAS books pack; the AML/CFT toolkit; the IC and NPC compliance registers; reinsurance and facultative placements; Product Configurator; reports, Report Builder and BI extract; notifications, e-mail, SMS and the integration connectors; data privacy; branding and e-signatures; administration, security, the go-live data workbench and configuration.
+
+The effort to activate the regulatory modules and to take each connector live with its partner is not in the base implementation fee, which was sized before these modules. It is priced as optional service lines (Rate Card, to confirm by management): activation of the AML/CFT toolkit, of the IC compliance registers and of the BIR pack, go-live of each connector, set-up of each dealer programme and of a client brand pack.
 
 ## Commercial models
 
@@ -185,7 +194,7 @@ Year 1 at list for the reference users (Small 15 users and 5 lines of business; 
 
 ## Optional services
 
-Additional environments (PHP 100,000.00 set-up, PHP 11,000.00 a month hosted), training beyond the included days (PHP 30,000.00 per trainer day), data migration beyond the standard templates (PHP 240,000.00 per legacy source), integrations (standard PHP 320,000.00, complex PHP 720,000.00), additional line of business after go-live (PHP 100,000.00), new report or document template (typical PHP 60,000.00), on-site days (PHP 20,000.00), 24x7 Severity 1 support (Small PHP 240,000.00 to Enterprise PHP 1,500,000.00 a year), change requests at day rates (business analyst PHP 18,000.00, developer PHP 16,000.00, QA engineer PHP 12,000.00, project manager PHP 22,000.00, blended PHP 16,100.00). The Service Catalogue and Rate Annex holds the full list.
+Additional environments (PHP 100,000.00 set-up, PHP 11,000.00 a month hosted), training beyond the included days (PHP 30,000.00 per trainer day), data migration beyond the standard templates (PHP 240,000.00 per legacy source), new integrations beyond the delivered connectors (standard PHP 320,000.00, complex PHP 720,000.00), the go-live of a delivered connector with one partner (PHP 80,000.00 per connector, to confirm by management), activation of the AML/CFT toolkit, the IC compliance registers or the BIR pack (PHP 130,000.00, PHP 100,000.00 and PHP 130,000.00, to confirm by management), set-up of a dealer programme (PHP 50,000.00 per programme, to confirm by management) and of a client brand pack (PHP 30,000.00, to confirm by management), additional line of business after go-live (PHP 100,000.00), new report or document template (typical PHP 60,000.00), on-site days (PHP 20,000.00), 24x7 Severity 1 support (Small PHP 240,000.00 to Enterprise PHP 1,500,000.00 a year), change requests at day rates (business analyst PHP 18,000.00, developer PHP 16,000.00, QA engineer PHP 12,000.00, project manager PHP 22,000.00, blended PHP 16,100.00). The Service Catalogue and Rate Annex holds the full list.
 
 # Sales process
 
@@ -193,9 +202,9 @@ Additional environments (PHP 100,000.00 set-up, PHP 11,000.00 a month hosted), t
 
 | # | Stage | Collateral to use | Exit criterion | Owner |
 |---|---|---|---|---|
-| 1 | Target and first contact | Brochure; prospect e-mails (cold introduction small or large broker, follow-ups 1 and 2, LinkedIn note, event invitation) | Meeting agreed | Account manager |
+| 1 | Target and first contact | One-page and two-page brochures; prospect e-mails (cold introduction small or large broker, compliance-led introduction, follow-ups 1 and 2, LinkedIn note, event invitation) | Meeting agreed | Account manager |
 | 2 | First meeting and qualification | Client Presentation; pre-meeting agenda and thank-you e-mails; discovery questions of the Demo Script; FAQ and Objection Handling | Qualified against the five criteria | Account manager |
-| 3 | Demonstration | Demo Script (60 or 30 minutes) on the demo environment with the UAT data set; demo invitation and follow-up e-mails; Mutual NDA if own data is shown | Workshop agreed | Account manager and solution consultant |
+| 3 | Demonstration | Demo Script (60 or 30 minutes, with the optional segments the prospect asks for) on the demo environment with the UAT data set; demo invitation and follow-up e-mails; Mutual NDA if own data is shown | Workshop agreed | Account manager and solution consultant |
 | 4 | Discovery workshop and sizing | Product Functionality document; Regulatory Compliance Matrix; Implementation Approach and Plan; ROI Calculator when finance asks; Architecture document for IT | Size, users, lines of business, hosting and model agreed | Solution consultant |
 | 5 | Proposal | Rate Card; Quick Quote at list with the Validity and Terms sheet; proposal cover e-mail within 5 working days of the workshop; ROI result | Proposal sent | Account manager |
 | 6 | Negotiation | Negotiation Playbook (internal only); negotiation follow-up e-mail; FAQ and Objection Handling | Price and terms agreed within the approval limits | Account manager, sales head |
@@ -395,14 +404,12 @@ The themes below come from the known limits and the "outside OOTB" list of the c
 
 | Theme | Current release | Candidate direction |
 |---|---|---|
-| Bank payment files | Transfers approved and their bank result recorded; no bank payment file | Payment file formats for the main Philippine banks, starting with the banks of the first clients |
-| Insurer APIs | Files and e-mail to insurers; insurer statement files | API connectors for named insurers where the insurer offers an API, as change requests merged into the product |
-| SMS | E-mail and in-app notifications | SMS gateway for renewal notices, payment reminders and sign-in codes |
-| BIR eFPS and eBIRForms | BIR working papers in BIR column order, validated with BIR tools before filing | Output files in the formats the BIR tools accept |
-| IC report formats | Figures from financial statements and production reports; no IC-format report | IC report formats as delivered reports |
+| Partner certification | Connectors delivered for SMS, CTPL, LTO, insurers, banks, BIR EIS and screening, in test mode | A list of partners whose interface was accepted, kept per release, so the next client goes live faster |
+| BIR eFPS and eBIRForms | Returns, alphalists and DAT files prepared and reconciled; the broker validates and files | Follow the BIR formats each year under the AMC; e-filing only if the BIR offers an interface |
+| IC report formats | IC annual statement schedules and production report as working papers (compliance package) | Track the IC form set each year; confirm the account mapping per client chart |
+| AMLC reporting | Report files in the BV-AMLC-TXN 1.0 layout, confirmed by the compliance officer | Align the file with the AMLC's current guidelines once confirmed with a first client |
 | Mobile | Web application for desktop and laptop browsers; mobile layouts not tested | Responsive layouts for key screens first; a mobile application only if demand is shown |
-| Percentage tax | No working paper for a non-VAT broker's percentage tax | Working paper |
-| Anti-money laundering | No transaction monitoring, sanctions or PEP screening | Screening integration or export |
+| In progress | Sales activity log, quote wizard from the Product Configurator, supplier 2307, fixed asset disposal | Complete and release in the next planned release |
 | Security and usability | Session in local storage; two-step enrolment without QR code; moderate advisory on a front-end library; no screen for report schedules; some masters without an Upload button; Filipino screens not available | httpOnly cookie session; QR code enrolment; library upgrade; schedule screen; Upload buttons; translation file |
 | Capacity | No load test run yet | Load test on a production-sized environment before the first Large go-live |
 
@@ -580,6 +587,9 @@ The plan starts on the date management approves this playbook (Day 1). Owners ar
 | Cross-border data concerns | Lost deals with data residency needs | Local partner hosting option in the Philippines |
 | Known limits of the release | Objections in demos | Disclose with the workaround; roadmap themes; change request route |
 | No load test yet | Performance risk for Large clients | Load test before the first Large go-live |
+| Partner certification takes longer than the project | Connectors stay in test mode at go-live | Start partner contracts at kick-off (welcome e-mail); go live without the connector and switch it on after |
+| Regulatory settings taken as advice | Liability if a threshold, code or tax treatment is wrong | Every delivered value is marked for the compliance officer, DPO or tax adviser to confirm; the documents say so |
+| Client brand packs with third-party marks | Trademark exposure | Use only in that client's environments with written permission; never in demos |
 
 # Decisions for the owner
 
@@ -595,3 +605,5 @@ The plan starts on the date management approves this playbook (Day 1). Owners ar
 | 8 | Create the product manager role and the product council | Approve |
 | 9 | Mobile: the FAQ says "not planned in OOTB, to confirm roadmap" | Keep it as a roadmap theme for responsive layouts; no mobile application commitment |
 | 10 | KPI targets marked Proposed | Confirm at the first quarterly business review |
+| 11 | Price lines for the activation of the AML/CFT toolkit, the IC compliance registers and the BIR pack, the go-live of each connector, dealer programme set-up and client brand packs (Rate Card, marked to confirm by management) | Confirm the lines and amounts, or fold them into the implementation fee of the size |
+| 12 | Whether the AML/CFT toolkit, IC compliance registers and BIR pack stay in every package or become paid modules for new clients | Keep them in every package: they are the main local differentiator and a module price would weaken the per-user comparison |

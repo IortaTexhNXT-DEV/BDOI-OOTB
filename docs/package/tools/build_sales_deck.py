@@ -333,7 +333,7 @@ Ask whether there is a topic the audience wants first, for example accounting an
         ('3', 'The platform', 'Module map and the end-to-end journey'),
         ('4', 'Module walk-through', 'From sales and placement to accounting, BIR tax and reinsurance'),
         ('5', 'Controls, data privacy and security', 'Maker-checker, authority limits, approval notifications'),
-        ('6', 'Who does what', 'The seven delivered roles'),
+        ('6', 'Who does what', 'The eight delivered roles'),
         ('7', 'Delivery', 'Technology, deployment, implementation timeline, support'),
         ('8', 'Commercials and next steps', 'Perpetual or subscription, then demo, workshop, proposal'),
     ]
@@ -415,8 +415,10 @@ Read the map from top to bottom: the front office creates the business, the mone
 the finance layer closes the books and files BIR, and everything sits on one set of masters, roles and controls.
 Stress that accounting is inside the product: every business event posts to the general ledger through posting rules
 the broker can see and approve. There is no separate accounting package to reconcile.
-Integrations are deliberately simple: e-mail, payment links (PayMongo, Dragonpay), bank and insurer statement files.
-There is no insurer API; documents and files go to insurers.""")
+Integrations run through one monitored outbox: SMS and Viber, CTPL authentication and the LTO feed, insurer APIs with
+a mapping per insurer, bank payment files, the BIR EIS, plus e-mail, payment links and statement files. Every connector is
+delivered in test mode; each partner accepts its side during onboarding.
+The compliance layer is in the product too: the AML/CFT toolkit, the IC registers and the BIR returns.""")
     layers = [
         ('Front office', NAVY, ['Sales & Marketing\nProspects, Quick Quote,\nQuotations', 'Placement\nBroker Slips,\nPlacement Slips',
                                 'Policy servicing\nIssue, endorsements,\nclient view', 'Claims\nRegistration to\nsettlement',
@@ -425,8 +427,8 @@ There is no insurer API; documents and files go to insurers.""")
                                       'Remittance\nTo insurers,\ndirect bill', 'Commission\nReferrers and\nincentive programmes',
                                       'Reinsurance\nTreaties, cessions,\nrecoveries']),
         ('Finance and compliance', NAVY_DARK, ['General ledger\nPosting rules,\njournals', 'Period end\nMonth-end and\nyear-end close',
-                                               'Reconciliation\nBank and insurer\nstatements', 'BIR tax\n2307, VAT, SAWT,\nQAP, SLSP',
-                                               'Reports\nDashboards and\n39 catalogue reports']),
+                                               'Reconciliation\nBank and insurer\nstatements', 'BIR and AML\nReturns, EOPT,\nAMLC reports',
+                                               'Reports\nDashboards, Report\nBuilder, My Work']),
     ]
     bx, bw, gap = 2.45, 1.62, 0.1
     for r, (lab, col, boxes) in enumerate(layers):
@@ -456,8 +458,8 @@ There is no insurer API; documents and files go to insurers.""")
     # integrations
     rect(s, 11.2, 1.3, 1.63, 5.52, fill=LIGHT, line=LINE, shape=MSO_SHAPE.ROUNDED_RECTANGLE, radius=0.08)
     text(s, 11.25, 1.38, 1.53, 0.3, 'Connects to', size=12, bold=True, color=NAVY, align=PP_ALIGN.CENTER)
-    ints = ['E-mail (SMTP)', 'PayMongo and Dragonpay payment links', 'Bank statement files: BDO, BPI, Metrobank, generic',
-            'Insurer statement files (CSV, XLSX)', 'Reinsurer bordereaux (CSV)', 'Excel, CSV and PDF outputs',
+    ints = ['E-mail (SMTP); SMS and Viber', 'CTPL authentication; LTO feed', 'Insurer APIs; insurer statement files',
+            'Bank payment and statement files', 'BIR EIS and DAT files; AMLC report files', 'PayMongo and Dragonpay links',
             'REST API with OpenAPI']
     for i, t in enumerate(ints):
         text(s, 11.3, 1.8 + i * 0.7, 1.45, 0.66, t, size=10, color=TEXT, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
@@ -702,7 +704,7 @@ Question: who prepares your BIR returns today, in-house or an external accountan
 
     # 16. Reports and dashboards ---------------------------------------------------
     s = d.slide('Reports and dashboards', 'Module walk-through: management information', notes="""
-39 catalogue reports in seven groups, each with a preview on screen and a download as Excel, CSV or PDF with the
+The catalogue reports in seven groups, each with a preview on screen and a download as Excel, CSV or PDF with the
 letterhead. Users see only the reports their role allows.
 Dashboards read live figures: they change as soon as a transaction is saved. The Executive Dashboard compares the
 key figures with targets set in configuration.
@@ -716,7 +718,7 @@ for the workshop.""")
         ('Ledger and period end', 'Journal Register, Trial Balance, Trial Balance Movement, General Ledger Detail, Income Statement, Balance Sheet, Month-End Close Status'),
         ('BIR tax and bank', 'VAT Summary, SAWT, QAP, SLSP Sales and Purchases; Bank Reconciliation Statement, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines, Bank Book'),
     ]
-    text(s, 0.5, 1.2, 6.2, 0.4, '39 catalogue reports', size=16, bold=True, color=NAVY)
+    text(s, 0.5, 1.2, 6.2, 0.4, 'Catalogue reports, plus the Report Builder', size=16, bold=True, color=NAVY)
     for i, (g, body) in enumerate(groups):
         y = 1.65 + i * 0.86
         rect(s, 0.5, y + 0.05, 0.08, 0.7, fill=BLUE)
@@ -732,6 +734,33 @@ for the workshop.""")
                                   ('Preview on screen with totals, then Excel, CSV or PDF on the letterhead. Access by '
                                    'role. The Production Register, Collection Report and Claims Position are generated '
                                    'every morning.', {})]], size=11, anchor=MSO_ANCHOR.MIDDLE)
+
+    # 16b. Compliance, connections and branding ----------------------------------------------
+    s = d.slide('Compliance, connections and your brand', 'Module walk-through: what this release adds', notes="""
+Six areas that a Philippine broker asks about since this release. Each has an optional segment in the Demo Script.
+Keep the honest line for each: the compliance officer confirms the AML thresholds and the AMLC file codes; the
+accountant confirms the IC working papers; the tax adviser confirms ATCs, invoice wording and VAT treatment; each
+partner (SMS gateway, CTPL provider, insurer, bank, BIR EIS) accepts its side of the connection during onboarding.
+The IC and NPC registers come with the compliance package of this release.""")
+    adds = [('AML/CFT toolkit', 'Client onboarding, risk rating and EDD, list screening, covered and suspicious '
+                                'transaction alerts, cases and AMLC report files; a Compliance Officer role'),
+            ('IC and NPC registers', 'Licence register with the commission hold, fit and proper, insurer certificate check, '
+                                     'complaints register (RA 11765), IC working papers, breach register on the 72-hour clock'),
+            ('BIR and EOPT', '0619-E, 1601-EQ, 1604-E and 2551Q reconciled to the ledger, DAT files, EOPT sales invoices, '
+                             'EIS connector, CAS books pack, overriding commission from insurers'),
+            ('Integrations', 'SMS and Viber, CTPL authentication and COC series, LTO feed, insurer APIs, bank payment files; '
+                             'one outbox with retries; delivered in test mode'),
+            ('Distribution', 'Lead assignment, channels, dealer programmes with bank letters, fleets, marine open covers, '
+                             'facultative placements, comparison reports, campaigns'),
+            ('Your brand, your day', 'Theme, logo and sign-in page; branded documents and e-mails; e-signatures; My Work '
+                                     'for each person; Report Builder and BI extract')]
+    for i, (h, b) in enumerate(adds):
+        col, row = i % 3, i // 3
+        x = 0.5 + col * 4.15; y = 1.3 + row * 2.8
+        card(s, x, y, 3.98, 2.6, fill=LIGHT)
+        rect(s, x, y, 3.98, 0.08, fill=BLUE if row == 0 else NAVY)
+        text(s, x + 0.25, y + 0.3, 3.5, 0.5, h, size=15, bold=True, color=NAVY_DARK)
+        text(s, x + 0.25, y + 0.9, 3.5, 1.6, b, size=12)
 
     # 17. Reinsurance ------------------------------------------------------------
     module_slide(d, 'Reinsurance', 'Module walk-through: specialty', [
@@ -874,7 +903,7 @@ notices. iorta TechNXT acts as processor when it hosts or supports.""")
     ], size=11.5, spacing=4)
 
     # 21. Persona view --------------------------------------------------------------
-    s = d.slide('Who does what: the seven delivered roles', 'Persona view', notes="""
+    s = d.slide('Who does what: the eight delivered roles', 'Persona view', notes="""
 The role model is delivered ready to use. Each user holds a role; the menus and the server permissions follow it.
 Referrers and sub-agents do not sign in: Sales & Marketing enter their business and they are paid from the referrer
 master. That keeps the user count, and the licence cost, to the broker's own staff.
@@ -888,8 +917,9 @@ Ask the audience to map their own teams to these roles. The answer drives the us
             ['Operations', 'Client servicing, endorsements, renewals, payment capture, data subject requests', '-'],
             ['Claims', 'Claim registration, follow-up with insurers, settlement, reinsurance recoveries', 'Settlements of another Claims user'],
             ['Accounting', 'Receipts, collections, disbursements, remittance, commission, journals, reconciliation, BIR', 'Vouchers, JVs, remittances, debit notes, incentives'],
-            ['Accounting Manager', 'Everything Accounting does, plus period control', 'Month-end and year-end close, bank and insurer reconciliation, credit control, posting rules']]
-    table(s, 0.5, 1.3, 12.33, rows, [2.3, 5.83, 4.2], size=11.5, row_h=0.62, bold_first=True)
+            ['Accounting Manager', 'Everything Accounting does, plus period control', 'Month-end and year-end close, bank and insurer reconciliation, credit control, posting rules'],
+            ['Compliance Officer', 'AML/CFT: client due diligence, screening, transaction alerts, cases, AMLC report files', 'EDD reviews, screening decisions, cases for filing']]
+    table(s, 0.5, 1.3, 12.33, rows, [2.3, 5.83, 4.2], size=11, row_h=0.55, bold_first=True)
     text(s, 0.5, 6.45, 12.3, 0.4, 'Each role lands on its own dashboard. Roles can be added or adjusted in Master > Generals > '
          'User Management, with Role Permissions and the User Access Matrix for review.', size=11, color=MUTED)
 
@@ -1129,9 +1159,10 @@ Summarise in four points and stop. Each point can be proven in the demo.
 3. Controls the auditor expects, already in the product.
 4. A predictable project and price: configure-not-customise, 8 to 20 weeks, published prices and day rates.
 Evidence to quote: 497 test cases prepared for this release, 480 passed, with the remaining items tracked in the defect
-register; a user manual and role guides for all seven roles; about 40 upload templates for the go-live data.""")
-    why = [('Built for the Philippines', 'VAT, DST, LGT by city, fire service tax, BIR 2307, VAT Summary, SAWT, QAP and SLSP; '
-                                         'BDO, BPI and Metrobank statement formats; PayMongo and Dragonpay; Data Privacy Act functions'),
+register; a user manual opened per screen with F1 and role guides; the go-live data workbench with its workbooks and the
+upload templates.""")
+    why = [('Built for the Philippines', 'Premium taxes by city, BIR returns and DAT files, EOPT invoices, AML/CFT and AMLC '
+                                         'reports, IC registers, CTPL authentication, local bank files, Data Privacy Act functions'),
            ('One system, one ledger', 'Prospect, placement, policy, claims and renewals in the same system as billing, remittance, '
                                       'commission, the general ledger and the month-end close'),
            ('Controls in the product', 'Maker-checker on money and configuration, Authority Matrix, segregation of duties, '
@@ -1140,8 +1171,8 @@ register; a user manual and role guides for all seven roles; about 40 upload tem
                                     'hypercare through the first month-end close'),
            ('Open pricing', 'Published per-user prices on graduated slabs, perpetual or subscription, AMC terms and day rates '
                             'for change requests'),
-           ('Ready to hand over', '497 test cases for this release; user manual and role guides for seven roles; '
-                                  'about 40 upload templates; reports book and data dictionary')]
+           ('Ready to hand over', '497 test cases for release 1.0; user manual with in-screen help and role guides; '
+                                  'go-live data workbench; reports book, support runbooks and data dictionary')]
     for i, (h, b) in enumerate(why):
         col, row = i % 3, i // 3
         x = 0.5 + col * 4.15; y = 1.3 + row * 2.8

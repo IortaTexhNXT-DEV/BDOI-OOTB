@@ -50,7 +50,7 @@ settings, and texts with `<` or `>`.
 * Backend: `backend/src/modules/branding/` (presets, schema, contrast, service, router). `GET /api/branding` is public,
   cached with an ETag (`If-None-Match` answers 304); images are served by `GET /api/branding/assets/:name?v=` (public,
   versioned, sandbox CSP).
-* Front end: `brokerverse/src/theme/runtime/` — `themeEngine.js` sets the `--bv-*` CSS custom properties on `<html>`,
+* Front end: `brokerverse/src/theme/runtime/`: `themeEngine.js` sets the `--bv-*` CSS custom properties on `<html>`,
   `BrandingProvider.jsx` revalidates the branding on every navigation (at most every 15 s), when the tab becomes
   visible and every 5 minutes. `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
   as before when no theme is loaded). A PostCSS step (`brokerverse/scripts/postcss-brand-vars.js`, wired in

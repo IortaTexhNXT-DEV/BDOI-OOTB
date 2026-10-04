@@ -1,11 +1,12 @@
 """Builds BrokerVerse_Commercials_and_Pricing.xlsx (formula driven)."""
+import os
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.workbook.defined_name import DefinedName
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.utils import get_column_letter as L
 
-OUT = '/home/user/BDOI-OOTB/docs/package/02_Commercials/BrokerVerse_Commercials_and_Pricing.xlsx'
+OUT = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '02_Commercials', 'BrokerVerse_Commercials_and_Pricing.xlsx')
 ACC = '03 Oct 2026'
 
 NAVY = '0F4761'
@@ -300,9 +301,15 @@ ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=14)
 for n, lab, v, unit, fmt, basis in [
     ('Env_Setup_Days', 'Additional environment: set-up man-days', 6, 'man-days', '0', 'Estimate: provisioning, deployment, configuration copy, smoke test.'),
     ('Mig_Days_Source', 'Data migration beyond templates: man-days per additional legacy source', 15, 'man-days', '0', 'Estimate: mapping, extraction scripts, 2 trial loads, reconciliation.'),
-    ('Int_Std_Days', 'Additional integration, standard (documented API or file)', 20, 'man-days', '0', 'Estimate: e.g. one insurer API, SMS gateway, payment gateway variant.'),
+    ('Int_Std_Days', 'Additional integration, standard (documented API or file)', 20, 'man-days', '0', 'Estimate: a new kind of interface not covered by the delivered connectors, e.g. a payment gateway variant or an accounting package feed.'),
     ('Int_Cx_Days', 'Additional integration, complex (no API, two-way, or batch reconciliation)', 45, 'man-days', '0', 'Estimate.'),
-    ('Report_Days', 'New report or document template (typical)', 4, 'man-days', '0', 'Estimate: falls in the Small CR band.')]:
+    ('Report_Days', 'New report or document template (typical)', 4, 'man-days', '0', 'Estimate: falls in the Small CR band.'),
+    ('Conn_Golive_Days', 'Go-live of a delivered connector with one partner (to confirm by management)', 5, 'man-days', '0', 'Assumption: SMS gateway, CTPL provider, one insurer API mapping, one bank file layout or the BIR EIS: configuration, credentials check, live test, support of the partner acceptance. To confirm by management.'),
+    ('AML_Act_Days', 'Activation of the AML/CFT toolkit (to confirm by management)', 8, 'man-days', '0', 'Assumption: risk factors and rules workshop with the compliance officer, settings, first list loads, provider set-up, AMLC test file. To confirm by management.'),
+    ('IC_Act_Days', 'Activation of the IC compliance registers (to confirm by management)', 6, 'man-days', '0', 'Assumption: licence and fit and proper register load, insurer certificates, complaints and breach settings, IC statement account mapping to the broker chart. To confirm by management.'),
+    ('BIR_Act_Days', 'Activation of the BIR pack (to confirm by management)', 8, 'man-days', '0', 'Assumption: BIR and EOPT invoice settings with the tax adviser, ATC mapping, DAT file dry run, CAS books pack. To confirm by management.'),
+    ('Dealer_Prog_Days', 'Set-up of one dealer programme (to confirm by management)', 3, 'man-days', '0', 'Assumption: channels, rates, subsidy, bank letter and the first upload. To confirm by management.'),
+    ('Brand_Pack_Days', 'Client brand pack (to confirm by management)', 2, 'man-days', '0', 'Assumption: theme, sign-in picture, document and e-mail branding, e-signature mapping, exported pack. To confirm by management.')]:
     r += 1
     put(ws, r, 1, lab)
     put(ws, r, 2, v, fmt, inp=True)
@@ -925,6 +932,12 @@ items = [
     ('Data migration, additional effort', 'per man-day', '=Blended', None, 'For volume or data-quality work beyond the estimate.'),
     ('Additional integration, standard', 'per integration', '=ROUND(Int_Std_Days*Blended/Round_To,0)*Round_To', 'Int_Std_Days', 'One documented API or file exchange, one direction.'),
     ('Additional integration, complex', 'per integration', '=ROUND(Int_Cx_Days*Blended/Round_To,0)*Round_To', 'Int_Cx_Days', 'Two-way, no API, or batch with reconciliation.'),
+    ('Connector go-live with a partner', 'per connector', '=ROUND(Conn_Golive_Days*Blended/Round_To,0)*Round_To', 'Conn_Golive_Days', 'To confirm by management. A delivered connector (SMS gateway, CTPL provider, one insurer, one bank file layout, BIR EIS) taken live; the partner certifies its own side.'),
+    ('Activation of the AML/CFT toolkit', 'one-time', '=ROUND(AML_Act_Days*Blended/Round_To,0)*Round_To', 'AML_Act_Days', 'To confirm by management. The toolkit is included in the software; this is the set-up effort. The compliance officer confirms the settings and loads the lists.'),
+    ('Activation of the IC compliance registers', 'one-time', '=ROUND(IC_Act_Days*Blended/Round_To,0)*Round_To', 'IC_Act_Days', 'To confirm by management. Registers included in the software; this is the set-up effort.'),
+    ('Activation of the BIR pack', 'one-time', '=ROUND(BIR_Act_Days*Blended/Round_To,0)*Round_To', 'BIR_Act_Days', 'To confirm by management. BIR forms, EOPT invoices, EIS and CAS pack included in the software; the tax adviser confirms the treatment.'),
+    ('Dealer programme set-up', 'per programme', '=ROUND(Dealer_Prog_Days*Blended/Round_To,0)*Round_To', 'Dealer_Prog_Days', 'To confirm by management. Dealer programmes are included in the software; this is the set-up of one programme.'),
+    ('Client brand pack', 'per pack', '=ROUND(Brand_Pack_Days*Blended/Round_To,0)*Round_To', 'Brand_Pack_Days', 'To confirm by management. Branding is included in the software; a pack carrying third-party marks needs the owner\'s written permission.'),
     ('Additional line of business after go-live', 'per line', '=ROUND(Days_per_LOB*Blended/Round_To,0)*Round_To', 'Days_per_LOB', 'Product set-up, rating and tax lines, templates, testing.'),
     ('New report or document template', 'per item (typical)', '=ROUND(Report_Days*Blended/Round_To,0)*Round_To', 'Report_Days', 'Small CR band; firm price after the impact note.'),
     ('On-site day (Metro Manila)', 'per consultant day', '=Rate_Onsite', None, 'Outside Metro Manila: travel, lodging and meals at cost.'),
@@ -953,7 +966,8 @@ sec(op, r, 'Included in the standard implementation (no extra charge)', 6)
 for line in ['Configuration of the company, branches, users and roles, insurers, commission rates, chart of accounts, banks and the included lines of business.',
              'Data load using the standard upload templates (about 50 templates in docs/package/05_Delivery/Upload_Templates), with the broker supplying clean data.',
              'Training days included for the tier (train-the-trainer), UAT support, go-live support and 4 weeks of hypercare.',
-             'Set-up of the environment set of the tier (Dev, UAT and Production; SIT as well for Large and Enterprise) and of Pre-Prod for the go-live rehearsal; hosting is billed separately. Deployment guidance when the broker hosts.']:
+             'Set-up of the environment set of the tier (Dev, UAT and Production; SIT as well for Large and Enterprise) and of Pre-Prod for the go-live rehearsal; hosting is billed separately. Deployment guidance when the broker hosts.',
+             'Every module is included in the software price, including the AML/CFT toolkit, the IC compliance registers, the BIR pack, the integration framework with its connectors, dealer programmes and branding. Their activation and each connector go-live are the optional lines above (to confirm by management).']:
     r += 1
     op.cell(r, 1, line).alignment = WRAP
     op.merge_cells(start_row=r, start_column=1, end_row=r, end_column=6)
