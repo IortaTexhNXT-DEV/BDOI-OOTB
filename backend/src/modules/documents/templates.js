@@ -237,7 +237,9 @@ export async function policyScheduleDoc(p) {
   return { ...h, meta: kv([['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Period from', f.date(p.inception)], ['Period to', f.date(p.expiry)],
     ['Date issued', f.date(p.issuedDate)], ['Product', p.productName || p.productType], ['Policy type', p.policyTypeName || await policyTypeLabel(p.insurancePolicyType)],
     ['Sum insured', num(p.sumInsured) ? f.ccy(p.sumInsured, p.currency) : ''],
-    ['Bill no.', p.billNumber], ['Payment status', p.paymentStatus ? humanize(p.paymentStatus) : ''], ['Quotation', q.quotationNumber], ['Currency', p.currency]]),
+    ['Bill no.', p.billNumber], ['Payment status', p.paymentStatus ? humanize(p.paymentStatus) : ''], ['Quotation', q.quotationNumber], ['Currency', p.currency],
+    // CTPL certificate of cover and its authentication code (Operations > CTPL Authentication)
+    ['COC no.', p.cocNumber], ['CTPL authentication code', p.ctplAuthenticationCode], ['Insurer policy no.', p.insurerPolicyNumber]]),
   sections: [riskSection(x, f), coverageSection(x, f), premiumTable(x, p.currency),
     { heading: 'Declaration', text: 'Subject to the terms, conditions, clauses and warranties of the policy wording of the insurer.' }] };
 }

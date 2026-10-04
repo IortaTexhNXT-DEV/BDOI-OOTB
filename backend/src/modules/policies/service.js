@@ -339,6 +339,8 @@ export async function issuePolicy(db, src, body, userId) {
   // the policy is issued whatever the client's credit limit; going over it only warns Accounting
   const { warnIfOverLimit } = await import('../credit-control/limits.js');
   const creditWarning = await warnIfOverLimit(db, { clientId: src.clientId, policyId, amount: Number(receivable.amount), user: { id: userId } });
+  // integrations: CTPL COC registration and authentication request, insurer issuance request (never blocks the issue)
+  await (await import('../integrations/hooks.js')).afterPolicyIssued(db, policyId, userId);
   return { policyId, receivable, commission, creditWarning };
 }
 

@@ -155,12 +155,50 @@ The database is PostgreSQL 16 (the version in `docker-compose.yml` and in CI). A
 | Job code | Cron (business time zone) |
 |---|---|
 | `email-outbox` | every 5 minutes |
+| `integration-outbox` | every 2 minutes |
 | `renewal-queue` | every minute |
 | `policy-expiry`, `quote-expiry` | 00:15, 00:30 daily |
 | `recurring-journals`, `dormant-users`, `period-auto-soft-close`, `housekeeping` | 01:15, 01:45, 02:00, 02:45 daily |
 | `daily-reports`, `bank-auto-match`, `renewal-pipeline` | 05:00, 05:45, 05:30 daily |
 | `renewal-notices`, `receivable-ageing`, `collection-reminders`, `month-end-reminder` | 06:00, 07:00, 08:00, 08:00 daily |
+| `sms-renewal-notices`, `sms-payment-reminders` (delivered off) | 08:10, 08:20 daily |
 | `accrual-reversal` | 00:30 on the first day of the month |
+
+## Integration framework
+
+Every connection to a third party goes through one framework in `backend/src/modules/integrations` (migrations 0310 to 0314, reference data in `seeds/75_integrations.sql`). A new integration (the BIR EIS connector, a new SMS provider, an insurer with its own protocol) is an adapter and one or more message types registered in it; it then gets the settings, the outbox with retry, the inbox, the monitor screen and the audit trail without further work.
+
+| Part | File | What it does |
+|---|---|---|
+| Registry | `framework/registry.js` | `registerAdapter({ code, label, kinds, credentialKeys, needsEndpoint, send, test })` and `registerMessageType({ type, kind, label, onSent, onFailed, onRequeued, onInbound })`; `IntegrationError(message, { retryable, httpStatus, response })` |
+| Connectors | `framework/connectors.js` | `integration_connectors`: kind, adapter, enabled, mode `test` / `live`, endpoint, `credential_env` (environment variable NAMES per credential key), adapter options, timeout, attempts and backoff. `credentialsOf()` reads the values from `process.env` at send time; the API returns only the names and whether each is set. Live mode is refused while the endpoint or a credential variable is missing (`liveBlockers()`). |
+| Outbox | `framework/outbox.js` | `enqueue(db, { connectorCode, messageType, entity, entityId, reference, payload, idempotencyKey, status })` inside the caller's transaction; `processOutbox({ ids, limit, connectorCode, fetchImpl })` picks due rows with `FOR UPDATE SKIP LOCKED`, sends, records `integration_attempts`, applies the answer with `onSent` under a savepoint, or schedules the next attempt after `retry_base_seconds x 2^(attempt - 1)` capped at `retry_max_seconds`; a non-retryable error or the last attempt marks the row failed and calls `onFailed`. `resend()`, `cancel()`, `sendNow()`. Rows left `processing` longer than `integrations.stuck_minutes` are queued again. |
+| Inbox | `framework/outbox.js` | `receive({ connectorCode, messageType, source, payload, signatureValid })` stores and processes a pushed message or an imported file through the type's `onInbound` in a transaction; `reprocess()` for a failed one. `POST /api/public/integrations/inbound/:connector` verifies `x-signature` (HMAC-SHA256 of the raw body with the connector's `webhookSecret` credential; in test mode a key derived from `DATA_ENCRYPTION_KEY`). |
+| Fake provider | `adapters/fake.js` | Every connector in test mode sends through it: deterministic answers per message type, `options.fakeFailFirst` (retryable failures) and `options.fakeReject` (refusal) to exercise retry and failure paths. |
+| Live adapters | `adapters/http.js` | `http_sms` (presets `semaphore`, `globe_labs`, `generic`: path, body template, headers, number format, id path), `viber_business`, `ctpl_http`, `lto_http`, `insurer_rest` (one path per operation, answer read through the insurer's response map), `file_drop` (bank files). Templates use `{{placeholders}}` from the payload, the options and `{{credentials.<key>}}`. HTTP 429, 408, 5xx, timeouts and network errors are retryable; other 4xx are not. |
+| Job | `jobs/handlers.js` | `integrationOutbox` (job `integration-outbox`, every 2 minutes, on), `smsRenewalNotices`, `smsPaymentReminders` (daily, off). |
+| Hooks | `hooks.js`, `messaging.js` | `afterPolicyIssued` (called by `policies/service.js` `issuePolicy`, under a savepoint so it never blocks the issue): CTPL registration and the insurer issuance request. `claimStatusChanged` (called by the claims workflow `transition`). |
+
+Business modules on the framework:
+
+| Module | Files | Tables | Message types |
+|---|---|---|---|
+| SMS and messaging | `messaging.js` | `message_templates` | `sms.send`, `viber.send` |
+| CTPL COC authentication | `ctpl.js`, `ctplRoutes.js` | `coc_series`, `ctpl_authentications` | `ctpl.authenticate`, `ctpl.lto_feed`, inbound `ctpl.authentication_result` |
+| Insurer integration | `insurer.js`, `insurerRoutes.js` | `insurer_api_mappings` | `insurer.policy_issue`, `insurer.policy_data`, `insurer.claim_status`, inbound `insurer.claim_status`, `insurer.policy_issued` |
+| Bank payment files | `bankfiles/layouts.js`, `bankfiles/batches.js`, `bankRoutes.js` | `bank_file_layouts`, `payee_bank_accounts`, `bank_payment_batches`, `bank_payment_batch_lines` | `bank.payment_file`, inbound `bank.status_file` |
+
+Adding a connector for a new provider:
+
+1. Write the adapter (`send(message, connector, ctx)` returns `{ externalRef, httpStatus, response, data }` or throws `IntegrationError`) and register it; add a branch for its message types to the fake provider so test mode answers.
+2. Register the message types with `onSent` / `onFailed` (and `onInbound` for pushed messages); update the business record in the `db` passed in, never with a separate connection.
+3. Seed the connector row in test mode with `credential_env` naming its environment variables, in a reference seed or a migration.
+4. Queue messages with `enqueue(db, ...)` inside the business transaction and an idempotency key per business event.
+5. Test with the fake provider (`options.fakeFailFirst`, `options.fakeReject`) and a live call through `processOutbox({ fetchImpl })` with a mocked fetch, as `backend/test/integrations.test.js` does.
+
+Routes: `/api/integrations` (connectors, outbox, inbox: `read:integrations` / `write:integrations`), `/api/messaging`, `/api/ctpl` (`read:policies` / `write:policies`), `/api/insurer-integration`, `/api/bank-payments` (`read:disbursements` / `write:disbursements`). Screens: Master > System Configuration > Integrations, Message Templates, Insurer Integration; Operations > CTPL Authentication; Master > Finance > Bank File Layouts; Accounts > Bank Payment Files (`brokerverse/src/module/Integrations`).
+
+Bank payment posting: a paid batch line posts through the existing voucher paths as the batch approver: a cheque-book row with instrument book `BANK-FILE` approved and released (`disbursements/service.js`, payment mode bank-transfer, cash from the batch's bank account), or for a referrer payout `approveAgentPayout` with the batch's bank account. The batch approval checks maker-checker against the batch and every voucher and the Authority Matrix type `payment_voucher`.
 
 ## Front-end structure
 
@@ -651,6 +689,7 @@ These endpoints answer without a bearer token. Each has its own control.
 | `POST /api/quotations/approve-by-customer` | Signed approval token from the e-mail link |
 | `GET /api/public/payments/:token`, `/policy.pdf`, `POST /sandbox` | Signed payment-link token; the simulation works only on sandbox payment links |
 | `GET`, `POST /api/public/payments/webhooks/:gateway` | Gateway signature checked on the raw body |
+| `POST /api/public/integrations/inbound/:connector` | HMAC-SHA256 signature of the raw body with the connector's webhook secret; connector enabled and `integrations.inbound_enabled`; unsigned messages are kept as ignored, never applied |
 | `GET /api/settings/public`, `GET /api/system-settings`, `GET /api/version` | Branding and version information only |
 
 ## Keeping the API documentation current

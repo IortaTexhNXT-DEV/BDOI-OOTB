@@ -583,6 +583,91 @@ const numberingSheet = () => ({
   },
 });
 
+// ------------------------------------------------------------------ integrations: payee bank accounts and COC series
+
+const payeeAccountsSheet = () => ({
+  key: 'payee-bank-accounts', name: 'Payee Bank Accounts', menu: 'Master > Finance > Bank File Layouts (Payee bank accounts)',
+  columns: [
+    { key: 'payeeType', header: 'Payee Type', required: true, list: 'Payee Type', allowed: ['Insurer', 'Agent/Referrer', 'Customer', 'Supplier'], format: 'Insurer, Agent/Referrer, Customer or Supplier' },
+    { key: 'payeeId', header: 'Payee', required: true, format: 'Insurer code, referrer id, client code or supplier code' },
+    { key: 'bankCode', header: 'Bank Code', required: true, format: 'Code of the Bank master (BDO, BPI, MBT, LBP, UBP ...)' },
+    { key: 'accountNumber', header: 'Account Number', required: true, format: 'Digits, spaces and -' },
+    { key: 'accountName', header: 'Account Name', required: true },
+    { key: 'accountType', header: 'Account Type', list: 'Bank Account Type', allowed: ['savings', 'current'], format: 'savings or current (savings when empty)' },
+    { key: 'bankBranch', header: 'Bank Branch' },
+    { key: 'email', header: 'Email', format: 'E-mail for the bank\'s credit advice' },
+    { key: 'active', header: 'Active', type: 'bool', list: 'Yes No', format: 'Yes when empty' },
+  ],
+  keyColumns: ['payeeType', 'payeeId', 'accountNumber'], keyOf: (v) => `${keyText(v.payeeType)}|${keyText(v.payeeId)}|${keyText(v.accountNumber)}`,
+  sample: { payeeType: 'Insurer', payeeId: 'MALAYAN', bankCode: 'MBT', accountNumber: '0071-2345-67', accountName: 'Malayan Insurance Co., Inc.', accountType: 'current', active: 'Yes' },
+  async exportRows() {
+    const rows = await many(`SELECT a.*, ic.code AS insurer_code FROM payee_bank_accounts a LEFT JOIN insurance_companies ic ON a.payee_type = 'Insurer' AND ic.id::text = a.payee_id
+      ORDER BY a.payee_type, a.payee_name, a.id`);
+    return rows.map((a) => ({ payeeType: a.payee_type, payeeId: a.insurer_code || a.payee_id, bankCode: a.bank_code, accountNumber: a.account_number, accountName: a.account_name,
+      accountType: a.account_type, bankBranch: cell(a.bank_branch), email: cell(a.email), active: yesNo(a.active) }));
+  },
+  async importRow(ctx, v) {
+    const { savePayeeAccount, PAYEE_TYPES } = await import('../integrations/bankfiles/batches.js');
+    if (!PAYEE_TYPES.includes(v.payeeType)) fail('payeeType', `Payee Type must be one of ${PAYEE_TYPES.join(', ')}`);
+    const active = v.active === undefined || v.active === null || v.active === '' ? true : toBool(v.active);
+    if (active === null) fail('active', 'Active must be Yes or No');
+    let payeeId = String(v.payeeId).trim();
+    if (v.payeeType === 'Insurer') {
+      const ins = await one('SELECT id FROM insurance_companies WHERE id::text = $1 OR upper(code) = upper($1) OR name = $1', [payeeId]);
+      if (!ins) fail('payeeId', `Insurer ${payeeId} is not in the Insurer master`);
+      payeeId = String(ins.id);
+    }
+    const hit = await one('SELECT id FROM payee_bank_accounts WHERE payee_type = $1 AND payee_id = $2 AND account_number = $3', [v.payeeType, payeeId, String(v.accountNumber).trim()]);
+    await savePayeeAccount(hit?.id || null, { payeeType: v.payeeType, payeeId, bankCode: String(v.bankCode).trim(), accountNumber: String(v.accountNumber).trim(), accountName: v.accountName,
+      accountType: v.accountType === 'current' ? 'current' : 'savings', bankBranch: v.bankBranch || null, email: v.email || null, isDefault: true, active }, ctx.user);
+    return hit ? 'updated' : 'created';
+  },
+});
+
+const cocSeriesSheet = () => ({
+  key: 'coc-series', name: 'COC Series', menu: 'Operations > CTPL Authentication (COC series)',
+  columns: [
+    { key: 'insurer', header: 'Insurer', required: true, list: 'Insurers', format: 'Insurer code (or name)' },
+    { key: 'branchCode', header: 'Branch Code', format: 'Branch the series is for; empty = every branch' },
+    { key: 'prefix', header: 'Prefix', format: 'Capital letters, digits and -' },
+    { key: 'seriesFrom', header: 'From', required: true, type: 'number', format: 'First COC number' },
+    { key: 'seriesTo', header: 'To', required: true, type: 'number', format: 'Last COC number' },
+    { key: 'nextNumber', header: 'Next Number', type: 'number', format: 'Next number not yet used (the first number when empty)' },
+    { key: 'numberWidth', header: 'Digits', type: 'number', format: 'Digits of the number, zero-padded (8 when empty)' },
+    { key: 'remarks', header: 'Remarks' },
+  ],
+  keyColumns: ['insurer', 'prefix', 'seriesFrom'], keyOf: (v) => `${keyText(v.insurer)}|${keyText(v.prefix)}|${keyText(v.seriesFrom)}`,
+  sample: { insurer: 'MALAYAN', prefix: 'MIC', seriesFrom: '10000', seriesTo: '10499', nextNumber: '10000', numberWidth: '8' },
+  async exportRows() {
+    const rows = await many('SELECT s.*, ic.code AS insurer_code FROM coc_series s JOIN insurance_companies ic ON ic.id = s.insurance_company_id ORDER BY ic.code, s.prefix, s.series_from');
+    return rows.map((r) => ({ insurer: r.insurer_code, branchCode: cell(r.branch_code), prefix: r.prefix, seriesFrom: String(r.series_from), seriesTo: String(r.series_to),
+      nextNumber: String(r.next_number), numberWidth: String(r.number_width), remarks: cell(r.remarks) }));
+  },
+  async importRow(ctx, v) {
+    const ins = await one('SELECT id FROM insurance_companies WHERE upper(code) = upper($1) OR name = $1', [String(v.insurer).trim()]);
+    if (!ins) fail('insurer', `Insurer ${v.insurer} is not in the Insurer master`);
+    const prefix = String(v.prefix || '').trim().toUpperCase();
+    if (!/^[A-Z0-9-]*$/.test(prefix)) fail('prefix', 'Prefix must be capital letters, digits and -');
+    const from = numberCell(v.seriesFrom); const to = numberCell(v.seriesTo);
+    if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < from) fail('seriesTo', 'From and To must be whole numbers, To not below From');
+    const next = v.nextNumber ? numberCell(v.nextNumber) : from;
+    if (!Number.isInteger(next) || next < from || next > to + 1) fail('nextNumber', 'Next Number must be between From and To + 1');
+    const width = v.numberWidth ? numberCell(v.numberWidth) : 8;
+    const hit = await one('SELECT id FROM coc_series WHERE insurance_company_id = $1 AND prefix = $2 AND series_from = $3', [ins.id, prefix, from]);
+    if (hit) {
+      await query(`UPDATE coc_series SET series_to = $2, next_number = GREATEST(next_number, $3), number_width = $4, branch_code = $5, remarks = $6,
+        status = CASE WHEN GREATEST(next_number, $3) > $2 THEN 'exhausted' ELSE status END, updated_by = $7, updated_at = now() WHERE id = $1`,
+      [hit.id, to, next, width, v.branchCode || null, v.remarks || null, ctx.user?.id ?? null]);
+      return 'updated';
+    }
+    const overlap = await one('SELECT 1 FROM coc_series WHERE insurance_company_id = $1 AND prefix = $2 AND series_from <= $4 AND series_to >= $3', [ins.id, prefix, from, to]);
+    if (overlap) fail('seriesFrom', 'The numbers overlap another series of the insurer with the same prefix');
+    await query(`INSERT INTO coc_series(insurance_company_id, branch_code, prefix, series_from, series_to, next_number, number_width, status, remarks, created_by, updated_by)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$10)`, [ins.id, v.branchCode || null, prefix, from, to, next, width, next > to ? 'exhausted' : 'active', v.remarks || null, ctx.user?.id ?? null]);
+    return 'created';
+  },
+});
+
 // ------------------------------------------------------------------ the kit
 
 /** Sheets of the configuration kit, in load order. */
@@ -597,6 +682,8 @@ export async function configurationSheets() {
     await m('insurance-company'), await m('line-of-business'), await m('product'), await m('policy-type'), await m('cover'),
     await m('vehicle-brand'), await m('vehicle-model'), await m('vehicle-variant'), await m('vehicle'),
     commissionSheet(), chargesSheet(), lguSheet(), authoritySheet(), numberingSheet(),
+    // integrations: bank accounts of the payees paid by bank file, COC number series of the insurers
+    payeeAccountsSheet(), cocSeriesSheet(),
   ];
 }
 
@@ -611,6 +698,8 @@ export const CONFIGURATION_ON_SCREEN = [
   ['Product templates, rating, acceptance rules, motor tariff, documents', 'Product Configurator > Product Templates'],
   ['Package bundles and insurer rate tables', 'Master > Packaged Products'],
   ['Payment gateway credentials (kept in the secret store)', 'Master > Finance > Payment Gateways'],
+  ['Integration connectors (endpoint, mode, credential variable names; the credentials themselves in the secret store), message templates, insurer API mappings', 'Master > System Configuration > Integrations / Message Templates / Insurer Integration'],
+  ['Bank file layouts (validate each starter layout with the bank)', 'Master > Finance > Bank File Layouts'],
   ['Application name, logo, colours, display currency, language', 'Master > System Settings'],
   ['Company logo and letterhead images', 'Master > Generals > Organization > Company (upload the logo on the screen)'],
   ['Scheduled jobs', 'Master > Configuration > Schedules'],

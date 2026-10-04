@@ -540,6 +540,22 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Controls | E-mail sending off until "Send e-mails" is switched on; templates with merge fields in Master > Configuration |
 | Integrations | SMTP mailbox (for example Office 365 on port 587 with STARTTLS); queue sent every 5 minutes, up to 5 attempts |
 
+## Integrations: SMS, CTPL authentication, insurers and bank files
+
+**What it does.** Connects BrokerVerse to third parties through one integration framework, each connection with a test mode, a file or manual fallback that completes the process today, and a monitor with retry and resend.
+
+- **SMS and Viber.** Renewal notices, payment reminders and claim updates by SMS from templates with placeholders, after a consent check against the client's recorded consents. Provider adapters for a generic HTTP SMS API with Semaphore-style and Globe Labs-style presets; Viber business messages optional behind the same interface.
+- **CTPL authentication.** COC series per insurer and branch, the next COC number allocated at issue, the authentication request to the IC-accredited provider, the authentication code stored and printed on the policy schedule, the LTO feed when needed, the code keyed in by hand when the provider's portal was used, and the unauthenticated CTPL report.
+- **Insurer systems.** A mapping per insurer (codes, request and answer fields, claim statuses) for the policy issuance request, policy and premium data and claim status; claim status by CSV file and premium data by the insurer statement import when an insurer has no API.
+- **Bank payment files.** Insurer remittances and referrer payouts paid by bulk credit, InstaPay or PESONet files written from a layout per bank (fixed width or delimited); maker-checker approval of the batch; the bank's status file marks each payment paid (payment journal posted) or rejected. Starter layouts for BDO, BPI, Metrobank, Landbank and UnionBank, to be validated with each bank during onboarding.
+- **Integrations monitor.** Connectors with mode, endpoint and credentials named by environment variable (never stored), the outbox with status, attempts, last error, retry with backoff, resend and cancel, and the inbox of pushed messages and imported files.
+
+| Aspect | Detail |
+|---|---|
+| Personas | System Administrator (connectors, templates, insurer mappings); Processing and Operations (CTPL); Accounting (bank payment files and layouts) |
+| Controls | Test mode until the provider is contracted; live refused while a credential variable or the endpoint is missing; signed inbound messages; maker-checker and Authority Matrix on bank batches; audit trail on every change and resend |
+| Integrations | SMS gateway, Viber aggregator, CTPL authentication provider, LTO, insurer APIs, bank upload portals; certification of each interface is done with the partner during onboarding |
+
 ## Data privacy
 
 **What it does.** Supports the broker's obligations under the Data Privacy Act: consent, data subject requests, access and portability, and erasure once records no longer have to be kept.
@@ -598,7 +614,7 @@ Customisation is outside the OOTB scope. A requirement that cannot be met by con
 | Outside OOTB, available as a change request or optional service | Examples |
 |---|---|
 | Customisation | Changes to screens, workflows, printed documents or the database; new reports |
-| New integrations | Insurer systems, core banking, bank payment files, SMS gateways, accounting packages, BIR eFPS or eBIRForms, LTO or IC systems, other payment gateways |
+| New integrations | Core banking, accounting packages, BIR eFPS or eBIRForms, IC systems, other payment gateways; a provider whose protocol the delivered adapters (SMS, CTPL, insurer API, bank file) cannot be configured for |
 | Data services | Data cleansing and enrichment, extraction from the old system, migration of closed policies, history and documents, more than one fiscal year |
 | Additional environments and hosting | Extra test or training environments; hosting by iorta TechNXT on AWS, Azure or a local partner |
 | Additional training | Training beyond the agreed curriculum, users added after go-live |

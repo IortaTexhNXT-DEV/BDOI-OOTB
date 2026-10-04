@@ -106,3 +106,20 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/items.js')).runDueSchedules();
 }
+
+/**
+ * Integrations (Master > System Configuration > Integrations): send the integration messages that are due and retry
+ * failed attempts with backoff (every 2 minutes); SMS renewal notices and payment reminders (daily, disabled by default).
+ */
+export async function integrationOutbox() {
+  if (!(await tableExists('integration_outbox'))) return { skipped: 'integration tables missing' };
+  return (await import('../modules/integrations/index.js')).processOutbox();
+}
+export async function smsRenewalNotices() {
+  if (!(await tableExists('message_templates'))) return { skipped: 'message templates missing' };
+  return (await import('../modules/integrations/index.js')).smsRenewalNotices();
+}
+export async function smsPaymentReminders() {
+  if (!(await tableExists('message_templates'))) return { skipped: 'message templates missing' };
+  return (await import('../modules/integrations/index.js')).smsPaymentReminders();
+}

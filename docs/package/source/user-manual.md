@@ -401,9 +401,9 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 
 | Menu | Items |
 |---|---|
-| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Go-Live Data Load, Data Privacy (Data Subject Requests, Consent Register) |
+| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration, Go-Live Data Load, Data Privacy (Data Subject Requests, Consent Register) |
 | Master | Organization (Company, Branch); Insurance (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Reinsurance Treaty); Location (Country, Province, City / Municipality); Employees (Hierarchy, Designation); Users and Access (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
-| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Remittance Master, Incentive Programs, Reinsurance Treaty |
+| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Bank File Layouts, Remittance Master, Incentive Programs, Reinsurance Treaty |
 
 ## Daily and periodic tasks
 
@@ -591,6 +591,102 @@ The jobs, their times and what they do are listed in the BrokerVerse Schedules a
 ![Master > E-mail Outbox](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-outbox.png)
 
 Every e-mail the system queues (quotation approval links, requests for quotation, placement slips, loss advices, renewal notices, reminders, official receipts, premium invoices, debit notes) is listed with **Status**, **To**, **Subject**, **Record**, **Attachments**, **Attempts**, **Last error**, **Created** and **Sent**. **Attachments** names the PDF files sent with the message (official receipt, premium invoice, policy schedule, commission debit note); the PDF is produced when the message is sent. A message whose attachments exceed `email.max_attachment_mb` (10 MB) fails with the reason in **Last error**. The E-mail outbox job sends queued messages every 5 minutes; **Retry** sends a failed message again. Nothing leaves the system until **Send e-mails** (`notification.email_enabled`) is on and the mail server is set on the server; until then the screen says so and messages stay queued. Review the outbox before switching sending on.
+
+## Integrations
+
+Master > System Configuration > Integrations is where every connection to a third party is set up and watched: the SMS gateways and the optional Viber business messages, the CTPL authentication provider accredited by the Insurance Commission and the LTO feed, the insurers' systems and the bank payment files. The screen needs `read:integrations` (changes: `write:integrations`); both are held by the System Administrator only.
+
+### Connectors
+
+The **Connectors** tab lists each connector with its **Type**, **Mode** (**Test mode** or **Live**, and **Cancelled** when it is switched off), the **Credentials** it needs (a green tick when the environment variable is set on the server), the messages **Waiting**, **Failed** and **Sent today**, what is missing **Before going live**, and the last success and failure.
+
+The system is delivered with these connectors, all in test mode except the bank files:
+
+| Connector | Used for | Delivered |
+|---|---|---|
+| SMS_SEMAPHORE | SMS (Semaphore-style API: form post with an API key) | Enabled, test mode; the default SMS connector (`messaging.sms_connector`) |
+| SMS_GLOBE_LABS | SMS (Globe Labs-style API: access token and short code) | Switched off |
+| SMS_GENERIC | SMS through any HTTP API (path, body, headers and the answer's message id are options) | Switched off |
+| VIBER_BUSINESS | Viber business messages through an aggregator (optional) | Switched off |
+| CTPL_AUTH | Authentication of CTPL certificates of cover | Enabled, test mode |
+| LTO_FEED | Authenticated COCs sent to the LTO, when the provider does not do it | Switched off |
+| INSURER_API | Insurer systems (one mapping per insurer on Insurer Integration) | Enabled, test mode |
+| BANK_FILES | Bank payment files (download and upload on the bank portal) | Enabled |
+
+In **test mode** a connector answers from a built-in test provider: SMS are recorded as sent, a COC gets a test authentication code, an insurer returns a test policy number. Nothing leaves the system, so the whole process can be tried before the contract with the provider is signed.
+
+To change a connector, select the pencil (**Edit**):
+
+1. **Endpoint**: the address of the provider's service, from the provider.
+2. **Credentials**: one line per credential with the NAME of the environment variable that holds it, for example `SEMAPHORE_API_KEY`. The value itself is never entered on the screen or stored in the database: the server administrator sets it in the secret store of the environment. The tag shows whether the variable is set.
+3. **Adapter options**: the provider's details in JSON (sender name, short code, number format, paths, field names). The defaults match the provider style named in the connector.
+4. **Attempts**, **First retry after** and **Longest wait**: a message that fails is tried again after the first wait, then twice as long each time, up to the longest wait, until the number of attempts is reached. A request the provider refuses (for example an invalid number) is not retried.
+5. **Mode** **Live** and **Enabled**. Live is refused while the endpoint or a credential variable is missing; the message says what is missing.
+
+**Test connection** checks the connector without sending a business message: in test mode it confirms the test provider, in live mode it calls the provider's health-check path when one is set in the options. Every change and test is in the audit trail.
+
+### Outbox and inbox
+
+The **Outbox** tab lists every message sent or waiting: SMS and Viber messages, CTPL authentication requests, LTO feeds, insurer requests and bank files, with **Status** (Queued, Retry scheduled, Sending, Sent, Failed, Cancelled, Not sent), **Attempts**, **Last error** and **Next attempt**. Filter by status or connector, or search a mobile number, COC, policy or error text.
+
+- The eye (**View**) shows what was sent, the provider's answer and every attempt with its duration and error.
+- **Resend** queues a failed, cancelled or not sent message again with a fresh attempt count and sends it at once; a message waiting for its next attempt is sent now.
+- **Cancel message** stops a message that has not been sent.
+- **Send due messages** (top right) sends what is due now. The job `integration-outbox` (Master > Schedules) does the same every 2 minutes.
+
+A message **Not sent** was deliberately not sent: the client has no valid mobile number, or the consent check refused it (see SMS and message templates). A switched-off connector keeps its messages queued until it is enabled again.
+
+The **Inbox** tab lists what third parties sent to the system: claim statuses pushed by an insurer, CTPL authentication results pushed by the provider, and the files imported by users (bank status files, claim status files). A message pushed by a third party must be signed with the connector's webhook secret; an unsigned or wrongly signed message is kept as **Ignored** and never applied. **Process again** retries a failed message once its cause is fixed.
+
+### Go live with a provider
+
+1. Sign the contract with the provider and obtain the endpoint, the credentials and the sender name or short code.
+2. Ask the server administrator to set the credentials as environment variables (secret store) and restart the service.
+3. On the connector, enter the endpoint and the variable names; **Test connection** in live mode.
+4. Switch the mode to **Live**. Send a test SMS from Message Templates, or authenticate one COC, and check the outbox.
+
+What is certified with each partner (the provider's acceptance of the requests, the LTO interface, an insurer's API and each bank's file) is done during onboarding with the partner; the system cannot certify it alone.
+
+## SMS and message templates
+
+Master > System Configuration > Message Templates holds the texts sent to clients by SMS (or Viber).
+
+| Template | Event | Sent |
+|---|---|---|
+| RENEWAL_NOTICE | Renewal notice | By the job `sms-renewal-notices` on the days `messaging.renewal_notice_days` (30 and 7) before expiry |
+| PAYMENT_REMINDER | Payment reminder | By the job `sms-payment-reminders` on the days `messaging.payment_reminder_days` (3 and 0) before an open bill is due |
+| CLAIM_UPDATE | Claim update | When a claim moves to a status of `messaging.claim_update_statuses` (in review, approved, settled, rejected, closed) |
+| CTPL_AUTHENTICATED | CTPL authenticated | When the authentication code of a COC is received (delivered inactive) |
+| RENEWAL_NOTICE_VIBER | Renewal notice by Viber | Delivered inactive; activate it and deactivate the SMS one to send renewal notices by Viber |
+
+To change a template, select the pencil:
+
+1. Change the **Text**. The placeholders in double braces are filled when the message is sent, for example `{{clientName}}`, `{{policyNumber}}`, `{{expiryDate}}`, `{{amountDue}}`, `{{dueDate}}`, `{{claimNumber}}`, `{{claimStatus}}`, `{{cocNumber}}`, `{{authCode}}` and `{{companyName}}`. The **Preview** shows the text with example values, its length and the number of SMS parts (160 characters each).
+2. Choose the **Consent needed**: **Processing (service message)** for renewal notices, reminders and claim updates; **Marketing** for promotions; **None** only for messages that need no consent.
+3. Leave **Connector** empty to use the default connector of the channel, or choose another one.
+4. Save. **Send a test** sends the template with example values to a mobile number you enter.
+
+**Consent check.** Before a message is queued the system reads the client's consents (Master > Data Privacy). A marketing message needs a granted marketing consent. A service message is sent unless the client refused or withdrew consent for processing; with `messaging.service_consent` set to `opt-in` it needs a granted consent. A message that fails the check, or a client without a valid mobile number, is recorded in the outbox as **Not sent** with the reason.
+
+The jobs `sms-renewal-notices` and `sms-payment-reminders` are delivered switched off: switch them on in Master > Schedules when the SMS connector is live. Each notice is sent once per policy and day; running a job again sends nothing twice. The **Messages sent** tab lists every SMS and Viber message.
+
+## Insurer integration
+
+Master > System Configuration > Insurer Integration connects BrokerVerse to the insurers' systems.
+
+**Mappings.** Select **New mapping** (or the pencil of an insurer):
+
+1. Choose the **Insurer** and the **Connector** (INSURER_API, or a copy of it for an insurer or aggregator with its own endpoint and keys).
+2. Enter the **Broker code at the insurer** and the **Product codes** (for example `{"MOTOR": "PC", "FIRE": "FI"}`).
+3. **Issuance request map**: the fields the insurer expects and where each comes from in the policy (for example `"insuredName": "insuredName"`, `"plate": "vehicle.plateNumber"`, `"agent": "{{brokerCode}}"`). Empty: the default map shown under the fields.
+4. **Answer map**: where the insurer's answer holds the policy number, status and premium (for example `"policyNumber": "data.policyNo"`).
+5. **Claim statuses**: how the insurer's statuses read in BrokerVerse (for example `"UNDER EVALUATION": "In review"`).
+6. **Send the issuance request when a policy is issued** sends the request automatically at issue.
+7. Enter a policy number and select **Preview** to see the request exactly as the insurer will receive it. Save.
+
+**Requests.** **New request** sends a **Policy issuance** (the insurer's policy number is stored on the policy and printed on the schedule), **Policy and premium data** (the insurer's premium and status are stored on the policy; a difference above `insurer_integration.premium_tolerance` is flagged) or a **Claim status** (stored on the claim with a line in its history). The list shows each request with the insurer's answer.
+
+**Claim status file.** When an insurer has no API, import its claim status list as CSV with the columns Claim Number, Status, Remarks and Status Date: each row updates the claim through the inbox, and the result per row is shown. Premium and policy data by file go through the insurer statement import (Accounts > Insurer Reconciliation).
 
 ## Audit Trail
 
@@ -1339,6 +1435,26 @@ Operations records payments exactly as described in the Sales & Marketing chapte
 
 Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivables** and **Earned Commission**, and the bills in the tabs **Paid**, **Pending** and **Reviewing**. The **Type** column says whether the bill is for a **Policy**, a **Renewal Policy** or an **Endorsement**. Receipts are posted by Accounting; this screen shows the result.
 
+## CTPL authentication
+
+Every CTPL certificate of cover (COC) must be authenticated with the IC-accredited authentication provider before it is released. Operations > CTPL Authentication does it for every CTPL cover issued.
+
+**COC series.** On the **COC series** tab, record each series of COC numbers received from an insurer: **New COC series**, the **Insurer**, the **Branch** (empty for every branch), the **Prefix**, the first and last number and the number of digits. Numbers may not overlap another series of the insurer. The list shows the numbers **Used** and **Left**, in orange below the low-stock threshold; a series whose numbers are all used becomes **Used up**. **Make inactive** stops a series (for example numbers returned to the insurer).
+
+**At issue.** When a motor policy with CTPL is issued (`ctpl.register_on_issue`):
+
+1. The next COC number of the insurer's series is allocated (the branch of the issuing user first) and written on the policy.
+2. The plate number or MV file number, chassis and engine numbers are copied from the policy.
+3. The authentication request is sent to the provider (`ctpl.authenticate_on_issue`). The answer's authentication code is stored, and the COC number and the code are printed on the policy schedule.
+
+**The list.** The cards count the covers **Pending**, **Requested**, **Authenticated** and **Failed**; **Not yet authenticated only** shows the covers still waiting, flagged when they wait longer than `ctpl.unauthenticated_alert_hours` (24). On a cover not yet authenticated:
+
+- **Authenticate now** sends the request (again).
+- **Vehicle details** corrects the plate, MV file, chassis or engine number, or enters the COC number when no series had numbers left. A request is not sent while the plate (or MV file) and chassis numbers are missing (`ctpl.require_vehicle_ids`).
+- **Enter code from the provider portal** is the fallback when the COC was authenticated on the provider's own portal: enter the authentication code, the provider's reference and the date. The code is stored and printed like one received by the system (method **Keyed in**).
+
+**Register a policy** adds a CTPL cover issued before the automatic registration (for example a policy uploaded at go-live). **Unauthenticated CTPL report** downloads the covers still waiting as Excel. When the provider does not transmit to the LTO itself, switch on `ctpl.lto_feed` and the LTO_FEED connector: each authenticated COC is sent to the LTO and the **LTO** column shows the result.
+
 ## Renewals
 
 BrokerVerse puts every policy into the renewal pipeline 90 days before expiry (`renewals.pipeline_days`), sends renewal notices 60, 30 and 15 days before (`limits.renewal_notice_days`), and turns the accepted renewal into the next policy term. A policy not renewed within 30 days after expiry lapses (`renewals.grace_period_days`); an expired policy can still be renewed as a lapsed renewal for 90 more days (`renewals.lapsed_renewal_days`).
@@ -1652,6 +1768,32 @@ A second Accounting user opens the voucher, reviews the cheque details and appro
 | Approved | Approved; the cheque can be printed. |
 | Paid | Paid; the payment journal is posted. |
 | Cancelled | Cancelled before payment. |
+
+## Bank payment files
+
+Insurer remittances, referrer commission payouts, refunds and supplier payments can be paid by a bank upload file instead of cheques: bulk credit, InstaPay (up to `bank_payments.instapay_limit`, PHP 50,000 per payment) or PESONet.
+
+1. Prepare the payment vouchers as usual (Accounts > Disbursement, insurer remittance, bulk referrer payout) and submit them for approval. Every payee needs a bank account: Master > Finance > Bank File Layouts, **Payee bank accounts** (a referrer's account on the referrer record is used too).
+2. Choose Accounts > Bank Payment Files and select **New batch**. Choose the **Layout** of the bank, the bank account to **Pay from**, the **Channel** and the **Value date**, tick the vouchers (a voucher without a bank account cannot be ticked) and select **Create batch**. The batch takes a number from the BPB series.
+3. Open the batch and select **Submit for approval**. A second user opens it and selects **Approve**, or **Return to draft** with the reason. The approver may not be the maker of the batch or of one of its vouchers, and the total must be within the approver's Authority Matrix limit for payment vouchers.
+4. Select **Write file**, then **Download file** and upload it on the bank's portal. Select **Mark uploaded to the bank**.
+5. When the bank returns its payment status file, select **Import status file**. Each paid payment posts the voucher's payment journal (Dr payable of the payee / Cr cash in bank of the bank account paid from, or for a referrer payout Dr commission payable / Cr cash and withholding tax) dated the value date, and the voucher becomes Paid. A rejected payment keeps its reason; its voucher is free for another batch or a cheque. Rows the system could not apply are listed with the reason.
+6. Without a status file, use **Record result** on a payment to enter what the bank portal shows: paid with the bank reference, or rejected with the reason.
+
+The batch is **Completed** when every payment has a result. A batch with no paid payment can be cancelled; its vouchers become free again. Every step is in the audit trail, and the file and status file are in Master > System Configuration > Integrations (outbox and inbox).
+
+## Bank file layouts and payee bank accounts
+
+Master > Finance > Bank File Layouts says how each bank's upload file is written and how its status file is read. The system is delivered with starter layouts for BDO, BPI, Metrobank, Landbank and UnionBank and a generic CSV. **The starter layouts are examples: each must be validated against the bank's current file specification, and a test file accepted by the bank, during onboarding.** They are marked **Test mode** until changed.
+
+To change or add a layout, select the pencil or **New layout**:
+
+1. **File format** **Delimited** (with its delimiter) or **Fixed width**, the **Channels** the layout writes, the **Line ending** and the **File name** pattern (for example `{bankCode}_{batchNumber}_{valueDate:YYYYMMDD}.csv`).
+2. On **Header record**, **Payment records** and **Trailer record**, list the fields in order: the **Source** (a fixed value, a payment value such as account number or amount, or a batch value such as value date, total or count), the **Format** (text, upper case, digits, amount with two decimals, amount in centavos, date patterns), the **Width** and, for fixed width, the **Alignment** and **Pad** character.
+3. On **Status file**, describe the bank's return file: the columns of the reference, status, bank reference, reason and amount, and which status values mean paid or rejected.
+4. **Preview** writes the file for two example payments. Save.
+
+**Payee bank accounts** lists the bank accounts credited by the files, per insurer, referrer, client or supplier: bank, account number and name, account type and the e-mail for the bank's credit advice. One account per payee is the default.
 
 ## Remittance to insurers
 

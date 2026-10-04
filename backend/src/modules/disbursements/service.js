@@ -263,8 +263,9 @@ async function approveCheque(db, c, amount, user) {
     source: 'disbursement', entryType: payeeType === 'Insurer' ? 'REMITTANCE' : payeeType === AGENT ? 'COMMISSION_PAYMENT' : 'REFUND',
     referenceType: 'Disbursement', referenceId: d?.id || c.id, transactionCode: d?.voucher_number || c.instrument_no, clientId: d?.client_id || inv?.client_id || null,
     policyId: inv?.policy_id || d?.policy_id || null, policyNumber: inv?.policy_number || d?.policy_number || null,
-    description: `Cheque ${c.instrument_no || ''} – ${d?.payee_name || c.customer_name || c.customer_code || payeeType}`.trim(),
-    payeeType, bankAccount: c.main_account || null, paymentMode: 'check',
+    // a payment made by bank payment file (Accounts > Bank Payment Files) is a bank transfer, not a cheque
+    description: `${c.instrument_book_id === 'BANK-FILE' ? 'Bank transfer' : 'Cheque'} ${c.instrument_no || ''} – ${d?.payee_name || c.customer_name || c.customer_code || payeeType}`.trim(),
+    payeeType, bankAccount: c.main_account || null, paymentMode: c.instrument_book_id === 'BANK-FILE' ? 'bank-transfer' : 'check',
     // the payment is booked on the cheque date (today when it is post-dated), so the bank book shows it when it was issued
     date: await postingDate(c.instrument_date),
     amounts: { amount, payable: round2(amount - taxes.vat - taxes.dst - taxes.lgt), ...taxes },
@@ -340,14 +341,14 @@ export async function agentInvoiceLines(db, referrerId) {
 }
 
 /** Checker approves an agent payout voucher: selected Approved lines are paid (maker-checker vs voucher creator). */
-export async function approveAgentPayout(db, id, lineIds, user) {
+export async function approveAgentPayout(db, id, lineIds, user, { bankAccount = null, paymentMode = null } = {}) {
   const d = await getDisbursementRaw(db, id, true);
   if (d.payee_type !== AGENT) throw badRequest('Voucher is not an Agent/Referrer payout');
   if (['paid', 'cancelled'].includes(d.status)) throw conflict(`Voucher ${d.voucher_number} is ${d.status}`);
   await assertChecker(user, d.created_by, 'payment voucher');
   const lines = (await db.query('SELECT * FROM commissions WHERE id = ANY($1) AND referrer_id = $2 FOR UPDATE', [lineIds, d.referrer_id])).rows;
   if (lines.length !== lineIds.length) throw badRequest('Some commission lines do not belong to this referrer');
-  const r = await payLines(db, { lines, disbursement: d, user });
+  const r = await payLines(db, { lines, disbursement: d, user, bankAccount, paymentMode });
   await db.query(`UPDATE disbursements SET amount = $2, gross_amount = $3, wht_amount = $4, status = 'paid', approved_by = $5, approved_at = now(), paid_at = now(),
     journal_id = $6, updated_at = now() WHERE id = $1`, [d.id, r.net, r.gross, r.wht, user.id, r.journalId]);
   return { disbursementId: d.id, voucherNumber: d.voucher_number, amount: r.net, grossAmount: r.gross, whtAmount: r.wht, lineIds, journalId: r.journalId, status: 'paid' };

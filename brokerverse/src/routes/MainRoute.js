@@ -295,6 +295,13 @@ import RemittanceNotifications from "../module/Remittance/RemittanceNotification
 import RemittanceHistory from "../module/Remittance/RemittanceHistory";
 import RemittanceAnalytics from "../module/Remittance/RemittanceAnalytics";
 import PolicyRenewalWaiting from "../agentModule/renewalModule/WaitingScreen/PolicyRenewalWaiting";
+// Integrations: monitor, message templates, insurer integration, CTPL authentication, bank payment files
+import IntegrationsMonitor from "../module/Integrations/IntegrationsMonitor";
+import MessageTemplates from "../module/Integrations/MessageTemplates";
+import InsurerIntegration from "../module/Integrations/InsurerIntegration";
+import CtplAuthentication from "../module/Integrations/CtplAuthentication";
+import BankFileLayouts from "../module/Integrations/BankFileLayouts";
+import BankPaymentFiles from "../module/Integrations/BankPaymentFiles";
 
 // Commission Module Imports
 import CommissionDashboard from "../module/Commission/CommissionDashboard";
@@ -1109,6 +1116,13 @@ const Maincomponent = () => {
           <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />
           <Route path="/master/finance/premium-taxes" element={<LguTaxRates />} />
           <Route path="/master/finance/payment-gateways" element={<PaymentGateways />} />
+          {/* Integrations */}
+          <Route path="/master/configuration/integrations" element={<IntegrationsMonitor />} />
+          <Route path="/master/configuration/message-templates" element={<MessageTemplates />} />
+          <Route path="/master/configuration/insurer-integration" element={<InsurerIntegration />} />
+          <Route path="/operations/ctpl-authentication" element={<CtplAuthentication />} />
+          <Route path="/master/finance/bank-file-layouts" element={<BankFileLayouts />} />
+          <Route path="/accounts/bank-payment-files" element={<BankPaymentFiles />} />
           <Route path="/placement/broker-slips" element={<BrokerSlipList />} />
           <Route path="/placement/broker-slips/new" element={<BrokerSlipCreate />} />
           <Route path="/placement/broker-slips/:id" element={<BrokerSlipDetail />} />

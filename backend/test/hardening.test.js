@@ -429,6 +429,8 @@ describe('route registry', () => {
     // client checkout by the payment link's random token, and the gateways' signed webhooks / postbacks
     'GET /public/payments/:token', 'POST /public/payments/:token/sandbox', 'GET /public/payments/:token/policy.pdf',
     'POST /public/payments/webhooks/:gateway', 'GET /public/payments/webhooks/:gateway',
+    // messages pushed by third parties (insurer claim status, CTPL authentication result), HMAC-signed per connector
+    'POST /public/integrations/inbound/:connector',
   ]);
   it('declares only the intended public routes', () => {
     const open = ROUTES.filter((r) => !r.auth).map((r) => `${r.method} ${r.path}`);

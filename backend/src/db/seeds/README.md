@@ -60,5 +60,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `64_product_classification.sql` | reference | package / non-package business type and customer segment of the products (Philippine practice), the additional package and non-package products (travel, householder, micro-insurance, group PA, CAR, EAR, machinery breakdown, marine hull, money and securities), the two fields on the Product master |
 | `69_ph_practice_masters.sql` | reference | Philippine practice masters: salutations, civil status, gender, nationality, government ID types, customer types (DTI / SEC / CDA), payment modes, holidays 2026-2027; Philippine banks with SWIFT codes; the non-life insurers licensed by the Insurance Commission (inactive) and the IC certificate fields of the insurer master |
 | `70_security.sql` | reference | security configuration |
+| `75_integrations.sql` | reference | integration connectors in test mode (SMS, Viber, CTPL authentication, LTO feed, insurer API, bank files), message templates, starter bank file layouts (BDO, BPI, Metrobank, Landbank, UnionBank: examples to validate with each bank) and a generic CSV |
+| `sample/75_integrations.sql` | sample | demo COC series (Malayan, Pioneer), insurer payee bank accounts and an insurer API mapping for Malayan |
 
 No test users are seeded: the tests and the end-to-end checks create their own users.

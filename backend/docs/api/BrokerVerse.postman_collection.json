@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (889 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (946 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -6169,6 +6169,1594 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bank Payment Files",
+      "item": [
+        {
+          "name": "The broker's active bank accounts (bank account master) a batch can be paid from",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/bank-accounts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "bank-accounts"
+              ]
+            },
+            "description": "The broker's active bank accounts (bank account master) a batch can be paid from\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/bank-accounts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "bank-accounts"
+                  ]
+                },
+                "description": "The broker's active bank accounts (bank account master) a batch can be paid from\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"ACC-BDO-001\",\n      \"name\": \"BrokerVerse - Operating Account\",\n      \"bankCode\": \"BDO\",\n      \"accountNumber\": \"001234567890\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches?status=approved,file-generated",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "approved,file-generated"
+                }
+              ]
+            },
+            "description": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches?status=approved,file-generated",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "approved,file-generated"
+                    }
+                  ]
+                },
+                "description": "Bank payment batches (status (comma-separated), search on batch, voucher or payee; paging)\n\nFront-end touchpoint: Accounts > Bank Payment Files\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"bpb_0123456789abcdef\",\n      \"batchNumber\": \"BPB-2026-00001\",\n      \"layoutCode\": \"BDO-BULK\",\n      \"bankAccountCode\": \"ACC-BDO-001\",\n      \"channel\": \"pesonet\",\n      \"valueDate\": \"2026-10-05\",\n      \"status\": \"file-generated\",\n      \"lineCount\": 2,\n      \"totalAmount\": 153250.5,\n      \"paidCount\": 0,\n      \"rejectedCount\": 0,\n      \"pendingCount\": 2,\n      \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n      \"lines\": [\n        {\n          \"id\": 1,\n          \"seq\": 1,\n          \"voucherNumber\": \"PV-2026-00011\",\n          \"payeeName\": \"Malayan Insurance Co., Inc.\",\n          \"bankCode\": \"MBT\",\n          \"accountNumber\": \"0012345678\",\n          \"amount\": 125000,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "New batch (draft) from payment vouchers: layout, bank account paid from, channel (bulk_credit, instapay, pesonet), value date",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches"
+              ]
+            },
+            "description": "New batch (draft) from payment vouchers: layout, bank account paid from, channel (bulk_credit, instapay, pesonet), value date\n\nFront-end touchpoint: Accounts > Bank Payment Files > New batch\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"layoutCode\": \"BDO-BULK\",\n  \"bankAccountCode\": \"ACC-BDO-001\",\n  \"channel\": \"pesonet\",\n  \"valueDate\": \"2026-10-05\",\n  \"disbursementIds\": [\n    \"pv_1\",\n    \"pv_2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches"
+                  ]
+                },
+                "description": "New batch (draft) from payment vouchers: layout, bank account paid from, channel (bulk_credit, instapay, pesonet), value date\n\nFront-end touchpoint: Accounts > Bank Payment Files > New batch\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"layoutCode\": \"BDO-BULK\",\n  \"bankAccountCode\": \"ACC-BDO-001\",\n  \"channel\": \"pesonet\",\n  \"valueDate\": \"2026-10-05\",\n  \"disbursementIds\": [\n    \"pv_1\",\n    \"pv_2\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"draft\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One batch with its lines",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One batch with its lines\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One batch with its lines\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve a batch (not by its maker or the maker of one of its vouchers; Authority Matrix payment_voucher on the total)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve a batch (not by its maker or the maker of one of its vouchers; Authority Matrix payment_voucher on the total)\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Approve\n\nAccess: write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve a batch (not by its maker or the maker of one of its vouchers; Authority Matrix payment_voucher on the total)\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Approve\n\nAccess: write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a batch that has no paid line (its vouchers become free again)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a batch that has no paid line (its vouchers become free again)\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Cancel\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong value date\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a batch that has no paid line (its vouchers become free again)\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Cancel\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Wrong value date\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download the payment file of a batch for upload on the bank portal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "file"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Download the payment file of a batch for upload on the bank portal\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Download file\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/file",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "file"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Download the payment file of a batch for upload on the bank portal\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Download file\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(file) BDO_BPB-2026-00001_20261005.csv"
+            }
+          ]
+        },
+        {
+          "name": "Write the payment file from the layout (approved batch; again until a result is recorded)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/generate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "generate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Write the payment file from the layout (approved batch; again until a result is recorded)\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Write file\n\nAccess: write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/generate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "generate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Write the payment file from the layout (approved batch; again until a result is recorded)\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Write file\n\nAccess: write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Manual result of one payment (as shown on the bank portal): paid with the bank reference, or rejected with the reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/lines/:lineId/result",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "lines",
+                ":lineId",
+                "result"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "lineId",
+                  "value": "",
+                  "description": "lineId (path parameter)"
+                }
+              ]
+            },
+            "description": "Manual result of one payment (as shown on the bank portal): paid with the bank reference, or rejected with the reason\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Record result\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"paid\",\n  \"bankReference\": \"PESONET-889201\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/lines/:lineId/result",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "lines",
+                    ":lineId",
+                    "result"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "lineId",
+                      "value": "",
+                      "description": "lineId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Manual result of one payment (as shown on the bank portal): paid with the bank reference, or rejected with the reason\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Record result\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"paid\",\n  \"bankReference\": \"PESONET-889201\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"outcome\": {\n      \"applied\": 1,\n      \"paid\": 1\n    },\n    \"batch\": {\n      \"id\": \"bpb_0123456789abcdef\",\n      \"batchNumber\": \"BPB-2026-00001\",\n      \"layoutCode\": \"BDO-BULK\",\n      \"bankAccountCode\": \"ACC-BDO-001\",\n      \"channel\": \"pesonet\",\n      \"valueDate\": \"2026-10-05\",\n      \"status\": \"file-generated\",\n      \"lineCount\": 2,\n      \"totalAmount\": 153250.5,\n      \"paidCount\": 0,\n      \"rejectedCount\": 0,\n      \"pendingCount\": 2,\n      \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n      \"lines\": [\n        {\n          \"id\": 1,\n          \"seq\": 1,\n          \"voucherNumber\": \"PV-2026-00011\",\n          \"payeeName\": \"Malayan Insurance Co., Inc.\",\n          \"bankCode\": \"MBT\",\n          \"accountNumber\": \"0012345678\",\n          \"amount\": 125000,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send a batch back to draft with the reason",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/reject",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "reject"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Send a batch back to draft with the reason\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Reject\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Wrong value date\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/reject",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "reject"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Send a batch back to draft with the reason\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Reject\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Wrong value date\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record that the file was uploaded on the bank portal",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/sent",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "sent"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record that the file was uploaded on the bank portal\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Mark uploaded\n\nAccess: write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/sent",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "sent"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record that the file was uploaded on the bank portal\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Mark uploaded\n\nAccess: write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Import the bank's payment status file (read with the layout's status file definition): paid lines post their payment and mark the voucher paid, rejected lines free the voucher",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/status-file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "status-file"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Import the bank's payment status file (read with the layout's status file definition): paid lines post their payment and mark the voucher paid, rejected lines free the voucher\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Import status file\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(multipart) status.csv\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/status-file",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "status-file"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Import the bank's payment status file (read with the layout's status file definition): paid lines post their payment and mark the voucher paid, rejected lines free the voucher\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Import status file\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(multipart) status.csv\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"outcome\": {\n      \"applied\": 2,\n      \"paid\": 1,\n      \"rejected\": 1,\n      \"skipped\": []\n    },\n    \"batch\": {\n      \"id\": \"bpb_0123456789abcdef\",\n      \"batchNumber\": \"BPB-2026-00001\",\n      \"layoutCode\": \"BDO-BULK\",\n      \"bankAccountCode\": \"ACC-BDO-001\",\n      \"channel\": \"pesonet\",\n      \"valueDate\": \"2026-10-05\",\n      \"status\": \"completed\",\n      \"lineCount\": 2,\n      \"totalAmount\": 153250.5,\n      \"paidCount\": 0,\n      \"rejectedCount\": 0,\n      \"pendingCount\": 2,\n      \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n      \"lines\": [\n        {\n          \"id\": 1,\n          \"seq\": 1,\n          \"voucherNumber\": \"PV-2026-00011\",\n          \"payeeName\": \"Malayan Insurance Co., Inc.\",\n          \"bankCode\": \"MBT\",\n          \"accountNumber\": \"0012345678\",\n          \"amount\": 125000,\n          \"status\": \"pending\"\n        }\n      ]\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit a draft batch for approval",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/batches/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "batches",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit a draft batch for approval\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Submit\n\nAccess: write:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/batches/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "batches",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit a draft batch for approval\n\nFront-end touchpoint: Accounts > Bank Payment Files > Batch > Submit\n\nAccess: write:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"bpb_0123456789abcdef\",\n    \"batchNumber\": \"BPB-2026-00001\",\n    \"layoutCode\": \"BDO-BULK\",\n    \"bankAccountCode\": \"ACC-BDO-001\",\n    \"channel\": \"pesonet\",\n    \"valueDate\": \"2026-10-05\",\n    \"status\": \"file-generated\",\n    \"lineCount\": 2,\n    \"totalAmount\": 153250.5,\n    \"paidCount\": 0,\n    \"rejectedCount\": 0,\n    \"pendingCount\": 2,\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"lines\": [\n      {\n        \"id\": 1,\n        \"seq\": 1,\n        \"voucherNumber\": \"PV-2026-00011\",\n        \"payeeName\": \"Malayan Insurance Co., Inc.\",\n        \"bankCode\": \"MBT\",\n        \"accountNumber\": \"0012345678\",\n        \"amount\": 125000,\n        \"status\": \"pending\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Payment vouchers that can go on a batch (submitted for approval, unpaid, no cheque, not on another batch) with the payee's bank account (payeeType, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/eligible-vouchers?payeeType=Insurer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "eligible-vouchers"
+              ],
+              "query": [
+                {
+                  "key": "payeeType",
+                  "value": "Insurer"
+                }
+              ]
+            },
+            "description": "Payment vouchers that can go on a batch (submitted for approval, unpaid, no cheque, not on another batch) with the payee's bank account (payeeType, search)\n\nFront-end touchpoint: Accounts > Bank Payment Files > New batch\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/eligible-vouchers?payeeType=Insurer",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "eligible-vouchers"
+                  ],
+                  "query": [
+                    {
+                      "key": "payeeType",
+                      "value": "Insurer"
+                    }
+                  ]
+                },
+                "description": "Payment vouchers that can go on a batch (submitted for approval, unpaid, no cheque, not on another batch) with the payee's bank account (payeeType, search)\n\nFront-end touchpoint: Accounts > Bank Payment Files > New batch\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"disbursementId\": \"pv_1\",\n      \"voucherNumber\": \"PV-2026-00011\",\n      \"payeeType\": \"Insurer\",\n      \"payeeName\": \"Malayan Insurance Co., Inc.\",\n      \"amount\": 125000,\n      \"bankCode\": \"MBT\",\n      \"accountNumber\": \"0012-3456-78\",\n      \"ready\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank file layouts (all=true includes inactive ones) with the sources and formats a field may use",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/layouts?all=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "layouts"
+              ],
+              "query": [
+                {
+                  "key": "all",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Bank file layouts (all=true includes inactive ones) with the sources and formats a field may use\n\nFront-end touchpoint: Master > Finance > Bank File Layouts\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/layouts?all=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "layouts"
+                  ],
+                  "query": [
+                    {
+                      "key": "all",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Bank file layouts (all=true includes inactive ones) with the sources and formats a field may use\n\nFront-end touchpoint: Master > Finance > Bank File Layouts\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"BDO-BULK\",\n      \"name\": \"BDO bulk credit (example)\",\n      \"bankCode\": \"BDO\",\n      \"channels\": [\n        \"bulk_credit\",\n        \"pesonet\"\n      ],\n      \"format\": \"delimited\",\n      \"delimiter\": \",\",\n      \"detailFields\": [\n        {\n          \"name\": \"Account number\",\n          \"source\": \"line.accountNumber\",\n          \"format\": \"digits\"\n        },\n        {\n          \"name\": \"Amount\",\n          \"source\": \"line.amount\",\n          \"format\": \"amount\"\n        }\n      ],\n      \"statusFile\": {\n        \"format\": \"delimited\",\n        \"hasHeader\": true,\n        \"columns\": {\n          \"reference\": \"Reference\",\n          \"status\": \"Status\"\n        },\n        \"paidValues\": [\n          \"SUCCESS\"\n        ],\n        \"rejectedValues\": [\n          \"FAILED\"\n        ]\n      },\n      \"isExample\": true,\n      \"active\": true\n    }\n  ],\n  \"sources\": [\n    \"const\",\n    \"line.seq\",\n    \"line.voucherNumber\",\n    \"line.reference\",\n    \"line.payeeName\",\n    \"line.accountName\",\n    \"line.accountNumber\",\n    \"line.bankCode\",\n    \"line.accountType\",\n    \"line.amount\",\n    \"line.email\",\n    \"line.payeeType\",\n    \"batch.batchNumber\",\n    \"batch.valueDate\",\n    \"batch.bankAccountNumber\",\n    \"batch.bankAccountName\",\n    \"batch.bankCode\",\n    \"batch.companyName\",\n    \"batch.totalAmount\",\n    \"batch.count\",\n    \"batch.channel\",\n    \"batch.createdDate\"\n  ],\n  \"formats\": [\n    \"text\",\n    \"upper\",\n    \"digits\",\n    \"alnum\",\n    \"amount\",\n    \"amount_cents\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "New bank file layout",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/layouts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "layouts"
+              ]
+            },
+            "description": "New bank file layout\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > New layout\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"BDO-BULK\",\n  \"name\": \"BDO bulk credit (example)\",\n  \"bankCode\": \"BDO\",\n  \"channels\": [\n    \"bulk_credit\",\n    \"pesonet\"\n  ],\n  \"format\": \"delimited\",\n  \"delimiter\": \",\",\n  \"detailFields\": [\n    {\n      \"name\": \"Account number\",\n      \"source\": \"line.accountNumber\",\n      \"format\": \"digits\"\n    },\n    {\n      \"name\": \"Amount\",\n      \"source\": \"line.amount\",\n      \"format\": \"amount\"\n    }\n  ],\n  \"statusFile\": {\n    \"format\": \"delimited\",\n    \"hasHeader\": true,\n    \"columns\": {\n      \"reference\": \"Reference\",\n      \"status\": \"Status\"\n    },\n    \"paidValues\": [\n      \"SUCCESS\"\n    ],\n    \"rejectedValues\": [\n      \"FAILED\"\n    ]\n  },\n  \"isExample\": true,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/layouts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "layouts"
+                  ]
+                },
+                "description": "New bank file layout\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > New layout\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"BDO-BULK\",\n  \"name\": \"BDO bulk credit (example)\",\n  \"bankCode\": \"BDO\",\n  \"channels\": [\n    \"bulk_credit\",\n    \"pesonet\"\n  ],\n  \"format\": \"delimited\",\n  \"delimiter\": \",\",\n  \"detailFields\": [\n    {\n      \"name\": \"Account number\",\n      \"source\": \"line.accountNumber\",\n      \"format\": \"digits\"\n    },\n    {\n      \"name\": \"Amount\",\n      \"source\": \"line.amount\",\n      \"format\": \"amount\"\n    }\n  ],\n  \"statusFile\": {\n    \"format\": \"delimited\",\n    \"hasHeader\": true,\n    \"columns\": {\n      \"reference\": \"Reference\",\n      \"status\": \"Status\"\n    },\n    \"paidValues\": [\n      \"SUCCESS\"\n    ],\n    \"rejectedValues\": [\n      \"FAILED\"\n    ]\n  },\n  \"isExample\": true,\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"BDO-BULK\",\n    \"name\": \"BDO bulk credit (example)\",\n    \"bankCode\": \"BDO\",\n    \"channels\": [\n      \"bulk_credit\",\n      \"pesonet\"\n    ],\n    \"format\": \"delimited\",\n    \"delimiter\": \",\",\n    \"detailFields\": [\n      {\n        \"name\": \"Account number\",\n        \"source\": \"line.accountNumber\",\n        \"format\": \"digits\"\n      },\n      {\n        \"name\": \"Amount\",\n        \"source\": \"line.amount\",\n        \"format\": \"amount\"\n      }\n    ],\n    \"statusFile\": {\n      \"format\": \"delimited\",\n      \"hasHeader\": true,\n      \"columns\": {\n        \"reference\": \"Reference\",\n        \"status\": \"Status\"\n      },\n      \"paidValues\": [\n        \"SUCCESS\"\n      ],\n      \"rejectedValues\": [\n        \"FAILED\"\n      ]\n    },\n    \"isExample\": true,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a bank file layout (a starter layout stops being marked as example once changed)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/layouts/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "layouts",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a bank file layout (a starter layout stops being marked as example once changed)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Edit\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"detailFields\": [\n    {\n      \"name\": \"Account number\",\n      \"source\": \"line.accountNumber\",\n      \"format\": \"digits\"\n    },\n    {\n      \"name\": \"Amount\",\n      \"source\": \"line.amount\",\n      \"format\": \"amount\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/layouts/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "layouts",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a bank file layout (a starter layout stops being marked as example once changed)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Edit\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"detailFields\": [\n    {\n      \"name\": \"Account number\",\n      \"source\": \"line.accountNumber\",\n      \"format\": \"digits\"\n    },\n    {\n      \"name\": \"Amount\",\n      \"source\": \"line.amount\",\n      \"format\": \"amount\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"BDO-BULK\",\n    \"name\": \"BDO bulk credit (example)\",\n    \"bankCode\": \"BDO\",\n    \"channels\": [\n      \"bulk_credit\",\n      \"pesonet\"\n    ],\n    \"format\": \"delimited\",\n    \"delimiter\": \",\",\n    \"detailFields\": [\n      {\n        \"name\": \"Account number\",\n        \"source\": \"line.accountNumber\",\n        \"format\": \"digits\"\n      },\n      {\n        \"name\": \"Amount\",\n        \"source\": \"line.amount\",\n        \"format\": \"amount\"\n      }\n    ],\n    \"statusFile\": {\n      \"format\": \"delimited\",\n      \"hasHeader\": true,\n      \"columns\": {\n        \"reference\": \"Reference\",\n        \"status\": \"Status\"\n      },\n      \"paidValues\": [\n        \"SUCCESS\"\n      ],\n      \"rejectedValues\": [\n        \"FAILED\"\n      ]\n    },\n    \"isExample\": true,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The file a layout writes for two example payments (layout as edited, not saved)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/layouts/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "layouts",
+                "preview"
+              ]
+            },
+            "description": "The file a layout writes for two example payments (layout as edited, not saved)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Preview\n\nAccess: read:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"format\": \"delimited\",\n  \"detailFields\": [\n    {\n      \"name\": \"Account number\",\n      \"source\": \"line.accountNumber\",\n      \"format\": \"digits\"\n    },\n    {\n      \"name\": \"Amount\",\n      \"source\": \"line.amount\",\n      \"format\": \"amount\"\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/layouts/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "layouts",
+                    "preview"
+                  ]
+                },
+                "description": "The file a layout writes for two example payments (layout as edited, not saved)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Preview\n\nAccess: read:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"format\": \"delimited\",\n  \"detailFields\": [\n    {\n      \"name\": \"Account number\",\n      \"source\": \"line.accountNumber\",\n      \"format\": \"digits\"\n    },\n    {\n      \"name\": \"Amount\",\n      \"source\": \"line.amount\",\n      \"format\": \"amount\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fileName\": \"BDO_BPB-2026-00001_20261005.csv\",\n    \"content\": \"1234567890,28250.50\\r\\n\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Bank accounts of payees credited by bank payment files (payeeType, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/payee-accounts?payeeType=Insurer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "payee-accounts"
+              ],
+              "query": [
+                {
+                  "key": "payeeType",
+                  "value": "Insurer"
+                }
+              ]
+            },
+            "description": "Bank accounts of payees credited by bank payment files (payeeType, search)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Payee Bank Accounts\n\nAccess: read:disbursements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/payee-accounts?payeeType=Insurer",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "payee-accounts"
+                  ],
+                  "query": [
+                    {
+                      "key": "payeeType",
+                      "value": "Insurer"
+                    }
+                  ]
+                },
+                "description": "Bank accounts of payees credited by bank payment files (payeeType, search)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Payee Bank Accounts\n\nAccess: read:disbursements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"payeeType\": \"Insurer\",\n      \"payeeId\": \"3\",\n      \"payeeName\": \"Malayan Insurance Co., Inc.\",\n      \"bankCode\": \"MBT\",\n      \"accountNumber\": \"0012-3456-78\",\n      \"accountName\": \"Malayan Insurance Co., Inc.\",\n      \"accountType\": \"current\",\n      \"isDefault\": true,\n      \"active\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a payee's bank account (insurer, referrer, client or supplier)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/payee-accounts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "payee-accounts"
+              ]
+            },
+            "description": "Record a payee's bank account (insurer, referrer, client or supplier)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Payee Bank Accounts > New\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"payeeType\": \"Insurer\",\n  \"payeeId\": \"3\",\n  \"payeeName\": \"Malayan Insurance Co., Inc.\",\n  \"bankCode\": \"MBT\",\n  \"accountNumber\": \"0012-3456-78\",\n  \"accountName\": \"Malayan Insurance Co., Inc.\",\n  \"accountType\": \"current\",\n  \"isDefault\": true,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/payee-accounts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "payee-accounts"
+                  ]
+                },
+                "description": "Record a payee's bank account (insurer, referrer, client or supplier)\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Payee Bank Accounts > New\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"payeeType\": \"Insurer\",\n  \"payeeId\": \"3\",\n  \"payeeName\": \"Malayan Insurance Co., Inc.\",\n  \"bankCode\": \"MBT\",\n  \"accountNumber\": \"0012-3456-78\",\n  \"accountName\": \"Malayan Insurance Co., Inc.\",\n  \"accountType\": \"current\",\n  \"isDefault\": true,\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"payeeType\": \"Insurer\",\n    \"payeeId\": \"3\",\n    \"payeeName\": \"Malayan Insurance Co., Inc.\",\n    \"bankCode\": \"MBT\",\n    \"accountNumber\": \"0012-3456-78\",\n    \"accountName\": \"Malayan Insurance Co., Inc.\",\n    \"accountType\": \"current\",\n    \"isDefault\": true,\n    \"active\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a payee's bank account",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/bank-payments/payee-accounts/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "bank-payments",
+                "payee-accounts",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a payee's bank account\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Payee Bank Accounts > Edit\n\nAccess: write:disbursements",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"payeeType\": \"Insurer\",\n  \"payeeId\": \"3\",\n  \"payeeName\": \"Malayan Insurance Co., Inc.\",\n  \"bankCode\": \"MBT\",\n  \"accountNumber\": \"0012-3456-78\",\n  \"accountName\": \"Malayan Insurance Co., Inc.\",\n  \"accountType\": \"current\",\n  \"isDefault\": true,\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/bank-payments/payee-accounts/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "bank-payments",
+                    "payee-accounts",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a payee's bank account\n\nFront-end touchpoint: Master > Finance > Bank File Layouts > Payee Bank Accounts > Edit\n\nAccess: write:disbursements",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"id\": 1,\n  \"payeeType\": \"Insurer\",\n  \"payeeId\": \"3\",\n  \"payeeName\": \"Malayan Insurance Co., Inc.\",\n  \"bankCode\": \"MBT\",\n  \"accountNumber\": \"0012-3456-78\",\n  \"accountName\": \"Malayan Insurance Co., Inc.\",\n  \"accountType\": \"current\",\n  \"isDefault\": true,\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"payeeType\": \"Insurer\",\n    \"payeeId\": \"3\",\n    \"payeeName\": \"Malayan Insurance Co., Inc.\",\n    \"bankCode\": \"MBT\",\n    \"accountNumber\": \"0012-3456-78\",\n    \"accountName\": \"Malayan Insurance Co., Inc.\",\n    \"accountType\": \"current\",\n    \"isDefault\": true,\n    \"active\": true\n  }\n}"
             }
           ]
         }
@@ -16886,6 +18474,870 @@
       ]
     },
     {
+      "name": "CTPL Authentication",
+      "item": [
+        {
+          "name": "CTPL covers and their authentication (status (comma-separated), unauthenticated=true, insuranceCompanyId, from, to, search; paging) with the count per status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications?unauthenticated=true&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications"
+              ],
+              "query": [
+                {
+                  "key": "unauthenticated",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "CTPL covers and their authentication (status (comma-separated), unauthenticated=true, insuranceCompanyId, from, to, search; paging) with the count per status\n\nFront-end touchpoint: Operations > CTPL Authentication\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications?unauthenticated=true&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications"
+                  ],
+                  "query": [
+                    {
+                      "key": "unauthenticated",
+                      "value": "true"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "CTPL covers and their authentication (status (comma-separated), unauthenticated=true, insuranceCompanyId, from, to, search; paging) with the count per status\n\nFront-end touchpoint: Operations > CTPL Authentication\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"cta_0123456789abcdef\",\n      \"policyNumber\": \"PC-MLY-2026-000101\",\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"cocNumber\": \"MIC00012345\",\n      \"plateNumber\": \"NCA 4521\",\n      \"chassisNumber\": \"MHFXR41G5J0012345\",\n      \"status\": \"authenticated\",\n      \"method\": \"api\",\n      \"authCode\": \"7F3A9C21B0D4\",\n      \"providerReference\": \"TXN-88123\",\n      \"ltoStatus\": \"not-required\",\n      \"hoursWaiting\": null,\n      \"overdue\": false\n    }\n  ],\n  \"counts\": {\n    \"pending\": 2,\n    \"requested\": 1,\n    \"authenticated\": 40\n  },\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register a CTPL cover by hand (policy issued before the automatic registration, or uploaded): COC number from the series unless given",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications"
+              ]
+            },
+            "description": "Register a CTPL cover by hand (policy issued before the automatic registration, or uploaded): COC number from the series unless given\n\nFront-end touchpoint: Operations > CTPL Authentication > Register policy\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyNumber\": \"PC-MLY-2026-000101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications"
+                  ]
+                },
+                "description": "Register a CTPL cover by hand (policy issued before the automatic registration, or uploaded): COC number from the series unless given\n\nFront-end touchpoint: Operations > CTPL Authentication > Register policy\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"policyNumber\": \"PC-MLY-2026-000101\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cta_0123456789abcdef\",\n    \"policyNumber\": \"PC-MLY-2026-000101\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"cocNumber\": \"MIC00012345\",\n    \"plateNumber\": \"NCA 4521\",\n    \"chassisNumber\": \"MHFXR41G5J0012345\",\n    \"status\": \"requested\",\n    \"method\": \"api\",\n    \"authCode\": \"7F3A9C21B0D4\",\n    \"providerReference\": \"TXN-88123\",\n    \"ltoStatus\": \"not-required\",\n    \"hoursWaiting\": null,\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One CTPL authentication record (by id or COC number)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One CTPL authentication record (by id or COC number)\n\nFront-end touchpoint: Operations > CTPL Authentication > Detail\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One CTPL authentication record (by id or COC number)\n\nFront-end touchpoint: Operations > CTPL Authentication > Detail\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cta_0123456789abcdef\",\n    \"policyNumber\": \"PC-MLY-2026-000101\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"cocNumber\": \"MIC00012345\",\n    \"plateNumber\": \"NCA 4521\",\n    \"chassisNumber\": \"MHFXR41G5J0012345\",\n    \"status\": \"authenticated\",\n    \"method\": \"api\",\n    \"authCode\": \"7F3A9C21B0D4\",\n    \"providerReference\": \"TXN-88123\",\n    \"ltoStatus\": \"not-required\",\n    \"hoursWaiting\": null,\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Correct the vehicle identifiers or the COC number of a cover not yet authenticated",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Correct the vehicle identifiers or the COC number of a cover not yet authenticated\n\nFront-end touchpoint: Operations > CTPL Authentication > Edit\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plateNumber\": \"NCA 4521\",\n  \"chassisNumber\": \"MHFXR41G5J0012345\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Correct the vehicle identifiers or the COC number of a cover not yet authenticated\n\nFront-end touchpoint: Operations > CTPL Authentication > Edit\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"plateNumber\": \"NCA 4521\",\n  \"chassisNumber\": \"MHFXR41G5J0012345\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cta_0123456789abcdef\",\n    \"policyNumber\": \"PC-MLY-2026-000101\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"cocNumber\": \"MIC00012345\",\n    \"plateNumber\": \"NCA 4521\",\n    \"chassisNumber\": \"MHFXR41G5J0012345\",\n    \"status\": \"authenticated\",\n    \"method\": \"api\",\n    \"authCode\": \"7F3A9C21B0D4\",\n    \"providerReference\": \"TXN-88123\",\n    \"ltoStatus\": \"not-required\",\n    \"hoursWaiting\": null,\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send the authentication request to the CTPL authentication provider now (again after a failure)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications/:id/authenticate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications",
+                ":id",
+                "authenticate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Send the authentication request to the CTPL authentication provider now (again after a failure)\n\nFront-end touchpoint: Operations > CTPL Authentication > Authenticate\n\nAccess: write:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications/:id/authenticate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications",
+                    ":id",
+                    "authenticate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Send the authentication request to the CTPL authentication provider now (again after a failure)\n\nFront-end touchpoint: Operations > CTPL Authentication > Authenticate\n\nAccess: write:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cta_0123456789abcdef\",\n    \"policyNumber\": \"PC-MLY-2026-000101\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"cocNumber\": \"MIC00012345\",\n    \"plateNumber\": \"NCA 4521\",\n    \"chassisNumber\": \"MHFXR41G5J0012345\",\n    \"status\": \"authenticated\",\n    \"method\": \"api\",\n    \"authCode\": \"7F3A9C21B0D4\",\n    \"providerReference\": \"TXN-88123\",\n    \"ltoStatus\": \"not-required\",\n    \"hoursWaiting\": null,\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a CTPL record (spoiled COC, policy cancelled); the COC number stays used",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a CTPL record (spoiled COC, policy cancelled); the COC number stays used\n\nFront-end touchpoint: Operations > CTPL Authentication > Cancel\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"COC spoiled when printing\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a CTPL record (spoiled COC, policy cancelled); the COC number stays used\n\nFront-end touchpoint: Operations > CTPL Authentication > Cancel\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"COC spoiled when printing\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cta_0123456789abcdef\",\n    \"policyNumber\": \"PC-MLY-2026-000101\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"cocNumber\": \"MIC00012345\",\n    \"plateNumber\": \"NCA 4521\",\n    \"chassisNumber\": \"MHFXR41G5J0012345\",\n    \"status\": \"cancelled\",\n    \"method\": \"api\",\n    \"authCode\": \"7F3A9C21B0D4\",\n    \"providerReference\": \"TXN-88123\",\n    \"ltoStatus\": \"not-required\",\n    \"hoursWaiting\": null,\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Manual fallback: record the authentication code obtained on the provider's portal",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications/:id/manual",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications",
+                ":id",
+                "manual"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Manual fallback: record the authentication code obtained on the provider's portal\n\nFront-end touchpoint: Operations > CTPL Authentication > Enter code\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"authCode\": \"7F3A9C21B0D4\",\n  \"providerReference\": \"PORTAL-2026-0091\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications/:id/manual",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications",
+                    ":id",
+                    "manual"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Manual fallback: record the authentication code obtained on the provider's portal\n\nFront-end touchpoint: Operations > CTPL Authentication > Enter code\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"authCode\": \"7F3A9C21B0D4\",\n  \"providerReference\": \"PORTAL-2026-0091\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"cta_0123456789abcdef\",\n    \"policyNumber\": \"PC-MLY-2026-000101\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"cocNumber\": \"MIC00012345\",\n    \"plateNumber\": \"NCA 4521\",\n    \"chassisNumber\": \"MHFXR41G5J0012345\",\n    \"status\": \"authenticated\",\n    \"method\": \"manual\",\n    \"authCode\": \"7F3A9C21B0D4\",\n    \"providerReference\": \"TXN-88123\",\n    \"ltoStatus\": \"not-required\",\n    \"hoursWaiting\": null,\n    \"overdue\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Unauthenticated CTPL report (pending, requested and failed covers with the hours waited; or the filters of the list) as Excel or CSV",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/authentications/report?format=xlsx&unauthenticated=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "authentications",
+                "report"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "xlsx"
+                },
+                {
+                  "key": "unauthenticated",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Unauthenticated CTPL report (pending, requested and failed covers with the hours waited; or the filters of the list) as Excel or CSV\n\nFront-end touchpoint: Operations > CTPL Authentication > Unauthenticated CTPL report\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/authentications/report?format=xlsx&unauthenticated=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "authentications",
+                    "report"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "xlsx"
+                    },
+                    {
+                      "key": "unauthenticated",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Unauthenticated CTPL report (pending, requested and failed covers with the hours waited; or the filters of the list) as Excel or CSV\n\nFront-end touchpoint: Operations > CTPL Authentication > Unauthenticated CTPL report\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(file) unauthenticated-ctpl.xlsx"
+            }
+          ]
+        },
+        {
+          "name": "COC number series per insurer and branch with the numbers left (insuranceCompanyId, status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/coc-series",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "coc-series"
+              ]
+            },
+            "description": "COC number series per insurer and branch with the numbers left (insuranceCompanyId, status)\n\nFront-end touchpoint: Operations > CTPL Authentication > COC Series\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/coc-series",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "coc-series"
+                  ]
+                },
+                "description": "COC number series per insurer and branch with the numbers left (insuranceCompanyId, status)\n\nFront-end touchpoint: Operations > CTPL Authentication > COC Series\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"insuranceCompanyId\": 3,\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"branchCode\": null,\n      \"prefix\": \"MIC\",\n      \"seriesFrom\": 12000,\n      \"seriesTo\": 12999,\n      \"nextNumber\": 12346,\n      \"numberWidth\": 8,\n      \"remaining\": 654,\n      \"status\": \"active\",\n      \"lowStock\": false\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a COC series received from an insurer (numbers may not overlap another series of the insurer with the same prefix)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/coc-series",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "coc-series"
+              ]
+            },
+            "description": "Record a COC series received from an insurer (numbers may not overlap another series of the insurer with the same prefix)\n\nFront-end touchpoint: Operations > CTPL Authentication > COC Series > New\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"insuranceCompanyId\": 3,\n  \"prefix\": \"MIC\",\n  \"seriesFrom\": 12000,\n  \"seriesTo\": 12999,\n  \"numberWidth\": 8\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/coc-series",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "coc-series"
+                  ]
+                },
+                "description": "Record a COC series received from an insurer (numbers may not overlap another series of the insurer with the same prefix)\n\nFront-end touchpoint: Operations > CTPL Authentication > COC Series > New\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"insuranceCompanyId\": 3,\n  \"prefix\": \"MIC\",\n  \"seriesFrom\": 12000,\n  \"seriesTo\": 12999,\n  \"numberWidth\": 8\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 3,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"branchCode\": null,\n    \"prefix\": \"MIC\",\n    \"seriesFrom\": 12000,\n    \"seriesTo\": 12999,\n    \"nextNumber\": 12346,\n    \"numberWidth\": 8,\n    \"remaining\": 654,\n    \"status\": \"active\",\n    \"lowStock\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close or reopen a series, change its branch, low-stock threshold or remarks",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/ctpl/coc-series/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ctpl",
+                "coc-series",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close or reopen a series, change its branch, low-stock threshold or remarks\n\nFront-end touchpoint: Operations > CTPL Authentication > COC Series > Edit\n\nAccess: write:policies",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"closed\",\n  \"remarks\": \"Returned to the insurer\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/ctpl/coc-series/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "ctpl",
+                    "coc-series",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close or reopen a series, change its branch, low-stock threshold or remarks\n\nFront-end touchpoint: Operations > CTPL Authentication > COC Series > Edit\n\nAccess: write:policies",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"closed\",\n  \"remarks\": \"Returned to the insurer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 3,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"branchCode\": null,\n    \"prefix\": \"MIC\",\n    \"seriesFrom\": 12000,\n    \"seriesTo\": 12999,\n    \"nextNumber\": 12346,\n    \"numberWidth\": 8,\n    \"remaining\": 654,\n    \"status\": \"closed\",\n    \"lowStock\": false\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Dashboards",
       "item": [
         {
@@ -24847,6 +27299,473 @@
       ]
     },
     {
+      "name": "Insurer Integration",
+      "item": [
+        {
+          "name": "File fallback: claim statuses from the insurer as CSV (Claim Number, Status, Remarks, Status Date); each row goes through the integration inbox",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-integration/claim-status/import",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-integration",
+                "claim-status",
+                "import"
+              ]
+            },
+            "description": "File fallback: claim statuses from the insurer as CSV (Claim Number, Status, Remarks, Status Date); each row goes through the integration inbox\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Claim status file\n\nAccess: write:claims, write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(multipart) claim-status.csv\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-integration/claim-status/import",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-integration",
+                    "claim-status",
+                    "import"
+                  ]
+                },
+                "description": "File fallback: claim statuses from the insurer as CSV (Claim Number, Status, Remarks, Status Date); each row goes through the integration inbox\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Claim status file\n\nAccess: write:claims, write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(multipart) claim-status.csv\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rows\": 2,\n    \"processed\": 2,\n    \"failed\": 0,\n    \"results\": [\n      {\n        \"row\": 2,\n        \"claimNumber\": \"CLM-2026-00031\",\n        \"status\": \"processed\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "API mapping of each insurer with the default request map",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-integration/mappings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-integration",
+                "mappings"
+              ]
+            },
+            "description": "API mapping of each insurer with the default request map\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Mappings\n\nAccess: read:integrations, read:policies, read:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-integration/mappings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-integration",
+                    "mappings"
+                  ]
+                },
+                "description": "API mapping of each insurer with the default request map\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Mappings\n\nAccess: read:integrations, read:policies, read:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"insuranceCompanyId\": 3,\n      \"insurerName\": \"Malayan Insurance Co., Inc.\",\n      \"connectorCode\": \"INSURER_API\",\n      \"enabled\": true,\n      \"brokerCode\": \"BRK-00123\",\n      \"autoIssueRequest\": false,\n      \"productMap\": {\n        \"MOTOR\": \"PC\",\n        \"FIRE\": \"FI\"\n      },\n      \"requestMap\": {},\n      \"responseMap\": {\n        \"policyNumber\": \"data.policyNo\",\n        \"status\": \"data.status\",\n        \"premium\": \"data.totalPremium\"\n      },\n      \"claimStatusMap\": {\n        \"UNDER EVALUATION\": \"In review\"\n      }\n    }\n  ],\n  \"defaultRequestMap\": {\n    \"brokerCode\": \"{{brokerCode}}\",\n    \"productCode\": \"productCode\",\n    \"brokerPolicyNumber\": \"policyNumber\",\n    \"insuredName\": \"insuredName\",\n    \"inceptionDate\": \"inceptionDate\",\n    \"expiryDate\": \"expiryDate\",\n    \"sumInsured\": \"sumInsured\",\n    \"netPremium\": \"netPremium\",\n    \"grossPremium\": \"grossPremium\",\n    \"currency\": \"currency\",\n    \"vehicle\": {\n      \"plateNumber\": \"vehicle.plateNumber\",\n      \"chassisNumber\": \"vehicle.chassisNumber\",\n      \"engineNumber\": \"vehicle.engineNumber\",\n      \"make\": \"vehicle.make\",\n      \"model\": \"vehicle.model\",\n      \"year\": \"vehicle.year\"\n    },\n    \"client\": {\n      \"name\": \"client.name\",\n      \"email\": \"client.email\",\n      \"mobile\": \"client.mobile\",\n      \"tin\": \"client.tin\",\n      \"address\": \"client.address\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create or change the API mapping of an insurer: connector, broker code, automatic issuance request, product codes, request / response / claim status maps",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-integration/mappings/:insurerId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-integration",
+                "mappings",
+                ":insurerId"
+              ],
+              "variable": [
+                {
+                  "key": "insurerId",
+                  "value": "",
+                  "description": "insurerId (path parameter)"
+                }
+              ]
+            },
+            "description": "Create or change the API mapping of an insurer: connector, broker code, automatic issuance request, product codes, request / response / claim status maps\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Mappings > Edit\n\nAccess: write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"connectorCode\": \"INSURER_API\",\n  \"brokerCode\": \"BRK-00123\",\n  \"productMap\": {\n    \"MOTOR\": \"PC\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-integration/mappings/:insurerId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-integration",
+                    "mappings",
+                    ":insurerId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "insurerId",
+                      "value": "",
+                      "description": "insurerId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Create or change the API mapping of an insurer: connector, broker code, automatic issuance request, product codes, request / response / claim status maps\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Mappings > Edit\n\nAccess: write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"connectorCode\": \"INSURER_API\",\n  \"brokerCode\": \"BRK-00123\",\n  \"productMap\": {\n    \"MOTOR\": \"PC\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"insuranceCompanyId\": 3,\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"connectorCode\": \"INSURER_API\",\n    \"enabled\": true,\n    \"brokerCode\": \"BRK-00123\",\n    \"autoIssueRequest\": false,\n    \"productMap\": {\n      \"MOTOR\": \"PC\",\n      \"FIRE\": \"FI\"\n    },\n    \"requestMap\": {},\n    \"responseMap\": {\n      \"policyNumber\": \"data.policyNo\",\n      \"status\": \"data.status\",\n      \"premium\": \"data.totalPremium\"\n    },\n    \"claimStatusMap\": {\n      \"UNDER EVALUATION\": \"In review\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The issuance request a policy of this insurer would send (request map applied); nothing is sent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-integration/mappings/:insurerId/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-integration",
+                "mappings",
+                ":insurerId",
+                "preview"
+              ],
+              "variable": [
+                {
+                  "key": "insurerId",
+                  "value": "",
+                  "description": "insurerId (path parameter)"
+                }
+              ]
+            },
+            "description": "The issuance request a policy of this insurer would send (request map applied); nothing is sent\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Mappings > Preview\n\nAccess: read:integrations, read:policies, read:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"policyNumber\": \"PC-MLY-2026-000101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-integration/mappings/:insurerId/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-integration",
+                    "mappings",
+                    ":insurerId",
+                    "preview"
+                  ],
+                  "variable": [
+                    {
+                      "key": "insurerId",
+                      "value": "",
+                      "description": "insurerId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The issuance request a policy of this insurer would send (request map applied); nothing is sent\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Mappings > Preview\n\nAccess: read:integrations, read:policies, read:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"policyNumber\": \"PC-MLY-2026-000101\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"request\": {\n      \"brokerCode\": \"BRK-00123\",\n      \"productCode\": \"PC\",\n      \"insuredName\": \"Maria Santos\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Requests sent to insurers (status, messageType, entityId, search; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-integration/requests?messageType=insurer.claim_status&status=failed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-integration",
+                "requests"
+              ],
+              "query": [
+                {
+                  "key": "messageType",
+                  "value": "insurer.claim_status"
+                },
+                {
+                  "key": "status",
+                  "value": "failed"
+                }
+              ]
+            },
+            "description": "Requests sent to insurers (status, messageType, entityId, search; paging)\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Requests\n\nAccess: read:integrations, read:policies, read:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-integration/requests?messageType=insurer.claim_status&status=failed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-integration",
+                    "requests"
+                  ],
+                  "query": [
+                    {
+                      "key": "messageType",
+                      "value": "insurer.claim_status"
+                    },
+                    {
+                      "key": "status",
+                      "value": "failed"
+                    }
+                  ]
+                },
+                "description": "Requests sent to insurers (status, messageType, entityId, search; paging)\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Requests\n\nAccess: read:integrations, read:policies, read:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 12,\n      \"connectorCode\": \"INSURER_API\",\n      \"messageType\": \"insurer.policy_issue\",\n      \"entity\": \"policy\",\n      \"reference\": \"PC-MLY-2026-000101\",\n      \"status\": \"sent\",\n      \"externalRef\": \"MIC-PC-2026-77812\"\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send a request to the insurer: policy issuance (insurer.policy_issue), policy and premium data (insurer.policy_data) or claim status (insurer.claim_status)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/insurer-integration/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "insurer-integration",
+                "requests"
+              ]
+            },
+            "description": "Send a request to the insurer: policy issuance (insurer.policy_issue), policy and premium data (insurer.policy_data) or claim status (insurer.claim_status)\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Requests > New request\n\nAccess: write:policies, write:claims, write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"insurer.policy_issue\",\n  \"policyId\": \"PC-MLY-2026-000101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/insurer-integration/requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "insurer-integration",
+                    "requests"
+                  ]
+                },
+                "description": "Send a request to the insurer: policy issuance (insurer.policy_issue), policy and premium data (insurer.policy_data) or claim status (insurer.claim_status)\n\nFront-end touchpoint: Master > System Configuration > Insurer Integration > Requests > New request\n\nAccess: write:policies, write:claims, write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"insurer.policy_issue\",\n  \"policyId\": \"PC-MLY-2026-000101\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 12,\n    \"status\": \"sent\",\n    \"externalRef\": \"MIC-PC-2026-77812\"\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Insurer Reconciliation",
       "item": [
         {
@@ -26310,6 +29229,772 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"format\": \"GENERIC\",\n    \"lines\": [\n      {\n        \"lineNo\": 1,\n        \"policyNo\": \"POL-2026-00001\",\n        \"grossPremium\": 12525,\n        \"commission\": 1500\n      }\n    ],\n    \"errors\": [],\n    \"totals\": {\n      \"count\": 1\n    }\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Integrations",
+      "item": [
+        {
+          "name": "Connectors with their mode, endpoint, credential environment variable names (whether each is set; never the values), what blocks live use and the messages waiting or failed",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/connectors?kind=sms",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "connectors"
+              ],
+              "query": [
+                {
+                  "key": "kind",
+                  "value": "sms"
+                }
+              ]
+            },
+            "description": "Connectors with their mode, endpoint, credential environment variable names (whether each is set; never the values), what blocks live use and the messages waiting or failed\n\nFront-end touchpoint: Master > System Configuration > Integrations\n\nAccess: read:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/connectors?kind=sms",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "connectors"
+                  ],
+                  "query": [
+                    {
+                      "key": "kind",
+                      "value": "sms"
+                    }
+                  ]
+                },
+                "description": "Connectors with their mode, endpoint, credential environment variable names (whether each is set; never the values), what blocks live use and the messages waiting or failed\n\nFront-end touchpoint: Master > System Configuration > Integrations\n\nAccess: read:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"SMS_SEMAPHORE\",\n      \"name\": \"SMS gateway (Semaphore-style)\",\n      \"kind\": \"sms\",\n      \"adapter\": \"http_sms\",\n      \"enabled\": true,\n      \"mode\": \"test\",\n      \"endpoint\": \"https://api.semaphore.co/api/v4/messages\",\n      \"credentialEnv\": {\n        \"apiKey\": \"SEMAPHORE_API_KEY\"\n      },\n      \"credentials\": [\n        {\n          \"key\": \"apiKey\",\n          \"envName\": \"SEMAPHORE_API_KEY\",\n          \"present\": false,\n          \"required\": true\n        }\n      ],\n      \"credentialsConfigured\": false,\n      \"liveBlockers\": [\n        \"environment variable SEMAPHORE_API_KEY (apiKey) is not set\"\n      ],\n      \"options\": {\n        \"preset\": \"semaphore\",\n        \"senderName\": \"BROKER\"\n      },\n      \"maxAttempts\": 5,\n      \"retryBaseSeconds\": 60,\n      \"queued\": 0,\n      \"failed\": 0\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Connector settings: enabled, mode (test / live: live needs the endpoint and every credential variable set), endpoint, credential variable names, adapter options, timeout and retry policy",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/connectors/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "connectors",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Connector settings: enabled, mode (test / live: live needs the endpoint and every credential variable set), endpoint, credential variable names, adapter options, timeout and retry policy\n\nFront-end touchpoint: Master > System Configuration > Integrations\n\nAccess: write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"mode\": \"test\",\n  \"credentialEnv\": {\n    \"apiKey\": \"SEMAPHORE_API_KEY\"\n  },\n  \"options\": {\n    \"preset\": \"semaphore\",\n    \"senderName\": \"BROKER\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/connectors/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "connectors",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Connector settings: enabled, mode (test / live: live needs the endpoint and every credential variable set), endpoint, credential variable names, adapter options, timeout and retry policy\n\nFront-end touchpoint: Master > System Configuration > Integrations\n\nAccess: write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": true,\n  \"mode\": \"test\",\n  \"credentialEnv\": {\n    \"apiKey\": \"SEMAPHORE_API_KEY\"\n  },\n  \"options\": {\n    \"preset\": \"semaphore\",\n    \"senderName\": \"BROKER\"\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"SMS_SEMAPHORE\",\n    \"name\": \"SMS gateway (Semaphore-style)\",\n    \"kind\": \"sms\",\n    \"adapter\": \"http_sms\",\n    \"enabled\": true,\n    \"mode\": \"test\",\n    \"endpoint\": \"https://api.semaphore.co/api/v4/messages\",\n    \"credentialEnv\": {\n      \"apiKey\": \"SEMAPHORE_API_KEY\"\n    },\n    \"credentials\": [\n      {\n        \"key\": \"apiKey\",\n        \"envName\": \"SEMAPHORE_API_KEY\",\n        \"present\": false,\n        \"required\": true\n      }\n    ],\n    \"credentialsConfigured\": false,\n    \"liveBlockers\": [\n      \"environment variable SEMAPHORE_API_KEY (apiKey) is not set\"\n    ],\n    \"options\": {\n      \"preset\": \"semaphore\",\n      \"senderName\": \"BROKER\"\n    },\n    \"maxAttempts\": 5,\n    \"retryBaseSeconds\": 60,\n    \"queued\": 0,\n    \"failed\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Connection test: test mode answers from the fake provider; live mode calls the provider's health-check path when one is configured. Sends no business message",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/connectors/:code/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "connectors",
+                ":code",
+                "test"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Connection test: test mode answers from the fake provider; live mode calls the provider's health-check path when one is configured. Sends no business message\n\nFront-end touchpoint: Master > System Configuration > Integrations > Test connection\n\nAccess: write:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/connectors/:code/test",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "connectors",
+                    ":code",
+                    "test"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Connection test: test mode answers from the fake provider; live mode calls the provider's health-check path when one is configured. Sends no business message\n\nFront-end touchpoint: Master > System Configuration > Integrations > Test connection\n\nAccess: write:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"ok\": true,\n    \"mode\": \"test\",\n    \"detail\": \"Test mode: messages go to the fake provider; nothing leaves the system\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Integration inbox: messages pushed by third parties and files imported (connectorCode, status, messageType, source, search; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/inbox?status=failed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "inbox"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "failed"
+                }
+              ]
+            },
+            "description": "Integration inbox: messages pushed by third parties and files imported (connectorCode, status, messageType, source, search; paging)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Inbox\n\nAccess: read:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/inbox?status=failed",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "inbox"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "failed"
+                    }
+                  ]
+                },
+                "description": "Integration inbox: messages pushed by third parties and files imported (connectorCode, status, messageType, source, search; paging)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Inbox\n\nAccess: read:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"connectorCode\": \"BANK_FILES\",\n      \"messageType\": \"bank.status_file\",\n      \"source\": \"file\",\n      \"status\": \"processed\",\n      \"result\": {\n        \"applied\": 12,\n        \"paid\": 11,\n        \"rejected\": 1\n      }\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Process a failed inbound message again (after the cause was fixed)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/inbox/:id/reprocess",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "inbox",
+                ":id",
+                "reprocess"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Process a failed inbound message again (after the cause was fixed)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Inbox > Reprocess\n\nAccess: write:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/inbox/:id/reprocess",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "inbox",
+                    ":id",
+                    "reprocess"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Process a failed inbound message again (after the cause was fixed)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Inbox > Reprocess\n\nAccess: write:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 7,\n    \"status\": \"processed\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Integration outbox (connectorCode, status (comma-separated), messageType, kind, entity, entityId, from, to, search; paging) with the count per status",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/outbox?status=failed,retry&connectorCode=SMS_SEMAPHORE&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "outbox"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "failed,retry"
+                },
+                {
+                  "key": "connectorCode",
+                  "value": "SMS_SEMAPHORE"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Integration outbox (connectorCode, status (comma-separated), messageType, kind, entity, entityId, from, to, search; paging) with the count per status\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox\n\nAccess: read:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/outbox?status=failed,retry&connectorCode=SMS_SEMAPHORE&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "outbox"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "failed,retry"
+                    },
+                    {
+                      "key": "connectorCode",
+                      "value": "SMS_SEMAPHORE"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Integration outbox (connectorCode, status (comma-separated), messageType, kind, entity, entityId, from, to, search; paging) with the count per status\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox\n\nAccess: read:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 41,\n      \"connectorCode\": \"SMS_SEMAPHORE\",\n      \"messageType\": \"sms.send\",\n      \"entity\": \"policy\",\n      \"entityId\": \"pol_0123456789abcdef\",\n      \"reference\": \"+639171234567\",\n      \"status\": \"retry\",\n      \"mode\": \"test\",\n      \"attempts\": 2,\n      \"maxAttempts\": 5,\n      \"nextAttemptAt\": \"2026-10-04T02:04:00Z\",\n      \"lastError\": \"HTTP 503: Service unavailable\",\n      \"externalRef\": null\n    }\n  ],\n  \"counts\": {\n    \"queued\": 0,\n    \"retry\": 1,\n    \"sent\": 120,\n    \"failed\": 2\n  },\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "One integration message with its payload, the provider's answer and every attempt",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/outbox/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "outbox",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One integration message with its payload, the provider's answer and every attempt\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox > Detail\n\nAccess: read:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/outbox/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "outbox",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One integration message with its payload, the provider's answer and every attempt\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox > Detail\n\nAccess: read:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 41,\n    \"connectorCode\": \"SMS_SEMAPHORE\",\n    \"messageType\": \"sms.send\",\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_0123456789abcdef\",\n    \"reference\": \"+639171234567\",\n    \"status\": \"retry\",\n    \"mode\": \"test\",\n    \"attempts\": 2,\n    \"maxAttempts\": 5,\n    \"nextAttemptAt\": \"2026-10-04T02:04:00Z\",\n    \"lastError\": \"HTTP 503: Service unavailable\",\n    \"externalRef\": null,\n    \"payload\": {\n      \"to\": \"+639171234567\",\n      \"text\": \"Your policy ...\"\n    },\n    \"attemptLog\": [\n      {\n        \"attempt\": 1,\n        \"ok\": false,\n        \"httpStatus\": 503,\n        \"durationMs\": 412,\n        \"error\": \"HTTP 503\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a message that has not been sent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/outbox/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "outbox",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a message that has not been sent\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox > Cancel\n\nAccess: write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Sent by e-mail instead\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/outbox/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "outbox",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a message that has not been sent\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox > Cancel\n\nAccess: write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Sent by e-mail instead\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 41,\n    \"connectorCode\": \"SMS_SEMAPHORE\",\n    \"messageType\": \"sms.send\",\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_0123456789abcdef\",\n    \"reference\": \"+639171234567\",\n    \"status\": \"cancelled\",\n    \"mode\": \"test\",\n    \"attempts\": 2,\n    \"maxAttempts\": 5,\n    \"nextAttemptAt\": \"2026-10-04T02:04:00Z\",\n    \"lastError\": \"HTTP 503: Service unavailable\",\n    \"externalRef\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Queue a failed, cancelled or skipped message again with a fresh attempt count and send it at once (a waiting one is sent now)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/outbox/:id/resend",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "outbox",
+                ":id",
+                "resend"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Queue a failed, cancelled or skipped message again with a fresh attempt count and send it at once (a waiting one is sent now)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox > Resend\n\nAccess: write:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/outbox/:id/resend",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "outbox",
+                    ":id",
+                    "resend"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Queue a failed, cancelled or skipped message again with a fresh attempt count and send it at once (a waiting one is sent now)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Outbox > Resend\n\nAccess: write:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Sent\",\n  \"data\": {\n    \"id\": 41,\n    \"connectorCode\": \"SMS_SEMAPHORE\",\n    \"messageType\": \"sms.send\",\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_0123456789abcdef\",\n    \"reference\": \"+639171234567\",\n    \"status\": \"sent\",\n    \"mode\": \"test\",\n    \"attempts\": 1,\n    \"maxAttempts\": 5,\n    \"nextAttemptAt\": \"2026-10-04T02:04:00Z\",\n    \"lastError\": \"HTTP 503: Service unavailable\",\n    \"externalRef\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send the messages that are due now (what the integration-outbox job does every 2 minutes)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/outbox/process",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "outbox",
+                "process"
+              ]
+            },
+            "description": "Send the messages that are due now (what the integration-outbox job does every 2 minutes)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Send due messages\n\nAccess: write:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/outbox/process",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "outbox",
+                    "process"
+                  ]
+                },
+                "description": "Send the messages that are due now (what the integration-outbox job does every 2 minutes)\n\nFront-end touchpoint: Master > System Configuration > Integrations > Send due messages\n\nAccess: write:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"sent\": 3,\n    \"retry\": 1,\n    \"failed\": 0,\n    \"held\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Installed provider adapters and message types (for the connector editor and the monitor filters)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/integrations/registry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "integrations",
+                "registry"
+              ]
+            },
+            "description": "Installed provider adapters and message types (for the connector editor and the monitor filters)\n\nFront-end touchpoint: Master > System Configuration > Integrations\n\nAccess: read:integrations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/integrations/registry",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "integrations",
+                    "registry"
+                  ]
+                },
+                "description": "Installed provider adapters and message types (for the connector editor and the monitor filters)\n\nFront-end touchpoint: Master > System Configuration > Integrations\n\nAccess: read:integrations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"adapters\": [\n      {\n        \"code\": \"http_sms\",\n        \"label\": \"HTTP SMS API\",\n        \"kinds\": [\n          \"sms\"\n        ]\n      }\n    ],\n    \"messageTypes\": [\n      {\n        \"type\": \"sms.send\",\n        \"kind\": \"sms\",\n        \"label\": \"SMS to a client\",\n        \"inbound\": false\n      }\n    ]\n  }\n}"
             }
           ]
         }
@@ -28831,6 +32516,562 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 2 created, 0 failed\",\n    \"total\": 2,\n    \"created\": 2,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Messaging",
+      "item": [
+        {
+          "name": "SMS and Viber messages (clientId, status, search; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/messages?clientId=cl_0123456789abcdef&status=skipped",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messaging",
+                "messages"
+              ],
+              "query": [
+                {
+                  "key": "clientId",
+                  "value": "cl_0123456789abcdef"
+                },
+                {
+                  "key": "status",
+                  "value": "skipped"
+                }
+              ]
+            },
+            "description": "SMS and Viber messages (clientId, status, search; paging)\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Messages sent\n\nAccess: read:integrations, read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/messaging/messages?clientId=cl_0123456789abcdef&status=skipped",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "messaging",
+                    "messages"
+                  ],
+                  "query": [
+                    {
+                      "key": "clientId",
+                      "value": "cl_0123456789abcdef"
+                    },
+                    {
+                      "key": "status",
+                      "value": "skipped"
+                    }
+                  ]
+                },
+                "description": "SMS and Viber messages (clientId, status, search; paging)\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Messages sent\n\nAccess: read:integrations, read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 41,\n      \"connectorCode\": \"SMS_SEMAPHORE\",\n      \"messageType\": \"sms.send\",\n      \"entity\": \"policy\",\n      \"entityId\": \"pol_0123456789abcdef\",\n      \"reference\": \"+639171234567\",\n      \"status\": \"sent\",\n      \"mode\": \"test\",\n      \"attempts\": 2,\n      \"maxAttempts\": 5,\n      \"nextAttemptAt\": \"2026-10-04T02:04:00Z\",\n      \"lastError\": \"HTTP 503: Service unavailable\",\n      \"externalRef\": null\n    }\n  ],\n  \"total\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send a message to a client from a template (or a free text) about a policy or claim: consent check, mobile number from the client record unless given",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/send",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messaging",
+                "send"
+              ]
+            },
+            "description": "Send a message to a client from a template (or a free text) about a policy or claim: consent check, mobile number from the client record unless given\n\nFront-end touchpoint: Operations > Clients / Policy / Claims > Send SMS\n\nAccess: write:clients, write:policies, write:claims, write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"cl_0123456789abcdef\",\n  \"templateCode\": \"RENEWAL_NOTICE\",\n  \"policyId\": \"PC-MLY-2026-000101\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/messaging/send",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "messaging",
+                    "send"
+                  ]
+                },
+                "description": "Send a message to a client from a template (or a free text) about a policy or claim: consent check, mobile number from the client record unless given\n\nFront-end touchpoint: Operations > Clients / Policy / Claims > Send SMS\n\nAccess: write:clients, write:policies, write:claims, write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": \"cl_0123456789abcdef\",\n  \"templateCode\": \"RENEWAL_NOTICE\",\n  \"policyId\": \"PC-MLY-2026-000101\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 41,\n    \"connectorCode\": \"SMS_SEMAPHORE\",\n    \"messageType\": \"sms.send\",\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_0123456789abcdef\",\n    \"reference\": \"+639171234567\",\n    \"status\": \"sent\",\n    \"mode\": \"test\",\n    \"attempts\": 2,\n    \"maxAttempts\": 5,\n    \"nextAttemptAt\": \"2026-10-04T02:04:00Z\",\n    \"lastError\": \"HTTP 503: Service unavailable\",\n    \"externalRef\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Message templates (event, active) with the placeholders a template may use",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/templates?event=renewal_notice",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messaging",
+                "templates"
+              ],
+              "query": [
+                {
+                  "key": "event",
+                  "value": "renewal_notice"
+                }
+              ]
+            },
+            "description": "Message templates (event, active) with the placeholders a template may use\n\nFront-end touchpoint: Master > System Configuration > Message Templates\n\nAccess: read:integrations, write:clients, write:policies, write:claims"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/messaging/templates?event=renewal_notice",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "messaging",
+                    "templates"
+                  ],
+                  "query": [
+                    {
+                      "key": "event",
+                      "value": "renewal_notice"
+                    }
+                  ]
+                },
+                "description": "Message templates (event, active) with the placeholders a template may use\n\nFront-end touchpoint: Master > System Configuration > Message Templates\n\nAccess: read:integrations, write:clients, write:policies, write:claims"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"RENEWAL_NOTICE\",\n      \"name\": \"Renewal notice\",\n      \"channel\": \"sms\",\n      \"event\": \"renewal_notice\",\n      \"consentPurpose\": \"processing\",\n      \"connectorCode\": null,\n      \"active\": true,\n      \"body\": \"Hi {{clientName}}, your policy {{policyNumber}} with {{insurer}} expires on {{expiryDate}}. Reply or call us to renew. {{companyName}}\"\n    }\n  ],\n  \"placeholders\": {\n    \"clientName\": \"Maria Santos\",\n    \"companyName\": \"iorta TechNXT Corp.\",\n    \"policyNumber\": \"PC-MLY-2026-000101\",\n    \"insurer\": \"Malayan Insurance Co., Inc.\",\n    \"expiryDate\": \"2026-11-03\",\n    \"daysToExpiry\": \"30\",\n    \"billNumber\": \"BILL-2026-00012\",\n    \"amountDue\": \"12,450.00\",\n    \"dueDate\": \"2026-10-10\",\n    \"claimNumber\": \"CLM-2026-00031\",\n    \"claimStatus\": \"In review\",\n    \"cocNumber\": \"MIC-00012345\",\n    \"authCode\": \"A1B2C3D4E5F6\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "New message template",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/templates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messaging",
+                "templates"
+              ]
+            },
+            "description": "New message template\n\nFront-end touchpoint: Master > System Configuration > Message Templates > New template\n\nAccess: write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"RENEWAL_NOTICE\",\n  \"name\": \"Renewal notice\",\n  \"channel\": \"sms\",\n  \"event\": \"renewal_notice\",\n  \"consentPurpose\": \"processing\",\n  \"connectorCode\": null,\n  \"active\": true,\n  \"body\": \"Hi {{clientName}}, your policy {{policyNumber}} with {{insurer}} expires on {{expiryDate}}. Reply or call us to renew. {{companyName}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/messaging/templates",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "messaging",
+                    "templates"
+                  ]
+                },
+                "description": "New message template\n\nFront-end touchpoint: Master > System Configuration > Message Templates > New template\n\nAccess: write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"RENEWAL_NOTICE\",\n  \"name\": \"Renewal notice\",\n  \"channel\": \"sms\",\n  \"event\": \"renewal_notice\",\n  \"consentPurpose\": \"processing\",\n  \"connectorCode\": null,\n  \"active\": true,\n  \"body\": \"Hi {{clientName}}, your policy {{policyNumber}} with {{insurer}} expires on {{expiryDate}}. Reply or call us to renew. {{companyName}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"RENEWAL_NOTICE\",\n    \"name\": \"Renewal notice\",\n    \"channel\": \"sms\",\n    \"event\": \"renewal_notice\",\n    \"consentPurpose\": \"processing\",\n    \"connectorCode\": null,\n    \"active\": true,\n    \"body\": \"Hi {{clientName}}, your policy {{policyNumber}} with {{insurer}} expires on {{expiryDate}}. Reply or call us to renew. {{companyName}}\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a message template",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/templates/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messaging",
+                "templates",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a message template\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Edit\n\nAccess: write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Hi {{clientName}}, policy {{policyNumber}} expires on {{expiryDate}}.\",\n  \"active\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/messaging/templates/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "messaging",
+                    "templates",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a message template\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Edit\n\nAccess: write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body\": \"Hi {{clientName}}, policy {{policyNumber}} expires on {{expiryDate}}.\",\n  \"active\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"RENEWAL_NOTICE\",\n    \"name\": \"Renewal notice\",\n    \"channel\": \"sms\",\n    \"event\": \"renewal_notice\",\n    \"consentPurpose\": \"processing\",\n    \"connectorCode\": null,\n    \"active\": true,\n    \"body\": \"Hi {{clientName}}, your policy {{policyNumber}} with {{insurer}} expires on {{expiryDate}}. Reply or call us to renew. {{companyName}}\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send a template with the example values to a mobile number (no consent check), through the template's connector",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/templates/:code/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messaging",
+                "templates",
+                ":code",
+                "test"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Send a template with the example values to a mobile number (no consent check), through the template's connector\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Send test\n\nAccess: write:integrations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"to\": \"09171234567\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/messaging/templates/:code/test",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "messaging",
+                    "templates",
+                    ":code",
+                    "test"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Send a template with the example values to a mobile number (no consent check), through the template's connector\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Send test\n\nAccess: write:integrations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"to\": \"09171234567\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 41,\n    \"connectorCode\": \"SMS_SEMAPHORE\",\n    \"messageType\": \"sms.send\",\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_0123456789abcdef\",\n    \"reference\": \"+639171234567\",\n    \"status\": \"sent\",\n    \"mode\": \"test\",\n    \"attempts\": 2,\n    \"maxAttempts\": 5,\n    \"nextAttemptAt\": \"2026-10-04T02:04:00Z\",\n    \"lastError\": \"HTTP 503: Service unavailable\",\n    \"externalRef\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Text of a template body with the example values of the placeholders (characters and SMS parts)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/messaging/templates/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "messaging",
+                "templates",
+                "preview"
+              ]
+            },
+            "description": "Text of a template body with the example values of the placeholders (characters and SMS parts)\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Edit\n\nAccess: read:integrations, write:clients, write:policies, write:claims",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"body\": \"Hi {{clientName}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/messaging/templates/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "messaging",
+                    "templates",
+                    "preview"
+                  ]
+                },
+                "description": "Text of a template body with the example values of the placeholders (characters and SMS parts)\n\nFront-end touchpoint: Master > System Configuration > Message Templates > Edit\n\nAccess: read:integrations, write:clients, write:policies, write:claims",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"body\": \"Hi {{clientName}}\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"text\": \"Hi Maria Santos\",\n    \"length\": 15,\n    \"parts\": 1\n  }\n}"
             }
           ]
         }
@@ -48734,6 +52975,112 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Public Integrations",
+      "item": [
+        {
+          "name": "Message pushed by a third party (claim status from an insurer, CTPL authentication result): JSON with \"type\" (message type), signed in header x-signature = HMAC-SHA256 of the raw body with the connector's webhookSecret credential",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/public/integrations/inbound/:connector",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "public",
+                "integrations",
+                "inbound",
+                ":connector"
+              ],
+              "variable": [
+                {
+                  "key": "connector",
+                  "value": "",
+                  "description": "connector (path parameter)"
+                }
+              ]
+            },
+            "description": "Message pushed by a third party (claim status from an insurer, CTPL authentication result): JSON with \"type\" (message type), signed in header x-signature = HMAC-SHA256 of the raw body with the connector's webhookSecret credential\n\nFront-end touchpoint: Third party to server\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"type\": \"insurer.claim_status\",\n  \"claimNumber\": \"CLM-2026-00031\",\n  \"status\": \"APPROVED\",\n  \"remarks\": \"Approved for payment\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/public/integrations/inbound/:connector",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "public",
+                    "integrations",
+                    "inbound",
+                    ":connector"
+                  ],
+                  "variable": [
+                    {
+                      "key": "connector",
+                      "value": "",
+                      "description": "connector (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Message pushed by a third party (claim status from an insurer, CTPL authentication result): JSON with \"type\" (message type), signed in header x-signature = HMAC-SHA256 of the raw body with the connector's webhookSecret credential\n\nFront-end touchpoint: Third party to server\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"type\": \"insurer.claim_status\",\n  \"claimNumber\": \"CLM-2026-00031\",\n  \"status\": \"APPROVED\",\n  \"remarks\": \"Approved for payment\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 9,\n    \"status\": \"processed\"\n  }\n}"
             }
           ]
         }

@@ -477,6 +477,8 @@ async function transition(row, to, user, { note, sets = {}, action } = {}) {
   row.status = to;
   const labels = await statusLabels();
   await notifyParties(row, { title: `Claim ${row.claim_number}: ${labels[to]}`, message: note || `Claim ${row.claim_number} is now ${labels[to]}` });
+  // claim update SMS to the client (Master > System Configuration > Message Templates); never blocks the workflow
+  await import('../integrations/messaging.js').then((m) => m.claimStatusChanged(row, to, labels[to])).catch(() => null);
 }
 
 /** PUT /claims/updatestatus/:id: only statuses without their own workflow step (review, close, reject). */
