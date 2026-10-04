@@ -137,6 +137,26 @@ describe('cancellation return premium', () => {
     expect(c.body.status).toBe('Completed');
     expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('active');
   });
+  it('a CTPL tariff policy (no net premium) is cancelled on the tariff amount, without premium taxes of its own', async () => {
+    // the Insurance Commission tariff is booked as the gross premium with its taxes inside: the net premium is 0
+    const m = await makePolicy({ net: 0, product: 'CTPL', inceptionOffset: -10 });
+    await query("UPDATE policies SET premium_total = 610.40, commission_amount = 0, net_premium = 0, details = '{\"netPremium\":0,\"grossPremium\":610.4}' WHERE id = $1", [m.policy.id]);
+    const rcv = await bill(m, 610.4);
+    const quote = await ctx.api('post', '/cancellations/quote').send({ policyId: m.policy.id, effectiveDate: asOf, reason: 'NON_PAYMENT' });
+    expect(quote.status).toBe(200);
+    const expected = r2((610.4 * 355) / 365);
+    expect(quote.body.data).toMatchObject({ method: 'pro-rata', tariffOnly: true, policyNetPremium: 610.4, returnNetPremium: expected, grossReturn: expected });
+    expect(quote.body.data.taxes).toEqual({ vat: 0, dst: 0, lgt: 0, fst: 0, other: 0 });
+    const e = await ctx.api('post', '/endorsements/create-endorsement').send({ policyId: m.policy.id, endorsementTypeIds: [5], isCancelPolicy: true, cancellationType: 'FULL',
+      cancellationReason: 'NON_PAYMENT', effectiveDate: asOf });
+    expect(e.status).toBe(201);
+    expect(e.body.premiumDelta).toBe(-expected);
+    const c = await ctx.api('post', '/endorsements/complete-endorsement').send({ endorsementId: e.body.endorsementId });
+    expect(c.status).toBe(200);
+    expect((await one('SELECT status FROM policies WHERE id = $1', [m.policy.id])).status).toBe('cancelled');
+    expect(Number((await one('SELECT balance FROM receivables WHERE id = $1', [rcv.id])).balance)).toBe(r2(610.4 - expected));
+    expect(await ledgerIntegrity()).toEqual({ unbalanced: 0, diff: 0 });
+  });
 });
 
 // ---------------------------------------------------------------- 8.12 post-dated cheques

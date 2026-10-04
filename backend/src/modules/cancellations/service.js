@@ -9,6 +9,8 @@
  * auto | pro-rata | short-period | flat); endorsements.short_period_for_insured switches the short-period scale off.
  * A partial cancellation (cancellationType PARTIAL / PRO_RATA_PARTIAL) returns on the premium of the part cancelled
  * (partialPremium, or partialPercent of the policy premium) and leaves the policy in force.
+ * A policy whose premium is only the CTPL tariff (net premium 0, gross premium the tariff amount with its taxes and the
+ * authentication fee inside) returns on the tariff amount with no premium tax of its own (tariffOnly in the result).
  *
  * The premium taxes of the return come from the premium tax and charge engine (premium-charges quotationCharges) on the
  * returned premium, those of endorsements.cancellation_returned_taxes only (documentary stamp tax is not refundable by
@@ -78,12 +80,17 @@ export async function computeReturn(db, policy, input = {}) {
 
   const doc = policy.doc || {};
   const policyNet = round2(num(policy.net_premium) || num(doc.netPremium) || num(policy.details?.netPremium));
-  if (!(policyNet > 0)) throw conflict(`Policy ${policy.policy_number} has no net premium to compute a return on`);
+  // A policy whose premium is only the CTPL tariff has no net premium: the Insurance Commission tariff carries its
+  // taxes and the authentication fee inside, so the return is computed on the tariff amount and adds no premium tax.
+  const policyGross = round2(num(policy.premium_total) || num(doc.grossPremium) || num(policy.details?.grossPremium));
+  const tariffOnly = !(policyNet > 0) && policyGross > 0;
+  if (!(policyNet > 0) && !tariffOnly) throw conflict(`Policy ${policy.policy_number} has no net premium to compute a return on`);
+  const policyBase = tariffOnly ? policyGross : policyNet;
   const partial = isPartialCancellation(type);
-  let base = policyNet;
+  let base = policyBase;
   if (partial) {
-    if (num(input.partialPremium) > 0) base = round2(Math.min(num(input.partialPremium), policyNet));
-    else if (num(input.partialPercent) > 0 && num(input.partialPercent) <= 100) base = round2((policyNet * num(input.partialPercent)) / 100);
+    if (num(input.partialPremium) > 0) base = round2(Math.min(num(input.partialPremium), policyBase));
+    else if (num(input.partialPercent) > 0 && num(input.partialPercent) <= 100) base = round2((policyBase * num(input.partialPercent)) / 100);
     else throw badRequest('Validation failed', [{ path: 'partialPremium', message: 'A partial cancellation needs the net premium (partialPremium) or the percentage (partialPercent) of the part cancelled' }]);
   }
 
@@ -109,20 +116,21 @@ export async function computeReturn(db, policy, input = {}) {
   if (factor === null && !(returnNet > 0)) throw badRequest('Validation failed', [{ path: 'returnPremium', message: 'Enter the net return premium' }]);
 
   const returned = (await getSetting('endorsements.cancellation_returned_taxes', { vat: true, dst: false, lgt: true, fst: false, other: false })) || {};
-  const ch = returnNet > 0 ? await quotationCharges({ productId: policy.product_id || null, lguCode: doc.lguCode || null, lguCity: doc.lguCity || null,
+  const ch = returnNet > 0 && !tariffOnly ? await quotationCharges({ productId: policy.product_id || null, lguCode: doc.lguCode || null, lguCity: doc.lguCity || null,
     premiumTaxRegime: doc.premiumTaxRegime || null }, returnNet, policy.lob || policy.product_line, db) : null;
+  if (tariffOnly) explanation += '; CTPL tariff policy: returned on the tariff amount, which includes its taxes';
   const tax = (k, key) => (ch && returned[k] ? round2(num(ch.tax[key])) : 0);
   const taxes = { vat: tax('vat', 'valueAddedTax'), dst: tax('dst', 'documentaryStampTax'), lgt: tax('lgt', 'localGovernmentTax'), fst: tax('fst', 'fireServiceTax'),
     other: ch && returned.other ? round2(num(ch.others)) : 0 };
   const grossReturn = round2(returnNet + taxes.vat + taxes.dst + taxes.lgt + taxes.fst + taxes.other);
 
-  const booked = num(policy.commission_amount) > 0 && policyNet > 0 ? num(policy.commission_amount) / policyNet : null;
+  const booked = num(policy.commission_amount) > 0 && policyBase > 0 ? num(policy.commission_amount) / policyBase : null;
   const rate = booked ?? (await resolveCommissionRate({ insurerId: policy.insurance_company_id, productId: policy.product_id, lob: policy.lob, date: inception, db })).rate;
   const commission = round2(Math.min(returnNet * (rate || 0), returnNet));
   return {
     policyId: policy.id, policyNumber: policy.policy_number, inceptionDate: inception, expiryDate: expiry, effectiveDate: effective < inception ? inception : effective,
     totalDays, daysInForce, daysLeft, reason: { code: reason.code, name: reason.name, initiatedBy }, method, cancellationType: partial ? type : 'FULL', partial,
-    policyNetPremium: policyNet, basePremium: base, factor: factor === null ? null : Math.round(factor * 1e6) / 1e6, shortPeriodBand: band,
+    policyNetPremium: policyBase, tariffOnly, basePremium: base, factor: factor === null ? null : Math.round(factor * 1e6) / 1e6, shortPeriodBand: band,
     returnNetPremium: returnNet, taxes, grossReturn, commissionRate: Math.round((rate || 0) * 1e6) / 1e6, commissionReversed: commission,
     retainedNetPremium: round2(base - returnNet), explanation,
   };

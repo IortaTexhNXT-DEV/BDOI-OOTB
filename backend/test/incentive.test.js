@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { setup, loginAs } from './helpers.js';
 import { pool } from '../src/db/pool.js';
+import { parsePeriod } from '../src/modules/incentive/service.js';
 
 let ctx;
 let agentTok;
@@ -18,6 +19,17 @@ beforeAll(async () => {
 });
 afterAll(async () => { await pool.end(); });
 const as = (tok, m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${tok}`);
+
+describe('periods', () => {
+  it('reads a month, a label, and the quarter or half-year key of a semi-annual or quarterly result', () => {
+    expect(parsePeriod('2026-09')).toEqual({ label: 'September 2026', from: '2026-09-01', to: '2026-09-30' });
+    expect(parsePeriod('September 2026').from).toBe('2026-09-01');
+    expect(parsePeriod('2026-H1')).toEqual({ label: 'January to June 2026', from: '2026-01-01', to: '2026-06-30' });
+    expect(parsePeriod('2026-h2').to).toBe('2026-12-31');
+    expect(parsePeriod('2026-Q3')).toEqual({ label: 'July to September 2026', from: '2026-07-01', to: '2026-09-30' });
+    expect(() => parsePeriod('2026-H3')).toThrow();
+  });
+});
 
 describe('programs', () => {
   it('lists seeded programs in the mock shape', async () => {

@@ -49,6 +49,21 @@ function motorQuoteBody(ctx, lead, insurerCode, { ctplOnly = false, motorcycle =
   return { body, vehicle: { ...v, year, plate, brandNew } };
 }
 
+/** The account executive's first call with the prospect, logged as a sales activity with the next step. */
+async function logCall(ctx, sales, lead, prospect, item) {
+  const day = minDate(businessDay(ctx.rnd, item.month), ctx.today);
+  await sales.post('/sales-activities', { entity: 'lead', entityId: lead.id, activityType: 'CALL', subject: `Introductory call: ${item.product} cover`,
+    activityAt: `${day}T${String(ctx.rnd.int(9, 16)).padStart(2, '0')}:${ctx.rnd.pick(['00', '15', '30', '45'])}:00+08:00`,
+    durationMinutes: ctx.rnd.int(5, 25), contactPerson: `${prospect.firstName} ${prospect.lastName}`, outcome: 'INTERESTED', nextStep: `Send the ${item.product} quotation`, nextStepDate: addDays(ctx.today, ctx.rnd.int(1, 5)) });
+  ctx.log.count('Sales activities logged');
+}
+
+/** The sub-agent who referred a motor sale (every fourth comprehensive motor item, the referrers in turn); null otherwise. */
+function referrerOf(ctx, item) {
+  if (item.product !== 'MOTOR' || !ctx.referrers?.length || item.i % 4 !== 0) return null;
+  return ctx.referrers[(item.i / 4) % ctx.referrers.length];
+}
+
 /** Motor or CTPL: quick quote from the tariff, quotation, customer answer, KYC, issuance. */
 async function motorSale(ctx, item, lead, prospect) {
   const { rnd, as, log } = ctx;
@@ -59,11 +74,18 @@ async function motorSale(ctx, item, lead, prospect) {
   const ctplOnly = item.product === 'CTPL';
   const { body, vehicle } = motorQuoteBody(ctx, lead, insurerCode, { ctplOnly, motorcycle: ctplOnly && item.i % 3 === 1, inception });
   // business referred by a sub-agent carries the commission split on the order summary (primary referrer, comsub rate)
-  const referrer = !ctplOnly && ctx.referrers?.length && item.i % 4 === 0 ? ctx.referrers[(item.i / 4) % ctx.referrers.length] : null;
+  const referrer = referrerOf(ctx, item);
   if (referrer) body.commissionDetails = { brokeragePct: 20, primary: { referrerId: referrer.id, level: referrer.level, comsubPct: referrer.type === 'External' ? 7.5 : 5 }, chain: [] };
   // quick quote: the premium from the motor tariff before the quotation is saved
   const calc = dataOf(await sales.post('/quotations/calculate-premium', body));
   if (!(calc.grossPremium > 0)) throw new Error('Quick quote returned no premium');
+  // the quote wizard lists the covers of the governing template (Coverage Builder): the AE keeps the mandatory covers
+  // and the optional ones the quick quote priced, and the quotation is priced on the covers chosen
+  const covers = calc.coverSelection?.covers || [];
+  if (!ctplOnly && covers.length) {
+    body.selectedCovers = covers.filter((c) => c.type === 'Mandatory' || c.selected).map((c) => c.code);
+    log.count('Quotations priced on the covers chosen in the wizard');
+  }
   const quote = await sales.post('/quotations', body);
   const quoteId = quote.quotationId || dataOf(quote).quotationId;
   log.count(ctplOnly ? 'Quotations (CTPL only)' : 'Quotations (motor comprehensive with CTPL)');
@@ -164,6 +186,7 @@ async function finishQuote(ctx, item, q) {
     id: pol.policyId || pol.id, policyNumber: pol.policyNumber, clientId: pol.clientId, leadId: q.lead.id, segment: 'retail', product: q.product, lob: pol.lob,
     insurerCode: insurerCodeOf(ctx, pol.insuranceCompanyId) || q.insurerCode, gross: Number(pol.grossPremium), net: Number(pol.netPremium), issueDate: q.issueDate, inception: pol.inception || q.inception,
     expiry: pol.expiry, billing: pol.billingMode || 'broker', sales: item.sales, month: item.month.period, quoteId: q.quoteId,
+    kyc: extra.customerInfo,
   };
   if (record.issueDate !== (pol.issuedDate || record.issueDate)) log.note(`Policy ${record.policyNumber} issued date ${pol.issuedDate} instead of ${record.issueDate}`);
   ctx.policies.push(record);
@@ -178,12 +201,21 @@ export async function retail(ctx) {
   for (const i of [3, 14, 27]) if (plan[i]) plan[i].direct = true;
   for (const item of plan) {
     const prospect = person(rnd);
+    // a prospect brought by the dealer's F&I officer is tagged with the dealer branch (distribution channel)
+    const dealer = referrerOf(ctx, item)?.channelId || null;
+    const source = rnd.pick(['Referral', 'Walk-in', 'Facebook page', 'Car dealer tie-up', 'Existing client referral']);
     const lead = await log.step(`Lead ${prospect.firstName} ${prospect.lastName}`, () => createLead(ctx, as[item.sales], {
       ...prospect, leadCategory: 'Retail', lob: ['MOTOR', 'CTPL'].includes(item.product) ? 'MOTOR' : item.product === 'HOME' ? 'FIRE' : 'ACCIDENT',
-      productType: item.product, source: rnd.pick(['Referral', 'Walk-in', 'Facebook page', 'Car dealer tie-up', 'Existing client referral']),
+      productType: item.product, source: dealer ? 'Car dealer tie-up' : source,
+      ...(dealer ? { channelId: dealer } : {}),
     }), { who: as[item.sales].username });
     if (!lead) continue;
     ctx.clients.push({ leadId: lead.id, segment: 'retail', name: `${prospect.firstName} ${prospect.lastName}`, prospect });
+    // the account executive logs the first contact with a prospect of the current month (an activity is logged when it
+    // takes place: sales_activities.backdate_days; the next step is a follow-up task in My Work)
+    if (item.month.period === ctx.today.slice(0, 7)) {
+      await log.step(`Introductory call with ${prospect.firstName} ${prospect.lastName} logged`, () => logCall(ctx, as[item.sales], lead, prospect, item), { who: as[item.sales].username });
+    }
     const run = ['MOTOR', 'CTPL'].includes(item.product) ? motorSale : rfqSale;
     await log.step(`${item.product} for ${prospect.firstName} ${prospect.lastName} (${item.month.period}, ${item.outcome})`, () => run(ctx, item, lead, prospect), { who: as[item.sales].username });
   }

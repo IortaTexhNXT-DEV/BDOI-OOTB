@@ -95,7 +95,8 @@ export const MASKED_TEXT = '[masked]';
 
 /** Patterns of personal data in free text: also used by the verification step. */
 export const EMAIL_RE = /[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}/g;
-export const MOBILE_RE = /(?<![\d+])(?:\+?63|0)[\s.-]?\(?9\d{2}\)?[\s.-]?\d{3}[\s.-]?\d{4}(?!\d)/g;
+// A mobile number stands on its own: a digit run glued to letters or an underscore is part of an identifier (pol_0991234567ab)
+export const MOBILE_RE = /(?<![\w+])(?:\+?63|0)[\s.-]?\(?9\d{2}\)?[\s.-]?\d{3}[\s.-]?\d{4}(?!\w)/g;
 export const TIN_RE = /(?<![\d-])\d{3}[- ]\d{3}[- ]\d{3}(?:[- ]\d{3,5})?(?![\d-])/g;
 const WORD_RE = /[\p{L}\p{M}\p{N}]+(?:['’][\p{L}\p{M}]+)*/gu;
 
@@ -300,9 +301,10 @@ export class Masker {
     return `user${this.hmac('email', s).toString('hex').slice(0, 12)}@${MASKED_EMAIL_DOMAIN}`;
   }
 
+  /** E-mail addresses in a value; a recipient of an SMS or Viber message (the "to" of an integration payload) is a mobile number, masked as one. */
   emailList(v) {
     if (v == null || v === '') return v;
-    return String(v).replace(EMAIL_RE, (m) => this.email(m));
+    return String(v).replace(EMAIL_RE, (m) => this.email(m)).replace(MOBILE_RE, (m) => (isMaskedMobile(m) ? m : this.phone(m)));
   }
 
   phone(v) {

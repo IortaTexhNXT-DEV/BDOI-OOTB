@@ -87,14 +87,19 @@ async function forEachBatch(client, sql, params, fn) {
 }
 
 /** Text-like columns of every public table: Map(table -> [{ name, udt, nullable }]) (date columns kept for dob rules). */
-async function tableColumns(client) {
+/** Columns of every table; `key` marks a primary or foreign key column (an identifier, never swept). */
+export async function tableColumns(client) {
   const r = await client.query(`SELECT c.table_name, c.column_name, c.udt_name, c.is_nullable = 'YES' AS nullable
     FROM information_schema.columns c JOIN pg_tables t ON t.tablename = c.table_name AND t.schemaname = 'public'
     WHERE c.table_schema = 'public' AND c.is_generated = 'NEVER' ORDER BY c.table_name, c.ordinal_position`);
+  const keys = new Set((await client.query(`SELECT cl.relname AS t, a.attname AS c FROM pg_constraint k
+      JOIN pg_class cl ON cl.oid = k.conrelid JOIN pg_namespace n ON n.oid = cl.relnamespace
+      JOIN LATERAL unnest(k.conkey) AS u(attnum) ON true JOIN pg_attribute a ON a.attrelid = k.conrelid AND a.attnum = u.attnum
+    WHERE n.nspname = 'public' AND k.contype IN ('p', 'f')`)).rows.map((x) => `${x.t}.${x.c}`));
   const out = new Map();
   for (const x of r.rows) {
     if (!out.has(x.table_name)) out.set(x.table_name, []);
-    out.get(x.table_name).push({ name: x.column_name, udt: x.udt_name, nullable: x.nullable });
+    out.get(x.table_name).push({ name: x.column_name, udt: x.udt_name, nullable: x.nullable, key: keys.has(`${x.table_name}.${x.column_name}`) });
   }
   return out;
 }
@@ -194,14 +199,19 @@ function collectValue(m, rule, x, opt) {
 
 // ------------------------------------------------------------------------------------------------ masking
 
-function planColumns(table, cols) {
+/**
+ * What to do with each column of a table: its catalogue rule, else a storage-key rename for *_key columns, else the
+ * sweep of free text. Primary and foreign key columns (policies.renewed_from, ...) and columns named like identifiers
+ * are never swept: a name token inside an id (pol_bea...) must not be rewritten.
+ */
+export function planColumns(table, cols) {
   const names = NAME_SWEEP_TABLES.has(table);
   const plan = [];
   for (const c of cols) {
     const entry = catalogueEntry(table, c.name);
     const textLike = TEXT_TYPES.has(c.udt);
     let fallback = null;
-    if (textLike) fallback = KEY_COLUMN_RE.test(c.name) ? 'keyOnly' : NO_SWEEP_RE.test(c.name) ? null : 'sweep';
+    if (textLike) fallback = KEY_COLUMN_RE.test(c.name) ? 'keyOnly' : c.key || NO_SWEEP_RE.test(c.name) ? null : 'sweep';
     const entryApplies = entry && (textLike || (entry.rule === 'dob' && c.udt === 'date'));
     if (!entryApplies && !fallback) continue;
     plan.push({ ...c, entry: entryApplies ? entry : null, fallback, names, changed: 0, rows: 0 });

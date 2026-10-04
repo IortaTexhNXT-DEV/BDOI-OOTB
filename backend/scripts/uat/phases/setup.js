@@ -1,7 +1,9 @@
 /**
  * Set-up: sign in as the built-in administrator, create one persona per broker role (two where maker-checker needs a
  * second user), and the masters the business needs: insurers with credit terms, the commission rate matrix, bank
- * accounts linked to the ledger, insurer statement formats. Everything is looked up first, so a second run reuses it.
+ * accounts linked to the ledger, insurer statement formats, the sub-agent referrers with their licences on the licence
+ * register (Compliance > Insurance Commission) and the dealer tie-up as a distribution channel. Everything is looked up
+ * first, so a second run reuses it.
  */
 import { Session, ApiError, dataOf, listOf } from '../http.js';
 import { INSURERS, COMMISSION_OVERRIDES, BANK_ACCOUNTS } from '../data.js';
@@ -10,7 +12,7 @@ import { todayIn, timeline, monthStart, addMonths } from '../dates.js';
 /** Job titles shown on the user records, by role. */
 const DESIGNATIONS = {
   'system-admin': 'System Administrator', sales: 'Account Executive', processing: 'Placement Officer', operations: 'Client Service Officer',
-  claims: 'Claims Officer', accounting: 'Accounting Officer', 'accounting-manager': 'Accounting Manager',
+  claims: 'Claims Officer', accounting: 'Accounting Officer', 'accounting-manager': 'Accounting Manager', 'compliance-officer': 'Compliance Officer',
 };
 
 /** Persona users: key, username, name, roles. The key is how the phases refer to them. */
@@ -27,6 +29,7 @@ export const PERSONAS = [
   ['accounting2', 'nestor.pangilinan', 'Nestor Pangilinan', ['accounting']],
   ['manager1', 'teresa.villaroman', 'Teresa Villaroman', ['accounting-manager']],
   ['manager2', 'ramon.almario', 'Ramon Almario', ['accounting-manager']],
+  ['compliance', 'imelda.navarro', 'Imelda Navarro', ['compliance-officer']],
 ];
 
 async function ensurePersona(ctx, [key, username, name, roles]) {
@@ -184,18 +187,65 @@ async function settlementLimits(ctx) {
 async function ensureReferrers(ctx) {
   const acc = ctx.as.accounting1;
   const wanted = [
-    { id: 'uat-ref-rtiu', name: 'Rolando Tiu (dealer F&I officer)', type: 'Sub-agent', level: 'L1', bankName: 'BPI', bankAccountNo: '3179-0412-88', tin: '214-558-902-000', email: 'rolando.tiu@dealer.example.ph', phone: '09178820011' },
-    { id: 'uat-ref-kaagapay', name: 'Kaagapay Insurance Agency', type: 'External', level: 'L1', bankName: 'BDO', bankAccountNo: '0071-5566-2201', tin: '008-771-340-000', email: 'billing@kaagapay.example.ph', phone: '(032) 8233-4410' },
+    { id: 'uat-ref-rtiu', name: 'Rolando Tiu (dealer F&I officer)', type: 'Sub-agent', level: 'L1', bankName: 'BPI', bankAccountNo: '3179-0412-88', tin: '214-558-902-000', email: 'rolando.tiu@dealer.example.ph', phone: '09178820011',
+      licence: { licenceType: 'Sub-agent', licenceNumber: 'SA-2025-041873', linesAuthorised: 'Non-life' }, dealer: true },
+    { id: 'uat-ref-kaagapay', name: 'Kaagapay Insurance Agency', type: 'External', level: 'L1', bankName: 'BDO', bankAccountNo: '0071-5566-2201', tin: '008-771-340-000', email: 'billing@kaagapay.example.ph', phone: '(032) 8233-4410',
+      licence: { licenceType: 'General Agent', licenceNumber: 'GA-2025-007712', linesAuthorised: 'Non-life' } },
   ];
   const have = listOf(await acc.get('/commission/referrer-accounts'));
   ctx.referrers = [];
   for (const r of wanted) {
+    const { licence, dealer, ...account } = r;
     if (!have.some((x) => x.id === r.id)) {
-      await acc.post('/commission/referrer-accounts', r);
+      await acc.post('/commission/referrer-accounts', account);
       ctx.log.count('Sub-agent referrers');
     }
-    ctx.referrers.push(r);
+    ctx.referrers.push({ ...account, licence, dealer });
   }
+}
+
+/**
+ * The licences of the referrers on the licence register (Compliance > Insurance Commission > Licence Register), recorded
+ * by the compliance officer: commission to an agent or sub-agent without a licence in force is not approved or paid
+ * (compliance.licence_required_referrer_types). The agency's general agent licence is recorded too.
+ */
+async function ensureLicences(ctx) {
+  const s = ctx.as.compliance;
+  const year = ctx.today.slice(0, 4);
+  for (const r of ctx.referrers) {
+    const have = listOf(await s.get('/compliance/licences', { referrerId: r.id })).filter((l) => l.status === 'active');
+    if (have.length) continue;
+    await s.post('/compliance/licences', { holderType: 'referrer', referrerId: r.id, holderName: r.name, issuingAuthority: 'Insurance Commission',
+      issueDate: `${year}-01-01`, expiryDate: `${year}-12-31`, ...r.licence, remarks: 'Copy of the licence on file' });
+    ctx.log.count('Referrer licences recorded');
+  }
+}
+
+/**
+ * The car dealer tie-up as a distribution channel (Master > Insurance Management > Distribution Channels): the dealer
+ * group and its branch, whose F&I officer is the sub-agent referrer; the dealer-sourced motor prospects are tagged with
+ * the branch, so the quotations and policies carry it (Dealer Production report).
+ */
+async function ensureChannels(ctx) {
+  const s = ctx.as.sysadmin;
+  const dealer = ctx.referrers.find((r) => r.dealer);
+  if (!dealer) return;
+  const have = listOf(await s.get('/channels', { status: 'active' }));
+  const find = (code) => have.find((c) => c.code === code);
+  let group = find('NGM');
+  if (!group) {
+    group = dataOf(await s.post('/channels', { code: 'NGM', name: 'Northgate Motors Group', channelType: 'dealer_group', branchCode: 'HO', province: 'Metro Manila', city: 'Makati',
+      address: '2288 Chino Roces Ave., Makati', contactPerson: 'Dealer principal', contactEmail: 'fi@northgatemotors.example.ph', contactPhone: '(02) 8844-1200', tin: '451-209-887-000' }));
+    ctx.log.count('Distribution channels');
+  }
+  let branch = find('NGM-MKT');
+  if (!branch) {
+    branch = dataOf(await s.post('/channels', { code: 'NGM-MKT', name: 'Northgate Motors Makati', channelType: 'dealer_branch', parentId: group.id, referrerId: dealer.id, comsubPct: 5,
+      branchCode: 'HO', province: 'Metro Manila', city: 'Makati', address: '2288 Chino Roces Ave., Makati', contactPerson: dealer.name.replace(/ \(.*\)$/, ''), contactEmail: dealer.email, contactPhone: dealer.phone }));
+    ctx.log.count('Distribution channels');
+  }
+  dealer.channelId = branch.id;
+  ctx.channels = { dealerGroup: group.id, dealerBranch: branch.id };
 }
 
 /** Tax codes the commission taxes use must exist and be active (VAT 12% out, EWT on commission). */
@@ -233,7 +283,9 @@ export async function setup(ctx) {
   await log.step('Bank accounts linked to the ledger', () => ensureBankAccounts(ctx), { critical: true });
   await log.step('Insurer statement formats', () => ensureInsurerFormats(ctx));
   await log.step('Tax codes of the commission taxes', () => checkTaxCodes(ctx));
-  await log.step('Sub-agent referrers', () => ensureReferrers(ctx));
+  await log.step('Sub-agent referrers', () => ensureReferrers(ctx), { critical: true });
+  await log.step('Licences of the referrers on the licence register', () => ensureLicences(ctx));
+  await log.step('Dealer tie-up as a distribution channel', () => ensureChannels(ctx));
   await log.step('Settlement limit of the remittance master', () => settlementLimits(ctx));
   ctx.firstMonth = monthStart(addMonths(ctx.today, -(cfg.months - 1)));
 }

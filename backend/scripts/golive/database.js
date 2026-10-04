@@ -110,17 +110,22 @@ export function sourceSnapshot(url, { cutover, receivableAccount = '1202001' }) 
         rows: {
           clients: clients.map((c) => ({
             'Client Code': c.client_code, 'Client Type': c.client_type, 'First Name': S(c.first_name), 'Last Name': S(c.last_name), 'Company Name': S(c.company_name),
-            Email: S(c.email), Phone: S(c.phone), TIN: S(revealPii(c.tin)), 'Birth Date': S(c.birth_date), Gender: S(c.gender), Address: S(c.address), City: S(c.city),
-            Province: S(c.state), Country: S(c.country), 'Postal Code': S(c.postal_code),
+            Email: S(c.email), Phone: S(c.phone), TIN: S(revealPii(c.tin)), 'Birth Date': S(c.birth_date), Gender: S(c.gender), Address: S(c.address),
+            // the Philippine address columns of the migration kit (Barangay, City / Municipality, Province, Region, ZIP Code)
+            Barangay: S(c.barangay), 'City / Municipality': S(c.city), Province: S(c.state), Region: S(c.region), Country: S(c.country), 'ZIP Code': S(c.postal_code),
           })),
           policies: policies.map((p) => {
             const open = openItems.filter((b) => b.policy_id === p.id).reduce((s, b) => s + Number(b.balance_asof), 0);
             const gross = Number(p.premium_total);
             const rate = p.doc?.commissionRate ?? (Number(p.net_premium) > 0 && p.commission_amount !== undefined ? Math.round((Number(p.commission_amount) / Number(p.net_premium)) * 10000) / 10000 : '');
+            // a discount on the quotation comes off the gross premium: when it takes the gross below the tariff net premium,
+            // the old book's net premium is the discounted one (the migration kit refuses a net premium above the gross)
+            const discount = Number(p.doc?.discount) || 0;
+            const net = discount > 0 && gross < Number(p.net_premium) ? Math.round((Number(p.net_premium) - discount) * 100) / 100 : Number(p.net_premium);
             return {
               'Policy Number': p.policy_number, 'Client Code': p.client_code, Insurer: S(p.insurer_code), Product: S(p.product_code), 'Insured Name': S(p.insured_name),
               'Inception Date': S(p.inception_date), 'Expiry Date': S(p.expiry_date), 'Issue Date': S(p.issued_date), 'Sum Insured': money(p.sum_insured),
-              'Net Premium': money(p.net_premium), 'Gross Premium': money(gross), 'Commission Rate': S(rate), 'Billing Mode': S(p.billing_mode),
+              'Net Premium': money(net), 'Gross Premium': money(gross), 'Commission Rate': S(rate), 'Billing Mode': S(p.billing_mode),
               'Payment Status': open <= 0.004 ? 'Completed' : open >= gross - 0.004 ? 'Pending' : 'Partial', 'Plate Number': S(p.doc?.plateNumber), 'Account Executive': S(p.owner_username),
             };
           }),
