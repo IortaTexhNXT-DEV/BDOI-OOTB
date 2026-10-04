@@ -80,6 +80,8 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Cancellation Reason master upload | No Upload button: Master > Insurance Management > Cancellation Reasons | `POST /api/masters/cancellation-reason/upload` | `Cancellation_Reason_Upload_Template.xlsx` |
 | Claim Document Checklist master upload | No Upload button: Master > Insurance Management > Claim Document Checklist | `POST /api/masters/claim-document-requirement/upload` | `Claim_Document_Checklist_Upload_Template.xlsx` |
 | Repair Shop master upload | No Upload button: Master > Insurance Management > Repair Shops | `POST /api/masters/repair-shop/upload` | `Repair_Shop_Upload_Template.xlsx` |
+| Sales Activity Type master upload | No Upload button: Master > Organization > Sales Activity Types | `POST /api/masters/sales-activity-type/upload` | `Sales_Activity_Type_Upload_Template.xlsx` |
+| Sales Activity Outcome master upload | No Upload button: Master > Organization > Sales Activity Outcomes | `POST /api/masters/sales-activity-outcome/upload` | `Sales_Activity_Outcome_Upload_Template.xlsx` |
 | Leads upload | Operations > Sales & Marketing > Prospects > Bulk Upload | `POST /api/leads/bulk-upload` | `Leads_Upload_Template.xlsx` |
 | Quotations upload | Operations > Sales & Marketing > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
 | Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |
