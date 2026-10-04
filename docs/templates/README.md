@@ -12,6 +12,10 @@ uploads. Each workbook has three sheets:
 The same templates can be downloaded on the screens that have an Upload or Import button (master screens, Chart of
 Accounts, Period Management, Collections).
 
+The two go-live workbooks of Master > Go-Live Data Load are generated here too: `GoLive_Configuration_Workbook.xlsx`
+and `GoLive_Migration_Workbook.xlsx` (Instructions, Lists and one sheet per object in load order; see
+`docs/onboarding/GO_LIVE_DATA_WORKBENCH.md`). Their sheets come from `backend/src/modules/data-load`.
+
 ## Keeping them in step with the code
 
 The templates are generated, not edited by hand. The column lists come from the importers themselves:

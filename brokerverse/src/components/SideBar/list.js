@@ -917,6 +917,12 @@ export const menuList = [
         includes: ["/master/configuration/email-outbox"],
       },
       {
+        id: 26,
+        name: "Go-Live Data Load",
+        path: "/master/go-live-data-load",
+        includes: ["/master/go-live-data-load"],
+      },
+      {
         id: 25,
         name: "Data Privacy",
         submenu: [

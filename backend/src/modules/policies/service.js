@@ -113,6 +113,8 @@ function listWhere(q) {
   if (q.quoteRefId) add('p.quote_id = ?', q.quoteRefId);
   if (q.clientId) add('p.client_id = ?', q.clientId);
   if (q.leadId) add('p.lead_id = ?', q.leadId);
+  // source: go-live-migration (in-force policies of the old system, go-live data workbench), bulk-upload ...
+  if (q.source) add("COALESCE(p.doc->>'source', '') = ?", String(q.source));
   if (q.productType) add("(COALESCE(p.product_type, pr.name) ILIKE '%' || ? || '%' OR COALESCE(p.lob, upper(pr.line)) = upper(?))", q.productType);
   if (q.lob) add('COALESCE(p.lob, upper(pr.line)) = ?', lobOf(q.lob));
   if (q.status) add('p.status = ?', policyStatusIn(q.status) || q.status);

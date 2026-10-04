@@ -1,4 +1,4 @@
-import { many, one, query } from '../db/pool.js';
+import { inTransaction, many, one, query } from '../db/pool.js';
 /**
  * Configuration-driven behaviour: every business parameter is read from app_settings, never hard-coded.
  *
@@ -41,6 +41,12 @@ export async function refreshSettingsCache({ force = false, now = Date.now() } =
 }
 
 export async function getSetting(key, fallback = null) {
+  // Inside an ambient transaction (go-live workbench dry run or load) the value is read from the transaction, never
+  // from or into the cache: a value changed there may still be rolled back.
+  if (inTransaction()) {
+    const row = await one('SELECT value FROM app_settings WHERE key = $1', [key]);
+    return row ? row.value : fallback;
+  }
   await refreshSettingsCache();
   const hit = cache.get(key);
   if (hit && Date.now() - hit.at < envMs('SETTINGS_CACHE_TTL_MS', 60000)) return hit.value;
