@@ -13,7 +13,7 @@ import { round2 } from '../../lib/money.js';
 import { issuePolicy, derivedPremiumTaxes } from '../policies/service.js';
 import { lobOf } from '../documents/common.js';
 import { OPEN_ITEM_COLUMNS, OPENING_SOURCE, loadOpenItem } from '../receipts/opening.js';
-import { GO_LIVE_PREFIX, OPENING_BALANCE_COLUMNS, importOpeningBalances } from '../period-end/opening.js';
+import { GO_LIVE_PREFIX, OPENING_BALANCE_COLUMNS, importOpeningBalances, zeroBalanceRow } from '../period-end/opening.js';
 import { seriesShape, sequenceOf } from './numbering.js';
 import { MIGRATION_SOURCE, amountValue, beforeCutover, cell, dateValue, fail, isDate, keyText, numberCell } from './common.js';
 
@@ -291,15 +291,26 @@ const openingBalancesSheet = () => ({
       [`${GO_LIVE_PREFIX}${ctx.cutover}`]);
     return rows.map((r) => ({ accountCode: r.account_code, accountName: r.name, debit: Number(r.balance) > 0 ? String(Number(r.balance)) : '', credit: Number(r.balance) < 0 ? String(-Number(r.balance)) : '' }));
   },
-  /** All or nothing, like the opening balance import: [{ action } | { errors }] per row. */
+  /**
+   * All or nothing, like the opening balance import: { rows: [{ action } | { errors } | { held }] per row, sheetError }.
+   * A row with no debit or credit (zero balance) is accepted and ignored. When the sheet fails, the rows in error carry
+   * their own errors, the other rows are held (not loaded, no error of their own) and sheetError says why.
+   */
   async importSheet(ctx, rows) {
     const existing = new Map((await many('SELECT account_code, balance FROM opening_balances WHERE source_run = $1', [`${GO_LIVE_PREFIX}${ctx.cutover}`]))
       .map((r) => [r.account_code, round2(Number(r.balance))]));
     const amount = (x) => numberCell(x) || 0;
-    const same = existing.size === rows.length && rows.every((r) => existing.get(String(r.values.accountCode).trim()) === round2(amount(r.values.debit) - amount(r.values.credit)));
-    if (same) return rows.map(() => ({ action: 'unchanged' }));
+    const zero = rows.map((r) => zeroBalanceRow(r.values));
+    const ignored = { action: 'ignored', note: 'no debit or credit (zero balance): accepted, nothing to load' };
+    const balances = rows.filter((_, i) => !zero[i]);
+    const zeroCodes = rows.filter((_, i) => zero[i]).map((r) => String(r.values.accountCode || '').trim());
+    const known = zeroCodes.length ? (await many('SELECT code FROM gl_accounts WHERE code = ANY($1)', [zeroCodes])).length === new Set(zeroCodes).size : true;
+    const same = known && balances.length && existing.size === balances.length
+      && balances.every((r) => existing.get(String(r.values.accountCode).trim()) === round2(amount(r.values.debit) - amount(r.values.credit)));
+    if (same) return { rows: rows.map((_, i) => (zero[i] ? ignored : { action: 'unchanged' })) };
+    let out;
     try {
-      await importOpeningBalances({ query }, rows.map((r) => r.values), { goLiveDate: ctx.cutover });
+      out = await importOpeningBalances({ query }, rows.map((r) => r.values), { goLiveDate: ctx.cutover });
     } catch (e) {
       const byRow = new Map();
       for (const d of e.details || []) {
@@ -310,12 +321,15 @@ const openingBalancesSheet = () => ({
         const column = /Debit|Credit|amount/.test(message) ? 'debit' : 'accountCode';
         byRow.set(i, [...(byRow.get(i) || []), { column, message }]);
       }
-      if (!byRow.size) return rows.map(() => ({ errors: [{ column: null, message: e.message }] }));
-      return rows.map((_, i) => (byRow.has(i) ? { errors: byRow.get(i) } : { errors: [{ column: null, message: 'Not loaded: the opening balances load all or nothing; fix the other rows' }] }));
+      const sheetError = byRow.size
+        ? `Nothing was loaded: the sheet loads all or nothing and ${byRow.size} row(s) are in error (${[...byRow.keys()].map((i) => `row ${rows[i].rowNumber}`).join(', ')}); the other rows are held until they are fixed`
+        : `Nothing was loaded: ${String(e.message).replace(/;? *nothing was loaded\.?$/i, '')}`;
+      return { rows: rows.map((_, i) => (byRow.has(i) ? { errors: byRow.get(i) } : { held: true })), sheetError };
     }
-    return rows.map((r) => ({ action: existing.has(String(r.values.accountCode).trim()) ? 'updated' : 'created' }));
+    const skipped = new Set(out.ignored.map((x) => x.row - 2));
+    return { rows: rows.map((r, i) => (skipped.has(i) ? ignored : { action: existing.has(String(r.values.accountCode).trim()) ? 'updated' : 'created' })) };
   },
-  totals: (rows) => ({ debit: sum(rows, 'debit'), credit: sum(rows, 'credit') }),
+  totals: (rows) => ({ debit: sum(rows, 'debit'), credit: sum(rows, 'credit'), zeroBalanceRows: rows.filter(zeroBalanceRow).length }),
 });
 
 function sum(rows, key, fallback = null) {

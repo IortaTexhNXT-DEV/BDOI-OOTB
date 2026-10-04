@@ -375,10 +375,37 @@ async function resolveRef(f, value) {
     const hit = await one(`SELECT id FROM ${q(r.table)} WHERE id = $1`, [Number(value)]);
     if (hit) return hit.id;
   }
-  const byCode = r.codeColumn ? ` OR lower(${q(r.codeColumn)}) = lower($1)` : '';
-  const hit = await one(`SELECT id FROM ${q(r.table)} WHERE (lower(${q(r.labelColumn || 'name')}) = lower($1)${byCode}) AND status <> 'deleted' ORDER BY id LIMIT 1`, [String(value)]);
+  const hit = await refId(f, value);
   if (!hit) throw badRequest('Validation failed', [{ path: f.name, message: `${f.label || f.name} '${value}' was not found` }]);
-  return hit.id;
+  return hit;
+}
+
+/**
+ * Id of the referenced record named by its code or its label (case-insensitive); the code wins, so a code tells
+ * apart records that share a label (e.g. two states named Cebu in two countries). Null when none.
+ */
+async function refId(f, value) {
+  const r = f.ref;
+  const text = String(value).trim();
+  if (r.codeColumn) {
+    const byCode = await one(`SELECT id FROM ${q(r.table)} WHERE lower(${q(r.codeColumn)}) = lower($1) AND status <> 'deleted' ORDER BY id LIMIT 1`, [text]);
+    if (byCode) return byCode.id;
+  }
+  const byLabel = await one(`SELECT id FROM ${q(r.table)} WHERE lower(${q(r.labelColumn || 'name')}) = lower($1) AND status <> 'deleted' ORDER BY id LIMIT 1`, [text]);
+  return byLabel ? byLabel.id : null;
+}
+
+/**
+ * Labels of the records a reference field points to that several records share ({ id -> code } of those records),
+ * for exports that must name the record without ambiguity (go-live configuration workbook).
+ */
+export async function ambiguousRefCodes(f) {
+  const r = f.ref;
+  if (!r?.codeColumn) return new Map();
+  const label = q(r.labelColumn || 'name');
+  const rows = await many(`SELECT id, ${q(r.codeColumn)} AS code FROM ${q(r.table)} WHERE status <> 'deleted' AND ${q(r.codeColumn)} IS NOT NULL
+      AND lower(${label}) IN (SELECT lower(${label}) FROM ${q(r.table)} WHERE status <> 'deleted' GROUP BY lower(${label}) HAVING count(*) > 1)`);
+  return new Map(rows.map((x) => [x.id, x.code]));
 }
 
 async function assertUnique(t, values, exceptId) {
@@ -388,7 +415,12 @@ async function assertUnique(t, values, exceptId) {
     const p = params();
     const alias = t.storage === 'generic' ? 'm' : 't';
     const from = t.storage === 'generic' ? `master_records m WHERE m.type_code = ${p.add(t.code)} AND` : `${q(t.table_name)} t WHERE`;
-    const conds = fields.map((f) => `lower(${textExpr(t, f, p.add)}) = lower(${p.add(String(values[f.name]))})`);
+    const conds = [];
+    for (const f of fields) {
+      // a reference compares the record it names (id, code or label), not its label text
+      if (t.storage !== 'generic' && f.ref && f.column) conds.push(`t.${q(f.column)} = ${p.add(await resolveRef(f, values[f.name]))}`);
+      else conds.push(`lower(${textExpr(t, f, p.add)}) = lower(${p.add(String(values[f.name]))})`);
+    }
     if (exceptId) conds.push(`${alias}.id <> ${p.add(Number(exceptId))}`);
     const hit = await one(`SELECT 1 FROM ${from} ${alias}.status <> 'deleted' AND ${conds.join(' AND ')} LIMIT 1`, p.values);
     if (hit) throw conflict(`${t.label} with the same ${fields.map((f) => f.label || f.name).join(' + ')} already exists`);
@@ -407,7 +439,15 @@ export async function findRecordByKey(t, values) {
   const p = params();
   const alias = t.storage === 'generic' ? 'm' : 't';
   const from = t.storage === 'generic' ? `master_records m WHERE m.type_code = ${p.add(t.code)} AND` : `${q(t.table_name)} t WHERE`;
-  const conds = fields.map((f) => `lower(${textExpr(t, f, p.add)}) = lower(${p.add(String(values[f.name]).trim())})`);
+  const conds = [];
+  for (const f of fields) {
+    // a reference is matched on the record it names (code or label), as createRecord resolves it
+    if (t.storage !== 'generic' && f.ref && f.column) {
+      const id = await refId(f, values[f.name]);
+      if (!id) return null;
+      conds.push(`t.${q(f.column)} = ${p.add(id)}`);
+    } else conds.push(`lower(${textExpr(t, f, p.add)}) = lower(${p.add(String(values[f.name]).trim())})`);
+  }
   const hit = await one(`SELECT ${alias}.id FROM ${from} ${alias}.status <> 'deleted' AND ${conds.join(' AND ')} ORDER BY ${alias}.id LIMIT 1`, p.values);
   return hit ? hit.id : null;
 }
@@ -464,7 +504,9 @@ export async function updateRecord(t, id, body, user) {
   const before = await getRecord(t, id);
   const { values, status } = validateRecord(t, body, { partial: true });
   assertDateOrder(t, { ...before, ...values });
-  await assertUnique(t, { ...before, ...values }, id);
+  // an unchanged reference keeps the record it points to (its id), not its label, which other records may share
+  const refIds = Object.fromEntries(t.fields.filter((f) => f.ref && before[`${f.name}Id`]).map((f) => [f.name, before[`${f.name}Id`]]));
+  await assertUnique(t, { ...before, ...refIds, ...values }, id);
   await assertSinglePrimary(t, { ...before, ...values }, status || (before.isActive ? 'active' : 'inactive'), id);
   const { makeBase } = await checkBaseCurrency(t, values, { before, status: status || (before.isActive ? 'active' : 'inactive') });
   if (t.storage === 'generic') {

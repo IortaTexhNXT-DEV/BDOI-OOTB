@@ -1,6 +1,7 @@
 /** Read the first worksheet of an .xlsx file (or a CSV) into row objects keyed by camel-cased header names. */
 import { badRequest } from '../../../lib/errors.js';
 import { assertRowLimit, inflateEntry } from '../../../lib/uploadLimits.js';
+import { texts, unxml } from '../../documents/xlsx.js';
 
 function unzip(buf) {
   let eocd = -1;
@@ -22,8 +23,6 @@ function unzip(buf) {
   return files;
 }
 
-const decode = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, '\'').replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n))).replace(/&amp;/g, '&');
-const texts = (xml) => [...xml.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((m) => decode(m[1])).join('');
 const colIndex = (ref) => [...ref.replace(/\d+/g, '')].reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0) - 1;
 
 function xlsxRows(buf) {
@@ -39,7 +38,7 @@ function xlsxRows(buf) {
       const ref = (attrs.match(/r="([A-Z]+\d+)"/) || [])[1];
       const type = (attrs.match(/t="(\w+)"/) || [])[1];
       const v = (inner.match(/<v>([\s\S]*?)<\/v>/) || [])[1];
-      let val = v === undefined ? '' : decode(v);
+      let val = v === undefined ? '' : unxml(v);
       if (type === 's') val = shared[Number(val)] ?? '';
       else if (type === 'inlineStr') val = texts(inner);
       row[ref ? colIndex(ref) : row.length] = val;

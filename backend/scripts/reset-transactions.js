@@ -15,7 +15,9 @@
  *   - notifications, the e-mail outbox, generated report records, job run history and queue, sign-in history,
  *     sign-in sessions and password reset codes;
  *   - the document records of transaction storage folders (with --purge-files also the files of those folders);
- *   - the document number counters of transaction series: each series restarts at its configured start number.
+ *   - the document number counters of transaction series: each series restarts at the next number configured for the
+ *     current period (Master > Document Numbering > Set next number, or the Numbering sheet of the go-live configuration
+ *     workbook: the old system's last number + 1), else at its start number; the dry run lists the restart per series.
  *     Counters of series that number master records (MASTER_SERIES: petty cash fund, product template, reinsurer,
  *     treaty, incentive programme, commission and employee codes) are kept, since the records they numbered stay;
  *   - the go-live opening balances, unless --keep-opening-balances (the migration is normally reloaded after the reset).
@@ -65,12 +67,33 @@ export function transactionFiles(uploadDir) {
   }).filter((f) => f.files > 0);
 }
 
+/**
+ * Restart of the series whose counters the reset deletes: [{ series, period, restartAt, preview, configured }] where
+ * restartAt is the first number issued after the reset in the current period, configured true when it is the next
+ * number set for that period (period_start_number, migration 0246) rather than the series' start number.
+ */
+export async function restartNumbers(client, names) {
+  if (!names.length) return [];
+  const withPeriodStart = (await client.query("SELECT to_regproc('numbering_start_number') IS NOT NULL AS ok")).rows[0].ok;
+  const start = withPeriodStart ? 'numbering_start_number(d.code, k.period)' : 'd.start_number';
+  const rows = (await client.query(`SELECT d.code, k.period, ${start} AS restart_at, ${start} IS DISTINCT FROM d.start_number AS configured,
+      format_document_number(d.pattern, d.prefix, d.seq_width, ${start}, numbering_business_date(), NULL, NULL) AS preview
+    FROM document_numbering d CROSS JOIN LATERAL (SELECT numbering_period_key(d.reset_rule, numbering_business_date()) AS period) k
+    WHERE d.code = ANY($1)`, [names.map((n) => n.replace(/-/g, '_'))])).rows;
+  const byCode = new Map(rows.map((r) => [r.code, r]));
+  return names.map((name) => {
+    const r = byCode.get(name.replace(/-/g, '_'));
+    return r ? { series: name, period: r.period, restartAt: Number(r.restart_at), preview: r.preview, configured: r.configured }
+      : { series: name, period: null, restartAt: 1, preview: null, configured: false };
+  });
+}
+
 const countRows = async (db, table, where = 'true', params = []) => (await db.query(`SELECT count(*)::int AS n FROM ${ident(table)} WHERE ${where}`, params)).rows[0].n;
 
 /**
  * Plan (and with execute, perform) the reset on a pg client, in one transaction.
  * Options: execute, keepOpeningBalances, purgeAudit, purgeFiles (with uploadDir), actor (recorded in the audit trail).
- * Returns { executed, tables: [{ table, category, what, rows }], kept: { tables, rows }, series: { reset, kept }, files, total }.
+ * Returns { executed, tables: [{ table, category, what, rows }], kept: { tables, rows }, series: { reset, kept, restart }, files, total }.
  * Throws ResetRefused (code GOLIVE_LOCKED or UNCLASSIFIED_TABLES) without changing anything.
  */
 export async function resetTransactions(client, {
@@ -107,7 +130,7 @@ export async function resetTransactions(client, {
       partial.push({ table: 'documents', category: 'system', what: 'records of transaction storage folders', where: "split_part(storage_key, '/', 1) = ANY($1)", params: [TRANSACTION_FILE_FOLDERS] });
     }
     if (has.has('sequences')) {
-      partial.push({ table: 'sequences', category: 'system', what: 'counters of transaction series (restart at the start number)', where: `NOT (${seriesKey} = ANY($1))`, params: [MASTER_SERIES] });
+      partial.push({ table: 'sequences', category: 'system', what: 'counters of transaction series (restart at the configured next number of the period, else the start number)', where: `NOT (${seriesKey} = ANY($1))`, params: [MASTER_SERIES] });
     }
     if (keepOpeningBalances) {
       if (has.has('opening_balances')) partial.push({ table: 'opening_balances', category: 'system', what: 'balances carried forward by a year-end close (go-live balances kept)', where: 'COALESCE(source_run, \'\') NOT LIKE $1', params: [GO_LIVE_RUN] });
@@ -124,6 +147,9 @@ export async function resetTransactions(client, {
       reset: [...new Set(counters.filter((c) => !MASTER_SERIES.includes(c.code)).map((c) => c.name))],
       kept: [...new Set(counters.filter((c) => MASTER_SERIES.includes(c.code)).map((c) => c.name))],
     };
+    // Where each restarted series starts again: the next number configured for the current period (Set next number,
+    // go-live Numbering sheet), else its start number.
+    series.restart = await restartNumbers(client, series.reset);
     const keptTables = existing.filter((t) => MASTER_CONFIG_TABLES.includes(t));
     let keptRows = 0;
     for (const t of keptTables) keptRows += await countRows(client, t);
@@ -156,7 +182,7 @@ export async function resetTransactions(client, {
         await client.query(`INSERT INTO audit_log(username, entity, entity_id, action, after_data) VALUES ($1, 'database', 'transactions', 'reset', $2)`,
           [actor, JSON.stringify({
             tables: plan.filter((p) => p.rows).map((p) => ({ table: p.table, what: p.what, rows: p.rows })),
-            seriesRestarted: series.reset, seriesKept: series.kept, pettyCashFundsDetached: pettyCash,
+            seriesRestarted: series.restart.map((x) => ({ series: x.series, restartAt: x.restartAt })), seriesKept: series.kept, pettyCashFundsDetached: pettyCash,
             keepOpeningBalances, purgeAudit, purgeFiles: purgeFiles ? files.map((f) => ({ folder: f.folder, files: f.files })) : false,
           })]);
       }
@@ -232,7 +258,12 @@ async function main() {
       console.log(`  ${t.table.padEnd(36)} ${String(t.rows || t.updated).padStart(8)}  ${t.category.padEnd(11)} ${t.what}`);
     }
     console.log(`  kept: ${r.kept.tables} master and configuration tables (${r.kept.rows} rows), users, the audit trail${opts.purgeAudit ? ' (emptied: --purge-audit)' : ''}`);
-    if (r.series.reset.length) console.log(`  numbering restarts at the series start for: ${r.series.reset.join(', ')}`);
+    if (r.series.restart.length) {
+      console.log(`  numbering restarts (${r.series.restart.length} transaction series), first number after the reset:`);
+      for (const x of r.series.restart) {
+        console.log(`    ${x.series.padEnd(28)} ${String(x.restartAt).padStart(8)}  ${(x.preview || '').padEnd(22)} ${x.configured ? 'next number configured for the period' : 'start number of the series'}`);
+      }
+    }
     if (r.series.kept.length) console.log(`  numbering continues (master records keep their codes) for: ${r.series.kept.join(', ')}`);
     if (opts.purgeFiles) console.log(r.files.length ? `  files ${r.executed ? 'removed' : 'to remove'}: ${r.files.map((f) => `${f.folder}/ ${f.files}`).join(', ')}` : '  no transaction files in storage');
     console.log(`  opening balances: ${opts.keepOpeningBalances ? 'go-live balances kept' : 'removed (load the go-live migration again)'}`);

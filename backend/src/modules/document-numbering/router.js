@@ -13,7 +13,7 @@ const { router, define } = moduleRouter('Document Numbering', '/document-numberi
 const SCREEN = 'Master > Document Numbering';
 const example = {
   code: 'policy', name: 'Policy', module: 'policy', prefix: 'POL', pattern: '{PREFIX}-{YYYY}-{SEQ}', seqWidth: 5, resetRule: 'yearly', startNumber: 1,
-  active: true, periodKey: '2026', currentValue: 41, nextNumber: 42, nextPreview: 'POL-2026-00042',
+  active: true, periodKey: '2026', currentValue: 41, periodStartNumber: null, nextNumber: 42, nextPreview: 'POL-2026-00042',
 };
 
 const updateSchema = z.object({
@@ -56,9 +56,9 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/:code/next-number', summary: 'Set the next number of the current period; forward only (never at or below a number already issued)', screen: `${SCREEN} > Set next number`,
+  method: 'PUT', path: '/:code/next-number', summary: 'Set the next number of the current period; forward only (never at or below a number already issued). Kept as the start of the period: after a transaction reset the series restarts there', screen: `${SCREEN} > Set next number`,
   middleware: [...canWrite('settings'), validate(z.object({ nextNumber: z.coerce.number().int().min(1).max(999999999999) }).strict())],
-  request: { nextNumber: 1001 }, response: { success: true, data: { ...example, nextNumber: 1001, nextPreview: 'POL-2026-01001' } },
+  request: { nextNumber: 1001 }, response: { success: true, data: { ...example, nextNumber: 1001, periodStartNumber: 1001, nextPreview: 'POL-2026-01001' } },
   handler: async (req, res) => {
     const { before, after } = await svc.setNextNumber(req.params.code, req.body.nextNumber, req.user);
     await audit(req, { entity: 'document_numbering', entityId: req.params.code, action: 'set-next-number',

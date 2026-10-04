@@ -407,6 +407,7 @@
       "billBalance": "ยอดคงเหลือ",
       "billDueDate": "วันครบกำหนด",
       "billNumber": "เลขที่ใบแจ้งหนี้",
+      "billWithOldNumber": "{{bill}} (เลขที่เดิมในระบบเก่า {{old}})",
       "billPaid": "ชำระแล้ว",
       "billType": "ประเภท",
       "billStatus": "สถานะ",

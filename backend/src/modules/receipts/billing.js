@@ -12,7 +12,8 @@ const client = async (db, id) => (id ? (await db.query('SELECT * FROM clients WH
 export async function policyStatement(db, policyRef) {
   const p = await findPolicy(db, policyRef);
   if (!p) throw notFound('Policy not found');
-  const spec = await billingStatementDoc('Policy', { policy: p, bills: await bills(db, p.id, ['policy', 'receipt', 'manual']), client: await client(db, p.client_id) });
+  // migrated open items (source opening) are bills of the policy too
+  const spec = await billingStatementDoc('Policy', { policy: p, bills: await bills(db, p.id, ['policy', 'receipt', 'manual', 'opening']), client: await client(db, p.client_id) });
   return { fileName: `policy-billing-statement-${p.policy_number}.pdf`, pdf: buildPdf(spec) };
 }
 
@@ -48,7 +49,9 @@ export async function endorsementStatement(db, id) {
 
 /** A bill (receivable) by id or bill number with its policy; 404 when unknown. */
 export async function findBill(db, ref) {
-  const bill = (await db.query('SELECT * FROM receivables WHERE id = $1 OR bill_number = $1', [String(ref)])).rows[0];
+  // a migrated open item is also found by the old system's bill number
+  const bill = (await db.query(`SELECT * FROM receivables WHERE id::text = $1 OR bill_number = $1 OR (source = 'opening' AND reference = $1)
+    ORDER BY (bill_number = $1) DESC, id LIMIT 1`, [String(ref)])).rows[0];
   if (!bill) throw notFound('Bill not found');
   const policy = await findPolicy(db, bill.policy_id);
   if (!policy) throw notFound('Policy of the bill not found');
@@ -61,7 +64,8 @@ const SOURCE_KIND = { endorsement: 'Endorsement', renewal: 'Renewal' };
 export async function billStatement(db, ref) {
   const { bill: b, policy } = await findBill(db, ref);
   const n = (v) => Number(v || 0);
-  const extra = (f) => [['Bill no.', b.bill_number], ['Bill date', f.date(b.created_at)], ['Due date', f.date(b.due_date)], ['Net premium', f.ccy(n(b.net_premium), b.currency)],
+  const old = b.source === 'opening' && b.reference && b.reference !== b.bill_number ? [['Old system bill no.', b.reference]] : [];
+  const extra = (f) => [['Bill no.', b.bill_number], ...old, ['Bill date', f.date(b.created_at)], ['Due date', f.date(b.due_date)], ['Net premium', f.ccy(n(b.net_premium), b.currency)],
     ['VAT', f.ccy(n(b.vat), b.currency)], ['Documentary stamp tax', f.ccy(n(b.dst), b.currency)], ['Local government tax', f.ccy(n(b.lgt), b.currency)],
     ...(n(b.other_charges) ? [['Other charges', f.ccy(n(b.other_charges), b.currency)]] : []), ...(n(b.discount) ? [['Discount', f.ccy(-n(b.discount), b.currency)]] : []),
     ['Gross premium (with taxes)', f.ccy(n(b.amount), b.currency), { bold: true }]];

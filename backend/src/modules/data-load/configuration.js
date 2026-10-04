@@ -57,7 +57,16 @@ export async function masterSheet(code) {
     sample: info.samples?.[0] || {},
     async exportRows() {
       const { rows } = await masters.listRecords(t, { sortBy: t.code_field || t.label_field }, { limit: 1000000, offset: 0 });
-      return rows.map((r) => Object.fromEntries(columns.map((c) => [c.key, c.key === 'status' ? r.status : cell(r[c.key])])));
+      // a reference is written as the label of the record it points to (e.g. the state of a city), or as its code
+      // when several records share that label (two states named Cebu): the key of the row then names one record
+      const refs = new Map();
+      for (const f of t.fields.filter((x) => x.ref && t.storage !== 'generic' && columns.some((c) => c.key === x.name))) refs.set(f.name, await masters.ambiguousRefCodes(f));
+      const valueOf = (r, c) => {
+        if (c.key === 'status') return r.status;
+        const code = refs.get(c.key)?.get(r[`${c.key}Id`]);
+        return cell(code ?? r[c.key]);
+      };
+      return rows.map((r) => Object.fromEntries(columns.map((c) => [c.key, valueOf(r, c)])));
     },
     async importRow(ctx, v) {
       const body = {};
@@ -480,6 +489,15 @@ const authoritySheet = () => ({
 
 // ------------------------------------------------------------------ document numbering
 
+/**
+ * Counter of a series in the current period: counter (the last number issued, null when the period has no counter yet,
+ * e.g. after the transaction reset) and start (where that counter starts: the configured next number of the period,
+ * else the start number).
+ */
+const COUNTER_SQL = (code, rule) => `(SELECT q.value AS counter, numbering_start_number(${code}, k.period) AS start
+  FROM (SELECT numbering_period_key(${rule}, numbering_business_date()) AS period) k LEFT JOIN sequences q ON q.name = ${code} AND q.period = k.period) s`;
+const nextOf = (c) => (c.counter === null || c.counter === undefined ? Number(c.start) : Number(c.counter) + 1);
+
 const numberingSheet = () => ({
   key: 'numbering', name: 'Numbering', menu: 'Master > Configuration > Document Numbering',
   columns: [
@@ -489,16 +507,15 @@ const numberingSheet = () => ({
     { key: 'pattern', header: 'Pattern', format: 'Tokens {PREFIX} {YYYY} {YY} {MM} {FY} {BRANCH} {LOB} {SEQ}, e.g. {PREFIX}-{YYYY}-{SEQ}' },
     { key: 'seqWidth', header: 'Sequence Width', type: 'number', format: 'Digits of the sequence, 1 to 12 (padding with zeros)' },
     { key: 'resetRule', header: 'Reset Rule', list: 'Reset Rule' },
-    { key: 'nextNumber', header: 'Next Number', type: 'number', format: 'Next sequence number of the current period: the last number used in the old system plus one. It cannot go backwards' },
+    { key: 'nextNumber', header: 'Next Number', type: 'number', format: 'Next sequence number of the current period: the last number used in the old system plus one. It cannot go below a number already issued; the transaction reset restarts the series here' },
     { key: 'active', header: 'Active', type: 'bool', list: 'Yes No' },
   ],
   keyColumns: ['code'], keyOf: (v) => keyText(v.code),
   sample: { code: 'receipt', name: 'Official Receipt', prefix: 'OR', pattern: '{PREFIX}-{YYYY}-{SEQ}', seqWidth: '5', resetRule: 'yearly', nextNumber: '1201', active: 'Yes' },
   async exportRows() {
-    const rows = await many(`SELECT d.*, q.value AS current FROM document_numbering d
-      LEFT JOIN sequences q ON q.name = d.code AND q.period = numbering_period_key(d.reset_rule, numbering_business_date()) ORDER BY d.module, d.code`);
+    const rows = await many(`SELECT d.*, s.counter, s.start FROM document_numbering d CROSS JOIN LATERAL ${COUNTER_SQL('d.code', 'd.reset_rule')} ORDER BY d.module, d.code`);
     return rows.map((d) => ({ code: d.code, name: d.name, prefix: d.prefix, pattern: d.pattern, seqWidth: String(d.seq_width), resetRule: d.reset_rule,
-      nextNumber: String(d.current === null || d.current === undefined ? Number(d.start_number) : Number(d.current) + 1), active: yesNo(d.active) }));
+      nextNumber: String(nextOf(d)), active: yesNo(d.active) }));
   },
   async importRow(ctx, v) {
     const code = String(v.code).trim().toLowerCase();
@@ -528,21 +545,25 @@ const numberingSheet = () => ({
       await updateSeries(code, input, ctx.user);
       changed = true;
     }
+    const counterOf = async () => one(`SELECT s.counter, s.start FROM ${COUNTER_SQL('$1::text', '$2::text')}`, [code, input.resetRule ?? s.reset_rule]);
     if (v.nextNumber) {
       const next = numberCell(v.nextNumber);
       if (!Number.isInteger(next) || next < 1) fail('nextNumber', 'Next Number must be a whole number of 1 or more');
-      const cur = await one('SELECT value FROM sequences WHERE name = $1 AND period = numbering_period_key($2, numbering_business_date())', [code, input.resetRule ?? s.reset_rule]);
-      const current = cur ? Number(cur.value) + 1 : Number(s.start_number);
-      if (next < current) fail('nextNumber', `The next number cannot go backwards: ${current - 1} has already been issued; enter ${current} or more`);
-      if (next > current) {
+      const c = await counterOf();
+      // never below a number already issued in the current period
+      if (c.counter !== null && next <= Number(c.counter)) {
+        fail('nextNumber', `The next number cannot go backwards: ${c.counter} has already been issued; enter ${Number(c.counter) + 1} or more`);
+      }
+      // the next number becomes the start of the period's counter too (kept on the series), so the transaction reset
+      // restarts the series here and the Numbering sheet need not be loaded again
+      if (next !== nextOf(c)) {
         await setNextNumber(code, next, ctx.user);
         changed = true;
       }
     }
     // new numbers must not collide with migrated numbers of the same format (legacy numbers kept by migration)
     if (MIGRATED_NUMBER_TARGETS[code]) {
-      const seq = await one('SELECT value FROM sequences WHERE name = $1 AND period = numbering_period_key($2, numbering_business_date())', [code, input.resetRule ?? s.reset_rule]);
-      const next = seq ? Number(seq.value) + 1 : Number(s.start_number);
+      const next = nextOf(await counterOf());
       const clash = await collidingNumber(code, next);
       if (clash) fail('nextNumber', `${MIGRATED_NUMBER_TARGETS[code].label} ${clash} already exists with the format of this series: set the Next Number above it`);
     }

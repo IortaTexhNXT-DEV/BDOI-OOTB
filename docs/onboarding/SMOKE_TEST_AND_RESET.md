@@ -21,7 +21,8 @@ user stays exactly as configured**. This page explains the recommended practice 
    - when the test is finished, run the transaction reset (section 3). Masters created only for the test (the test
      branch, insurer or product) are masters: the reset keeps them, so set them inactive or delete them in their master
      screen afterwards.
-3. **After the reset**: document numbering restarts, the accounting is empty (section 2), then load the go-live
+3. **After the reset**: document numbering restarts (at the next numbers the Numbering sheet set), the accounting is
+   empty (section 2), then load the go-live
    migration (`GO_LIVE_DATA_SETUP.md`: open items, in-force policies, opening balances) and switch on the go-live lock.
 4. **Switch on `golive.locked`** (Master > Configuration > Go-live, "Go-live lock") as soon as the migration is loaded.
    From then on the reset refuses to run: the database holds the live book.
@@ -44,11 +45,15 @@ migration adds a table that no list names, and the reset itself refuses to run o
 
 ### Numbering
 
-Document numbers come from the series of Master > Document Numbering; the counters are rows of `sequences`. A series
-restarts at its configured **start number** when its counter row is removed (the first number issued takes the start
-number). The reset removes the counters of every transaction series (lead, quotation, client code, policy, endorsement,
-claim, renewal, receipt, invoice, voucher, journal, remittance, cession, period close, ...): the first live policy after
-go-live is `POL-<year>-00001` again (or the start number set on the series).
+Document numbers come from the series of Master > Document Numbering; the counters are rows of `sequences`. When its
+counter row is removed, a series restarts at the **next number configured for the current period** (Master > Document
+Numbering > Set next number, or the Numbering sheet of the go-live configuration workbook: the old system's last number
+plus one), else at its **start number**. The configured next number is kept on the series
+(`document_numbering.period_start_key` / `period_start_number`, migration `0246_numbering_period_start.sql`) and applies
+to the period it was set for; the next period of a yearly series starts at the start number. The reset removes the
+counters of every transaction series (lead, quotation, client code, policy, endorsement, claim, renewal, receipt,
+invoice, voucher, journal, remittance, cession, period close, ...): the first live policy after go-live is the next
+number the Numbering sheet set (e.g. `POL-2026-00068`), or `POL-<year>-00001` when none was set.
 
 The counters of series that number **master records** are kept, because those records stay and a restarted counter
 would issue a code that already exists:
@@ -66,9 +71,10 @@ The **client code** series restarts: clients are business records of the smoke t
 migration loads the real clients.
 
 The next numbers set by the **Numbering** sheet of the go-live configuration workbook (the last numbers of the old
-system plus one) are counters too, so the reset sets them back to the start number. Load the Numbering sheet (or the
-whole configuration workbook: every other row is reported unchanged) again after the reset and before the migration
-workbook; otherwise the migration refuses the legacy numbers that fall in the range the series has still to issue.
+system plus one) therefore survive the reset: the series restart there, above the legacy numbers the migration keeps,
+and the Numbering sheet need not be loaded again before the migration workbook (loaded again, it is reported
+unchanged). The rule that a next number cannot go below a number already issued stays; right after the reset, with
+nothing issued in the period, the next number may be corrected downwards (Set next number or the Numbering sheet).
 
 ### Accounting
 
@@ -103,8 +109,15 @@ later or leave them to the storage lifecycle.
    CONFIRM_RESET=yes npm run reset:transactions
    ```
 
-   It prints, per table, the rows it would remove, the series that restart and the series that continue. Nothing is
-   changed.
+   It prints, per table, the rows it would remove, then for every series that restarts the first number after the
+   reset and where it comes from (`next number configured for the period` or `start number of the series`), and the
+   series that continue. Nothing is changed. Example:
+
+   ```text
+     numbering restarts (32 transaction series), first number after the reset:
+       policy                             68  POL-2026-00068         next number configured for the period
+       journal                             1  JV-2026-00001          start number of the series
+   ```
 4. Reset:
 
    ```bash
@@ -119,7 +132,7 @@ later or leave them to the storage lifecycle.
    | `--keep-audit` / `--purge-audit` | Keep the audit trail (default) / empty it; the reset is recorded in it either way |
 
    Everything runs in one database transaction: any error rolls the whole reset back. The audit trail receives an entry
-   (entity `database`, action `reset`) with the counts per table and the series restarted.
+   (entity `database`, action `reset`) with the counts per table and the series restarted with their restart number.
 5. Start the API, sign in, and check that Leads, Clients, Policies and the Trial Balance are empty and that the masters,
    users and Configuration are as before.
 6. Load the go-live migration, then switch on the go-live lock.

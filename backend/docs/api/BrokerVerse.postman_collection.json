@@ -14540,7 +14540,7 @@
           ]
         },
         {
-          "name": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)",
+          "name": "Add a commission rate (insurer, product and / or line of business: a code of the Line of Business master, else 400; no overlap with an active row of the same keys)",
           "request": {
             "method": "POST",
             "header": [
@@ -14558,7 +14558,7 @@
                 "commission-rates"
               ]
             },
-            "description": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+            "description": "Add a commission rate (insurer, product and / or line of business: a code of the Line of Business master, else 400; no overlap with an active row of the same keys)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"insuranceCompanyId\": 3,\n  \"productId\": 1,\n  \"policyType\": \"new\",\n  \"rate\": 0.175,\n  \"effectiveFrom\": \"2026-01-01\"\n}",
@@ -14589,7 +14589,7 @@
                     "commission-rates"
                   ]
                 },
-                "description": "Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+                "description": "Add a commission rate (insurer, product and / or line of business: a code of the Line of Business master, else 400; no overlap with an active row of the same keys)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"insuranceCompanyId\": 3,\n  \"productId\": 1,\n  \"policyType\": \"new\",\n  \"rate\": 0.175,\n  \"effectiveFrom\": \"2026-01-01\"\n}",
@@ -14678,7 +14678,7 @@
           ]
         },
         {
-          "name": "Update a commission rate (same overlap rule)",
+          "name": "Update a commission rate (same overlap rule; a new line of business must be a code of the Line of Business master)",
           "request": {
             "method": "PUT",
             "header": [
@@ -14704,7 +14704,7 @@
                 }
               ]
             },
-            "description": "Update a commission rate (same overlap rule)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+            "description": "Update a commission rate (same overlap rule; a new line of business must be a code of the Line of Business master)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"rate\": 0.18,\n  \"effectiveTo\": \"2026-12-31\"\n}",
@@ -14743,7 +14743,7 @@
                     }
                   ]
                 },
-                "description": "Update a commission rate (same overlap rule)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
+                "description": "Update a commission rate (same overlap rule; a new line of business must be a code of the Line of Business master)\n\nFront-end touchpoint: Master > Finance > Commission Rate Matrix\n\nAccess: write:masters",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"rate\": 0.18,\n  \"effectiveTo\": \"2026-12-31\"\n}",
@@ -19247,7 +19247,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"policy\",\n      \"name\": \"Policy\",\n      \"module\": \"policy\",\n      \"prefix\": \"POL\",\n      \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n      \"seqWidth\": 5,\n      \"resetRule\": \"yearly\",\n      \"startNumber\": 1,\n      \"active\": true,\n      \"periodKey\": \"2026\",\n      \"currentValue\": 41,\n      \"nextNumber\": 42,\n      \"nextPreview\": \"POL-2026-00042\"\n    }\n  ],\n  \"modules\": [\n    {\n      \"module\": \"policy\",\n      \"count\": 5\n    }\n  ],\n  \"tokens\": [\n    \"{PREFIX}\",\n    \"{YYYY}\",\n    \"{YY}\",\n    \"{MM}\",\n    \"{FY}\",\n    \"{BRANCH}\",\n    \"{LOB}\",\n    \"{SEQ}\"\n  ],\n  \"resetRules\": [\n    \"yearly\",\n    \"fiscal_yearly\",\n    \"monthly\",\n    \"never\"\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"policy\",\n      \"name\": \"Policy\",\n      \"module\": \"policy\",\n      \"prefix\": \"POL\",\n      \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n      \"seqWidth\": 5,\n      \"resetRule\": \"yearly\",\n      \"startNumber\": 1,\n      \"active\": true,\n      \"periodKey\": \"2026\",\n      \"currentValue\": 41,\n      \"periodStartNumber\": null,\n      \"nextNumber\": 42,\n      \"nextPreview\": \"POL-2026-00042\"\n    }\n  ],\n  \"modules\": [\n    {\n      \"module\": \"policy\",\n      \"count\": 5\n    }\n  ],\n  \"tokens\": [\n    \"{PREFIX}\",\n    \"{YYYY}\",\n    \"{YY}\",\n    \"{MM}\",\n    \"{FY}\",\n    \"{BRANCH}\",\n    \"{LOB}\",\n    \"{SEQ}\"\n  ],\n  \"resetRules\": [\n    \"yearly\",\n    \"fiscal_yearly\",\n    \"monthly\",\n    \"never\"\n  ]\n}"
             }
           ]
         },
@@ -19310,7 +19310,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"nextNumber\": 42,\n    \"nextPreview\": \"POL-2026-00042\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"periodStartNumber\": null,\n    \"nextNumber\": 42,\n    \"nextPreview\": \"POL-2026-00042\"\n  }\n}"
             }
           ]
         },
@@ -19401,12 +19401,12 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"nextNumber\": 42,\n    \"nextPreview\": \"POL-2026-00042\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"periodStartNumber\": null,\n    \"nextNumber\": 42,\n    \"nextPreview\": \"POL-2026-00042\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Set the next number of the current period; forward only (never at or below a number already issued)",
+          "name": "Set the next number of the current period; forward only (never at or below a number already issued). Kept as the start of the period: after a transaction reset the series restarts there",
           "request": {
             "method": "PUT",
             "header": [
@@ -19433,7 +19433,7 @@
                 }
               ]
             },
-            "description": "Set the next number of the current period; forward only (never at or below a number already issued)\n\nFront-end touchpoint: Master > Document Numbering > Set next number\n\nAccess: write:settings",
+            "description": "Set the next number of the current period; forward only (never at or below a number already issued). Kept as the start of the period: after a transaction reset the series restarts there\n\nFront-end touchpoint: Master > Document Numbering > Set next number\n\nAccess: write:settings",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"nextNumber\": 1001\n}",
@@ -19473,7 +19473,7 @@
                     }
                   ]
                 },
-                "description": "Set the next number of the current period; forward only (never at or below a number already issued)\n\nFront-end touchpoint: Master > Document Numbering > Set next number\n\nAccess: write:settings",
+                "description": "Set the next number of the current period; forward only (never at or below a number already issued). Kept as the start of the period: after a transaction reset the series restarts there\n\nFront-end touchpoint: Master > Document Numbering > Set next number\n\nAccess: write:settings",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"nextNumber\": 1001\n}",
@@ -19494,7 +19494,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"nextNumber\": 1001,\n    \"nextPreview\": \"POL-2026-01001\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"code\": \"policy\",\n    \"name\": \"Policy\",\n    \"module\": \"policy\",\n    \"prefix\": \"POL\",\n    \"pattern\": \"{PREFIX}-{YYYY}-{SEQ}\",\n    \"seqWidth\": 5,\n    \"resetRule\": \"yearly\",\n    \"startNumber\": 1,\n    \"active\": true,\n    \"periodKey\": \"2026\",\n    \"currentValue\": 41,\n    \"periodStartNumber\": 1001,\n    \"nextNumber\": 1001,\n    \"nextPreview\": \"POL-2026-01001\"\n  }\n}"
             }
           ]
         },
@@ -21990,7 +21990,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
             }
           ]
         },
@@ -22067,7 +22067,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -22132,7 +22132,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
             }
           ]
         },
@@ -22294,7 +22294,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"message\": \"Loaded\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"temporaryPasswords\": [\n      {\n        \"username\": \"andrea.lim\",\n        \"displayName\": \"Andrea Lim\",\n        \"temporaryPassword\": \"<shown once>\"\n      }\n    ],\n    \"reconciliation\": null\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"message\": \"Loaded\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"temporaryPasswords\": [\n      {\n        \"username\": \"andrea.lim\",\n        \"displayName\": \"Andrea Lim\",\n        \"temporaryPassword\": \"<shown once>\"\n      }\n    ],\n    \"reconciliation\": null\n  }\n}"
             }
           ]
         },
@@ -22428,7 +22428,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -33510,7 +33510,7 @@
           ]
         },
         {
-          "name": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it",
+          "name": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it",
           "request": {
             "method": "POST",
             "header": [
@@ -33530,7 +33530,7 @@
                 "import"
               ]
             },
-            "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+            "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -33563,7 +33563,7 @@
                     "import"
                   ]
                 },
-                "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
+                "description": "Go-live: load the old system's trial balance (multipart \"file\" + goLiveDate) into the opening balances of the fiscal year of the go-live date; all or nothing, debits must equal credits; rows with no debit or credit (zero balance) are ignored; loading the same date again replaces it\n\nFront-end touchpoint: Accounts > Period End > Period Management > Import opening balances\n\nAccess: write:period-end",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"goLiveDate\": \"2026-10-01\",\n  \"file\": \"(multipart) Opening_Balances_Upload_Template.xlsx\"\n}",
@@ -33584,7 +33584,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": \"FY2026\",\n    \"goLiveDate\": \"2026-10-01\",\n    \"asAt\": \"2026-09-30\",\n    \"accounts\": 7,\n    \"totalDebit\": 2102400,\n    \"totalCredit\": 2102400,\n    \"replaced\": 0\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fiscalYear\": \"FY2026\",\n    \"goLiveDate\": \"2026-10-01\",\n    \"asAt\": \"2026-09-30\",\n    \"accounts\": 7,\n    \"totalDebit\": 2102400,\n    \"totalCredit\": 2102400,\n    \"replaced\": 0,\n    \"ignored\": [\n      {\n        \"row\": 9,\n        \"accountCode\": \"1301001\"\n      }\n    ]\n  }\n}"
             }
           ]
         },

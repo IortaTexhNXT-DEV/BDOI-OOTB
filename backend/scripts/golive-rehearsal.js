@@ -12,7 +12,9 @@
  * Steps: 1. SOURCE configuration exported with the current data. 2. Loaded into TARGET with the cutover date: validate,
  * 3 deliberate errors reported with sheet / row / column, errors workbook fixed and loaded, reload without duplicates,
  * masters and configuration compared. 3. Smoke test on TARGET (client, quotation, policy, receipt: numbers and journals),
- * transaction reset (dry run, execute), masters identical (checksums), counters restarted, trial balance empty.
+ * transaction reset (dry run, execute), masters identical (checksums), counters restarted at the next numbers the
+ * Numbering sheet set (no reload of the sheet needed: step 4 loads the workbook again only to check it changes nothing),
+ * trial balance empty.
  * 4. Migration workbook = TARGET's blank template filled with SOURCE's open book at cutover - 1; injected errors, errors
  * workbook, fix, load, reconciliation against SOURCE, reload without duplicates. 5. New and migrated data side by side:
  * new policy number, renewal of a migrated policy, receipt on a migrated open item, trial balance and receivables

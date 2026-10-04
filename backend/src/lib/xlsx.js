@@ -52,7 +52,8 @@ class SharedStrings {
     return this.map.get(s);
   }
   xml() {
-    const items = this.list.map((s) => `<si><t xml:space="preserve">${xmlEscape(s)}</t></si>`).join('');
+    // a literal _xHHHH_ in the text is escaped as Excel does (_x005F_ = underscore), so readers do not decode it
+    const items = this.list.map((s) => `<si><t xml:space="preserve">${xmlEscape(s).replace(/_(x[0-9A-Fa-f]{4}_)/g, '_x005F_$1')}</t></si>`).join('');
     return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<sst xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" count="${this.count}" uniqueCount="${this.list.length}">${items}</sst>`;
   }
 }

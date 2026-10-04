@@ -266,6 +266,23 @@ describe('commission rate matrix', () => {
     expect(test.body.data).toMatchObject({ rate: 0.14, source: 'matrix' });
   });
 
+  it('accepts only a line of business of the Line of Business master (400 otherwise), on add and on change', async () => {
+    const bad = await add({ insuranceCompanyId: ins.id, lineOfBusiness: 'MOTR', rate: 0.1, effectiveFrom: '2033-01-01' });
+    expect(bad.status).toBe(400);
+    expect(bad.body.message).toMatch(/Line of business MOTR is not in the Line of Business master/);
+    expect(bad.body.errors).toEqual([expect.objectContaining({ path: 'lineOfBusiness' })]);
+    // the master code in any case, as the screen sends it (lower case from the master options)
+    const good = await add({ insuranceCompanyId: ins.id, lineOfBusiness: 'Fire', rate: 0.1, effectiveFrom: '2033-01-01' });
+    expect(good.status).toBe(201);
+    expect(good.body.data.lineOfBusiness).toBe('fire');
+    const change = await ctx.api('put', `/commission-rates/${good.body.data.id}`).send({ lineOfBusiness: 'no-such-line' });
+    expect(change.status).toBe(400);
+    expect(change.body.message).toMatch(/no-such-line is not in the Line of Business master/);
+    // a change that keeps the line of business (the screen sends every field) is not checked again
+    expect((await ctx.api('put', `/commission-rates/${good.body.data.id}`).send({ lineOfBusiness: 'fire', rate: 0.11 })).status).toBe(200);
+    expect((await ctx.api('delete', `/commission-rates/${good.body.data.id}`)).status).toBe(200);
+  });
+
   it('rejects overlapping active rows with the same keys; inactive rows do not count', async () => {
     const dup = await add({ insuranceCompanyId: ins.id, productId: motor.id, rate: 0.16, effectiveFrom: '2030-12-01' });
     expect(dup.status).toBe(409);

@@ -60,7 +60,7 @@ define({
   handler: async (req, res) => ok(res, await svc.getRate(id.parse(req.params.id))),
 });
 define({
-  method: 'POST', path: '/', summary: 'Add a commission rate (insurer, product and / or line of business; no overlap with an active row of the same keys)', screen: SCREEN,
+  method: 'POST', path: '/', summary: 'Add a commission rate (insurer, product and / or line of business: a code of the Line of Business master, else 400; no overlap with an active row of the same keys)', screen: SCREEN,
   middleware: [...canWrite('masters'), validate(createSchema)],
   request: { insuranceCompanyId: 3, productId: 1, policyType: 'new', rate: 0.175, effectiveFrom: '2026-01-01' }, response: { success: true, data: example },
   handler: async (req, res) => {
@@ -70,7 +70,7 @@ define({
   },
 });
 define({
-  method: 'PUT', path: '/:id', summary: 'Update a commission rate (same overlap rule)', screen: SCREEN,
+  method: 'PUT', path: '/:id', summary: 'Update a commission rate (same overlap rule; a new line of business must be a code of the Line of Business master)', screen: SCREEN,
   middleware: [...canWrite('masters'), validate(updateSchema)], request: { rate: 0.18, effectiveTo: '2026-12-31' }, response: { success: true, data: example },
   handler: async (req, res) => {
     const { before, after } = await svc.updateRate(id.parse(req.params.id), req.body, req.user);

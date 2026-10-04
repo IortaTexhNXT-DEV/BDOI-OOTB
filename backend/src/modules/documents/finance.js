@@ -29,7 +29,9 @@ export async function billingStatementDoc(kind, { policy: p, bills, extra = [], 
   const f = formatters(h);
   const currency = p.currency || h.format?.currency || 'PHP';
   const billTo = client ? [client.display_name, client.address, [client.city, client.state].filter(Boolean).join(', ')].filter(Boolean).join('\n') : p.client_name;
-  const rows = bills.map((b) => [b.bill_number, f.date(b.created_at), f.date(b.due_date), round2(num(b.amount)), round2(num(b.amount) - num(b.balance)), round2(num(b.balance)), humanize(b.status)]);
+  // a migrated open item that carries another number shows the old system's bill number with it
+  const billNo = (b) => (b.source === 'opening' && b.reference && b.reference !== b.bill_number ? `${b.bill_number} (old system ${b.reference})` : b.bill_number);
+  const rows = bills.map((b) => [billNo(b), f.date(b.created_at), f.date(b.due_date), round2(num(b.amount)), round2(num(b.amount) - num(b.balance)), round2(num(b.balance)), humanize(b.status)]);
   const total = (i) => round2(rows.reduce((s, r) => s + r[i], 0));
   const due = total(5);
   const more = kv(typeof extra === 'function' ? extra(f) : extra);

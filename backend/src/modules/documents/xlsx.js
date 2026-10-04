@@ -38,8 +38,17 @@ export function readZip(buf) {
 }
 
 // ---------- XML helpers ----------
-const unxml = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&amp;/g, '&');
-const texts = (frag) => [...frag.matchAll(/<t[^>]*>([\s\S]*?)<\/t>/g)].map((m) => unxml(m[1])).join('');
+const codePoint = (n) => (Number.isInteger(n) && n >= 0 && n <= 0x10ffff ? String.fromCodePoint(n) : '');
+/**
+ * Text of an XML text node: the five named entities and numeric character references (&#8211; &#xF1;), which some
+ * spreadsheet writers (e.g. openpyxl) use for every character outside ASCII.
+ */
+export const unxml = (s) => s.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'")
+  .replace(/&#x([0-9a-f]+);/gi, (_, h) => codePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_, d) => codePoint(Number(d))).replace(/&amp;/g, '&');
+/** Cell text: OOXML escapes _xHHHH_ (Excel writes a carriage return as _x000D_; _x005F_ is a literal underscore). */
+export const cellText = (s) => unxml(s).replace(/_x([0-9A-Fa-f]{4})_/g, (_, h) => String.fromCharCode(parseInt(h, 16)));
+/** Text of a shared or inline string: its runs (<r><t>), without the phonetic guides (<rPh>). */
+export const texts = (frag) => [...frag.replace(/<rPh\b[\s\S]*?<\/rPh>/g, '').matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)].map((m) => cellText(m[1])).join('');
 const colIndex = (ref) => {
   const letters = ref.replace(/[0-9]/g, '');
   let n = 0;

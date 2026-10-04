@@ -32,10 +32,15 @@ Download from the screen (**Download Template**: *Blank template* or *Current da
    batch (`data_load_batches`, its rows in `data_load_rows`). Validation is a dry run: every sheet runs through its
    importer in load order inside **one database transaction that is rolled back**. Cross-sheet references therefore
    validate as they will load: a policy may refer to a client and an insurer added by the same workbook.
-2. **Result per sheet**: rows read, valid, with errors, and new / changed / unchanged / for approval. Each error has
-   its sheet, row number, column and message (`GET /api/data-load/batches/:id`).
+2. **Result per sheet**: rows read, valid, with errors, held, and new / changed / unchanged / for approval / ignored.
+   Each error has its sheet, row number, column and message (`GET /api/data-load/batches/:id`). A sheet that loads all
+   or nothing (Opening Balances) and fails as a whole lists the real errors on their rows plus **one message for the
+   sheet** (row empty, "Sheet" on the screen); its other rows are counted as *held* (not loaded, no error of their
+   own). Informational notes (e.g. zero-balance rows ignored) are in the batch message shown above the counts.
 3. **Download errors** (`GET /api/data-load/batches/:id/errors`): a workbook in the same layout with only the rows in
-   error and an **Errors** column. Correct those rows and upload the file again (or the whole corrected workbook).
+   error and an **Errors** column. Correct those rows and upload the file again (or the whole corrected workbook). For a
+   sheet that failed as a whole the workbook has all its rows (it is uploaded again as a whole): the real errors on
+   their rows, the sheet message on the first row (`Whole sheet: ...`), an empty Errors cell on the held rows.
 4. **Load** (`POST /api/data-load/batches/:id/load`): allowed when the latest validation has no error, or with
    *Load valid rows only* (`validRowsOnly: true`; the screen ticks it by default for the configuration workbook and
    not for the migration workbook). The load runs in one transaction; if a row fails now because the data changed
@@ -48,7 +53,12 @@ Download from the screen (**Download Template**: *Blank template* or *Current da
 ### Natural keys
 
 Every sheet upserts on a natural key, so loading the same or a corrected workbook again updates and never duplicates;
-rows equal to the stored data are reported as unchanged and not written.
+rows equal to the stored data are reported as unchanged and not written. A workbook downloaded with **Current data**
+and uploaded unchanged into the same environment reports every row unchanged (0 new, 0 changed), also after it was
+opened and saved in a spreadsheet program: cell text is compared trimmed, with line breaks as `\n` and Unicode in
+composed form, and the reader decodes numeric character references (`&#8211;`, written by e.g. openpyxl for every
+character outside ASCII) and Excel's `_x000D_` escapes. A master reference shared by several records (two states
+named Cebu in two countries) is written as the referenced record's code, so the row's key names one record.
 
 | Sheet | Key |
 |---|---|
@@ -84,11 +94,17 @@ screen, not under the second-user approval of Account Determination); `golive.lo
 - **Authority limits** are proposals: another administrator approves them on Master > Generals > User Management >
   Authority Matrix (maker-checker), as on the screen.
 - **Numbering.** *Next Number* is the next sequence number of the current period (last number used in the old system
-  plus one). It cannot go backwards. The transaction reset (`SMOKE_TEST_AND_RESET.md`) restarts the counters of the
-  transaction series, so load the Numbering sheet (or the whole configuration workbook) again after a reset and before
-  the migration workbook.
+  plus one). It cannot go below a number already issued in the period. It is also kept on the series as the start of
+  that period's counter (`document_numbering.period_start_key` / `period_start_number`, migration
+  `0246_numbering_period_start.sql`; the same for **Set next number** on Master > Document Numbering): when the
+  transaction reset (`SMOKE_TEST_AND_RESET.md`) deletes the counters, each series restarts at that number, not at 1.
+  The Numbering sheet therefore need not be loaded again after the reset; loading it again reports it unchanged. With no
+  number issued yet in the period (right after the reset) the next number may be corrected downwards. Other periods
+  (next year of a yearly series) start at the series' start number.
 - **Commission rates.** A Line of Business on the Commission Rates sheet must be a code of the Line of Business master
-  (Lines of Business sheet or Master > Line of Business); a rate on an unknown line would never apply.
+  (Lines of Business sheet or Master > Line of Business); a rate on an unknown line would never apply. The Commission
+  Rate Matrix API (`POST` / `PUT /api/commission-rates`, the screen) applies the same rule: 400 with the field
+  `lineOfBusiness` when the code is not in the master (checked on add and when the code changes).
 - **Cutover date.** `golive.cutover_date` (Settings sheet of the configuration workbook, or Master > Configuration) is
   the first day of live transactions. The migration workbook is refused until it is set.
 - **Go-live lock.** Once `golive.locked` is on (Master > Configuration), the migration workbook is refused (upload,
@@ -100,20 +116,24 @@ screen, not under the second-user approval of Account Determination); `golive.lo
   date. Policies must be in force at cutover (expiry on or after the cutover date). Open claims are `registered` or
   `in-review`.
 - Opening balances are the trial balance of the old system at the close of the day before the cutover date. Debits must
-  equal credits. The fiscal year of the cutover date must have no journal posted before it.
+  equal credits. The fiscal year of the cutover date must have no journal posted before it. A row with neither a debit
+  nor a credit (or zero), an account whose movements net to zero, is accepted and ignored (counted as *ignored*, with
+  a note in the batch message and `zeroBalanceRows` in the reconciliation totals); its account must still be in the
+  chart of accounts. The sheet loads all or nothing: see *Result per sheet* above for how a failure is reported.
 - Migrated records are flagged and post nothing:
 
 | Record | Flag | Not created |
 |---|---|---|
 | Client | `source = 'go-live-migration'`, `load_batch_id` | |
 | Policy | `doc.source = 'go-live-migration'`, `doc.loadBatchId`, `load_batch_id`; insurer at 100% | bill, booking journal, commission accrual (policy migration mode of `issuePolicy`) |
-| Open item | receivable `source = 'opening'`, `go_live_date` = cutover, `load_batch_id`; a collection item | booking journal (the GL carries it in the opening balance) |
+| Open item | receivable `source = 'opening'`, `go_live_date` = cutover, `load_batch_id`; the old bill number as `bill_number` and `reference`; a collection item | booking journal (the GL carries it in the opening balance) |
 | Open claim | `details.source = 'go-live-migration'`, `load_batch_id`, a claim history line | acknowledgement e-mail, notifications, settlement journal |
 | Opening balance | `opening_balances.source_run = 'go-live:<cutover>'` | journal |
 
 ## New and migrated data side by side
 
-- **Numbers.** Migrated records keep the numbers of the old system (client code, policy number, claim number). New
+- **Numbers.** Migrated records keep the numbers of the old system (client code, policy number, claim number, the bill
+  number of an open item). New
   business takes the next number of its Document Numbering series, which the Numbering sheet sets. Both workbooks refuse
   a collision: the configuration workbook when a series' next number would issue a number that a migrated record of
   the same format already has, the migration workbook when a legacy number has the format of a series in the current
@@ -125,8 +145,16 @@ screen, not under the second-user approval of Account Determination); `golive.lo
   renewal term is new business: it does not carry the `go-live-migration` source or the load batch of the expiring term.
 - **Reports.** The policy API and lists show `source` and filter on it (`GET /api/policies?source=go-live-migration`);
   `load_batch_id` ties every migrated record to its batch.
-- **Open items** get a bill number of the invoice series; the bill number of the old system is kept as the bill
-  reference (search the open receivables by it).
+- **Open items** keep the bill number of the old system (*Bill Reference*) as their bill number, under the same
+  rule as the other legacy numbers: a bill number with the format of the invoice series at or above its next number
+  (e.g. `INV-2026-00004` while the series is at 1) is refused until the invoice series' Next Number is raised above it
+  (Numbering sheet). Only when another bill already carries that number (one debit note over several policies) does the
+  open item get the next number of the invoice series; the old number is then kept as the bill's `reference` and shown
+  with the bill number (`oldBillNumber` in `GET /api/receipts/open-receivables`, `GET /api/collections` and the policy
+  payment screen; "INV-2026-00011 (old system DN-OLD-77)" on the Add Receipt bill list and the billing statements),
+  and the receipt allocation search (`GET /api/receipts/open-receivables?search=`) and the bill statement
+  (`/api/billing-statement/bills/:id/generate`) find the bill by it. The policy billing statement lists migrated open
+  items.
 - **Money.** Open items are collected with normal official receipts. Amounts due to insurers and commission payable
   are in the opening balances and paid with payment vouchers (Accounts > Disbursement).
 

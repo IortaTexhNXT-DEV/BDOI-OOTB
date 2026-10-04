@@ -91,14 +91,25 @@ export async function batchErrors(id, { limit = 2000 } = {}) {
     .sort((a, b) => (order[a.sheet] ?? 99) - (order[b.sheet] ?? 99) || a.row_number - b.row_number);
   const out = [];
   for (const r of rows) {
-    for (const e of r.errors || []) {
+    // a row held by an all-or-nothing sheet has no error of its own: the sheet message below says why
+    for (const e of (r.errors || []).filter((x) => !x.held)) {
       const s = names[r.sheet];
       const col = s?.columns.find((c) => c.key === e.column);
       out.push({ sheet: r.sheet, sheetName: s?.name || r.sheet, row: r.row_number, column: col ? col.header : e.column || null, message: e.message });
     }
   }
+  // one message per sheet that failed as a whole, after the errors of its rows
+  for (const s of batch.sheets || []) {
+    if (!s.message || !rows.some((r) => r.sheet === s.sheet)) continue;
+    const at = out.findLastIndex((e) => (order[e.sheet] ?? 99) <= (order[s.sheet] ?? 99));
+    out.splice(at + 1, 0, { sheet: s.sheet, sheetName: names[s.sheet]?.name || s.name, row: null, column: null, message: s.message });
+  }
   return { total: out.length, errors: out.slice(0, limit) };
 }
+
+const HELD = 'Not loaded: the sheet loads all or nothing (see the rows in error)';
+/** Rows that cannot be loaded: rows in error and rows held by an all-or-nothing sheet. */
+const unloadable = (sheets) => sheets.reduce((s, x) => s + x.errors + (x.held || 0), 0);
 
 /** Errors of a row-level exception: [{ column, message }] with column = column key (or null). */
 function rowErrors(e, sheet) {
@@ -124,15 +135,21 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
   const summary = [];
   for (const sheet of sheets) {
     const rows = rowsBySheet[sheet.key] || [];
-    const sum = { sheet: sheet.key, name: sheet.name, read: rows.length, valid: 0, errors: 0, created: 0, updated: 0, unchanged: 0, proposed: 0, skipped: 0 };
+    // errors: rows with an error of their own; held: rows of an all-or-nothing sheet not loaded because of other rows
+    // (message: why the sheet as a whole was not loaded); ignored: rows accepted with nothing to load (zero balance)
+    const sum = { sheet: sheet.key, name: sheet.name, read: rows.length, valid: 0, errors: 0, held: 0, created: 0, updated: 0, unchanged: 0, proposed: 0, ignored: 0, skipped: 0, message: null };
     summary.push(sum);
     if (!rows.length) continue;
     const done = (row, r) => {
       results.set(row.id, r);
       if (r.status === 'skipped') sum.skipped += 1;
+      else if (r.held) sum.held += 1;
       else if (r.errors?.length) sum.errors += 1;
       else { sum.valid += 1; if (r.action) sum[r.action] = (sum[r.action] || 0) + 1; }
     };
+    // a held row is not loadable (status error, so the load and the errors workbook treat it as such) but carries no
+    // error of its own: the error list shows the real errors and one message for the sheet
+    const held = { status: 'error', action: null, held: true, errors: [{ column: null, message: HELD, held: true }] };
     // stored data by natural key, for the unchanged check (loaded lazily, once per sheet)
     let stored = null;
     const storedFor = async () => {
@@ -178,18 +195,31 @@ async function runSheets(ctx, sheets, rowsBySheet, { skip = new Set() } = {}) {
       }
     }
     if (sheet.importSheet && pending.length && pending.length < rows.length - sum.skipped) {
-      // all or nothing: rows in error leave the rest of the sheet unloaded
-      for (const row of pending) done(row, { status: 'error', action: null, errors: [{ column: null, message: 'Not loaded: this sheet loads all or nothing; fix the other rows in error' }] });
+      // all or nothing: rows in error hold the rest of the sheet
+      for (const row of pending) done(row, held);
+      sum.message = `Nothing was loaded: the sheet loads all or nothing and ${sum.errors} row(s) are in error; the other ${pending.length} row(s) are held until they are fixed`;
     } else if (sheet.importSheet && pending.length) {
       const out = await withTransaction(async () => {
         const r = await sheet.importSheet(ctx, pending);
-        if (r.some((x) => x.errors)) throw Object.assign(new Error('sheet rejected'), { sheetResult: r });
+        if (r.sheetError || r.rows.some((x) => x.errors || x.held)) throw Object.assign(new Error('sheet rejected'), { sheetResult: r });
         return r;
       }).catch((e) => {
         if (e.sheetResult) return e.sheetResult;
         throw e;
       });
-      pending.forEach((row, i) => done(row, out[i].errors ? { status: 'error', action: null, errors: out[i].errors } : { status: 'valid', action: out[i].action, errors: [] }));
+      pending.forEach((row, i) => {
+        const x = out.rows[i];
+        if (x.held) done(row, held);
+        else if (x.errors) done(row, { status: 'error', action: null, errors: x.errors });
+        else done(row, { status: 'valid', action: x.action, errors: [] });
+      });
+      if (out.sheetError) sum.message = out.sheetError;
+      // informational note (rows accepted with nothing to load), once for the sheet
+      const notes = pending.filter((_, i) => out.rows[i].note);
+      if (notes.length) {
+        const which = notes.length > 20 ? '' : ` (row${notes.length > 1 ? 's' : ''} ${notes.map((r) => r.rowNumber).join(', ')})`;
+        ctx.warn(`${sheet.name}: ${notes.length} row(s) with ${out.rows.find((x) => x.note).note}${which}`);
+      }
     }
   }
   return { results, sheets: summary };
@@ -281,7 +311,7 @@ export async function validateBatch(id, user) {
     clearLetterheadCache();
   }
   await saveResults(batch.id, outcome.results, (r) => r.status);
-  const errors = outcome.sheets.reduce((s, x) => s + x.errors, 0);
+  const errors = unloadable(outcome.sheets);
   const valid = outcome.sheets.reduce((s, x) => s + x.valid, 0);
   await query(`UPDATE data_load_batches SET status = $2, rows_valid = $3, rows_error = $4, sheets = $5, reconciliation = $6, cutover_date = $7, validated_at = now(),
     message = $8 WHERE id = $1`, [batch.id, errors ? 'failed' : 'validated', valid, errors, JSON.stringify(outcome.sheets), outcome.reconciliation ? JSON.stringify(outcome.reconciliation) : null,
@@ -314,7 +344,7 @@ export async function loadBatch(id, user, { validRowsOnly = false } = {}) {
       await query(`SELECT pg_advisory_xact_lock(${LOCK})`);
       const ctx = newCtx(batch, user, state, false);
       const run = await runSheets(ctx, sheets, rowsBySheet, { skip });
-      if (run.sheets.some((s) => s.errors)) {
+      if (unloadable(run.sheets)) {
         failed.run = run;
         throw failed;
       }
@@ -326,7 +356,7 @@ export async function loadBatch(id, user, { validRowsOnly = false } = {}) {
     if (e !== failed) throw e;
     // nothing was saved: record the errors found now, so they can be downloaded and fixed
     await saveResults(batch.id, failed.run.results, (r) => r.status);
-    const errors = failed.run.sheets.reduce((s, x) => s + x.errors, 0);
+    const errors = unloadable(failed.run.sheets);
     await query('UPDATE data_load_batches SET status = \'failed\', rows_error = $2, rows_valid = $3, sheets = $4, validated_at = now(), message = $5 WHERE id = $1',
       [batch.id, errors, failed.run.sheets.reduce((s, x) => s + x.valid, 0), JSON.stringify(failed.run.sheets), 'The load stopped: rows failed although the validation passed (the data changed since). Nothing was loaded.']);
     throw conflict(`The load stopped: ${errors} row(s) failed although the validation passed (the data changed since). Nothing was loaded; download the errors`);
@@ -337,7 +367,7 @@ export async function loadBatch(id, user, { validRowsOnly = false } = {}) {
   // rows skipped by "load valid rows only" keep their status and errors: the errors workbook of the batch still lists
   // them, to be fixed and uploaded again
   await saveResults(batch.id, new Map([...outcome.results].filter(([id]) => !skip.has(id))), (r) => (r.status === 'valid' ? 'loaded' : r.status));
-  const counts = Object.fromEntries(outcome.sheets.map((s) => [s.sheet, { created: s.created, updated: s.updated, unchanged: s.unchanged, proposed: s.proposed, skipped: s.skipped }]));
+  const counts = Object.fromEntries(outcome.sheets.map((s) => [s.sheet, { created: s.created, updated: s.updated, unchanged: s.unchanged, proposed: s.proposed, ignored: s.ignored, skipped: s.skipped }]));
   await query('UPDATE data_load_batches SET loaded_counts = $2, sheets = $3, reconciliation = COALESCE($4, reconciliation) WHERE id = $1',
     [batch.id, JSON.stringify(counts), JSON.stringify(outcome.sheets), outcome.reconciliation ? JSON.stringify(outcome.reconciliation) : null]);
   return { batch: await getBatch(batch.id), temporaryPasswords: outcome.temporaryPasswords, reconciliation: outcome.reconciliation };
@@ -352,14 +382,18 @@ export async function errorsWorkbook(id) {
   const data = {};
   const errors = {};
   const byKey = Object.fromEntries(sheets.map((s) => [s.key, s]));
+  // the message of a sheet that failed as a whole goes on its first row; held rows (no error of their own) stay in the
+  // workbook, since an all-or-nothing sheet is uploaded again as a whole, with an empty Errors cell
+  const sheetMessages = Object.fromEntries((batch.sheets || []).filter((s) => s.message).map((s) => [s.sheet, s.message]));
   for (const r of rows) {
     const s = byKey[r.sheet];
     (data[r.sheet] ||= []).push(r.data);
-    const text = (r.errors || []).map((e) => {
+    const text = (r.errors || []).filter((e) => !e.held).map((e) => {
       const col = s?.columns.find((c) => c.key === e.column);
       return `${col ? `${col.header}: ` : ''}${e.message}`;
     }).join(' | ');
-    (errors[r.sheet] ||= []).push(`Row ${r.row_number}: ${text}`);
+    const first = sheetMessages[r.sheet] && !errors[r.sheet] ? `Whole sheet: ${sheetMessages[r.sheet]}` : '';
+    (errors[r.sheet] ||= []).push([first, text ? `Row ${r.row_number}: ${text}` : ''].filter(Boolean).join(' | '));
   }
   const { cutoverDate } = await goLiveState();
   return { fileName: `${KITS[batch.kit].file.replace('.xlsx', '')}_Batch${batch.id}_Errors.xlsx`, buffer: await kitWorkbook(batch.kit, sheets, { data, errors, cutover: cutoverDate }) };

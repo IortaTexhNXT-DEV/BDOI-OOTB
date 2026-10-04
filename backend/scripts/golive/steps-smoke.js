@@ -1,7 +1,8 @@
 /**
  * Step 3: smoke test on TARGET (client, quotation, policy, receipt through the API; numbers issued and journals posted),
  * then the transaction reset (dry run, then execute) and the checks that it removed the transactions only: masters and
- * configuration identical to after step 2 (checksums and configuration export), counters restarted, trial balance empty.
+ * configuration identical to after step 2 (checksums and configuration export), counters restarted at the next numbers
+ * the configuration workbook set, trial balance empty.
  */
 import { dataOf, listOf } from '../uat/http.js';
 import { expect, fmt } from './log.js';
@@ -51,7 +52,8 @@ export async function step3(ctx) {
     const after = await countRows(ctx.cfg.targetDb, BUSINESS_TABLES);
     expect(JSON.stringify(before) === JSON.stringify(after), 'the dry run changed the database');
     expect(plan.total > 0, 'the dry run found nothing to remove');
-    return `would remove ${plan.total} rows in ${plan.tables.filter((t) => t.rows).length} tables (${plan.tables.filter((t) => t.rows && BUSINESS_TABLES.includes(t.table)).map((t) => `${t.table} ${t.rows}`).join(', ')}); keeps ${plan.kept.tables} master tables (${plan.kept.rows} rows); ${plan.series.reset.length} series restart`;
+    const restart = plan.series.restart.filter((x) => ['policy', 'receipt', 'invoice', 'client'].includes(x.series)).map((x) => `${x.series} at ${x.preview || x.restartAt}`);
+    return `would remove ${plan.total} rows in ${plan.tables.filter((t) => t.rows).length} tables (${plan.tables.filter((t) => t.rows && BUSINESS_TABLES.includes(t.table)).map((t) => `${t.table} ${t.rows}`).join(', ')}); keeps ${plan.kept.tables} master tables (${plan.kept.rows} rows); ${plan.series.reset.length} series restart (${plan.series.restart.filter((x) => x.configured).length} at the next number configured, e.g. ${restart.join(', ')})`;
   }, { critical: true });
 
   await log.check('Transaction reset, execute (CONFIRM_RESET=yes)', async () => {
@@ -79,21 +81,20 @@ export async function step3(ctx) {
     return `${Object.keys(now).length} tables, ${Object.values(now).reduce((s, x) => s + x.rows, 0)} rows: all checksums equal`;
   });
 
-  await log.check('Configuration export after the reset equals the export after step 2, except the restarted counters', async () => {
+  await log.check('Configuration export after the reset equals the export after step 2 (Numbering included: the series restart at the next numbers of step 2)', async () => {
     const after = await wb.template(admin, 'configuration', { prefill: true });
     const diffs = wb.compareBooks(ctx.kitInfo.configuration, ctx.state.targetConfigAfter2, after);
-    const other = diffs.filter((d) => d.sheet !== 'Numbering' || d.onlyA.length || d.onlyB.length || d.changed.some((c) => c.columns.some((x) => x.column !== 'Next Number')));
     ctx.sections.push({ title: 'Step 3: configuration export after the reset vs after step 2', body: diffTable(diffs) });
-    expect(!other.length, `unexpected differences in ${other.map((d) => d.sheet).join(', ')}`);
-    const restarted = diffs.find((d) => d.sheet === 'Numbering')?.changed.length || 0;
-    return `identical except Numbering > Next Number of ${restarted} transaction series (restarted)`;
+    expect(!diffs.length, `differences in ${diffs.map((d) => `${d.sheet} (${[...d.onlyA, ...d.onlyB, ...d.changed.map((c) => c.key)].slice(0, 5).join(', ')})`).join('; ')}`);
+    return 'identical, Numbering > Next Number included';
   });
 
-  await log.check('Number counters restarted at the start number (transaction series), master series kept', async () => {
+  await log.check('Number counters restarted at the next number configured for the period (transaction series), master series kept', async () => {
     const series = listOf(await admin.get('/document-numbering'));
     const tx = ['policy', 'receipt', 'client', 'quote', 'lead', 'journal', 'invoice'].map((c) => series.find((s) => s.code === c)).filter(Boolean);
-    const wrong = tx.filter((s) => s.nextNumber !== s.startNumber);
-    expect(!wrong.length, `not restarted: ${wrong.map((s) => `${s.code} next ${s.nextNumber}`).join(', ')}`);
+    const prev = (code) => Number(ctx.configBook.rows('Numbering').find((r) => r.values['Series Code'] === code)?.values['Next Number'] || 0);
+    const wrong = tx.filter((s) => s.currentValue !== 0 || s.nextNumber !== (s.periodStartNumber ?? s.startNumber) || (prev(s.code) > s.startNumber && s.nextNumber !== prev(s.code)));
+    expect(!wrong.length, `not restarted at the configured number: ${wrong.map((s) => `${s.code} next ${s.nextNumber} (workbook ${prev(s.code)})`).join(', ')}`);
     return tx.map((s) => `${s.code} next ${s.nextPreview || s.nextNumber}`).join(', ');
   });
 

@@ -67,19 +67,28 @@ export async function step5(ctx) {
     });
   }
 
-  await log.check('Receipt against a migrated open item', async () => {
+  await log.check('Receipt against a migrated open item, found by the old system\'s bill number (kept as its bill number)', async () => {
     const acc = await persona(ctx, personaFor(ctx, 'accounting'));
     const open = listOf(await acc.get('/receipts/open-receivables'));
-    const item = open.find((o) => ctx.snapshot.rows.openItems.some((m) => m['Policy Number'] === o.policyNumber && m['Bill Reference'] === (o.reference || o.billReference || o.billNumber)))
-      || open.find((o) => o.source === 'opening');
+    const legacy = ctx.snapshot.rows.openItems;
+    const migrated = open.filter((o) => o.source === 'opening');
+    // migrated open items keep the old system's bill number (or show it as oldBillNumber when another bill had it)
+    const keeps = (o) => legacy.some((m) => m['Policy Number'] === o.policyNumber && m['Bill Reference'] === (o.oldBillNumber || o.billNumber));
+    const lost = migrated.filter((o) => !keeps(o));
+    expect(!lost.length, `open items without their old bill number: ${lost.slice(0, 3).map((o) => `${o.policyNumber} ${o.billNumber}`).join(', ')}`);
+    const item = migrated.find((o) => !o.oldBillNumber);
     expect(item, 'no migrated open item in the open receivables');
+    const found = listOf(await acc.get('/receipts/open-receivables', { search: item.billNumber }));
+    expect(found.some((o) => o.receivableId === item.receivableId), `the receipt allocation search does not find ${item.billNumber}`);
+    ctx.state.openItemsKeptNumbers = `${migrated.filter((o) => !o.oldBillNumber).length} of ${migrated.length}`;
     const amount = r2(Math.min(Number(item.balance), Math.max(1000, r2(Number(item.balance) / 2))));
     const r = await receipt(ctx, { receivableId: item.receivableId, amount, label: `${item.policyNumber} (migrated open item)` });
     const after = listOf(await acc.get('/receipts/open-receivables', { policyNumber: item.policyNumber })).find((o) => o.receivableId === item.receivableId);
     const left = after ? Number(after.balance) : 0;
     expect(Math.abs(left - r2(Number(item.balance) - amount)) < 0.005, `balance after the receipt ${left}, expected ${r2(Number(item.balance) - amount)}`);
     ctx.state.openItemReceipt = { policy: item.policyNumber, amount, receipt: r.receiptNumber };
-    return `receipt ${r.receiptNumber}: ${fmt(amount)} on ${item.policyNumber} bill ${item.billNumber} (balance ${fmt(item.balance)} -> ${fmt(left)})`;
+    return `receipt ${r.receiptNumber}: ${fmt(amount)} on ${item.policyNumber} bill ${item.billNumber} = the old system's bill number (balance ${fmt(item.balance)} -> ${fmt(left)}); `
+      + `open migrated items with the old bill number as bill number: ${ctx.state.openItemsKeptNumbers}`;
   });
 
   await log.check('Trial balance (opening balances + new journals) balances; receivables control account agrees with the open items', async () => {
