@@ -1,0 +1,23 @@
+// Test levels and environments of BrokerVerse OOTB (Test Strategy and Test Plan).
+// Render from docs/package/tools: python3 qa-diagrams/render.py
+digraph G {
+  rankdir=TB; nodesep=0.4; ranksep=0.7;
+  node [shape=box, style="rounded,filled", fontname="Helvetica", fontsize=10, color="#0B2A4A", fillcolor="#E8EEF5", margin="0.12,0.06"];
+  edge [color="#0B2A4A", fontname="Helvetica", fontsize=9];
+  pr [label="Pull request\nor push", fillcolor="#FFFFFF"];
+  ci [label="CI (ci.yml)\nbackend lint, vitest on PostgreSQL 16\nfront-end lint, jest, build\ndependency audit\nartefacts web-<sha>, backend-<sha>"];
+  dev [label="Dev\nunit, API and front-end tests\nSIT of small and medium brokers\nsynthetic data (uat-scenario.js)"];
+  sit [label="SIT (large brokers)\nend to end with every role\nconfiguration build\nmock loads"];
+  uat [label="UAT\nUAT cycles 1 and 2 by key users\nmock loads with the broker's data\ntraining"];
+  pre [label="Pre-Prod (temporary)\ngo-live rehearsal\n(npm run rehearsal:golive)\nenvironment comparison\nmasking verification"];
+  prod [label="Production\nsmoke test\ncutover verification\nhypercare checks", fillcolor="#DCEFE3"];
+  pr -> ci;
+  ci -> dev [label="push to\nbrokerverse-platform"];
+  dev -> sit [label="tag vX.Y.Z-rc.N"];
+  sit -> uat [label="SIT exit"];
+  dev -> uat [label="small, medium:\nSIT exit", style=dashed];
+  uat -> pre [label="UAT sign-off"];
+  pre -> prod [label="go decision,\ntag vX.Y.Z"];
+  {rank=same; pr; ci; dev;}
+  {rank=same; sit; uat; pre; prod;}
+}

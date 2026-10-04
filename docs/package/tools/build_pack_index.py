@@ -79,9 +79,11 @@ DOCS = [
     ('05_Delivery', 'BrokerVerse_Communication_Templates_and_Touchpoints', 'docx, pdf', 'Every e-mail, notification and printed document the system sends', [D, P], True, [IMP, SUP]),
     ('05_Delivery', 'BrokerVerse_Communication_Touchpoints', 'xlsx', 'Companion workbook of the communication templates', [D, P], True, [IMP, SUP]),
     ('05_Delivery', 'BrokerVerse_Schedules_and_Batch_Jobs', 'docx, pdf', 'Scheduled jobs, batch processes and the operational run book', [D, P], True, [IMP, GO, SUP]),
-    ('05_Delivery', 'BrokerVerse_Test_Cases', 'xlsx', 'Release test cases, traceability and defects', [D, V], True, [IMP, GO]),
+    ('05_Delivery', 'BrokerVerse_Test_Cases', 'xlsx', 'Release test cases with regulatory references, traceability to automated tests and to the process catalogue, defects', [D, V], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Test_Summary_Report', 'docx, pdf', 'Results of the release test', [D, V, M], True, [PRE, GO]),
     ('05_Delivery', 'BrokerVerse_Philippine_Regulatory_Compliance_Matrix', 'docx, pdf', 'How the product supports IC, BIR, premium tax, CTPL, DPA and AMLA obligations', [S, D, M], True, [PRE, IMP]),
+    ('05_Delivery', 'BrokerVerse_Test_Strategy', 'docx, pdf', 'How the product and each implementation are tested: levels, types, environments, test data and masking, entry and exit criteria, defects, CI gates', [D, V, M], True, [IMP, GO]),
+    ('05_Delivery', 'BrokerVerse_Test_Plan', 'docx, pdf', 'Test plan of a broker implementation: scope per module, schedule by size, cycles from SIT to hypercare, resourcing, sign-off', [D, V, M], True, [IMP, GO]),
     # ---------------------------------------------------------------- 06_Support
     ('06_Support', 'BrokerVerse_Production_Support_Approach_and_Standards', 'docx, pdf', 'Support model, severities, change and release management, monitoring', [P, M], True, [CON, GO, SUP]),
     ('06_Support', 'BrokerVerse_Business_Continuity_and_Disaster_Recovery_Plan', 'docx, pdf', 'Backups, recovery objectives, scenarios and DR tests', [P, M], True, [CON, SUP]),
