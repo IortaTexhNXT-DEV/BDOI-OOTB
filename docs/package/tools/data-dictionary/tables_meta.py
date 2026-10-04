@@ -1,6 +1,7 @@
 """Functional area, owning module and description of every BrokerVerse table (data dictionary)."""
 import sys
-sys.path.insert(0, '/home/user/BDOI-OOTB/docs/architecture/tools')
+from ddpaths import ARCH_TOOLS
+sys.path.insert(0, ARCH_TOOLS)
 import table_catalog as tc
 
 AREAS = [
@@ -21,23 +22,31 @@ AREAS = [
     'Incentives',
     'Security and audit',
     'Configuration and schedules',
+    'Distribution and marketing',
+    'Fleet, marine and motor claims',
+    'Payables and fixed assets',
+    'BIR returns and invoicing',
+    'Compliance',
+    'Integrations',
 ]
 
 AREA_TABLES = {
-    'Party and client': 'clients insurance_companies banks branches signatories countries regions states cities districts postal_codes',
+    'Party and client': 'clients insurance_companies banks branches signatories countries regions states cities districts postal_codes '
+                        'client_signatories client_beneficial_owners client_kyc_documents',
     'Product and rating': 'products policy_types coverages vehicle_brands vehicle_models vehicle_variants product_templates product_components '
                           'product_risk_mappings product_risk_sections premium_charge_rules lgu_tax_rates insurer_rate_tables package_bundles package_bundle_sections',
     'Sales and quotation': 'leads quotes quote_customer_responses package_quotes package_sections payment_gateways payment_links payment_events agent_events',
     'Placement': 'broker_slips insurer_offers placements risk_participants',
-    'Policy and endorsement': 'policies endorsements package_endorsements policy_payments',
+    'Policy and endorsement': 'policies endorsements package_endorsements policy_payments cover_notes',
     'Billing, receipts and payments': 'receivables receivable_participants receivable_credits receipts receipt_lines receipt_applications write_off_reasons '
                                       'disbursements invoice_lists checkbooks petty_cash_funds petty_cash_requests petty_cash_request_lines petty_cash_disbursements '
-                                      'petty_cash_receipts petty_cash_replenishments',
+                                      'petty_cash_receipts petty_cash_replenishments post_dated_cheques',
     'Remittance and insurer accounting': 'remittances remittance_lines remittance_items remittance_allocations remittance_approvals remittance_delegations '
                                          'insurer_refund_credits direct_bill_items direct_bill_client_payments commission_debit_notes commission_debit_note_lines '
                                          'commission_debit_note_collections',
-    'Commission': 'commissions commission_adjustments commission_rates commission_referrers',
-    'Claims': 'claims claim_history claim_field_changes claim_settlement_movements',
+    'Commission': 'commissions commission_adjustments commission_rates commission_referrers override_agreements override_agreement_tiers '
+                  'override_computations override_settlements',
+    'Claims': 'claims claim_history claim_field_changes claim_settlement_movements claim_document_items claim_document_reminders',
     'Renewals': 'renewals renewal_quotes renewal_notices renewal_activities renewal_batches renewal_batch_policies winback_campaigns',
     'General ledger and period end': 'gl_accounts journal_vouchers journal_lines entry_matches posting_rules posting_rule_lines accounting_config_changes '
                                      'accounting_periods fiscal_years opening_balances period_close_checklist period_close_runs period_close_run_checks '
@@ -47,13 +56,29 @@ AREA_TABLES = {
                                        'insurer_statement_formats insurer_statements insurer_statement_lines insurer_statement_resolutions',
     'Credit control': 'collection_items collection_actions premium_instalment_plans premium_instalments premium_warranty_extensions premium_warranty_actions '
                       'client_credit_exceptions',
-    'Reinsurance': 'reinsurers reinsurance_treaties cessions reinsurance_recoveries reinsurance_bordereaux reinsurance_reconciliations reinsurance_exceptions',
+    'Reinsurance': 'reinsurers reinsurance_treaties cessions reinsurance_recoveries reinsurance_bordereaux reinsurance_reconciliations reinsurance_exceptions '
+                   'fac_placements fac_placement_shares fac_settlements',
     'Incentives': 'incentive_programs incentive_calculations incentive_results',
     'Security and audit': 'users roles permissions role_permissions user_roles refresh_tokens password_resets password_history login_history audit_log '
-                          'authority_transaction_types authority_limits sod_rules user_delegations access_reviews access_review_items '
-                          'privacy_consents data_subject_requests',
+                          'authority_transaction_types authority_limits sod_rules user_delegations access_reviews access_review_items',
     'Configuration and schedules': 'app_settings master_types master_records currencies document_numbering sequences scheduled_jobs job_runs job_queue '
-                                   'notifications email_outbox documents report_definitions report_schedules generated_reports schema_migrations',
+                                   'notifications email_outbox documents report_definitions report_schedules generated_reports schema_migrations '
+                                   'report_builder_reports bi_extract_runs data_load_batches data_load_rows data_load_comparisons work_tasks '
+                                   'e_signatures document_signature_slots',
+    'Distribution and marketing': 'lead_assignment_rules lead_assignment_history distribution_channels channel_billing_accounts motor_programmes '
+                                  'dealer_sales_batches dealer_sales comparison_reports campaigns campaign_segments campaign_templates campaign_recipients '
+                                  'sales_activities',
+    'Fleet, marine and motor claims': 'fleet_schedules fleet_vehicles open_covers open_cover_certificates open_cover_declarations claim_repair_estimates '
+                                      'claim_loas claim_vehicle_releases',
+    'Payables and fixed assets': 'supplier_invoices supplier_invoice_lines supplier_payments supplier_payment_allocations fixed_assets '
+                                 'fixed_asset_depreciation fixed_asset_disposals',
+    'BIR returns and invoicing': 'bir_return_filings sales_invoices sales_invoice_lines sales_invoice_payments cas_book_prints eis_submissions',
+    'Compliance': 'aml_risk_factors aml_risk_assessments aml_edd_reviews aml_screening_lists aml_list_versions aml_list_entries aml_screenings '
+                  'aml_screening_hits aml_provider_requests aml_rules aml_alerts aml_cases aml_reports aml_report_items compliance_licences '
+                  'compliance_licence_reminders compliance_fit_proper ic_statement_lines complaints complaint_reminders personal_data_breaches '
+                  'personal_data_breach_reminders privacy_consents data_subject_requests',
+    'Integrations': 'integration_connectors integration_outbox integration_attempts integration_inbox message_templates coc_series '
+                    'ctpl_authentications insurer_api_mappings bank_file_layouts payee_bank_accounts bank_payment_batches bank_payment_batch_lines',
 }
 AREA_OF = {t: a for a, ts in AREA_TABLES.items() for t in ts.split()}
 

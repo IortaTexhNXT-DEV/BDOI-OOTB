@@ -1,7 +1,7 @@
 # BrokerVerse Solution Architecture
 
 Eleven stand-alone architecture documents for BrokerVerse OOTB, the insurance broking platform of iorta
-TechNXT. Version 1.1, 29 September 2026, prepared by iorta TechNXT. Every document is provided as `.docx` (editable)
+TechNXT. Version 1.2, 04 October 2026, prepared by iorta TechNXT. Every document is provided as `.docx` (editable)
 and `.pdf` (same content). Each one has its own cover, document control, table of contents, related documents and
 glossary.
 
@@ -30,9 +30,10 @@ docs/architecture/
   NN_BrokerVerse_<title>.docx / .pdf   the eleven documents (generated)
   diagrams/
     d01_*.dot, d05_*.dot, d07_*.dot,    Graphviz sources (component, deployment, topology, lifecycle, monitoring)
-    d09_*.dot, d10_*.dot, d11_*.dot
+    d09_*.dot, d10_*.dot, d11_*.dot     (module map, components, shared services and monitoring updated in 1.2)
     seq_*.seq                           sequence diagrams (small text format, see tools/render_diagrams.py)
-    er_*.dot                            ER diagrams, generated from tools/data/db_snapshot.json (do not edit)
+    er_*.dot                            ER diagrams, generated from tools/data/db_snapshot.json (do not edit);
+                                        groups in render_diagrams.py ER_GROUPS (21 diagrams in 1.2)
     *.png, *.svg                        rendered diagrams (PNG used in the documents, SVG for the web)
   tools/
     src/NN_*.md                         document sources (one per document) and src/glossary.md (master glossary)
@@ -60,8 +61,9 @@ python3 docs/manual/tools/install_fonts.py  # Nunito font for LibreOffice (from 
 From the repository root:
 
 ```
-# 1. Optional: refresh the database facts (read-only). Issue 1.1 used a fresh database: created empty with the
-#    time zone Asia/Manila, then `npm run migrate` and `npm run seed` in backend/ with SEED_SAMPLE_DATA=true
+# 1. Optional: refresh the database facts (read-only). Issue 1.2 used a new database created empty with the time
+#    zone Asia/Manila, `npm run migrate` and `npm run seed` in backend/ with SEED_SAMPLE_DATA=false (reference data
+#    only), plus the migrations of packages B and G applied with psql
 DATABASE_URL=postgres://brokerverse:brokerverse@127.0.0.1:5432/brokerverse_arch \
   python3 docs/architecture/tools/collect_db_inventory.py
 

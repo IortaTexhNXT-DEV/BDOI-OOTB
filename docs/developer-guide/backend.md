@@ -18,7 +18,9 @@ backend/
     db/migrations/       NNNN_name.sql, applied once each, in file-name order
     db/seeds/            reference data (always) and seeds/sample/ (demo data, only when SEED_SAMPLE_DATA is on)
     tools/export-api.js  generates docs/api (OpenAPI, Postman, the API touchpoint workbook)
-  scripts/               command-line tools (check-settings, provision-users, purge-sample-data, fk-index-report)
+  scripts/               command-line tools (check-settings, provision-users, purge-sample-data, fk-index-report,
+                         reset-transactions, mask-data, compare-environments, golive-rehearsal, build-brand-pack,
+                         load-barangays; lib/table-classification.js and lib/pii-catalogue.js are read by tests)
   test/                  integration tests against a real database
   docs/MODULE_GUIDE.md   conventions for writing a module
   docs/api/              generated API documentation (do not edit by hand)
@@ -41,10 +43,20 @@ Shared code in `src/lib`:
 | `mailer.js` | `queueEmail()` writes to the e-mail outbox; the `email-outbox` job sends. |
 | `logger.js` | The pino logger and log redaction. |
 | `scope.js` | Own-book record scoping for roles listed in `security.scoped_roles`. |
-| `audit.js` | `audit(req, { entity, entityId, action, before, after })` writes `audit_log`. |
+| `audit.js`, `auditEvents.js` | `audit(req, { entity, entityId, action, before, after })` writes `audit_log` with its source; `auditEvents.js` reads it back as business events. |
+| `settingOwners.js` | Keys owned by one screen (branding, company identity, premium taxes); the generic endpoints refuse them. |
+| `currency.js`, `address.js` | Base currency and dated exchange rates; Philippine address format (region from city or province). |
+| `environment.js`, `goLiveLock.js` | Environment marker and go-live lock, read by the data tools. |
+| `pii.js`, `piiPolicy.js` (package B) | Encryption of TIN, ID and bank account numbers; masking by role (`view:pii`). |
 
-Seven modules have their own README because they are larger: `accounting`, `placement`, `period-end`,
-`bank-reconciliation`, `remittance`, `reports`, `document-numbering`. Read the README before changing one of them.
+Shared engines inside modules: the posting engine (`modules/accounting/lib/posting.js`), the premium tax engine
+(`modules/premium-charges/calculator.js`, `chargesFor()`), the branding and e-mail layout (`modules/branding`), the
+e-signature mapping (`modules/e-signatures`) and the integration framework (`modules/integrations/framework`).
+
+Thirteen modules have their own README because they are larger: `accounting`, `bank-reconciliation`,
+`credit-control`, `document-numbering`, `insurer-reconciliation`, `packages`, `payment-gateway`, `period-end`,
+`placement`, `posting-rules`, `premium-charges`, `remittance`, `reports`. Read the README before changing one of them.
+Scheduled jobs of a module live in its own `jobs.js` and are re-exported by `src/jobs/handlers.js`.
 
 ## 2. Running locally
 
@@ -65,15 +77,21 @@ web server together (see `deploy/REFERENCE.md`).
 ## 3. Tests and checks
 
 ```bash
-TEST_DATABASE_URL=postgres://user:pass@127.0.0.1:5432/brokerverse_test npx vitest run   # whole suite, about 4 minutes
+TEST_DATABASE_URL=postgres://user:pass@127.0.0.1:5432/brokerverse_test npx vitest run   # whole suite: 97 files, 1,035 tests
 TEST_DATABASE_URL=... npx vitest run test/receipts.test.js                             # one file
-npx eslint src test scripts                                                             # must be clean
+npm run lint                                                                            # eslint src test scripts, must be clean
 DATABASE_URL=... npm run check:settings                                                  # settings read vs seeded
 npm run export:api                                                                      # after changing routes
 ```
 
 Every test file drops and recreates the schema of the test database, so never point `TEST_DATABASE_URL` at a database
-you need. Tests are integration tests: they call the API through supertest and check the database.
+you need. On a PostgreSQL server shared with many databases a file can stop with "out of shared memory" while it
+drops the schema (lock table full); run that file again on its own.
+
+Guard tests fail when a convention is missed: `reset-transactions.test.js` (every table classified in
+`scripts/lib/table-classification.js`), `mask-data.test.js` (every personal column in `scripts/lib/pii-catalogue.js`),
+`hardening.test.js` (every non-public route answers 401 without a token), `role-access.test.js` and
+`user-access.test.js` (role grants), `settings-ownership.test.js`. Tests are integration tests: they call the API through supertest and check the database.
 
 ESLint refuses `console` outside `scripts/`, `src/db/*.js` and `src/tools/`, unused variables, `==` (except against
 null) and `let` that is never reassigned.
@@ -89,6 +107,9 @@ ones where they are used). The important ones:
 |---|---|
 | `DATABASE_URL` | PostgreSQL connection. |
 | `JWT_SECRET`, `DATA_ENCRYPTION_KEY` | Token signing and encryption at rest (two-factor secrets). Required in production. |
+| `PII_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY_PREVIOUS` (package B) | Encryption of TIN, government ID and bank account numbers; the previous key only during a rotation (`npm run pii:rotate`). Required in production, at least 32 characters, different from the other two keys. |
+| `APP_ENVIRONMENT` | Environment of the deployment (dev, sit, uat, preprod, production). |
+| Connector credential variables | Named in each integration connector (`credential_env`); never stored in the database. |
 | `CORS_ORIGINS`, `PUBLIC_BASE_URL` | The web address. Required in production; file links are built from `PUBLIC_BASE_URL`. |
 | `ADMIN_PASSWORD` | Password of the first administrator, used only when the seed creates it. |
 | `SEED_SAMPLE_DATA` | Demo data on or off (off by default in production). |
@@ -182,7 +203,12 @@ change. Run `npm run export:api`.
 label is what administrators read on Master > Configuration). Read it with `getSetting('group.key', <the seeded
 value>)`. `npm run check:settings` and `test/configuration.test.js` fail on a key that is read but never seeded.
 
-**A migration.** A new file `src/db/migrations/NNNN_short_name.sql` with the next number. Never edit an applied
+**A migration.** A new file `src/db/migrations/NNNN_short_name.sql` with the next number in the range agreed for the
+work package (parallel packages reserve ranges, for example `0270` to `0277` and `0320` to `0329`). Check that seeded
+unique values (number series prefixes, permission, job, master type and posting event codes) are not already used on
+the branch or in a package being merged. Add every new table to `scripts/lib/table-classification.js` and every
+personal column to `scripts/lib/pii-catalogue.js`, and describe the table in
+`docs/architecture/tools/table_catalog.py` and `docs/package/tools/data-dictionary/tables_meta.py`. Never edit an applied
 migration's SQL: fix forward in a new file. Make it safe to run on a database that already has data (`IF NOT EXISTS`,
 `ON CONFLICT DO NOTHING`, updates with a `WHERE`). Migrations run at start-up inside a transaction each, one instance
 at a time (advisory lock).
@@ -203,9 +229,16 @@ migration, then `nextDocumentNumber('<code>', { db })`.
 
 **A report.** See `src/modules/reports/README.md`: a base query in `queries.js`, a `report_definitions` row, a test.
 
-**A scheduled job.** Export an async handler from `src/jobs/handlers.js` (it receives the job's `params` and returns
-a JSON summary), then add the job to `src/db/seeds/jobs.json` (code, name, description, cron, handler, params,
-enabled). The seed adds it; administrators change the schedule and parameters on Master > Schedules.
+**A scheduled job.** Write an async handler in the module's `jobs.js` (it receives the job's `params` and returns a
+JSON summary, uses the business date of `lib/dates.js` and is idempotent for the day), re-export it from
+`src/jobs/handlers.js`, then seed the job in its migration or in `src/db/seeds/jobs.json` (code, name, description,
+cron, handler, params, enabled). Seed it off when it needs a decision, a provider or a credential. Administrators
+change the schedule on Master > System Configuration > Schedules.
+
+**An integration.** Register an adapter and its message types in `src/modules/integrations` (see the Technical
+Reference, "Integration framework"), give the fake provider an answer for them, seed the connector in test mode with
+the names of its credential variables, queue messages with `enqueue(db, ...)` inside the business transaction with an
+idempotency key, and test with `fakeFailFirst` and `fakeReject`.
 
 **A module.** Follow `backend/docs/MODULE_GUIDE.md`. A folder with `router.js` under `src/modules` is mounted
 automatically.

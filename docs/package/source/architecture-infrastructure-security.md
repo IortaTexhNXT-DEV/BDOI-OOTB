@@ -1,12 +1,13 @@
 ---
 title: Architecture, Infrastructure, Security and Data Privacy
 subtitle: BrokerVerse OOTB
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; IC=Insurance Commission; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (Republic Act 10173); IRR=Implementing Rules and Regulations; DPO=Data Protection Officer; PIC=Personal information controller; PIP=Personal information processor; SPA=Single-page application; API=Application programming interface; RDS=Amazon Relational Database Service; EFS=Amazon Elastic File System; WAF=Web application firewall; CDN=Content delivery network; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; TOTP=Time-based one-time password; JWT=JSON Web Token; SoD=Segregation of duties; BIR=Bureau of Internal Revenue; DR=Disaster recovery; DEV=Development environment; SIT=System integration test; PRE-PROD=Pre-production environment; PROD=Production environment; UAT=User acceptance testing
+change: New modules (AML/CFT, BIR, operations and accounting, distribution, My Work, go-live workbench), integration framework and its connectors, encryption of personal identifiers at rest and masking by role, runtime theming and e-signatures, release pipeline, IC and NPC compliance registers
+acronyms: OOTB=Out of the box; IC=Insurance Commission; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (Republic Act 10173); IRR=Implementing Rules and Regulations; DPO=Data Protection Officer; PIC=Personal information controller; PIP=Personal information processor; SPA=Single-page application; API=Application programming interface; RDS=Amazon Relational Database Service; EFS=Amazon Elastic File System; WAF=Web application firewall; CDN=Content delivery network; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; TOTP=Time-based one-time password; JWT=JSON Web Token; SoD=Segregation of duties; BIR=Bureau of Internal Revenue; DR=Disaster recovery; DEV=Development environment; SIT=System integration test; PRE-PROD=Pre-production environment; PROD=Production environment; UAT=User acceptance testing; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; EIS=Electronic Invoicing System; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; PII=Personally identifiable information; OIDC=OpenID Connect; CAB=Change advisory board
 ---
 
 # Introduction
@@ -17,7 +18,7 @@ This document describes how BrokerVerse OOTB is built, how it can be hosted for 
 
 ## Sources and conventions
 
-The facts in this document come from the source code and configuration of branch `brokerverse-platform` (backend in `backend/`, front end in `brokerverse/`), the deployment package in `deploy/`, the GitHub workflows in `.github/workflows/`, `docker-compose.yml`, the onboarding guides in `docs/onboarding/` and the eleven Solution Architecture documents in `docs/architecture/` (version 1.1, 29 September 2026).
+The facts in this document come from the source code and configuration of branch `brokerverse-platform` on 04 October 2026 (backend in `backend/`, front end in `brokerverse/`), the two packages being merged into it (package B: Insurance Commission and data privacy compliance, with encryption and masking of personal data; package G: sales activities, quote covers and risk fields, supplier BIR Form 2307 and fixed asset disposal), the deployment package in `deploy/` (including `deploy/RELEASE_PIPELINE.md`), the GitHub workflows in `.github/workflows/`, `docker-compose.yml`, the onboarding guides in `docs/onboarding/` and the eleven Solution Architecture documents in `docs/architecture/` (version 1.2, 04 October 2026). Where a statement depends on package B or G it says so.
 
 - Statements without a label describe what the system does today.
 - **Recommended** marks a design choice, a size, a threshold or a procedure that iorta TechNXT advises but that is not built into the code or the deployment package. It must be confirmed by the broker and the hosting team.
@@ -36,13 +37,15 @@ This document gives the regulatory context in general terms. It is not legal adv
 | 05 Shared Service Components | Authentication, settings, audit, numbering, PDF engine |
 | 06 to 11 | Capacity, high availability, RTO and RPO, backup, archival, monitoring |
 | `deploy/README.md`, `deploy/REFERENCE.md` | Deployment checklist, environment variables, start-up rules |
-| `docs/onboarding/` | Getting started, go-live data set-up, UAT scripts, support and escalation |
+| `docs/onboarding/` | Getting started, go-live data set-up and workbench, smoke test and reset, data masking, branding and signatures, UAT scripts, support and escalation |
+| `deploy/RELEASE_PIPELINE.md` | Build once and promote, environments, approvals, migrations policy, rollback, hotfix |
+| Technical Reference, Data Dictionary | Module catalogue, engines, code review; tables, columns and personal data classification |
 
 # Solution overview and logical architecture
 
 ## What BrokerVerse does
 
-BrokerVerse OOTB is the operating system of a non-life insurance broker. It covers the full broking cycle: leads, quotations and quick quotes, broker slips to several insurers, placement and co-insurance, policy issue, endorsements, claims, renewals, billing, receipts, collections and credit control, remittance to insurers, direct bill, commission and incentives, reinsurance, bank and insurer statement reconciliation, period-end close with BIR tax outputs, reports and dashboards. Referrers and sub-agents do not sign in; their business is entered by Sales & Marketing.
+BrokerVerse OOTB is the operating system of a non-life insurance broker. It covers the full broking cycle: leads and lead assignment, distribution channels and dealer programmes, quotations driven by the Product Configurator, broker slips to several insurers, comparison reports, placement and co-insurance, cover notes, policy issue, fleet schedules, marine open covers, endorsements and computed cancellations, claims with document checklists and motor repairs, renewals, billing with instalment invoices, receipts and post-dated cheques, collections and credit control, remittance to insurers, direct bill, commission, override commission and incentives, reinsurance including facultative placement, accounts payable and fixed assets, bank and insurer statement reconciliation, period-end close, BIR returns, sales invoices and the CAS books, AML/CFT compliance, Insurance Commission and data privacy registers (package B), marketing campaigns, My Work, reports, the report builder and dashboards. Referrers and sub-agents do not sign in; their business is entered by Sales & Marketing.
 
 ## Architecture at a glance
 
@@ -50,25 +53,27 @@ BrokerVerse OOTB is the operating system of a non-life insurance broker. It cove
 |---|---|
 | Style | Three-tier web application: SPA, stateless REST API, relational database. The API is a modular monolith. |
 | Presentation tier | React 18 SPA (PrimeReact, Redux Toolkit), served as static files from object storage and a CDN, or from an nginx container |
-| Application tier | Node.js 22 with Express 4. 45 module folders under `/api`, 868 registered routes, two health endpoints, a built-in scheduler of 18 jobs in Asia/Manila time |
-| Data tier | PostgreSQL 16, database time zone Asia/Manila, 80 migration files applied on start under an advisory lock |
+| Application tier | Node.js 22 with Express 4. 70 module folders under `/api` (73 with packages B and G), 1,291 registered routes (1,356), two health endpoints, a built-in scheduler of 32 jobs (35) in Asia/Manila time, an integration framework with an outbox and retries |
+| Data tier | PostgreSQL 16, database time zone Asia/Manila, 139 migration files (149) applied on start under an advisory lock; 250 tables (260) |
 | File store | Persistent volume at `UPLOAD_DIR` (documents, ID images, photos, generated reports) |
-| Security | JWT sessions with refresh-token rotation, role and permission checks on every route, maker-checker, authority matrix, SoD rules, access reviews, TOTP two-factor, audit log |
+| Security | JWT sessions with refresh-token rotation, role and permission checks on every route, maker-checker, authority matrix, SoD rules, access reviews, TOTP two-factor, audit log with source; with package B field encryption of personal identifiers and masking by role |
+| Branding | Runtime theme (colours, logo, sign-in picture) applied to screens, documents, reports and e-mails without a rebuild; e-signatures mapped to documents |
 
-> Route, module and migration counts were taken from the code on 03 October 2026. The diagrams reproduced from the architecture set show the counts of 29 September 2026 (38 modules, 717 routes, 58 migrations); the structure is unchanged.
+> Route, module and migration counts were taken from the code on 04 October 2026; the figures in brackets include packages B and G. The diagrams come from the architecture set, version 1.2.
 
 ## Logical components
 
-![Logical component view of BrokerVerse OOTB (architecture document 01)](/home/user/BDOI-OOTB/docs/architecture/diagrams/d01_logical_components.png)
+![Logical component view of BrokerVerse OOTB (architecture document 01)](../../architecture/diagrams/d01_logical_components.png)
 
 | Layer | Components |
 |---|---|
 | Users | Broker staff in a browser; clients through public links (quotation approval, payment checkout) |
 | Edge | DNS, TLS, CDN or reverse proxy, WAF (recommended) |
-| Presentation | SPA: Operations, Accounts, Master, Product Configurator, Reinsurance, Reports, Dashboards |
+| Presentation | SPA: Home, My Work, Operations, Accounts, Commission, Reinsurance, Compliance, Reports, Master (in sections), Product Configurator, Dashboards; help panel (F1) with the user manual section of each screen; runtime theme |
 | HTTP pipeline | Request id, security headers (helmet), CORS, access log with redaction, rate limit, JSON size limit, signed file links, one error envelope |
 | Business modules | `backend/src/modules`: each module owns its routes, services and tables |
-| Shared services | `backend/src/lib`: authentication, permissions, settings cache, audit, numbering, e-mail outbox, secrets, PDF engine, letterhead |
+| Shared services | `backend/src/lib`: authentication, permissions, settings cache, audit, numbering, e-mail outbox, secrets, personal data encryption and masking (package B), PDF and Excel engines, letterhead and branding |
+| Integration framework | `backend/src/modules/integrations`: connectors (test or live), outbox with retries, inbox, adapters for SMS, Viber, CTPL and LTO, insurer APIs and bank files; fake provider for test mode |
 | Scheduler | node-cron jobs with a PostgreSQL advisory lock per run, so each run executes once across instances |
 | Data | PostgreSQL 16 and the file store |
 
@@ -76,13 +81,18 @@ BrokerVerse OOTB is the operating system of a non-life insurance broker. It cove
 
 | Area | Backend modules |
 |---|---|
-| Sales and operations | leads, clients, addresses, quotations, packages, premium-charges, placement, policies, endorsements, documents |
-| Claims and renewals | claims, renewals |
-| Billing and collection | receipts, collections, credit-control, payments, payment-gateway |
-| Insurer accounts | remittance, insurer-reconciliation, commission, commission-rates, incentive, reinsurance |
-| Accounting | accounting, posting-rules, journal-vouchers, disbursements, period-end, bank-reconciliation |
-| Configuration | product-configurator, masters, document-numbering, settings, system-settings, schedules |
-| Administration and security | auth, users, access-control, notifications, uploads, search, dashboard, reports, system |
+| Sales and operations | leads, clients, addresses, quotations, packages, premium-charges, placement, comparison-reports, cover-notes, policies, endorsements, cancellations, documents; sales-activities (package G) |
+| Distribution and specialty lines | channels, motor-programmes, fleet, marine, campaigns |
+| Claims and renewals | claims, claim-documents, motor-claims, claim-payments, renewals |
+| Billing and collection | receipts, collections, credit-control, pdc, payments, payment-gateway |
+| Insurer accounts | remittance, insurer-reconciliation, commission, commission-rates, insurer-overrides, incentive, reinsurance |
+| Accounting and tax | accounting, posting-rules, journal-vouchers, disbursements, payables, fixed-assets, period-end, bank-reconciliation, bir |
+| Compliance | aml, privacy; ic-compliance and data-breaches (package B) |
+| Integrations | integrations (framework, messaging, CTPL, insurer connectors, bank payment files) |
+| Configuration | product-configurator, masters, ops-masters, document-numbering, settings, system-settings, schedules, branding, e-signatures, data-load |
+| Administration and security | auth, users, access-control, my-work, notifications, uploads, search, audit, dashboard, reports, report-builder, system |
+
+The Technical Reference describes each module (purpose, routes, tables, jobs, posting events, settings).
 
 ## Integrations
 
@@ -90,10 +100,15 @@ BrokerVerse OOTB is the operating system of a non-life insurance broker. It cove
 |---|---|---|
 | E-mail (SMTP) | Outbound | Messages are queued in `email_outbox`; the `email-outbox` job sends up to 50 per run every 5 minutes through `SMTP_URL` (Office 365, port 587, STARTTLS), up to 5 attempts. Off until "Send e-mails" is switched on in Master > Configuration. |
 | Payment gateways | Inbound and outbound | Payment links (`PL-` numbers) for a quotation, a package quotation or a policy's open premium. Providers: SANDBOX (training and UAT), PayMongo (Checkout Session) and Dragonpay (Payment Switch). Webhooks are signature-checked, logged in `payment_events` and idempotent; a paid link creates the official receipt and can issue a package policy. |
-| Insurers | Outbound files and e-mail | Broker slips, placement orders, remittance statements, commission debit notes as PDF, CSV or XLSX. No insurer API. |
+| Insurers | Outbound files and e-mail; API through the integration framework | Broker slips, placement orders, remittance statements, commission debit notes as PDF, CSV or XLSX. Insurer API connectors (`insurer_rest` adapter with a mapping per insurer) send the policy issuance request and receive claim status updates; delivered in test mode until certified with each insurer. |
+| SMS and Viber | Outbound | Message templates per event (renewal notices, payment reminders, claim updates) sent through an SMS gateway connector (Semaphore, Globe Labs or a generic HTTP gateway) or Viber business messages, via the integration outbox; jobs `sms-renewal-notices` and `sms-payment-reminders` are delivered off |
+| CTPL authentication and LTO | Outbound and inbound | COC numbers allocated from the insurer's series and authenticated with the CTPL provider (`ctpl_http`), optional LTO feed (`lto_http`); asynchronous results arrive on the signed inbound endpoint |
+| BIR Electronic Invoicing System | Outbound | Every sales invoice and its cancellation queued as an e-invoice payload (`eis_submissions`); job `eis-outbox` delivered off until the broker's EIS accreditation |
+| AML screening provider | Outbound | Optional commercial screening provider through `aml_provider_requests` (job `aml-provider-retry`, off); the built-in screening uses the lists loaded in Compliance > Screening Lists |
+| BI extract | Outbound files | Job `bi-extract` (off) writes one CSV per curated dataset to `bi.extract_folder` for the broker's BI tool |
 | Insurer statements | Inbound files | CSV or XLSX statements of account read with an insurer statement format (column mapping per insurer) for Accounts > Insurer Reconciliation. |
 | Bank statements | Inbound files | CSV or XLSX statements read with a bank statement format; BDO, BPI, Metrobank and a generic layout ship as standard. |
-| Electronic transfers | Recorded | Transfers to insurers are approved in the system and the bank result is recorded (Completed or Failed). No bank payment file or bank API is generated. |
+| Electronic transfers and bank payment files | Outbound files, inbound status files | Payment vouchers are batched per bank account and written in the bank's bulk credit, InstaPay or PESONet layout (Accounts > Bank Payment Files, layouts in Master > Finance > Bank File Layouts); the bank's status file marks each line paid or rejected and posts the payment. No direct bank API. |
 | Reinsurers | Outbound files | Bordereaux and reconciliation files as CSV |
 | Uploads and go-live imports | Inbound files | 10 MB per file, 50 MB decompressed, 20,000 rows; templates in `docs/package/05_Delivery/Upload_Templates` |
 | Document generation | Internal | One PDF engine (`lib/pdf`) with the letterhead of the primary company in the Company master; XLSX, CSV and ZIP writers. No third-party document library. |
@@ -164,10 +179,10 @@ Whatever the hosting option, BrokerVerse needs the same components.
 | API runtime | Container from `backend/Dockerfile` (runs as user `node`, port 8000, health check `/api/health`) or Node.js 22 under a process manager |
 | Database | PostgreSQL 16, empty database and a login that may create tables; time zone Asia/Manila; TLS on the connection |
 | File store | Persistent volume at `UPLOAD_DIR`, shared between instances when there is more than one |
-| Secrets | `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `ADMIN_PASSWORD`, `DATABASE_URL`, `SMTP_URL`, payment gateway keys, in a secret store |
+| Secrets | `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY` (package B), `ADMIN_PASSWORD`, `DATABASE_URL`, `SMTP_URL`, payment gateway keys, integration connector credentials (variables named in each connector), in a secret store |
 | TLS | HTTPS at the CDN, load balancer or reverse proxy |
-| Outbound | SMTP (port 587) and, when used, the payment gateways over HTTPS |
-| Inbound public paths | Quotation approval, payment checkout and gateway webhooks under `/api/public/...` |
+| Outbound | SMTP (port 587) and, when used, the payment gateways, SMS and Viber gateways, the CTPL provider and LTO feed, insurer APIs, the BIR EIS and a screening provider over HTTPS; the addresses are the connector endpoints set by an administrator |
+| Inbound public paths | Quotation approval, payment checkout and gateway webhooks under `/api/public/...`, signed integration callbacks (`/api/public/integrations/inbound/:connector`), campaign opt-out links, the branding of the sign-in page |
 
 ## Environment layout
 
@@ -182,14 +197,14 @@ Whatever the hosting option, BrokerVerse needs the same components.
 | PROD | Live operations | Reference data only, then go-live imports | Two API instances and managed PostgreSQL sized by tier (sizing below); high availability with a standby database required for large brokers |
 | DR | Recovery after a regional or site disaster | Restored from cross-region or off-site backups | Pilot light or warm standby (chapter on resilience); included for the Enterprise size |
 
-> **Recommended:** Never copy production personal data into DEV, SIT or UAT. A PRE-PROD restored from a production backup is masked with the data masking tool before anyone without production access uses it (the masking tool is described in the Environment Strategy and Production Rollout Plan when it is released). Each environment has its own secrets; `DATA_ENCRYPTION_KEY` and `JWT_SECRET` must differ between environments.
+> **Recommended:** Never copy production personal data into DEV, SIT or UAT. A PRE-PROD restored from a production backup is masked with the data masking tool before anyone without production access uses it (`npm run mask:data`, `docs/onboarding/DATA_MASKING.md`: it refuses on a database marked production, `--remark-copy` re-marks a restored copy, `--register-production` records where production lives). Each environment has its own secrets; `DATA_ENCRYPTION_KEY`, `JWT_SECRET` and `PII_ENCRYPTION_KEY` differ between environments (a restored copy is masked with production's personal data key, then rotated to its own). The environment marker `system.environment` and the label next to the logo (`ENVIRONMENT_NAME`) show which environment a user is in.
 
 ## Network zones
 
 | Zone | Contents | Allowed traffic |
 |---|---|---|
 | Public edge | DNS, CDN, WAF, public load balancer or reverse proxy | HTTPS 443 from the internet |
-| Application zone (private) | API instances | From the load balancer only, on the API port; outbound to SMTP and the payment gateways |
+| Application zone (private) | API instances | From the load balancer only, on the API port; outbound to SMTP, the payment gateways and the enabled integration endpoints only (allow-list) |
 | Data zone (private) | PostgreSQL, file store | PostgreSQL 5432 and NFS from the application zone only |
 | Management zone | Bastion or session manager, CI/CD runner access | Administrator access with multi-factor sign-in, logged |
 
@@ -197,7 +212,7 @@ Whatever the hosting option, BrokerVerse needs the same components.
 
 This is the reference deployment of `deploy/README.md` and architecture documents 01 and 07. The region is ap-southeast-1 (Singapore).
 
-![Production deployment on AWS ap-southeast-1 (architecture document 01)](/home/user/BDOI-OOTB/docs/architecture/diagrams/d01_deployment_aws.png)
+![Production deployment on AWS ap-southeast-1 (architecture document 01)](../../architecture/diagrams/d01_deployment_aws.png)
 
 | Component | AWS service |
 |---|---|
@@ -308,20 +323,20 @@ The largest cost items are the database with its standby, the load balancer or r
 
 Details, approvals and the GitHub settings: `deploy/RELEASE_PIPELINE.md`. The earlier git-checkout script `deploy/ec2/deploy.sh` (checks out the branch, `npm ci --omit=dev`, creates the database if missing, installs the nginx site after `nginx -t`, starts the API under PM2 and waits for `/api/health`) remains for manual use.
 
-> **Gap:** The pipelines use long-lived AWS access keys and an SSH private key stored as GitHub secrets, and the backend image is not pushed to a registry. **Recommended:** GitHub OIDC with an IAM role limited to the bucket and the distribution; build, scan and push a versioned backend image (for example to ECR) and deploy that image, so a release can be rolled back by tag.
+> **Gap:** The deploy workflow accepts an IAM role through GitHub OIDC (`AWS_ROLE_ARN`) but falls back to long-lived AWS access keys, and reaches the EC2 host with an SSH key stored per environment. **Recommended:** use the OIDC role in every environment, limited to the bucket and the distribution; for container platforms push the versioned backend image (`backend/Dockerfile`, build arguments `GIT_COMMIT`, `BUILD_TIME`, `GIT_REF`) to a registry and scan it.
 
 > **Note:** In `brokerverse/.github/workflows/deploy.yml` the publish job requires the branch `dev` while the trigger is `brokerverse-platform`; as written it tests and builds but does not publish. Align the branch names when the front end is moved to its own repository.
 
 ## Release process
 
-**Recommended** release steps (the release pipeline with an approval gate per environment, decided by the product owner, is described when it is released):
+The release pipeline (`deploy/RELEASE_PIPELINE.md`) builds once and promotes the same artefacts:
 
-1. Merge to the release branch through a reviewed pull request with a green CI run.
-2. Tag the release (for example `v1.0.0`, as named in `deploy/README.md`) and record `GIT_COMMIT` in the build so `GET /api/version` shows it.
-3. Deploy to DEV, then SIT for a large broker, then UAT; run the UAT scripts in `docs/onboarding/UAT_SCRIPTS.md` for the changed areas and obtain business sign-off. For a major release, rehearse it in a PRE-PROD restored from a PROD backup, then remove PRE-PROD.
-4. Before PROD: take a manual database snapshot when the release contains migrations.
-5. Deploy one API instance first; when `/api/health` is ready, roll the others.
-6. Smoke test as in `deploy/README.md` section 4; keep the previous image and front-end build for rollback.
+1. Merge to `brokerverse-platform` through a reviewed pull request with the four required checks green; dev deploys automatically.
+2. Tag a release candidate `vX.Y.Z-rc.N`: UAT deploys after the iorta TechNXT delivery lead approves (SIT by hand for a large broker). Run the UAT scripts for the changed areas and obtain business sign-off.
+3. For a major release or go-live, deploy the release tag to a PRE-PROD restored from a PROD backup (masked where required), rehearse, run the environment comparison against PROD, then remove PRE-PROD.
+4. Tag the release `vX.Y.Z`: PROD deploys after two reviewers approve (DevOps lead and the broker's release approver or CAB), inside the maintenance window.
+5. Every deployment takes a verified pre-deploy backup (always for PRE-PROD and PROD), migrates forward only, switches the API, publishes the front end, runs the smoke test and rolls the application back by itself when the switch or the smoke test fails.
+6. `rollback.yml` switches an environment back to an earlier build; a database restore is a CAB decision.
 
 ## Environment configuration and secrets
 
@@ -331,6 +346,9 @@ Details, approvals and the GitHub settings: `deploy/RELEASE_PIPELINE.md`. The ea
 | `DATABASE_URL` | PostgreSQL connection, `sslmode=require` on managed databases | |
 | `JWT_SECRET` | Signs sessions, file links and approval tokens | Required, not a placeholder, at least 32 characters |
 | `DATA_ENCRYPTION_KEY` | Encrypts TOTP secrets, keys reset-code hashes | Required, at least 32 characters, different from `JWT_SECRET` |
+| `PII_ENCRYPTION_KEY` (package B) | Encrypts TIN, government ID and bank account numbers at rest and keys their blind indexes | Required, at least 32 characters, different from `JWT_SECRET` and `DATA_ENCRYPTION_KEY` |
+| `PII_ENCRYPTION_KEY_PREVIOUS` (package B) | Set only during a key rotation (`npm run pii:rotate`) | |
+| `APP_ENVIRONMENT` | Environment of the deployment (dev, sit, uat, preprod, production) | |
 | `ADMIN_PASSWORD` | First password of the `BrokerVerse` administrator | Must meet the password policy |
 | `CORS_ORIGINS` | Allowed web origins | `*` refused |
 | `PUBLIC_BASE_URL` | Public API address for links | localhost refused |
@@ -339,6 +357,7 @@ Details, approvals and the GitHub settings: `deploy/RELEASE_PIPELINE.md`. The ea
 | `SEED_SAMPLE_DATA` | Demo data on or off (off by default in production) | |
 | `SCHEDULER_ENABLED` | Runs scheduled jobs on this instance | |
 | `<prefix>_SECRET_KEY`, `<prefix>_WEBHOOK_SECRET`, `<prefix>_MERCHANT_ID`, `<prefix>_PASSWORD` | Payment gateway credentials, read only from the environment | A gateway cannot go live without them |
+| Variables named in each integration connector (`credential_env`) and in `eis.client_id_env`, `eis.client_secret_env`, `eis.signing_key_env` | Credentials of SMS, Viber, CTPL, LTO, insurer APIs, bank file drop and the BIR EIS | A connector cannot be switched to live while a variable is missing |
 
 If a rule fails, the API logs `Refusing to start in production: ...` with the reason and exits. Secrets are never stored in the repository; `deploy/backend.env.example` holds placeholders only.
 
@@ -363,8 +382,9 @@ Migrations only add to the schema (project convention), so the previous release 
 | Jobs on several instances | Advisory lock per run; a job runs once even with several schedulers |
 | One transaction per business operation | A failure rolls back the whole operation including the document number |
 | E-mail outbox | SMTP outages delay e-mail without failing transactions |
+| Integration outbox | Messages to third parties are queued in the business transaction and sent with retries and exponential backoff; a provider outage never fails or blocks a policy issue; stuck messages are queued again |
 
-![High-availability topology (architecture document 07, recommended)](/home/user/BDOI-OOTB/docs/architecture/diagrams/d07_ha_topology.png)
+![High-availability topology (architecture document 07, recommended)](../../architecture/diagrams/d07_ha_topology.png)
 
 **Recommended** production topology: at least two API instances in two availability zones, rolling deployment with 100% minimum healthy, managed PostgreSQL with a synchronous standby, a shared file store across zones, container stop timeout 30 s and load balancer deregistration delay 30 s.
 
@@ -373,7 +393,7 @@ Migrations only add to the schema (project convention), so the previous release 
 | Database | Standby with automatic failover; PITR |
 | File store | Shared, zone-redundant store with daily backup |
 | Single API instance | Two or more instances |
-| Secrets | Versioned secret store and sealed escrow copy of `DATA_ENCRYPTION_KEY` and `JWT_SECRET` |
+| Secrets | Versioned secret store and sealed escrow copy of `DATA_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY` and `JWT_SECRET` |
 | Region or site | Cross-region or off-site copies and a documented recovery |
 
 > **Known limitation:** Rate limits are counted per API process, so with N instances the effective limit is N times the setting. **Recommended:** enforce rate limits at the WAF as well.
@@ -397,9 +417,9 @@ Service tiers: Tier 1 core transactions in PostgreSQL; Tier 2 documents in the f
 
 ## Backup
 
-![Backup and recovery data flows (architecture document 09, recommended)](/home/user/BDOI-OOTB/docs/architecture/diagrams/d09_backup_flow.png)
+![Backup and recovery data flows (architecture document 09, recommended)](../../architecture/diagrams/d09_backup_flow.png)
 
-`deploy/README.md` requires daily automated database snapshots kept at least 30 days, a backup of the upload volume and of `DATA_ENCRYPTION_KEY`, and one restore test before go-live. The code contains no backup automation. Document 09 recommends:
+`deploy/README.md` requires daily automated database snapshots kept at least 30 days, a backup of the upload volume and of `DATA_ENCRYPTION_KEY` (and, with package B, `PII_ENCRYPTION_KEY`, without which the encrypted identifiers in a backup cannot be read), and one restore test before go-live. The release pipeline takes a verified `pg_dump` before every deployment to PRE-PROD and PROD (`release.sh backup`, newest ten kept, copy to `BACKUP_S3_URI`); these are restore points for a release, not the backup plan. Document 09 recommends:
 
 | Backup | Retention (recommended) |
 |---|---|
@@ -431,7 +451,9 @@ The daily `housekeeping` job (02:45 Manila time) deletes operational rows past t
 
 Business and financial records are kept; financial documents are cancelled or reversed, not deleted. The `dormant-users` job (01:45 daily) deactivates accounts without a sign-in for `access.dormant_days` (90 days).
 
-![Data lifecycle: online, archive, purge (architecture document 10, recommended)](/home/user/BDOI-OOTB/docs/architecture/diagrams/d10_data_lifecycle.png)
+> **Gap:** Housekeeping does not yet purge the operational tables added with the new modules: `integration_outbox` and `integration_attempts`, `integration_inbox`, `eis_submissions`, `aml_provider_requests` and the rows of loaded go-live workbooks (`data_load_rows`). **Recommended:** add retention rules for them before volumes grow (for example 180 days for sent messages and attempts, 730 days for failed ones, 90 days for workbook rows after the load), keeping AML records for `aml.record_retention_years`.
+
+![Data lifecycle: online, archive, purge (architecture document 10, recommended)](../../architecture/diagrams/d10_data_lifecycle.png)
 
 > **Recommended:** Document 10 proposes keeping financial and policy records 10 years after the financial year end or policy expiry, unconverted leads and quotations 3 years then anonymised or deleted, and an annual export of closed years to write-once archive storage. The application anonymises the personal data of a client or prospect on request (Master > Data Privacy > Data Subject Requests, Anonymise, with a dry run first); it refuses while the records must still be kept (`privacy.retention_years`, 10 years after the last policy expiry). There is no archive function: the annual export of closed years is a database procedure run by the hosting team under change control.
 
@@ -439,7 +461,7 @@ Business and financial records are kept; financial documents are cancelled or re
 
 The application produces JSON logs on standard output (pino) with a request id on every line and response, redaction of authorization headers, passwords, tokens and signatures, the health and version endpoints, and operational tables (`job_runs`, `email_outbox`, `login_history`, `audit_log`, `generated_reports`). The deployment package contains no monitoring configuration.
 
-![Monitoring and alerting (architecture document 11, recommended)](/home/user/BDOI-OOTB/docs/architecture/diagrams/d11_monitoring.png)
+![Monitoring and alerting (architecture document 11, recommended)](../../architecture/diagrams/d11_monitoring.png)
 
 | Alarm (recommended) | Threshold | Severity |
 |---|---|---|
@@ -450,6 +472,9 @@ The application produces JSON logs on standard output (pino) with a request id o
 | API CPU / memory | over 80% for 15 min / over 85% for 10 min | P2 |
 | Database CPU, free storage, connections | over 80% / under 20% / over 80% of maximum | P2 |
 | Scheduled job failed or not run | any failure of a daily job; over 26 hours since success | P2 |
+| Integration messages failed or stuck | any message `failed`, or messages queued over 30 minutes (integration monitor, `integration_outbox`) | P2 |
+| BIR EIS submission rejected or failed | any (`eis_submissions`) | P2 |
+| AML monitoring or breach deadline jobs not run | over 26 hours since success | P2 |
 | Failed sign-ins | over 50 in 5 minutes | P2 |
 | Refresh-token reuse | any | P3 |
 | Backup failure or PITR older than 15 minutes | any | P2 |
@@ -463,13 +488,13 @@ Severity P1 is a 24 x 7 response, P2 the same business day and P3 the next busin
 
 | Control | Implementation |
 |---|---|
-| Accounts | Named users only; no shared or agent sign-in. Users are created in Master > Generals > User Management or from a CSV with `scripts/provision-users.js`; each must change the initial password at first sign-in. |
+| Accounts | Named users only; no shared or agent sign-in. Users are created in Master > User Management or from a CSV with `scripts/provision-users.js`; each must change the initial password at first sign-in. |
 | Password storage | bcrypt (cost 10); reset codes stored only as keyed HMAC hashes |
 | Password policy | Minimum 8 characters, upper and lower case, digit and symbol, history of 5, maximum age 90 days (`security.password_*`) |
 | Lockout | Account locked after 5 wrong passwords (`limits.max_login_attempts`); 10 attempts per 5 minutes per IP and per username (`security.login_rate_limit`) |
 | Two-factor | TOTP (RFC 6238); secrets encrypted with AES-256-GCM; compulsory for the roles in `security.require_2fa_roles` (empty by default) |
 | Sessions | Access token 30 minutes, refresh token 30 days rotated on each use; reuse of a rotated token revokes the token family and is logged |
-| Revocation | Password change or reset, deactivation, role or permission change raise the token version and end sessions at once; Master > Generals > User Management can end every session of a user |
+| Revocation | Password change or reset, deactivation, role or permission change raise the token version and end sessions at once; Master > User Management can end every session of a user |
 | Idle sign-out | 30 minutes (`limits.session_idle_minutes`) with a one-minute warning |
 | Sign-in history | Every attempt in `login_history` with result, reason, IP and user agent |
 
@@ -479,7 +504,7 @@ Severity P1 is a 24 x 7 response, P2 the same business day and P3 the next busin
 
 ## Authorisation, maker-checker and segregation of duties
 
-Permissions are `read:<module>`, `write:<module>` and `approve:<area>` codes, checked by the server on every route (`requirePermission`, `requireRole`); the route registry adds the sign-in check to every route that is not explicitly public. The front end also hides menus by role (deny by default).
+Permissions are `read:<module>`, `write:<module>` and `approve:<area>` codes (98 with packages B and G), plus `view:pii` for full personal identifiers (package B), checked by the server on every route (`requirePermission`, `requireRole`); the route registry adds the sign-in check to every route that is not explicitly public. The front end also hides menus by role (deny by default).
 
 | Role (seeded) | Main access |
 |---|---|
@@ -489,17 +514,20 @@ Permissions are `read:<module>`, `write:<module>` and `approve:<area>` codes, ch
 | Operations (`operations`) | Leads, clients, quotations, policies, endorsements, renewals |
 | Claims (`claims`) | Claims; read clients and policies |
 | Accounting (`accounting`) | Receipts, collections, disbursements, commission, remittance, incentive, journals, period end, bank reconciliation |
-| Accounting Manager (`accounting-manager`) | Inherits Accounting; approves period close, bank and insurer reconciliations, credit control, posting rule changes |
+| Accounting Manager (`accounting-manager`) | Inherits Accounting; approves period close, bank and insurer reconciliations, credit control, payables, posting rule changes |
+| Compliance Officer (`compliance-officer`) | AML/CFT: customer risk rating and EDD approval, screening decisions, transaction monitoring, AML cases and AMLC reports; read of clients, policies, claims and payments |
+
+With package B, Sales, Operations and Accounting hold `view:pii` and see full TIN, ID, mobile, e-mail, bank account and birth date values; Processing and Claims see them masked unless the broker grants it. Operations also keeps the Insurance Commission registers and the complaints register; Claims works complaints.
 
 | Control | Implementation |
 |---|---|
 | Administrator protection | Only a System Administrator can grant that role or change an administrator; nobody can change their own roles or status |
 | Record scope | Roles listed in `security.scoped_roles` see only their own records and clients (empty by default) |
 | Maker-checker | A different user approves journal vouchers, payment vouchers and cheques, commission payouts, remittances and settlements, debit notes, claim settlements, incentive calculations, treaties, petty cash, period closes, reconciliations, quotation and renewal approvals, authority limits and posting rule changes (`finance.maker_checker_enabled`) |
-| Authority matrix | Approval limits per transaction type and role or user (Master > Generals > User Management > Authority Matrix); a new limit applies only after another administrator approves it; default limits in PHP are seeded and replaced by the board-approved signing authority |
-| Delegation of authority | Time-bound delegation of approval authority (leave, travel), revocable (Master > Generals > User Management > Delegations) |
+| Authority matrix | Approval limits per transaction type and role or user (Master > User Management > Authority Matrix); a new limit applies only after another administrator approves it; default limits in PHP are seeded and replaced by the board-approved signing authority |
+| Delegation of authority | Time-bound delegation of approval authority (leave, travel), revocable (Master > User Management > Delegations) |
 | Segregation of duties | Rules on pairs of roles, checked when roles are assigned (`access.sod_enforced`). Seeded: placement and payment, placement and payment approval, claims and payment (block); sales and collection, sales and claims (warn) |
-| Access reviews | Recertification campaigns over every active user; "revoke" deactivates the account and signs it out (Master > Generals > User Management > Access Reviews) |
+| Access reviews | Recertification campaigns over every active user; "revoke" deactivates the account and signs it out (Master > User Management > Access Reviews) |
 | Access reports | User Access Matrix and Role Permissions, downloadable as XLSX or CSV |
 | Period control | Postings refused in closed or locked periods; soft-closed periods only with `approve:period-end` |
 
@@ -507,8 +535,8 @@ Permissions are `read:<module>`, `write:<module>` and `approve:<area>` codes, ch
 
 | OWASP risk | Controls in BrokerVerse |
 |---|---|
-| A01 Broken access control | Authentication by default on every route; permission check per route; record scope; maker-checker; signed, expiring file links (30 minutes) |
-| A02 Cryptographic failures | TLS in transit; bcrypt passwords; AES-256-GCM for TOTP secrets; HMAC-SHA256 for links, reset codes and webhooks; JWT limited to HS256 |
+| A01 Broken access control | Authentication by default on every route; permission check per route; record scope; maker-checker; signed, expiring file links (30 minutes); masking of personal identifiers by role (package B) |
+| A02 Cryptographic failures | TLS in transit; bcrypt passwords; AES-256-GCM for TOTP secrets; AES-256-CBC with an HMAC-SHA256 tag for personal identifiers (package B); HMAC-SHA256 for links, reset codes and webhooks; JWT limited to HS256 |
 | A03 Injection | Parameterised SQL only, dynamic identifiers from white lists; zod validation; CSV formula-injection guarding |
 | A04 Insecure design | Maker-checker, authority limits, SoD, one transaction per operation, idempotent payment webhooks with amount check |
 | A05 Security misconfiguration | Production start refuses unsafe secrets, `CORS_ORIGINS=*` and localhost URLs; helmet headers; `x-powered-by` off; sample data off in production |
@@ -516,7 +544,7 @@ Permissions are `read:<module>`, `write:<module>` and `approve:<area>` codes, ch
 | A07 Identification and authentication failures | Password policy, lockout, rate limits, TOTP, refresh-token rotation with reuse detection, idle sign-out |
 | A08 Software and data integrity failures | Webhook signatures verified on the raw body; uploads checked by file signature; lock files; reviewed pull requests (recommended) |
 | A09 Security logging and monitoring failures | Audit log, sign-in history, request ids, redacted JSON logs; alarms recommended in the monitoring chapter |
-| A10 Server-side request forgery | The API calls only fixed provider addresses (SMTP, PayMongo, Dragonpay); no user-supplied URL is fetched |
+| A10 Server-side request forgery | The API calls only configured provider addresses (SMTP, payment gateways, integration connector endpoints set by an administrator with `write:integrations`); no address taken from a request is fetched |
 
 Further controls: uploads limited by type (`uploads.allowed_types`, checked by file signature), size (10 MB, 10 files) and decompressed size (50 MB); stored files served with `nosniff` and a sandbox content security policy, and anything other than images and PDF as a download; 5xx responses return a generic message with the request id.
 
@@ -531,36 +559,43 @@ Further controls: uploads limited by type (`uploads.allowed_types`, checked by f
 | File store | | Storage encryption of EFS, Azure Files or the partner's storage (recommended) |
 | Backups | | Encrypted snapshots and write-once storage (recommended) |
 | TOTP secrets | | AES-256-GCM, key derived from `DATA_ENCRYPTION_KEY` |
+| TIN, government ID and bank account numbers (package B) | | AES-256-CBC with an HMAC-SHA256 tag, keys derived from `PII_ENCRYPTION_KEY`, encrypted by database triggers on every write; blind indexes for exact search |
+| Integration credentials | | Not stored: the connector keeps only the names of the environment variables |
 | Password reset codes | | HMAC-SHA256 keyed from `DATA_ENCRYPTION_KEY` |
 | Sandbox gateway webhook secret | | Derived from `DATA_ENCRYPTION_KEY` when no secret is set |
 | Passwords | | bcrypt hash |
 
-`DATA_ENCRYPTION_KEY` is not used to encrypt client records, ID numbers or uploaded documents; these rely on storage encryption of the database, file store and backups. Losing the key makes two-factor secrets unreadable (administrators reset two-factor and users enrol again); no business data is lost.
+`DATA_ENCRYPTION_KEY` is not used to encrypt client records or uploaded documents. Losing it makes two-factor secrets unreadable (administrators reset two-factor and users enrol again); no business data is lost. With package B, TIN, government ID and bank account numbers of clients, prospects, referrers and payees, the identifier keys inside quotation, placement and policy documents and the same values in the audit trail are encrypted with `PII_ENCRYPTION_KEY`; losing that key makes those identifiers unreadable in the database and in every backup. Other client data and uploaded documents rely on storage encryption of the database, file store and backups.
 
-> **Recommended:** Keep `DATA_ENCRYPTION_KEY` and `JWT_SECRET` in the secret store with versioning and an escrow copy under dual control. Turn on storage encryption for the database, file store and backups in every option; on premises use encrypted volumes (LUKS or the storage array's encryption).
+**Key rotation (package B).** Set the new key in `PII_ENCRYPTION_KEY` and the old one in `PII_ENCRYPTION_KEY_PREVIOUS`, restart, run `npm run pii:rotate` (dry run) and `npm run pii:rotate -- --execute`, then remove the previous key when nothing is left on it. Keep the old key with the backups taken before the rotation.
+
+**Masking by role (package B).** Users without `view:pii` receive personal identifiers partially masked in every screen, export and report file (`privacy.masking_enabled`). With `privacy.pii_reveal_mode` set to `on-request`, even holders see masked values until they switch on "Show full identifiers", and each answer given in full is recorded in the audit trail. Before package B, these values are shown to every user who can open the record.
+
+> **Recommended:** Keep `DATA_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY` and `JWT_SECRET` in the secret store with versioning and an escrow copy under dual control. Turn on storage encryption for the database, file store and backups in every option; on premises use encrypted volumes (LUKS or the storage array's encryption).
 
 ## Audit trail and logging
 
 | Record | Content |
 |---|---|
-| `audit_log` | User, entity, record id, action, before and after JSON, IP and time, written by every mutating handler; kept by default |
+| `audit_log` | User, entity, record id, action, before and after JSON, IP, time and source (screen, API or job), written by every mutating handler; kept by default; shown as business events with old and new values per field |
 | Field-level and status history | `claim_field_changes`, `claim_history`, period status, bank reconciliation history, remittance approvals |
 | `login_history` | Sign-in attempts, two-factor results, token reuse |
 | `payment_events` | Every gateway notification with signature result |
+| `integration_attempts`, `integration_inbox` | Every call to a third party and every message received, with result |
 | Application log | JSON on standard output with request id; secrets redacted |
 
-Master > Audit Trail filters by entity, record, user and date. **Recommended** reviews (document 11): monthly access reviews of administrators and new or dormant users; weekly review of changes to settings, posting rules, number series, tax codes and the Company master; monthly review of maker-checker exceptions; weekly review of security events. Ship application logs to central storage kept at least one year.
+Master > System Configuration > Audit Trail filters by record type, record, user, action and date and exports to Excel or CSV; the History panel of a record shows its own events. **Recommended** reviews (document 11): monthly access reviews of administrators and new or dormant users; weekly review of changes to settings, posting rules, number series, tax codes and the Company master; monthly review of maker-checker exceptions; weekly review of security events. Ship application logs to central storage kept at least one year.
 
 ## Vulnerability management
 
 | Item | Status |
 |---|---|
-| Backend dependencies | `npm audit` reported no advisories on 29 September 2026 (document 04) |
+| Backend dependencies | `npm audit` reported no advisories on 29 September 2026 (document 04); CI runs `npm audit --omit=dev --audit-level=high` on every pull request and fails on a high or critical advisory in a production dependency |
 | Front-end dependencies | 71 advisories at the review, almost all build-time dependencies of react-scripts 5.0.1; Create React App is no longer maintained. Move to Vite is the planned remedy. |
 | Unused packages | `js-cookie`, `react-pro-sidebar`, `web-vitals` to be removed |
 | Base images | `node:22-alpine`, `nginx:1.27-alpine`, `postgres:16-alpine` |
 
-> **Recommended:** Run `npm audit` and an image scan (for example Trivy or the registry's scanner) in CI on every pull request; enable GitHub Dependabot alerts and secret scanning; patch critical findings within 14 days and high within 30 days; patch the operating system, PostgreSQL and nginx monthly.
+> **Recommended:** Add an image scan (for example Trivy or the registry's scanner) to the CI audit job; enable GitHub Dependabot alerts and secret scanning; patch critical findings within 14 days and high within 30 days; patch the operating system, PostgreSQL and nginx monthly.
 
 ## Penetration testing approach
 
@@ -578,14 +613,15 @@ Master > Audit Trail filters by entity, record, user and date. **Recommended** r
 
 | Practice | Current state |
 |---|---|
-| Code review | Pull requests run `ci.yml` (lint and 65 backend test files against PostgreSQL 16; front-end tests) |
+| Code review | Pull requests run `ci.yml` (lint, the backend suite of 97 test files against PostgreSQL 16, front-end lint, tests and build, dependency audit); branch protection requires one approving review and the four checks; the Technical Reference gives the reviewer's checklist |
 | Tests | Backend integration tests with vitest and supertest on a real database; front-end tests with Jest |
 | Lint rules | `no-console` outside scripts, `no-unused-vars` and `eqeqeq` as errors |
 | Secure defaults | Production start-up checks; sample data off in production; routes authenticated unless declared public |
 | API inventory | `npm run export:api` writes OpenAPI, Postman and Excel lists of every route and its permission |
 | Secrets | Never in the repository; placeholders in `deploy/*.env.example` |
+| Data classification | Every table classified for the transaction reset and every personal column in the personal data catalogue; tests fail otherwise |
 
-> **Recommended:** Branch protection with required reviews and CI; tests restored in the deployment pipeline; dependency and image scanning; a short threat review for changes to authentication, payments and personal data.
+> **Recommended:** Image scanning; a short threat review for changes to authentication, payments, integrations and personal data.
 
 # Data privacy
 
@@ -621,7 +657,11 @@ Master > Audit Trail filters by entity, record, user and date. **Recommended** r
 | Claimants and payees | Loss details, description, settlement amounts, payee and bank details, claim documents and photos | `claims`, claim cash, documents |
 | Payments | Payment references, amounts, gateway notifications (no card numbers: card entry happens on the gateway's page) | `policy_payments`, `payment_events` |
 | Referrers and sub-agents | Name, bank account, withholding tax data | Referrer master |
-| Staff users | Name, username, e-mail, roles, sign-in history with IP and browser | `users`, `login_history` |
+| Staff users | Name, username, e-mail, roles, sign-in history with IP and browser, signature image | `users`, `login_history`, `e_signatures` |
+| Juridical clients' signatories and beneficial owners | Names, IDs, ownership share, board resolutions, due diligence documents | `client_signatories`, `client_beneficial_owners`, `client_kyc_documents` |
+| AML/CFT | Risk rating, screening matches, transaction alerts, case notes, CTR and STR files | `aml_*` tables (Compliance Officer only) |
+| Campaign recipients | Name, e-mail, consent checked, opt-out | `campaign_recipients` |
+| Complainants and breach records (package B) | Complainant name and contact, complaint details; breach description and affected data subjects | `complaints`, `personal_data_breaches` |
 
 Government-issued identifiers and some claim information (for example injury details in a personal accident claim) are sensitive personal information under the DPA and need the stricter protection the DPA requires. The system holds no structured beneficiary register for policies; named beneficiaries, where captured, sit in policy details or documents.
 
@@ -632,7 +672,8 @@ Government-issued identifiers and some claim information (for example injury det
 | Quotation, placement, policy issue, endorsements, claims, renewals | Necessary for a contract with the data subject or steps at their request |
 | Accounting, tax records, BIR forms, IC examination | Compliance with a legal obligation |
 | KYC identification | Legal obligation and the insurers' underwriting requirements |
-| Marketing to leads, win-back campaigns | Consent, or legitimate interest where the DPO concludes it applies |
+| Marketing to leads, win-back campaigns, marketing campaigns | Consent, or legitimate interest where the DPO concludes it applies; the campaign module sends only to parties with a marketing consent and every e-mail carries an opt-out link |
+| AML/CFT customer due diligence, screening, covered and suspicious transaction reports | Compliance with a legal obligation (AMLA and its rules) |
 
 Consent is recorded per client or prospect and per purpose (processing, that is the privacy notice acknowledged; marketing; sharing with insurers and reinsurers) on the Data privacy tab of the client and on the prospect view, with the channel, the evidence and the notice version in force (`privacy.notice_version`). A withdrawal is stamped on the consent it ends; records are never deleted. Master > Data Privacy > Consent Register lists every consent across clients and prospects.
 
@@ -678,9 +719,9 @@ When BrokerVerse is hosted in Singapore (options A and B), personal data is stor
 |---|---|
 | Detect | Alarms on failed sign-ins, token reuse, 5xx spikes; audit and sign-in history; WAF logs |
 | Contain | End user sessions (Master > Generals > User Management), deactivate accounts, rotate `JWT_SECRET` to sign everyone out, block addresses at the WAF |
-| Assess | Use the audit log, `login_history` and request ids to find which records were affected |
-| Notify | The broker's DPO notifies the NPC and affected data subjects within 72 hours of knowledge where NPC Circular 16-03 requires it; iorta TechNXT informs the broker without undue delay |
-| Record | Incident and breach records kept for the annual report to the NPC |
+| Assess | Use the audit log, `login_history` and request ids to find which records were affected; with package B record the assessment against the NPC criteria in Compliance > Data Privacy (NPC) > Breach Register |
+| Notify | The broker's DPO notifies the NPC and affected data subjects within 72 hours of knowledge where NPC Circular 16-03 requires it; with package B the Breach Register tracks the 72-hour deadline (`privacy.breach_notify_hours`) and the `privacy-breach-deadlines` job reminds the team; iorta TechNXT informs the broker without undue delay |
+| Record | Incident and breach records kept for the annual report to the NPC (package B: annual security incident report from the Breach Register) |
 
 # Insurance Commission and records
 
@@ -693,6 +734,11 @@ The Amended Insurance Code (Republic Act 10607) and the circulars of the Insuran
 | Records available for examination | Reports in XLSX, CSV and PDF; audit trail; retention as recommended above |
 | Reconciliation with insurers | Insurer statement reconciliation with approval and adjustment journals |
 | Control over changes and approvals | Maker-checker, authority matrix, SoD, period locks |
+| Licensed persons and payouts (package B) | Licence register of the firm, officers and referrers with expiry reminders; payouts to a referrer with a lapsed licence are blocked (`compliance.referrer_licence_check`); fit and proper records |
+| Placement only with authorised insurers (package B) | Insurer certificate of authority checked at placement and policy issue (`compliance.insurer_authority_check`) |
+| IC annual statement and production report (package B) | GL accounts mapped to the statement lines; production by line of business and insurer |
+| Complaints handling, RA 11765 (package B) | Complaints register with acknowledgement and resolution deadlines, escalation and the regulator reference |
+| AML/CFT | Customer due diligence and onboarding before the first policy, beneficial owners, risk rating and EDD, screening, covered and suspicious transaction monitoring, cases and AMLC report files |
 | IT resilience and security | Backup, recovery objectives, monitoring and security controls in this document |
 
 # Compliance checklist
@@ -702,25 +748,28 @@ The Amended Insurance Code (Republic Act 10607) and the circulars of the Insuran
 | Named user accounts | Users created per person; initial password changed at first sign-in | Request, approve and remove access through a joiner-mover-leaver process |
 | Strong passwords and lockout | Policy of 8 characters with four classes, 5-password history, 90-day age, lockout after 5 failures | Review the settings before go-live |
 | Two-factor authentication | TOTP built in, compulsory per role | Set `security.require_2fa_roles`; reset two-factor when a phone is lost |
-| Least privilege | Seven roles with read and write permissions; deny by default | Assign roles by job; keep few System Administrators |
+| Least privilege | Eight roles with read, write and approve permissions; deny by default; personal identifiers masked without `view:pii` (package B) | Assign roles by job; keep few System Administrators; decide who holds `view:pii` |
 | Segregation of duties | SoD rules checked on role assignment; maker-checker | Approve the rule set; act on conflicts in the User Access Matrix |
 | Approval limits | Authority matrix with approved limits and delegations | Replace default limits with the board-approved signing authority |
 | Access recertification | Access Reviews; dormant accounts deactivated after 90 days | Run a review at least twice a year (recommended) |
 | Audit trail | `audit_log` with before and after values, kept by default | Review sensitive changes; set the retention period |
 | Encryption in transit | HTTPS; TLS to the database; STARTTLS to SMTP | Provide certificates; refuse plain HTTP |
-| Encryption at rest | TOTP secrets encrypted; passwords hashed | Turn on storage encryption for database, files and backups |
-| Secrets management | Production start refuses weak or missing secrets | Store secrets in a vault; escrow `DATA_ENCRYPTION_KEY` |
+| Encryption at rest | TOTP secrets encrypted; passwords hashed; TIN, ID and bank account numbers encrypted (package B) | Turn on storage encryption for database, files and backups |
+| Secrets management | Production start refuses weak or missing secrets | Store secrets in a vault; escrow `DATA_ENCRYPTION_KEY` and `PII_ENCRYPTION_KEY`; rotate the personal data key on schedule |
 | Backup and restore | Transactional database; health checks after restore | Configure backups; test restores quarterly |
 | High availability | Stateless API, single job execution, graceful shutdown | Run two instances and a database standby |
 | Monitoring | Health and version endpoints, JSON logs, operational tables | Set up dashboards, alarms and on-call |
 | Vulnerability management | Lock files; backend audit clean at review | Scan in CI; patch OS and middleware; yearly penetration test |
-| Change management | Pull request CI; migrations on start under a lock | Branch protection; UAT sign-off; pre-release snapshot |
+| Change management | Pull request CI with required checks; one artefact promoted with approvals per environment; pre-deploy backup; forward-only migrations; automatic rollback | Name the release approvers and CAB; UAT sign-off |
+| Non-production data | Data masking tool; environment marker; go-live lock | Mask every copy of production before people without production access use it |
 | DPO and registration | Not a system function | Appoint the DPO; register with the NPC where required |
 | Privacy notice and consent | Consent per purpose with notice version; Consent Register | Issue the notice; record consent; act on withdrawals |
 | Data subject rights | Data Subject Requests register with due dates; export; anonymisation | Log every request; respond within the agreed period |
 | Retention and disposal | Housekeeping of temporary data; financial records kept; anonymisation after the retention period | Approve retention periods; run archival |
 | Cross-border transfer | Hosting choice of Singapore or the Philippines | Document the transfer; sign the provider's data processing terms |
 | Data processing agreement | iorta TechNXT acts on instructions | Sign the agreement with iorta TechNXT and the hosting partner |
-| Breach notification | Logs and audit data to assess a breach | Breach response team; notify NPC and data subjects within 72 hours |
+| Breach notification | Logs and audit data to assess a breach; Breach Register with the 72-hour tracker (package B) | Breach response team; notify NPC and data subjects within 72 hours |
+| AML/CFT | AML module and the Compliance Officer role | Appoint the compliance officer; approve the risk factors and thresholds; file CTRs and STRs with the AMLC |
+| Complaints (RA 11765) | Complaints register (package B) | Set the deadlines and the escalation; report to the IC as required |
 | Insurer and IC records | Registers, reconciliations, reports | Keep records available for IC examination |
 | Payment card data | Card details entered on the gateway's page only | Use gateways that hold the card industry certification |

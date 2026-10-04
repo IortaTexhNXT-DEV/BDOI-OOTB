@@ -48,12 +48,13 @@ import table_catalog as catalog  # noqa: E402
 
 PRODUCT = 'BrokerVerse OOTB'
 SERIES = 'Solution Architecture'
-VERSION = '1.1'
+VERSION = '1.2'
 HISTORY = [
     ('1.0', '29 September 2026', 'Initial issue'),
     ('1.1', '29 September 2026', 'Updated to the current system: placement journey, co-insurance, posting rules, period end and BIR tax, bank reconciliation, document numbering, commission rate matrix, single PDF engine, uploads and go-live imports, housekeeping, business time zone, broker roles, deployment on the BrokerVerse URL'),
+    ('1.2', '04 October 2026', 'New modules (AML/CFT, BIR, payables and fixed assets, distribution, fleet and marine, My Work, go-live workbench), integration framework, encryption and masking of personal data, branding and e-signatures, release pipeline; database at migration 0322 (reference data), new ER diagrams'),
 ]
-DATE = '29 September 2026'
+DATE = '04 October 2026'
 AUTHOR = 'iorta TechNXT'
 FONT = 'Nunito'
 BLUE = RGBColor(0x00, 0x65, 0xB3)
@@ -373,9 +374,9 @@ def gen_domain_summary():
     missing = sorted(set(s) - set(catalog.TABLES))
     if missing:
         print(f'  warning: tables not described in tools/table_catalog.py: {", ".join(missing)}')
-    rows = [['Domain', 'Tables', 'Rows (test data)', 'Size KB (test data)', 'Tables']]
+    rows = [['Domain', 'Tables', 'Rows (reference data)', 'Size KB', 'Tables']]
     for code, label in catalog.DOMAINS:
-        names = [t for t, v in catalog.TABLES.items() if v[0] == code]
+        names = [t for t, v in catalog.TABLES.items() if v[0] == code and t in s]   # views are described, not counted
         rows.append([label, str(len(names)), f'{sum(s[t]["rows"] for t in names):,}', kb(sum(s[t]['totalBytes'] for t in names)), ', '.join(sorted(names))])
     rows.append(['**Total**', f'**{len(s)}**', f'**{sum(v["rows"] for v in s.values()):,}**', f'**{kb(sum(v["totalBytes"] for v in s.values()))}**', ''])
     return ('table', rows, [17, 7, 10, 10, 56], 8)
@@ -402,7 +403,7 @@ def gen_inventory():
     s = snapshot()['tables']
     blocks = []
     for code, label in catalog.DOMAINS:
-        names = sorted(t for t, v in catalog.TABLES.items() if v[0] == code)
+        names = sorted(t for t, v in catalog.TABLES.items() if v[0] == code and t in s)
         rows = [['Table', 'Purpose', 'Key columns', 'Rows', 'KB', 'Idx', 'Retention', 'Owner module']]
         for t in names:
             dom, mod, purpose, ret = catalog.TABLES[t]
@@ -440,15 +441,16 @@ def gen_settings_groups():
 
 
 def gen_number_sequences():
+    """The active number series of the Document Numbering master (code and prefix), two series per row."""
     s = snapshot()
-    rows = [['Counter (sequences.name)', 'Year', 'Last value (test data)', 'Counter', 'Year', 'Last value (test data)']]
-    items = s['numberSequences']
+    items = s.get('numberSeries') or []
+    rows = [['Series (code)', 'Prefix', 'Reset', 'Series (code)', 'Prefix', 'Reset']]
     half = (len(items) + 1) // 2
     for i in range(half):
         a = items[i]
         b = items[i + half] if i + half < len(items) else None
-        rows.append([a['name'], a['period'], str(a['value'])] + ([b['name'], b['period'], str(b['value'])] if b else ['', '', '']))
-    return ('table', rows, [24, 9, 17, 24, 9, 17], 8)
+        rows.append([a['code'], a['prefix'], a['reset']] + ([b['code'], b['prefix'], b['reset']] if b else ['', '', '']))
+    return ('table', rows, [26, 10, 14, 26, 10, 14], 8)
 
 
 def gen_db_facts():

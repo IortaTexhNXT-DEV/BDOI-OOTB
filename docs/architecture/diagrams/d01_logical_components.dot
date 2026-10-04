@@ -4,27 +4,29 @@ digraph G {
   node  [shape=box, style="rounded,filled", fillcolor="#EAF6FD", color="#0065B3", fontname="Nunito", fontsize=10.5, margin="0.1,0.05"];
   edge  [color="#5B6776", fontname="Nunito", fontsize=9, arrowsize=0.7];
 
-  user [label="Broker staff (browser): Sales & Marketing, Processing Team, Operations,\nClaims, Accounting, Accounting Manager, System Administrator", fillcolor="#FFFFFF"];
+  user [label="Broker staff (browser): Sales & Marketing, Processing Team, Operations, Claims,\nAccounting, Accounting Manager, Compliance Officer, System Administrator", fillcolor="#FFFFFF"];
   cdn [label="Static hosting: S3 + CloudFront\n(nginx container in Docker Compose)", shape=box3d, fillcolor="#FFFFFF"];
-  client [label="Client\n(e-mailed quote approval link)", fillcolor="#FFFFFF"];
+  client [label="Client\n(quote approval, payment link,\ncampaign opt-out)", fillcolor="#FFFFFF"];
 
   subgraph cluster_web { label="Presentation tier: BrokerVerse SPA (React 18, PrimeReact, Redux Toolkit)"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
-    spa_ops [label="Operations\nleads, quotations, broker slips,\nplacement, policies, endorsements,\nclaims, renewals"];
-    spa_fin [label="Accounts\nbilling, receipts, remittance,\ncommission, JV, disbursements,\nperiod end, bank reconciliation"];
-    spa_cfg [label="Product configurator,\nreinsurance, reports,\ndashboards"];
-    spa_adm [label="Master\nusers, roles, configuration,\nnumbering, posting rules,\nuploads, schedules, audit"];
-    spa_core [label="Shared front-end services: API client and token refresh, route guard,\nsystem settings and branding, i18n, dialogs and toasts", fillcolor="#FFFFFF"];
+    spa_ops [label="Home, My Work, Operations\nleads, quotations, placement,\ncover notes, policies, fleet, marine,\nclaims, renewals, campaigns"];
+    spa_fin [label="Accounts and Commission\nreceipts, PDCs, payables, fixed assets,\nremittance, JV, period end, BIR,\nbank reconciliation, bank files"];
+    spa_cfg [label="Product configurator,\nreinsurance, compliance,\nreports, report builder"];
+    spa_adm [label="Master (in sections)\nusers and access, theme and branding,\nintegrations, numbering, posting rules,\ngo-live data, schedules, audit trail"];
+    spa_core [label="Shared front-end services: API client and token refresh, route guard,\nruntime theme engine, help panel (F1), i18n, dialogs and toasts", fillcolor="#FFFFFF"];
   }
 
   subgraph cluster_api { label="Application tier: BrokerVerse API (Node.js 22, Express 4), stateless"; style="rounded"; color="#00ACF1"; fontcolor="#0065B3";
     pipeline [label="HTTP pipeline: request id, helmet, CORS, pino-http log, rate limit,\nJSON limit, signed file links, error envelope", fillcolor="#FFFFFF"];
-    modules [label="38 business modules (src/modules, 717 routes)\nsales and policy, placement and co-insurance, claims, renewals,\nbilling and receipts, remittance, commission and rate matrix, posting rules,\nperiod end and BIR tax, bank reconciliation, reinsurance, incentive,\nproduct configurator, masters and uploads, reports, administration"];
-    sched [label="Scheduler (node-cron)\n15 jobs in Asia/Manila time,\nadvisory lock per run"];
-    shared [label="Shared services (src/lib)\nauth, permissions, registry, settings cache,\naudit, document numbering, e-mail outbox,\nsecrets, business dates, money, validation", fillcolor="#FFFFFF"];
-    docs [label="File engines\none PDF engine with the Company\nletterhead; XLSX, CSV, ZIP"];
+    modules [label="70 business modules (src/modules, 1,291 routes)\nsales, distribution and policy, placement and co-insurance, claims, renewals,\nbilling, receipts and payables, remittance, commission, posting rules,\nperiod end, BIR returns and invoices, reconciliation, reinsurance,\nAML/CFT and privacy, My Work, go-live workbench, administration"];
+    sched [label="Scheduler (node-cron)\n32 jobs in Asia/Manila time,\nadvisory lock per run"];
+    shared [label="Shared services (src/lib)\nauth, permissions, registry, settings cache,\naudit, numbering, posting, e-mail outbox,\nsecrets, PII encryption and masking (B)", fillcolor="#FFFFFF"];
+    integ [label="Integration framework\nconnectors, outbox with retries,\ninbox, adapters (SMS, Viber,\nCTPL, insurer API, bank files)"];
+    docs [label="File engines\nPDF with letterhead, branding\nand e-signatures; XLSX, CSV, ZIP"];
   }
 
-  db [label="PostgreSQL 16\n138 tables, 58 migrations\ntime zone Asia/Manila", shape=cylinder, fillcolor="#FFFFFF"];
+  db [label="PostgreSQL 16\n250 tables, 139 migrations\ntime zone Asia/Manila", shape=cylinder, fillcolor="#FFFFFF"];
+  ext [label="Third parties\nSMS and Viber gateways, CTPL / LTO,\ninsurer APIs, banks, BIR EIS,\npayment gateways", shape=component, fillcolor="#FFFFFF"];
   files [label="File store (UPLOAD_DIR)\npersistent volume:\nuploads, photos, reports", shape=folder, fillcolor="#FFFFFF"];
   smtp [label="Office 365 SMTP\n(SMTP_URL)", shape=component, fillcolor="#FFFFFF"];
 
@@ -32,9 +34,10 @@ digraph G {
   cdn -> spa_fin [lhead=cluster_web];
   spa_ops -> spa_core [style=invis]; spa_fin -> spa_core [style=invis]; spa_cfg -> spa_core [style=invis]; spa_adm -> spa_core [style=invis];
   spa_core -> pipeline [label=" HTTPS /api, JWT bearer", lhead=cluster_api];
-  client -> pipeline [label=" public approval link", style=dashed];
-  pipeline -> modules; sched -> modules [label=" job handlers"]; modules -> shared; modules -> docs;
+  client -> pipeline [label=" public signed links", style=dashed];
+  pipeline -> modules; sched -> modules [label=" job handlers"]; modules -> shared; modules -> docs; modules -> integ;
+  integ -> ext [label=" outbox job, HTTPS", style=dashed]; ext -> pipeline [label=" signed callbacks", style=dashed];
   shared -> db [label=" pg pool (10)"]; docs -> files; shared -> smtp [label=" outbox job", style=dashed];
   { rank=same; sched; pipeline; }
-  { rank=same; db; files; smtp; }
+  { rank=same; db; files; smtp; ext; }
 }

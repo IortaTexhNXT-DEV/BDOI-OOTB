@@ -1,13 +1,13 @@
 import re, os, json, glob
-MIG='/home/user/BDOI-OOTB/backend/src/db/migrations'
+from ddpaths import migration_files
 created={}   # table -> migration
 colmig={}    # (table,col) -> migration that added
 comments={}  # (table,col) -> comment
 tablecomment={} # table -> preceding comment
 KW=('primary','unique','constraint','foreign','check','exclude','like')
 def strip_q(s): return s.strip().strip('"').lower()
-for f in sorted(os.listdir(MIG)):
-    txt=open(os.path.join(MIG,f)).read()
+for f, full in migration_files():
+    txt=open(full).read()
     lines=txt.split('\n')
     i=0; cur=None; prevcomment=[]
     while i<len(lines):

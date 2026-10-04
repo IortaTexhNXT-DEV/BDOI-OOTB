@@ -34,6 +34,9 @@ This document describes how BrokerVerse OOTB is monitored: the telemetry the app
 |---|---|
 | `job_runs`, `scheduled_jobs` | Every scheduled or manual job run with status (`success` / `failed`), start and end time, output or error; `scheduled_jobs.last_status` per job. Visible in Master > Schedules > History. The `housekeeping` output lists the rows deleted per table. |
 | `email_outbox` | Queued, sent and failed e-mails with attempts and last error. |
+| `integration_outbox`, `integration_attempts`, `integration_inbox` | Messages to and from third parties with status, attempts, last error and duration; the Integrations monitor (Master > System Configuration > Integrations) shows them. |
+| `eis_submissions` | Sales invoices sent to the BIR EIS: queued, accepted, rejected, failed. |
+| `aml_alerts`, `aml_cases` | Open AML alerts and cases (business monitoring by the Compliance Officer). |
 | `login_history` | Every sign-in attempt with success flag and reason (`bad-password`, `locked`, `unknown-user`, `inactive`, `2fa-required`, `refresh-token-reuse` ...), IP and user agent. |
 | `users` | `status = 'locked'`, `failed_logins`, `last_login_at`, `password_changed_at`, `totp_enabled`. |
 | `audit_log` | All business and administrative changes (chapter 5). |
@@ -101,6 +104,9 @@ This document describes how BrokerVerse OOTB is monitored: the telemetry the app
 | RDS failover / reboot event | any | P2 | DevOps (information) |
 | Scheduled job failed | any failure of `policy-expiry`, `receivable-ageing`, `renewal-pipeline`, `renewal-notices`, `collection-reminders`, `daily-reports`, `housekeeping` and, once enabled, the period-end and bank-matching jobs; 3 consecutive failures of `email-outbox` or `renewal-queue` | P2 | DevOps, business application support |
 | Job not run | Hours since success > 26 for daily jobs; > 0.5 for `email-outbox` | P2 | DevOps |
+| Integration messages failed or stuck | any `failed` message; messages `queued` or `retry` older than 30 min | P2 | DevOps, application support |
+| BIR EIS submission rejected or failed | any | P2 | Accounting, application support |
+| AML monitoring or breach deadline job not run | > 26 hours since success (`aml-transaction-monitoring`; `privacy-breach-deadlines` with package B) | P2 | Compliance officer, DevOps |
 | E-mail backlog | Queued messages older than 15 min > 0 for 30 min (when e-mail is enabled); failed > 10 per day | P3 | Application support |
 | Failed sign-ins | > 50 in 5 min (possible credential attack) | P2 | Security |
 | Refresh-token reuse | any | P3 | Security (review the user's sessions) |

@@ -1,13 +1,14 @@
 ---
 title: Release Notes and Product Roadmap
-subtitle: BrokerVerse OOTB Release 1.0
-version: 1.0
-date: 03 October 2026
+subtitle: BrokerVerse OOTB Release 1.1
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-open_item: Release tag of the final 1.0 build to be confirmed; re-test of the data privacy cases after the release test; roadmap dates indicative
-acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); EOPT=Ease of Paying Taxes Act (RA 11976); CTPL=Compulsory Third Party Liability; LTO=Land Transportation Office; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; LGU=Local government unit; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; KYC=Know your customer; RFQ=Request for quotation; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; GL=General ledger; SoD=Segregation of duties; TOTP=Time-based one-time password; API=Application programming interface; AMC=Annual Maintenance Contract; CR=Change request; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test
+change: Release 1.1 entry (migrations 0243 to 0329): Philippine masters, enterprise menu and help, My Work, Product Configurator in the flow, audit trail, go-live workbench, release pipeline, AML/CFT, IC and NPC compliance, BIR, operations and accounting, distribution, integrations, branding and e-signatures; upgrade notes; roadmap of partner certifications
+open_item: Release tag of the 1.1 build to be confirmed; packages B and G to be merged before the tag; partner certifications per broker; roadmap dates indicative
+acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); EOPT=Ease of Paying Taxes Act (RA 11976); EIS=Electronic Invoicing System; CAS=Computerized accounting system; CTPL=Compulsory Third Party Liability; COC=Certificate of cover; LTO=Land Transportation Office; LOA=Letter of authority; PDC=Post-dated cheque; PSGC=Philippine Standard Geographic Code; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; CTR=Covered transaction report; STR=Suspicious transaction report; EDD=Enhanced due diligence; PEP=Politically exposed person; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; ATC=Alphanumeric tax code; DAT=Data file format of the BIR alphalists; KYC=Know your customer; OR=Official receipt; JV=Journal voucher; GL=General ledger; SoD=Segregation of duties; TOTP=Time-based one-time password; API=Application programming interface; BI=Business intelligence; AMC=Annual Maintenance Contract; CAB=Change advisory board; CR=Change request; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test
 ---
 
 # About this release
@@ -17,173 +18,243 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | Item | Value |
 |---|---|
 | Product | iNXT BrokerVerse OOTB, insurance broking platform for Philippine non-life brokers |
-| Release | 1.0 |
-| Build | Branch `brokerverse-platform` of 03 October 2026; backend package version 1.0.0. The repository carries tag `v1.0.0` (29 September 2026); the tag of the final 1.0 build is [to confirm] |
+| Release | 1.1 |
+| Build | Branch `brokerverse-platform` of 04 October 2026 (commit "E-signature consent IP in the personal data catalogue"), plus package B (Insurance Commission and data privacy compliance) and package G (sales activities, quote covers and risk fields, supplier BIR Form 2307, fixed asset disposal) once merged. The release tag `v1.1.0` is [to confirm] |
+| Previous release | 1.0 (03 October 2026); its content is summarised in the chapter "Release 1.0" |
+| Database migrations | `0243` to `0329`: `0243` to `0254` platform and go-live, `0260` to `0263` AML/CFT, `0270` to `0277` package B, `0280` to `0284` BIR, `0290` to `0298` operations and accounting, `0300` to `0308` distribution, `0310` to `0314` integrations, `0320` to `0322` package G (`0323` to `0329` kept for the rest of package G) |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
-| Release test | 03 to 04 October 2026; see the Test Summary Report |
-| Audience | Broker management, key users, System Administrator, auditors, and the iorta TechNXT support team |
+| Audience | Broker management, key users, System Administrator, compliance officer, auditors, and the iorta TechNXT delivery and support teams |
 
 ## Release in figures
 
-| Item | Count |
+| Item | Release 1.0 | Release 1.1 |
+|---|---|---|
+| Delivered roles | 7 | 8 (Compliance Officer added) |
+| Back-end modules | 45 | 70 (73 with packages B and G) |
+| Registered API routes | 868 | 1,291 (1,356 with packages B and G) |
+| Menu screens | 170 | 223 |
+| Database tables | 167 | 250 (260 with packages B and G) |
+| Settings | 404 | 659 (with packages B and G) |
+| Scheduled jobs (Asia/Manila time) | 18 | 32, 35 with package B; 14 delivered switched off |
+| Document number series | 61 | 85 |
+| Posting events with a delivered rule | 31 | 43 |
+| Automated back-end tests | 634 | 1,035 in 97 files, all passed on 04 October 2026 |
+| Front-end tests | 43 | 162 in 31 suites, all passed |
+
+# Release 1.1: what is new
+
+## Platform, navigation and Philippine masters
+
+| Capability | Where |
 |---|---|
-| Delivered roles | 7 (System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager) |
-| Menu screens checked per role in the release test | 173 |
-| Catalogue reports in Excel, CSV and PDF | 39, plus dashboards and printed documents |
-| Registered API routes | 868, documented in OpenAPI, Postman and an Excel touchpoint list |
-| Scheduled jobs (Asia/Manila time) | 18, of which 7 are delivered switched off (including the remittance schedules and the overdue data subject request reminder) |
-| Document number series | 61, counters that only move forward |
-| Upload templates for go-live data | About 40, each verified against its importer |
-| Test cases | 497 prepared: 486 passed, 2 failed, 3 blocked, 6 not run after the re-test of 03 October 2026 (first run: 480 passed, 8 failed) |
-| Automated business-rule tests | 634, all passed |
-| End-to-end UAT cycle | 371 business steps, 0 failed |
+| Philippine geography out of the box from the PSGC of the 2nd quarter 2026: Region, Province (no longer "State"), City / Municipality with class and ZIP code, Barangay (full list as an optional load); Philippine address format on leads, clients, users, claims and endorsements, the region filled from the city or province (migration 0250, seed `12_ph_geography.sql`) | Master > Location; every address form |
+| Philippine practice masters: banks, government ID types with number formats, salutations, holidays, the IC list of insurers (seed `69_ph_practice_masters.sql`) | Master > Organization; Master > Insurance Management |
+| Enterprise side menu: Master in sections (Organization, Insurance Management, Location, Employee Management, User Management, Finance, System Configuration, Data Privacy, Go-Live and Data); skeleton rows while lists load | Side menu |
+| Help panel: F1 or the help button opens the user manual section of the screen, with the support contacts (`support.*` settings, migration 0251) | Every screen |
+| My Work: My Items, My Team by reporting line, My Tasks with reminders, Calendar; reassignment where the module allows it (migration 0253) | Operations > My Work |
+| Product Configurator in the business flow: acceptance rules (refer, decline, loading) with authority, rating factors, document templates with merge fields, market mapping and the governing template applied to quotations (migration 0252) | Product Configurator; quotations |
+| Audit trail as business events: who, when, from which screen, each changed field with old and new value; History panel on records; filters and Excel export (migration 0247) | Master > System Configuration > Audit Trail |
+| Theme and Branding: themes, logo, favicon, sign-in picture, brand packs (the optional Toyota Insurance Services pack only with the client's written permission); branded documents, report files and e-mails; e-signatures captured with consent and mapped to document slots (migration 0254) | Master > System Configuration > System Settings > Theme and Branding; Master > Insurance Management > Signatories; My Profile |
 
-# What is delivered
+## Go-live and release tooling
 
-## Sales and placement
-
-| Capability | Main screens |
+| Capability | Where |
 |---|---|
-| Prospects with contact details, address and status, bulk upload | Operations > Sales & Marketing > Prospects |
-| Quick Quote of packaged products from insurer rate tables; Compare Insurers | Quick Quote; Compare Insurers |
-| Request for Quotation to several insurers on a broker slip; insurer offers and declines | Request for Quotation |
-| Quotations with premium taxes and commission; customer response recorded on screen or through an approval link; maker-checker on quotations | Quotations |
-| Placement Slips with lead insurer and co-insurers, shares totalling 100% | Placement Slips |
-| Placement journey per line of business (`placement.journey`), shown as a progress bar | Master > Configuration |
+| Go-Live Data Workbench: configuration and migration kits, validation as a dry run, errors workbook, load (all or nothing), reconciliation (migrations 0244, 0246) | Master > Go-Live and Data > Go-Live Data Load |
+| Environment comparison report: configuration and masters mirrored between environments, on screen and as `backend/scripts/compare-environments.js` (migration 0248) | Go-Live Data Load > Compare environments |
+| Transaction reset after the smoke test (`npm run reset:transactions`), refused once the go-live lock `golive.locked` is on (migration 0243) | Command line |
+| Client data masking for non-production copies (`npm run mask:data`) with `--remark-copy` and `--register-production`; environment marker `system.environment` (migration 0249) | Command line; `docs/onboarding/DATA_MASKING.md` |
+| Release pipeline: one build promoted through Dev, SIT, UAT, a temporary Pre-Prod and Production with approvals, pre-deploy backup, smoke test, automatic and manual rollback (`ci.yml`, `deploy.yml`, `rollback.yml`) | `deploy/RELEASE_PIPELINE.md` |
 
-## Policy, servicing, claims and renewals
+## Compliance
 
-| Capability | Main screens |
+| Capability | Where |
 |---|---|
-| Policy issue for package and non-package business, motor with CTPL and Auto Passenger PA, KYC checks before motor issue, co-insurance | Operations > Policy |
-| Endorsements (additional premium, return premium, changes of details, extension) and cancellations, with taxes following the premium | Operations > Policy |
-| Claims from notification to settlement and closure, preliminary loss advice, claim letters, settlement maker-checker, SLA ageing | Operations > Claims |
-| Renewals: pipeline 90 days before expiry, notices at 60, 30 and 15 days, renewal batch and queue, at-risk policies, retention analytics, lapse management, win-back campaigns | Operations > Renewals |
-| Clients with their policies and accounting position | Operations > Clients |
+| AML/CFT: onboarding of juridical clients before the first policy with signatories and beneficial owners, KYC documents, risk rating and EDD, screening lists (UN, AMLC, PEP, internal) and hits, covered and suspicious transaction alerts, cases, AMLC report files; Compliance Officer role (migrations 0260 to 0263) | Compliance |
+| Package B, Insurance Commission: licence register with expiry reminders and payout block for unlicensed referrers, fit and proper records, insurer authority check at placement and issue, IC annual statement and production report (migrations 0270, 0271, 0274) | Compliance > Insurance Commission |
+| Package B, complaints register under RA 11765 with acknowledgement and resolution deadlines and escalation (migration 0272) | Compliance > Insurance Commission > Complaints |
+| Package B, breach register with the NPC 72-hour notification tracker (migration 0273) | Compliance > Data Privacy (NPC) > Breach Register |
+| Package B, masking of personal data by role: TIN, ID, mobile, e-mail, bank account and birth date shown partially masked to users without `view:pii`, in screens and exports; optional "Show full identifiers" on request with audit (migration 0276) | Every screen and export |
+| Package B, field encryption of TIN, government ID and bank account numbers at rest with key `PII_ENCRYPTION_KEY` and blind indexes for search (migration 0277) | Database |
 
-## Money and accounting
+## BIR and tax
 
-| Capability | Main screens |
+| Capability | Where |
 |---|---|
-| Open items, payment capture by sales and operations, acknowledgement receipts | Operations > Open Items; Payments |
-| Billing, official receipts, receipt and invoice e-mails with PDF | Accounts > Receipts |
-| Collections, reminders, credit control: instalment plans, premium warranty monitor, client credit limits, remittance ageing | Accounts > Collections; Credit Control |
-| Disbursement and payment vouchers, petty cash from request to replenishment | Accounts > Disbursement; Petty Cash |
-| Remittance to insurers by share, with tracking, statements, settlement, approval within the Authority Matrix limits, schedules run by the `remittance-schedules` job, exceptions, electronic transfer records, agency bill and direct bill processing | Accounts > Remittance |
-| Commission: referrer and sub-agent accounts, commission rate matrix, payout after collection with withholding | Commission |
-| Incentive programmes, calculations, approvals and statements | Accounts > Incentive |
-| General ledger from posting rules; Journal Voucher, Correction JV, Reversal JV; open entry matching | Accounts |
-| Period End: period management, month-end close with checklist and sub-ledger tie-out, year-end close, recurring journals, financial statements | Accounts > Period End |
-| Bank reconciliation with statement import (BDO, BPI, Metrobank and generic formats) and matching rules | Accounts > Bank Reconciliation |
-| Insurer statement reconciliation with column mapping per insurer | Accounts > Insurer Reconciliation |
-| Reinsurance: treaties, cessions, recoveries, bordereaux, reconciliation | Reinsurance |
+| BIR returns with filing records: 0619-E, 1601-EQ, 1604-E with the alphalist DAT files, 2551Q percentage tax (migration 0280) | Accounts > Tax |
+| Sales invoices under the EOPT Act for commission, fees and override commission, with payment acknowledgements (migration 0281) | Accounts > Tax > Sales Invoices |
+| CAS registration pack: loose-leaf books of accounts with running page numbers (migration 0282) | Accounts > Tax |
+| EIS connector: every invoice and cancellation queued for the BIR Electronic Invoicing System (migration 0283; job `eis-outbox` delivered off) | Accounts > Tax |
+| Overriding, profit and contingent commission from insurers: agreements with tiers, computation, approval, settlement (migration 0284) | Commission > Insurer Overrides |
+| Package G: supplier BIR Form 2307 from payables and supplier EWT in the returns | Accounts > Tax |
 
-## Configuration, controls and reporting
+## Operations and accounting
 
-| Capability | Main screens |
+| Capability | Where |
 |---|---|
-| Product Configurator: product templates, coverage builder, rating engine, acceptance rules, document manager, market and risk mapping | Product Configurator |
-| Masters for organisation, insurers, lines of business, products, covers, vehicles, locations, designations and hierarchy, finance | Master > Generals; Master > Finance |
-| System Settings, Configuration by business area, Document Numbering, Schedules, E-mail Outbox, Audit Trail | Master |
-| User management: users, roles, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews | Master > Generals > User Management |
-| Security: password policy, lockout, TOTP two-step verification by role, session rotation and idle sign-out, permission check on every API route | Master > Configuration |
-| Data privacy: Consent Register, Data Subject Requests, personal data export, anonymisation with dry run | Master > Data Privacy |
-| Approval notifications in every maker-checker flow: the request to the approvers and the decision to the maker (`notification.approval_requests`) | Notifications (bell) |
-| Reports: operational and financial reports, co-insurance register, due to insurers by co-insurer; dashboards for executives, claims, processing, sales and commission | Reports; Dashboard |
-| Payment links through PayMongo and Dragonpay (sandbox provider for testing); a confirmed payment posts the official receipt | Master > Finance > Payment Gateways |
+| Cover notes (binders) issued from an accepted quotation or placement, superseded by the policy (migration 0290) | Operations > Cover Notes |
+| Computed cancellation: pro-rata, short-period scale when the insured cancels, flat; return premium with taxes and commission taken back (migration 0291) | Operations > Policy Cancellation |
+| Post-dated cheque register: deposit due list, deposit into an official receipt, bounce, replacement (migration 0292) | Accounts > Post-Dated Cheques |
+| Instalment invoices for instalment plans (migration 0293) | Accounts > Credit Control |
+| Claim document checklist with reminders; claims settlements worked from the Accounting menu (migration 0294) | Operations > Claim Documents; Accounts > Claims Settlements |
+| Motor claim repairs: estimates, letters of authority, vehicle release (migration 0295) | Operations > Motor Claim Repairs |
+| Accounts payable: supplier invoices with input VAT and EWT, payments, AP ageing (migration 0296) | Accounts > Payables |
+| Fixed assets and monthly depreciation (migration 0297); package G adds disposal by sale or write-off with gain or loss | Accounts > Fixed Assets |
 
-## Philippine rules built in
+## Distribution and marketing
 
-| Area | Rule as delivered |
+| Capability | Where |
 |---|---|
-| Premium taxes | DST of PHP 0.50 on each PHP 4.00 of premium, a fraction counting as a whole unit (NIRC section 184), VAT 12% for products under the VAT regime, LGT by the client's city or municipality (0.75% delivered default), FST 2% on fire lines; set in Master > Finance > Premium Taxes & LGU Rates |
-| CTPL | 1-year and 3-year CTPL per vehicle class from the motor template MOT-003-2025; inclusive of taxes and fees, never discounted; certificate number and authentication code on the policy |
-| KYC | Government ID type, number and image, chassis, motor and plate or MV file number required before motor issue; accepted IDs include PhilSys ID, UMID, passport and driver's licence |
-| Commission tax | Output VAT on commission (VAT12-OUT); EWT on referrer commission by payee type (WI515 5% for agents and sub-agents, WC515 10% for external referrers, delivered); insurer EWT on direct-bill commission (WC139 10%) to Creditable Withholding Tax |
-| BIR working papers | BIR Form 2307 issued and received, VAT Summary, SAWT, QAP, SLSP Sales and SLSP Purchases, in the BIR column order |
-| Invoices and receipts | Number series for invoices, official receipts, debit notes and Form 2307; next numbers can continue the old system's numbering; cancelled documents kept with a reason |
-| Local formats | Asia/Manila time zone, PHP base currency, +63 mobile numbers, Philippine provinces and cities with all NCR LGUs, Philippine banks |
-| Data privacy | Consent per purpose with notice version; data subject requests due in 15 calendar days; anonymisation refused within 10 years of the last policy expiry |
+| Lead assignment rules, queue and reassignment SLA (migration 0300) | Operations > Sales & Marketing > Lead Assignment |
+| Distribution channels: dealer groups and branches, financing banks, affinity partners (migration 0301) | Master > Insurance Management > Distribution Channels |
+| Brand-new vehicle dealer programmes with dealer sales uploads and bank letters (migration 0302) | Operations > Sales & Marketing > Dealer Programmes |
+| Fleet schedules (migration 0303) and marine cargo open covers with certificates and declarations (migration 0304) | Operations > Fleet Schedules; Marine Open Covers |
+| Facultative reinsurance placement as reinsurance broker (migration 0305) | Reinsurance > Facultative Placements |
+| Client comparison and recommendation report (migration 0306) | Operations > Sales & Marketing > Comparison Reports |
+| Marketing campaigns to consenting clients and prospects with opt-out (migration 0307) | Operations > Sales & Marketing > Campaigns |
+| Report builder and scheduled BI extract (migration 0308) | Reports > Report Builder |
+| Package G: sales activity log with follow-ups in My Work; quote wizard offering the covers and asking the risk fields of the Product Configurator template | Sales; quotations |
 
-## Changes after the release test
+## Integrations
 
-These changes were made on the release branch after the release test of 03 and 04 October 2026. The cases they touch are re-run in the next manual cycle.
-
-| Change | Effect for users |
+| Capability | Where |
 |---|---|
-| Data privacy module (Master > Data Privacy) | Consents, data subject requests, export and anonymisation in the system instead of outside it |
-| E-mail attachments | Official receipt, premium invoice, policy schedule and commission debit note e-mailed with the PDF attached; attachments listed in the E-mail Outbox |
-| Approval notifications | Every maker-checker request and decision notified under the bell |
-| Remittance approvals in the Authority Matrix | Transaction types Remittance approval and Remittance settlement; delivered limits Accounting PHP 1,000,000.00, Accounting Manager without limit; `remittance.approval_levels` only as a fallback; cover through User Management > Delegations (the separate remittance delegation tab is removed) |
-| Remittance schedules job | The schedules of Accounts > Remittance > Scheduling run daily through `remittance-schedules` on Master > Schedules (delivered switched off) |
-| Duplicate masters retired | Remittance Master keeps automated remittance, statement templates, settlement parameters, bulk processing, exceptions, agency bill, adjustments and notifications; the tabs Reconciliation Rule, Electronic Transfer, History, Analytics, Direct Bill and Report Template are removed (their values are in Master > Configuration). The Commission, Employee and Petty Cash masters are removed from the menu: commission rates are in Master > Finance > Commission Rate Matrix, staff details on the user form (branch, designation, reporting to), petty cash fund size and limits on Accounts > Petty Cash > Initiate. Product Configurator > Approval Workflows is removed |
-| One source for currency, exchange rates and premium taxes | One base currency in the Currency master; dated rates only from the Exchange Rate master; premium taxes only from Premium Taxes & LGU Rates |
-| Screen stability | Lists paged by the server (20, 50 or 100 rows), Prospects shown as a table, description paragraphs removed from working screens, steadier loading |
+| Integration framework: connectors in test or live mode, outbox with retries, inbox with signature check, monitor (migration 0310) | Master > System Configuration > Integrations |
+| SMS (Semaphore, Globe Labs, generic) and Viber business messages with templates per event (migration 0311) | Master > System Configuration > Message Templates |
+| CTPL authentication with COC number series and optional LTO feed (migration 0312) | Operations > CTPL Authentication |
+| Insurer API connectors: policy issuance request and claim status updates per insurer mapping (migration 0313) | Master > System Configuration > Insurer Integration |
+| Bank payment files (bulk credit, InstaPay, PESONet layouts) and status files (migration 0314) | Accounts > Bank Payment Files; Master > Finance > Bank File Layouts |
+
+Every connector is delivered in test mode with a built-in fake provider. Live use needs the provider's credentials in the environment and the certification listed in the roadmap.
+
+# Upgrade notes for release 1.1
+
+## How the upgrade runs
+
+The API applies migrations `0243` onwards and the seed by itself when it starts, under the migration lock, before it reports ready. Deploy through the release pipeline: the pre-deploy backup is taken first, one instance migrates, the smoke test runs. The previous release still runs on the newer schema, so an application rollback needs no database change. Run the environment comparison report against UAT before and after the production upgrade.
+
+## New environment variable: PII_ENCRYPTION_KEY
+
+Package B adds `PII_ENCRYPTION_KEY`. Set it before deploying the release that contains migration `0277`:
+
+1. Generate a random value of at least 32 characters (`openssl rand -hex 32`), different from `JWT_SECRET` and `DATA_ENCRYPTION_KEY` and different in every environment.
+2. Store it in the secret store of the environment and add it to the backend environment (`deploy/backend.env.example`). In production the API refuses to start without it.
+3. Keep it with the database backups under the same controls as `DATA_ENCRYPTION_KEY`: without it the TIN, ID and bank account numbers in the database and in every later backup cannot be read.
+4. Migration `0277` encrypts the identifiers already stored during the upgrade; allow for it in the maintenance window on a large database.
+5. Rotation later: set the new key in `PII_ENCRYPTION_KEY` and the old one in `PII_ENCRYPTION_KEY_PREVIOUS`, restart, run `npm run pii:rotate` then `npm run pii:rotate -- --execute`, remove the previous key when nothing is left on it (`deploy/REFERENCE.md`).
+
+Other variables: `APP_ENVIRONMENT` names the environment; integration connectors and the EIS read their credentials from environment variables named on the connector (`credential_env`, `eis.*_env`), never from the database.
+
+## Jobs delivered switched off
+
+These jobs are installed but off. Switch each on in Master > System Configuration > Schedules only when its prerequisite is met.
+
+| Job | Switch on when |
+|---|---|
+| `recurring-journals`, `accrual-reversal`, `period-auto-soft-close`, `month-end-reminder` | Accounting has set up recurring journals, accruals and the close calendar |
+| `bank-auto-match` | Bank statement formats and match rules are confirmed |
+| `remittance-schedules` | Remittance schedules are agreed with each insurer |
+| `privacy-requests-due` | The DPO has confirmed the response period for data subject requests |
+| `lead-assignment-sla` | Lead assignment rules and SLA hours are set |
+| `sms-renewal-notices`, `sms-payment-reminders` | The SMS connector is live and the templates are approved |
+| `eis-outbox` | The broker's EIS accreditation is granted and the EIS credentials are in the environment |
+| `campaign-dispatch` | The first campaign is approved and marketing consents are recorded |
+| `aml-provider-retry` | A commercial screening provider is contracted |
+| `bi-extract` | The BI datasets and the extract folder are agreed |
+
+The new jobs delivered on are `my-work-reminders`, `integration-outbox`, `cover-note-expiry`, `pdc-deposit-due`, `claim-document-reminders`, `aml-transaction-monitoring`, `aml-kyc-refresh-due` and, with package B, `compliance-reminders`, `complaints-deadlines` and `privacy-breach-deadlines`.
+
+## Settings to review
+
+| Group | Review |
+|---|---|
+| `aml.*` | Covered transaction threshold and payment modes, risk score bands, beneficial owner threshold, KYC refresh months, block of issue pending EDD, AMLC institution code (compliance officer) |
+| `bir.*`, `invoice.*`, `cas.*`, `eis.*` | Registered trade name, TIN branch code, withholding agent category, percentage tax rate and ATC, ATP and CAS permit numbers, invoice serial range, EIS mode and endpoint (finance and tax adviser) |
+| `compliance.*`, `complaints.*`, `privacy.*` (package B) | Licence types and reminder days, referrer licence check, insurer authority check (warn or block), IC statement mapping and minimum net worth, complaint deadlines, breach notification hours, masking and reveal mode |
+| `cover_note.*`, `endorsements.cancellation_*`, `pdc.*`, `payables.*`, `fixed_assets.*`, `motor_claims.*`, `claims.document_*` | Cover note validity and wording, short-period rules, PDC deposit account, input VAT code and maker-checker, depreciation start, LOA wording and participation |
+| `leads.assignment_*`, `channels.*`, `motor_programmes.*`, `fleet.*`, `marine.*`, `campaigns.*`, `comparison.*`, `report_builder.*`, `bi.*`, `sales_activities.*` | Assignment fallback and SLA, mortgagee clause, bank letter text, fleet pro-rata basis, marine conveyances and wording, opt-out text, comparison disclaimer, report row limits |
+| `integrations.*`, `messaging.*`, `ctpl.*`, `bank_payments.*`, `insurer_integration.*` | Inbound enabled, stuck minutes, SMS and Viber connectors and consent, CTPL authentication on issue, InstaPay limit, premium tolerance |
+| `branding.*`, `signatures.*`, `support.*`, `system.environment`, `golive.*` | Theme and logos, draft watermark, support e-mail and hours, environment marker, cutover date and go-live lock |
+
+Review the number series of the new documents in Master > Document Numbering (cover notes, sales invoices, supplier invoices, complaints and others) and the posting rules of the new events in Master > Finance > Posting Rules (`ap.invoice`, `ap.payment`, `fa.depreciation`, `fa.disposal`, `sales_invoice.issue`, `sales_invoice.payment`, `override_commission.accrual`, `override_commission.settlement`, `ri.facultative.*`).
+
+## Before the release is tagged
+
+- Merge package B and package G and run the full test suites again.
+- Change the number series prefix of the complaints register: migration `0272` of package B seeds the prefix `CMP`, which the comparison report series of migration `0306` already uses; the migration stops on a database that has both.
+- Add housekeeping rules for the new operational tables (integration outbox and attempts, EIS outbox, go-live workbook rows).
+- Add the 25 translation keys reported missing by `npm run check:i18n` (audit timeline, claim audit trail, currency master, policy history).
+
+# Release 1.0
+
+## What release 1.0 delivered
+
+Release 1.0 (03 October 2026, tag `v1.0.0`) delivered the core broking cycle: prospects, quick quote and comparison of packaged products, requests for quotation to several insurers, quotations with premium taxes and commission, placement slips with co-insurance, policy issue with KYC, endorsements and cancellations, claims to settlement, renewals with notices and win-back, open items and payment capture, billing and official receipts, collections and credit control, disbursements and petty cash, remittance with approvals, commission and incentives, the general ledger from posting rules with journal vouchers and period end, bank and insurer reconciliation, reinsurance treaties and cessions, the Product Configurator, masters, user management with the authority matrix, SoD and access reviews, data privacy (consents, data subject requests, export and anonymisation), payment links and the report catalogue. Philippine rules built in: DST, VAT, LGT and FST premium taxes, CTPL tariff, KYC, commission VAT and EWT, BIR Form 2307 and the BIR working papers, Asia/Manila time and PHP.
+
+## Defects and observations carried forward
+
+| ID | Item | Status in 1.1 |
+|---|---|---|
+| BV-DEF-001 | react-router moderate security advisory (open redirect) | Open; navigation targets come from the application's own routes; upgrade on the roadmap |
+| BV-DEF-003 | Application-level encryption covered only two-step verification secrets | Closed with package B: TIN, ID and bank account numbers encrypted at rest |
+| BV-DEF-002, 004, 006; BV-OBS-005, 007, 008 | Data privacy module, template column, charges calculator, renewal beyond grace, menu group address, incentive card | Closed in 1.0 |
+
+## Limits of release 1.0 resolved in 1.1
+
+| Topic | Release 1.0 | Release 1.1 |
+|---|---|---|
+| Insurer systems | No insurer API | Insurer API connectors (test mode until certified) |
+| IC report formats | No IC-format report | IC annual statement and production report (package B) |
+| Percentage tax | No working paper for a non-VAT broker | 2551Q return |
+| Anti-money laundering | Outside OOTB | AML/CFT module |
+| Bank payments | No bank payment file | Bank payment files and status files |
+| Claim settlement cash | On the claim screens only | Accounts > Claims Settlements |
+| Personal identifiers | Not encrypted, not masked | Encrypted and masked by role (package B) |
 
 # Known limitations and open items
 
-## Defects and observations from the release test
+## Limits of the OOTB scope in release 1.1
 
-| ID | Item | Severity | Workaround | Target |
-|---|---|---|---|---|
-| BV-DEF-001 | react-router carries a moderate security advisory (open redirect) | Medium | Navigation targets come from the application's own routes; web server allows only the application origin | Next minor release |
-| BV-DEF-002 | Data privacy features were not built at the release test | Medium | Closed: delivered (Master > Data Privacy) and re-tested on 03 October 2026 | Closed |
-| BV-DEF-003 | Application-level encryption covers only two-step verification secrets | Medium | Encrypted database storage and backups; restricted database access | Product backlog |
-| BV-DEF-004 | Product configurator component lists did not show the template | Low | Closed: Template column added and re-tested on 03 October 2026 | Closed |
-| BV-OBS-005 | Renewal refused for a policy expired beyond grace plus lapsed-renewal days | Low | Closed as by design: quote as new business | Closed |
-| BV-DEF-006 | Premium Taxes & LGU Rates: charges calculator product list empty for Accounting roles | Low | Closed: fixed and re-tested on 03 October 2026 | Closed |
-| BV-OBS-007 | Address of the menu group Master > Generals > Organization opened "Page not found" | Low | Closed: menu groups carry no address | Closed |
-| BV-OBS-008 | Incentive > My Programs: Achievement Overview card cut off at 1440 px | Low | Closed: fixed and re-tested on 03 October 2026 | Closed |
-
-Cases not run or blocked in the release test (SMTP-dependent checks, idle sign-out timing, some screen-only negative checks) are listed in the Test Summary Report and are planned for the next manual cycle.
-
-## Limits of the OOTB scope
-
-| Topic | Release 1.0 behaviour | Route |
+| Topic | Release 1.1 behaviour | Route |
 |---|---|---|
-| Insurer systems | No insurer API; slips, statements and debit notes by file and e-mail | Change request per insurer |
-| IC report formats | Figures from financial statements and production reports; no IC-format report | Change request |
-| Percentage tax | No working paper for a non-VAT broker | Ledger by insurer; change request |
-| Anti-money laundering | No transaction monitoring, sanctions or PEP screening | Outside OOTB |
-| Report schedules | Scheduled e-mail of reports exists in the API; no screen to set it up | System Administrator through the API |
-| Bank payments | Transfers approved and recorded; no bank payment file | Change request per bank format |
+| Partner connectors | Delivered in test mode; live use after certification with each partner | Roadmap and change request per partner |
+| Report schedules | Scheduled e-mail of reports exists in the API; no setup screen | System Administrator through the API |
 | Two-step enrolment | Shows the key and a link, not a QR code | Users type the key into the authenticator app |
 | Session tokens | Kept in browser local storage | Move to httpOnly cookie on the roadmap |
-| Masters without Upload button | Templates loaded by the System Administrator through the API route | Upload buttons on the roadmap |
-| Claim settlement cash | Settlement cash panel is on the claim screens; the System Administrator records funds on Accounting's instruction | Accounting menu extension on the roadmap |
-| Mobile | Web application for desktop and laptop browsers (current Chrome, Edge or Firefox) | See roadmap |
-| Language | English screens; no Filipino translation file | Change request |
-| Load test | Not run; single-server timings only | Run on the production-sized environment before go-live |
-| External penetration test | Not run | Commission before go-live |
+| Housekeeping | No retention rule yet for the integration outbox and attempts, the EIS outbox and go-live workbook rows | Next minor release |
+| Mobile | Web application for desktop and laptop browsers | See roadmap |
+| Language | English screens; Thai partly translated; no Filipino translation file | Change request |
+| Load test and penetration test | Not run on a production-sized environment | Before go-live at each broker |
 
 ## Before go-live at a broker
 
-- Set `security.require_2fa_roles` to at least System Administrator, Accounting and Accounting Manager.
-- Replace the default authority limits with the board-approved signing authority.
-- Fill the BIR settings (registered name, address, TIN of the withholding agent).
-- Confirm premium tax rules, LGU rates, ATC and GL accounts with the broker's tax adviser.
-- Switch off the Sandbox payment gateway in production; enter live gateway keys in the secret store.
+- Set `security.require_2fa_roles` to at least System Administrator, Accounting and Accounting Manager; decide who holds `view:pii`.
+- Replace the default authority limits with the board-approved signing authority; appoint the Compliance Officer.
+- Fill the BIR, invoice and CAS settings; confirm premium tax rules, LGU rates, ATC and GL accounts with the broker's tax adviser.
+- Load configuration and open business through the Go-Live Data Workbench; run the transaction reset after the smoke test, then switch on the go-live lock.
+- Register production for the masking tool (`npm run mask:data -- --register-production`) and set `PII_ENCRYPTION_KEY` with its escrow copy.
+- Keep every integration connector in test mode until its certification is signed; switch off the Sandbox payment gateway in production.
 - Switch on "Send e-mails" only after the SMTP mailbox is tested.
 
 # Upgrade and versioning policy
 
 ## Version numbers
 
-Releases are numbered MAJOR.MINOR.PATCH and tagged in the repository (for example `v1.0.0`); `GET /api/version` shows the commit that is running.
+Releases are numbered MAJOR.MINOR.PATCH and tagged in the repository (for example `v1.1.0`); `GET /api/version` shows the commit that is running.
 
 | Type | Example | Content | Frequency (standard) |
 |---|---|---|---|
-| Patch | 1.0.1 | Defect fixes and security fixes; no change to how users work | As needed; emergency release for P1 or security |
-| Minor | 1.1.0 | New functions, new reports, regulatory form updates, upgrades of components; existing data and settings kept | Planned releases, monthly when there are fixes or changes |
+| Patch | 1.1.1 | Defect fixes and security fixes; no change to how users work | As needed; emergency release for P1 or security |
+| Minor | 1.2.0 | New functions, new reports, regulatory form updates, upgrades of components; existing data and settings kept | Planned releases, monthly when there are fixes or changes |
 | Major | 2.0.0 | Changes that need a migration project, retraining or a change of hosting components | Announced at least 6 months ahead [to confirm] |
 
 ## Rules for every release
 
-- Database changes only add to the schema; they are applied automatically when the API starts, under a lock, and recorded. The previous release runs on the newer schema, so a release can be rolled back by redeploying the previous image.
+- Database changes only add to the schema; they are applied automatically when the API starts, under a lock, and recorded. The previous release runs on the newer schema, so a release can be rolled back by redeploying the previous build.
 - Settings and master data changed by the broker are kept: the seed inserts only what is missing.
-- Every release has release notes: fixes, changes, migrations and anything the System Administrator must do by hand.
-- Each release is installed in Dev, then in SIT for a large broker, then in UAT, before production; a major release is also rehearsed in a temporary Pre-Prod restored from a production backup; the broker runs the UAT scripts for the changed areas; iorta TechNXT runs the regression; the CAB approves.
-- A database snapshot is taken before deployment; deployment happens in the agreed maintenance window, announced at least 5 business days ahead.
+- Every release has release notes: fixes, changes, migrations, new environment variables, jobs delivered off, settings to review and anything the System Administrator must do by hand.
+- Each release follows the release pipeline: Dev, then SIT for a large broker, then UAT on a release candidate tag, a temporary Pre-Prod for a major release, then Production on the release tag after the CAB approval; the broker runs the UAT scripts for the changed areas; iorta TechNXT runs the regression.
+- A verified backup is taken before every deployment to Pre-Prod and Production; deployment happens in the agreed maintenance window, announced at least 5 business days ahead.
 
 ## Entitlement and support of versions
 
@@ -195,25 +266,36 @@ Releases are numbered MAJOR.MINOR.PATCH and tagged in the repository (for exampl
 
 > **Indicative and not contractual.** The roadmap shows iorta TechNXT's current intentions. Content, order and timing may change. It is not a commitment to deliver any function, it is not part of any licence, subscription or support agreement, and a purchase decision should be based on the functions in the release delivered. Items a broker needs by a date are agreed as change requests.
 
-## Near term: next patch and minor release (indicative: within 3 months)
+## Partner certifications (what remains for live connectors)
+
+The connectors are built and tested against the fake provider. Each needs the partner's sandbox, credentials, test cases signed by the partner and, where the partner requires it, a formal certification before it is switched to live for a broker.
+
+| Partner connector | What remains | Owner |
+|---|---|---|
+| BIR EIS | Broker's EIS accreditation, BIR test environment run, production credentials | Broker with iorta TechNXT |
+| CTPL authentication provider and LTO feed | Provider onboarding per insurer, COC series issued by the insurer, test authentications | Broker, insurer, iorta TechNXT |
+| Insurer APIs | Mapping per insurer (products, codes, answers), the insurer's sandbox and sign-off, one insurer at a time | Insurer with iorta TechNXT |
+| Bank payment files | Bank's file layout confirmation and test file acceptance per bank and service (bulk credit, InstaPay, PESONet) | Broker's bank |
+| SMS and Viber | Sender name registration, gateway account, template approval | Broker |
+| Payment gateways (PayMongo, Dragonpay) | Merchant account, live keys, test in the provider's sandbox | Broker |
+| Commercial AML screening provider | Contract and API credentials, list coverage confirmation | Broker's compliance officer |
+
+## Near term (indicative: within 3 months)
 
 | Item | Why |
 |---|---|
-| Upgrade react-router to the fixed major version (BV-DEF-001) | Close the moderate advisory |
-| Re-run of the blocked SMTP cases and the cases not run | Close the release test |
-| QR code for two-step enrolment | Easier enrolment |
-| Upload buttons on the masters that only have an API route | Self-service go-live loads |
-| Automated dependency and image scanning in the pipeline; tests restored in the deployment workflow; branch protection | Secure development lifecycle gaps of the architecture review |
+| Merge of packages B and G and the rest of package G (supplier 2307, fixed asset disposal, sales activities, quote covers and risk fields) | Complete release 1.1 |
+| Housekeeping rules for the integration, EIS and workbench tables | Control database growth |
+| Upgrade react-router (BV-DEF-001) | Close the moderate advisory |
+| QR code for two-step enrolment; setup screen for scheduled report e-mails | Easier use |
+| Image scanning in the pipeline | Secure development lifecycle |
 
 ## Mid term (indicative: 3 to 9 months)
 
 | Item | Why |
 |---|---|
 | Session refresh in an httpOnly cookie | Remove tokens from browser local storage |
-| Field-level encryption of personal identifiers (TIN, ID numbers) (BV-DEF-003) | Defence in depth for sensitive personal information |
 | Move of the front-end build from Create React App to Vite | Maintained build tooling; clears build-time advisories |
-| Screen to set up scheduled report e-mails | Today only through the API |
-| Claim settlement cash on the Accounting menu | Accounting records claim funds directly |
 | Rate limits shared across API instances | Consistent limits with several instances |
 | Load test results and sizing confirmation on a production-sized environment | Evidence for larger brokers |
 
@@ -221,12 +303,8 @@ Releases are numbered MAJOR.MINOR.PATCH and tagged in the repository (for exampl
 
 | Item | Why |
 |---|---|
-| IC report formats | Reduce manual preparation of IC reports |
-| Percentage tax working paper for non-VAT brokers | Complete the BIR working papers |
-| Bank payment files for the main Philippine banks | Remittance and payouts without re-keying in bank portals |
-| Insurer API connectors, starting with insurers that publish an API | Fewer files and e-mails with insurers |
 | Mobile-friendly screens for sales and claims | Field use |
 | Filipino screen translation | Users who prefer Filipino |
-| Screening support for anti-money laundering checks | Brokers covered by the AMLA |
+| Further partner connectors as brokers request them | Fewer files and e-mails with partners |
 
 Brokers can propose roadmap items through their account manager. iorta TechNXT reviews the roadmap with customers at least once a year [to confirm the forum, for example a customer advisory meeting].

@@ -10,6 +10,7 @@ digraph ER {
   "accounting_periods" [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#0065B3"><tr><td colspan="2" bgcolor="#0065B3"><font color="white"><b>accounting_periods</b></font></td></tr><tr><td align="left" balign="left"><b>PK</b></td><td align="left">period</td></tr><tr><td align="left"><font color="#0065B3">FK</font></td><td align="left">fiscal_year</td></tr></table>>];
   "posting_rules" [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#0065B3"><tr><td colspan="2" bgcolor="#0065B3"><font color="white"><b>posting_rules</b></font></td></tr><tr><td align="left" balign="left"><b>PK</b></td><td align="left">id</td></tr><tr><td align="left"><font color="#5B6776">UK</font></td><td align="left">event_code, version</td></tr></table>>];
   "posting_rule_lines" [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#0065B3"><tr><td colspan="2" bgcolor="#0065B3"><font color="white"><b>posting_rule_lines</b></font></td></tr><tr><td align="left" balign="left"><b>PK</b></td><td align="left">id</td></tr><tr><td align="left"><font color="#5B6776">UK</font></td><td align="left">rule_id, line_no</td></tr><tr><td align="left"><font color="#0065B3">FK</font></td><td align="left">rule_id</td></tr></table>>];
+  "accounting_config_changes" [label=<<table border="1" cellborder="0" cellspacing="0" cellpadding="3" color="#0065B3"><tr><td colspan="2" bgcolor="#0065B3"><font color="white"><b>accounting_config_changes</b></font></td></tr><tr><td align="left" balign="left"><b>PK</b></td><td align="left">id</td></tr><tr><td align="left"><font color="#0065B3">FK</font></td><td align="left">rule_id</td></tr><tr><td align="left"><font color="#5B6776">{ }</font></td><td align="left"><font color="#5B6776">payload, before</font></td></tr></table>>];
   "clients" [shape=box, style="rounded,dashed", color="#5B6776", fontcolor="#5B6776", label="clients"];
   "fiscal_years" [shape=box, style="rounded,dashed", color="#5B6776", fontcolor="#5B6776", label="fiscal_years"];
   "policies" [shape=box, style="rounded,dashed", color="#5B6776", fontcolor="#5B6776", label="policies"];
@@ -21,6 +22,7 @@ digraph ER {
   "journal_vouchers" -> "journal_lines";
   "policies" -> "journal_lines";
   "policies" -> "journal_vouchers";
+  "posting_rules" -> "accounting_config_changes";
   "posting_rules" -> "journal_vouchers";
   "posting_rules" -> "posting_rule_lines";
 }

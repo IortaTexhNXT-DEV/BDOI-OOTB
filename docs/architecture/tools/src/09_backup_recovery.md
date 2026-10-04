@@ -11,16 +11,17 @@ This document defines what must be backed up for BrokerVerse OOTB, how (in the A
 {widths: 22,30,48}
 | Asset | Location | Why it matters |
 |---|---|---|
-| Database | PostgreSQL database `brokerverse` (for example Amazon RDS) | All business, financial, configuration, security and audit data (138 tables). The only copy of transactions. |
+| Database | PostgreSQL database `brokerverse` (for example Amazon RDS) | All business, financial, configuration, security and audit data (250 tables; 260 with packages B and G). The only copy of transactions. |
 | Uploaded and generated files | `UPLOAD_DIR` (`/app/uploads`; EFS in the target) | Policy documents, IDs, vehicle photos, claim documents, signatures, logos, statements and generated reports. The `documents` table holds only the keys, not the content. |
 | `DATA_ENCRYPTION_KEY` | Secrets Manager / environment | Decrypts the two-factor (TOTP) secrets stored in `users` and keys the reset-code hashes. A database restored without the same key works, but every user with two-factor sign-in must be reset by an administrator and enrol again. |
+| `PII_ENCRYPTION_KEY` (package B) | Secrets Manager / environment | Decrypts the TIN, government ID and bank account numbers stored encrypted in the database (and in every backup). A backup cannot be read without the key it was written with: keep every key version, including the previous key after a rotation, as long as backups taken with it are kept. |
 | `JWT_SECRET` | Secrets Manager / environment | Signs sessions, signed file links and approval / download tokens. Losing it signs everyone out and invalidates links already sent (for example quotation approval e-mails); no data is lost. |
 | Other configuration | `DATABASE_URL`, `SMTP_URL`, `CORS_ORIGINS`, `PUBLIC_BASE_URL`, `ADMIN_PASSWORD`, task definitions | Needed to recreate the environment. |
 | Front-end build | S3 bucket behind CloudFront | Rebuilt from Git by the pipeline; S3 versioning allows an immediate rollback. |
 | Code and schema | Git repositories (front end, backend incl. `db/migrations`, `db/seeds`, `seeds/settings.json`, `seeds/jobs.json`) | The schema and reference data are recreated from the code; backups of Git hosting are the responsibility of the repository owner. |
 | Container images | Amazon ECR | Allow redeploying exactly the running release; keep at least the last 10 release tags. |
 
-Application settings, masters, product templates, users and roles are data in the database (edited in the application), so they are covered by the database backup. There is no application function to export the configuration.
+Application settings, masters, product templates, users and roles are data in the database (edited in the application), so they are covered by the database backup. The Go-Live Data Workbench exports the configuration as a workbook (Master > Go-Live and Data > Go-Live Data Load, configuration kit with current data) and compares two environments (`backend/scripts/compare-environments.js`). The release pipeline takes a verified `pg_dump` before every deployment to Pre-Prod and Production (`deploy/ec2/release.sh backup`, newest ten kept on the server, copy to `BACKUP_S3_URI`); these are restore points for a release, not the backup plan.
 
 > **Recommended / to be confirmed by the business and DevOps:** Take a configuration export before every release and before large configuration changes, for audit and for comparison between environments: `pg_dump --data-only --table=app_settings --table=master_types --table=master_records --table=product_templates --table=product_components --table=product_risk_mappings --table=product_risk_sections --table=report_definitions --table=scheduled_jobs --table=roles --table=permissions --table=role_permissions --table=gl_accounts --table=posting_rules --table=posting_rule_lines --table=document_numbering --table=commission_rates --table=tax_codes --table=period_close_checklist --table=bank_statement_formats --table=bank_transaction_types --table=bank_match_rules` into the backup bucket.
 
@@ -90,7 +91,8 @@ The database and the file store are backed up separately, so a restore can yield
 
 1. Restore the previous secret version in Secrets Manager (or recreate it from the escrow copy under dual control).
 2. Restart the API containers so they read the secret.
-3. If `DATA_ENCRYPTION_KEY` is lost permanently: generate a new key; administrators turn two-factor off for the affected users in User Management; the users enrol again. If `JWT_SECRET` is changed: users sign in again; quotation approval links and report download links already sent must be re-sent.
+3. If `PII_ENCRYPTION_KEY` is lost, the encrypted identifiers cannot be recovered: restore the key from the escrow copy; never generate a new key for an existing database except through the rotation procedure (`npm run pii:rotate`, `deploy/REFERENCE.md`).
+4. If `DATA_ENCRYPTION_KEY` is lost permanently: generate a new key; administrators turn two-factor off for the affected users in User Management; the users enrol again. If `JWT_SECRET` is changed: users sign in again; quotation approval links and report download links already sent must be re-sent.
 
 ## Application release rollback
 

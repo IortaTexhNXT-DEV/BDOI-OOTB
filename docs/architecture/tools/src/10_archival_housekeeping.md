@@ -11,10 +11,10 @@ This document describes how BrokerVerse OOTB data grows, the housekeeping the sy
 {widths: 22,22,56}
 | Data | Growth driver | Handling in the baseline |
 |---|---|---|
-| Business and financial records (about 100 tables: leads to journals, placement, period end, bank reconciliation) | Every quotation, policy, receipt, voucher, claim, statement line | Kept indefinitely; financial documents are cancelled or reversed, not deleted; draft quotations can be deleted; leads, quotations and bank statements have `deleted_at` |
+| Business and financial records (about 190 tables: leads to journals, placement, period end, bank reconciliation, payables, fixed assets, BIR filings and invoices, AML records, compliance registers) | Every quotation, policy, receipt, voucher, claim, statement line | Kept indefinitely; financial documents are cancelled or reversed, not deleted; draft quotations can be deleted; leads, quotations and bank statements have `deleted_at` |
 | `audit_log` | Every change, sign-in related event, job run started by a user, report generation | Kept; purged only if `housekeeping.audit_log_days` is set, never below seven years |
 | `login_history` | Every password, two-factor and refresh attempt | Purged by housekeeping after 365 days |
-| `job_runs` | About 1,736 rows a day: `renewal-queue` every minute (1,440), `email-outbox` every 5 minutes (288), 8 enabled daily jobs | Purged by housekeeping after 90 days |
+| `job_runs` | About 2,550 rows a day with the jobs enabled by default: `renewal-queue` every minute (1,440), `integration-outbox` every 2 minutes (720), `email-outbox` every 5 minutes (288), `my-work-reminders` every 15 minutes (96) and the daily jobs | Purged by housekeeping after 90 days |
 | `notifications` | Reminders, approvals, renewal and collection notices | Read notifications purged after 180 days; users can delete them in the bell menu |
 | `email_outbox` | Every e-mail (full HTML body kept) | Sent messages purged after 180 days, failed ones after 730 days |
 | `refresh_tokens` | Every sign-in and every refresh (rotation) | Expired or revoked rows purged 30 days after expiry or revocation |
@@ -23,6 +23,9 @@ This document describes how BrokerVerse OOTB data grows, the housekeeping the sy
 | `job_queue` | Renewal batch notices | Completed items purged after 30 days |
 | `generated_reports` and report files | Scheduled daily reports and user-generated reports | Rows and files older than `reports.retention_days` (90) deleted by the `daily-reports` job |
 | Uploaded files (`UPLOAD_DIR`) | Documents, photos, statements, bordereaux, exports | No lifecycle; deleted only through the delete endpoint (uploader, module writer or administrator) |
+| `integration_outbox`, `integration_attempts`, `integration_inbox` | Every SMS, Viber, CTPL, insurer and bank file message and each attempt | Not purged (Gap) |
+| `eis_submissions`, `aml_provider_requests` | Every sales invoice sent to the BIR EIS; screening provider requests | Not purged (Gap); AML records kept for `aml.record_retention_years` |
+| `data_load_rows` | Every row of every uploaded go-live workbook | Not purged (Gap); needed only until the load is reconciled |
 | Status housekeeping | Policies past expiry, quotations past validity, renewals past grace | Jobs `policy-expiry`, `quote-expiry`, `renewal-pipeline` change the status (no deletion) |
 
 > **Note:** In production, files without a database record (orphans) can arise from failed uploads (a key is reserved before the file is written) and from restores done at different times for the database and the files. A periodic reconciliation report is recommended (chapter 4).
@@ -78,9 +81,14 @@ The scheduled job `housekeeping` (daily at 02:45 Manila time, `jobs/housekeeping
 | `policy-expiry` | 00:15 | Status `expired` for policies past expiry |
 | `quote-expiry` | 00:30 | Status `expired` for quotations older than `limits.quote_validity_days` |
 | `renewal-pipeline` | 05:30 | Lapses renewals past `renewals.grace_period_days` |
+| `cover-note-expiry` | 06:20 | Status `expired` for cover notes past their validity |
+| Data subject request, anonymisation | on request | Personal data of a client or prospect anonymised once `privacy.retention_years` has passed (Master > Data Privacy) |
+| Transaction reset | before go-live | `npm run reset:transactions` removes the smoke-test records; refused once `golive.locked` is on |
 | Password change | on change | Keeps only the last N password hashes |
 
 ## Recommended additions
+
+> **Gap:** Housekeeping has no retention rule yet for the integration outbox, attempts and inbox, the EIS outbox, the screening provider requests and the go-live workbook rows. **Recommended:** 180 days for sent messages and attempts, 730 days for failed ones, 90 days for workbook rows after the load is reconciled.
 
 > **Recommended / to be confirmed by the business and DevOps:** Archive `login_history` and, once the compliance period is agreed, `audit_log` before housekeeping deletes them (chapter 5). Add a weekly report of files in `UPLOAD_DIR` without a `documents` or `generated_reports` row, and of rows whose file is missing; do not delete automatically.
 

@@ -6,9 +6,9 @@ This document is the inventory of the BrokerVerse OOTB database: every table wit
 
 ## Source and currency of the figures
 
-The inventory is generated from the catalogue of a PostgreSQL 16 database created for this issue (`brokerverse_arch`, migrated to `0152_email_sender.sql` and seeded with `SEED_SAMPLE_DATA=true`) by `docs/architecture/tools/collect_db_inventory.py`, which runs read-only catalogue queries and one `count(*)` per table. The descriptions, owning modules and retention classes come from `tools/table_catalog.py`.
+The inventory is generated from the catalogue of a PostgreSQL 16 database created for this issue on 04 October 2026, migrated to `0322_quote_covers_and_risk_fields.sql` (the branch's 139 migrations plus the 10 of packages B and G being merged) and seeded with the reference data only (`SEED_SAMPLE_DATA=false`), by `docs/architecture/tools/collect_db_inventory.py`, which runs read-only catalogue queries and one `count(*)` per table. The descriptions, owning modules and retention classes come from `tools/table_catalog.py`.
 
-> **Note:** Row counts and sizes are those of a fresh database with reference data and the sample data set. They show relative weight, not production volumes. A production database starts with reference data only. Re-run the collector against UAT or production and rebuild the documents to refresh them (see `docs/architecture/README.md`).
+> **Note:** Row counts and sizes are those of a new database with the reference data only: masters, the Philippine geography, settings, posting rules, number series, reports and jobs. Transaction tables are empty. A production database starts in this state. Re-run the collector against UAT or production and rebuild the documents to refresh them (see `docs/architecture/README.md`).
 
 Size is the total relation size in KB (table, TOAST and indexes). PostgreSQL allocates at least one 8 KB page per relation and index, so small tables show 16 to 64 KB. "Idx" is the number of indexes including the primary key.
 
@@ -29,13 +29,13 @@ Size is the total relation size in KB (table, TOAST and indexes). PostgreSQL all
 
 {generate: domain_summary}
 
-## Tables with the most rows (test data)
+## Tables with the most rows (reference data)
 
 {generate: largest_tables}
 
 # Table inventory
 
-Key columns: PK primary key, UK unique constraint, FK foreign-key columns (first four), JSONB document columns. Rows and KB are test data.
+Key columns: PK primary key, UK unique constraint, FK foreign-key columns (first four), JSONB document columns. Rows and KB are those of the reference data.
 
 {generate: inventory}
 
@@ -47,11 +47,11 @@ Key columns: PK primary key, UK unique constraint, FK foreign-key columns (first
 
 ## Indexes
 
-448 indexes: 138 primary keys, 91 further unique indexes, 33 partial indexes and 1 GIN index (`master_records_data_idx` on `master_records.data`). The partial indexes serve hot subsets and conditional uniqueness: open direct-bill items, live refresh tokens, active entry matches, direct-billed policies, due recurring journals and close entries, active bank reconciliations and close runs, one lead co-insurer per record, one open renewal per policy, one pending approval per entity, one active document-number prefix, and codes that are unique among records not deleted.
+901 indexes: 260 primary keys, 180 further unique indexes, 71 partial indexes and 1 GIN index (`master_records_data_idx` on `master_records.data`). The partial indexes serve hot subsets and conditional uniqueness: open direct-bill items, live refresh tokens, active entry matches, direct-billed policies, due recurring journals and close entries, active bank reconciliations and close runs, one lead co-insurer per record, one open renewal per policy, one pending approval per entity, one active document-number prefix, and codes that are unique among records not deleted.
 
 ### Foreign keys without a supporting index
 
-Migration `0146_foreign_key_indexes.sql` indexed the foreign keys of every table that grows. The 36 foreign keys below have no index whose first column is the foreign-key column. They are on small master and set-up tables or are maker-checker stamp columns, and are left without an index on purpose. `node backend/scripts/fk-index-report.js` lists them again after new migrations.
+Migration `0146_foreign_key_indexes.sql` indexed the foreign keys of every table that grows. The 60 foreign keys below have no index whose first column is the foreign-key column. They are on small master and set-up tables or are maker-checker stamp columns, and are left without an index on purpose. `node backend/scripts/fk-index-report.js` lists them again after new migrations.
 
 {generate: unindexed_fks}
 

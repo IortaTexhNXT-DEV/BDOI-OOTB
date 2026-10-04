@@ -51,7 +51,15 @@ Three layers decide what a user can do. They must agree.
    through the menu and checks the grants against the API permissions.
 
 When a role must see a new screen: add the menu entry, add it to the role in `roleMenuPermissions`,
-and make sure the backend role has the permission the screen's API calls need.
+and make sure the backend role has the permission the screen's API calls need. Master is organised in
+sections (Organization, Insurance Management, Location, Employee Management, User Management, Finance,
+System Configuration, Data Privacy, Go-Live and Data); a grant such as `"Finance > Bank File Layouts"`
+opens one item of a section.
+
+4. **Help** (`components/HelpPanel/helpRoutes.js`). Every screen maps its address prefix to a heading
+   of the user manual; F1 or the help button opens that section with the support contacts.
+   `helpRoutes.test.js` checks each heading id against `public/help/sections.json`; `npm run help:build`
+   rebuilds `public/help/` from `docs/package/source/user-manual.md`.
 
 ## 3. Business areas
 
@@ -129,6 +137,11 @@ acceptable for data no other screen needs.
 | File upload | `components/S3FileUpload`, `services/s3Service` |
 | Bulk upload template | `agentModule/component/bulkUploadTemplate` |
 | Required-field checks without Formik | `utility/requiredFields` |
+| Lists | `components/DataTable` (skeleton rows while loading, paging, numeric alignment) |
+| Record history | `components/AuditTrail/AuditTimeline` (business events of `GET /api/audit/records/:entity/:id`) |
+| Philippine address | `agentModule/component/PhAddressFields` (region, province, city or municipality, barangay, ZIP code) |
+| Colours and logo | the theme tokens; the saved theme is applied at run time by `theme/runtime/themeEngine.js` and `BrandingProvider`; never hard-code a brand colour |
+| Masked identifiers (package B) | `utility/piiReveal.js`: the "Show full identifiers" switch for holders of `view:pii` |
 | Diagnostics | `utility/logger` (silent in production, see section 8) |
 
 The display currency and the date format come from System Settings. `module/SystemSettings/store`
@@ -173,6 +186,7 @@ language pickers offer the languages configured in System Settings that have a b
 `services/`. Add a `<Route>` to `routes/MainRoute.js`. If users reach it from the menu, add an entry
 to `components/SideBar/list.js` with `path` and `includes` (detail pages), then grant it to the roles
 in `utils/menuPermissions.js` and extend `menuPermissions.test.js` when a persona's access changes.
+Add its help entry to `components/HelpPanel/helpRoutes.js` and its texts to `en.json`.
 Buttons that open another screen should check `canOpen(path)`.
 
 **Add a menu entry for an existing screen.** Add it to `list.js` and to the roles that need it. An
@@ -214,6 +228,10 @@ tab title. The Docker images (`brokerverse/Dockerfile`, `Dockerfile.railway`) se
 (`react-app` rules plus `no-console`); keep the count from growing. Deployment:
 [deploy/RELEASE_PIPELINE.md](../../deploy/RELEASE_PIPELINE.md).
 
-Tests live next to the code they test (`*.test.js`): formatting helpers, menu permissions and route
-guard, placement helpers, the lead service and an application smoke test. End-to-end scenarios are
+Tests live next to the code they test (`*.test.js`, 31 suites, 162 tests on 04 October 2026): formatting
+helpers, menu tree, permissions and route guard, help routes, the theme engine, the Philippine address
+fields, Product Configurator rules, My Work, BIR Tax, Compliance, Distribution and Integrations screens,
+placement helpers, the lead and masters services and an application smoke test. `npm run lint` on
+04 October 2026: no errors, 256 warnings (mostly `react-hooks/exhaustive-deps` and `eqeqeq`); new code
+should add none. End-to-end scenarios are
 in `docs/e2e`.

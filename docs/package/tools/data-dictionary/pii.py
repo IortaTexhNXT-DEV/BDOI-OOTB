@@ -53,9 +53,44 @@ PII.update({
 })
 
 
+# Columns added after this list was written are classified from the personal data catalogue of the client data
+# masking tool (backend/scripts/lib/pii-catalogue.js, kept complete by test/mask-data.test.js): the masking rule gives
+# the class. DD_PII_CATALOGUE names further copies of that file (branches being merged), separated by ":".
+import os as _os
+import re as _re
+from ddpaths import ROOT as _ROOT
+
+_RULE_CLASS = {'tin': S, 'dob': S, 'idNumber': S, 'secret': C, 'json': J, 'freeText': J, 'fileName': J, 'storageKey': J,
+               'scrub': J, 'blank': J}
+
+
+def _catalogue():
+    files = [_os.path.join(_ROOT, 'backend', 'scripts', 'lib', 'pii-catalogue.js')]
+    files += [f for f in _os.environ.get('DD_PII_CATALOGUE', '').split(':') if f]
+    out = {}
+    for f in files:
+        if not _os.path.exists(f):
+            continue
+        txt = open(f).read().split('export const TABLE_ACTIONS')[0]
+        for m in _re.finditer(r"\.\.\.party\('([a-z_0-9]+)'", txt):
+            for col, rule in (('first_name', 'firstName'), ('last_name', 'lastName'), ('company_name', 'companyName'),
+                              ('display_name', 'partyName'), ('email', 'email'), ('phone', 'phone'), ('birth_date', 'dob'),
+                              ('address', 'street'), ('barangay', 'barangay'), ('city', 'locality'), ('state', 'province'),
+                              ('postal_code', 'postal'), ('extra', 'json')):
+                out.setdefault((m.group(1), col), rule)
+        for m in _re.finditer(r"'([a-z_0-9]+)\.([a-z_0-9]+)':\s*(?:'([A-Za-z]+)'|\{\s*rule:\s*'([A-Za-z]+)')", txt):
+            out.setdefault((m.group(1), m.group(2)), m.group(3) or m.group(4))
+    return {k: _RULE_CLASS.get(v, P) for k, v in out.items()}
+
+
+CATALOGUE = _catalogue()
+
+
 def classify(t, c, cols_of_table):
     if (t, c) in PII and c in cols_of_table:
         return PII[(t, c)]
+    if (t, c) in CATALOGUE and c in cols_of_table:
+        return CATALOGUE[(t, c)]
     if c in ('insured_name', 'customer_name', 'payee_name', 'payer_name', 'insured', 'requester_name'):
         return P
     return ''

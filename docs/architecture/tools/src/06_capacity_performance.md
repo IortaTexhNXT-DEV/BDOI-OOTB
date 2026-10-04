@@ -82,7 +82,7 @@ Clients: concurrent clients; Req/s: completed requests per second; latencies in 
 
 # Data growth and storage
 
-## Current relative weight (test data)
+## Current relative weight (reference data)
 
 {generate: largest_tables}
 
