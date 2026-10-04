@@ -1,6 +1,6 @@
 """Refreshes the table of contents of built documents and writes a PDF next to each (LibreOffice, headless).
 
-    python3 refresh.py out/*.docx
+    python3 refresh.py ../05_Delivery/*.docx
 """
 import os, subprocess, sys, time
 import uno

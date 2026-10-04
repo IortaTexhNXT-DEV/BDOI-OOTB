@@ -1,7 +1,7 @@
 """Build the iNXT BrokerVerse client presentation (16:9 PowerPoint) with python-pptx.
 
     python3 docs/package/tools/build_sales_deck.py
-    soffice --headless --convert-to pdf --outdir docs/package/sales docs/package/sales/iNXT_BrokerVerse_Client_Presentation.pptx
+    soffice --headless --convert-to pdf --outdir docs/package/01_Sales docs/package/01_Sales/iNXT_BrokerVerse_Client_Presentation.pptx
 
 Screens are the user manual screenshots in docs/package/source/manual-images (UAT data set). Facts come from the
 documentation package sources (docs/package/source), the user manual and the pricing workbook. Items that iorta
@@ -22,7 +22,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, '..', '..', '..'))
 LOGO = os.path.join(REPO, 'brokerverse', 'public', 'bdoi', 'iorta-technxt.png')
 SHOTS = os.path.join(REPO, 'docs', 'package', 'source', 'manual-images')
-OUT = os.path.join(REPO, 'docs', 'package', 'sales', 'iNXT_BrokerVerse_Client_Presentation.pptx')
+OUT = os.path.join(REPO, 'docs', 'package', '01_Sales', 'iNXT_BrokerVerse_Client_Presentation.pptx')
 
 NAVY = RGBColor(0x0F, 0x47, 0x61)
 NAVY_DARK = RGBColor(0x0B, 0x2A, 0x4A)

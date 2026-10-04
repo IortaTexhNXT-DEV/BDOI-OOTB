@@ -1,6 +1,7 @@
 """Builds a BrokerVerse document in the iorta TechNXT template from a plain-text source file.
 
-    python3 build_doc.py source/user-manual.md out/BrokerVerse_User_Manual.docx
+    python3 build_doc.py ../source/user-manual.md ../05_Delivery/BrokerVerse_User_Manual.docx
+    (python3 build_all.py rebuilds every document into its folder)
 
 Source format (one block per line group):
   front matter between --- lines: title, subtitle, version, date, prepared, reviewed, approved, acronyms (A=B; C=D),

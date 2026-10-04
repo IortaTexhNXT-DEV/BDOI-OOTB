@@ -22,7 +22,8 @@ defects in production.
 | `deploy/README.md` | What to check before a site goes live. |
 | `docs/review/CODE_REVIEW.md` | Code reviews: what was found, fixed and left open. |
 | `docs/e2e/` | End-to-end test runs on the screens and their defect register. |
-| `docs/architecture/`, `docs/manual/`, `docs/decks/` | Architecture description, user manual, presentations. |
+| `docs/package/` | The documentation pack: sales, commercials, contracts, onboarding, delivery (including the user manual), support, technical and management documents. See `docs/package/README.md`. |
+| `docs/architecture/`, `docs/manual/`, `docs/decks/` | Architecture description, user manual screenshots and their capture tools, role presentations. |
 | `backend/docs/api/` | Generated API list: OpenAPI, Postman collection, the API touchpoint workbook (screen to API). |
 | `docker-compose.yml` | Database, API and web server for a single-server installation. |
 

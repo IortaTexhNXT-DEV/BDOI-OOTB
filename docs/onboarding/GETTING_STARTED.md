@@ -2,7 +2,7 @@
 
 This guide is for everyone who uses BrokerVerse day to day. It explains how to sign in the first time, what you see
 after signing in, which menus your role opens and how to ask for help. The user manual
-(`docs/manual/BrokerVerse_User_Manual.pdf`) describes every screen in detail.
+(`docs/package/05_Delivery/BrokerVerse_User_Manual.pdf`) describes every screen in detail.
 
 ## 1. Signing in the first time
 

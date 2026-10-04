@@ -1,5 +1,5 @@
-"""Builds sales/iNXT_BrokerVerse_Price_Book.xlsx (formula driven) from the recommended price points of
-out/BrokerVerse_Commercials_and_Pricing.xlsx.
+"""Builds 02_Commercials/iNXT_BrokerVerse_Price_Book.xlsx (formula driven) from the recommended price points of
+02_Commercials/BrokerVerse_Commercials_and_Pricing.xlsx.
 
     python3 build_price_book.py
 
@@ -19,8 +19,8 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PKG = os.path.dirname(HERE)
-SRC = os.path.join(PKG, 'out', 'BrokerVerse_Commercials_and_Pricing.xlsx')
-OUT = os.path.join(PKG, 'sales', 'iNXT_BrokerVerse_Price_Book.xlsx')
+SRC = os.path.join(PKG, '02_Commercials', 'BrokerVerse_Commercials_and_Pricing.xlsx')
+OUT = os.path.join(PKG, '02_Commercials', 'iNXT_BrokerVerse_Price_Book.xlsx')
 
 
 # ------------------------------------------------------------------ read the pricing workbook

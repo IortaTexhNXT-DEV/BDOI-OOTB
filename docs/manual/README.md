@@ -1,14 +1,16 @@
 # BrokerVerse user manual
 
-`BrokerVerse_User_Manual.docx` and `BrokerVerse_User_Manual.pdf` are the user manual of BrokerVerse OOTB by iorta
-TechNXT, version 1.0, 29 September 2026 (199 pages, 189 figures). Both files have the same content. The manual is
-written for the seven roles: System Administrator, Sales & Marketing, Processing Team, Operations, Claims,
-Accounting and Accounting Manager.
+The user manual given to brokers is `docs/package/05_Delivery/BrokerVerse_User_Manual.docx` and `.pdf`, built from
+`docs/package/source/user-manual.md` (see `docs/package/README.md`). This folder holds the earlier role-based manual
+source, its screenshots and the capture tools. The role decks in `docs/decks` take their screens from `images/` and
+their rules from `tools/manual_source.md`, so these are kept up to date. `build_manual.py` still writes
+`BrokerVerse_User_Manual.docx` and `.pdf` here as a working copy for review; they are not kept in the repository
+(`.gitignore`) and are not given to brokers.
 
 | Path | What it is |
 |---|---|
-| `BrokerVerse_User_Manual.docx` / `.pdf` | The manual (A4, table of contents, headers and footers with page numbers). |
-| `tools/manual_source.md` | The text of the manual. Edit this file to change the manual. |
+| `BrokerVerse_User_Manual.docx` / `.pdf` | Working copy written by `build_manual.py` (not kept in the repository). |
+| `tools/manual_source.md` | The text of the role-based manual, read by the role decks. |
 | `tools/build_manual.py` | Builds the .docx with python-docx, then uses LibreOffice to fill the table of contents and export the PDF. |
 | `tools/capture.py`, `tools/scenes.py` | Take the screenshots from a running system with Playwright. |
 | `tools/style_scan.py` | Checks the manual and the role decks for stock words, emojis, long dashes and names that must not appear. |

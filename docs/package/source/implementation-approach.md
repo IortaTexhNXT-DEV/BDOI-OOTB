@@ -29,7 +29,7 @@ The broker's management (sponsor and steering committee), the broker's project m
 | BrokerVerse Training Plan | Training per role, curriculum, train-the-trainer, assessment |
 | BrokerVerse Production Support Approach and Standards | Support after hypercare |
 | BrokerVerse Philippine Regulatory Compliance Matrix | How the system supports the broker's obligations |
-| BrokerVerse User Manual (`docs/manual`) | Every screen, for every role |
+| BrokerVerse User Manual (`docs/package/05_Delivery`) | Every screen, for every role |
 | Go-live data set-up (`docs/onboarding/GO_LIVE_DATA_SETUP.md`) | The order of set-up from company to first month-end |
 | User acceptance test scripts (`docs/onboarding/UAT_SCRIPTS.md`) | 5 to 8 scenarios per role |
 | Deployment checklist (`deploy/README.md`, `deploy/REFERENCE.md`) | Servers, database, secrets, e-mail, health checks, rollback |

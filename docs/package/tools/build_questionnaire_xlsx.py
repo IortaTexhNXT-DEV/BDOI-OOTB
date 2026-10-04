@@ -2,7 +2,7 @@
 so the Word version and the workbook always carry the same answers.
 
     python3 build_questionnaire_xlsx.py ../source/security-due-diligence-questionnaire.md \
-        ../out/BrokerVerse_Security_Due_Diligence_Questionnaire.xlsx
+        ../04_Onboarding_and_Go_Live/BrokerVerse_Security_Due_Diligence_Questionnaire.xlsx
 """
 import re, sys
 from openpyxl import Workbook
@@ -10,7 +10,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.worksheet.datavalidation import DataValidation
 
 SRC = sys.argv[1] if len(sys.argv) > 1 else '../source/security-due-diligence-questionnaire.md'
-OUT = sys.argv[2] if len(sys.argv) > 2 else '../out/BrokerVerse_Security_Due_Diligence_Questionnaire.xlsx'
+OUT = sys.argv[2] if len(sys.argv) > 2 else '../04_Onboarding_and_Go_Live/BrokerVerse_Security_Due_Diligence_Questionnaire.xlsx'
 NAVY = '0B2A4A'
 HEAD_FILL = PatternFill('solid', fgColor=NAVY)
 HEAD_FONT = Font(name='Segoe UI', bold=True, color='FFFFFF', size=10)

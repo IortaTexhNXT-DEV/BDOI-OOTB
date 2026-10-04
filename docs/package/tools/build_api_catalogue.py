@@ -27,7 +27,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-DEFAULT_OUT = os.path.join(REPO, "docs", "package", "out", "BrokerVerse_API_and_Dependency_Catalogue.xlsx")
+DEFAULT_OUT = os.path.join(REPO, "docs", "package", "07_Technical", "BrokerVerse_API_and_Dependency_Catalogue.xlsx")
 
 # Data that must exist before a module's endpoints are useful (per backend module folder).
 PREREQUISITES = {

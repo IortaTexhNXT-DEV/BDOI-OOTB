@@ -25,7 +25,7 @@ from openpyxl.styles import Alignment, Font, PatternFill
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SOURCE = os.path.normpath(os.path.join(HERE, "..", "source", "communication-templates.md"))
-DEFAULT_OUT = os.path.normpath(os.path.join(HERE, "..", "out", "BrokerVerse_Communication_Touchpoints.xlsx"))
+DEFAULT_OUT = os.path.normpath(os.path.join(HERE, "..", "05_Delivery", "BrokerVerse_Communication_Touchpoints.xlsx"))
 
 HFILL = PatternFill("solid", fgColor="0F4761")
 HFONT = Font(bold=True, color="FFFFFF", name="Segoe UI", size=10)

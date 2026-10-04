@@ -1,13 +1,13 @@
 """Builds BrokerVerse_Implementation_Plan.xlsx: three Gantt sheets (small, medium, large) and the RACI matrix.
 
-    python3 build_plan_xlsx.py ../out/BrokerVerse_Implementation_Plan.xlsx
+    python3 build_plan_xlsx.py ../05_Delivery/BrokerVerse_Implementation_Plan.xlsx
 """
 import sys
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else "../out/BrokerVerse_Implementation_Plan.xlsx"
+OUT = sys.argv[1] if len(sys.argv) > 1 else "../05_Delivery/BrokerVerse_Implementation_Plan.xlsx"
 NAVY = '0F4761'
 HEAD = PatternFill('solid', fgColor='DCE9F7')
 THIN = Side(style='thin', color='BFC7D1')

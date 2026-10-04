@@ -1,7 +1,7 @@
 """Builds BrokerVerse_Discovery_and_Configuration_Workbook.xlsx: the workbook used at mobilisation and in the
 discovery workshops to record every configuration decision of a broker, one sheet per area.
 
-    python3 build_discovery_workbook.py ../out/BrokerVerse_Discovery_and_Configuration_Workbook.xlsx
+    python3 build_discovery_workbook.py ../04_Onboarding_and_Go_Live/BrokerVerse_Discovery_and_Configuration_Workbook.xlsx
 
 Screens use the menu names of brokerverse/src/components/SideBar/list.js. OOTB defaults are the values seeded by
 backend/src/db/seeds and the migrations (settings keys in the Notes column). The Reports sheet is read from the
@@ -14,8 +14,8 @@ from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.formatting.rule import FormulaRule
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, '../out/BrokerVerse_Discovery_and_Configuration_Workbook.xlsx')
-REPORTS_BOOK = os.path.join(HERE, '../out/BrokerVerse_Reports_Book.xlsx')
+OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(HERE, '../04_Onboarding_and_Go_Live/BrokerVerse_Discovery_and_Configuration_Workbook.xlsx')
+REPORTS_BOOK = os.path.join(HERE, '../05_Delivery/BrokerVerse_Reports_Book.xlsx')
 
 NAVY = '0B2A4A'
 HEAD_FILL = PatternFill('solid', fgColor=NAVY)

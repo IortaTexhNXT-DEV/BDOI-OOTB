@@ -5,7 +5,7 @@ from openpyxl.workbook.defined_name import DefinedName
 from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.utils import get_column_letter as L
 
-OUT = '/home/user/BDOI-OOTB/docs/package/out/BrokerVerse_Commercials_and_Pricing.xlsx'
+OUT = '/home/user/BDOI-OOTB/docs/package/02_Commercials/BrokerVerse_Commercials_and_Pricing.xlsx'
 ACC = '03 Oct 2026'
 
 NAVY = '0F4761'

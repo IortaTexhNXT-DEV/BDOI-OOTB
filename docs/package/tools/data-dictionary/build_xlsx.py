@@ -7,7 +7,7 @@ import gen
 import tables_meta as tm
 import pii
 
-OUT = '/home/user/BDOI-OOTB/docs/package/out/BrokerVerse_Data_Dictionary.xlsx'
+OUT = '/home/user/BDOI-OOTB/docs/package/07_Technical/BrokerVerse_Data_Dictionary.xlsx'
 # Database read by dump_db.py / vals.py (DD_DB, default the loaded test database "golive"). DD_REFERENCE_ONLY=1 when it
 # was built with the migrations and the reference seed data only (SEED_SAMPLE_DATA=false): row counts are then those
 # of the reference data.

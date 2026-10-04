@@ -1,6 +1,6 @@
 """Builds the project control workbooks of the implementation:
 
-    python3 build_project_templates_xlsx.py ../out
+    python3 build_project_templates_xlsx.py ../05_Delivery
 
   BrokerVerse_Fit_Gap_Register.xlsx   Instructions, Register, Lists
   BrokerVerse_RAID_Log_Template.xlsx  Instructions, Summary, Risks, Assumptions, Issues, Dependencies, Lists
@@ -17,7 +17,7 @@ from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 from openpyxl.worksheet.datavalidation import DataValidation
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else '../out'
+OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '05_Delivery')
 NAVY = '0B2A4A'
 HEAD_FILL = PatternFill('solid', fgColor=NAVY)
 HEAD_FONT = Font(name='Segoe UI', bold=True, color='FFFFFF', size=10)

@@ -39,7 +39,7 @@ This plan sets out how the broker's people learn to use BrokerVerse OOTB and how
 
 | Material | Use |
 |---|---|
-| BrokerVerse User Manual (`docs/manual/BrokerVerse_User_Manual.pdf`, 199 pages) | Reference for every screen; chapter 25 has a one-page quick guide per role; appendices hold status values, number series, key settings, schedules, glossary, troubleshooting and known limitations |
+| BrokerVerse User Manual (`docs/package/05_Delivery/BrokerVerse_User_Manual.pdf`) | Reference for every screen, with one chapter per role; the end-to-end business process; a module reference; reports, dashboards, schedules and notifications; troubleshooting, FAQ and glossary |
 | Role decks (`docs/decks`) | One PowerPoint per role: the role, its menu map, key functions with screens, its part of the end-to-end flow, reports, schedules, notifications, known limitations and tips |
 | Getting started guide (`docs/onboarding/GETTING_STARTED.md`) | First sign-in, password rules, two-step verification, menus per role, how to ask for help; handed to every user |
 | UAT scripts (`docs/onboarding/UAT_SCRIPTS.md`) | Basis for the practical exercises and the assessment |

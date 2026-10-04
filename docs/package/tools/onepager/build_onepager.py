@@ -1,6 +1,6 @@
 """Builds the iNXT BrokerVerse one-page brochure.
 
-Outputs into docs/package/sales:
+Outputs into docs/package/01_Sales:
   iNXT_BrokerVerse_One_Page_Brochure.pdf   print and e-mail attachment (A4)
   iNXT_BrokerVerse_One_Page_Brochure.png   for WhatsApp, Viber and LinkedIn posts
   iNXT_BrokerVerse_One_Page_Brochure.docx  Word copy (the page as one picture)
@@ -15,7 +15,7 @@ from docx.shared import Mm
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-OUT = os.path.normpath(os.path.join(HERE, '..', '..', 'sales'))
+OUT = os.path.normpath(os.path.join(HERE, '..', '..', '01_Sales'))
 NAME = 'iNXT_BrokerVerse_One_Page_Brochure'
 WEBSITE = 'https://www.iortatechnxt.com'
 

@@ -113,7 +113,7 @@ Enclosures: as listed above.
 | 17 | Hypercare Exit and Handover to Support Certificate | Hypercare Exit and Handover Certificate | Form | The Client; iorta TechNXT |
 | 18 | Contract Pack Index and Cover Letter | Contract Pack Index and Cover Letter | This document | Not signed |
 
-File names are in `docs/package/out/contracts`, start with iNXT_BrokerVerse_ and use underscores in place of spaces. Each file exists as .docx (for editing) and .pdf (for reading). The editable sources are in `docs/package/source/contracts`.
+File names are in `docs/package/03_Contracts`, start with iNXT_BrokerVerse_ and use underscores in place of spaces. Each file exists as .docx (for editing) and .pdf (for reading). The editable sources are in `docs/package/source/contracts`.
 
 ## Documents by commercial model
 

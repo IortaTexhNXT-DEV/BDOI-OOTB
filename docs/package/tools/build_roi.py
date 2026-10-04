@@ -1,8 +1,8 @@
-"""Builds sales/iNXT_BrokerVerse_ROI_Calculator.xlsx (formula driven).
+"""Builds 01_Sales/iNXT_BrokerVerse_ROI_Calculator.xlsx (formula driven).
 
     python3 build_roi.py
 
-Package costs are the list prices of the pre-set packages in sales/iNXT_BrokerVerse_Price_Book.xlsx, read after a
+Package costs are the list prices of the pre-set packages in 02_Commercials/iNXT_BrokerVerse_Price_Book.xlsx, read after a
 LibreOffice (headless) recalculation. Run build_price_book.py first.
 """
 import os
@@ -18,8 +18,8 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 PKG = os.path.dirname(HERE)
-BOOK = os.path.join(PKG, 'sales', 'iNXT_BrokerVerse_Price_Book.xlsx')
-OUT = os.path.join(PKG, 'sales', 'iNXT_BrokerVerse_ROI_Calculator.xlsx')
+BOOK = os.path.join(PKG, '02_Commercials', 'iNXT_BrokerVerse_Price_Book.xlsx')
+OUT = os.path.join(PKG, '01_Sales', 'iNXT_BrokerVerse_ROI_Calculator.xlsx')
 
 
 def recalculated(path):

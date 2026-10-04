@@ -3,7 +3,7 @@ DD_DB = os.environ.get('DD_DB', 'golive')
 from openpyxl import load_workbook
 import tables_meta as tm
 import pii
-wb = load_workbook('/home/user/BDOI-OOTB/docs/package/out/BrokerVerse_Data_Dictionary.xlsx')
+wb = load_workbook('/home/user/BDOI-OOTB/docs/package/07_Technical/BrokerVerse_Data_Dictionary.xlsx')
 T = list(wb['Tables'].iter_rows(min_row=2, values_only=True))
 C = list(wb['Columns'].iter_rows(min_row=2, values_only=True))
 R = list(wb['Relationships'].iter_rows(min_row=2, values_only=True))
