@@ -9,17 +9,7 @@ from docx.oxml.ns import qn
 from docx.shared import Cm, Pt, RGBColor, Emu
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-# Pictures: tools/brochure/img when present, else the logo of the one-pager and the user manual screenshots.
-IMG_DIRS = [os.path.join(HERE, 'img'), os.path.join(HERE, '..', 'onepager', 'img'), os.path.join(HERE, '..', '..', 'source', 'manual-images')]
-
-
-def img(name):
-    for d in IMG_DIRS:
-        if os.path.exists(os.path.join(d, name)):
-            return os.path.join(d, name)
-    raise SystemExit('picture not found: ' + name)
-
-
+IMG = os.path.join(HERE, 'img')
 OUT = sys.argv[1]
 
 FONT = 'Segoe UI'
@@ -297,7 +287,7 @@ cp.title = 'iNXT BrokerVerse'; cp.subject = 'Product brochure'; cp.author = 'ior
 
 # ===== Page 1: cover =====
 t = table(doc, 1, [9.0, CONTENT - 9.0])
-picture(t.cell(0, 0), img('logo.png'), 6.2, WD_ALIGN_PARAGRAPH.LEFT)
+picture(t.cell(0, 0), os.path.join(IMG, 'logo.png'), 6.2, WD_ALIGN_PARAGRAPH.LEFT)
 c = t.cell(0, 1); valign(c, 'center')
 add_par(c, 'Product brochure', 9, True, NAVY, WD_ALIGN_PARAGRAPH.RIGHT, first=True, after=0)
 add_par(c, 'Out-of-the-box (OOTB) edition', 9, False, MUTED, WD_ALIGN_PARAGRAPH.RIGHT, after=0)
@@ -320,7 +310,7 @@ add_par(ic, 'From the first quotation to the month-end close: every slip, policy
             'in one place, with maker-checker on the money and an audit trail on every change.',
         10, False, LIGHT2, first=True, after=0, line=1.2)
 spacer(c, 16)
-picture(c, img('s-exec-dashboard.png'), CONTENT - 1.8)
+picture(c, os.path.join(IMG, 's-exec-dashboard.png'), CONTENT - 1.8)
 add_par(c, 'Executive Dashboard: premium, policies, new business, claims, retention and receivables against target.',
         8, False, SKY, before=4, after=0, italic=True)
 spacer(doc, 10)
@@ -447,7 +437,7 @@ for i in range(0, len(features), 2):
     gap = grid.add_row(); height(gap, 0.28, exact=True)
 spacer(doc, 4)
 t = table(doc, 1, [CONTENT])
-picture(t.cell(0, 0), img('p-rfq-compare.png'), CONTENT - 3.4)
+picture(t.cell(0, 0), os.path.join(IMG, 'p-rfq-compare.png'), CONTENT - 3.4)
 caption(t.cell(0, 0), '        Request for Quotation BS-2026-00047, tab Compare offers: offers ranked by gross premium, '
                       'best offer marked, lead and shares chosen for the Placement Slip.')
 page_break(doc)
@@ -495,9 +485,9 @@ for i in range(0, len(features2), 2):
     gap = grid.add_row(); height(gap, 0.28, exact=True)
 spacer(doc, 4)
 t = table(doc, 1, [(CONTENT - 0.4) / 2, 0.4, (CONTENT - 0.4) / 2])
-picture(t.cell(0, 0), img('a-receipts.png'), (CONTENT - 0.4) / 2)
+picture(t.cell(0, 0), os.path.join(IMG, 'a-receipts.png'), (CONTENT - 0.4) / 2)
 caption(t.cell(0, 0), 'Accounts > Receipts: official receipts against open bills.')
-picture(t.cell(0, 2), img('a-br-workspace.png'), (CONTENT - 0.4) / 2)
+picture(t.cell(0, 2), os.path.join(IMG, 'a-br-workspace.png'), (CONTENT - 0.4) / 2)
 caption(t.cell(0, 2), 'Bank Reconciliation: balance per bank and per books agree.')
 spacer(doc, 12)
 t = table(doc, 1, [CONTENT])
@@ -746,13 +736,13 @@ page_break(doc)
 # ===== Page 8: back cover =====
 t = table(doc, 1, [CONTENT])
 c = t.cell(0, 0)
-picture(c, img('s-sales-dashboard.png'), CONTENT)
+picture(c, os.path.join(IMG, 's-sales-dashboard.png'), CONTENT)
 caption(c, 'Sales Dashboard: prospects, quotations, conversion, policies issued and premium for the sales team.')
 spacer(doc, 10)
 t = table(doc, 1, [(CONTENT - 0.4) / 2, 0.4, (CONTENT - 0.4) / 2])
-picture(t.cell(0, 0), img('a-pe-close.png'), (CONTENT - 0.4) / 2)
+picture(t.cell(0, 0), os.path.join(IMG, 'a-pe-close.png'), (CONTENT - 0.4) / 2)
 caption(t.cell(0, 0), 'Month-End Close: one run per period, approved by a second user.')
-picture(t.cell(0, 2), img('a-tax-2307.png'), (CONTENT - 0.4) / 2)
+picture(t.cell(0, 2), os.path.join(IMG, 'a-tax-2307.png'), (CONTENT - 0.4) / 2)
 caption(t.cell(0, 2), 'BIR Form 2307 per payee and quarter, issued and received.')
 spacer(doc, 14)
 band = table(doc, 1, [CONTENT])
@@ -777,7 +767,7 @@ add_par(b, 'Subscription per user per month, or perpetual licence with annual ma
         9, False, WHITE, after=0, line=1.15)
 spacer(doc, 12)
 t = table(doc, 1, [7.0, CONTENT - 7.0])
-picture(t.cell(0, 0), img('logo.png'), 5.2, WD_ALIGN_PARAGRAPH.LEFT)
+picture(t.cell(0, 0), os.path.join(IMG, 'logo.png'), 5.2, WD_ALIGN_PARAGRAPH.LEFT)
 c = t.cell(0, 1); valign(c, 'center')
 add_par(c, 'iNXT BrokerVerse, OOTB edition, version 1.0. Product facts and figures are taken from the system and its '
            'release test of 03 October 2026. Timelines, service levels and prices are confirmed in the proposal and '

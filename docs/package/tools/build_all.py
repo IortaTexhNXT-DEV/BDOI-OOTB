@@ -7,6 +7,7 @@ says which text source becomes which file in which folder.
     python3 build_all.py --list             print the table and stop
     python3 build_all.py --sales            also the brochure, the one-page brochure and the client presentation
     python3 build_all.py --workbooks        also the Excel workbooks that have a builder (see WORKBOOKS)
+    python3 build_all.py --sales --no-docs  only the extra builds asked for, no Word documents
 
 Steps for each document: build_doc.py (source to .docx in the iorta TechNXT template), the post-processing step
 when one is listed, then refresh.py (contents page and PDF). The pack index source and README.md are regenerated
@@ -89,10 +90,10 @@ DOCUMENTS = [
     ('documentation-pack-index.md', MANAGEMENT, 'BrokerVerse_OOTB_Documentation_Pack_Index', None),
 ]
 
-# Sales material built without a text source (python-docx, python-pptx, a browser), run with --sales.
+# Sales material built without a text source (python-pptx, a browser), run with --sales.
+# The two-page brochure (brochure/build_brochure.py) is not rebuilt here: it needs the cropped pictures of
+# brochure/img, which are not in the repository; without them the layout runs over. Its .docx and .pdf are kept as built.
 SALES_BUILDS = [
-    ['python3', 'brochure/build_brochure.py', os.path.join(PKG, SALES, 'iNXT_BrokerVerse_Brochure.docx')],
-    ['python3', 'refresh.py', os.path.join(PKG, SALES, 'iNXT_BrokerVerse_Brochure.docx')],
     ['python3', 'onepager/build_onepager.py'],
     ['python3', 'build_sales_deck.py'],
     ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', os.path.join(PKG, SALES),
@@ -136,13 +137,13 @@ def main(args):
         for src, folder, name, post in DOCUMENTS:
             print(f'{src:50} {folder}/{name}.docx, .pdf' + (f'   (then {post})' if post else ''))
         return
-    docs = [d for d in DOCUMENTS if not names or d[0][:-3] in names]
+    docs = [] if '--no-docs' in flags else [d for d in DOCUMENTS if not names or d[0][:-3] in names]
     if names and len(docs) != len(names):
         sys.exit('Unknown source in: ' + ', '.join(names))
     if '--workbooks' in flags:
         for cmd in WORKBOOKS:
             run(cmd)
-    if not names or 'documentation-pack-index' in names:
+    if docs and (not names or 'documentation-pack-index' in names):
         run(['python3', 'build_pack_index.py'])
     built = []
     for src, folder, name, post in docs:
