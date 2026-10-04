@@ -14,6 +14,7 @@ import { showErrorMessage, showSuccessMessage, showWarningMessage } from "../../
 import { formatDate } from "../../utility/dateFormat";
 import "../Administration/index.scss";
 import "../AccessControl/index.scss";
+import CompareEnvironments from "./CompareEnvironments";
 import "./index.scss";
 
 const STATUS_SEVERITY = { validated: "info", failed: "danger", loaded: "success" };
@@ -24,7 +25,8 @@ const totalsText = (o) => Object.entries(o || {}).map(([k, v]) => `${k}: ${money
 /**
  * Master > Go-Live Data Load: the configuration workbook (everything needed for new business) and the migration
  * workbook (open business of the old system at cutover). Download a template (blank or with the current data),
- * upload it (validated as a dry run, nothing saved), download the rows in error, load, history and reconciliation.
+ * upload it (validated as a dry run, nothing saved), download the rows in error, load, history and reconciliation;
+ * compare environments (an export of another environment against this one, or two exports: never loads).
  */
 const GoLiveDataLoad = () => {
   const { t } = useTranslation();
@@ -317,6 +319,10 @@ const GoLiveDataLoad = () => {
               </div>
             )} />
           </DataTable>
+        </TabPanel>
+
+        <TabPanel header={t("goLiveData.tabCompare")}>
+          <CompareEnvironments iconButton={iconButton} />
         </TabPanel>
       </TabView>
 

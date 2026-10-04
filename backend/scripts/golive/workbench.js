@@ -20,6 +20,21 @@ export const errorsBook = async (session, id) => Book.from(await session.file(`/
 export const reconciliationBook = async (session, id) => Book.from(await session.file(`/data-load/batches/${id}/reconciliation`));
 export const kits = async (session) => dataOf(await session.get('/data-load/kits'));
 
+/**
+ * Environment comparison (POST /data-load/compare, never loads): the workbook compared with the environment of the
+ * session, or with fileB. Returns the comparison (verdict, totals, sheets, environmentSpecific, rules).
+ */
+export async function compare(session, book, fileName, { fileB = null, includeNumbering = false } = {}) {
+  const buf = (b) => (Buffer.isBuffer(b) ? b : b.toBuffer());
+  const files = [{ field: 'file', name: fileName, type: XLSX, data: buf(book) }];
+  if (fileB) files.push({ field: 'fileB', name: 'file_B.xlsx', type: XLSX, data: buf(fileB) });
+  const c = dataOf(await session.upload('POST', '/data-load/compare', { includeNumbering: includeNumbering ? 'true' : 'false' }, files));
+  return dataOf(await session.get(`/data-load/compare/${c.id}`));
+}
+/** Rows of a comparison that differ (different, only in the file, only here), with their field-level differences. */
+export const comparisonRows = async (session, id) => dataOf(await session.get(`/data-load/compare/${id}/rows`, { perPage: 500 }));
+export const comparisonWorkbook = async (session, id) => session.file(`/data-load/compare/${id}/workbook`);
+
 /** Totals of a batch's sheet summary: { read, valid, errors, created, updated, unchanged, proposed, skipped }. */
 export function totals(b) {
   const t = { read: 0, valid: 0, errors: 0, held: 0, created: 0, updated: 0, unchanged: 0, proposed: 0, ignored: 0, skipped: 0 };

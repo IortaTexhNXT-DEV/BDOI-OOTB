@@ -76,6 +76,54 @@
   .golive__checks {
     margin-top: 0.75rem;
   }
+
+  // Compare environments: counts coloured like the comparison workbook (only in the file green, only here amber)
+  .golive__count--added,
+  .golive__stat-only-in-file {
+    color: #15803d;
+    font-weight: 600;
+  }
+
+  .golive__count--missing,
+  .golive__stat-only-here {
+    color: #b45309;
+    font-weight: 600;
+  }
+
+  .golive__stat-different {
+    color: #b91c1c;
+  }
+
+  .golive__pick {
+    max-width: 22rem;
+
+    .p-button-label {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
+
+  .golive__note {
+    color: var(--brand-blue, #0072d8);
+    cursor: help;
+  }
+
+  .golive__values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem 1rem;
+    padding: 0.25rem 0.5rem;
+  }
+
+  .golive__scroll {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+
+  .golive__diff-table {
+    max-width: 60rem;
+  }
 }
 
 .golive__warn-line {

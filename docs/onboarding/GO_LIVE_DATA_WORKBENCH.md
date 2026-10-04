@@ -83,9 +83,94 @@ the source environment and upload it into the target. Rows equal to the target a
 missing records are created. Exported settings are those of Master > Configuration (editable, not owned by another
 screen, not under the second-user approval of Account Determination); `golive.locked` is never exported or loaded.
 
+## Compare environments
+
+Proves that configuration and masters are mirrored between environments (Dev -> SIT -> UAT -> Pre-Prod -> Production)
+and shows exactly what differs. **Master > Go-Live Data Load > Compare environments** (permission `read:data-load`).
+Comparing never loads anything and writes no business data; only the result is kept (`data_load_comparisons`,
+migration `0247`) and the comparison is recorded in the audit trail (`data_load_comparison`, action `compare`).
+
+| Compare | What is compared |
+|---|---|
+| **File vs this environment** | the configuration workbook exported (**Current data**) from another environment, against this environment's current data (the same export, read only) |
+| **File A vs file B** | two exports against each other, e.g. UAT and Production exports compared offline by an auditor; this environment is not read |
+
+Rows are matched on the natural keys of the workbench (table above) and every column of the configuration workbook is
+compared in its comparable form (dates, numbers, Yes / No, lists of roles or lines without order, codes without case).
+Each row is one of:
+
+| Result | Meaning |
+|---|---|
+| Identical | the same row on both sides |
+| Different | the key is on both sides with field-level differences: column, value in the file, value here |
+| Only in the file (A) | the row would be new here (missing from this environment / file B) |
+| Only here (B) | the row is here but not in the file (missing from the other environment) |
+
+A sheet missing from a file counts as an empty sheet (its rows are *only here*); a column missing from a file is not
+compared (noted on the sheet). The verdict is **Mirrored** when no row differs and no row is on one side only, else
+**Differences found**.
+
+**Environment-specific fields** legitimately differ between environments. They are listed in a separate
+*environment-specific* section with both values and never count as a difference
+(`ENVIRONMENT_SPECIFIC` in `backend/src/modules/data-load/compare.js`):
+
+| Field | Why it may differ |
+|---|---|
+| `golive.cutover_date` | each environment (rehearsal, go-live) has its own cutover date |
+| Settings holding a URL or host (a key part `url`, `uri`, `host`, `hostname`, `domain`, `endpoint`, `callback`, `webhook`, `origin`: `general.frontend_url`, `policy.payment_gateway_url`) | every environment has its own addresses |
+| E-mail sender settings (`notification.from_address`, keys ending `from_address`, `from_name`, `from_email`, `reply_to`, `mail_from`, `sender…`, `smtp…`) | test environments send from their own address |
+| Payment gateway modes (`payments.gateway…`, keys with `sandbox`, `live_mode`, `test_mode`, `gateway…mode`) | gateways run in sandbox outside Production; the gateways and their credentials are on Master > Finance > Payment Gateways, not in the workbook |
+| Settings naming the environment (a key part `environment` or `env`) | they name the environment itself |
+| Settings: Description column | reference text, never loaded |
+| Numbering: Next Number | counters move with each environment's business. Switch on **Include numbering counters** (`includeNumbering=true`) to compare them as ordinary fields |
+| Any column whose key ends in `url`, `uri`, `host`, `hostname`, `endpoint`, `webhook`, `callback` | addresses |
+
+`golive.locked` and secrets are never exported, so never compared.
+
+**On screen.** Choose *File vs this environment* or *File A vs file B*, the file(s) and *Include numbering counters*,
+then **Compare only**. The result shows the verdict, counts (identical, different, only in the file, only here,
+environment-specific), a summary per sheet, the rows with their field-level differences (filters: sheet, result,
+search; expand a row for column / value in the file / value here), the environment-specific values and the earlier
+comparisons. **Download comparison** gives the comparison workbook:
+
+- **Summary**: per sheet the rows on each side, identical, different, only in the file, only here, environment-specific
+  and the result; the line *All sheets* and the overall verdict (*Mirrored* or *Differences found*); the files and the
+  environment compared;
+- one sheet per object: its rows (differences first) and a **Difference** column (*Identical*, *Only in File*, *Only in
+  This environment*, or *Different: Column: File "x" / This environment "y"*); rows only in the file green, rows only
+  here amber, changed cells highlighted;
+- **Environment-specific** (sheet, key, column, both values, why) and **Rules** (the rules and whether they applied).
+
+Headers navy (`0B2A4A`) with white bold text, frozen.
+
+**API.**
+
+| Call | |
+|---|---|
+| `POST /api/data-load/compare` | multipart `file` [, `fileB`], `includeNumbering` (`true` or `false`): compares and returns the comparison (201, message *Mirrored* or *Differences found*) |
+| `GET /api/data-load/compare` | comparisons made, newest first (paging) |
+| `GET /api/data-load/compare/:id` | verdict, totals, counts per sheet, environment-specific values, rules |
+| `GET /api/data-load/compare/:id/rows` | rows with their differences; `sheet`, `status` (`different`, `only-in-file`, `only-here`, `identical`, comma list; default all but identical), `search`, paging |
+| `GET /api/data-load/compare/:id/workbook` | the comparison workbook (XLSX) |
+
+**Release pipelines.** `npm run compare:environments` (`backend/scripts/compare-environments.js`) downloads the
+configuration export from two running APIs, compares them with the same engine and writes the comparison workbook;
+nothing is uploaded to either environment.
+
+```
+SOURCE_API=https://uat.example/api TARGET_API=https://prod.example/api \
+SOURCE_ADMIN_PASSWORD=... TARGET_ADMIN_PASSWORD=... \
+COMPARE_OUTPUT=comparison.xlsx npm run compare:environments
+```
+
+`SOURCE_ADMIN_USER` / `TARGET_ADMIN_USER` (default `ADMIN_USER` or `BrokerVerse`, a user with `read:data-load`),
+`SOURCE_FILE` / `TARGET_FILE` (a saved export instead of an API; one side must be an API), `INCLUDE_NUMBERING=yes`.
+Exit code **0** mirrored (environment-specific differences only), **1** differences found, **2** the comparison could
+not run (sign-in, network). The differing rows are printed; passwords never are.
+
 ## Rules
 
-- **Permission.** `read:data-load` (download, history) and `write:data-load` (upload, validate, load), granted to the
+- **Permission.** `read:data-load` (download, history, compare environments) and `write:data-load` (upload, validate, load), granted to the
   System Administrator only (migration `0243_go_live_data_workbench.sql` and the seed).
 - **Users.** Passwords are never in a workbook. A new user gets a temporary password that the load returns once to the
   administrator (shown in a dialog, `Cache-Control: no-store`, never stored in the batch); the user changes it at the
@@ -174,7 +259,9 @@ compares with the old system (`batch.reconciliation`; download: `GET /api/data-l
 environments, SOURCE (configuration and business data, e.g. UAT) and TARGET (the environment going live, e.g. Pre-Prod):
 configuration promoted with three deliberate errors, smoke test and transaction reset, migration workbook filled from
 SOURCE's open book at cutover - 1 with injected errors and the reconciliation against SOURCE, new and migrated business
-side by side, the go-live lock, and the promotion check. Its run log is `docs/e2e/GOLIVE_REHEARSAL_RUN.md`; the
+side by side, the go-live lock, and the promotion check. After the configuration load, step 2 runs **Compare
+environments** on TARGET with the SOURCE export: it must be *Mirrored*, the only differences being environment-specific
+(the cutover date set on TARGET); the comparison workbook is saved with the other workbooks of the run. Its run log is `docs/e2e/GOLIVE_REHEARSAL_RUN.md`; the
 environment variables are in the header of the script. It changes TARGET (reset included, `CONFIRM_RESET=yes`), so
 never point it at a live database.
 

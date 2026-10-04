@@ -3,7 +3,7 @@ import request from "../utility/interceptor";
 
 /**
  * Go-live data workbench API (/data-load): the configuration and migration workbooks (templates, upload and dry-run
- * validation, errors workbook, load, history, reconciliation). System Administrator only.
+ * validation, errors workbook, load, history, reconciliation) and the environment comparison. System Administrator only.
  */
 const enc = encodeURIComponent;
 const clean = (params = {}) => Object.fromEntries(Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== ""));
@@ -52,6 +52,18 @@ const goLiveDataService = {
   load: (id, validRowsOnly) => withMessage(postRequest(`data-load/batches/${enc(id)}/load`, { validRowsOnly: !!validRowsOnly })),
   downloadErrors: (id) => download(`data-load/batches/${enc(id)}/errors`, {}, `GoLive_Batch${id}_Errors.xlsx`),
   downloadReconciliation: (id) => download(`data-load/batches/${enc(id)}/reconciliation`, {}, `GoLive_Reconciliation_Batch${id}.xlsx`),
+  // environment comparison (never loads): an export compared with this environment, or file A with file B
+  compare: (file, fileB, includeNumbering) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (fileB) form.append("fileB", fileB);
+    form.append("includeNumbering", includeNumbering ? "true" : "false");
+    return withMessage(request.post("data-load/compare", form));
+  },
+  comparisons: (params) => getRequest("data-load/compare", clean(params)).then((r) => ({ items: r.data.data, total: r.data.total })),
+  comparison: (id) => data(getRequest(`data-load/compare/${enc(id)}`)),
+  comparisonRows: (id, params) => getRequest(`data-load/compare/${enc(id)}/rows`, clean(params)).then((r) => ({ items: r.data.data, total: r.data.total })),
+  downloadComparison: (id) => download(`data-load/compare/${enc(id)}/workbook`, {}, `GoLive_Environment_Comparison_${id}.xlsx`),
 };
 
 export default goLiveDataService;

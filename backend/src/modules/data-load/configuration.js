@@ -315,7 +315,7 @@ const commissionSheet = () => ({
     { key: 'active', header: 'Active', type: 'bool', list: 'Yes No', format: 'Yes when empty' },
     { key: 'remarks', header: 'Remarks' },
   ],
-  keyColumns: ['insurer', 'product', 'lineOfBusiness', 'policyType', 'effectiveFrom'],
+  keyColumns: ['insurer', 'product', 'lineOfBusiness', 'policyType', 'effectiveFrom'], keyDefaults: { policyType: 'any' },
   keyOf: (v) => keyText(v.insurer, v.product, v.lineOfBusiness, v.policyType || 'any', v.effectiveFrom),
   sample: { insurer: 'MALAYAN', product: 'MOTOR', policyType: 'new', rate: '0.175', effectiveFrom: '2026-01-01', active: 'Yes', remarks: 'Agreement 2026' },
   async exportRows() {

@@ -38,7 +38,8 @@ export async function kits() {
   for (const kit of Object.keys(KITS)) {
     const sheets = await kitSheets(kit);
     out.push({ kit, title: KITS[kit].title, file: KITS[kit].file, sheets: sheets.map((s) => ({ key: s.key, name: s.name, menu: s.menu, keyColumns: s.keyColumns,
-      columns: s.columns.map((c) => ({ key: c.key, header: c.header, required: !!c.required, format: c.format || null, list: c.list || null })) })) });
+      keyDefaults: s.keyDefaults || {},
+      columns: s.columns.map((c) => ({ key: c.key, header: c.header, required: !!c.required, format: c.format || null, list: c.list || null, type: c.type || 'text' })) })) });
   }
   return { kits: out, ...(await goLiveState()) };
 }

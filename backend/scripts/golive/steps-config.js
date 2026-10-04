@@ -169,6 +169,26 @@ export async function step2(ctx) {
     return `${pending.length} limit(s) proposed by the load; the loader's own approval refused (${own.status}); approved by ${approver}`;
   });
 
+  await log.check('Environment comparison (Compare environments, POST /data-load/compare on TARGET with the SOURCE export): mirrored, environment-specific differences only', async () => {
+    const c = await wb.compare(admin, ctx.configBook, 'SOURCE_configuration.xlsx');
+    fs.writeFileSync(path.join(ctx.cfg.workDir, `2_comparison_SOURCE_vs_TARGET_${c.id}.xlsx`), await wb.comparisonWorkbook(admin, c.id));
+    const rows = c.verdict === 'mirrored' ? [] : await wb.comparisonRows(admin, c.id);
+    // the write-off reason of step 6 of an earlier rehearsal is on TARGET only (configuration after go-live)
+    const rehearsal = (r) => r.status === 'only-here' && r.sheetName === REHEARSAL_MASTER.sheet && r.key.toUpperCase() === REHEARSAL_MASTER.code;
+    const unexpected = rows.filter((r) => !rehearsal(r));
+    const env = c.environmentSpecific.map((e) => `${e.sheetName} ${e.key}${e.header ? ` ${e.header}` : ''}: "${e.file ?? '(none)'}" / "${e.here ?? '(none)'}" (${e.rule})`);
+    const t = c.totals;
+    ctx.sections.push({ title: 'Step 2: environment comparison SOURCE vs TARGET (Compare environments)', body: [
+      `Verdict: **${c.verdictText}** (comparison ${c.id}): ${t.identical} identical, ${t.different} different, ${t.onlyInFile} only in SOURCE, ${t.onlyHere} only in TARGET, ${t.environmentSpecific} environment-specific.`,
+      '', '| Sheet | Identical | Different | Only in SOURCE | Only in TARGET | Environment-specific |', '|---|---|---|---|---|---|',
+      ...c.sheets.map((s) => `| ${s.name} | ${s.identical} | ${s.different} | ${s.onlyInFile} | ${s.onlyHere} | ${s.environmentSpecific} |`),
+      '', 'Environment-specific (not differences):', '', ...(env.length ? env.map((e) => `- ${e}`) : ['- none']),
+      ...(rows.length ? ['', 'Differences:', '', ...rows.map((r) => `- ${r.sheetName} ${r.key}: ${r.status === 'different' ? r.differences.map((d) => `${d.header} "${d.file}" / "${d.here}"`).join('; ') : r.status}${rehearsal(r) ? ' (expected: step 6 of an earlier rehearsal)' : ''}`)] : []),
+    ].join('\n') });
+    expect(!unexpected.length, `${c.verdictText}: ${unexpected.slice(0, 10).map((r) => `${r.sheetName} ${r.key} ${r.status}${r.differences.length ? ` (${r.differences.map((d) => d.header).join(', ')})` : ''}`).join('; ')}`);
+    return `${c.verdictText}${rows.length ? ` apart from ${REHEARSAL_MASTER.code} of an earlier rehearsal` : ''}: ${t.identical} rows identical over ${c.sheets.length} sheets; ${t.environmentSpecific} environment-specific value(s): ${env.join('; ') || 'none'}`;
+  });
+
   await log.check('Baseline of TARGET masters and configuration after step 2 (checksums, configuration export)', async () => {
     ctx.state.checksums = await masterChecksums(ctx.cfg.targetDb);
     ctx.state.targetConfigAfter2 = await wb.template(admin, 'configuration', { prefill: true });
