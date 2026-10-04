@@ -292,8 +292,9 @@ $text-strong: #1f2937;
     box-shadow: $focus-ring;
   }
 
-  // Buttons: one height, one radius (no pill / square mix), consistent icon spacing.
-  .p-button:not(.p-button-icon-only):not(.p-button-link) {
+  // Buttons: one height, one radius (no pill / square mix), consistent icon spacing. The segments of a SelectButton
+  // are styled as one joined control further down, so they are left out here (the forced radius broke their corners).
+  .p-button:not(.p-button-icon-only):not(.p-button-link):not(.p-selectbutton > .p-button) {
     min-height: 40px;
     padding: 8px 18px;
     border-radius: $radius-sm !important;
@@ -318,6 +319,200 @@ $text-strong: #1f2937;
     font-size: 12px;
     font-weight: 700;
     padding: 2px 10px;
+  }
+}
+
+// ---------------------------------------------------------------- number spinners
+// The up / down buttons of an InputNumber with showButtons are part of the field: surface background, the input's
+// border, a muted icon, the same total height as the input. The stock theme gave each of them the look and size of
+// a filled primary button, so a year field read as two large coloured blocks. Global: the field may sit in a dialog.
+
+.p-inputnumber .p-inputnumber-button.p-button {
+  flex: 1 1 0;
+  width: 2.25rem;
+  min-height: 0;
+  height: auto;
+  padding: 0;
+  background: $color-surface !important;
+  border: 1px solid $brand-field-blue !important;
+  color: $color-text-muted !important;
+  box-shadow: none !important;
+
+  .p-button-icon {
+    font-size: 11px;
+  }
+
+  &:enabled:hover {
+    background: $brand-blue-050 !important;
+    color: $brand-blue !important;
+  }
+
+  &:disabled {
+    color: $color-placeholder !important;
+  }
+}
+
+.p-inputnumber-buttons-stacked {
+  align-items: stretch;
+
+  .p-inputnumber-button-group {
+    align-self: stretch;
+  }
+
+  .p-inputnumber-button-up.p-button {
+    border-left: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 0 $radius-sm 0 0 !important;
+  }
+
+  .p-inputnumber-button-down.p-button {
+    border-left: 0 !important;
+    border-radius: 0 0 $radius-sm 0 !important;
+  }
+}
+
+.p-inputnumber-buttons-horizontal {
+  align-items: stretch;
+
+  .p-inputnumber-button.p-button {
+    flex: 0 0 auto;
+    width: 2.5rem;
+  }
+
+  .p-inputnumber-button-down.p-button {
+    border-right: 0 !important;
+    border-radius: $radius-sm 0 0 $radius-sm !important;
+  }
+
+  .p-inputnumber-button-up.p-button {
+    border-left: 0 !important;
+    border-radius: 0 $radius-sm $radius-sm 0 !important;
+  }
+}
+
+// ---------------------------------------------------------------- select buttons (one choice out of a few)
+// A SelectButton is a joined row of segments at the height of an input: the chosen segment is filled in the brand
+// colour with white text, the others are white with the input border and dark text. Without these rules the theme's
+// filled-button colour applied to every segment and nothing showed which one was selected. Global: may sit in a dialog.
+
+.p-selectbutton {
+  display: inline-flex;
+
+  .p-button {
+    min-height: 40px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    background: $color-surface;
+    border: 1px solid $brand-field-blue;
+    color: $color-heading;
+    box-shadow: none;
+    border-radius: 0;
+
+    &:not(:first-child) {
+      border-left-width: 0;
+    }
+
+    &:first-child {
+      border-radius: $radius-sm 0 0 $radius-sm;
+    }
+
+    &:last-child {
+      border-radius: 0 $radius-sm $radius-sm 0;
+    }
+
+    .p-button-label {
+      font-size: inherit;
+      font-weight: inherit;
+    }
+
+    &:not(.p-disabled):not(.p-highlight):hover {
+      background: $brand-blue-050;
+      border-color: $brand-field-blue;
+      color: $brand-navy;
+    }
+
+    &.p-highlight,
+    &.p-highlight:hover {
+      background: $brand-blue;
+      border-color: $brand-blue;
+      color: var(--bv-primary-text, #ffffff);
+    }
+
+    &.p-highlight:hover {
+      background: $brand-blue-600;
+      border-color: $brand-blue-600;
+    }
+
+    &:focus-visible {
+      z-index: 1;
+      box-shadow: $focus-ring;
+    }
+  }
+}
+
+[data-bv-density="compact"] .p-selectbutton .p-button {
+  min-height: 34px;
+  padding: 5px 14px;
+}
+
+// ---------------------------------------------------------------- progress meters
+// A progress bar carries its figure outside the bar (components/ProgressMeter): a 6px rounded track with the value as
+// small muted text on the right. A label inside the bar is clipped at low values ("7.6" cut off in a short block), so
+// it is hidden wherever a bar sits in a table.
+
+.p-datatable .p-progressbar {
+  height: 6px;
+  border-radius: 3px;
+  background: $color-border;
+
+  .p-progressbar-label {
+    display: none;
+  }
+}
+
+.bv-meter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 6rem;
+
+  .p-progressbar {
+    flex: 1 1 auto;
+    height: 6px;
+    border-radius: 3px;
+    background: $color-border;
+
+    .p-progressbar-value {
+      background: $brand-blue;
+      border-radius: 3px;
+    }
+
+    .p-progressbar-label {
+      display: none;
+    }
+  }
+
+  // warning above 80, danger above 100 (components/ProgressMeter sets the modifier)
+  &.bv-meter--warning .p-progressbar .p-progressbar-value {
+    background: $brand-gold-600;
+  }
+
+  &.bv-meter--danger .p-progressbar .p-progressbar-value {
+    background: $color-danger;
+  }
+
+  &.bv-meter--success .p-progressbar .p-progressbar-value {
+    background: $color-success;
+  }
+
+  .bv-meter__value {
+    flex: 0 0 auto;
+    font-size: 12px;
+    line-height: 16px;
+    white-space: nowrap;
+    color: $color-text-muted;
+    font-variant-numeric: tabular-nums;
   }
 }
 
@@ -533,6 +728,9 @@ $text-strong: #1f2937;
 // ---------------------------------------------------------------- messages
 // Toasts, message boxes and field errors share one quiet style: white or lightly tinted surface, dark text,
 // a thin coloured rule on the left and a small icon. Colour marks the kind of message; it does not fill the box.
+// Information boxes take a neutral grey tint with the rule in the theme's primary colour, so the box matches any
+// brand (a blue tint under a green brand's rule was the defect). Success, warning and error keep their semantic rule
+// colour over a very light tint of the same hue; none of the tints is pink or saturated (tokens.scss).
 
 @mixin bv-message($accent, $tint) {
   background: $tint !important;
@@ -544,6 +742,11 @@ $text-strong: #1f2937;
   .p-message-icon,
   .p-inline-message-icon {
     color: $accent !important;
+  }
+
+  .p-toast-icon-close,
+  .p-message-close {
+    color: $color-text-muted !important;
   }
 }
 
@@ -610,7 +813,7 @@ $text-strong: #1f2937;
 .p-inline-message {
   border-radius: $radius-sm;
   font-size: 13px;
-  @include bv-message($brand-blue, $brand-blue-050);
+  @include bv-message($brand-blue, $color-surface-muted);
 
   &.p-message-success,
   &.p-inline-message-success {
@@ -626,6 +829,64 @@ $text-strong: #1f2937;
   &.p-inline-message-error {
     @include bv-message($color-danger, $color-danger-050);
   }
+}
+
+// compact message box: one line of text with a 16px icon, not a banner
+.p-message {
+  .p-message-wrapper {
+    padding: 10px 14px;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .p-message-icon {
+    font-size: 16px;
+    margin: 1px 0 0;
+
+    &.p-icon {
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  .p-message-text {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.45;
+  }
+
+  .p-message-close {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+  }
+}
+
+.p-inline-message {
+  padding: 6px 10px;
+
+  .p-inline-message-icon {
+    font-size: 14px;
+  }
+}
+
+// The alert of the sign-in and security screens (outside the application shell, agentModule/authModule/security)
+// is the same quiet error box: warm grey tint, red rule, dark text.
+.bv-security__alert {
+  border-radius: $radius-sm;
+  font-size: 13px;
+  @include bv-message($color-danger, $color-danger-050);
+}
+
+// Hint, note and information boxes drawn by screens with their own class names follow the information box.
+.bv-hint,
+.bv-note,
+.bv-info-box {
+  padding: 10px 14px;
+  border-radius: $radius-sm;
+  font-size: 13px;
+  line-height: 1.45;
+  @include bv-message($brand-blue, $color-surface-muted);
 }
 
 // validation text under a field, and the border of an invalid field

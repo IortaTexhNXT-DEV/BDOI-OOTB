@@ -66,6 +66,11 @@
   border-bottom: 1px solid var(--surface-border);
 }
 
+// year filter in the page header, next to the report buttons
+.compliance__year {
+  width: 7.5rem;
+}
+
 .compliance__row-actions {
   display: flex;
   gap: 0.15rem;

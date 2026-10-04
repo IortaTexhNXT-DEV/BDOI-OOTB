@@ -9,16 +9,7 @@
   }
 
   .treaty-table {
-    .utilization-cell {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-
-      .utilization-text {
-        font-size: 0.875rem;
-        font-weight: 500;
-      }
-    }
+    // utilisation: components/ProgressMeter (bar with the value beside it)
 
     .action-buttons {
       display: flex;

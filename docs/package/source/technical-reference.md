@@ -1,12 +1,12 @@
 ---
 title: Technical Reference
 subtitle: Modules, APIs and code review
-version: 1.1.2
+version: 1.1.3
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Version 1.1.2: client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026); manifest fields and the engagement confirmation of the Enable dialog. Version 1.1.1: release figures aligned (packages B and G merged: 73 modules, 1,356 endpoints, migrations to 0331, 104 test files with 1,113 tests, 33 front-end suites with 175 tests). Version 1.1: module catalogue of all 70 modules; platform engines (registry, permissions, posting, tax, numbering, jobs, PDF, Excel and e-mail with branding, e-signatures, integrations, encryption and masking, audit, go-live workbench, release pipeline); how to review a change; figures at migration 0322
+change: Version 1.1.3: Enterprise UI standard added to the front-end conventions (checklist for the developer and the QA reviewer, with the theme rules for number spinners, select buttons, message tints and progress meters). Version 1.1.2: client brand packs: basis is the client's contract with iorta TechNXT (management decision of 04 October 2026); manifest fields and the engagement confirmation of the Enable dialog. Version 1.1.1: release figures aligned (packages B and G merged: 73 modules, 1,356 endpoints, migrations to 0331, 104 test files with 1,113 tests, 33 front-end suites with 175 tests). Version 1.1: module catalogue of all 70 modules; platform engines (registry, permissions, posting, tax, numbering, jobs, PDF, Excel and e-mail with branding, e-signatures, integrations, encryption and masking, audit, go-live workbench, release pipeline); how to review a change; figures at migration 0322
 acronyms: OOTB=Out of the box; API=Application programming interface; JWT=JSON Web Token; SQL=Structured Query Language; ESM=ECMAScript modules; CRA=Create React App; GL=General ledger; LGU=Local government unit; LGT=Local government tax; DST=Documentary stamp tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; BIR=Bureau of Internal Revenue; EOPT=Ease of Paying Taxes Act; EIS=Electronic Invoicing System; CAS=Computerized accounting system; IC=Insurance Commission; NPC=National Privacy Commission; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; KYC=Know your customer; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; PDC=Post-dated cheque; PSGC=Philippine Standard Geographic Code; PII=Personally identifiable information; TOTP=Time-based one-time password; HMAC=Hash-based message authentication code; AES=Advanced Encryption Standard; CORS=Cross-origin resource sharing; OWASP=Open Worldwide Application Security Project; UAT=User acceptance testing; SIT=System integration testing; CI=Continuous integration; CAB=Change advisory board; PM2=Node.js process manager used on the EC2 server
 ---
 
@@ -578,6 +578,28 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 - Colours come from the theme tokens (`theme/bdoi/tokens.scss`) as CSS custom properties set at run time by the theme engine; a literal brand colour in a stylesheet is mapped to a token by `scripts/postcss-brand-vars.js`. Status colours (success, warning, danger) are not themed.
 - Lists use `components/DataTable` (skeleton rows while loading, numeric columns right-aligned); add and edit forms open as side panels and return to the list after saving.
 
+## Enterprise UI standard
+
+Every screen looks like the same product. The rules below are applied by the developer before the pull request and by the QA reviewer during the screen check per role (Test Plan, UI standard check). Most of them are enforced once in the theme (`theme/bdoi/enterprise.scss`, loaded last, anchored on the application shell) so that a screen gets them without its own styling; the checklist is for what the theme cannot decide for the screen.
+
+The theme fixes the following for every screen: input, button and select-button height (40px, 34px in compact density); quiet number spinners; the selected segment of a select button; message boxes and toasts; status tags; progress bars inside tables; dialog surfaces. A screen that overrides one of these needs a reason in the pull request.
+
+| Area | The developer builds, the reviewer checks |
+|---|---|
+| Page header | One title (24px) and a breadcrumb; one line of purpose under the title when the screen needs one; the actions on the right of the header, the primary action last |
+| Summary figures | Compact strips (`access__stats`, `components/StatCards`): label and figure, no dials, gauges or knobs, no large icons, no coloured card edges or gradients |
+| Tables | `components/DataTable` or a PrimeReact table with the theme's row height (44px, 36px compact); numbers and dates right-aligned and never wrapped (`bv-num`, `bv-date`, set by `utility/tableNumericAlign.js`); status as a quiet tag (`Tag` with a severity), not a coloured cell; row actions as icon buttons in one colour; a figure out of 100 as `components/ProgressMeter` (6px bar with the value written beside it, never inside the bar) |
+| Forms | Labels above fields; one input height; an `InputNumber` with buttons shows quiet spinners inside the field, and a year or period that the user picks is a drop-down, not a counter; a `SelectButton` has exactly one selected segment (`unselectable={false}`) and its selected state is visible; filters sit above the list, actions sit in the header or in the footer of the panel, never mixed in one row |
+| Buttons | One primary (filled) button per action bar, the other actions outlined or text; never a row of filled buttons; a download next to a filter is outlined, a download that is the only action is primary; destructive actions use the danger severity only on the confirmation |
+| Messages and toasts | `Message`, inline messages and toasts as the theme draws them: white or neutral tint, a 3px rule on the left in the kind's colour, dark text, a 16px icon; information boxes take the neutral grey tint with the rule in the brand's primary colour; hint and note boxes written by a screen use `bv-hint`, `bv-note` or `bv-info-box`; no pink, salmon or saturated red surface anywhere (the danger tint is a warm grey) |
+| Charts | Straight lines (`tension: 0`), plain captions in the text colour, no gradients, no 3D, no decorative shadows; colours from the tokens; a legend only when there is more than one series |
+| Colour | Tokens only (`theme/bdoi/tokens.scss` and the `--bv-*` properties): no hard-coded hex in a screen stylesheet, no pink or magenta, status colours only for status; the brand colour for the primary action, links and the selected state |
+| Icons | PrimeIcons at 16 to 18px beside text or in an icon button; no large decorative icons, no coloured icon tiles |
+| Dialogs | White surface, the theme's header and footer rules; a form dialog with Save and Cancel opens as a side panel; a confirmation or a read-only viewer stays centred (`bv-centered`); Cancel as a text button, the confirming action as the one primary button |
+| Density and text | 14px body and cell text, 13px labels and table headers, 12px tags and meter values; nothing in capitals except abbreviations |
+
+How to check a screen in the browser: open it as each role, resize to a 1280px window, trigger one success and one error message, open each dialog, and compare with this table. A deviation that the theme should have prevented is fixed in `enterprise.scss`, not on the screen.
+
 # Code quality controls
 
 ## Size of the code base
@@ -989,7 +1011,7 @@ This chapter is the reviewer's guide for a pull request into `brokerverse-platfo
 | Secrets | None in code, seeds or tests; new environment variables in `deploy/backend.env.example` and `deploy/REFERENCE.md`; production refuses placeholders |
 | Logging | No `console.log`; `req.log` or `logger`; nothing personal or secret in a log line |
 | Personal data | New personal columns classified in the personal data catalogue; identifiers that must be encrypted added to `PII_STORAGE` (package B) |
-| Front end | Calls only through a service file; texts in `en.json`; menu entry, grants and help entry added; theme tokens, not literal colours; list and form patterns of the existing screens |
+| Front end | Calls only through a service file; texts in `en.json`; menu entry, grants and help entry added; theme tokens, not literal colours; list and form patterns of the existing screens; the Enterprise UI standard checklist (chapter Solution layout) applied to every new or changed screen |
 
 ## Test expectations
 

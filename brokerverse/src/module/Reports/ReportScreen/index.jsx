@@ -241,7 +241,7 @@ const ReportScreen = ({ code, group, groupPath }) => {
           <div className="report-screen__actions">
             <div className="report-screen__format">
               <span className="report-screen__format-label">File format</span>
-              <SelectButton value={format} options={formatOptions} onChange={(e) => e.value && setFormat(e.value)} aria-label="File format" />
+              <SelectButton value={format} options={formatOptions} onChange={(e) => e.value && setFormat(e.value)} unselectable={false} aria-label="File format" />
             </div>
             <div className="report-screen__buttons">
               <Button label="Preview" icon="pi pi-eye" outlined onClick={runPreview} loading={busy === "preview"} disabled={Boolean(busy)} />
