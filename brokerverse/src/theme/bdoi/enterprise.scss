@@ -1350,3 +1350,10 @@ small.p-error {
     color: $brand-blue-600;
   }
 }
+
+// ---------------------------------------------------------------- tab rows
+// A tab row hides its scrollbar, so tabs past the right edge could not be seen on a narrow screen. A tab row that is
+// not marked scrollable wraps to a second line instead; a scrollable one shows its arrows.
+.p-tabview:not(.p-tabview-scrollable) .p-tabview-nav {
+  flex-wrap: wrap;
+}

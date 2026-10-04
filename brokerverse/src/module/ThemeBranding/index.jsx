@@ -72,6 +72,9 @@ const ThemeBrandingPage = () => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const [editor, setEditor] = useState(null);
+  // the open tab; the Brand packs tab is the last of seven and can sit past the edge of a narrow screen
+  const [tabIndex, setTabIndex] = useState(0);
+  const PACKS_TAB = 6;
   const [theme, setTheme] = useState(null);
   const [systemName, setSystemName] = useState("");
   const [check, setCheck] = useState({ errors: [], warnings: [], checks: [] });
@@ -198,6 +201,7 @@ const ThemeBrandingPage = () => {
           <p className="bv-tb__lead">{t("themeBranding.lead", "The look of the screens, the sign-in page, printed documents, reports and e-mails of this broker. Changes apply to every user without a new release.")}</p>
         </div>
         <div className="bv-tb__actions">
+          <Button label={t("themeBranding.tabs.packs", "Brand packs")} icon="pi pi-box" className="p-button-outlined" onClick={() => setTabIndex(PACKS_TAB)} data-testid="open-brand-packs" />
           <Button label={t("themeBranding.sampleDocument", "Sample document")} icon="pi pi-file-pdf" className="p-button-outlined" onClick={openSample} loading={busy === "sample"} />
           <Button label={t("themeBranding.discard", "Discard changes")} icon="pi pi-undo" className="p-button-text" onClick={() => { setTheme(clone(editor.theme)); setSystemName(editor.systemName || ""); }} />
           <Button label={t("common.save", "Save")} icon="pi pi-check" onClick={save} loading={saving} disabled={blocking.length > 0} data-testid="save-theme" />
@@ -209,7 +213,7 @@ const ThemeBrandingPage = () => {
 
       <div className="bv-tb__layout">
         <div className="bv-tb__editor">
-          <TabView>
+          <TabView scrollable activeIndex={tabIndex} onTabChange={(e) => setTabIndex(e.index)}>
             <TabPanel header={t("themeBranding.tabs.theme", "Theme")}>
               <Section title={t("themeBranding.presets", "Presets")}>
                 <div className="bv-tb__presets">
