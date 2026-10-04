@@ -623,7 +623,7 @@ psgc_code,name,official_name,city_class,province_psgc,region_psgc,ncr_district,z
 0600601000,Anini-Y,Anini-Y,Municipality,0600600000,0600000000,,5717
 0600602000,Barbaza,Barbaza,Municipality,0600600000,0600000000,,5706
 0600603000,Belison,Belison,Municipality,0600600000,0600000000,,5701
-0600604000,Bugasong,Bugasong,Municipality,0600600000,0600000000,,5456
+0600604000,Bugasong,Bugasong,Municipality,0600600000,0600000000,,5704
 0600605000,Caluya,Caluya,Municipality,0600600000,0600000000,,5711
 0600606000,Culasi,Culasi,Municipality,0600600000,0600000000,,5708
 0600607000,Tobias Fornier,Tobias Fornier,Municipality,0600600000,0600000000,,5716
@@ -753,7 +753,7 @@ psgc_code,name,official_name,city_class,province_psgc,region_psgc,ncr_district,z
 0701247000,Valencia,Valencia,Municipality,0701200000,0700000000,,6306
 0701248000,Bien Unido,Bien Unido,Municipality,0701200000,0700000000,,6326
 0702201000,Alcantara,Alcantara,Municipality,0702200000,0700000000,,6033
-0702202000,Alcoy,Alcoy,Municipality,0702200000,0700000000,,2566
+0702202000,Alcoy,Alcoy,Municipality,0702200000,0700000000,,6023
 0702203000,Alegria,Alegria,Municipality,0702200000,0700000000,,6030
 0702204000,Aloguinsan,Aloguinsan,Municipality,0702200000,0700000000,,6040
 0702205000,Argao,Argao,Municipality,0702200000,0700000000,,6021
@@ -1165,16 +1165,16 @@ psgc_code,name,official_name,city_class,province_psgc,region_psgc,ncr_district,z
 1102510000,San Isidro,San Isidro,Municipality,1102500000,1100000000,,8209
 1102511000,Tarragona,Tarragona,Municipality,1102500000,1100000000,,8201
 1108201000,Compostela,Compostela,Municipality,1108200000,1100000000,,8803
-1108202000,Laak,Laak,Municipality,1108200000,1100000000,,8103
+1108202000,Laak,Laak,Municipality,1108200000,1100000000,,8810
 1108203000,Mabini,Mabini,Municipality,1108200000,1100000000,,8807
-1108204000,Maco,Maco,Municipality,1108200000,1100000000,,8114
-1108205000,Maragusan,Maragusan,Municipality,1108200000,1100000000,,8116
-1108206000,Mawab,Mawab,Municipality,1108200000,1100000000,,8108
-1108207000,Monkayo,Monkayo,Municipality,1108200000,1100000000,,8111
+1108204000,Maco,Maco,Municipality,1108200000,1100000000,,8806
+1108205000,Maragusan,Maragusan,Municipality,1108200000,1100000000,,8808
+1108206000,Mawab,Mawab,Municipality,1108200000,1100000000,,8802
+1108207000,Monkayo,Monkayo,Municipality,1108200000,1100000000,,8805
 1108208000,Montevista,Montevista,Municipality,1108200000,1100000000,,8801
 1108209000,Nabunturan,Nabunturan,Municipality,1108200000,1100000000,,8800
-1108210000,New Bataan,New Bataan,Municipality,1108200000,1100000000,,8110
-1108211000,Pantukan,Pantukan,Municipality,1108200000,1100000000,,8117
+1108210000,New Bataan,New Bataan,Municipality,1108200000,1100000000,,8804
+1108211000,Pantukan,Pantukan,Municipality,1108200000,1100000000,,8809
 1108601000,Don Marcelino,Don Marcelino,Municipality,1108600000,1100000000,,8013
 1108602000,Jose Abad Santos,Jose Abad Santos,Municipality,1108600000,1100000000,,8014
 1108603000,Malita,Malita,Municipality,1108600000,1100000000,,8012

@@ -63,7 +63,7 @@ define({
 const ONE_CITY = `SELECT ci.id FROM cities ci WHERE ${parentMatch('ci', { code: false })} ORDER BY (ci.id::text = $1 OR ci.psgc_code = $1) DESC, (ci.status = 'active') DESC, ci.id LIMIT 1`;
 const barangays = {
   screen: SCREEN, middleware: [requireAuth],
-  response: { success: true, data: [{ id: 1, name: 'Bel-Air', psgcCode: '1380300003', postalCode: '1209' }] },
+  response: { success: true, data: [{ id: 1, name: 'Bel-Air', psgcCode: '1380300002', postalCode: '1209' }] },
   handler: async (req, res) => ok(res, await many(`SELECT d.id, d.name, d.psgc_code AS "psgcCode", d.postal_code AS "postalCode" FROM districts d
     WHERE d.city_id = (${ONE_CITY}) AND d.status = 'active' ORDER BY d.name`, [req.params.cityId])),
 };

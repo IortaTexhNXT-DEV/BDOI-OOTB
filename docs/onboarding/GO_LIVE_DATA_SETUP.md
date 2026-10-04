@@ -36,7 +36,7 @@ barangay is picked from a list where the city's barangays are loaded, otherwise 
 | Province (formerly called State; `Province_Upload_Template.xlsx`) | 82 provinces with their ISO 3166-2:PH code (e.g. CEB) and PSGC code, plus Metro Manila (the 17 local government units of NCR) and the BARMM Special Geographic Area | PSGC |
 | City / Municipality (`City_Municipality_Upload_Template.xlsx`) | 1,642 cities and municipalities (149 cities: 33 highly urbanised, 5 independent component, 111 component; 1,493 municipalities) with PSGC code, class, main ZIP code and, for Metro Manila, its district. A highly urbanised city is listed under the province it lies in (Cebu City under Cebu); Isabela City is listed under Basilan and keeps Region IX | PSGC; ZIP codes from PHLPost |
 | Barangay (`Barangay_Upload_Template.xlsx`) | the 1,715 barangays of Metro Manila. The 42,010 barangays of the whole country are an optional load (below) | PSGC |
-| ZIP codes | 1,855 PHLPost ZIP codes with the place they serve (ZIP code look-up on the address forms) | PHLPost list |
+| ZIP codes | 1,846 PHLPost ZIP codes with the place they serve (ZIP code look-up on the address forms) | PHLPost list |
 
 Release: **PSGC 2Q 2026** of the Philippine Statistics Authority (as of 30 June 2026), the edition with 18 regions and
 82 provinces; ZIP codes from the PHLPost ZIP code list (GeoNames, CC BY 4.0, mappings reviewed against the PHLPost ZIP
@@ -92,6 +92,7 @@ warranties, renewals and reminders).
 | Banks | The SWIFT codes of the banks you remit through (the delivered codes are the head-office BIC) and add the banks missing |
 | LGU Tax Rates | The local government tax rate of each city / municipality where you place business (the 10 delivered Metro Manila rates of 0.2% and the 0.75% default are examples to confirm against each city's revenue code) |
 | Taxes | VAT, DST, FST, premium tax rates and their GL accounts (Step 5) |
+| ZIP codes | The main ZIP code of the cities and municipalities where most of your clients are. The list comes from the PHLPost list as published by GeoNames; where a town had two codes, the one outside its province's ZIP range was dropped (9 entries, e.g. Alcoy, Cebu keeps 6023). The ZIP code is only suggested on the forms and can be overwritten |
 | Government ID number formats | The number formats are examples for the users, not validation rules |
 | Customer types | The registration authorities and labels used in your KYC process |
 

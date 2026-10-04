@@ -389,7 +389,7 @@ Select New Submission to start a quotation.
 ![Claims Dashboard](dash-claims)
 
 1. Choose Dashboard > Claims Dashboard.
-2. Read the cards: Total Open Claims, Claims Overdue (past the handling time of 20 days, `claims.sla_days`), Today's Claims, Highest Claims (line with the most claims) and Max Claims By State.
+2. Read the cards: Total Open Claims, Claims Overdue (past the handling time of 20 days, `claims.sla_days`), Today's Claims, Highest Claims (line with the most claims) and Max Claims by Province.
 3. Open a claim from Recent Claims.
 4. Choose a date range and select Export Report to download the claims data.
 
@@ -1789,7 +1789,7 @@ Every printed document and every report PDF (quotation, broker slip, placement s
 ![Editing the company: name, licence, TIN, logo and Letterhead company](m-company-edit)
 
 1. Choose Master > Generals > Organization > Company. Type part of the company name in the search box to list it, then select the pencil on the delivered company (iorta TechNXT Corp.) to edit it into your own.
-2. Enter the Company Name, the License Number (Insurance Commission licence), Email ID, TIN (for example 000-123-456-000), Logo (printed on documents), Website link, the address lines, ZIP Code, City, State, Country, Phone Number and Fax.
+2. Enter the Company Name, the License Number (Insurance Commission licence), Email ID, TIN (for example 000-123-456-000), Logo (printed on documents), Website link, the address lines, ZIP Code, City / Municipality, Province, Country, Phone Number and Fax.
 3. Tick Letterhead company (used on documents and reports) for the company whose letterhead the documents use. Only one company can hold it.
 4. Save, then print any billing statement or report as PDF to check the letterhead.
 

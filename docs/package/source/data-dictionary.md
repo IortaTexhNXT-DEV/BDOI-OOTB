@@ -671,7 +671,7 @@ This appendix lists every table and view with a one-line description and the num
 | `countries` | Countries | 5 |
 | `districts` | Barangays with PSGC code and ZIP code (Metro Manila delivered; the rest loaded by script) | 1715 |
 | `insurance_companies` | Insurers (principals): contact, default commission rate, credit terms, billing mode | 58 |
-| `postal_codes` | ZIP code look-up (province, city, place) | 1855 |
+| `postal_codes` | ZIP code look-up (province, city, place) | 1846 |
 | `regions` | Regions of a country (PSGC) | 18 |
 | `signatories` | Authorised signatories for documents | 0 |
 | `states` | Provinces (formerly called State), with region and PSGC code | 84 |
