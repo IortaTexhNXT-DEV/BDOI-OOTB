@@ -62,7 +62,7 @@ The developer and production support guide is `docs/developer-guide/README.md`; 
 5. **Configuration before code.** Rates, account codes, limits, e-mail texts and switches are settings in Master >
    Configuration. Check the setting and the Audit Trail (Master > Audit Trail) for a recent change.
 6. **Uploads.** A rejected upload lists the failing rows with reasons. Compare the file with the template in
-   `docs/templates` (headers, date format YYYY-MM-DD, plain numbers).
+   `docs/package/05_Delivery/Upload_Templates` (headers, date format YYYY-MM-DD, plain numbers).
 
 ## 5. Changes and releases
 

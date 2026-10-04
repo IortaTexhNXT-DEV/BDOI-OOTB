@@ -65,9 +65,10 @@ The backend has 13 direct runtime dependencies (333 packages in the lock file, i
 | `npm run migrate`, `npm run seed`, `npm run db:reset` | Apply migrations; run the seed; drop and rebuild the schema (development only) |
 | `npm run export:api` | Write OpenAPI, Postman and Excel API documentation from the route registry |
 | `npm run purge:sample` | Remove sample data before go-live (dry run by default) |
+| `npm run reset:transactions` | Remove the transactions of a smoke test, keeping masters, configuration and users (dry run by default; refused once `golive.locked` is on) |
 | `npm run check:settings` | Compare the setting keys read in code with the keys in the database |
 | `node scripts/provision-users.js` | Create named users from a CSV kept outside the repository |
-| `node scripts/build-upload-templates.js` | Regenerate the upload templates in `docs/templates` |
+| `node scripts/build-upload-templates.js` | Regenerate the upload templates in `docs/package/05_Delivery/Upload_Templates` |
 | `node scripts/fk-index-report.js` | List foreign keys without a supporting index |
 | `npm test`, `npm run lint` | Tests and lint |
 

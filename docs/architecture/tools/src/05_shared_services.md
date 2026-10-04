@@ -109,7 +109,7 @@ One PDF engine, with no third-party dependency, produces every document and repo
 |---|---|
 | `lib/xlsx.js` with `lib/zip.js` | Multi-sheet XLSX with styled frozen header, auto-filter and typed cells (money, date, integer) |
 | `lib/csv.js` | RFC 4180 CSV with UTF-8 BOM; every cell starting with `=`, `+`, `-` or `@` is guarded against spreadsheet formulas |
-| `modules/documents/uploadTemplates.js`, `scripts/build-upload-templates.js` | The upload templates (Data, Columns and Instructions sheets) built from each importer's own column list; the same workbooks are downloadable on the screens with an Upload button and published in `docs/templates` |
+| `modules/documents/uploadTemplates.js`, `scripts/build-upload-templates.js` | The upload templates (Data, Columns and Instructions sheets) built from each importer's own column list; the same workbooks are downloadable on the screens with an Upload button and published in `docs/package/05_Delivery/Upload_Templates` |
 
 ## Reports engine (modules/reports)
 

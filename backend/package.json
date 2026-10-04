@@ -16,6 +16,7 @@
     "db:reset": "node src/db/migrate.js --reset && node src/db/seed.js",
     "export:api": "node src/tools/export-api.js",
     "purge:sample": "node scripts/purge-sample-data.js",
+    "reset:transactions": "node scripts/reset-transactions.js",
     "check:settings": "node scripts/check-settings.js",
     "test": "vitest run",
     "lint": "eslint src test scripts"

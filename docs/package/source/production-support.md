@@ -49,7 +49,7 @@ This model maps to the levels users see in the user manual (Appendix H) and in `
 
 - Answer how-to questions from the user manual and the role decks.
 - Check the user's role and menus (`GETTING_STARTED.md`, section 2), the setting concerned (Master > Configuration) and Master > Audit Trail for a recent change.
-- For uploads, compare the rejected file with the template in `docs/templates`.
+- For uploads, compare the rejected file with the template in `docs/package/05_Delivery/Upload_Templates`.
 - Raise a ticket with the evidence of chapter 7 when the issue remains.
 - Communicate with the broker's users during an incident and confirm the fix.
 

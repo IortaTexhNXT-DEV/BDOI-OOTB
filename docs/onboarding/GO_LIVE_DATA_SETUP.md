@@ -5,7 +5,7 @@ users start working, and for each step the screen, what to enter, the template t
 The technical installation (servers, database, secrets, SMTP account) is in `deploy/README.md` and must be
 finished first.
 
-The templates are in `docs/templates`. Each has a Data sheet with the exact headers and a sample row to delete, a
+The templates are in `docs/package/05_Delivery/Upload_Templates`. Each has a Data sheet with the exact headers and a sample row to delete, a
 Columns sheet and an Instructions sheet. On screens with an **Upload** button the same template is under
 **Download template**. Screens without an Upload button are marked below; for those a System Administrator loads the
 file through the API route written on the template's Instructions sheet, or enters the records on the screen.

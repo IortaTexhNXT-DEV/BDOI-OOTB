@@ -413,7 +413,7 @@ def main():
         ('Needed by', 'Mobilisation (week 1), Discovery (workshops), Configuration, Mock load 1, UAT. Due dates follow the plan of the implementation size.'),
         ('Defaults', 'OOTB defaults are the values seeded in the delivered system on 03 October 2026. Money in PHP. Tax rates, ATC and GL accounts are confirmed by the broker\'s accountant and tax adviser before configuration.'),
         ('Rules', 'Do not change the layout of the sheets. Add rows at the end of a sheet with the next ID if a new item comes up. Personal data (staff lists, client extracts) is not pasted into this workbook; it goes into the upload templates.'),
-        ('Companion', 'Discovery Workbook Guide (how to run the workshops); Implementation Approach and Plan; Data Migration and Cutover Plan; upload templates in docs/templates.'),
+        ('Companion', 'Discovery Workbook Guide (how to run the workshops); Implementation Approach and Plan; Data Migration and Cutover Plan; upload templates in docs/package/05_Delivery/Upload_Templates.'),
     ]
     for i, (k, v) in enumerate(lines, 3):
         ins.cell(row=i, column=1, value=k).font = BOLD

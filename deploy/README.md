@@ -174,7 +174,7 @@ Both workflows now refuse to publish a page that still holds `%PUBLIC_URL%`.
 - [ ] Banks and the broker's bank accounts (operating, premium trust); signatories (Master > Signatories).
 - [ ] Chart of accounts review with Accounting (Master > Main Account / Sub Account). Opening balances, open premium
   receivables and in-force policies are loaded with the go-live imports: see `docs/onboarding/GO_LIVE_DATA_SETUP.md`
-  (step 11) and the templates in `docs/templates`.
+  (step 11) and the templates in `docs/package/05_Delivery/Upload_Templates`.
 - [ ] Product templates and the motor tariff (Product Configurator > MOT-003-2025 > "CTPL & Auto PA"): CTPL amounts per
   vehicle class (confirmed 29 Sep 2026: 300.40 to 1,500.40 annual, 1,660.40 3-year private car), Auto Passenger PA
   rate and limits; 3-year CTPL for other classes when known.
@@ -211,6 +211,11 @@ Options: `--keep-users=jdoe,mreyes` keeps those users; `--purge-audit` also clea
 Without `CONFIRM_PURGE=yes` the script refuses to run.
 
 Set `SEED_SAMPLE_DATA=false` before starting again.
+
+After a smoke test on the client's own configuration, use the transaction reset instead: it removes the test
+transactions and keeps every master, configuration setting and user (`CONFIRM_RESET=yes npm run reset:transactions`,
+dry run unless `--execute`; refused once `golive.locked` is on). See
+[docs/onboarding/SMOKE_TEST_AND_RESET.md](../docs/onboarding/SMOKE_TEST_AND_RESET.md).
 
 ## 8. Rollback
 

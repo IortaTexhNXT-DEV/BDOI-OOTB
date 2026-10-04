@@ -1,13 +1,15 @@
 /**
  * Bulk upload templates generated in the browser as CSV (the upload endpoints accept CSV or XLSX).
  * Column names match the headers read by the bulk-upload endpoints of leads, quotations, policies,
- * receipts and disbursements (the backend camel-cases them: "Policy Number" -> policyNumber).
+ * receipts and disbursements (the backend camel-cases them: "Policy Number" -> policyNumber). They are the headers of
+ * the delivered upload templates (docs/package/05_Delivery/Upload_Templates); backend/test/upload-templates.test.js
+ * fails when a list here differs from the importer's column list.
  */
 export const BULK_UPLOAD_TEMPLATES = {
   leads: {
     fileName: "Leads-Bulk-Upload.csv",
     columns: [
-      "First Name", "Last Name", "Company Name", "Date of Birth", "Gender", "Email", "Contact Number",
+      "First Name", "Last Name", "Preferred Name", "Company Name", "Date of Birth", "Gender", "Email", "Contact Number",
       "House No", "Barangay", "City", "Province", "Country", "Zip Code", "Lead Category", "TIN", "LOB", "Source",
     ],
   },
@@ -33,7 +35,7 @@ export const BULK_UPLOAD_TEMPLATES = {
   disbursements: {
     fileName: "Disbursements-Bulk-Upload.csv",
     columns: [
-      "Voucher Date", "Payee Type", "Customer Code", "Insurer Name", "Policy Number", "Referrer Id", "Amount",
+      "Voucher Date", "Payee Type", "Customer Code", "Insurer Name", "Policy Number", "Referrer Id", "Amount", "Payment Mode",
       "Transaction Code", "Transaction Description", "Remarks",
     ],
   },

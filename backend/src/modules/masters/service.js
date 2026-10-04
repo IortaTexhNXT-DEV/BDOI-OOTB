@@ -506,7 +506,19 @@ function assertNotRetired(t) {
   if (RETIRED_TYPES.has(t.code)) throw badRequest(`The ${t.label} master is retired and can no longer be changed; use ${RETIRED_TYPES.get(t.code)}`);
 }
 
-export const NOT_UPLOADABLE = new Map([['main-account', 'the Chart of Accounts upload'], ['sub-account', 'the Chart of Accounts upload']]);
+/**
+ * Master types without an upload (and without an upload template): the main and sub accounts are copies of the chart
+ * of accounts; the account set-up has one record per fixed set-up code, all shipped, edited on the screen.
+ */
+export const NOT_UPLOADABLE = new Map([['main-account', 'the Chart of Accounts upload'], ['sub-account', 'the Chart of Accounts upload'],
+  ['account-setup', 'Master > Finance > Account Determination (one record per set-up code, edited on the screen)']]);
+
+/** Why a master type has no upload template (retired or not uploadable), or null when it has one. */
+export function noTemplateReason(t) {
+  if (RETIRED_TYPES.has(t.code) || t.status === 'inactive') return `The ${t.label} master is retired; use ${RETIRED_TYPES.get(t.code) || 'the screen that replaced it'}`;
+  if (NOT_UPLOADABLE.has(t.code)) return `${t.label} records are not uploaded here; use ${NOT_UPLOADABLE.get(t.code)}`;
+  return null;
+}
 
 const FORMAT = {
   string: 'Text', text: 'Text', number: 'Number', integer: 'Whole number', boolean: 'Yes or No', date: 'Date YYYY-MM-DD', email: 'E-mail address',

@@ -75,6 +75,8 @@ define({
   screen: `${SCREEN} > Upload > Download template`, middleware: canRead('masters'), response: '(xlsx file)',
   handler: async (req, res) => {
     const t = await svc.getType(req.params.type);
+    const why = svc.noTemplateReason(t);
+    if (why) throw badRequest(why);
     const { fileName, buffer } = masterTemplate(t, { maxRows: Number(await getSetting('limits.bulk_upload_max_rows', 1000)), withSamples: req.query.samples === 'true' });
     res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
     res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
@@ -87,7 +89,8 @@ define({
   response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', total: 2, created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
     const t = await svc.getType(req.params.type);
-    if (svc.NOT_UPLOADABLE.has(t.code)) throw badRequest(`${t.label} records are not uploaded here; use ${svc.NOT_UPLOADABLE.get(t.code)}`);
+    const why = svc.noTemplateReason(t);
+    if (why) throw badRequest(why);
     const rows = parseUploadedRows(req.file);
     const max = Number(await getSetting('limits.bulk_upload_max_rows', 1000));
     if (rows.length > max) throw badRequest(`The file has ${rows.length} rows; the limit is ${max}`);

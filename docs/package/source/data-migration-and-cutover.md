@@ -19,7 +19,7 @@ It applies the step-by-step set-up of `docs/onboarding/GO_LIVE_DATA_SETUP.md` to
 
 ## Principles
 
-- **Templates only.** Every load uses the delivered upload templates in `docs/templates`. Each workbook has a Data sheet (exact headers, sample rows to delete), a Columns sheet (required, format, allowed values, accepted alternative headers) and an Instructions sheet (screen, API route, file types, row limit, what happens to a wrong row).
+- **Templates only.** Every load uses the delivered upload templates in `docs/package/05_Delivery/Upload_Templates`. Each workbook has a Data sheet (exact headers, sample rows to delete), a Columns sheet (required, format, allowed values, accepted alternative headers) and an Instructions sheet (screen, API route, file types, row limit, what happens to a wrong row).
 - **The broker owns the data.** The broker extracts, cleanses and signs off its data. iorta TechNXT advises on mapping, runs the loads with the broker and reports the results.
 - **Open positions, not history.** BrokerVerse receives what is open at the go-live date: in-force policies, unpaid premium, the trial balance. Closed history stays in the old system, which is kept read-only.
 - **One go-live date.** The go-live date is the first day of transactions in BrokerVerse. Balances and open items are taken from the old system at the close of the day before.
@@ -78,9 +78,9 @@ Expired, cancelled and lapsed policies; settled and closed claims; paid bills; t
 
 # Upload templates
 
-## Templates in docs/templates
+## Templates in docs/package/05_Delivery/Upload_Templates
 
-All templates were verified against the importers: each was loaded unchanged through the API on a fresh database (`docs/templates/README.md`). Required columns are listed in bold on the template's Columns sheet. An import file holds at most 20,000 data rows and 10 MB (`IMPORT_MAX_ROWS`, `IMPORT_MAX_MB`); the receipt upload takes at most 1,000 rows.
+All templates were verified against the importers: each was loaded unchanged through the API on a fresh database (`docs/package/05_Delivery/Upload_Templates/README.md`). Required columns are listed in bold on the template's Columns sheet. An import file holds at most 20,000 data rows and 10 MB (`IMPORT_MAX_ROWS`, `IMPORT_MAX_MB`); the receipt upload takes at most 1,000 rows.
 
 | Template | Loads | Screen |
 |---|---|---|

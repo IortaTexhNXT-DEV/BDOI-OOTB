@@ -1815,7 +1815,7 @@ Masters with an Upload button take a spreadsheet:
 3. Delete the sample rows, enter your data and save the file.
 4. Choose the file and select Upload.
 
-The result shows how many rows were created or updated and lists each failed row with its problem. Fix those rows and upload them again; an existing code updates the record. The same templates are delivered in `docs/templates`.
+The result shows how many rows were created or updated and lists each failed row with its problem. Fix those rows and upload them again; an existing code updates the record. The same templates are delivered in `docs/package/05_Delivery/Upload_Templates`.
 
 | Screen with Upload | Template |
 |---|---|
@@ -1828,8 +1828,9 @@ The result shows how many rows were created or updated and lists each failed row
 | Leads/Prospects, Quotation, Policy, Receipts, Disbursement | `Leads_...`, `Quotations_...`, `Policies_...`, `Receipts_...`, `Disbursements_Upload_Template.xlsx` |
 | Collections (Import open items), Period Management (Import opening balances) | `Open_Items_...`, `Opening_Balances_Upload_Template.xlsx` |
 | Bank Reconciliation (Import statement, GENERIC format) | `Bank_Statement_Generic_Upload_Template.xlsx` |
+| Insurer Reconciliation (Import statement, GENERIC format) | `Insurer_Statement_Generic_Upload_Template.xlsx` |
 
-Masters without an Upload button (Company, Branch, Department, Line of Business, Product, Policy type, Cover, Signatories, Exchange Rate, Commission, Hierarchy, Designation, Employee, Write-off reasons) also have a template in `docs/templates`. The System Administrator loads those files through the API route written on the template's Instructions sheet, or the records are entered on the screen.
+Masters without an Upload button (Company, Branch, Department, Line of Business, Product, Policy type, Cover, Signatories, Exchange Rate, Hierarchy, Designation, Write-off reasons, Account Category, Security Rating, Product Category, Risk Section and the Remittance Master records) also have a template in `docs/package/05_Delivery/Upload_Templates`. The System Administrator loads those files through the API route written on the template's Instructions sheet, or the records are entered on the screen.
 
 ## Document Numbering
 
@@ -2198,7 +2199,7 @@ You see every menu. Keep this role for administration and use a business role fo
 | Users, roles, unlock, reset password | Master > Generals > User Management | 23 |
 | Company and letterhead | Master > Generals > Organization > Company | 23 |
 | Insurers and credit terms | Master > Generals > Insurance Management > Insurance Company | 23 |
-| Master uploads | The Upload button of each master; templates in `docs/templates` | 23 |
+| Master uploads | The Upload button of each master; templates in `docs/package/05_Delivery/Upload_Templates` | 23 |
 | Document numbering | Master > Document Numbering | 23 |
 | Commission rates | Master > Finance > Commission Rate Matrix | 23 |
 | Posting rules and account determination | Master > Finance > Posting Rules, Account Determination | 23 |

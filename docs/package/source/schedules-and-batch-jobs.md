@@ -13,7 +13,7 @@ acronyms: OOTB=Out of the box; BIR=Bureau of Internal Revenue; GL=General ledger
 
 This document describes everything BrokerVerse OOTB runs on a timetable and every batch process an operator starts by hand: what each one reads and writes, the setting that controls it, the e-mails and notifications it produces, how to run it on demand, how to watch it and what happens when it fails or runs twice. It closes with the daily and month-end run book.
 
-It is written for the operations and finance supervisors who own the processes and for the support team that runs the platform. All facts come from the application code (`backend/src/jobs`, `backend/src/modules/*/jobs.js`, the module services), the seeded `scheduled_jobs` table and the upload templates in `docs/templates`.
+It is written for the operations and finance supervisors who own the processes and for the support team that runs the platform. All facts come from the application code (`backend/src/jobs`, `backend/src/modules/*/jobs.js`, the module services), the seeded `scheduled_jobs` table and the upload templates in `docs/package/05_Delivery/Upload_Templates`.
 
 ## Terms used
 
@@ -258,7 +258,7 @@ A failed run is recorded with status failed and the error text, and the job's La
 
 ## Upload templates and the import rules
 
-Every bulk upload has a template in `docs/templates` (also downloadable on the screens that have an Upload or Import button). Each workbook has three sheets: Data (header row and one or two Philippine sample rows, required columns in dark red), Columns (required or not, format, allowed values, example, other accepted header names) and Instructions (screen, API route, file types, row limit, what happens on errors).
+Every bulk upload has a template in `docs/package/05_Delivery/Upload_Templates` (also downloadable on the screens that have an Upload or Import button). Each workbook has three sheets: Data (header row and one or two Philippine sample rows, required columns in dark red), Columns (required or not, format, allowed values, example, other accepted header names) and Instructions (screen, API route, file types, row limit, what happens on errors).
 
 Rules common to all uploads:
 
@@ -283,7 +283,7 @@ Rules common to all uploads:
 | Remittance bank transactions | Accounts > Remittance > Reconciliation > Import | Read in the browser | TransDate, Reference, Amount, Description. |
 | Users | Server script `backend/scripts/provision-users.js` | Dry run, then `CONFIRM_PROVISION=yes` | Not a screen upload; users must change the initial password. |
 
-The full column lists are in the templates and in `docs/templates/README.md`.
+The full column lists are in the templates and in `docs/package/05_Delivery/Upload_Templates/README.md`.
 
 ## Renewal batch
 

@@ -43,7 +43,7 @@ This plan sets out how the broker's people learn to use BrokerVerse OOTB and how
 | Role decks (`docs/decks`) | One PowerPoint per role: the role, its menu map, key functions with screens, its part of the end-to-end flow, reports, schedules, notifications, known limitations and tips |
 | Getting started guide (`docs/onboarding/GETTING_STARTED.md`) | First sign-in, password rules, two-step verification, menus per role, how to ask for help; handed to every user |
 | UAT scripts (`docs/onboarding/UAT_SCRIPTS.md`) | Basis for the practical exercises and the assessment |
-| Upload templates (`docs/templates`) | Exercises for users who load data (System Administrator, Accounting, Sales & Marketing, Processing Team) |
+| Upload templates (`docs/package/05_Delivery/Upload_Templates`) | Exercises for users who load data (System Administrator, Accounting, Sales & Marketing, Processing Team) |
 | Training environment | The test environment with training users (one per trainee) and training data; the delivered sample data (`SEED_SAMPLE_DATA=true`) may be used there, never in production |
 | Exercise book (prepared by the key users with iorta TechNXT) | The broker's own examples: products, insurers, a typical motor and fire risk, a typical month-end |
 

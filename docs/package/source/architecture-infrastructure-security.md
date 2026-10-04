@@ -95,7 +95,7 @@ BrokerVerse OOTB is the operating system of a non-life insurance broker. It cove
 | Bank statements | Inbound files | CSV or XLSX statements read with a bank statement format; BDO, BPI, Metrobank and a generic layout ship as standard. |
 | Electronic transfers | Recorded | Transfers to insurers are approved in the system and the bank result is recorded (Completed or Failed). No bank payment file or bank API is generated. |
 | Reinsurers | Outbound files | Bordereaux and reconciliation files as CSV |
-| Uploads and go-live imports | Inbound files | 10 MB per file, 50 MB decompressed, 20,000 rows; templates in `docs/templates` |
+| Uploads and go-live imports | Inbound files | 10 MB per file, 50 MB decompressed, 20,000 rows; templates in `docs/package/05_Delivery/Upload_Templates` |
 | Document generation | Internal | One PDF engine (`lib/pdf`) with the letterhead of the primary company in the Company master; XLSX, CSV and ZIP writers. No third-party document library. |
 | Client quotation approval | Inbound (public) | Signed link valid for `quotations.approval_link_ttl_hours` (168 hours) |
 
