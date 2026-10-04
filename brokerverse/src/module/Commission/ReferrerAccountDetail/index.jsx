@@ -11,6 +11,7 @@ import { formatAmount } from "../utils/formatAmount";
 import LineDetailDrawer from "./LineDetailDrawer";
 import "./style.scss";
 import logger from "../../../utility/logger";
+import { DetailPageSkeleton } from "../../../components/Skeletons";
 
 const ReferrerAccountDetail = () => {
   const { id } = useParams();
@@ -167,7 +168,7 @@ const ReferrerAccountDetail = () => {
   if (loading && !detail) {
     return (
       <div className="referrer-detail-page">
-        <p className="loading-msg">Loading account…</p>
+        <DetailPageSkeleton />
       </div>
     );
   }

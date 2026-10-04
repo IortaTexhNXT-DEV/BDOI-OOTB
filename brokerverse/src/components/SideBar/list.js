@@ -1,17 +1,30 @@
-import SvgAgentClientIcon from "../../assets/agentIcon/SvgAgentClientIcon";
-import SvgAgentHomeIcon from "../../assets/agentIcon/SvgAgentHomeIcon";
-import SvgAgentItemsIcon from "../../assets/agentIcon/SvgAgentItemsIcon";
-import SvgAgentLeadIcon from "../../assets/agentIcon/SvgAgentLeadIcon";
-import SvgAgentPaymentIcon from "../../assets/agentIcon/SvgAgentPaymentIcon";
-import SvgPolicyIcon from "../../assets/agentIcon/SvgPolicyIcon";
-import SvgAccountIcon from "../../assets/icons/SvgAccountIcon";
-import SvgMassterIcon from "../../assets/icons/SvgMassterIcon";
-import SvgReportsIcon from "../../assets/icons/SvgReportsIcon";
-
+/**
+ * The application menu. Conventions (components/SideBar renders it):
+ *  - at most three levels: group > item, or group > sub-group > item;
+ *  - only top-level entries carry an icon (a PrimeIcons class, all the same size and colour);
+ *  - `section: true` turns a sub-group into a plain heading inside its group instead of a collapsible level (Master);
+ *  - `name` is the key of the role grants (utils/menuPermissions.js) and of the label (sidebar.<name> in en.json):
+ *    shorten a label in en.json, not here, so that grants and links keep working.
+ */
 export const menuList = [
   {
+    // the working home page of a user (open items, upcoming events): a top-level entry, not part of Operations
+    name: "Home",
+    icon: "pi pi-home",
+    // not taken as the landing page of a role that also has a dashboard (firstAllowedPath)
+    landing: false,
+    path: "/agent/home",
+    // the notifications page and the user's own profile are open to every signed-in role (not part of Home)
+    includes: [
+      "/agent/home",
+      "/agent/openitems",
+      "/agent/openitems/upcomingevents",
+    ],
+    permissions: ["read:home"],
+  },
+  {
     name: "Dashboard",
-    icon: <SvgAgentHomeIcon color="#0072d8" />,
+    icon: "pi pi-chart-bar",
     submenu: [
       {
         id: 1,
@@ -45,26 +58,13 @@ export const menuList = [
   },
   {
     name: "Operations",
-    icon: <SvgReportsIcon />,
+    icon: "pi pi-briefcase",
     submenu: [
-      {
-        name: "Home",
-        icon: <SvgAgentHomeIcon color="#9DA4AE" />,
-        path: "/agent/home",
-        // the notifications page and the user's own profile are open to every signed-in role (not part of Home)
-        includes: [
-          "/agent/home",
-          "/agent/openitems",
-          "/agent/openitems/upcomingevents",
-        ],
-        permissions: ["read:home"],
-      },
       {
         // Sales & Marketing: prospects, quick quotes for package products, requests for quotation (broker slips) and
         // quotations for non-package risks, and the placement slips that bind them with the insurers
         id: 29,
         name: "Sales & Marketing",
-        icon: <SvgAgentLeadIcon color="#9DA4AE" />,
         submenu: [
           {
             id: 30,
@@ -147,7 +147,6 @@ export const menuList = [
       },
       {
         name: "Clients",
-        icon: <SvgAgentClientIcon color="#9DA4AE" />,
         path: "/agent/clientlisting",
         includes: [
           "/agent/clientlisting",
@@ -192,7 +191,6 @@ export const menuList = [
       },
       {
         name: "Policy",
-        icon: <SvgPolicyIcon color="#9DA4AE" />,
         path: "/agent/policy",
         includes: [
           "/agent/policy",
@@ -204,14 +202,12 @@ export const menuList = [
 
       {
         name: "Claims",
-        icon: <SvgAgentItemsIcon color="#9DA4AE" />,
         path: "/agent/claim",
         includes: ["/agent/claim"],
         permissions: ["read:claims"],
       },
       {
         id: 9,
-        icon: <SvgAgentItemsIcon color="#9DA4AE" />,
         name: "Renewals",
         submenu: [
           {
@@ -266,7 +262,6 @@ export const menuList = [
       },
       {
         name: "Open Items",
-        icon: <SvgAgentItemsIcon color="#9DA4AE" />,
         path: "/agent/openitemslistdata",
         includes: [
           "/agent/openitemslistdata",
@@ -280,7 +275,6 @@ export const menuList = [
       },
       {
         name: "Payments",
-        icon: <SvgAgentPaymentIcon color="#9DA4AE" />,
         path: "/agent/payments",
         includes: ["/agent/payments"],
         permissions: ["read:payments"],
@@ -289,7 +283,7 @@ export const menuList = [
   },
   {
     name: "Accounts",
-    icon: <SvgAccountIcon />,
+    icon: "pi pi-wallet",
     submenu: [
       {
         id: 1,
@@ -700,7 +694,7 @@ export const menuList = [
   },
   {
     name: "Commission",
-    icon: <SvgAgentPaymentIcon color="#0072d8" />,
+    icon: "pi pi-percentage",
     submenu: [
       {
         id: 1,
@@ -721,7 +715,7 @@ export const menuList = [
   },
   {
     name: "Reinsurance",
-    icon: <SvgReportsIcon />,
+    icon: "pi pi-shield",
     submenu: [
       {
         id: 1,
@@ -763,7 +757,7 @@ export const menuList = [
   },
   {
     name: "Reports",
-    icon: <SvgReportsIcon />,
+    icon: "pi pi-file",
     submenu: [
       {
         id: 0,
@@ -878,309 +872,262 @@ export const menuList = [
   },
   {
     name: "Master",
-    icon: <SvgMassterIcon />,
+    icon: "pi pi-database",
     submenu: [
-      {
-        id: 0,
-        name: "System Settings",
-        path: "/master/configuration/system-settings",
-        includes: ["/master/configuration/system-settings"],
-      },
-      {
-        id: 20,
-        name: "Configuration",
-        path: "/master/configuration/settings",
-        includes: ["/master/configuration/settings"],
-      },
-      {
-        id: 23,
-        name: "Document Numbering",
-        path: "/master/configuration/document-numbering",
-        includes: ["/master/configuration/document-numbering"],
-      },
-      {
-        id: 21,
-        name: "Schedules",
-        path: "/master/configuration/schedules",
-        includes: ["/master/configuration/schedules"],
-      },
-      {
-        id: 22,
-        name: "Audit Trail",
-        path: "/master/configuration/audit-trail",
-        includes: ["/master/configuration/audit-trail"],
-      },
-      {
-        id: 24,
-        name: "E-mail Outbox",
-        path: "/master/configuration/email-outbox",
-        includes: ["/master/configuration/email-outbox"],
-      },
-      {
-        id: 26,
-        name: "Go-Live Data Load",
-        path: "/master/go-live-data-load",
-        includes: ["/master/go-live-data-load"],
-      },
-      {
-        id: 25,
-        name: "Data Privacy",
-        submenu: [
-          {
-            id: 1,
-            name: "Data Subject Requests",
-            path: "/master/data-privacy/requests",
-            includes: ["/master/data-privacy/requests"],
-          },
-          {
-            id: 2,
-            name: "Consent Register",
-            path: "/master/data-privacy/consents",
-            includes: ["/master/data-privacy/consents"],
-          },
-        ],
-      },
+      // Master is two levels deep: each entry below is a section heading inside Master (not a collapsible group),
+      // so every master screen is one click from the Master group. Section names are the grant keys of menuPermissions.
       {
         id: 1,
-        name: "Generals",
+        name: "Organization",
+        section: true,
         submenu: [
           {
             id: 1,
-            name: "Organization",
-            submenu: [
-              {
-                id: 1,
-                name: "Company",
-                path: "/master/generals/organization/companymaster",
-                includes: [
-                  "/master/generals/organization/companymaster",
-                  "/master/generals/organization/companymaster/add/",
-                  "/master/generals/organization/companymaster/edit/",
-                  "/master/generals/organization/companymaster/view/",
-                ],
-              },
-
-              {
-                id: 2,
-                name: "Branch",
-                path: "/master/generals/organization/branchmaster",
-                includes: [
-                  "/master/generals/organization/branchmaster",
-                  "/master/generals/organization/branchmaster/add/",
-                  "/master/generals/organization/branchmaster/edit/",
-                  "/master/generals/organization/branchmaster/view/",
-                ],
-              },
+            name: "Company",
+            path: "/master/generals/organization/companymaster",
+            includes: [
+              "/master/generals/organization/companymaster",
+              "/master/generals/organization/companymaster/add/",
+              "/master/generals/organization/companymaster/edit/",
+              "/master/generals/organization/companymaster/view/",
             ],
           },
+
           {
             id: 2,
-            name: "Insurance Management",
-            submenu: [
-              {
-                id: 1,
-                name: "Insurance Company",
-                path: "/master/generals/insurancemanagement/insurancecompany",
-                includes: [
-                  "/master/generals/insurancemanagement/insurancecompany",
-                  "/master/generals/insurancemanagement/insurancecompany/add/",
-                  "/master/generals/insurancemanagement/insurancecompany/edit/",
-                  "/master/generals/insurancemanagement/insurancecompany/view/",
-                ],
-              },
-              {
-                id: 2,
-                name: "Line of Business",
-                path: "/master/generals/insurancemanagement/lineofbusiness",
-                includes: [
-                  "/master/generals/insurancemanagement/lineofbusiness",
-                  "/master/generals/insurancemanagement/lineofbusiness/add/",
-                  "/master/generals/insurancemanagement/lineofbusiness/edit/",
-                  "/master/generals/insurancemanagement/lineofbusiness/view/",
-                ],
-              },
-              {
-                id: 3,
-                name: "Product",
-                path: "/master/generals/insurancemanagement/productmaster",
-                includes: [
-                  "/master/generals/insurancemanagement/productmaster",
-                  "/master/generals/insurancemanagement/productmaster/add/",
-                  "/master/generals/insurancemanagement/productmaster/edit/",
-                  "/master/generals/insurancemanagement/productmaster/view/",
-                ],
-              },
-              {
-                id: 5,
-                name: "Cover",
-                path: "/master/generals/insurancemanagement/cover",
-                includes: [
-                  "/master/generals/insurancemanagement/cover",
-                  "/master/generals/insurancemanagement/cover/add/",
-                  "/master/generals/insurancemanagement/cover/view/",
-                  "/master/generals/insurancemanagement/cover/edit/",
-                ],
-              },
-              {
-                id: 6,
-                name: "Signatories",
-                path: "/master/generals/insurancemanagement/signatories",
-                includes: [
-                  "/master/generals/insurancemanagement/signatories",
-                  "/master/generals/insurancemanagement/signatories/add/",
-                  "/master/generals/insurancemanagement/signatories/edit/",
-                  "/master/generals/insurancemanagement/signatories/view/",
-                ],
-              },
-              {
-                id: 7,
-                name: "Vehicle",
-                path: "/master/generals/insurancemanagement/vehicle",
-                includes: [
-                  "/master/generals/insurancemanagement/vehicle",
-                  "/master/generals/insurancemanagement/vehicle/add/",
-                  "/master/generals/insurancemanagement/vehicle/edit/",
-                  "/master/generals/insurancemanagement/vehicle/view/",
-                ],
-              },
-            ],
-          },
-          {
-            id: 3,
-            name: "Location",
-            submenu: [
-              {
-                id: 1,
-                name: "Country",
-                path: "/master/generals/location/country",
-                includes: [
-                  "/master/generals/location/country",
-                  "/master/generals/location/country/add",
-                  "/master/generals/location/country/edit",
-                  "/master/generals/location/country/view",
-                ],
-              },
-              {
-                id: 2,
-                name: "State",
-                path: "/master/generals/location/state",
-                includes: [
-                  "/master/generals/location/state",
-                  "/master/generals/location/state/add",
-                  "/master/generals/location/state/edit",
-                  "/master/generals/location/state/view",
-                ],
-              },
-              {
-                id: 3,
-                name: "City",
-                path: "/master/generals/location/city",
-                includes: [
-                  "/master/generals/location/city",
-                  "/master/generals/location/city/add",
-                  "/master/generals/location/city/edit",
-                  "/master/generals/location/city/view",
-                ],
-              },
-            ],
-          },
-          {
-            id: 5,
-            name: "Employee Management",
-            submenu: [
-              {
-                id: 1,
-                name: "Hierarchy",
-                path: "/master/generals/employeemanagement/hierarchy",
-                includes: [
-                  "/master/generals/employeemanagement/hierarchy",
-                  "/master/generals/employeemanagement/hierarchy/add",
-                  "/master/generals/employeemanagement/hierarchy/edit/",
-                  "/master/generals/employeemanagement/hierarchy/view/",
-                ],
-              },
-              {
-                id: 2,
-                name: "Designation",
-                path: "/master/generals/employeemanagement/designation",
-                includes: [
-                  "/master/generals/employeemanagement/designation",
-                  "/master/generals/employeemanagement/designation/add/",
-                  "/master/generals/employeemanagement/designation/edit/",
-                  "/master/generals/employeemanagement/designation/view/",
-                ],
-              },
-            ],
-          },
-          {
-            id: 6,
-            name: "User Management",
-            submenu: [
-              {
-                id: 1,
-                name: "User",
-                path: "/master/generals/usermanagement/user",
-                includes: [
-                  "/master/generals/usermanagement/user",
-                  "/master/generals/usermanagement/user/add",
-                  "/master/generals/usermanagement/user/edit/",
-                  "/master/generals/usermanagement/user/view/",
-                ],
-              },
-              {
-                id: 2,
-                name: "Role",
-                path: "/master/generals/usermanagement/role",
-                includes: [
-                  "/master/generals/usermanagement/role",
-                  "/master/generals/usermanagement/role/add/",
-                  "/master/generals/usermanagement/role/edit/",
-                  "/master/generals/usermanagement/role/view/",
-                ],
-              },
-              {
-                id: 3,
-                name: "User Access Matrix",
-                path: "/master/generals/usermanagement/access-matrix",
-                includes: ["/master/generals/usermanagement/access-matrix"],
-              },
-              {
-                id: 4,
-                name: "Role Permissions",
-                path: "/master/generals/usermanagement/role-permissions",
-                includes: ["/master/generals/usermanagement/role-permissions"],
-              },
-              {
-                id: 5,
-                name: "Authority Matrix",
-                path: "/master/generals/usermanagement/authority-matrix",
-                includes: ["/master/generals/usermanagement/authority-matrix"],
-              },
-              {
-                id: 6,
-                name: "Delegations",
-                path: "/master/generals/usermanagement/delegations",
-                includes: ["/master/generals/usermanagement/delegations"],
-              },
-              {
-                id: 7,
-                name: "Segregation of Duties",
-                path: "/master/generals/usermanagement/segregation-of-duties",
-                includes: ["/master/generals/usermanagement/segregation-of-duties"],
-              },
-              {
-                id: 8,
-                name: "Access Reviews",
-                path: "/master/generals/usermanagement/access-reviews",
-                includes: ["/master/generals/usermanagement/access-reviews"],
-              },
+            name: "Branch",
+            path: "/master/generals/organization/branchmaster",
+            includes: [
+              "/master/generals/organization/branchmaster",
+              "/master/generals/organization/branchmaster/add/",
+              "/master/generals/organization/branchmaster/edit/",
+              "/master/generals/organization/branchmaster/view/",
             ],
           },
         ],
       },
       {
         id: 2,
+        name: "Insurance Management",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Insurance Company",
+            path: "/master/generals/insurancemanagement/insurancecompany",
+            includes: [
+              "/master/generals/insurancemanagement/insurancecompany",
+              "/master/generals/insurancemanagement/insurancecompany/add/",
+              "/master/generals/insurancemanagement/insurancecompany/edit/",
+              "/master/generals/insurancemanagement/insurancecompany/view/",
+            ],
+          },
+          {
+            id: 2,
+            name: "Line of Business",
+            path: "/master/generals/insurancemanagement/lineofbusiness",
+            includes: [
+              "/master/generals/insurancemanagement/lineofbusiness",
+              "/master/generals/insurancemanagement/lineofbusiness/add/",
+              "/master/generals/insurancemanagement/lineofbusiness/edit/",
+              "/master/generals/insurancemanagement/lineofbusiness/view/",
+            ],
+          },
+          {
+            id: 3,
+            name: "Product",
+            path: "/master/generals/insurancemanagement/productmaster",
+            includes: [
+              "/master/generals/insurancemanagement/productmaster",
+              "/master/generals/insurancemanagement/productmaster/add/",
+              "/master/generals/insurancemanagement/productmaster/edit/",
+              "/master/generals/insurancemanagement/productmaster/view/",
+            ],
+          },
+          {
+            id: 5,
+            name: "Cover",
+            path: "/master/generals/insurancemanagement/cover",
+            includes: [
+              "/master/generals/insurancemanagement/cover",
+              "/master/generals/insurancemanagement/cover/add/",
+              "/master/generals/insurancemanagement/cover/view/",
+              "/master/generals/insurancemanagement/cover/edit/",
+            ],
+          },
+          {
+            id: 6,
+            name: "Signatories",
+            path: "/master/generals/insurancemanagement/signatories",
+            includes: [
+              "/master/generals/insurancemanagement/signatories",
+              "/master/generals/insurancemanagement/signatories/add/",
+              "/master/generals/insurancemanagement/signatories/edit/",
+              "/master/generals/insurancemanagement/signatories/view/",
+            ],
+          },
+          {
+            id: 7,
+            name: "Vehicle",
+            path: "/master/generals/insurancemanagement/vehicle",
+            includes: [
+              "/master/generals/insurancemanagement/vehicle",
+              "/master/generals/insurancemanagement/vehicle/add/",
+              "/master/generals/insurancemanagement/vehicle/edit/",
+              "/master/generals/insurancemanagement/vehicle/view/",
+            ],
+          },
+          {
+            id: 12,
+            name: "Reinsurance Treaty",
+            path: "/master/reinsurance/treaty",
+            includes: [
+              "/master/reinsurance/treaty",
+              "/master/reinsurance/treaty/add",
+              "/master/reinsurance/treaty/edit",
+              "/master/reinsurance/treaty/view",
+            ],
+          },
+        ],
+      },
+      {
+        id: 3,
+        name: "Location",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Country",
+            path: "/master/generals/location/country",
+            includes: [
+              "/master/generals/location/country",
+              "/master/generals/location/country/add",
+              "/master/generals/location/country/edit",
+              "/master/generals/location/country/view",
+            ],
+          },
+          {
+            id: 2,
+            name: "State",
+            path: "/master/generals/location/state",
+            includes: [
+              "/master/generals/location/state",
+              "/master/generals/location/state/add",
+              "/master/generals/location/state/edit",
+              "/master/generals/location/state/view",
+            ],
+          },
+          {
+            id: 3,
+            name: "City",
+            path: "/master/generals/location/city",
+            includes: [
+              "/master/generals/location/city",
+              "/master/generals/location/city/add",
+              "/master/generals/location/city/edit",
+              "/master/generals/location/city/view",
+            ],
+          },
+        ],
+      },
+      {
+        id: 5,
+        name: "Employee Management",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Hierarchy",
+            path: "/master/generals/employeemanagement/hierarchy",
+            includes: [
+              "/master/generals/employeemanagement/hierarchy",
+              "/master/generals/employeemanagement/hierarchy/add",
+              "/master/generals/employeemanagement/hierarchy/edit/",
+              "/master/generals/employeemanagement/hierarchy/view/",
+            ],
+          },
+          {
+            id: 2,
+            name: "Designation",
+            path: "/master/generals/employeemanagement/designation",
+            includes: [
+              "/master/generals/employeemanagement/designation",
+              "/master/generals/employeemanagement/designation/add/",
+              "/master/generals/employeemanagement/designation/edit/",
+              "/master/generals/employeemanagement/designation/view/",
+            ],
+          },
+        ],
+      },
+      {
+        id: 6,
+        name: "User Management",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "User",
+            path: "/master/generals/usermanagement/user",
+            includes: [
+              "/master/generals/usermanagement/user",
+              "/master/generals/usermanagement/user/add",
+              "/master/generals/usermanagement/user/edit/",
+              "/master/generals/usermanagement/user/view/",
+            ],
+          },
+          {
+            id: 2,
+            name: "Role",
+            path: "/master/generals/usermanagement/role",
+            includes: [
+              "/master/generals/usermanagement/role",
+              "/master/generals/usermanagement/role/add/",
+              "/master/generals/usermanagement/role/edit/",
+              "/master/generals/usermanagement/role/view/",
+            ],
+          },
+          {
+            id: 3,
+            name: "User Access Matrix",
+            path: "/master/generals/usermanagement/access-matrix",
+            includes: ["/master/generals/usermanagement/access-matrix"],
+          },
+          {
+            id: 4,
+            name: "Role Permissions",
+            path: "/master/generals/usermanagement/role-permissions",
+            includes: ["/master/generals/usermanagement/role-permissions"],
+          },
+          {
+            id: 5,
+            name: "Authority Matrix",
+            path: "/master/generals/usermanagement/authority-matrix",
+            includes: ["/master/generals/usermanagement/authority-matrix"],
+          },
+          {
+            id: 6,
+            name: "Delegations",
+            path: "/master/generals/usermanagement/delegations",
+            includes: ["/master/generals/usermanagement/delegations"],
+          },
+          {
+            id: 7,
+            name: "Segregation of Duties",
+            path: "/master/generals/usermanagement/segregation-of-duties",
+            includes: ["/master/generals/usermanagement/segregation-of-duties"],
+          },
+          {
+            id: 8,
+            name: "Access Reviews",
+            path: "/master/generals/usermanagement/access-reviews",
+            includes: ["/master/generals/usermanagement/access-reviews"],
+          },
+        ],
+      },
+      {
+        id: 2,
         name: "Finance",
+        section: true,
         submenu: [
           {
             id: 1,
@@ -1389,16 +1336,80 @@ export const menuList = [
               "/master/incentive/programs/view",
             ],
           },
+        ],
+      },
+      {
+        // system parameters, numbering, schedules, audit trail and the e-mail outbox
+        name: "System Configuration",
+        section: true,
+        submenu: [
           {
-            id: 12,
-            name: "Reinsurance Treaty",
-            path: "/master/reinsurance/treaty",
-            includes: [
-              "/master/reinsurance/treaty",
-              "/master/reinsurance/treaty/add",
-              "/master/reinsurance/treaty/edit",
-              "/master/reinsurance/treaty/view",
-            ],
+            id: 0,
+            name: "System Settings",
+            path: "/master/configuration/system-settings",
+            includes: ["/master/configuration/system-settings"],
+          },
+          {
+            id: 20,
+            name: "Configuration",
+            path: "/master/configuration/settings",
+            includes: ["/master/configuration/settings"],
+          },
+          {
+            id: 23,
+            name: "Document Numbering",
+            path: "/master/configuration/document-numbering",
+            includes: ["/master/configuration/document-numbering"],
+          },
+          {
+            id: 21,
+            name: "Schedules",
+            path: "/master/configuration/schedules",
+            includes: ["/master/configuration/schedules"],
+          },
+          {
+            id: 22,
+            name: "Audit Trail",
+            path: "/master/configuration/audit-trail",
+            includes: ["/master/configuration/audit-trail"],
+          },
+          {
+            id: 24,
+            name: "E-mail Outbox",
+            path: "/master/configuration/email-outbox",
+            includes: ["/master/configuration/email-outbox"],
+          },
+        ],
+      },
+      {
+        id: 25,
+        name: "Data Privacy",
+        section: true,
+        submenu: [
+          {
+            id: 1,
+            name: "Data Subject Requests",
+            path: "/master/data-privacy/requests",
+            includes: ["/master/data-privacy/requests"],
+          },
+          {
+            id: 2,
+            name: "Consent Register",
+            path: "/master/data-privacy/consents",
+            includes: ["/master/data-privacy/consents"],
+          },
+        ],
+      },
+      {
+        // configuration and migration workbooks loaded before go-live
+        name: "Go-Live and Data",
+        section: true,
+        submenu: [
+          {
+            id: 26,
+            name: "Go-Live Data Load",
+            path: "/master/go-live-data-load",
+            includes: ["/master/go-live-data-load"],
           },
         ],
       },
@@ -1406,7 +1417,7 @@ export const menuList = [
   },
   {
     name: "Product Configurator",
-    icon: <SvgMassterIcon />,
+    icon: "pi pi-sliders-h",
     submenu: [
       {
         id: 1,

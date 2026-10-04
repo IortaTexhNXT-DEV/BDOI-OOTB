@@ -4,11 +4,11 @@ import { useNavigate, useParams } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
-import { ProgressSpinner } from "primereact/progressspinner";
 import SvgDot from "../../../assets/icons/SvgDot";
 import reportsService from "../../../services/reportsService";
 import ReportScreen from "../ReportScreen";
 import "../ReportScreen/index.scss";
+import { FieldsSkeleton } from "../../../components/Skeletons";
 
 const GROUPS = [
   ["operational", "Operational Reports"],
@@ -49,7 +49,7 @@ export const ReportCatalogue = () => {
         </span>
       </div>
       {error && <Message severity="warn" text={error} className="w-full mb-3" />}
-      {!reports && !error && <ProgressSpinner style={{ width: 40, height: 40 }} />}
+      {!reports && !error && <FieldsSkeleton rows={4} columns={3} />}
       {reports &&
         GROUPS.map(([category, label]) => {
           const list = visible.filter((r) => r.category === category);

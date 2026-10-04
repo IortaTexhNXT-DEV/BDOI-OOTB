@@ -12,6 +12,7 @@ import s3Service from "../../../services/s3Service";
 import { formatCurrency } from "../../../utility/currencyConverter";
 import { formatDate as formatConfiguredDate } from "../../../utility/dateFormat";
 import { notifyError } from "../../../utility/dialogs";
+import { FieldsSkeleton } from "../../../components/Skeletons";
 
 const EndorsementDetailedView = ({ action }) => {
   const { t } = useTranslation();
@@ -129,7 +130,9 @@ const EndorsementDetailedView = ({ action }) => {
     return (
       <div className="detailed__endorsement__container m-0">
         <Card className="mt-4">
-          <div className="p-4 text-center">{t("endorsement.loadingEndorsementDetails")}</div>
+          <div className="p-4">
+            <FieldsSkeleton rows={4} columns={3} />
+          </div>
         </Card>
       </div>
     );

@@ -11,8 +11,8 @@ export const AREAS = [
     id: "company",
     title: "Company & Branding",
     icon: "pi pi-building",
-    summary: "Time zone, date format and the look of printed documents. The application name, logo and colours are set in System Settings; the company's legal identity in the Company master.",
-    groups: ["general", "branding", "currency", "documents", "system", "golive"],
+    summary: "Time zone, date format, the look of printed documents and the support contacts shown in Help. The application name, logo and colours are set in System Settings; the company's legal identity in the Company master.",
+    groups: ["general", "branding", "currency", "documents", "system", "golive", "support"],
     links: [
       { label: "System Settings (application name, logo, colours, language, currency)", path: "/master/configuration/system-settings" },
       { label: "Go-Live Data Load (configuration and migration workbooks)", path: "/master/go-live-data-load" },
@@ -132,7 +132,7 @@ export const AREAS = [
 export const HIDDEN_GROUPS = ["numbering"];
 
 export const GROUP_TITLES = {
-  general: "General", branding: "Branding", currency: "Currency", documents: "Printed documents", system: "System",
+  general: "General", branding: "Branding", currency: "Currency", documents: "Printed documents", system: "System", support: "Support and help",
   leads: "Prospects", quotations: "Quotations", quote: "Motor quotations", broker_slips: "Requests for quotation", placement: "Placement",
   product: "Products", packages: "Packaged products", premium: "Premium", motor: "Motor pricing",
   policies: "Policies", policy: "Policy issuance and KYC", endorsements: "Endorsements", renewals: "Renewals",

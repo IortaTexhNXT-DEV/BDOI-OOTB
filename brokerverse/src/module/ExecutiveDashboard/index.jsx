@@ -15,6 +15,7 @@ import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import dashboardService from "../../services/dashboardService";
 import reportsService from "../../services/reportsService";
 import "./index.scss";
+import { ChartSkeleton, KpiValueSkeleton } from "../../components/Skeletons";
 
 import { numberLocale } from "../../utility/currencyConverter";
 import { menuList } from "../../components/SideBar/list";
@@ -327,7 +328,7 @@ const ExecutiveDashboard = () => {
           {!dashboard && [...Object.keys(kpiTitleKeys), "receivableClients", "receivableInsurers"].map((key) => (
             <Card key={`placeholder-${key}`} className="kpi-card" aria-hidden="true">
               <div className="kpi-header"><span className="kpi-title">{kpiTitleKeys[key] ? t(kpiTitleKeys[key]) : "\u00a0"}</span></div>
-              <div className="kpi-value">-</div>
+              <div className="kpi-value"><KpiValueSkeleton /></div>
               <div className="kpi-target"><span>{"\u00a0"}</span></div>
             </Card>
           ))}
@@ -368,7 +369,7 @@ const ExecutiveDashboard = () => {
             </small>
           </div>
           <div className="chart-scroll-container">
-            <Chart
+            {!dashboard ? <ChartSkeleton height="350px" /> : <Chart
               type="line"
               data={monthlyTrendData}
               options={{
@@ -415,13 +416,13 @@ const ExecutiveDashboard = () => {
                 },
               }}
               style={{ height: "350px", width: "1200px" }}
-            />
+            />}
           </div>
         </Card>
 
         {/* Revenue Distribution */}
         <Card title={t("executiveDashboard.revenueByProductLine")} className="revenue-card">
-          <Chart
+          {!dashboard ? <ChartSkeleton height="350px" /> : <Chart
             type="doughnut"
             data={revenueByProductData}
             options={{
@@ -441,7 +442,7 @@ const ExecutiveDashboard = () => {
               },
             }}
             style={{ height: "350px" }}
-          />
+          />}
         </Card>
 
         {/* Regional Performance Table */}
@@ -449,6 +450,7 @@ const ExecutiveDashboard = () => {
           <DataTable
             value={regionalPerformance}
             size="small"
+            loading={!dashboard}
             className="regional-table"
           >
             <Column field="region" header={t("executiveDashboard.region")} />
@@ -472,6 +474,7 @@ const ExecutiveDashboard = () => {
           <DataTable
             value={topProducts}
             size="small"
+            loading={!dashboard}
             className="products-table"
           >
             <Column field="product" header={t("executiveDashboard.product")} />
@@ -486,6 +489,7 @@ const ExecutiveDashboard = () => {
           <DataTable
             value={agentPerformance}
             size="small"
+            loading={!dashboard}
             className="agents-table"
           >
             <Column field="name" header={t("executiveDashboard.agent")} />
@@ -500,7 +504,7 @@ const ExecutiveDashboard = () => {
         <div className="quick-stats">
           {/* Claims Analytics */}
           <Card title={t("executiveDashboard.claimsStatusDistribution")} className="claims-card">
-            <Chart
+            {!claimsSummary ? <ChartSkeleton height="250px" /> : <Chart
               type="pie"
               data={claimsAnalytics}
               options={{
@@ -513,12 +517,12 @@ const ExecutiveDashboard = () => {
                 },
               }}
               style={{ height: "250px" }}
-            />
+            />}
           </Card>
 
           {/* Customer Segmentation */}
           <Card title={t("executiveDashboard.customerSegmentation")} className="segment-card">
-            <Chart
+            {!dashboard ? <ChartSkeleton height="250px" /> : <Chart
               type="bar"
               data={customerSegmentData}
               options={{
@@ -541,7 +545,7 @@ const ExecutiveDashboard = () => {
                 },
               }}
               style={{ height: "250px" }}
-            />
+            />}
           </Card>
         </div>
       </div>

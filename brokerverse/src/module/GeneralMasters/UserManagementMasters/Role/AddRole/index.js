@@ -36,7 +36,7 @@ const AddRole = ({ action }) => {
   const toastRef = useRef(null);
 
   const items = [
-    { label: "User Management" },
+    { label: "Users and Access" },
     {
       label: `${action === "add"
         ? "Add Role"

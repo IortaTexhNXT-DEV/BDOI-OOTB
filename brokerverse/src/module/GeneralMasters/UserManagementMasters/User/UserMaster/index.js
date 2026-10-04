@@ -73,7 +73,7 @@ const UserMaster = () => {
     navigate(`/master/generals/usermanagement/user/edit/${rowData?.id}`);
   };
   const items = [
-    { label: "User Management" },
+    { label: "Users and Access" },
     {
       label: "User",
       url: "/master/generals/usermanagement/user",

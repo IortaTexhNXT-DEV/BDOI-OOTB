@@ -14,7 +14,7 @@ const Index = () => {
 
   const items = [
     {
-      label: "Insurance Management",
+      label: "Insurance",
       url: "/master/generals/insurancemanagement/insurancecompany",
     },
     {

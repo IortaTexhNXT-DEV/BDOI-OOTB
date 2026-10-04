@@ -66,7 +66,7 @@ h6 {
     flex-direction: column;
     align-items: flex-start;
     gap: 8px;
-    padding: 8px 12px 24px;
+    padding: 4px 4px 16px;
     text-decoration: none;
 
     img {
@@ -80,55 +80,6 @@ h6 {
       letter-spacing: 0.3px;
       color: $color-text-muted;
     }
-  }
-
-  // Navigation text is Header Blue on white.
-  .list li div,
-  .itemname__container,
-  .itemname__container.collapsed,
-  .singleitemname__container,
-  .singleitemname__container__active,
-  .submunusidebar__container li div {
-    color: $brand-navy !important;
-    font-family: $font-body;
-  }
-
-  .list li div:hover {
-    color: $brand-navy !important;
-  }
-
-  // Group rows carry no fill; only the entry of the current page is tinted (SideBarItem).
-  .divcontent__sidebar_overall,
-  .divcontent__sidebardeactive__overall {
-    background-color: transparent;
-    color: $brand-navy !important;
-
-    &:hover {
-      background-color: $color-bg;
-      color: $brand-navy !important;
-    }
-  }
-
-  .submunusidebar__container {
-    border-left-color: $color-border;
-
-    li div:hover {
-      background-color: $color-bg;
-      color: $brand-navy !important;
-    }
-  }
-
-  // Menu icons take the text colour instead of their white / indigo fills.
-  li svg [fill]:not([fill="none"]) {
-    fill: currentColor;
-  }
-
-  li svg [stroke]:not([stroke="none"]) {
-    stroke: currentColor;
-  }
-
-  .itemarrow__container svg path {
-    fill: currentColor;
   }
 
   // Menu search

@@ -22,6 +22,7 @@ import {
   canonicalAddressValue,
   addressOptionsWithSaved,
 } from "../../../../utility/addressHelpers";
+import { FieldsSkeleton } from "../../../../components/Skeletons";
 
 const ClaimDetailsCard = ({
   leadRefId,
@@ -727,8 +728,8 @@ const ClaimDetailsCard = ({
           <div className="claim__details__card__container__title">
             {t("claimDetails.claimRequest")}
           </div>
-          <div className="text-center p-4">
-            <div>{t("claimDetails.loadingPolicyAndLead")}</div>
+          <div className="p-4">
+            <FieldsSkeleton rows={3} columns={3} />
           </div>
         </Card>
       </div>

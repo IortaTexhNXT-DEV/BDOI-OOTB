@@ -7,8 +7,8 @@
  *  - "bv-date": most non-empty cells are dates (or date ranges, with or without a time): never wrap;
  *  - "bv-code": most non-empty cells are document numbers or codes (POL-2026-00001): never wrap;
  *  - "bv-actions": every cell holds only buttons or icons and no text: narrow, at the right, on one line.
- * It also marks a new table that is still waiting for its first rows ("bv-awaiting", below).
- * theme/bdoi/enterprise.scss styles those classes.
+ * theme/bdoi/enterprise.scss styles those classes. (A table waiting for its first rows shows skeleton rows:
+ * components/DataTable.)
  */
 const NUMERIC = /^[-+(]?\s*(?:[₱$€£¥฿]|PHP|USD|THB|EUR)?\s*-?[\d,]+(?:\.\d+)?\s*%?\)?$/i;
 const MONTH = "(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\\.?";
@@ -69,38 +69,10 @@ const markTable = (table) => {
   });
 };
 
-// How long a new, still empty table waits for its first rows before it shows its headings and "No records".
-export const FIRST_LOAD_MS = 1500;
-
 let scheduled = false;
-
-/**
- * First load of a table: while a new table has no rows yet (for at most FIRST_LOAD_MS), it carries "bv-awaiting":
- * its headings (whose widths change with the data), the "No records" line and the paginator stay invisible, and a
- * paged list holds the height its rows will need, so the table appears once, complete, instead of being drawn empty
- * and then re-laid out under the user's eyes.
- */
-const markFirstLoad = (dt, now) => {
-  const hasRows = !!dt.querySelector(":scope > .p-datatable-wrapper > table > tbody > tr:not(.p-datatable-emptymessage)");
-  if (hasRows || dt.dataset.bvLoaded) {
-    dt.dataset.bvLoaded = "1";
-    dt.classList.remove("bv-awaiting");
-    return;
-  }
-  if (!dt.dataset.bvSince) {
-    dt.dataset.bvSince = String(now);
-    // look again when the wait is over, even if nothing else changes on the page
-    window.setTimeout(() => window.requestAnimationFrame(scan), FIRST_LOAD_MS + 20);
-  }
-  const waiting = now - Number(dt.dataset.bvSince) < FIRST_LOAD_MS;
-  if (!waiting) dt.dataset.bvLoaded = "1";
-  dt.classList.toggle("bv-awaiting", waiting);
-};
 
 function scan() {
   scheduled = false;
-  const now = Date.now();
-  document.querySelectorAll(".main__content .p-datatable").forEach((dt) => markFirstLoad(dt, now));
   document.querySelectorAll(".main__content table").forEach(markTable);
 }
 
