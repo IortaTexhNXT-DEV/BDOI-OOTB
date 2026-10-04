@@ -314,9 +314,9 @@ picture(c, os.path.join(IMG, 's-exec-dashboard.png'), CONTENT - 1.8)
 add_par(c, 'Executive Dashboard: premium, policies, new business, claims, retention and receivables against target.',
         8, False, SKY, before=4, after=0, italic=True)
 spacer(doc, 10)
-stat_tiles(doc, [('1,291', 'APIs'), ('8', 'connectors'), ('32', 'scheduled jobs'), ('8', 'personas'), ('497', 'test cases')])
+stat_tiles(doc, [('1,356', 'APIs'), ('8', 'connectors'), ('35', 'scheduled jobs'), ('8', 'personas'), ('629', 'test cases')])
 add_par(doc, 'APIs, connectors, jobs and personas of the current build. Release test of 03 and 04 October 2026: 480 of the '
-             '497 test cases passed, a 23-step policy life cycle passed end to end, every role checked on its menu screens.',
+             '629 test cases run, a full UAT cycle of 433 business steps passed end to end, every role checked on its menu screens.',
         7.8, False, MUTED, WD_ALIGN_PARAGRAPH.CENTER, before=5, after=0)
 page_break(doc)
 
@@ -715,7 +715,7 @@ kicker(doc, 'Why iorta TechNXT')
 heading(doc, 'A finished product, documented and tested', 15, after=6)
 why = [
     ('Built for Philippine broking', 'CTPL, premium taxes, BIR returns and EOPT invoices, AML/CFT, IC registers and the Data Privacy Act are part of the product, not a project.'),
-    ('Tested before you see it', '497 test cases, a 634-test business rule regression on PostgreSQL and a full UAT cycle of 371 business steps from set-up to month-end close.'),
+    ('Tested before you see it', '629 test cases, a 1,113-test business rule regression on PostgreSQL and a full UAT cycle of 433 business steps from set-up to month-end close, plus a 52-check go-live rehearsal.'),
     ('Documented for your team', 'A user manual opened on each screen with F1, role decks, requirements, process flows, test plans, reports book and support runbooks.'),
     ('Configuration over code', 'Settings, masters, posting rules and the Product Configurator change the system. Upgrades stay simple because the code is the same for every broker.'),
     ('Accounting that closes', 'Every event posts through a posting rule; maker-checker, period locks, bank reconciliation and month-end checklist give the auditors their trail.'),
