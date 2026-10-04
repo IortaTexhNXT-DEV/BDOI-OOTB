@@ -124,7 +124,8 @@ async function renderFile(format, def, result, meta) {
     const summary = Object.entries(result.summary || {}).filter(([, v]) => v !== null && v !== undefined && v !== '' && typeof v !== 'object')
       .map(([k, v]) => [humanize(k), Number.isFinite(Number(v)) ? formatAmount(Number(v), AMOUNT.test(k) || !Number.isInteger(Number(v)) ? ctx.format?.decimals ?? 2 : 0) : String(v)]);
     const sections = summary.length ? [{ heading: 'Summary', table: { columns: ['Item', { label: 'Value', align: 'right' }], widths: [300, 160], rows: summary } }] : [];
-    return buildReportPdf({ ...ctx, title: def.name, params, columns, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize, sections });
+    return buildReportPdf({ ...ctx, title: def.name, params, columns, rows, totals: Object.keys(totals).length ? totals : null, pageSize: meta.pageSize, sections,
+      footerNote: ctx.brand?.reportFooterText || undefined });
   }
   const width = (c) => ({ money: 16, number: 12, integer: 10, date: 12 }[c.type] || Math.min(40, Math.max(12, String(c.label).length + 4)));
   const xcols = columns.map((c) => ({ key: c.key, header: c.label, type: c.type === 'number' ? 'number' : c.type, width: width(c) }));
@@ -155,7 +156,7 @@ function brandSheets(sheets, def, result, meta) {
   if (!b.excel?.logo) return sheets;
   const lh = meta.print?.letterhead || {};
   const reg = [lh.tin ? `TIN ${lh.tin}` : '', lh.licence ? `IC Licence No. ${lh.licence}` : '', ...(lh.addressLines || []).slice(0, 1)].filter(Boolean).join('   |   ');
-  const banner = [lh.name || meta.companyName, reg, `${def.name}: ${result.params.from} to ${result.params.to}`, b.footerText].filter(Boolean);
+  const banner = [lh.name || meta.companyName, reg, `${def.name}: ${result.params.from} to ${result.params.to}`, b.footerText, b.reportFooterText].filter(Boolean);
   return sheets.map((sh, i) => (i === 0 ? { ...sh, banner, logo: true } : sh));
 }
 

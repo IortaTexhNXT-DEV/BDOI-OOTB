@@ -19,6 +19,12 @@ import { allocateWidths, prepareTable, CELL_PAD } from './table.js';
 
 const COLORS = { text: '#1a1a1a', muted: '#5f6b76', rule: '#b8c2cc', zebra: '#f3f6f9', total: '#e3e9f0', headingBg: '#e9eff5' };
 const decoded = new WeakMap();
+/** Mix two #rrggbb colours (weight 0 = a, 1 = b). */
+const mixHex = (a, b, w) => {
+  const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [x, y] = [p(a), p(b)];
+  return `#${x.map((v, i) => Math.round(v + (y[i] - v) * w).toString(16).padStart(2, '0')).join('')}`;
+};
 
 /** Decoded logo image for a letterhead ({ buffer } or an already decoded image); cached per buffer. Also used for signatures. */
 function logoImage(letterhead) {
@@ -47,6 +53,10 @@ export class DocRenderer {
     this.headingBg = this.brand.headingBg || COLORS.headingBg;
     this.thBg = this.brand.tableHeaderBg || this.accent;
     this.thText = this.brand.tableHeaderText || '#ffffff';
+    // total and zebra rows: a tint of the theme's heading band (the default band keeps the original greys)
+    const band = this.brand.headingBg && this.brand.headingBg.toLowerCase() !== COLORS.headingBg ? this.brand.headingBg : null;
+    this.totalBg = band || COLORS.total;
+    this.zebraBg = band ? mixHex(band, '#ffffff', 0.55) : COLORS.zebra;
     this.fontScale = fontScale;
     this.pages = [];
     this.lh = spec.letterhead || null;
@@ -286,9 +296,9 @@ export class DocRenderer {
       if (this.ensure(h)) drawHeader();
       const p = this.page;
       if (isTotal) {
-        p.rect(this.M, this.y - h, this.avail, h, { fill: COLORS.total });
+        p.rect(this.M, this.y - h, this.avail, h, { fill: this.totalBg });
         p.line(this.M, this.y, this.M + this.avail, this.y, { color: '#6b7a89', width: 0.8 });
-      } else if (r % 2 === 1) p.rect(this.M, this.y - h, this.avail, h, { fill: COLORS.zebra });
+      } else if (r % 2 === 1) p.rect(this.M, this.y - h, this.avail, h, { fill: this.zebraBg });
       let x = this.M;
       lines.forEach((ls, i) => {
         ls.forEach((l, j) => {
