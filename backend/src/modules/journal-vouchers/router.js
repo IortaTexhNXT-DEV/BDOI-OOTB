@@ -8,6 +8,8 @@ import { ok, created } from '../../lib/respond.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import { pageParams, sendList } from '../accounting/lib/http.js';
 import * as svc from './service.js';
+import { buildPdf, sendPdf } from '../documents/pdf.js';
+import { journalVoucherDoc } from '../documents/finance.js';
 
 const { router, define } = moduleRouter('Journal Vouchers', '/journal-vouchers');
 const read = [requireAuth, requirePermission('read:journal-vouchers')];
@@ -78,6 +80,15 @@ define({
     await audit(req, { entity: 'journal_voucher', entityId: jv.id, action: 'create-correction', after: req.body });
     await askApproval(jv, req);
     created(res, svc.headerRow(jv), `Transaction Number ${jv.jv_number} is created`);
+  },
+});
+define({
+  method: 'GET', path: '/:id/pdf', summary: 'Printable journal voucher (PDF, broker letterhead and branding; prepared / approved signatures once posted)', screen: `${SCREEN} > Details > Print`, middleware: read,
+  query: { download: 1 }, response: '(application/pdf)',
+  handler: async (req, res) => {
+    const jv = await svc.jvDetail(pool, req.params.id);
+    const row = await svc.getJv(pool, req.params.id);
+    sendPdf(res, buildPdf(await journalVoucherDoc(jv, row)), `journal-voucher-${jv.transactionNumber || jv.id}.pdf`, req.query.download ? 'attachment' : 'inline');
   },
 });
 define({

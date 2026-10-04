@@ -17,8 +17,9 @@ import TwoFactorCodeForm from "../security/TwoFactorCodeForm";
 import TwoFactorEnrolment from "../security/TwoFactorEnrolment";
 import ChangePasswordForm from "../security/ChangePasswordForm";
 import ForgotPassword from "../security/ForgotPassword";
+import LoginArt from "../../../theme/runtime/LoginArt";
+import { useBranding } from "../../../theme/runtime/BrandingProvider";
 
-const bdoBannerImage = "/brand/login-panel.svg";
 const initialValue = {
   EmailAddress: "",
   Password: "",
@@ -48,13 +49,18 @@ const Login = () => {
   const languageOptions = useLanguageOptions();
   const currentLanguage =
     languageOptions.find((o) => i18n.language && i18n.language.startsWith(o.value))?.value || languageOptions[0]?.value || "en";
-  const systemName = useSelector(
+  // Branding (Theme and Branding, GET /api/branding) first, then the System Settings values
+  const { branding } = useBranding();
+  const login = branding?.theme?.login || {};
+  const storedSystemName = useSelector(
     (state) => state.systemSettingsReducer?.systemName || DEFAULT_SYSTEM_SETTINGS.systemName
   );
-  const logoUrl = useSelector(
+  const systemName = branding?.systemName || storedSystemName;
+  const storedLogoUrl = useSelector(
     (state) =>
       state.systemSettingsReducer?.logoUrl || DEFAULT_SYSTEM_SETTINGS.logoUrl
   );
+  const logoUrl = branding?.logoUrl || storedLogoUrl;
   const primaryColor = useSelector(
     (state) =>
       state.systemSettingsReducer?.primaryColor ||
@@ -257,19 +263,14 @@ const Login = () => {
     );
   }
 
-  const title = step === "signin" ? t("login.title", { name: systemName }) : headings[step][0];
+  const title = step === "signin" ? login.headline || t("login.title", { name: systemName }) : headings[step][0];
   const subtitle = step === "signin" ? t("login.subtitle") : headings[step][1];
+  const tagline = step === "signin" ? login.tagline : "";
 
   return (
     <div className="agent__container__login bv-auth">
       <CustomToast ref={toastRef} message={t("login.loginSuccess")} />
-      <div
-        className="bv-auth__art"
-        aria-hidden="true"
-        style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
-      >
-        <img src={bdoBannerImage} alt="" className="bv-auth__art-image" />
-      </div>
+      <LoginArt theme={branding?.theme} fallback={{ primaryColor, secondaryColor }} />
       <main className="bv-auth__panel">
         {showLanguagePicker(languageOptions) && (
           <div className="bv-auth__lang">
@@ -290,13 +291,16 @@ const Login = () => {
             </div>
             <h1 className="bv-auth__title">{title}</h1>
             {subtitle && <p className="bv-auth__subtitle">{subtitle}</p>}
+            {tagline && <p className="bv-auth__tagline">{tagline}</p>}
             <div className="bv-auth__body">{step === "signin" ? signInForm : stepBody}</div>
           </div>
         </div>
-        <footer className="bv-auth__footer">
-          <span>{t("login.poweredBy")}</span>
-          <img src="/bdoi/iorta-technxt.png" alt="iorta TechNXT" />
-        </footer>
+        {login.showPoweredBy !== false && (
+          <footer className="bv-auth__footer">
+            <span>{t("login.poweredBy")}</span>
+            <img src="/bdoi/iorta-technxt.png" alt="iorta TechNXT" />
+          </footer>
+        )}
       </main>
     </div>
   );

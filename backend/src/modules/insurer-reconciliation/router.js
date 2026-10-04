@@ -15,7 +15,8 @@ import { getSetting } from '../../lib/settings.js';
 import { companyName } from '../../lib/letterhead.js';
 import { writeXlsx } from '../../lib/xlsx.js';
 import { toCsv, uploadFile } from '../documents/tabular.js';
-import { buildPdf, sendPdf } from '../documents/pdf.js';
+import { printContext, renderPdf, sendPdf } from '../documents/pdf.js';
+import { excelBrand } from '../reports/service.js';
 import * as st from './statements.js';
 import * as mt from './matching.js';
 import * as rc from './reconcile.js';
@@ -195,7 +196,7 @@ define({
     const format = String(req.query.format || 'xlsx').toLowerCase();
     if (format === 'pdf') {
       const company = { name: await companyName(), system: (await getSetting('general.system_name')) ?? '' };
-      sendPdf(res, buildPdf(rc.reportPdfSpec(s, company)), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
+      sendPdf(res, await renderPdf(rc.reportPdfSpec(s, company)), `${base}.pdf`, req.query.download ? 'attachment' : 'inline');
       return;
     }
     const rows = rc.reportRows(s);
@@ -207,7 +208,7 @@ define({
     }
     const money = new Set([6, 7, 8, 9, 10, 11, 12, 13, 14]);
     const sum = s.summary;
-    const buf = writeXlsx({ title: `Insurer statement reconciliation ${s.statementNumber}`, sheets: [
+    const buf = writeXlsx({ title: `Insurer statement reconciliation ${s.statementNumber}`, brand: excelBrand(await printContext()), sheets: [
       { name: 'Reconciliation', columns: rc.REPORT_HEADER.map((h, i) => ({ header: h, type: money.has(i) ? 'money' : 'text', width: i === 16 ? 60 : 16 })), rows },
       { name: 'Summary', columns: [{ header: 'Item', width: 40 }, { header: 'Value', width: 20, type: 'auto' }], rows: [
         ['Insurer', s.insurerName], ['Statement', `${s.statementTypeLabel} ${s.statementRef || ''}`.trim()], ['Period', `${s.periodFrom} to ${s.periodTo}`], ['Status', s.status],

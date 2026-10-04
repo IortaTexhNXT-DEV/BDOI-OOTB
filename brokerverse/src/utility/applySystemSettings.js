@@ -12,6 +12,8 @@ import { setQuoteOptions } from "./quoteOptions";
  */
 export function applyThemeColors(primaryColor, secondaryColor) {
   const root = document.documentElement;
+  // the broker theme (Theme and Branding, src/theme/runtime/themeEngine.js) owns the colours once it is loaded
+  if (root.hasAttribute("data-bv-theme")) return;
   const primary = primaryColor || DEFAULT_SYSTEM_SETTINGS.primaryColor;
   const secondary = secondaryColor || DEFAULT_SYSTEM_SETTINGS.secondaryColor;
   root.style.setProperty("--bv-primary", primary);

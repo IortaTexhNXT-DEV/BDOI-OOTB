@@ -5,9 +5,10 @@
  *
  * Spec: { title, number, subtitle, params, meta: [[label, value]], sections: [...], letterhead, generatedAt,
  *   generatedBy, format, footerNote | footer, pageSize: 'A4' | 'A3' | 'LETTER', orientation: 'portrait' | 'landscape',
- *   autoFit (reports: shrink the font, then A3), pageNumbering: { label, start } (running page numbers of loose-leaf books) }
+ *   autoFit (reports: shrink the font, then A3), pageNumbering: { label, start } (running page numbers of loose-leaf books),
+ *   brand (modules/branding documentBranding: colours, footer line, logo), watermark ('UNSIGNED DRAFT' on drafts: printed across every page) }
  * Sections: { heading, rows: [[label, value]], columns: 2 } | { heading, table: { columns, rows, widths?, totals?,
- *   totalRow?, fontSize? } } | { heading, text } | { heading, signatures: ['Prepared by' | { label, name, title, image }] }
+ *   totalRow?, fontSize? } } | { heading, text } | { heading, signatures: ['Prepared by' | { label, name, title, image, date }] }
  *   | { note } | { spacer: points } | { pageBreak: true }
  */
 import { PAGE_SIZES } from './writer.js';
@@ -18,6 +19,12 @@ import { allocateWidths, prepareTable, CELL_PAD } from './table.js';
 
 const COLORS = { text: '#1a1a1a', muted: '#5f6b76', rule: '#b8c2cc', zebra: '#f3f6f9', total: '#e3e9f0', headingBg: '#e9eff5' };
 const decoded = new WeakMap();
+/** Mix two #rrggbb colours (weight 0 = a, 1 = b). */
+const mixHex = (a, b, w) => {
+  const p = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
+  const [x, y] = [p(a), p(b)];
+  return `#${x.map((v, i) => Math.round(v + (y[i] - v) * w).toString(16).padStart(2, '0')).join('')}`;
+};
 
 /** Decoded logo image for a letterhead ({ buffer } or an already decoded image); cached per buffer. Also used for signatures. */
 function logoImage(letterhead) {
@@ -39,14 +46,25 @@ export class DocRenderer {
     [this.W, this.H] = landscape ? [b, a] : [a, b];
     this.M = landscape ? 30 : 40;
     this.avail = this.W - 2 * this.M;
-    this.accent = spec.accentColor || '#1f4e79';
+    // one branding source (modules/branding/service.js documentBranding, through printContext)
+    this.brand = spec.brand || {};
+    this.accent = spec.accentColor || this.brand.accent || '#1f4e79';
+    this.headingColor = this.brand.headingColor || this.accent;
+    this.headingBg = this.brand.headingBg || COLORS.headingBg;
+    this.thBg = this.brand.tableHeaderBg || this.accent;
+    this.thText = this.brand.tableHeaderText || '#ffffff';
+    // total and zebra rows: a tint of the theme's heading band (the default band keeps the original greys)
+    const band = this.brand.headingBg && this.brand.headingBg.toLowerCase() !== COLORS.headingBg ? this.brand.headingBg : null;
+    this.totalBg = band || COLORS.total;
+    this.zebraBg = band ? mixHex(band, '#ffffff', 0.55) : COLORS.zebra;
     this.fontScale = fontScale;
     this.pages = [];
     this.lh = spec.letterhead || null;
-    this.logo = logoImage(this.lh);
+    this.logo = this.brand.showLogo === false ? null : logoImage(this.lh);
     this.logoHandle = this.logo ? writer.addImage(this.logo) : null;
     const note = spec.footerNote ?? spec.footer ?? '';
-    this.noteLines = note ? wrapText(note, 7, this.avail).slice(0, 3) : [];
+    // the document's own note (e.g. the receipt's BIR permit line), then the broker's footer line (licence)
+    this.noteLines = [...(note ? wrapText(note, 7, this.avail).slice(0, 3) : []), ...(this.brand.footerText ? wrapText(this.brand.footerText, 7, this.avail).slice(0, 2) : [])];
     this.bottom = 52 + this.noteLines.length * 9;
   }
 
@@ -81,7 +99,7 @@ export class DocRenderer {
     let logoBottom = top;
     let logoBox = null;
     if (this.logo) {
-      const maxH = this.W > 700 ? 40 : 46;
+      const maxH = Math.min(80, Math.max(24, Number(this.brand.logoHeight) || 46)) * (this.W > 700 ? 40 / 46 : 1);
       const s2 = Math.min(maxH / this.logo.height, 150 / this.logo.width);
       logoBox = [this.logo.width * s2, this.logo.height * s2];
       x0 = M + logoBox[0] + 14;
@@ -98,7 +116,7 @@ export class DocRenderer {
     const rightW = Math.min(Math.max(textWidth(title, titleSize, true), textWidth(`No. ${number}`, 10, true), textWidth(sub, 9), textWidth(this.spec.dateLine || '', 8.5)) + 2, maxRight);
     const titleLines = wrapText(title, titleSize, rightW, { bold: true });
     let ry = top - titleSize;
-    for (const l of titleLines) { p.text(W - M - textWidth(l, titleSize, true), ry, l, { size: titleSize, bold: true, color: this.accent }); ry -= titleSize + 3; }
+    for (const l of titleLines) { p.text(W - M - textWidth(l, titleSize, true), ry, l, { size: titleSize, bold: true, color: this.headingColor }); ry -= titleSize + 3; }
     if (number) { ry -= 2; p.text(W - M - textWidth(`No. ${number}`, 10, true), ry, `No. ${number}`, { size: 10, bold: true, color: COLORS.text }); ry -= 13; }
     for (const l of sub ? wrapText(sub, 9, rightW) : []) { p.text(W - M - textWidth(l, 9), ry, l, { size: 9, color: COLORS.muted }); ry -= 12; }
     if (this.spec.dateLine) { p.text(W - M - textWidth(this.spec.dateLine, 8.5), ry, this.spec.dateLine, { size: 8.5, color: COLORS.muted }); ry -= 12; }
@@ -126,7 +144,7 @@ export class DocRenderer {
     const left = this.company;
     const right = [this.spec.title, this.spec.number].filter(Boolean).join('  -  ');
     p.text(this.M, top, left, { size: 8.5, bold: true, color: COLORS.text });
-    p.text(this.W - this.M - textWidth(right, 8.5, true), top, right, { size: 8.5, bold: true, color: this.accent });
+    p.text(this.W - this.M - textWidth(right, 8.5, true), top, right, { size: 8.5, bold: true, color: this.headingColor });
     p.rect(this.M, top - 7, this.avail, 0.8, { fill: this.accent });
     this.y = top - 18;
   }
@@ -145,7 +163,18 @@ export class DocRenderer {
       const pn = this.spec.pageNumbering;
       const pg = pn ? `${pn.label ? `${pn.label} ` : ''}page ${pn.start + i} (${i + 1} of ${total})` : `Page ${i + 1} of ${total}`;
       p.text(this.W - this.M - textWidth(pg, 7), 28, pg, { size: 7, color: COLORS.muted });
+      if (this.spec.watermark) this.watermark(p, String(this.spec.watermark));
     });
+  }
+
+  /** Diagonal watermark across the page ("UNSIGNED DRAFT"), drawn over the content at low opacity. */
+  watermark(p, text) {
+    const size = Math.min(72, (Math.hypot(this.W, this.H) * 0.62) / Math.max(1, textWidth(text, 1, true)));
+    const angle = (Math.atan2(this.H, this.W) * 180) / Math.PI;
+    const w = textWidth(text, size, true);
+    const a = (angle * Math.PI) / 180;
+    p.rotatedText(this.W / 2 - (w / 2) * Math.cos(a) + (size / 3) * Math.sin(a), this.H / 2 - (w / 2) * Math.sin(a) - (size / 3) * Math.cos(a), text,
+      { size, color: '#c0392b', angle, opacity: 0.14 });
   }
 
   // ---------- sections ----------
@@ -154,9 +183,9 @@ export class DocRenderer {
     this.ensure(18 + 40);
     const p = this.page;
     this.y -= 4;
-    p.rect(this.M, this.y - 15, this.avail, 15, { fill: COLORS.headingBg });
+    p.rect(this.M, this.y - 15, this.avail, 15, { fill: this.headingBg });
     p.rect(this.M, this.y - 15, 2.5, 15, { fill: this.accent });
-    p.text(this.M + 8, this.y - 10.8, text, { size: 9.5, bold: true, color: this.accent });
+    p.text(this.M + 8, this.y - 10.8, text, { size: 9.5, bold: true, color: this.headingColor });
     this.y -= 21;
   }
 
@@ -201,7 +230,7 @@ export class DocRenderer {
     return src ? { src, handle: this.w.addImage(src) } : null;
   }
 
-  /** Signature blocks: { label, name?, title? (designation), image? (signature) } or a plain label. */
+  /** Signature blocks: { label, name?, title? (designation), image? (signature), date? (signed on) } or a plain label. */
   signatures(items, perRow) {
     const list = items.map((s) => (typeof s === 'string' ? { label: s } : s));
     const n = perRow || Math.min(list.length, this.W > 700 ? 5 : 4);
@@ -210,7 +239,9 @@ export class DocRenderer {
     for (let i = 0; i < list.length; i += n) {
       const row = list.slice(i, i + n);
       const withTitle = row.some((s) => s.title);
-      this.ensure(withTitle ? 72 : 62);
+      const withDate = row.some((s) => s.date);
+      const extra = withDate ? 9 : 0;
+      this.ensure((withTitle ? 72 : 62) + extra);
       const lineY = this.y - 38;
       row.forEach((s, k) => {
         const x = this.M + k * (bw + gap);
@@ -224,8 +255,9 @@ export class DocRenderer {
         if (s.name) this.page.text(x, lineY - 20, s.name, { size: 8, color: COLORS.text });
         else this.page.text(x, lineY - 20, 'Signature over printed name / date', { size: 6.5, color: COLORS.muted });
         if (s.title) this.page.text(x, lineY - 29, s.title, { size: 7, color: COLORS.muted });
+        if (s.date) this.page.text(x, lineY - (s.title ? 38 : 29), s.date, { size: 7, color: COLORS.muted });
       });
-      this.y = lineY - (withTitle ? 39 : 30);
+      this.y = lineY - (withTitle ? 39 : 30) - extra;
     }
   }
 
@@ -246,12 +278,12 @@ export class DocRenderer {
     const headerH = Math.max(...headerLines.map((l) => l.length)) * lead + 2 * padV;
     const drawHeader = () => {
       const p = this.page;
-      p.rect(this.M, this.y - headerH, this.avail, headerH, { fill: this.accent });
+      p.rect(this.M, this.y - headerH, this.avail, headerH, { fill: this.thBg });
       let x = this.M;
       headerLines.forEach((lines, i) => {
         lines.forEach((l, j) => {
           const tx = cols[i].align === 'right' ? x + widths[i] - CELL_PAD - textWidth(l, size, true) : x + CELL_PAD;
-          p.text(tx, this.y - padV - size * 0.92 - j * lead, l, { size, bold: true, color: '#ffffff' });
+          p.text(tx, this.y - padV - size * 0.92 - j * lead, l, { size, bold: true, color: this.thText });
         });
         x += widths[i];
       });
@@ -266,9 +298,9 @@ export class DocRenderer {
       if (this.ensure(h)) drawHeader();
       const p = this.page;
       if (isTotal) {
-        p.rect(this.M, this.y - h, this.avail, h, { fill: COLORS.total });
+        p.rect(this.M, this.y - h, this.avail, h, { fill: this.totalBg });
         p.line(this.M, this.y, this.M + this.avail, this.y, { color: '#6b7a89', width: 0.8 });
-      } else if (r % 2 === 1) p.rect(this.M, this.y - h, this.avail, h, { fill: COLORS.zebra });
+      } else if (r % 2 === 1) p.rect(this.M, this.y - h, this.avail, h, { fill: this.zebraBg });
       let x = this.M;
       lines.forEach((ls, i) => {
         ls.forEach((l, j) => {

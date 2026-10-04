@@ -20,6 +20,7 @@ import { assertAuthority } from '../access-control/service.js';
 import { renderTemplate } from './docs.js';
 import { companyName } from '../../lib/letterhead.js';
 import { printContext, buildPdf } from '../../lib/pdf/index.js';
+import { SIGNATURE_PLACEHOLDER, documentState, renderSignatureBlock } from '../e-signatures/service.js';
 import { formatDate } from '../../lib/pdf/format.js';
 import { daysBetween, parseJsonField, round2, storeUpload, toBool, toNum, today, unprocessable, usersWithRole } from './util.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
@@ -602,7 +603,23 @@ export async function claimDocument(id, documentName) {
   const ctx = await printContext();
   const vars = await docVars(row, ctx.format);
   const lines = (Array.isArray(templates[key]) ? templates[key] : String(templates[key]).split('\n')).map((l) => renderTemplate(l, vars, { html: false }));
-  const pdf = buildPdf({ ...ctx, ...claimDocSpec(key, lines, vars, ctx) });
+  // {{signature:<slot>}} lines print the signature mapped to the claim settlement letter (modules/e-signatures)
+  const sigCtx = { status: row.status, date: row.settled_at || row.settlement_approved_at || new Date(), approvedBy: row.settlement_approved_by, format: ctx.format, companyName: ctx.letterhead?.name };
+  const docType = /settle/i.test(key) ? 'claim-settlement-letter' : null;
+  const signed = {};
+  for (const l of lines) {
+    for (const m of String(l).matchAll(SIGNATURE_PLACEHOLDER)) {
+      const slot = m[1].toLowerCase();
+      if (!signed[slot]) signed[slot] = (docType && await renderSignatureBlock(docType, slot, sigCtx)) || { label: 'Authorized signature' };
+    }
+  }
+  const watermarkOf = async () => {
+    if (!docType || !Object.keys(signed).length) return undefined;
+    const state = documentState(docType, row.status);
+    if (state === 'cancelled') return 'CANCELLED';
+    return state === 'draft' ? ((await getSetting('signatures.draft_watermark', 'UNSIGNED DRAFT')) || undefined) : undefined;
+  };
+  const pdf = buildPdf({ ...ctx, ...claimDocSpec(key, lines, vars, ctx, signed), watermark: await watermarkOf() });
   return { buffer: pdf, contentType: 'application/pdf', fileName: `${key}.pdf` };
 }
 
@@ -611,7 +628,7 @@ export async function claimDocument(id, documentName) {
  * paragraphs; a "Signature: ____" line becomes a signature block. Letters, discharge vouchers and data sheets get the
  * signature lines they need.
  */
-export function claimDocSpec(title, lines, vars, ctx = {}) {
+export function claimDocSpec(title, lines, vars, ctx = {}, signed = {}) {
   const sections = [];
   let rows = [];
   let signatures = [];
@@ -619,6 +636,15 @@ export function claimDocSpec(title, lines, vars, ctx = {}) {
   for (const raw of lines) {
     const l = String(raw).trim();
     if (!l) { flush(); continue; }
+    const placeholders = [...l.matchAll(SIGNATURE_PLACEHOLDER)].map((m) => m[1].toLowerCase());
+    if (placeholders.length) {
+      flush();
+      signatures = [...signatures, ...placeholders.map((slot) => {
+        const b = signed[slot] || { label: 'Authorized signature' };
+        return { label: b.label, name: b.name || null, title: b.title || null, image: b.image || null, date: b.date || null };
+      })];
+      continue;
+    }
     if (/^signature\b/i.test(l) || /_{4,}/.test(l)) {
       flush();
       signatures = [...signatures, ...l.split(/\s{2,}/).map((x) => x.replace(/[:_\s]+$/g, '').replace(/_+/g, '').trim()).filter(Boolean).map((x) => (/^signature$/i.test(x) ? 'Signature over printed name' : x))];
@@ -631,7 +657,7 @@ export function claimDocSpec(title, lines, vars, ctx = {}) {
   }
   flush();
   const company = ctx.letterhead?.name || vars.companyName || '';
-  if (/acknowledg/i.test(title)) signatures = [{ label: 'Claims Department', name: company }];
+  if (Object.keys(signed).length) { /* mapped signatures: as placed in the template */ } else if (/acknowledg/i.test(title)) signatures = [{ label: 'Claims Department', name: company }];
   else if (/discharge/i.test(title)) signatures = [{ label: 'Insured / claimant', name: vars.insuredName }, { label: 'Witness' }, { label: `For ${company}`.trim() }];
   else if (!signatures.length && /data sheet/i.test(title)) signatures = [{ label: 'Prepared by' }, { label: 'Reviewed by' }];
   const meta = [['Claim no.', vars.claimNumber], ['Policy no.', vars.policyNumber], ['Insured', vars.insuredName], ['Insurer', vars.insurerName]].filter(([, v]) => v);

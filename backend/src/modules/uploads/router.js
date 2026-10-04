@@ -131,6 +131,7 @@ define({
     const key = safeKey(req.params[0]);
     const doc = await findDocument(key);
     if (!doc) throw notFound('File not found');
+    if (doc.category === 'e-signatures') throw forbidden('Signature images are revoked through E-signatures, not deleted');
     if (!canModify(req.user, doc)) throw forbidden('You can only delete files you uploaded or files of a module you can edit');
     await deleteObject(key);
     await query('INSERT INTO audit_log(user_id, username, entity, entity_id, action) VALUES ($1,$2,\'document\',$3,\'delete\')', [req.user.id, req.user.username, key]);
@@ -152,6 +153,8 @@ async function serveObject(req, res) {
   }
   const doc = await findDocument(key);
   if (!doc || !objectExists(key)) throw notFound('File not found');
+  // e-signature images are never served by key (modules/e-signatures: GET /api/e-signatures/:id/image checks the caller)
+  if (doc.category === 'e-signatures') throw forbidden('Signature images are not available through file links');
   const stored = String(doc.content_type || '').split(';')[0].trim().toLowerCase();
   const known = [...await allowedTypes(), ...INLINE_TYPES];
   const type = known.includes(stored) && stored !== 'text/html' ? stored : 'application/octet-stream';

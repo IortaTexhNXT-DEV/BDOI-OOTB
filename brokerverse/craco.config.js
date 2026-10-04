@@ -9,8 +9,22 @@ process.env.REACT_APP_BUILD_DATE = process.env.REACT_APP_BUILD_DATE || new Date(
 // the PrimeReact table with skeleton rows while the first rows load. The wrapper itself imports the PrimeReact
 // module by its file name, which this alias does not match.
 const DATATABLE_WRAPPER = path.resolve(__dirname, 'src/components/DataTable/index.jsx');
+const brandVars = require('./scripts/postcss-brand-vars');
 
 module.exports = {
+  // Runtime broker theming: literal brand colours in the compiled CSS become CSS custom properties
+  // (scripts/postcss-brand-vars.js; values set by src/theme/runtime/themeEngine.js).
+  style: {
+    postcss: {
+      mode: 'extends',
+      loaderOptions: (postcssLoaderOptions) => {
+        const opts = postcssLoaderOptions.postcssOptions || {};
+        const base = opts.plugins;
+        const plugins = typeof base === 'function' ? base() : base || [];
+        return { ...postcssLoaderOptions, postcssOptions: { ...opts, plugins: [...plugins, brandVars] } };
+      },
+    },
+  },
   webpack: {
     alias: {
       'primereact/datatable$': DATATABLE_WRAPPER,

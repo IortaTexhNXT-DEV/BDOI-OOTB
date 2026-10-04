@@ -16,7 +16,7 @@ import { getSetting } from '../../lib/settings.js';
 import { companyName } from '../../lib/letterhead.js';
 import { today } from '../../lib/dates.js';
 import { uploadFile } from '../documents/tabular.js';
-import { buildPdf, sendPdf } from '../documents/pdf.js';
+import { renderPdf, sendPdf } from '../documents/pdf.js';
 import { approve as approveJournal } from '../journal-vouchers/service.js';
 import { APPROVE, accountRow, getBankAccount, iso, isPeriod, linkedAccount, periodEnd, periodStart, round2, userNames } from './common.js';
 import * as st from './statements.js';
@@ -560,7 +560,7 @@ define({
   handler: async (req, res) => {
     const rec = await tx((db) => rc.getRec(db, req.params.id));
     const company = { name: await companyName(), system: (await getSetting('general.system_name')) ?? '' };
-    sendPdf(res, buildPdf(await rc.statementPdfSpec(rec, company)), `bank-reconciliation-${rec.recNumber}.pdf`, req.query.download ? 'attachment' : 'inline');
+    sendPdf(res, await renderPdf(await rc.statementPdfSpec(rec, company)), `bank-reconciliation-${rec.recNumber}.pdf`, req.query.download ? 'attachment' : 'inline');
   },
 });
 define({

@@ -5,6 +5,7 @@ import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
+import brandingService from "../../../services/brandingService";
 import InputTextField from "../../component/inputText";
 import SvgBlueArrow from "../../../assets/agentIcon/SvgBlueArrow";
 import endorsementService from "../../../services/endorsementService";
@@ -270,6 +271,8 @@ const EndorsementDetailedView = ({ action }) => {
           <div className="grid m-0 mt-3">
             <div className="col-12 md:col-12 lg:col-12 p-0 back__complete__btn__container ">
               <div className="complete__btn__container">
+                <Button className="p-button-outlined mr-2" icon="pi pi-print" label={t("endorsement.print", "Print endorsement")}
+                  onClick={() => brandingService.printEndorsement(endorsementId).catch(() => {})} />
                 {isCancelled ? (
                   <Button
                     className="complete__btn"

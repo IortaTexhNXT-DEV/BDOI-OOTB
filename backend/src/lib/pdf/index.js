@@ -14,6 +14,7 @@ import { one } from '../../db/pool.js';
 import { getSetting } from '../settings.js';
 import { businessTimeZone } from '../dates.js';
 import { getLetterhead } from '../letterhead.js';
+import { documentBranding } from '../../modules/branding/service.js';
 import { currentUser } from '../requestContext.js';
 import { PdfWriter, PAGE_SIZES } from './writer.js';
 import { DocRenderer } from './layout.js';
@@ -64,21 +65,27 @@ async function displayNameOf(user) {
 
 /**
  * What every printed document needs besides its content: { letterhead, format, generatedAt, generatedBy,
- * accentColor }. The user defaults to the signed-in user of the current request.
+ * accentColor, brand }. The one branding source of every print: the letterhead (primary company of Master > Company:
+ * logo, legal name, TIN, IC licence, address) and the document branding of the theme (Master > System Settings >
+ * Theme and Branding: colours, footer line, logo size). The user defaults to the signed-in user of the current request.
+ * `theme` prints with a theme that is not saved (the theme editor's sample document).
  */
-export async function printContext({ user } = {}) {
+export async function printContext({ user, theme = null } = {}) {
   const format = await printFormat();
   const who = user === undefined ? currentUser() : user;
+  const letterhead = await getLetterhead();
+  const brand = await documentBranding(letterhead, theme).catch(async () => ({ accent: (await getSetting('documents.accent_color', '#1f4e79')) || '#1f4e79' }));
   return {
-    letterhead: await getLetterhead(), format, generatedAt: formatDateTime(new Date(), format),
+    letterhead, format, generatedAt: formatDateTime(new Date(), format),
     generatedBy: (await displayNameOf(who)) || (typeof who === 'string' ? who : ''),
-    accentColor: (await getSetting('documents.accent_color', '#1f4e79')) || '#1f4e79',
+    accentColor: brand.accent, brand,
   };
 }
 
 /** printContext + buildPdf. */
 export async function renderPdf(spec, opts = {}) {
-  return buildPdf({ ...(await printContext(opts)), ...stripUndefined(spec) });
+  const ctx = await printContext(opts);
+  return buildPdf({ ...ctx, ...stripUndefined(spec), brand: { ...ctx.brand, ...(spec?.brand || {}) } });
 }
 
 /** printContext + buildPdfBatch (bulk prints: one receipt / voucher per page group). */

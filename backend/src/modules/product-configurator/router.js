@@ -7,7 +7,7 @@ import * as svc from './service.js';
 import { many } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
 import { evaluate, marketFor, RISK_FIELDS, OPERATORS, RULE_ACTIONS, RULE_TYPES } from './underwriting.js';
-import { MERGE_FIELDS, BLOCKS, DEFAULT_LAYOUTS, PRINT_AS, LAYOUT_EXTENSIONS, LAYOUT_MAX, previewSpec } from '../documents/productDocuments.js';
+import { MERGE_FIELDS, BLOCKS, DEFAULT_LAYOUTS, PRINT_AS, LAYOUT_EXTENSIONS, LAYOUT_MAX, previewDoc } from '../documents/productDocuments.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 
 /** Product Configurator: templates, configuration components, risk mapping, analytics and dashboard. */
@@ -218,7 +218,7 @@ define({
   middleware: read, response: 'application/pdf',
   handler: async (req, res) => {
     const d = await svc.getComponent('documents', req.params.id);
-    sendPdf(res, buildPdf(await previewSpec(d)), `${d.documentCode}-preview.pdf`);
+    sendPdf(res, buildPdf(await previewDoc(d)), `${d.documentCode}-preview.pdf`);
   },
 });
 

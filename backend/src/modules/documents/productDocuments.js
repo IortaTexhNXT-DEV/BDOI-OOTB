@@ -254,7 +254,7 @@ export const SAMPLE_RECORD = {
 };
 
 /** Preview of a document template (its layout or the default one) on the sample record. */
-export async function previewSpec(d) {
+export async function previewDoc(d) {
   const layout = present(d.layout) ? d.layout : DEFAULT_LAYOUTS[d.printAs] || DEFAULT_LAYOUTS['policy-schedule'];
   const x = { ...SAMPLE_RECORD, __coverTerms: null };
   return layoutDoc(layout, x, { title: d.documentName || DOC_TITLES[d.printAs] || 'Document', number: d.printAs === 'quotation-slip' ? x.quotationNumber : x.policyNumber });

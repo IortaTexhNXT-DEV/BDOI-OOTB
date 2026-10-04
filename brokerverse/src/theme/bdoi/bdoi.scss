@@ -37,8 +37,8 @@ h6 {
 
 .protected__layout__container {
   .protected__layout__sidebar__container {
-    background-color: $color-surface !important;
-    background: $color-surface !important;
+    background-color: var(--bv-sidebar-bg, #{$color-surface}) !important;
+    background: var(--bv-sidebar-bg, #{$color-surface}) !important;
     border-right: 1px solid $color-border;
     box-shadow: none;
 
@@ -58,7 +58,7 @@ h6 {
 }
 
 .sidebar__overall__container {
-  background-color: $color-surface;
+  background-color: var(--bv-sidebar-bg, #{$color-surface});
 
   // Brand lockup: the BDO Insure logo with the product name under it.
   .bdoi-brand {
@@ -70,8 +70,10 @@ h6 {
     text-decoration: none;
 
     img {
-      height: 36px;
+      height: var(--bv-logo-app-height, 36px);
+      max-width: 100%;
       width: auto;
+      object-fit: contain;
     }
 
     // logo with the environment label (DEV, SIT, UAT...) beside it; production shows the logo alone
@@ -85,7 +87,7 @@ h6 {
       font-size: 12px;
       font-weight: 700;
       letter-spacing: 0.3px;
-      color: $color-text-muted;
+      color: var(--bv-sidebar-muted, #{$color-text-muted});
     }
   }
 
@@ -151,7 +153,8 @@ h6 {
 // ---------------------------------------------------------------- shell: top bar
 
 .protected__layout__header .Agentnavbar__container {
-  background: $color-surface;
+  background: var(--bv-header-bg, #{$color-surface});
+  color: var(--bv-header-text, #{$color-heading});
   border-bottom: 1px solid $color-border;
   translate: 0 0;
   padding-top: 8px;
@@ -164,7 +167,7 @@ h6 {
 
   .notification__title {
     font-family: $font-heading;
-    color: $color-heading;
+    color: var(--bv-header-text, #{$color-heading});
   }
 
   .notification-button-hover:hover {
@@ -176,9 +179,33 @@ h6 {
 // ---------------------------------------------------------------- PrimeReact components
 
 .p-button {
-  border-radius: $radius-sm;
+  border-radius: var(--bv-radius-button, 8px);
   font-family: $font-heading;
   font-weight: 700;
+}
+
+// Filled buttons take the theme's button colours (zero-specificity :where, so a screen's own button colours still win).
+.p-button:where(:not(.p-button-outlined):not(.p-button-text):not(.p-button-link):not(.p-button-secondary):not(.p-button-success):not(.p-button-info):not(.p-button-warning):not(.p-button-help):not(.p-button-danger):not(.p-button-contrast)) {
+  background: var(--bv-button-bg, #0072d8);
+  border-color: var(--bv-button-bg, #0072d8);
+  color: var(--bv-button-text, #ffffff);
+
+  &:enabled:hover,
+  &:not(button):not(a):not(.p-disabled):hover {
+    background: var(--bv-button-hover-bg, #005fb4);
+    border-color: var(--bv-button-hover-bg, #005fb4);
+    color: var(--bv-button-text, #ffffff);
+  }
+}
+
+// Links in the content area (plain anchors) take the theme's link colour.
+.protected__layout__container .main__content a:not([class]) {
+  color: var(--bv-link, #0072d8);
+}
+
+// Keyboard focus uses the theme's focus colour.
+:focus-visible {
+  outline-color: var(--bv-focus-color, #0072d8);
 }
 
 .p-inputtext,
@@ -220,20 +247,20 @@ h6 {
 // text) with higher specificity; every head row is Header Blue with white text.
 .p-datatable .p-datatable-thead > tr > th,
 .protected__layout__content thead > tr > th {
-  background: $brand-navy !important;
-  color: #ffffff !important;
+  background: var(--bv-table-header-bg, #004ea8) !important;
+  color: var(--bv-table-header-text, #ffffff) !important;
   font-family: $font-heading;
   font-weight: 700;
-  border-color: rgba(255, 255, 255, 0.18);
+  border-color: var(--bv-table-header-rule, rgba(255, 255, 255, 0.18));
 
   * {
-    color: #ffffff !important;
+    color: var(--bv-table-header-text, #ffffff) !important;
   }
 
   &.p-highlight,
   &.p-sortable-column:not(.p-highlight):hover {
-    background: $brand-navy !important;
-    color: #ffffff !important;
+    background: var(--bv-table-header-bg, #004ea8) !important;
+    color: var(--bv-table-header-text, #ffffff) !important;
   }
 }
 

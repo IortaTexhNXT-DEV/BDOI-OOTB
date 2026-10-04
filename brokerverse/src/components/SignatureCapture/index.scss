@@ -1,0 +1,132 @@
+.bv-sig {
+  .bv-sig__capture {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eeeeee;
+
+    > .p-button {
+      align-self: flex-start;
+    }
+  }
+
+  .bv-sig__modes {
+    display: flex;
+    gap: 8px;
+  }
+
+  .bv-sig__row {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    label {
+      font-weight: 600;
+      font-size: 13px;
+    }
+  }
+
+  .bv-sig__consent {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 19px;
+    background: #f6f6f6;
+    padding: 10px 12px;
+    border-radius: 8px;
+  }
+
+  .bv-sig__upload {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    small {
+      color: #656565;
+    }
+  }
+
+  .bv-sig__img {
+    display: block;
+    width: 180px;
+    height: 60px;
+    object-fit: contain;
+    background: #ffffff;
+    border: 1px solid #e4e4e4;
+    border-radius: 6px;
+  }
+
+  .bv-sig__img--empty {
+    background: #f6f6f6;
+  }
+
+  .bv-sig__h {
+    margin: 16px 0 8px;
+  }
+
+  .bv-sig__none {
+    color: #656565;
+  }
+
+  .bv-sig__versions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      display: grid;
+      grid-template-columns: 190px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+  }
+
+  .bv-sig__meta {
+    font-size: 12px;
+    color: #656565;
+    margin-top: 4px;
+  }
+
+  .bv-sig__revoke {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+
+    .p-inputtext {
+      flex: 1;
+    }
+  }
+}
+
+.bv-sig-pad {
+  position: relative;
+  border: 1px dashed var(--bv-field-border, #99c1e7);
+  border-radius: 8px;
+  background: #ffffff;
+
+  canvas {
+    display: block;
+    width: 100%;
+    touch-action: none;
+    cursor: crosshair;
+  }
+
+  .bv-sig-pad__line {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    bottom: 36px;
+    border-bottom: 1px solid #c2c2c1;
+    pointer-events: none;
+  }
+
+  .bv-sig-pad__clear {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+  }
+}

@@ -9,7 +9,7 @@ import { printContext } from '../../lib/pdf/index.js';
 import { amountInWords, formatAmount, formatDate, humanize } from '../../lib/pdf/format.js';
 import { round2 } from '../../lib/money.js';
 import { num } from './common.js';
-import { signatoryFor, signatureBlock } from './signatory.js';
+import { signatureSection } from '../e-signatures/service.js';
 
 const money = (v) => round2(num(v));
 const present = (v) => v !== null && v !== undefined && String(v).trim() !== '' && String(v).trim() !== '-';
@@ -23,6 +23,16 @@ export const kv = (rows) => rows.filter((r) => r && present(r[1])).map(([a, b, o
  */
 export async function header(title, number, opts = {}) {
   return { title, number: number || '', ...(await printContext(opts)) };
+}
+
+/**
+ * Signature part of a document (modules/e-signatures: Master > System Settings > Theme and Branding > Document
+ * signatures): { watermark, section }. `ctx` { status, date, signatory, issuedBy, approvedBy, names }; `blocks` the
+ * document's own signature lines in print order ({ slot } for a mapped one, { label } for a blank line).
+ */
+export async function signatures(h, documentType, ctx, opts = {}) {
+  const r = await signatureSection(documentType, { format: h.format, companyName: brokerName(h), ...ctx }, opts);
+  return { watermark: r.watermark || undefined, section: r.section };
 }
 
 /** Formatters bound to a spec's formats: date(v), amount(v), ccy(v, code) = "PHP 1,234.00". */
@@ -175,12 +185,15 @@ export async function standardQuoteDoc(q) {
   const f = formatters(h);
   const security = q.participants?.length > 1 ? [securitySection(q.participants, q.currency, null, brokerName(h))] : [];
   const market = q.offers?.length ? [offersSection(q.offers, q.currency, f)] : [];
-  return { ...h, meta: kv([['Date', f.date(q.createdAt)], ['Valid until', f.date(q.validUntil)], ['Customer', customerOf(q.lead || {})], ['Status', q.quotationStatus],
+  const qr = q.id ? await one('SELECT created_by, agent_user_id, approved_by FROM quotes WHERE id::text = $1', [String(q.id)]).catch(() => null) : null;
+  const sig = await signatures(h, 'quotation', { status: q.quotationStatus, date: q.approvedAt || q.createdAt, signatory: q.authorizedSignature,
+    issuedBy: qr?.agent_user_id || qr?.created_by, approvedBy: qr?.approved_by }, { blocks: [{ slot: 'authorized', label: `For ${brokerName(h) || 'the broker'}` }], perRow: 2 });
+  return { ...h, watermark: sig.watermark, meta: kv([['Date', f.date(q.createdAt)], ['Valid until', f.date(q.validUntil)], ['Customer', customerOf(q.lead || {})], ['Status', q.quotationStatus],
     ['Product', q.productType], ['Policy type', await policyTypeLabel(q.insurancePolicyType)], ['Insurer', q.insuranceCompanyName], ['Currency', q.currency],
     ['Broker slip', q.brokerSlipNumber]]),
   sections: [riskSection(q, f), coverageSection(q, f), premiumTable(q, q.currency), await coverTerms(q), ...security, ...market,
     { heading: 'Remarks', text: q.remarks || 'This quotation is subject to the insurer\'s terms, conditions and final underwriting approval.' },
-    { signatures: [signatureBlock(`For ${brokerName(h) || 'the broker'}`, await signatoryFor(q.authorizedSignature))], perRow: 2 }] };
+    sig.section] };
 }
 
 /** Risk of a broker slip or placement slip: the motor vehicle, else the generic risk details, else the quote-shaped risk. */
@@ -249,14 +262,17 @@ export async function standardPolicyScheduleDoc(p) {
   const x = { ...q, ...p, ...policyPremium(p, q) };
   const h = await header('Policy Schedule', p.policyNumber);
   const f = formatters(h);
-  return { ...h, meta: kv([['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Period from', f.date(p.inception)], ['Period to', f.date(p.expiry)],
+  const pr = p.id ? await one('SELECT created_by, status FROM policies WHERE id::text = $1', [String(p.id)]).catch(() => null) : null;
+  const sig = await signatures(h, 'policy-schedule', { status: pr?.status || p.status, date: p.issuedDate || p.inception, issuedBy: pr?.created_by },
+    { blocks: [{ slot: 'authorized', label: `For ${brokerName(h) || 'the broker'}` }], perRow: 2 });
+  return { ...h, watermark: sig.watermark, meta: kv([['Insured', p.insuredName], ['Insurer', p.insuranceCompanyName], ['Period from', f.date(p.inception)], ['Period to', f.date(p.expiry)],
     ['Date issued', f.date(p.issuedDate)], ['Product', p.productName || p.productType], ['Policy type', p.policyTypeName || await policyTypeLabel(p.insurancePolicyType)],
     ['Sum insured', num(p.sumInsured) ? f.ccy(p.sumInsured, p.currency) : ''],
     ['Bill no.', p.billNumber], ['Payment status', p.paymentStatus ? humanize(p.paymentStatus) : ''], ['Quotation', q.quotationNumber], ['Currency', p.currency],
     // CTPL certificate of cover and its authentication code (Operations > CTPL Authentication)
     ['COC no.', p.cocNumber], ['CTPL authentication code', p.ctplAuthenticationCode], ['Insurer policy no.', p.insurerPolicyNumber]]),
   sections: [riskSection(x, f), coverageSection(x, f), premiumTable(x, p.currency), await coverTerms(x),
-    { heading: 'Declaration', text: 'Subject to the terms, conditions, clauses and warranties of the policy wording of the insurer.' }] };
+    { heading: 'Declaration', text: 'Subject to the terms, conditions, clauses and warranties of the policy wording of the insurer.' }, sig.section] };
 }
 
 /** Placing slip of an issued policy: the security (each insurer and its share); `focus` (insurer id) gives one participant's slip. */
@@ -295,7 +311,9 @@ export async function receiptDoc(r, lines, h0 = null) {
   const totals = ['TOTAL', ...[1, 2, 3, 4, 5].map((i) => (lines.length || i === 5 ? round2(applied.reduce((s, x) => s + num(x[i]), 0)) : ''))];
   const supplementary = title !== 'Official Receipt' ? (await getSetting('invoice.supplementary_note', 'THIS DOCUMENT IS NOT VALID FOR CLAIM OF INPUT TAX.')) || '' : '';
   const footer = [(await getSetting('documents.receipt_footer', '')) || '', supplementary].filter(Boolean).join(' ');
-  return { ...h, footerNote: footer,
+  const sig = await signatures(h, 'official-receipt', { status: r.receipt_status || r.status, date: r.received_date, issuedBy: r.created_by },
+    { blocks: [{ slot: 'authorized', label: 'Authorized signature' }], perRow: 3 });
+  return { ...h, footerNote: footer, watermark: sig.watermark,
     meta: kv([['Date', f.date(r.received_date)], ['Received from', r.customer_name || r.client_name], ['Customer code', r.customer_code],
       ['Amount', f.ccy(r.amount, currency), { bold: true }], ['Payment mode', paymentModeLabel(r.payment_mode)], ['Reference', r.reference_no],
       ['Transaction no.', r.transaction_number], ['Status', r.receipt_status || r.status]]),
@@ -304,7 +322,7 @@ export async function receiptDoc(r, lines, h0 = null) {
       { heading: `Applied to (${currency})`, table: { columns: ['Policy no.', { label: 'Net premium', type: 'money' }, { label: 'VAT', type: 'money' }, { label: 'DST', type: 'money' },
         { label: 'LGT', type: 'money' }, { label: 'Amount paid', type: 'money' }], rows: [...applied, totals], totalRow: true } },
       { heading: 'Remarks', text: r.remarks || 'Thank you for your payment.' },
-      { signatures: [{ label: 'Authorized signature' }], perRow: 3 },
+      sig.section,
     ] };
 }
 
@@ -322,7 +340,9 @@ export async function acknowledgementReceiptDoc(c) {
   const address = [cl.address, cl.city, cl.state].filter(present).join(', ');
   const status = c.status === 'confirmed' ? `Confirmed${c.receiptNumber ? `, official receipt ${c.receiptNumber}` : ''}` : c.status === 'rejected' ? 'Rejected' : 'Awaiting verification by Accounting';
   const note = (await getSetting('documents.acknowledgement_receipt_note', 'This acknowledgement receipt is not an official receipt. The official receipt is issued once the payment is verified by Accounting.')) || '';
-  return { ...h, footerNote: note,
+  const sig = await signatures(h, 'acknowledgement-receipt', { status: c.status, date: c.paymentDate, issuedBy: c.submittedById, names: { 'issuing-user': c.submittedBy } },
+    { blocks: [{ slot: 'received-by', label: 'Received by', name: c.submittedBy || null }, { label: 'Received from (client)' }], perRow: 2 });
+  return { ...h, footerNote: note, watermark: sig.watermark,
     meta: kv([['Date received', f.date(c.paymentDate)], ['Received from', c.clientName], ['Customer code', c.clientCode], ['TIN', cl.tin], ['Address', address],
       ['Amount', f.ccy(c.amount, currency), { bold: true }], ['Payment mode', c.paymentModeLabel], ['Reference', c.referenceNo], ['Status', status]]),
     sections: [
@@ -330,7 +350,7 @@ export async function acknowledgementReceiptDoc(c) {
       { heading: `Payment for (${currency})`, table: { columns: ['Policy no.', 'Bill no.', 'Official receipt', { label: 'Amount received', type: 'money' }],
         rows: [[val(c.policyNumber), val(c.billNumber), val(c.receiptNumber), money(c.amount)]] } },
       ...(present(c.remarks) ? [{ heading: 'Remarks', text: c.remarks }] : []),
-      { signatures: [{ label: 'Received by', name: c.submittedBy || null }, { label: 'Received from (client)' }], perRow: 2 },
+      sig.section,
     ] };
 }
 
@@ -347,7 +367,9 @@ export async function commissionDebitNoteDoc(dn, lines) {
     [`Less: expanded withholding tax (${pct(dn.ewtRate)} of commission)`, dn.expectedEwt ? -money(dn.expectedEwt) : 0], ['Net amount payable', money(dn.netPayable)]];
   if (dn.collectedAmount) totals.push(['Collected to date (cash + tax withheld)', -money(dn.collectedAmount)], ['Balance', money(dn.balance)]);
   const sum = (k) => round2(lines.reduce((s, l) => s + num(l[k]), 0));
-  return { ...h, meta: kv([['Date', f.date(dn.dnDate)], ['Due date', f.date(dn.dueDate)], ['Bill to', dn.insurerName], ['Insurer TIN', dn.insurerTin],
+  const sig = await signatures(h, 'debit-note', { status: dn.statusCode || dn.status, date: dn.dnDate, issuedBy: dn.createdById, approvedBy: dn.approvedById,
+    names: { 'issuing-user': dn.createdBy, 'approving-user': dn.approvedBy } }, { blocks: [{ slot: 'prepared-by', label: 'Prepared by' }, { slot: 'approved-by', label: 'Approved by' }], perRow: 3 });
+  return { ...h, watermark: sig.watermark, meta: kv([['Date', f.date(dn.dnDate)], ['Due date', f.date(dn.dueDate)], ['Bill to', dn.insurerName], ['Insurer TIN', dn.insurerTin],
     ['Address', dn.insurerAddress], ['Period', dn.periodFrom || dn.periodTo ? `${f.date(dn.periodFrom) || '-'} to ${f.date(dn.periodTo) || '-'}` : ''],
     ['Currency', dn.currency], ['Status', dn.status ? humanize(dn.status) : ''], ['Policies', String(lines.length)]]),
   sections: [
@@ -360,6 +382,32 @@ export async function commissionDebitNoteDoc(dn, lines) {
     { heading: `Amount due (${dn.currency || f.ccy(0).split(' ')[0]})`, table: { columns: ['Item', { label: 'Amount', type: 'money' }], widths: [375, 140], rows: totals } },
     { heading: 'Payment instructions', text: ((await getSetting('direct_bill.debit_note_remarks')) ?? '') },
     ...(dn.remarks ? [{ heading: 'Remarks', text: dn.remarks }] : []),
-    { signatures: [{ label: 'Prepared by' }, { label: 'Approved by' }], perRow: 3 },
+    sig.section,
   ] };
+}
+
+/**
+ * Endorsement (Operations > Endorsement > Print): the policy, the type and effective date, the premium change, every
+ * change group recorded on the endorsement (personal details, vehicle, coverage, extension ...) and the authorised
+ * signature once issued. `e` is endorsements/service.js#toEndorsement, `row` its endorsements row.
+ */
+export async function endorsementDoc(e, row = {}) {
+  const h = await header(e.isCancelPolicy ? 'Cancellation Endorsement' : 'Endorsement', e.endorsementNumber || e.id);
+  const f = formatters(h);
+  const skip = new Set(['summary', 'completionDetails', 'documentKey', 'documentUrl', 'endorsementTypeIds', 'id', 'endorsementId', 'policyId', 'clientId', 'receivableId', 'remarks']);
+  const scalar = (v) => v !== null && v !== undefined && typeof v !== 'object' && String(v).trim() !== '';
+  const changes = Object.entries(row.changes || {}).filter(([k]) => !skip.has(k));
+  const groups = changes.filter(([, v]) => v && typeof v === 'object' && !Array.isArray(v))
+    .map(([k, v]) => ({ heading: humanize(k), rows: kv(Object.entries(v).filter(([, x]) => scalar(x)).map(([a, x]) => [humanize(a), x])).slice(0, 40) }))
+    .filter((g) => g.rows.length);
+  const loose = kv(changes.filter(([, v]) => scalar(v)).map(([k, v]) => [humanize(k), v])).slice(0, 30);
+  const sig = await signatures(h, 'endorsement', { status: row.status || e.status, date: e.completedAt || e.effectiveDate || e.createdAt, issuedBy: row.created_by },
+    { blocks: [{ slot: 'authorized', label: `For ${brokerName(h) || 'the broker'}` }], perRow: 2 });
+  return { ...h, watermark: sig.watermark,
+    meta: kv([['Policy no.', e.policyNumber], ['Insured', e.insuredName || e.clientName], ['Customer code', e.clientCode],
+      ['Endorsement type', humanize(String(e.endorsementType || '').replace(/,/g, ', '))], ['Effective date', f.date(e.effectiveDate)], ['Policy expiry', f.date(e.policyExpiry)],
+      ['Status', e.status], ['Premium change', num(e.premiumDelta) ? f.ccy(e.premiumDelta) : 'None'], ['Cancellation', e.isCancelPolicy ? humanize(e.cancellationType || 'yes') : '']]),
+    sections: [...(loose.length ? [{ heading: 'Changes', rows: loose }] : []), ...groups,
+      { heading: 'Declaration', text: 'All other terms, conditions and warranties of the policy remain unchanged. This endorsement forms part of the policy.' },
+      ...(present(e.remarks) ? [{ heading: 'Remarks', text: e.remarks }] : []), sig.section] };
 }
