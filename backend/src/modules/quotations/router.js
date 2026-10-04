@@ -242,6 +242,17 @@ define({
   },
 });
 define({
+  method: 'POST', path: '/:id/underwriting-referral', summary: 'Approve or decline the underwriting referral of a quotation (acceptance rule Refer): a user with the rule\'s authority role and enough Underwriting referral authority (authority matrix); a decline rejects the quotation',
+  screen: `${SCREEN} > Quote detail > Underwriting referral`, middleware: canWrite,
+  request: { decision: 'approve', remarks: 'Vehicle inspected, accepted by the insurer underwriter', insurerReference: 'UW-2026-0042' },
+  response: { success: true, message: 'Referral approved', data: { ...example, underwritingReferral: { status: 'approved', ruleCodes: ['VEH_AGE_LIMIT'], decidedBy: 'processor1' } } },
+  handler: async (req, res) => {
+    const r = await svc.decideReferral(req.params.id, req.body || {}, req.user);
+    await audit(req, { entity: 'quotation', entityId: r.after.id, action: `referral-${r.referral.status}`, before: { underwritingReferral: r.before.doc?.underwritingReferral || null }, after: { underwritingReferral: r.referral } });
+    res.json({ success: true, message: r.referral.status === 'approved' ? 'Referral approved' : 'Referral declined', data: out(r.after) });
+  },
+});
+define({
   method: 'PATCH', path: '/:id/vehicle-info', summary: 'Save customer / vehicle information and photo keys on the quotation (convert-to-policy steps)', screen: `${SCREEN} > Convert to policy > Customer info / Vehicle photos`,
   middleware: [...canWrite, ownRecord('quote')], request: { plateNumber: 'ABC 1234', chassisNumber: 'JTDBT923', motorNumber: '2NR123', vehicleFrontSidePhoto: 'vehicle/abc.jpg' }, response: { ...example, success: true },
   handler: async (req, res) => {

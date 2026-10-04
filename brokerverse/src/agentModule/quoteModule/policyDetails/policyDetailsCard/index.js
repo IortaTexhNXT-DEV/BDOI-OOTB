@@ -61,6 +61,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
         VehicleBrand: existingPolicyDetails.vehicleBrand || "",
         VehicleType: existingPolicyDetails.vehicleType || "",
         ModelYear: existingPolicyDetails.modelYear || "",
+        VehicleUse: existingPolicyDetails.vehicleUse || "",
         VehicleModel: existingPolicyDetails.vehicleModel || "",
         ModelVariant: existingPolicyDetails.modelVariant || "",
         VehicleColor: existingPolicyDetails.vehicleColor || "",
@@ -79,6 +80,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
       VehicleBrand: "",
       VehicleType: "",
       ModelYear: "",
+      VehicleUse: "",
       VehicleModel: "",
       ModelVariant: "",
       VehicleColor: "",
@@ -137,6 +139,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
       vehicleBrand: values.VehicleBrand,
       vehicleType: values?.VehicleType,
       modelYear: values.ModelYear,
+      vehicleUse: values.VehicleUse || null,
       vehicleModel: values.VehicleModel,
       modelVariant: values.ModelVariant,
       vehicleColor: values.VehicleColor,
@@ -544,6 +547,16 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
                 {formik.errors.VehicleBrand}
               </div>
             )}
+          </div>
+          <div className="col-12 md:col-6 lg:col-6">
+            {/* acceptance rules of the product test the vehicle use (e.g. a PUV is declined); empty = assumed from the vehicle class */}
+            <DropdownField
+              label={t("agent.vehicleUse")}
+              value={formik.values.VehicleUse}
+              options={["Private", "Commercial", "PUV", "TNVS"].map((v) => ({ label: t(`agent.vehicleUses.${v}`), value: v }))}
+              onChange={(e) => formik.setFieldValue("VehicleUse", e.value)}
+              optionLabel="label"
+            />
           </div>
           <div className="col-12 md:col-6 lg:col-6">
             <DropdownField

@@ -31690,6 +31690,114 @@
         ]
       }
     },
+    "/document-templates/product-document/{documentId}/policy/{id}": {
+      "get": {
+        "operationId": "getDocumentTemplatesProductDocumentDocumentIdPolicyId",
+        "summary": "A product document template (Product Configurator > Document Manager, e.g. CTPL certificate) printed for a policy: its uploaded layout, else the default layout",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Front-end touchpoint: Operations > Policy > Policy detail > Documents\n\nAccess: read:policies",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Policy > Policy detail > Documents",
+        "x-permissions": [
+          "read:policies"
+        ]
+      }
+    },
+    "/document-templates/product-document/{documentId}/quote/{id}": {
+      "get": {
+        "operationId": "getDocumentTemplatesProductDocumentDocumentIdQuoteId",
+        "summary": "A product document template (e.g. member enrollment form) printed for a quotation",
+        "tags": [
+          "Documents"
+        ],
+        "description": "Front-end touchpoint: Operations > Quotation > Quote detail\n\nAccess: read:quotations",
+        "parameters": [
+          {
+            "name": "documentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Quotation > Quote detail",
+        "x-permissions": [
+          "read:quotations"
+        ]
+      }
+    },
     "/document-templates/quote-template-fire/{id}": {
       "get": {
         "operationId": "getDocumentTemplatesQuoteTemplateFireId",
@@ -69949,6 +70057,112 @@
         ]
       }
     },
+    "/product-configurator/acceptance-limits/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorAcceptanceLimitsIdHistory",
+        "summary": "Change history of a acceptance limit (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Acceptance limits\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Acceptance limits",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
     "/product-configurator/analytics": {
       "get": {
         "operationId": "getProductConfiguratorAnalytics",
@@ -70454,6 +70668,112 @@
         ]
       }
     },
+    "/product-configurator/commissions/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorCommissionsIdHistory",
+        "summary": "Change history of a commission structure (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Commission structures\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Commission structures",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
     "/product-configurator/coverages": {
       "get": {
         "operationId": "getProductConfiguratorCoverages",
@@ -70824,6 +71144,112 @@
         ]
       }
     },
+    "/product-configurator/coverages/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorCoveragesIdHistory",
+        "summary": "Change history of a coverage (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Coverages\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Coverages",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
     "/product-configurator/dashboard": {
       "get": {
         "operationId": "getProductConfiguratorDashboard",
@@ -71009,6 +71435,129 @@
           }
         },
         "x-screen": "Product Configurator > Dashboard",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/document-merge-fields": {
+      "get": {
+        "operationId": "getProductConfiguratorDocumentMergeFields",
+        "summary": "Layout format of document templates: merge fields, blocks, accepted files and the default layout of each document type",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Document Manager > Merge fields\n\nAccess: read:products, write:products",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "fields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "blocks": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "printAs": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "extensions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "maxLength": {
+                          "type": "integer"
+                        },
+                        "defaults": {
+                          "type": "object",
+                          "properties": {
+                            "policy-schedule": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "fields": [
+                      {
+                        "name": "PolicyNumber",
+                        "label": "Policy number"
+                      }
+                    ],
+                    "blocks": [
+                      {
+                        "name": "Premium",
+                        "label": "Premium breakdown"
+                      }
+                    ],
+                    "printAs": [
+                      "policy-schedule"
+                    ],
+                    "extensions": [
+                      ".txt",
+                      ".md"
+                    ],
+                    "maxLength": 20000,
+                    "defaults": {
+                      "policy-schedule": "= Policy Schedule"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Document Manager > Merge fields",
         "x-permissions": [
           "read:products",
           "write:products"
@@ -71385,6 +71934,311 @@
         ]
       }
     },
+    "/product-configurator/documents/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorDocumentsIdHistory",
+        "summary": "Change history of a document template (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Document templates\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Document templates",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/documents/{id}/layout": {
+      "get": {
+        "operationId": "getProductConfiguratorDocumentsIdLayout",
+        "summary": "Download the layout of a document template (the uploaded one, else the default layout of its document type) as a text file",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Document Manager > Download\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "text/plain",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Document Manager > Download",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/documents/{id}/preview": {
+      "get": {
+        "operationId": "getProductConfiguratorDocumentsIdPreview",
+        "summary": "Preview a document template on sample data (PDF)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Document Manager > Preview\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Document Manager > Preview",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/market": {
+      "get": {
+        "operationId": "getProductConfiguratorMarket",
+        "summary": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers\n\nAccess: read:products, write:products, read:quotations",
+        "parameters": [
+          {
+            "name": "productId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "restricted": {
+                          "type": "boolean"
+                        },
+                        "insurerIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "integer"
+                          }
+                        },
+                        "insurers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "integer"
+                              },
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "templateCodes": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "restricted": true,
+                    "insurerIds": [
+                      2
+                    ],
+                    "insurers": [
+                      {
+                        "id": 2,
+                        "name": "Malayan Insurance Co., Inc."
+                      }
+                    ],
+                    "templateCodes": [
+                      "MOT-003-2025"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers",
+        "x-permissions": [
+          "read:products",
+          "write:products",
+          "read:quotations"
+        ]
+      }
+    },
     "/product-configurator/market-mappings": {
       "get": {
         "operationId": "getProductConfiguratorMarketMappings",
@@ -71747,6 +72601,112 @@
         },
         "x-screen": "Product Configurator > Market mappings",
         "x-permissions": [
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/market-mappings/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorMarketMappingsIdHistory",
+        "summary": "Change history of a market mapping (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Market mappings\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Market mappings",
+        "x-permissions": [
+          "read:products",
           "write:products"
         ]
       }
@@ -72612,6 +73572,112 @@
             }
           }
         }
+      }
+    },
+    "/product-configurator/products/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorProductsIdHistory",
+        "summary": "Change history of a product template (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Product Templates > History\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Draft",
+                          "to": "Active"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Product Templates > History",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
       }
     },
     "/product-configurator/products/{id}/insurers": {
@@ -74204,6 +75270,112 @@
         ]
       }
     },
+    "/product-configurator/rating-factors/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorRatingFactorsIdHistory",
+        "summary": "Change history of a rating factor (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Rating factors\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Rating factors",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
     "/product-configurator/rating-parameters": {
       "get": {
         "operationId": "getProductConfiguratorRatingParameters",
@@ -74566,6 +75738,112 @@
         },
         "x-screen": "Product Configurator > Rating parameters",
         "x-permissions": [
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/rating-parameters/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorRatingParametersIdHistory",
+        "summary": "Change history of a rating parameter (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Rating parameters\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Rating parameters",
+        "x-permissions": [
+          "read:products",
           "write:products"
         ]
       }
@@ -75214,6 +76492,112 @@
             }
           }
         }
+      }
+    },
+    "/product-configurator/risk-mappings/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorRiskMappingsIdHistory",
+        "summary": "Change history of a risk mapping (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Risk Mapping > History\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Draft",
+                          "to": "Active"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Risk Mapping > History",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
       }
     },
     "/product-configurator/risk-mappings/{id}/section-options": {
@@ -76133,6 +77517,112 @@
         ]
       }
     },
+    "/product-configurator/taxes/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorTaxesIdHistory",
+        "summary": "Change history of a statutory tax (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Statutory taxs\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Statutory taxs",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
     "/product-configurator/underwriting-rules": {
       "get": {
         "operationId": "getProductConfiguratorUnderwritingRules",
@@ -76225,7 +77715,7 @@
       },
       "post": {
         "operationId": "postProductConfiguratorUnderwritingRules",
-        "summary": "Create a underwriting rule (required: ruleCode, ruleName, type, condition, action)",
+        "summary": "Create a underwriting rule (required: ruleCode, ruleName, type, action)",
         "tags": [
           "Product Configurator"
         ],
@@ -76294,9 +77784,6 @@
                   "type": {
                     "type": "string"
                   },
-                  "condition": {
-                    "type": "string"
-                  },
                   "action": {
                     "type": "string"
                   }
@@ -76307,7 +77794,6 @@
                 "ruleCode": "value",
                 "ruleName": "value",
                 "type": "value",
-                "condition": "value",
                 "action": "value"
               }
             }
@@ -76507,6 +77993,363 @@
         },
         "x-screen": "Product Configurator > Underwriting rules",
         "x-permissions": [
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/underwriting-rules/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorUnderwritingRulesIdHistory",
+        "summary": "Change history of a underwriting rule (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Underwriting rules\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Underwriting rules",
+        "x-permissions": [
+          "read:products",
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/underwriting/evaluate": {
+      "post": {
+        "operationId": "postProductConfiguratorUnderwritingEvaluate",
+        "summary": "Test a risk against the acceptance rules and rating factors of a template (or of the template governing a product / line)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Acceptance Rules > Test a risk\n\nAccess: read:products, write:products, read:quotations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "templateCode": {
+                          "type": "string"
+                        },
+                        "decision": {
+                          "type": "string"
+                        },
+                        "results": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "ruleCode": {
+                                "type": "string"
+                              },
+                              "outcome": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "loadingPercent": {
+                          "type": "integer"
+                        },
+                        "factors": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "templateCode": "MOT-003-2025",
+                    "decision": "referred",
+                    "results": [
+                      {
+                        "ruleCode": "VEH_AGE_LIMIT",
+                        "outcome": "referred"
+                      }
+                    ],
+                    "loadingPercent": 0,
+                    "factors": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Acceptance Rules > Test a risk",
+        "x-permissions": [
+          "read:products",
+          "write:products",
+          "read:quotations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "templateCode": {
+                    "type": "string"
+                  },
+                  "insurerId": {
+                    "type": "integer"
+                  },
+                  "risk": {
+                    "type": "object",
+                    "properties": {
+                      "modelYear": {
+                        "type": "integer"
+                      },
+                      "vehicleType": {
+                        "type": "string"
+                      },
+                      "totalSumInsured": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "templateCode": "MOT-003-2025",
+                "insurerId": 2,
+                "risk": {
+                  "modelYear": 2008,
+                  "vehicleType": "private_cars",
+                  "totalSumInsured": 800000
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/product-configurator/underwriting/options": {
+      "get": {
+        "operationId": "getProductConfiguratorUnderwritingOptions",
+        "summary": "What an acceptance rule can test and do: risk fields, operators, actions, rule types, authority roles, quote cover fields",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Acceptance Rules > Add / edit rule\n\nAccess: read:products, write:products",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "fields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "operators": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "actions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "types": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "value": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "fields": [
+                      {
+                        "value": "vehicleAge",
+                        "label": "Vehicle age (years)",
+                        "type": "number"
+                      }
+                    ],
+                    "operators": [
+                      "<="
+                    ],
+                    "actions": [
+                      "Refer"
+                    ],
+                    "types": [
+                      "Acceptance"
+                    ],
+                    "roles": [
+                      {
+                        "value": "processing",
+                        "label": "Processing Team"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Acceptance Rules > Add / edit rule",
+        "x-permissions": [
+          "read:products",
           "write:products"
         ]
       }
@@ -76877,6 +78720,112 @@
         },
         "x-screen": "Product Configurator > Approval workflows",
         "x-permissions": [
+          "write:products"
+        ]
+      }
+    },
+    "/product-configurator/workflows/{id}/history": {
+      "get": {
+        "operationId": "getProductConfiguratorWorkflowsIdHistory",
+        "summary": "Change history of a approval workflow (audit trail)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Product Configurator > Approval workflows\n\nAccess: read:products, write:products",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "action": {
+                            "type": "string"
+                          },
+                          "at": {
+                            "type": "string"
+                          },
+                          "user": {
+                            "type": "string"
+                          },
+                          "changes": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "field": {
+                                  "type": "string"
+                                },
+                                "from": {
+                                  "type": "string"
+                                },
+                                "to": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "action": "update",
+                      "at": "2026-01-01T00:00:00Z",
+                      "user": "admin",
+                      "changes": [
+                        {
+                          "field": "status",
+                          "from": "Active",
+                          "to": "Inactive"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Product Configurator > Approval workflows",
+        "x-permissions": [
+          "read:products",
           "write:products"
         ]
       }
@@ -80138,6 +82087,179 @@
               },
               "example": {
                 "submittedBy": "agent"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quotations/{id}/underwriting-referral": {
+      "post": {
+        "operationId": "postQuotationsIdUnderwritingReferral",
+        "summary": "Approve or decline the underwriting referral of a quotation (acceptance rule Refer): a user with the rule's authority role and enough Underwriting referral authority (authority matrix); a decline rejects the quotation",
+        "tags": [
+          "Quotations"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Underwriting referral\n\nAccess: write:quotations",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "quotationId": {
+                          "type": "string"
+                        },
+                        "quotationNumber": {
+                          "type": "string"
+                        },
+                        "quotationStatus": {
+                          "type": "string"
+                        },
+                        "leadRefId": {
+                          "type": "string"
+                        },
+                        "productType": {
+                          "type": "string"
+                        },
+                        "netPremium": {
+                          "type": "integer"
+                        },
+                        "valueAddedTax": {
+                          "type": "integer"
+                        },
+                        "documentaryStampTax": {
+                          "type": "number"
+                        },
+                        "localGovernmentTax": {
+                          "type": "number"
+                        },
+                        "grossPremium": {
+                          "type": "number"
+                        },
+                        "totalSumInsured": {
+                          "type": "integer"
+                        },
+                        "lead": {
+                          "type": "object",
+                          "properties": {
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "underwritingReferral": {
+                          "type": "object",
+                          "properties": {
+                            "status": {
+                              "type": "string"
+                            },
+                            "ruleCodes": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "decidedBy": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Referral approved",
+                  "data": {
+                    "quotationId": "qt_1",
+                    "quotationNumber": "QT-2026-00001",
+                    "quotationStatus": "Draft",
+                    "leadRefId": "ld_1",
+                    "productType": "Motor",
+                    "netPremium": 18500,
+                    "valueAddedTax": 2220,
+                    "documentaryStampTax": 2312.5,
+                    "localGovernmentTax": 138.75,
+                    "grossPremium": 23171.25,
+                    "totalSumInsured": 1200000,
+                    "lead": {
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz"
+                    },
+                    "underwritingReferral": {
+                      "status": "approved",
+                      "ruleCodes": [
+                        "VEH_AGE_LIMIT"
+                      ],
+                      "decidedBy": "processor1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Quotations > Quote detail > Underwriting referral",
+        "x-permissions": [
+          "write:quotations"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  },
+                  "remarks": {
+                    "type": "string"
+                  },
+                  "insurerReference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "approve",
+                "remarks": "Vehicle inspected, accepted by the insurer underwriter",
+                "insurerReference": "UW-2026-0042"
               }
             }
           }

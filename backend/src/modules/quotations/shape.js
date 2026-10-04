@@ -5,7 +5,9 @@ export const RESERVED = ['id', 'quotationId', 'quotationNumber', 'generatedQuota
   'createdBy', 'updatedBy', 'lead', 'premiumBreakdown', 'policyId', 'approvalSentTo', 'approvalSentAt', 'customerAcceptedAt',
   'submittedToInsurerAt', 'approvedBy', 'approvedAt', 'success', 'message', 'data', 'insured',
   // placement journey links and co-insurance rows are served from their own tables, never stored in the document
-  'participants', 'brokerSlipId', 'brokerSlipNumber', 'placementId', 'placementNumber', 'placementStatus', 'journey', 'offers'];
+  'participants', 'brokerSlipId', 'brokerSlipNumber', 'placementId', 'placementNumber', 'placementStatus', 'journey', 'offers',
+  // underwriting referral state is set by the acceptance rules and the referral decision only
+  'underwritingReferral'];
 
 export const stripReserved = (body) => Object.fromEntries(Object.entries(body || {}).filter(([k]) => !RESERVED.includes(k)));
 

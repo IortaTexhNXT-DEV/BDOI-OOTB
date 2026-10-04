@@ -22,6 +22,7 @@ import { clientFromLead, createClientInTx } from '../clients/service.js';
 import { issuePolicy, getPolicyRow } from '../policies/service.js';
 import { assertKyc, kycPrefill } from '../policies/kyc.js';
 import { premiumBreakdown } from '../quotations/premium.js';
+import { assertNotDeclined, assertReferralCleared } from '../product-configurator/underwriting.js';
 import { journeyFor, resolveLob, assertStep } from './journey.js';
 import { normaliseParticipants, writeParticipants, participantsOf, participantInputs, leadOf, legacyParticipantDetails } from './participants.js';
 import { getSlipRow, participantsFromOffers, riskFromSlip, assertParty, partyName } from './brokerSlips.js';
@@ -98,7 +99,7 @@ export async function placementById(id, db = null) {
 async function directBreakdown(body, lob, leadIc) {
   const netPremium = num(body.netPremium);
   if (!(netPremium > 0)) throw badRequest('netPremium (the premium agreed with the insurer) is required');
-  return premiumBreakdown({ lob, productType: body.productType, agreedNetPremium: netPremium, totalSumInsured: num(body.sumInsured), commissionRate: body.commissionRate,
+  return premiumBreakdown({ ...(body.doc || {}), riskDetails: body.riskDetails || {}, productId: body.productId || null, lob, productType: body.productType, agreedNetPremium: netPremium, totalSumInsured: num(body.sumInsured), commissionRate: body.commissionRate,
     discount: body.discount, accountPremiumOthers: body.accountPremiumOthers, includeCTPL: false, autoPassengerPersonalAccident: '' }, { insurerId: leadIc });
 }
 
@@ -131,6 +132,7 @@ async function fromQuote(db, body, user) {
   if (!allowed.includes(quoteStatusOut(q.status))) throw badRequest(`A placement slip can be created from a ${allowed.join(' / ')} quotation (current: ${quoteStatusOut(q.status)})`);
   const journey = await journeyFor({ lob: q.lob, productType: q.product_type, productId: q.product_id }, db);
   assertStep(journey, 'placementSlip', ['skip'], `The ${journey.lob} placement journey skips the Placement Slip: convert the quotation to a policy directly`);
+  assertReferralCleared(q, 'placement');
   const open = (await db.query("SELECT placement_number FROM placements WHERE quote_id = $1 AND status NOT IN ('cancelled','declined')", [q.id])).rows[0];
   if (open) throw conflict(`Quotation ${q.quote_number} already has placement slip ${open.placement_number}`);
   let parts = body.participants?.length ? await normaliseParticipants(body.participants, { db }) : await participantInputs('quote', q.id, db);
@@ -161,6 +163,7 @@ async function fromBrokerSlip(db, body) {
   const { parts, lead, chosen } = await participantsFromOffers(slip, body);
   const risk = riskFromSlip(slip, lead);
   const b = await premiumBreakdown({ ...risk, includeCTPL: false }, { insurerId: lead.insuranceCompanyId });
+  assertNotDeclined(b.underwriting, 'The placement');
   const { inception, expiry } = await period(body, slip.inception_date);
   await db.query('UPDATE insurer_offers SET selected = (id = ANY($2)), updated_at = now() WHERE broker_slip_id = $1', [slip.id, chosen.map((o) => o.id)]);
   await db.query("UPDATE broker_slips SET status = 'closed', updated_at = now() WHERE id = $1", [slip.id]);
@@ -193,6 +196,7 @@ async function direct(db, body, user, { source = 'direct', checkJourney = true }
   }
   const parts = await normaliseParticipants(body.participants || (body.insuranceCompanyId || body.insuranceCompanyName ? [{ insuranceCompanyId: body.insuranceCompanyId, insuranceCompanyName: body.insuranceCompanyName, sharePercent: 100 }] : []), { db });
   const b = await directBreakdown(body, lob, leadOf(parts).insuranceCompanyId);
+  assertNotDeclined(b.underwriting, 'The placement');
   const { inception, expiry } = await period(body);
   const doc = { ...(body.doc || {}), riskDetails: body.riskDetails || {}, premiumBreakdown: b, valueAddedTax: b.valueAddedTax, documentaryStampTax: b.documentaryStampTax,
     localGovernmentTax: b.localGovernmentTax, fireServiceTax: b.fireServiceTax, discount: b.discount, productType: body.productType };

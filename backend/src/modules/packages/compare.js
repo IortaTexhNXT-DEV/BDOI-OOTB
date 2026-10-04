@@ -16,6 +16,7 @@ import { resolveCommissionRate } from '../commission-rates/resolve.js';
 import { resolveLob } from '../placement/journey.js';
 import { createQuote } from '../quotations/service.js';
 import { premiumOnRate, rateTablesInForce } from './rateTables.js';
+import { marketFor } from '../product-configurator/underwriting.js';
 
 /** Default note on comparisons and bundle schedules (setting packages.comparison_disclaimer). */
 const DISCLAIMER = "Premiums are indicative and subject to the insurer's acceptance of the risk, the policy wording and the final underwriting information.";
@@ -43,6 +44,11 @@ export async function compareInsurers({ productId, sumInsured, lguCode = null, c
   if ((lguCode || city) && !lgu) throw badRequest('Validation failed', [{ path: 'lguCode', message: `No LGU tax rate in force for ${lguCode || city}` }]);
   let tables = await rateTablesInForce(db, profile.productId, on);
   if (Array.isArray(insurerIds) && insurerIds.length) tables = tables.filter((t) => insurerIds.map(Number).includes(t.insuranceCompanyId));
+  // only insurers on the product's market (Product Configurator > Market Mapping) are compared
+  const market = await marketFor({ productId: profile.productId }, db);
+  const enforced = market.restricted && (await getSetting('product.market_panel_enforced', true));
+  const offMarket = enforced ? tables.filter((t) => !market.insurerIds.includes(t.insuranceCompanyId)).map((t) => t.insurerName) : [];
+  if (enforced) tables = tables.filter((t) => market.insurerIds.includes(t.insuranceCompanyId));
   const columns = [];
   for (const t of tables) {
     const p = premiumOnRate(t, si);
@@ -61,6 +67,7 @@ export async function compareInsurers({ productId, sumInsured, lguCode = null, c
     product: { id: profile.productId, code: profile.code, name: profile.name, line: profile.line, lob, taxRegime: profile.regime },
     sumInsured: si, date: on, lgu: lgu ? { code: lgu.code, name: lgu.name, rate: lgu.rate } : null, currency: await baseCurrency(),
     columns, cheapestId: columns[0]?.insuranceCompanyId ?? null,
+    market: { restricted: enforced, templateCodes: market.templateCodes, insurers: market.insurers.map((i) => i.name), excluded: offMarket },
   };
 }
 

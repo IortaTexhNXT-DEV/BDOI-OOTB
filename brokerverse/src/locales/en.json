@@ -2845,7 +2845,14 @@
     "noSignatories": "No active signatory in the Signatories master yet.",
     "openSignatoryMaster": "Add one",
     "fst": "FST",
-    "ctpl": "CTPL"
+    "ctpl": "CTPL",
+    "vehicleUse": "Vehicle use",
+    "vehicleUses": {
+      "Private": "Private",
+      "Commercial": "Commercial",
+      "PUV": "Public utility vehicle (PUV)",
+      "TNVS": "TNVS (ride-hailing)"
+    }
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -3830,7 +3837,6 @@
     "activeProducts": "Active Products",
     "totalPremium": "Total Premium",
     "avgLossRatio": "Avg Loss Ratio",
-    "avgCommission": "Avg Commission",
     "productTemplates": "Product Templates",
     "performanceAnalytics": "Performance Analytics",
     "quickActions": "Quick Actions",
@@ -3877,11 +3883,10 @@
     "health": "Health",
     "property": "Property",
     "travel": "Travel",
-    "marine": "Marine"
+    "marine": "Marine",
+    "rulesInForce": "Acceptance rules in force"
   },
   "productTemplateManager": {
-    "cardTitle": "Product Template Configuration",
-    "productTemplates": "Product Templates",
     "createTemplate": "Create Template",
     "templateCode": "Template Code",
     "productName": "Product Name",
@@ -3921,7 +3926,17 @@
     "reactivate": "Reactivate",
     "product": "Product",
     "selectProduct": "Select a product",
-    "selectLineOfBusiness": "Select a line of business"
+    "selectLineOfBusiness": "Select a line of business",
+    "inUse": "In use",
+    "inUseYes": "In use",
+    "inUseHelp": "Applied by the business flow to quotations, Requests for Quotation, placements and printed documents of its product",
+    "notInUse": "Not applied: another template is in use for this product",
+    "expiryDate": "Expiry date",
+    "insurers": "Insurer panel",
+    "components": "Configuration",
+    "componentCounts": "{{coverages}} coverages, {{ratingFactors}} rating factors, {{underwritingRules}} acceptance rules",
+    "confirmDeactivate": "Retire template {{code}}? It is no longer applied to new business.",
+    "confirmActivate": "Activate template {{code}}?"
   },
   "productRiskMapping": {
     "cardTitle": "Risk Mapping",
@@ -3946,7 +3961,7 @@
     "failedLoadDetail": "Failed to load product",
     "loading": "Loading...",
     "notFound": "Product not found",
-    "back": "← Products",
+    "back": "Risk Mapping",
     "definedBy": "defined by",
     "updated": "Product updated",
     "updatedColumn": "Updated",
@@ -3984,22 +3999,24 @@
     "deferredMeasureBody": "A peril's cover is a plain typed sum insured — no per-occurrence / aggregate / first-loss distinction.",
     "deferredPremiumTitle": "Premium.",
     "deferredPremiumBody": "Typed once at policy level. There is no rate × sum-insured calculation, and none is implied.",
-    "deferredBindingTitle": "Product ↔ quote binding.",
-    "deferredBindingBody": "A quote can add any section; this definition does not constrain it yet.",
+    "deferredBindingTitle": "Product and quote.",
+    "deferredBindingBody": "The IAR prospect and quotation screens offer only the active sections configured here, with their default rates.",
     "deferredCommissionTitle": "Per-section commission.",
     "deferredCommissionBody": "Out of scope — commission is one blended line on the policy premium.",
     "validation": "Validation",
     "configuration": "Configuration",
     "genericHelp": "Definition: {{definition}}. Configuration for this LOB will be defined here and integrated into create-prospect later.",
-    "notIntegrated": "Not integrated into create-prospect / quote flows yet.",
+    "notIntegrated": "Reference only: this definition is not read by the prospect or quotation screens yet.",
     "typedConfig": "Typed configuration (JSON)",
     "saveConfig": "Save configuration",
     "invalidJson": "Configuration must be valid JSON",
-    "sectionUpdated": "Section updated"
+    "sectionUpdated": "Section updated",
+    "usage": "The IAR risk sections are used by the IAR prospect and quotation screens: only the active sections are offered, with their default rates. The other definitions are kept for reference and are not read by the quotation screens yet.",
+    "usedBy": "Used by",
+    "usedByIar": "IAR prospect and quotation",
+    "referenceOnly": "Reference only"
   },
   "coverageBuilder": {
-    "cardTitle": "Coverage Configuration Builder",
-    "pageTitle": "Insurance Coverage Management",
     "addCoverage": "Add Coverage",
     "code": "Code",
     "coverageName": "Coverage Name",
@@ -4020,12 +4037,21 @@
     "saved": "Coverage saved",
     "failedToSave": "Failed to save coverage",
     "mandatory": "Mandatory",
-    "optional": "Optional"
+    "optional": "Optional",
+    "quoteField": "Priced on quotation as",
+    "notPriced": "Not a quoted cover",
+    "quoteFields": {
+      "lossAndDamageCoveragePremium": "Own damage / theft",
+      "actsOfNaturePremium": "Acts of nature",
+      "roadsideAssistancePremium": "Roadside assistance",
+      "personalAccidentCoverPremium": "Personal accident",
+      "bodilyInjuryCoveragePremium": "Bodily injury",
+      "propertyDamageCoveragePremium": "Property damage",
+      "APPAcoveragePremium": "Auto passenger personal accident",
+      "ctplCoveragePremium": "CTPL"
+    }
   },
   "ratingEngine": {
-    "cardTitle": "Rating Engine Configuration",
-    "pageTitle": "Rating Factors & Calculation Rules",
-    "testCalculator": "Test Calculator",
     "addFactor": "Add Factor",
     "ratingRules": "Rating Rules",
     "condition": "Condition",
@@ -4035,7 +4061,6 @@
     "factorName": "Factor Name",
     "type": "Type",
     "status": "Status",
-    "rulesCount": "Rules Count",
     "actions": "Actions",
     "configureFactor": "Configure Rating Factor",
     "saveFactor": "Save Factor",
@@ -4046,22 +4071,24 @@
     "failedToSave": "Failed to save factor",
     "multiplicative": "Multiplicative",
     "additive": "Additive",
-    "discount": "Discount"
+    "discount": "Discount",
+    "ratesOn": "Rates on",
+    "noField": "Not set",
+    "bands": "Bands",
+    "band": "Band",
+    "bandsHelp": "A band is a range (0-5, > 10, 3+), a value (Concrete) or Standard (any value). The factor of the matching band is applied; Standard applies when no other band matches.",
+    "bandsRequired": "Add at least one band",
+    "addBand": "Add band",
+    "removeBand": "Remove band",
+    "appliedFactors": "Rating factors applied"
   },
   "underwritingRules": {
-    "cardTitle": "Acceptance Rules (insurer underwriting guidelines)",
-    "pageTitle": "Insurer Acceptance Rules",
     "addRule": "Add Rule",
-    "acceptanceRules": "Acceptance Rules ({{count}})",
-    "validationRules": "Validation Rules ({{count}})",
-    "loadingRules": "Loading Rules ({{count}})",
     "ruleCode": "Rule Code",
     "ruleName": "Rule Name",
     "type": "Type",
     "action": "Action",
     "authorityLevel": "Authority Level",
-    "loadingDescription": "Loading Description",
-    "configureRule": "Configure Acceptance Rule",
     "saveRule": "Save Rule",
     "error": "Error",
     "failedToLoad": "Failed to load rules",
@@ -4074,7 +4101,87 @@
     "autoAccept": "Auto-Accept",
     "refer": "Refer",
     "decline": "Decline",
-    "applyLoading": "Apply Loading"
+    "applyLoading": "Apply Loading",
+    "rule": "Rule",
+    "insurer": "Insurer",
+    "allInsurers": "All insurers",
+    "insurerHelp": "Leave All insurers for a guideline every insurer applies; pick an insurer for its own guideline.",
+    "field": "Risk field",
+    "operator": "Operator",
+    "value": "Value",
+    "valueNumber": "Enter a number",
+    "whenTrue": "Yes",
+    "compareWith": "Compare with another field",
+    "fixedValue": "A fixed value",
+    "factor": "Multiplied by",
+    "otherwise": "When the condition is not met",
+    "loadingPercent": "Loading %",
+    "loadingRequired": "A loading rule needs the loading % (above 0)",
+    "authorityRequired": "Choose the role that may approve the referral",
+    "authorityMissing": "Not set",
+    "authorityHelp": "Users of this role approve the referral, within their Underwriting referral limit in the authority matrix.",
+    "noReferral": "No referral",
+    "selectRole": "Select a role",
+    "message": "Message",
+    "otherwiseMessage": "Message when not met",
+    "exceptions": "Exceptions",
+    "outcomeColumn": "Outcome",
+    "editRule": "Edit acceptance rule",
+    "preview": "Rule",
+    "testRisk": "Test a risk",
+    "runTest": "Run test",
+    "decision": "Decision",
+    "result": "Result",
+    "types": {
+      "Acceptance": "Acceptance",
+      "Validation": "Validation",
+      "Referral": "Referral",
+      "Loading": "Loading"
+    },
+    "actions": {
+      "Auto-Accept": "Auto-accept",
+      "Refer": "Refer",
+      "Decline": "Decline",
+      "Apply Loading": "Apply loading"
+    },
+    "actionHelp": {
+      "Auto-Accept": "The risk is accepted when the condition holds; otherwise the quotation is referred or declined.",
+      "Refer": "When the condition holds the quotation waits for approval by the authority role.",
+      "Decline": "When the condition holds the quotation is refused with the message.",
+      "Apply Loading": "When the condition holds the loading % is added to the net premium."
+    },
+    "outcome": {
+      "autoAccept": "Accept; otherwise {{otherwise}}",
+      "otherwiseRefer": "refer",
+      "otherwiseDecline": "decline",
+      "refer": "Refer",
+      "decline": "Decline",
+      "loading": "Add {{percent}}% loading"
+    },
+    "outcomes": {
+      "accepted": "Accepted",
+      "referred": "Referred",
+      "declined": "Declined",
+      "loaded": "Loading added",
+      "passed": "Not applicable",
+      "not-evaluated": "Not evaluated"
+    },
+    "decisions": {
+      "accepted": "The risk is accepted",
+      "referred": "The quotation would be referred",
+      "declined": "The quotation would be declined"
+    },
+    "risk": {
+      "modelYear": "Model year",
+      "vehicleUse": "Vehicle use",
+      "sumInsured": "Sum insured",
+      "fairMarketValue": "Fair market value",
+      "driverAge": "Driver age",
+      "claims": "Claims in the last 3 years",
+      "members": "Number of members",
+      "modified": "Vehicle has modifications",
+      "floodProne": "Flood-prone location"
+    }
   },
   "approvalWorkflows": {
     "cardTitle": "Product Approval Workflows",
@@ -4095,8 +4202,6 @@
     "addStage": "Add Stage"
   },
   "marketMapping": {
-    "cardTitle": "Product Market Mapping",
-    "pageTitle": "Insurer Product Mapping & Performance",
     "mapProduct": "Map Product",
     "product": "Product",
     "insurer": "Insurer",
@@ -4105,16 +4210,23 @@
     "overridePercent": "Override %",
     "target": "Target",
     "ytdPerformance": "YTD Performance",
-    "ofTarget": "of target",
     "status": "Status",
     "error": "Error",
     "failedToLoad": "Failed to load market mappings",
-    "failedToSave": "Failed to save mapping"
+    "failedToSave": "Failed to save mapping",
+    "agreedCommission": "Agreed comm. % (ref.)",
+    "commissionNote": "The agreed commission, override and profit share are kept for reference; commission on policies is taken from the Commission Rate Matrix.",
+    "editMapping": "Edit market mapping",
+    "valid": "Valid",
+    "validFrom": "Valid from",
+    "validTo": "Valid to",
+    "profitShare": "Profit share %",
+    "specialTerms": "Special terms",
+    "policies": "policies",
+    "ofTargetValue": "{{percent}}% of target",
+    "ofTargetAria": "{{percent}} percent of target"
   },
   "documentManager": {
-    "cardTitle": "Document Template Manager",
-    "pageTitle": "Product Document Templates",
-    "uploadTemplate": "Upload Template",
     "format": "Format",
     "documentCode": "Document Code",
     "documentName": "Document Name",
@@ -4127,12 +4239,40 @@
     "preview": "Preview",
     "error": "Error",
     "failedToLoad": "Failed to load documents",
-    "uploadFailed": "Upload failed",
     "failedToSave": "Failed to save document",
-    "noFile": "No template file uploaded"
+    "document": "Document",
+    "addTemplate": "Add document template",
+    "editTemplate": "Edit document template",
+    "printAs": "Printed as",
+    "notPrinted": "Not printed",
+    "printAsOptions": {
+      "policy-schedule": "Policy schedule",
+      "ctpl-certificate": "CTPL certificate",
+      "quotation-slip": "Quotation slip",
+      "member-enrollment": "Member enrollment form"
+    },
+    "stages": {
+      "Quotation": "Quotation",
+      "Policy Issuance": "Policy issuance"
+    },
+    "layout": "Layout",
+    "uploaded": "Uploaded {{file}}",
+    "standardLayout": "Standard layout",
+    "useStandard": "Use the standard layout",
+    "uploadLayout": "Upload layout",
+    "uploadHelp": "A text file ({{extensions}}) with merge fields; see Merge fields. Download gives the current layout to start from.",
+    "mergeFields": "Merge fields",
+    "formatHelp": "A layout is a text file ({{extensions}}). The first line starting with = is the title, # starts a section, Label: value lines are rows, other lines are paragraphs, and a block on its own line inserts a generated table. Every generated document is a PDF on the company letterhead.",
+    "placeholder": "Merge field",
+    "meaning": "Prints",
+    "fieldsUsed": "Merge fields used: {{fields}}",
+    "onlyText": "Upload a text file ({{extensions}}): Word, Excel and PDF files cannot be merged",
+    "emptyLayout": "The file is empty",
+    "layoutTooLong": "The layout is longer than {{max}} characters",
+    "unknownFields": "Unknown merge field(s): {{fields}}",
+    "noFields": "The layout has no merge field: it would print the same text for every record"
   },
   "productAnalytics": {
-    "cardTitle": "Product Performance Analytics",
     "premiumTrend": "Premium Trend",
     "categoryDistribution": "Category Distribution",
     "topProductsPerformance": "Top Products Performance",
@@ -4144,7 +4284,11 @@
     "lossRatio": "Loss Ratio",
     "profitMargin": "Profit Margin",
     "error": "Error",
-    "failedToLoad": "Failed to load analytics"
+    "failedToLoad": "Failed to load analytics",
+    "totalPremium": "Premium written",
+    "products": "Products with policies",
+    "growth": "Growth (12 months)",
+    "noData": "No policies issued yet: analytics appear once policies are issued"
   },
   "remittanceReports": {
     "title": "Remittance Reports",
@@ -7242,7 +7386,64 @@
   "productConfigurator": {
     "confirmDelete": "Delete {{name}}?",
     "template": "Template",
-    "allProducts": "All products"
+    "allProducts": "All products",
+    "title": "Product Configurator",
+    "breadcrumb": "Breadcrumb",
+    "screens": {
+      "dashboard": "Dashboard",
+      "templates": "Product Templates",
+      "coverages": "Coverage Builder",
+      "rating": "Rating Engine",
+      "underwriting": "Acceptance Rules",
+      "documents": "Document Manager",
+      "marketMapping": "Market Mapping",
+      "riskMapping": "Risk Mapping",
+      "analytics": "Product Analytics"
+    },
+    "usage": {
+      "templates": "The template marked In use is the one the business flow applies to its product: motor quotations are priced with the motor pricing template; its acceptance rules, rating factors, insurer market and document templates take effect on quotations, Requests for Quotation, placements and printed documents.",
+      "coverages": "Covers of each product template. For the covers quoted (Priced on quotation as), the deductible and main exclusions are printed as Cover terms on the quotation slip and the policy schedule. Cover premiums themselves are priced on the quotation screens with the template's motor tariff.",
+      "rating": "Rating factors adjust the net premium of a quotation of the template in use: the factor of the band the risk falls in multiplies the premium (Multiplicative, Discount) or adds a percentage (Additive). A factor applies only when the quotation carries its field, for example the vehicle's model year for vehicle age.",
+      "underwriting": "Insurer underwriting guidelines, checked when a quotation is priced or saved, when a Request for Quotation approaches an insurer and when a placement is created. Auto-accept passes the risk when the condition holds and otherwise refers (or declines) it; Refer holds the quotation until a user of the authority role approves it within the authority matrix (Underwriting referral approval); Decline refuses it with the message; Apply loading adds the loading to the net premium. A rule applies to all insurers or to one insurer.",
+      "documents": "Document templates of each product template, printed from the policy and quotation screens and attached to e-mails. Upload a layout (text file with merge fields) to replace the standard layout of the policy schedule, quotation slip, CTPL certificate or member enrollment form; without an upload the standard layout is printed.",
+      "marketMapping": "The insurers that offer each product. Only insurers on a product's market (the template's insurer panel and the active mappings here) can be approached on a Request for Quotation or compared in Compare Insurers. Year-to-date production is computed from the policies issued; the agreed commission is a reference, commission itself comes from the Commission Rate Matrix.",
+      "analytics": "Computed from the policies issued and the claims recorded (cancelled policies and rejected claims left out)."
+    },
+    "actions": {
+      "title": "Actions",
+      "view": "View",
+      "edit": "Edit",
+      "activate": "Activate",
+      "deactivate": "Deactivate",
+      "history": "History"
+    },
+    "filters": {
+      "search": "Search",
+      "template": "Template",
+      "lineOfBusiness": "Line of business",
+      "insurer": "Insurer",
+      "status": "Status",
+      "type": "Type"
+    },
+    "history": {
+      "title": "History {{name}}",
+      "empty": "No changes recorded",
+      "when": "When",
+      "user": "User",
+      "action": "Action",
+      "field": "Field",
+      "from": "From",
+      "to": "To"
+    },
+    "templateProduct": "Template / product",
+    "selectTemplate": "Select a product template",
+    "empty": "No records match the filters",
+    "error": "Error",
+    "fieldRequired": "{{field}} is required",
+    "activated": "Activated",
+    "deactivated": "Deactivated",
+    "notApplied": "Template not in use",
+    "notAppliedHelp": "Another template is in use for this product (Product Templates > In use): this entry is not applied to quotations until its template is the one in use."
   },
   "customerResponse": {
     "waiting": "Waiting for customer approval",
@@ -8553,5 +8754,24 @@
     "barangay": "Barangay",
     "houseUnitNo": "House / Unit No.",
     "street": "Street / Subdivision"
+  },
+  "underwritingReferral": {
+    "title": "Underwriting referral",
+    "status": {
+      "pending": "Referred: awaiting approval",
+      "approved": "Referral approved",
+      "declined": "Referral declined"
+    },
+    "awaiting": "The quotation cannot be sent to the customer, approved, placed or issued until {{roles}} approves the referral.",
+    "decidedBy": "Decided by {{user}}",
+    "insurerReference": "Insurer underwriter reference",
+    "approve": "Approve referral",
+    "decline": "Decline referral",
+    "approveTitle": "Approve the referral",
+    "declineTitle": "Decline the referral",
+    "remarks": "Remarks",
+    "approved": "Referral approved",
+    "declined": "Referral declined: the quotation is rejected",
+    "loadings": "Loadings added by the acceptance rules"
   }
 }

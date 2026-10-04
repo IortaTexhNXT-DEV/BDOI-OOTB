@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (889 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (910 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -20166,6 +20166,164 @@
                   ]
                 },
                 "description": "Motor policy schedule PDF\n\nFront-end touchpoint: Operations > Policy > Policy detail > Policy schedule\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "A product document template (Product Configurator > Document Manager, e.g. CTPL certificate) printed for a policy: its uploaded layout, else the default layout",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-templates/product-document/:documentId/policy/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-templates",
+                "product-document",
+                ":documentId",
+                "policy",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "documentId",
+                  "value": "",
+                  "description": "documentId (path parameter)"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A product document template (Product Configurator > Document Manager, e.g. CTPL certificate) printed for a policy: its uploaded layout, else the default layout\n\nFront-end touchpoint: Operations > Policy > Policy detail > Documents\n\nAccess: read:policies"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-templates/product-document/:documentId/policy/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-templates",
+                    "product-document",
+                    ":documentId",
+                    "policy",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "documentId",
+                      "value": "",
+                      "description": "documentId (path parameter)"
+                    },
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A product document template (Product Configurator > Document Manager, e.g. CTPL certificate) printed for a policy: its uploaded layout, else the default layout\n\nFront-end touchpoint: Operations > Policy > Policy detail > Documents\n\nAccess: read:policies"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "A product document template (e.g. member enrollment form) printed for a quotation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/document-templates/product-document/:documentId/quote/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "document-templates",
+                "product-document",
+                ":documentId",
+                "quote",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "documentId",
+                  "value": "",
+                  "description": "documentId (path parameter)"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "A product document template (e.g. member enrollment form) printed for a quotation\n\nFront-end touchpoint: Operations > Quotation > Quote detail\n\nAccess: read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/document-templates/product-document/:documentId/quote/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "document-templates",
+                    "product-document",
+                    ":documentId",
+                    "quote",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "documentId",
+                      "value": "",
+                      "description": "documentId (path parameter)"
+                    },
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A product document template (e.g. member enrollment form) printed for a quotation\n\nFront-end touchpoint: Operations > Quotation > Quote detail\n\nAccess: read:quotations"
               },
               "status": "OK",
               "code": 200,
@@ -43725,6 +43883,73 @@
           ]
         },
         {
+          "name": "Change history of a acceptance limit (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/acceptance-limits/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "acceptance-limits",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a acceptance limit (audit trail)\n\nFront-end touchpoint: Product Configurator > Acceptance limits\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/acceptance-limits/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "acceptance-limits",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a acceptance limit (audit trail)\n\nFront-end touchpoint: Product Configurator > Acceptance limits\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Product analytics from issued policies and claims: top products, performance trend, category breakdown",
           "request": {
             "method": "GET",
@@ -44135,6 +44360,73 @@
           ]
         },
         {
+          "name": "Change history of a commission structure (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/commissions/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "commissions",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a commission structure (audit trail)\n\nFront-end touchpoint: Product Configurator > Commission structures\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/commissions/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "commissions",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a commission structure (audit trail)\n\nFront-end touchpoint: Product Configurator > Commission structures\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Coverages (filter productId / templateCode / status / search)",
           "request": {
             "method": "GET",
@@ -44496,6 +44788,73 @@
           ]
         },
         {
+          "name": "Change history of a coverage (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/coverages/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "coverages",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a coverage (audit trail)\n\nFront-end touchpoint: Product Configurator > Coverages\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/coverages/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "coverages",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a coverage (audit trail)\n\nFront-end touchpoint: Product Configurator > Coverages\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Product configurator dashboard: template counts, categories, components, recent / expiring templates, analytics",
           "request": {
             "method": "GET",
@@ -44541,6 +44900,55 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": {\n      \"totalTemplates\": 12,\n      \"active\": 8,\n      \"draft\": 2,\n      \"retired\": 1,\n      \"components\": {\n        \"coverages\": 10\n      }\n    },\n    \"recentTemplates\": [\n      {\n        \"id\": 3,\n        \"templateCode\": \"MOT-003-2025\",\n        \"name\": \"Motor Insurance Basic Plan\",\n        \"category\": \"Motor\",\n        \"lineOfBusiness\": \"Motor Vehicle\",\n        \"status\": \"Active\",\n        \"version\": \"v3.2\",\n        \"effectiveDate\": \"2025-01-01\",\n        \"baseRate\": 2.5,\n        \"minPremium\": 10000,\n        \"commissionRate\": 12,\n        \"configuration\": {\n          \"premiumRates\": {\n            \"private_cars\": \"2\"\n          }\n        },\n        \"features\": {},\n        \"insurers\": [],\n        \"tags\": [],\n        \"_count\": {\n          \"coverages\": 7,\n          \"ratingFactors\": 8,\n          \"underwritingRules\": 7\n        }\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Layout format of document templates: merge fields, blocks, accepted files and the default layout of each document type",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/document-merge-fields",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "document-merge-fields"
+              ]
+            },
+            "description": "Layout format of document templates: merge fields, blocks, accepted files and the default layout of each document type\n\nFront-end touchpoint: Product Configurator > Document Manager > Merge fields\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/document-merge-fields",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "document-merge-fields"
+                  ]
+                },
+                "description": "Layout format of document templates: merge fields, blocks, accepted files and the default layout of each document type\n\nFront-end touchpoint: Product Configurator > Document Manager > Merge fields\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fields\": [\n      {\n        \"name\": \"PolicyNumber\",\n        \"label\": \"Policy number\"\n      }\n    ],\n    \"blocks\": [\n      {\n        \"name\": \"Premium\",\n        \"label\": \"Premium breakdown\"\n      }\n    ],\n    \"printAs\": [\n      \"policy-schedule\"\n    ],\n    \"extensions\": [\n      \".txt\",\n      \".md\"\n    ],\n    \"maxLength\": 20000,\n    \"defaults\": {\n      \"policy-schedule\": \"= Policy Schedule\"\n    }\n  }\n}"
             }
           ]
         },
@@ -44906,6 +45314,268 @@
           ]
         },
         {
+          "name": "Change history of a document template (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/documents/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "documents",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a document template (audit trail)\n\nFront-end touchpoint: Product Configurator > Document templates\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/documents/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "documents",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a document template (audit trail)\n\nFront-end touchpoint: Product Configurator > Document templates\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download the layout of a document template (the uploaded one, else the default layout of its document type) as a text file",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/documents/:id/layout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "documents",
+                ":id",
+                "layout"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Download the layout of a document template (the uploaded one, else the default layout of its document type) as a text file\n\nFront-end touchpoint: Product Configurator > Document Manager > Download\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/documents/:id/layout",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "documents",
+                    ":id",
+                    "layout"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Download the layout of a document template (the uploaded one, else the default layout of its document type) as a text file\n\nFront-end touchpoint: Product Configurator > Document Manager > Download\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "text/plain"
+            }
+          ]
+        },
+        {
+          "name": "Preview a document template on sample data (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/documents/:id/preview",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "documents",
+                ":id",
+                "preview"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Preview a document template on sample data (PDF)\n\nFront-end touchpoint: Product Configurator > Document Manager > Preview\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/documents/:id/preview",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "documents",
+                    ":id",
+                    "preview"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Preview a document template on sample data (PDF)\n\nFront-end touchpoint: Product Configurator > Document Manager > Preview\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
+            }
+          ]
+        },
+        {
+          "name": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/market?productId=2",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "market"
+              ],
+              "query": [
+                {
+                  "key": "productId",
+                  "value": "2"
+                }
+              ]
+            },
+            "description": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer\n\nFront-end touchpoint: Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers\n\nAccess: read:products, write:products, read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/market?productId=2",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "market"
+                  ],
+                  "query": [
+                    {
+                      "key": "productId",
+                      "value": "2"
+                    }
+                  ]
+                },
+                "description": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer\n\nFront-end touchpoint: Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers\n\nAccess: read:products, write:products, read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"restricted\": true,\n    \"insurerIds\": [\n      2\n    ],\n    \"insurers\": [\n      {\n        \"id\": 2,\n        \"name\": \"Malayan Insurance Co., Inc.\"\n      }\n    ],\n    \"templateCodes\": [\n      \"MOT-003-2025\"\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Market mappings (filter productId / templateCode / status / search)",
           "request": {
             "method": "GET",
@@ -45263,6 +45933,73 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change history of a market mapping (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/market-mappings/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "market-mappings",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a market mapping (audit trail)\n\nFront-end touchpoint: Product Configurator > Market mappings\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/market-mappings/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "market-mappings",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a market mapping (audit trail)\n\nFront-end touchpoint: Product Configurator > Market mappings\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -45678,6 +46415,73 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"basePremium\": 30000,\n    \"adjustedPremium\": 29700,\n    \"totalTax\": 3935.25,\n    \"grossPremium\": 33635.25,\n    \"commission\": 3564,\n    \"netPremium\": 26136\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change history of a product template (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/products/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "products",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a product template (audit trail)\n\nFront-end touchpoint: Product Configurator > Product Templates > History\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/products/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "products",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a product template (audit trail)\n\nFront-end touchpoint: Product Configurator > Product Templates > History\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -46620,6 +47424,73 @@
           ]
         },
         {
+          "name": "Change history of a rating factor (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/rating-factors/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "rating-factors",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a rating factor (audit trail)\n\nFront-end touchpoint: Product Configurator > Rating factors\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/rating-factors/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "rating-factors",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a rating factor (audit trail)\n\nFront-end touchpoint: Product Configurator > Rating factors\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Rating parameters (filter productId / templateCode / status / search)",
           "request": {
             "method": "GET",
@@ -46981,6 +47852,73 @@
           ]
         },
         {
+          "name": "Change history of a rating parameter (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/rating-parameters/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "rating-parameters",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a rating parameter (audit trail)\n\nFront-end touchpoint: Product Configurator > Rating parameters\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/rating-parameters/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "rating-parameters",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a rating parameter (audit trail)\n\nFront-end touchpoint: Product Configurator > Rating parameters\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Risk mappings (search, status, definitionType)",
           "request": {
             "method": "GET",
@@ -47301,6 +48239,73 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"prm_iar\",\n    \"productCode\": \"PRD-IAR\",\n    \"lobCode\": \"IAR\",\n    \"productName\": \"Industrial All Risks (IAR)\",\n    \"definitionType\": \"RISK_SECTIONS\",\n    \"status\": \"Active\",\n    \"configuration\": {\n      \"type\": \"IAR\",\n      \"defaultVatPercent\": 12\n    },\n    \"sectionCount\": 1,\n    \"sections\": [\n      {\n        \"id\": \"prs_iar_fire\",\n        \"sectionCode\": \"FIRE\",\n        \"sectionLabel\": \"Fire Material Damage\",\n        \"defaultRatePercent\": 0.15,\n        \"isActive\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change history of a risk mapping (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/risk-mappings/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "risk-mappings",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a risk mapping (audit trail)\n\nFront-end touchpoint: Product Configurator > Risk Mapping > History\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/risk-mappings/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "risk-mappings",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a risk mapping (audit trail)\n\nFront-end touchpoint: Product Configurator > Risk Mapping > History\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Draft\",\n          \"to\": \"Active\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -48016,6 +49021,73 @@
           ]
         },
         {
+          "name": "Change history of a statutory tax (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/taxes/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "taxes",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a statutory tax (audit trail)\n\nFront-end touchpoint: Product Configurator > Statutory taxs\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/taxes/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "taxes",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a statutory tax (audit trail)\n\nFront-end touchpoint: Product Configurator > Statutory taxs\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
           "name": "Underwriting rules (filter productId / templateCode / status / search)",
           "request": {
             "method": "GET",
@@ -48077,7 +49149,7 @@
           ]
         },
         {
-          "name": "Create a underwriting rule (required: ruleCode, ruleName, type, condition, action)",
+          "name": "Create a underwriting rule (required: ruleCode, ruleName, type, action)",
           "request": {
             "method": "POST",
             "header": [
@@ -48096,10 +49168,10 @@
                 "underwriting-rules"
               ]
             },
-            "description": "Create a underwriting rule (required: ruleCode, ruleName, type, condition, action)\n\nFront-end touchpoint: Product Configurator > Underwriting rules\n\nAccess: write:products",
+            "description": "Create a underwriting rule (required: ruleCode, ruleName, type, action)\n\nFront-end touchpoint: Product Configurator > Underwriting rules\n\nAccess: write:products",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"productId\": 3,\n  \"ruleCode\": \"value\",\n  \"ruleName\": \"value\",\n  \"type\": \"value\",\n  \"condition\": \"value\",\n  \"action\": \"value\"\n}",
+              "raw": "{\n  \"productId\": 3,\n  \"ruleCode\": \"value\",\n  \"ruleName\": \"value\",\n  \"type\": \"value\",\n  \"action\": \"value\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -48128,10 +49200,10 @@
                     "underwriting-rules"
                   ]
                 },
-                "description": "Create a underwriting rule (required: ruleCode, ruleName, type, condition, action)\n\nFront-end touchpoint: Product Configurator > Underwriting rules\n\nAccess: write:products",
+                "description": "Create a underwriting rule (required: ruleCode, ruleName, type, action)\n\nFront-end touchpoint: Product Configurator > Underwriting rules\n\nAccess: write:products",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"productId\": 3,\n  \"ruleCode\": \"value\",\n  \"ruleName\": \"value\",\n  \"type\": \"value\",\n  \"condition\": \"value\",\n  \"action\": \"value\"\n}",
+                  "raw": "{\n  \"productId\": 3,\n  \"ruleCode\": \"value\",\n  \"ruleName\": \"value\",\n  \"type\": \"value\",\n  \"action\": \"value\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -48373,6 +49445,203 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change history of a underwriting rule (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/underwriting-rules/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "underwriting-rules",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a underwriting rule (audit trail)\n\nFront-end touchpoint: Product Configurator > Underwriting rules\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/underwriting-rules/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "underwriting-rules",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a underwriting rule (audit trail)\n\nFront-end touchpoint: Product Configurator > Underwriting rules\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Test a risk against the acceptance rules and rating factors of a template (or of the template governing a product / line)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/underwriting/evaluate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "underwriting",
+                "evaluate"
+              ]
+            },
+            "description": "Test a risk against the acceptance rules and rating factors of a template (or of the template governing a product / line)\n\nFront-end touchpoint: Product Configurator > Acceptance Rules > Test a risk\n\nAccess: read:products, write:products, read:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"templateCode\": \"MOT-003-2025\",\n  \"insurerId\": 2,\n  \"risk\": {\n    \"modelYear\": 2008,\n    \"vehicleType\": \"private_cars\",\n    \"totalSumInsured\": 800000\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/underwriting/evaluate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "underwriting",
+                    "evaluate"
+                  ]
+                },
+                "description": "Test a risk against the acceptance rules and rating factors of a template (or of the template governing a product / line)\n\nFront-end touchpoint: Product Configurator > Acceptance Rules > Test a risk\n\nAccess: read:products, write:products, read:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"templateCode\": \"MOT-003-2025\",\n  \"insurerId\": 2,\n  \"risk\": {\n    \"modelYear\": 2008,\n    \"vehicleType\": \"private_cars\",\n    \"totalSumInsured\": 800000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"templateCode\": \"MOT-003-2025\",\n    \"decision\": \"referred\",\n    \"results\": [\n      {\n        \"ruleCode\": \"VEH_AGE_LIMIT\",\n        \"outcome\": \"referred\"\n      }\n    ],\n    \"loadingPercent\": 0,\n    \"factors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "What an acceptance rule can test and do: risk fields, operators, actions, rule types, authority roles, quote cover fields",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/underwriting/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "underwriting",
+                "options"
+              ]
+            },
+            "description": "What an acceptance rule can test and do: risk fields, operators, actions, rule types, authority roles, quote cover fields\n\nFront-end touchpoint: Product Configurator > Acceptance Rules > Add / edit rule\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/underwriting/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "underwriting",
+                    "options"
+                  ]
+                },
+                "description": "What an acceptance rule can test and do: risk fields, operators, actions, rule types, authority roles, quote cover fields\n\nFront-end touchpoint: Product Configurator > Acceptance Rules > Add / edit rule\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"fields\": [\n      {\n        \"value\": \"vehicleAge\",\n        \"label\": \"Vehicle age (years)\",\n        \"type\": \"number\"\n      }\n    ],\n    \"operators\": [\n      \"<=\"\n    ],\n    \"actions\": [\n      \"Refer\"\n    ],\n    \"types\": [\n      \"Acceptance\"\n    ],\n    \"roles\": [\n      {\n        \"value\": \"processing\",\n        \"label\": \"Processing Team\"\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -48734,6 +50003,73 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change history of a approval workflow (audit trail)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/workflows/:id/history",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "workflows",
+                ":id",
+                "history"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change history of a approval workflow (audit trail)\n\nFront-end touchpoint: Product Configurator > Approval workflows\n\nAccess: read:products, write:products"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/workflows/:id/history",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "workflows",
+                    ":id",
+                    "history"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change history of a approval workflow (audit trail)\n\nFront-end touchpoint: Product Configurator > Approval workflows\n\nAccess: read:products, write:products"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"action\": \"update\",\n      \"at\": \"2026-01-01T00:00:00Z\",\n      \"user\": \"admin\",\n      \"changes\": [\n        {\n          \"field\": \"status\",\n          \"from\": \"Active\",\n          \"to\": \"Inactive\"\n        }\n      ]\n    }\n  ]\n}"
             }
           ]
         }
@@ -51243,6 +52579,99 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Quotation submitted to insurer\",\n  \"data\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"SubmittedToInsurer\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or decline the underwriting referral of a quotation (acceptance rule Refer): a user with the rule's authority role and enough Underwriting referral authority (authority matrix); a decline rejects the quotation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/quotations/:id/underwriting-referral",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "quotations",
+                ":id",
+                "underwriting-referral"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve or decline the underwriting referral of a quotation (acceptance rule Refer): a user with the rule's authority role and enough Underwriting referral authority (authority matrix); a decline rejects the quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Underwriting referral\n\nAccess: write:quotations",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"remarks\": \"Vehicle inspected, accepted by the insurer underwriter\",\n  \"insurerReference\": \"UW-2026-0042\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/quotations/:id/underwriting-referral",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "quotations",
+                    ":id",
+                    "underwriting-referral"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve or decline the underwriting referral of a quotation (acceptance rule Refer): a user with the rule's authority role and enough Underwriting referral authority (authority matrix); a decline rejects the quotation\n\nFront-end touchpoint: Operations > Sales & Marketing > Quotations > Quote detail > Underwriting referral\n\nAccess: write:quotations",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"approve\",\n  \"remarks\": \"Vehicle inspected, accepted by the insurer underwriter\",\n  \"insurerReference\": \"UW-2026-0042\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Referral approved\",\n  \"data\": {\n    \"quotationId\": \"qt_1\",\n    \"quotationNumber\": \"QT-2026-00001\",\n    \"quotationStatus\": \"Draft\",\n    \"leadRefId\": \"ld_1\",\n    \"productType\": \"Motor\",\n    \"netPremium\": 18500,\n    \"valueAddedTax\": 2220,\n    \"documentaryStampTax\": 2312.5,\n    \"localGovernmentTax\": 138.75,\n    \"grossPremium\": 23171.25,\n    \"totalSumInsured\": 1200000,\n    \"lead\": {\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\"\n    },\n    \"underwritingReferral\": {\n      \"status\": \"approved\",\n      \"ruleCodes\": [\n        \"VEH_AGE_LIMIT\"\n      ],\n      \"decidedBy\": \"processor1\"\n    }\n  }\n}"
             }
           ]
         },

@@ -1,0 +1,177 @@
+@import "../../../theme/bdoi/tokens";
+
+// Product Configurator screens: one page header, note, filter bar, row actions and dialogs for every screen.
+.pc-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+
+  &__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__title {
+    margin: 0 0 4px;
+    font-family: $font-heading;
+    font-size: 24px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  &__crumbs.p-breadcrumb {
+    border: none;
+    background: transparent;
+    padding: 0;
+    font-size: 14px;
+
+    .p-menuitem-text {
+      color: $color-text-muted;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__card.p-card {
+    border-radius: 12px;
+
+    .p-card-body {
+      padding: 16px;
+    }
+
+    .p-card-content {
+      padding: 0;
+    }
+  }
+}
+
+.pc-usage {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  padding: 10px 14px;
+  border-left: 3px solid $brand-blue;
+  background: $brand-blue-050;
+  color: $color-text;
+  font-size: 14px;
+  border-radius: 4px;
+
+  .pi {
+    color: $brand-blue;
+    margin-top: 2px;
+  }
+}
+
+.pc-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  &__search input {
+    width: 18rem;
+  }
+
+  &__field {
+    min-width: 12rem;
+  }
+}
+
+.pc-row-actions {
+  display: flex;
+  gap: 2px;
+  justify-content: flex-end;
+}
+
+.p-button.pc-icon-action {
+  color: $brand-blue;
+
+  &:enabled:hover {
+    color: $brand-blue-600;
+    background: $brand-blue-050;
+  }
+}
+
+.pc-cell-stack {
+  display: flex;
+  flex-direction: column;
+}
+
+.pc-muted {
+  color: $color-text-muted;
+}
+
+.pc-error {
+  color: $color-danger;
+}
+
+.pc-view {
+  display: grid;
+  grid-template-columns: 12rem 1fr;
+  gap: 6px 16px;
+  margin: 0;
+
+  dt {
+    color: $color-text-muted;
+  }
+
+  dd {
+    margin: 0;
+    color: $color-heading;
+    white-space: pre-wrap;
+  }
+}
+
+.pc-tabs .p-tabview-panels {
+  padding: 12px 0 0;
+}
+
+.pc-empty {
+  padding: 24px;
+  text-align: center;
+  color: $color-text-muted;
+}
+
+.pc-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+
+  .pc-kpi {
+    border: 1px solid $color-border;
+    border-radius: 8px;
+    padding: 12px 14px;
+    background: $color-surface;
+
+    span {
+      display: block;
+      color: $color-text-muted;
+      font-size: 13px;
+    }
+
+    strong {
+      font-size: 20px;
+      color: $color-heading;
+    }
+  }
+}
+
+.pc-layout-text {
+  width: 100%;
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.pc-not-applied.p-tag {
+  align-self: flex-start;
+  margin-top: 4px;
+}

@@ -24,6 +24,8 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { participantsFromDoc, writeParticipants, legacyParticipantDetails, leadOf, participantsOf, participantInputs } from '../placement/participants.js';
 import { journeyFor, assertStep, resolveLob } from '../placement/journey.js';
 import { companyName } from '../../lib/letterhead.js';
+import { assertNotDeclined, referralFor, assertReferralCleared, assertMayDecide } from '../product-configurator/underwriting.js';
+import { assertAuthority } from '../access-control/service.js';
 
 export async function getQuoteRow(id, db = null) {
   const r = await (db || { query }).query(`${QUOTE_SELECT} WHERE (q.id = $1 OR q.quote_number = $1) AND q.deleted_at IS NULL`, [id]);
@@ -86,6 +88,9 @@ export async function createQuote(body, userId, db = null) {
     if (productId && !raw.lob) raw.lob = await resolveLob({ productId, productType: body.productType }, c);
     const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
     const b = await premiumBreakdown(doc, { insurerId: icId });
+    assertNotDeclined(b.underwriting, 'The quotation');
+    const referral = referralFor(b.underwriting);
+    if (referral) doc.underwritingReferral = referral;
     const number = await nextDocumentNumber('quote', { db: c, unique: { table: 'quotes', column: 'quote_number' } });
     const validity = Number(await getSetting('limits.quote_validity_days', 30));
     const status = 'draft';
@@ -113,6 +118,9 @@ export async function updateQuote(id, body, userId) {
   await withTransaction(async (c) => {
     const { parts, icId, doc } = await quoteParticipants(c, merged, body.participants, before.insurance_company_id);
     const b = await premiumBreakdown(doc, { insurerId: icId });
+    assertNotDeclined(b.underwriting, 'The quotation');
+    const referral = referralFor(b.underwriting, before.doc?.underwritingReferral || null);
+    if (referral) doc.underwritingReferral = referral; else delete doc.underwritingReferral;
     const data = { ...premiumCols(b), insurance_company_id: icId, lob: b.lob, product_type: body.productType || before.product_type,
       doc: JSON.stringify({ ...withServerCovers(doc, b), premiumBreakdown: b }), updated_by: userId, updated_at: new Date() };
     if (body.leadRefId && body.leadRefId !== before.lead_id) data.lead_id = body.leadRefId;
@@ -143,6 +151,7 @@ export async function changeStatus(id, label, user) {
   const to = quoteStatusOut(target);
   const transitions = await getSetting('quotations.transitions', {});
   if (!(transitions[from] || []).includes(to)) throw badRequest(`Cannot change a ${from} quotation to ${to}`);
+  if (to === 'Approved') assertReferralCleared(q, 'approval');
   if (to === 'Approved' && await getSetting('workflow.quote_maker_checker', true) && q.created_by === user.id) {
     throw forbidden('Maker-checker: the approver must be different from the user who created the quotation');
   }
@@ -208,6 +217,7 @@ export async function sendForApproval(id, user) {
   if (!['draft', 'sent'].includes(q.status)) throw badRequest(`Only Draft quotations can be sent for approval (current: ${quoteStatusOut(q.status)})`);
   // a quotation without premium could be accepted but never issued (the policy bill would be nil)
   if (!(Number(q.premium_total) > 0)) throw badRequest(`Quotation ${q.quote_number} has no premium: price the cover before sending it to the customer`);
+  assertReferralCleared(q, 'sending it to the customer');
   const email = await emailSendingStatus();
   // Quotations without a lead (e.g. renewals of imported policies) go to the client's address.
   const client = q.client_id ? await one('SELECT display_name, email FROM clients WHERE id = $1', [q.client_id]) : null;
@@ -286,6 +296,7 @@ export async function convertToPolicy(id, body, user) {
     await updatePolicy(existing.policy_id, extra, user.id);
     return { policyId: existing.policy_id, clientId: existing.client_id, created: false };
   }
+  assertReferralCleared(existing, 'policy issuance');
   const allowed = await getSetting('quotations.convertible_statuses', ['CustomerAccepted', 'Approved']);
   if (!allowed.includes(quoteStatusOut(existing.status))) throw badRequest(`Cannot convert quotation with status "${quoteStatusOut(existing.status)}". Quote must be CustomerAccepted or Approved`);
   // placement journey: a line that requires a Placement Slip issues its policy from the placement slip
@@ -523,4 +534,30 @@ export async function quoteById(id) {
       rate: o.rate === null ? null : Number(o.rate), premiumTotal: o.premium_total === null ? null : Number(o.premium_total), offeredShare: Number(o.offered_share), deductibles: o.deductibles,
       validityDate: o.validity_date, selected: o.selected })),
   };
+}
+
+/**
+ * Decide the underwriting referral of a quotation (acceptance rule with action Refer, or an Auto-Accept rule not met):
+ * a user with one of the rules' authority roles and enough Underwriting referral authority for the sum insured
+ * (authority matrix) approves it, or declines it (the quotation is then rejected). The insurer's underwriter
+ * reference can be recorded with the decision.
+ */
+export async function decideReferral(id, { decision, remarks = null, insurerReference = null }, user) {
+  const q = await getQuoteRow(id);
+  const ref = q.doc?.underwritingReferral;
+  if (!ref || ref.status !== 'pending') throw badRequest(`Quotation ${q.quote_number} has no pending underwriting referral`);
+  if (!['approve', 'decline'].includes(decision)) throw badRequest('decision must be approve or decline');
+  if (decision === 'decline' && !String(remarks || '').trim()) throw badRequest('Give the reason for declining the referral');
+  assertMayDecide(user, ref);
+  if (decision === 'approve') await withTransaction((db) => assertAuthority(db, user, 'underwriting_referral', Number(q.sum_insured) || 0));
+  const next = { ...ref, status: decision === 'approve' ? 'approved' : 'declined', decidedBy: user.username, decidedById: user.id, decidedAt: new Date().toISOString(),
+    remarks: remarks || null, insurerReference: insurerReference || null };
+  await query(`UPDATE quotes SET doc = jsonb_set(doc, '{underwritingReferral}', $2::jsonb), updated_by = $3, updated_at = now()${decision === 'decline' ? ", status = 'rejected'" : ''} WHERE id = $1`,
+    [q.id, JSON.stringify(next), user.id]);
+  if (q.created_by && q.created_by !== user.id) {
+    await notifyDecision({ userId: q.created_by, decidedBy: user.id, document: 'Quotation referral', number: q.quote_number, approved: decision === 'approve', by: user.username,
+      message: `The underwriting referral of quotation ${q.quote_number} was ${decision === 'approve' ? 'approved' : 'declined'} by ${user.username}${remarks ? `: ${remarks}` : ''}`,
+      link: `/agent/quotedetailview/${q.id}`, entity: 'quotation', entityId: q.id });
+  }
+  return { before: q, after: await getQuoteRow(q.id), referral: next };
 }

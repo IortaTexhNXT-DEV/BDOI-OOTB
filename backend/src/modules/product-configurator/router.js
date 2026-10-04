@@ -4,6 +4,11 @@ import { badRequest } from '../../lib/errors.js';
 import { created, ok, paging } from '../../lib/respond.js';
 import { canRead, canWrite, sendList } from '../masters/helpers.js';
 import * as svc from './service.js';
+import { many } from '../../db/pool.js';
+import { notFound } from '../../lib/errors.js';
+import { evaluate, marketFor, RISK_FIELDS, OPERATORS, RULE_ACTIONS, RULE_TYPES } from './underwriting.js';
+import { MERGE_FIELDS, BLOCKS, DEFAULT_LAYOUTS, PRINT_AS, LAYOUT_EXTENSIONS, LAYOUT_MAX, previewSpec } from '../documents/productDocuments.js';
+import { buildPdf, sendPdf } from '../documents/pdf.js';
 
 /** Product Configurator: templates, configuration components, risk mapping, analytics and dashboard. */
 const { router, define } = moduleRouter('Product Configurator', '/product-configurator');
@@ -86,6 +91,11 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/products/:id/history', summary: 'Change history of a product template (audit trail)', screen: 'Product Configurator > Product Templates > History', middleware: read,
+  response: { success: true, data: [{ id: 1, action: 'update', at: '2026-01-01T00:00:00Z', user: 'admin', changes: [{ field: 'status', from: 'Draft', to: 'Active' }] }] },
+  handler: async (req, res) => ok(res, await svc.templateHistory(req.params.id)),
+});
+define({
   method: 'GET', path: '/products/:id/insurers', summary: 'Insurer panel of a template with market-mapping terms', screen: 'Product Configurator > Market Mapping', middleware: read,
   response: { success: true, data: [{ insurerName: 'Malayan Insurance Co., Inc.', insurerId: 2, onPanel: true, defaultCommissionRate: 15, mapping: null }] },
   handler: async (req, res) => ok(res, await svc.insurerPanel(req.params.id)),
@@ -140,6 +150,11 @@ for (const [kind, def] of Object.entries(svc.KINDS)) {
     },
   });
   define({
+    method: 'GET', path: `/${kind}/:id/history`, summary: `Change history of a ${def.label.toLowerCase()} (audit trail)`, screen, middleware: read,
+    response: { success: true, data: [{ id: 1, action: 'update', at: '2026-01-01T00:00:00Z', user: 'admin', changes: [{ field: 'status', from: 'Active', to: 'Inactive' }] }] },
+    handler: async (req, res) => ok(res, await svc.componentHistory(kind, req.params.id)),
+  });
+  define({
     method: 'DELETE', path: `/${kind}/:id`, summary: `Delete a ${def.label.toLowerCase()} (soft)`, screen, middleware: write, response: { success: true },
     handler: async (req, res) => {
       const before = await svc.deleteComponent(kind, req.params.id, req.user);
@@ -148,6 +163,64 @@ for (const [kind, def] of Object.entries(svc.KINDS)) {
     },
   });
 }
+
+// ---------- rules in the business flow ----------
+define({
+  method: 'GET', path: '/underwriting/options', summary: 'What an acceptance rule can test and do: risk fields, operators, actions, rule types, authority roles, quote cover fields',
+  screen: 'Product Configurator > Acceptance Rules > Add / edit rule', middleware: read,
+  response: { success: true, data: { fields: [{ value: 'vehicleAge', label: 'Vehicle age (years)', type: 'number' }], operators: ['<='], actions: ['Refer'], types: ['Acceptance'], roles: [{ value: 'processing', label: 'Processing Team' }] } },
+  handler: async (_req, res) => ok(res, {
+    fields: Object.entries(RISK_FIELDS).map(([value, f]) => ({ value, label: f.label, type: f.type, options: f.options || null })),
+    operators: OPERATORS, actions: RULE_ACTIONS, types: RULE_TYPES, quoteFields: svc.QUOTE_FIELDS,
+    roles: (await many('SELECT code, name FROM roles ORDER BY name')).map((r) => ({ value: r.code, label: r.name })),
+  }),
+});
+define({
+  method: 'POST', path: '/underwriting/evaluate', summary: 'Test a risk against the acceptance rules and rating factors of a template (or of the template governing a product / line)',
+  screen: 'Product Configurator > Acceptance Rules > Test a risk', middleware: canRead('products', 'read:quotations'),
+  request: { templateCode: 'MOT-003-2025', insurerId: 2, risk: { modelYear: 2008, vehicleType: 'private_cars', totalSumInsured: 800000 } },
+  response: { success: true, data: { templateCode: 'MOT-003-2025', decision: 'referred', results: [{ ruleCode: 'VEH_AGE_LIMIT', outcome: 'referred' }], loadingPercent: 0, factors: [] } },
+  handler: async (req, res) => {
+    const b = req.body || {};
+    const r = await evaluate(b.risk || {}, { insurerId: b.insurerId || null, productId: b.productId || null, lob: b.lob || null, templateCode: b.templateCode || null });
+    if (!r) throw notFound('No active product template governs this product / line of business');
+    ok(res, r);
+  },
+});
+define({
+  method: 'GET', path: '/market', summary: 'Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer',
+  screen: 'Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers', middleware: canRead('products', 'read:quotations'), query: { productId: 2 },
+  response: { success: true, data: { restricted: true, insurerIds: [2], insurers: [{ id: 2, name: 'Malayan Insurance Co., Inc.' }], templateCodes: ['MOT-003-2025'] } },
+  handler: async (req, res) => ok(res, await marketFor({ productId: req.query.productId || null, lob: req.query.lob || null })),
+});
+define({
+  method: 'GET', path: '/document-merge-fields', summary: 'Layout format of document templates: merge fields, blocks, accepted files and the default layout of each document type',
+  screen: 'Product Configurator > Document Manager > Merge fields', middleware: read,
+  response: { success: true, data: { fields: [{ name: 'PolicyNumber', label: 'Policy number' }], blocks: [{ name: 'Premium', label: 'Premium breakdown' }], printAs: ['policy-schedule'], extensions: ['.txt', '.md'], maxLength: 20000, defaults: { 'policy-schedule': '= Policy Schedule' } } },
+  handler: async (_req, res) => ok(res, {
+    fields: Object.entries(MERGE_FIELDS).map(([name, f]) => ({ name, label: f.label })), blocks: Object.entries(BLOCKS).map(([name, b]) => ({ name, label: b.label })),
+    printAs: PRINT_AS, extensions: LAYOUT_EXTENSIONS, maxLength: LAYOUT_MAX, defaults: DEFAULT_LAYOUTS,
+  }),
+});
+define({
+  method: 'GET', path: '/documents/:id/layout', summary: 'Download the layout of a document template (the uploaded one, else the default layout of its document type) as a text file',
+  screen: 'Product Configurator > Document Manager > Download', middleware: read, response: 'text/plain',
+  handler: async (req, res) => {
+    const d = await svc.getComponent('documents', req.params.id);
+    const text = d.layout || DEFAULT_LAYOUTS[d.printAs] || DEFAULT_LAYOUTS['policy-schedule'];
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${d.layoutFileName || `${d.documentCode}-layout.txt`}"`);
+    res.send(text);
+  },
+});
+define({
+  method: 'GET', path: '/documents/:id/preview', summary: 'Preview a document template on sample data (PDF)', screen: 'Product Configurator > Document Manager > Preview',
+  middleware: read, response: 'application/pdf',
+  handler: async (req, res) => {
+    const d = await svc.getComponent('documents', req.params.id);
+    sendPdf(res, buildPdf(await previewSpec(d)), `${d.documentCode}-preview.pdf`);
+  },
+});
 
 // ---------- analytics / dashboard ----------
 define({
@@ -194,6 +267,11 @@ define({
     await audit(req, { entity: 'risk_mapping', entityId: req.params.id, action: 'update', before, after });
     ok(res, after, 'Risk mapping updated');
   },
+});
+define({
+  method: 'GET', path: '/risk-mappings/:id/history', summary: 'Change history of a risk mapping (audit trail)', screen: 'Product Configurator > Risk Mapping > History', middleware: read,
+  response: { success: true, data: [{ id: 1, action: 'update', at: '2026-01-01T00:00:00Z', user: 'admin', changes: [{ field: 'status', from: 'Draft', to: 'Active' }] }] },
+  handler: async (req, res) => ok(res, await svc.riskMappingHistory(req.params.id)),
 });
 define({
   method: 'GET', path: '/risk-mappings/:id/section-options', summary: 'Risk sections that can still be added (from the risk-section master)', screen: 'Product Configurator > Risk Mapping > IAR sections',

@@ -12,6 +12,7 @@ import { captureForReceipt } from '../policies/payments.js';
 import { quoteById } from '../quotations/service.js';
 import { getPolicyRow, toPolicy } from '../policies/service.js';
 import { ownRecord, assertVisible } from '../../lib/scope.js';
+import { productDocumentSpec } from './productDocuments.js';
 
 const { router, define } = moduleRouter('Documents', '');
 const readQuotes = [requireAuth, requirePermission('read:quotations')];
@@ -33,6 +34,27 @@ for (const [path, handler, label] of [
 for (const [path, label] of [['/document-templates/policy-schedule/:id', 'Motor policy schedule PDF'], ['/document-templates/policy-schedule-fire/:id', 'Fire / IAR policy schedule PDF']]) {
   define({ method: 'GET', path, summary: label, screen: 'Operations > Policy > Policy detail > Policy schedule', middleware: [...readPolicies, ownRecord('policy')], response: 'application/pdf', handler: policyPdf });
 }
+define({
+  method: 'GET', path: '/document-templates/product-document/:documentId/policy/:id', summary: 'A product document template (Product Configurator > Document Manager, e.g. CTPL certificate) printed for a policy: its uploaded layout, else the default layout',
+  screen: 'Operations > Policy > Policy detail > Documents', middleware: [...readPolicies, ownRecord('policy')], response: 'application/pdf',
+  handler: async (req, res) => {
+    const row = await getPolicyRow(req.params.id);
+    const p = await printablePolicy(toPolicy(row), row);
+    const spec = await productDocumentSpec('policy', p, { documentId: req.params.documentId });
+    if (!spec) throw notFound('This document template is not an active document of the policy\'s product template');
+    sendPdf(res, buildPdf(spec), `${String(spec.title).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${p.policyNumber}.pdf`);
+  },
+});
+define({
+  method: 'GET', path: '/document-templates/product-document/:documentId/quote/:id', summary: 'A product document template (e.g. member enrollment form) printed for a quotation',
+  screen: 'Operations > Quotation > Quote detail', middleware: [...readQuotes, ownRecord('quote')], response: 'application/pdf',
+  handler: async (req, res) => {
+    const q = await quoteById(req.params.id);
+    const spec = await productDocumentSpec('quote', q, { documentId: req.params.documentId });
+    if (!spec) throw notFound('This document template is not an active document of the quotation\'s product template');
+    sendPdf(res, buildPdf(spec), `${String(spec.title).toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${q.quotationNumber}.pdf`);
+  },
+});
 define({
   method: 'GET', path: '/document-templates/receipt/:id', summary: 'Official receipt PDF (optionally only some lines: lineIds=a,b)', screen: 'Accounts > Receipts > Print',
   middleware: [requireAuth, requirePermission('read:receipts', 'read:policies'), ownRecord('receipt')], query: { lineIds: 'rl_1,rl_2' }, response: 'application/pdf',
