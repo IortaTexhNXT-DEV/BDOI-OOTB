@@ -96,10 +96,8 @@ CATALOGUE = [
      'Data privacy tab on client and prospect; Master > Data Privacy > Consent Register; privacy.test.js', '', '', '', False),
 
     # 2 Prospecting and sales pipeline
-    ('2.01', 2, 'Lead capture by line (motor, fire, IAR, employee benefits), retail or corporate', 'Both', 'Ops', 2, 2,
-     'Sales & Marketing > Prospects (/agent/leadlisting); leads.test.js', '', '', '', False),
-    ('2.02', 2, 'Bulk lead upload with row error report', 'Both', 'Ops', 1, 2,
-     'POST /leads/bulk-upload; leads.test.js', '', '', '', False),
+    ('2.01', 2, 'Lead capture by line (motor, fire, IAR, employee benefits), retail or corporate, with bulk upload', 'Both', 'Ops', 2, 2,
+     'Sales & Marketing > Prospects (/agent/leadlisting); POST /leads/bulk-upload; leads.test.js', '', '', '', False),
     ('2.03', 2, 'Lead status pipeline and conversion funnel', 'Both', 'Ops', 2, 2,
      'Lead statuses New to Converted or Lost; Lead Conversion Funnel report; reports.test.js', '', '', '', False),
     ('2.04', 2, 'Sales activities: calls, meetings, follow-up tasks and reminders', 'Both', 'Ops', 2, 0,
@@ -151,8 +149,8 @@ CATALOGUE = [
      'Sales & Marketing > Request for Quotation (/placement/broker-slips); request-for-quotation.test.js', '', '', '', False),
     ('4.02', 4, 'Record insurer offers and declines with terms', 'Broker', 'Ops', 3, 2,
      'Broker slip offers (Offered, Declined, Pending); request-for-quotation.test.js', '', '', '', False),
-    ('4.03', 4, 'Compare offers, best offer and market capacity', 'Broker', 'Ops', 3, 2,
-     'Request for Quotation > Compare offers; request-for-quotation.test.js', '', '', '', False),
+    ('4.03', 4, 'Compare offers, best offer, market capacity and hit ratio per insurer', 'Broker', 'Ops', 3, 2,
+     'Request for Quotation > Compare offers; Market Response and Placement Pipeline reports; request-for-quotation.test.js; reports.test.js', '', '', '', False),
     ('4.04', 4, 'Placement slip to lead and co-insurers with confirmation per insurer', 'Broker', 'Ops', 3, 2,
      'Sales & Marketing > Placement Slips (/placement/placement-slips); placement.test.js', '', '', '', False),
     ('4.05', 4, 'Co-insurance shares, payables and taxes split per participant', 'Broker', 'Ops', 3, 2,
@@ -165,8 +163,6 @@ CATALOGUE = [
     ('4.08', 4, 'Placement only with insurers authorised by the IC', 'Both', 'IC', 2, 1,
      'Master > Generals > Insurance Management > Insurance Company',
      'No certificate of authority number or expiry check; IC non-life insurer list is in development.', 'In development', 'S', True),
-    ('4.09', 4, 'Market response analytics (hit ratio per insurer)', 'Broker', 'Ops', 1, 2,
-     'Market Response and Placement Pipeline reports; reports.test.js', '', '', '', False),
     ('4.10', 4, 'Facultative reinsurance placement (where the broker acts as reinsurance broker)', 'Broker', 'Ops', 1, 1,
      'Reinsurance > Treaty Dashboard, Cession Tracking; reinsurance.test.js',
      'The module records treaties and cessions from the cedant side; there is no facultative reinsurance slip workflow.',
@@ -175,7 +171,7 @@ CATALOGUE = [
      'Reinsurance > Claims Recovery, Reconciliation; reinsurance.test.js', '', '', '', False),
 
     # 5 Policy issuance, documents and motor
-    ('5.01', 5, 'Issue policy from bound placement or accepted quotation, create client, bill premium', 'Both', 'Ops', 3, 2,
+    ('5.01', 5, 'Issue policy from bound placement or accepted quotation, create client, bill premium; policy statuses', 'Both', 'Ops', 3, 2,
      'Operations > Policy; quote-to-policy.test.js; policies.test.js; UAT scenario 371 steps passed', '', '', '', False),
     ('5.02', 5, 'Record a policy already issued by the insurer', 'Both', 'Ops', 3, 2,
      'Placement Slips > Record Issued Policy; placement.test.js', '', '', '', False),
@@ -196,8 +192,6 @@ CATALOGUE = [
     ('5.09', 5, 'Bulk issuance: fleet schedules and group policies', 'Both', 'Ops', 2, 1,
      'Policy bulk upload for new business and in-force book; upload-templates.test.js',
      'No fleet schedule with per-vehicle premium inside one policy.', 'Code', 'M', False),
-    ('5.10', 5, 'Policy life cycle statuses and payment statuses', 'Both', 'Ops', 2, 2,
-     'Policy statuses Active, Expired, Renewed, Lapsed, Cancelled; policies.test.js', '', '', '', False),
     ('5.11', 5, 'Lines placed: motor, fire, IAR, CAR, EAR, marine, CGL, money, PA, travel, EB, surety', 'Both', 'Ops', 2, 2,
      'UAT data set issued 62 new policies across these lines (test-summary.md, UAT data set)', '', '', '', False),
     ('5.12', 5, 'Marine open cover with certificates and declarations', 'Broker', 'Ops', 1, 0,
@@ -229,10 +223,8 @@ CATALOGUE = [
      'Renewals > Negotiations; renewals.test.js; money-single-source.test.js', '', '', '', False),
     ('7.03', 7, 'Renewal batch (up to 500 policies)', 'Both', 'Ops', 2, 2,
      'Renewals > Renewal Batch; renewals.test.js', '', '', '', False),
-    ('7.04', 7, 'At-risk scoring, retention analytics and performance', 'Both', 'Ops', 1, 2,
-     'Renewals > At-Risk Policies, Retention Analytics, Performance; renewals.test.js', '', '', '', False),
-    ('7.05', 7, 'Lapse management and win-back', 'Both', 'Ops', 1, 2,
-     'Renewals > Lapse Management; renewals.grace_period_days; renewals.test.js', '', '', '', False),
+    ('7.04', 7, 'At-risk scoring, retention analytics, lapse management and win-back', 'Both', 'Ops', 1, 2,
+     'Renewals > At-Risk Policies, Retention Analytics, Lapse Management, Performance; renewals.grace_period_days; renewals.test.js', '', '', '', False),
     ('7.06', 7, 'Renewal of placed and co-insured risks through the placement journey', 'Broker', 'Ops', 2, 2,
      'placement.journey_applies_to_renewals; placement.test.js', '', '', '', False),
     ('7.07', 7, 'Renewal notices by SMS or messaging app', 'Both', 'Ops', 1, 0,
@@ -243,8 +235,8 @@ CATALOGUE = [
      'INV series; E-mail invoice; receipts.test.js; email-documents.test.js', '', '', '', False),
     ('8.02', 8, 'Payment capture (cash, cheque, transfer, online) with proof for verification', 'Both', 'Ops', 3, 2,
      'Operations > Payments; payments.test.js; policy-payments.test.js; payment-segregation.test.js', '', '', '', False),
-    ('8.03', 8, 'Official receipt posting by Accounting, partial payments', 'Both', 'Ops', 3, 2,
-     'Accounts > Receipts; receipts.test.js', '', '', '', False),
+    ('8.03', 8, 'Official receipt posting by Accounting, partial payments, bulk upload and bulk print', 'Both', 'Ops', 3, 2,
+     'Accounts > Receipts; receipts bulk upload (1,000 rows) and Bulk Print; receipts.test.js', '', '', '', False),
     ('8.04', 8, 'Receipt numbering continuity and printing on letterhead with TIN', 'Both', 'BIR', 2, 2,
      'Master > Document Numbering (61 series); numbering.test.js; printing.test.js', '', '', '', False),
     ('8.05', 8, 'Returned cheques (DAIF, DAUD) cancel the receipt and reopen the bill', 'Both', 'Ops', 2, 2,
@@ -266,18 +258,14 @@ CATALOGUE = [
     ('8.12', 8, 'Post-dated cheque register and deposit on due date', 'Both', 'Ops', 2, 0,
      'Not found as a register (cheque date handling in disbursements only)',
      'Post-dated cheques received from clients are not tracked until deposit.', 'Code', 'S', False),
-    ('8.13', 8, 'Bulk receipt upload and bulk print', 'Both', 'Ops', 1, 2,
-     'Receipts bulk upload (1,000 rows) and Bulk Print; receipts.test.js', '', '', '', False),
 
     # 9 Remittance, direct bill and insurer reconciliation
     ('9.01', 9, 'Remittance per insurer net of commission, by co-insurer share', 'Both', 'IC', 3, 2,
      'Accounts > Remittance > Automated Processing; remittance.test.js', '', '', '', False),
     ('9.02', 9, 'Remittance terms per insurer, due dates and remittance ageing', 'Both', 'IC', 3, 2,
      'Insurance Company > Remittance Terms; Credit Control > Remittance Ageing; remittance.test.js', '', '', '', False),
-    ('9.03', 9, 'Remittance approval within Authority Matrix limits', 'Both', 'Ops', 2, 2,
-     'Remittance > Approval Workflow; Authority Matrix; consolidation.test.js; remittance.test.js', '', '', '', False),
-    ('9.04', 9, 'Settlement by payment voucher and electronic transfer record', 'Both', 'Ops', 2, 2,
-     'Remittance > Settlement, Electronic Transfer; disbursements.test.js', '', '', '', False),
+    ('9.03', 9, 'Remittance approval within Authority Matrix limits and settlement by payment voucher', 'Both', 'Ops', 2, 2,
+     'Remittance > Approval Workflow, Settlement, Electronic Transfer; Authority Matrix; consolidation.test.js; remittance.test.js; disbursements.test.js', '', '', '', False),
     ('9.05', 9, 'Bank payment file (InstaPay, PESONet, bulk credit) for insurers and referrers', 'Both', 'Ops', 2, 0,
      'Transfers recorded only (checklist item 58)', 'No bank upload file; payments keyed in the bank portal.', 'Integration', 'M', False),
     ('9.06', 9, 'Direct bill commission debit notes with VAT and EWT', 'Both', 'BIR', 3, 2,
@@ -300,8 +288,6 @@ CATALOGUE = [
      'commission.wht_code_by_type; bir.atc_by_payee; commission-taxes.test.js', '', '', '', False),
     ('10.05', 10, 'Commission payout by voucher and bulk disbursement', 'Both', 'Ops', 2, 2,
      'Generate payout; Disbursement > Bulk Disburse; disbursements.test.js', '', '', '', False),
-    ('10.06', 10, 'Commission clawback on return premium', 'Both', 'Ops', 2, 2,
-     'Commission line status Reversed; commission.test.js', '', '', '', False),
     ('10.07', 10, 'Commission statements for referrers and the broker', 'Both', 'Ops', 2, 2,
      'Broker Commission Statement; Commission Dashboard; reports.test.js', '', '', '', False),
     ('10.08', 10, 'Incentive programmes for account executives', 'Both', 'Ops', 1, 2,
@@ -320,8 +306,8 @@ CATALOGUE = [
     ('11.03', 11, 'Claim document checklist per line and missing document follow-up', 'Both', 'Ops', 2, 1,
      'Claim documents upload; causes of loss per line (GET /claims/config)',
      'No required-document checklist or reminder to the claimant.', 'Code', 'S', False),
-    ('11.04', 11, 'Adjuster, insurer claim number, status tracking and handling time', 'Both', 'Ops', 2, 2,
-     'Claim statuses; claims.sla_days 20; Claims Dashboard; claims.test.js', '', '', '', False),
+    ('11.04', 11, 'Adjuster, insurer claim number, status tracking, handling time and claims reports', 'Both', 'Ops', 2, 2,
+     'Claim statuses; claims.sla_days 20; Claims Dashboard; Claims Position, Claims Ageing; claims.test.js; reports.test.js', '', '', '', False),
     ('11.05', 11, 'Settlement approval by a second user and claim letters (discharge voucher)', 'Both', 'Ops', 3, 2,
      'claims.settlement_maker_checker; Claims Discharge Voucher PDF; claims.test.js', '', '', '', False),
     ('11.06', 11, 'Claims paid through the broker: funds received and paid to claimant', 'Both', 'Ops', 2, 1,
@@ -331,12 +317,10 @@ CATALOGUE = [
      'Claim screens show each insurer share; claims.test.js', '', '', '', False),
     ('11.08', 11, 'Motor claims: repair shop, estimate and letter of authority', 'Both', 'Ops', 2, 1,
      'Repair shop on settlement (migration 0216)', 'No estimate approval or letter of authority workflow.', 'Code', 'M', False),
-    ('11.09', 11, 'Claims position and ageing reports', 'Both', 'Ops', 2, 2,
-     'Claims Position, Claims Ageing; reports.test.js', '', '', '', False),
 
     # 12 Accounting, GL, period end and audit
-    ('12.01', 12, 'Double-entry general ledger fed by posting rules', 'Both', 'Ops', 3, 2,
-     'Master > Finance > Posting Rules, Account Determination; posting-rules.test.js; accounting-flow.test.js', '', '', '', False),
+    ('12.01', 12, 'Double-entry general ledger fed by posting rules, each journal traced to its source', 'Both', 'Ops', 3, 2,
+     'Master > Finance > Posting Rules, Account Determination; General Ledger Detail, Journal Register; posting-rules.test.js; accounting-flow.test.js', '', '', '', False),
     ('12.02', 12, 'Philippine broker chart of accounts with premium trust account', 'Both', 'Ops', 2, 2,
      'Main Account, Sub Account masters; chart-of-accounts.test.js', '', '', '', False),
     ('12.03', 12, 'Journal, correction and reversal vouchers with approval', 'Both', 'Ops', 3, 2,
@@ -356,15 +340,11 @@ CATALOGUE = [
     ('12.10', 12, 'Supplier invoices, input VAT, fixed assets and depreciation', 'Both', 'Ops', 2, 1,
      'Supplier payment vouchers with withholding; input VAT tax code',
      'No supplier invoice register (accounts payable sub-ledger) or fixed asset register.', 'Code', 'M', False),
-    ('12.11', 12, 'Audit support: GL detail, journal register, source document trace', 'Both', 'Ops', 2, 2,
-     'General Ledger Detail, Journal Register; each journal points to its source; journal.test.js', '', '', '', False),
 
     # 13 Taxes and BIR
-    ('13.01', 13, 'Premium taxes: DST (NIRC s.184), VAT 12%, LGT by LGU, FST 2%', 'Both', 'BIR', 3, 2,
-     'Master > Finance > Premium Taxes & LGU Rates; premium-charges.test.js',
+    ('13.01', 13, 'Premium taxes: DST (NIRC s.184), VAT 12% or premium tax per product regime, LGT by LGU, FST 2%', 'Both', 'BIR', 3, 2,
+     'Master > Finance > Premium Taxes & LGU Rates; Product master premium_tax_regime; premium-charges.test.js',
      'DST rule delivered as 12.5% of premium; the per-unit option (PHP 0.50 per PHP 4.00, fraction rounded up) is available.', '', '', False),
-    ('13.02', 13, 'Premium tax regime per product (VAT or premium tax)', 'Both', 'BIR', 2, 2,
-     'Product master premium_tax_regime; premium-charges.test.js', '', '', '', False),
     ('13.03', 13, 'Output VAT on commission and VAT Summary (2550Q working paper)', 'Both', 'BIR', 3, 2,
      'Accounts > Tax > VAT Summary; commission-taxes.test.js', '', '', '', False),
     ('13.04', 13, 'Percentage tax for a non-VAT broker or agent (2551Q)', 'Both', 'BIR', 1, 1,
@@ -395,8 +375,6 @@ CATALOGUE = [
      'Master > Finance > Taxation; commission-taxes.test.js', '', '', '', False),
 
     # 14 Insurance Commission and Data Privacy
-    ('14.01', 14, 'IC licence number on company master and documents', 'Both', 'IC', 1, 2,
-     'Company master (IC licence number); printing.test.js', '', '', '', False),
     ('14.02', 14, 'Licence renewal tracking of the firm and licensed individuals', 'Both', 'IC', 2, 0,
      'None found', 'No licence expiry calendar for the firm, its officers or solicitors.', 'Code', 'S', False),
     ('14.03', 14, 'Fit and proper records of directors and officers', 'Both', 'IC', 1, 0,
@@ -405,8 +383,8 @@ CATALOGUE = [
      'Financial Statements; Trial Balance (figures only)', 'No IC-format report (checklist item 60).', 'Code', 'M', False),
     ('14.05', 14, 'IC production and business reports (premium placed by insurer and line)', 'Both', 'IC', 2, 1,
      'Production Register; Premium by Product / Month / Insurer', 'Figures available; IC layout not produced.', 'Code', 'S', False),
-    ('14.06', 14, 'Records of business available for IC examination', 'Both', 'IC', 3, 2,
-     'Numbered placement trail RFQ to policy to receipt; reports; audit log', '', '', '', False),
+    ('14.06', 14, 'Records of business available for IC examination, licence number on documents', 'Both', 'IC', 3, 2,
+     'Numbered placement trail RFQ to policy to receipt; reports; audit log; Company master IC licence number on letterhead (printing.test.js)', '', '', '', False),
     ('14.07', 14, 'Premium held in trust for insurers, apart from own funds', 'Both', 'IC', 3, 2,
      'Premiums Payable to Insurers per insurer; Premium Trust Account; payment-segregation.test.js', '', '', '', False),
     ('14.08', 14, 'Complaints handling and financial consumer protection (RA 11765)', 'Both', 'IC', 2, 0,
@@ -445,19 +423,15 @@ CATALOGUE = [
      'brokerverse/src/components/SideBar/list.js (173 menu screens)', 'Menu redesign in development.', 'In development', 'S', True),
     ('15.09', 15, 'My Work: one inbox of tasks and approvals per user', 'Both', 'Ops', 2, 1,
      'In-app notifications and approval notifications; approval-notifications.test.js', 'My Work inbox in development.', 'In development', 'M', True),
-    ('15.10', 15, 'Document numbering and configuration with approval and audit', 'Both', 'Ops', 2, 2,
-     'Master > Document Numbering, Configuration, Configuration Approvals; numbering.test.js; configuration-controls.test.js', '', '', '', False),
+    ('15.10', 15, 'Document numbering, configuration with approval, e-mail outbox and notifications', 'Both', 'Ops', 2, 2,
+     'Master > Document Numbering, Configuration, Configuration Approvals, E-mail Outbox; numbering.test.js; configuration-controls.test.js; email-outbox.test.js', '', '', '', False),
     ('15.11', 15, 'Branding, letterhead and e-signature on documents', 'Both', 'Ops', 1, 1,
      'Letterhead from Company master; System Settings logo and theme', 'Branding and e-signature in development.', 'In development', 'S', True),
     ('15.12', 15, 'Philippine reference masters (PSGC geography, banks, IDs, salutations, IC insurer list)', 'Both', 'Ops', 2, 1,
      'Seeds: Metro Manila and selected LGUs (seeds/10_masters.sql); KYC ID setting',
      'Full Philippine masters are in development.', 'In development', 'M', True),
-    ('15.13', 15, 'Go-live data load: masters, in-force book, open items, GL opening balances', 'Both', 'Ops', 3, 2,
-     'Master > Go-Live Data Load; go-live.test.js; go-live-workbench.test.js; go-live-roundtrip.test.js', '', '', '', False),
-    ('15.14', 15, 'Migration rehearsal and reconciliation', 'Both', 'Ops', 2, 2,
-     'scripts/golive-rehearsal.js; docs/e2e/GOLIVE_REHEARSAL_RUN.md (51 checks passed)', '', '', '', False),
-    ('15.15', 15, 'E-mail outbox and in-app notifications', 'Both', 'Ops', 2, 2,
-     'Master > Configuration > E-mail Outbox; email-outbox.test.js', '', '', '', False),
+    ('15.13', 15, 'Go-live data load (masters, in-force book, open items, GL opening balances) with rehearsal and reconciliation', 'Both', 'Ops', 3, 2,
+     'Master > Go-Live Data Load; go-live.test.js; go-live-workbench.test.js; go-live-roundtrip.test.js; docs/e2e/GOLIVE_REHEARSAL_RUN.md (51 checks passed)', '', '', '', False),
     ('15.16', 15, 'Hosting choice, backups and disaster recovery', 'Both', 'Ops', 2, 2,
      'Architecture and BCDR documents; /api/health', 'Recovery objectives are recommended values; no DR test yet.', '', '', False),
 ]
@@ -685,7 +659,7 @@ def build(res):
     ws.merge_cells('A2:F2')
     ws['A2'].alignment = WRAP
     ws.row_dimensions[2].height = 30
-    header(ws, 4, ['Headline', 'Value', 'Basis'], [46, 14, 70])
+    header(ws, 4, ['Headline', 'Value', 'Basis'], [None] * 3)
     c = res['counts']
     rows = [
         ('Overall Philippine process fit', res['overall'] / 100, f"{c['l2']} L2 processes in 15 L1 areas, weighted 1 to 3"),
@@ -727,14 +701,19 @@ def build(res):
     ch.legend = None
     ch.dataLabels = DataLabelList()
     ch.dataLabels.showVal = True
-    ch.height, ch.width = 11, 18
+    ch.dataLabels.showCatName = False
+    ch.dataLabels.showSerName = False
+    ch.dataLabels.showLegendKey = False
+    ch.dataLabels.showPercent = False
+    ch.height, ch.width = 13, 20
+    ch.gapWidth = 40
     ch.x_axis.scaling.orientation = 'maxMin'
     ch.series[0].graphicalProperties.solidFill = NAVY
-    ws.add_chart(ch, 'E4')
+    ws.add_chart(ch, 'G4')
 
     r1 = last + 3
     ws.cell(row=r1 - 1, column=1, value='ASEAN rollout: change needed against the Philippine product').font = BOLD
-    header(ws, r1, ['Country', 'Change % (range)', 'Midpoint %', 'Effort (calendar weeks, team of 5)', 'Rank'], [None, None, 12, 22, 8])
+    header(ws, r1, ['Country', 'Change % (range)', 'Midpoint %', 'Effort (calendar weeks, team of 5)', 'Rank'], [None] * 5)
     for n, cc in enumerate(res['country_order'], 1):
         d = res['countries'][cc]
         put(ws, r1 + n, [COUNTRIES[cc]['name'], f"{d['lo']} to {d['hi']}%", d['mid'], f"{d['wk_lo']} to {d['wk_hi']}", d['rank']],
@@ -750,9 +729,15 @@ def build(res):
     ch2.legend = None
     ch2.dataLabels = DataLabelList()
     ch2.dataLabels.showVal = True
+    ch2.dataLabels.showCatName = False
+    ch2.dataLabels.showSerName = False
+    ch2.dataLabels.showLegendKey = False
+    ch2.dataLabels.showPercent = False
     ch2.height, ch2.width = 9, 18
     ch2.series[0].graphicalProperties.solidFill = '2F6EBA'
     ws.add_chart(ch2, f'G{r1}')
+    for col, w in zip('ABCDE', (50, 16, 58, 24, 8)):
+        ws.column_dimensions[col].width = w
     ws.freeze_panes = 'A5'
 
     # ---------------------------------------------------------------- PH Process Fit
