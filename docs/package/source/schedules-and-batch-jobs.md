@@ -83,6 +83,9 @@ A job switched off can still be run with Run now. This is the way to use the per
 | Bank reconciliation auto-match (`bank-auto-match`) | Daily 05:45 | Off | `bankAutoMatch` | `bank_reconciliation.date_window_days`, `bank_reconciliation.group_max_lines`, match rules |
 | Renewal notices (`renewal-notices`) | Daily 06:00 | On | `renewalNotices` | `notification.renewal_reminder`, `limits.renewal_notice_days` (60, 30, 15) |
 | Remittance schedules (`remittance-schedules`) | Daily 06:15 | Off | `remittanceSchedules` | the schedules of Accounts > Remittance > Scheduling (insurers, cut-off days, frequency, next run date) |
+| Cover note expiry (`cover-note-expiry`) | Daily 06:20 | On | `coverNoteExpiry` | `cover_note.reminder_days_before` (7); links issued policies and expires cover notes past their end date |
+| Post-dated cheques due (`pdc-deposit-due`) | Daily 06:25 | On | `pdcDepositDue` | `pdc.due_window_days` (3) |
+| Missing claim documents (`claim-document-reminders`) | Daily 06:35 | On | `claimDocumentReminders` | `claims.document_reminder_days` (3; 0 = off), e-mail template `claim_missing_documents` |
 | Overdue data subject requests (`privacy-requests-due`) | Daily 07:00 | Off | `privacyRequestsDue` | `privacy.request_due_days` (15) sets the due dates |
 | Integration outbox (`integration-outbox`) | Every 2 minutes | On | `integrationOutbox` | the connectors of Master > System Configuration > Integrations (retry policy per connector), `integrations.dispatch_batch_size`, `integrations.stuck_minutes` |
 | SMS renewal notices (`sms-renewal-notices`) | Daily 08:10 | Off | `smsRenewalNotices` | `messaging.renewal_notice_days` (30, 7), template event renewal_notice, `messaging.service_consent` |

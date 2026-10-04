@@ -280,6 +280,12 @@
    "chapter": "System Administrator"
   },
   {
+   "id": "operational-masters",
+   "title": "Operational masters",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
    "id": "uploads",
    "title": "Uploads",
    "level": 3,
@@ -730,6 +736,18 @@
    "chapter": "Operations (client servicing)"
   },
   {
+   "id": "cover-notes-binders",
+   "title": "Cover notes (binders)",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
+   "id": "cancel-a-policy-computed-return-premium",
+   "title": "Cancel a policy: computed return premium",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
    "id": "operations-client-servicing-record-the-client-s-payment",
    "title": "Record the client's payment",
    "level": 2,
@@ -850,6 +868,18 @@
    "chapter": "Claims"
   },
   {
+   "id": "claim-document-checklist",
+   "title": "Claim document checklist",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
+   "id": "motor-claim-repairs-and-letters-of-authority",
+   "title": "Motor claim repairs and letters of authority",
+   "level": 2,
+   "chapter": "Claims"
+  },
+  {
    "id": "reinsurance-recoveries",
    "title": "Reinsurance recoveries",
    "level": 2,
@@ -912,6 +942,24 @@
   {
    "id": "credit-control",
    "title": "Credit control",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "separate-instalment-invoices",
+   "title": "Separate instalment invoices",
+   "level": 3,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "post-dated-cheques",
+   "title": "Post-dated cheques",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "claims-settlements-paid-through-the-broker",
+   "title": "Claims settlements paid through the broker",
    "level": 2,
    "chapter": "Accounting"
   },
@@ -1084,6 +1132,18 @@
    "chapter": "Accounting"
   },
   {
+   "id": "accounts-payable",
+   "title": "Accounts payable",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "fixed-assets-and-depreciation",
+   "title": "Fixed assets and depreciation",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
    "id": "incentives",
    "title": "Incentives",
    "level": 2,
@@ -1170,6 +1230,12 @@
   {
    "id": "commission-rate-matrix",
    "title": "Commission Rate Matrix",
+   "level": 2,
+   "chapter": "Accounting Manager"
+  },
+  {
+   "id": "approve-supplier-invoices",
+   "title": "Approve supplier invoices",
    "level": 2,
    "chapter": "Accounting Manager"
   },

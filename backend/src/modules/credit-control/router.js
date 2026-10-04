@@ -66,6 +66,16 @@ define({
   },
 });
 define({
+  method: 'POST', path: '/instalment-plans/:planId/invoice', summary: 'Issue separate instalment invoices: the plan\'s bill (no payment applied yet) is replaced by one bill per instalment with its own due date and booking journal',
+  screen: `${S} > Instalment Plans`, middleware: write, request: {},
+  response: { success: true, data: { replacedBill: 'INV-2026-00012', invoices: [{ seq: 1, billNumber: 'INV-2026-00013', dueDate: '2026-10-15', amount: 3131.25 }], plan: { ...planExample, invoiced: true } } },
+  handler: async (req, res) => {
+    const r = await tx((db) => inst.invoicePlan(db, req.params.planId, req.user));
+    await audit(req, { entity: 'instalment_plan', entityId: r.plan.id, action: 'invoice', after: { replacedBill: r.replacedBill, invoices: r.invoices } });
+    created(res, r, `${r.invoices.length} instalment invoices issued in place of bill ${r.replacedBill}`);
+  },
+});
+define({
   method: 'GET', path: '/instalments/ageing', summary: 'Outstanding instalments of active plans aged on their due dates (clientId, policyId, insurerId, overdueOnly)', screen: `${S} > Instalment Plans`, middleware: read,
   query: { overdueOnly: 'true' }, response: { success: true, data: { summary: { count: 1, outstanding: 3131.25, current: 0, b1: 3131.25 }, rows: [] } },
   handler: async (req, res) => ok(res, await inst.instalmentAgeing(pool, req.query)),

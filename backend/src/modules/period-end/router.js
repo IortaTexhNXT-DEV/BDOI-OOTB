@@ -207,7 +207,7 @@ const runAction = (path, summary, schema, fn, action, mw = write) => define({
     ok(res, r);
   },
 });
-runAction('/close-runs/:id/execute', 'Execute the steps (accruals, recurring, deferral, fx, checks); a rerun first reverses the run\'s own previous accrual, deferral and FX journals',
+runAction('/close-runs/:id/execute', 'Execute the steps (accruals, recurring, deferral, fx, depreciation, checks); a rerun first reverses the run\'s own previous accrual, deferral and FX journals',
   z.object({ steps: z.array(z.enum(close.STEPS)).optional() }), (db, req) => close.executeRun(db, req.params.id, req.user, { steps: req.body.steps || close.STEPS }), 'execute');
 runAction('/close-runs/:id/checks', 'Run the automatic checklist items again', z.object({}).passthrough(), (db, req) => close.recheck(db, req.params.id), 'recheck');
 runAction('/close-runs/:id/checks/:code/sign', 'Sign off (or withdraw the sign-off of) a manual checklist item', z.object({ remarks: z.string().max(1000).optional(), signed: z.boolean().optional() }),

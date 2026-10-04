@@ -64,6 +64,10 @@ export const TRANSACTION_TABLES = [
   // their hits, provider requests, transaction alerts, cases and AMLC report files
   'client_signatories', 'client_beneficial_owners', 'client_kyc_documents', 'aml_risk_assessments', 'aml_edd_reviews', 'aml_screenings', 'aml_screening_hits',
   'aml_provider_requests', 'aml_alerts', 'aml_cases', 'aml_reports', 'aml_report_items',
+  // operations and accounting (migrations 0290 to 0297): cover notes, post-dated cheques, claim document checklist and
+  // reminders, motor claim repairs, accounts payable, fixed assets and their depreciation (masters are generic types)
+  'cover_notes', 'post_dated_cheques', 'claim_document_items', 'claim_document_reminders', 'claim_repair_estimates', 'claim_loas', 'claim_vehicle_releases',
+  'supplier_invoices', 'supplier_invoice_lines', 'supplier_payments', 'supplier_payment_allocations', 'fixed_assets', 'fixed_asset_depreciation',
 ];
 
 /**

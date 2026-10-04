@@ -315,6 +315,20 @@ export const CATALOGUE = {
   'aml_reports.amlc_notes': 'freeText',
   'aml_provider_requests.request': 'json',
   'aml_provider_requests.response': 'json',
+  // ---------------------------------------------------------------- operations and accounting (migrations 0290 to 0297)
+  'cover_notes.insured_name': 'partyName',
+  'cover_notes.risk_description': 'scrub',
+  'cover_notes.conditions': 'freeText',
+  'post_dated_cheques.remarks': 'freeText',
+  'claim_document_reminders.recipient_email': 'email',
+  'claim_repair_estimates.adjuster_name': 'personName',
+  'claim_repair_estimates.decision_remarks': 'freeText',
+  'claim_loas.remarks': 'freeText',
+  'claim_vehicle_releases.released_to': 'personName',
+  'claim_vehicle_releases.remarks': 'freeText',
+  'supplier_payments.remarks': 'freeText',
+  'fixed_assets.custodian': { rule: 'personName', party: 'staff' },
+  'fixed_assets.disposal_remarks': 'freeText',
 };
 
 /** Tables emptied: credentials, sign-in sessions and history, and messages addressed to real people. */
@@ -458,6 +472,7 @@ export const ALLOW_LIST = {
   'signatories.*': 'signatory master: name and signature catalogued',
   'remittance_approvals.description': 'description of the approval step (swept)',
   'petty_cash_requests.requester_user_id': 'reference',
+  'claim_document_reminders.email_id': 'reference to the e-mail outbox row',
 };
 
 /**

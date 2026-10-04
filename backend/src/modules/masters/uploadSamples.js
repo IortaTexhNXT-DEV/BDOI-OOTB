@@ -243,6 +243,43 @@ export const MASTER_TEMPLATES = [
     notes: ['National holidays of the current and next year are shipped (Republic Act No. 9492 and the yearly proclamation). Add local special non-working days (city or province charter days) and correct a date when a proclamation moves it.'],
     samples: [{ code: '2026-08-19-QCDAY', name: 'Quezon City Day', date: '2026-08-19', holidayType: 'Special Non-working Day', scope: 'Local', location: 'Quezon City', legalBasis: 'Proclamation for the year', remarks: 'Confirm the date with the yearly proclamation' }],
   },
+  // operations and accounting masters (seed 73_ops_accounting.sql)
+  {
+    type: 'supplier', menu: 'Accounts > Payables > Suppliers',
+    formats: { ewtCode: 'EWT tax code of Master > Finance > Taxation withheld from the supplier, e.g. WC158 (goods), WC160 (services), WC100 (rentals); empty = none',
+      paymentTermsDays: 'Days from the invoice date to the due date', expenseAccount: 'GL expense account proposed on new invoice lines, e.g. 4401008' },
+    samples: [{ code: 'SUP-010', name: 'Metro Courier Services Inc.', tin: '009-876-543-000', address: '12 Shaw Blvd., Mandaluyong City', vatRegistered: 'Yes', ewtCode: 'WC160',
+      paymentTermsDays: '30', expenseAccount: '4401007', contactPerson: 'Billing Officer', email: 'billing@metrocourier.example.ph', phone: '+63 2 8700 1234', bankName: 'BDO Unibank, Inc.', bankAccountNo: '0012-3456-7899' }],
+  },
+  {
+    type: 'asset-class', menu: 'Master > Finance > Asset Classes',
+    formats: { usefulLifeMonths: 'Straight-line useful life in months, e.g. 36 for computers', salvagePercent: 'Salvage value as a percent of cost (0 when none)',
+      assetAccount: 'GL asset account, e.g. 1401003', accumulatedAccount: 'GL accumulated depreciation account, e.g. 1402003', expenseAccount: 'GL depreciation expense account, e.g. 4406001' },
+    samples: [{ code: 'OFFICE-FITOUT', name: 'Office fit-out', usefulLifeMonths: '84', salvagePercent: '0', assetAccount: '1401005', accumulatedAccount: '1402005', expenseAccount: '4406002' }],
+  },
+  {
+    type: 'short-period-rate', menu: 'Master > Insurance Management > Short-Period Rates',
+    notes: ['Premium the insurer keeps when the insured cancels, by the days the policy was in force (annual policies). The common Philippine non-life scale is shipped; replace it with the scale of your insurers if it differs.'],
+    formats: { maxDays: 'Upper limit of the band in days in force, e.g. 31 for not exceeding 1 month', retainedPercent: 'Percent of the annual premium kept by the insurer, e.g. 20' },
+    samples: [{ code: 'SP13', maxDays: '15', retainedPercent: '10', description: 'Not exceeding 15 days' }],
+  },
+  {
+    type: 'cancellation-reason', menu: 'Master > Insurance Management > Cancellation Reasons',
+    formats: { initiatedBy: 'insured (short-period scale) or insurer (pro-rata)', method: 'auto (from who initiates), pro-rata, short-period or flat (whole premium returned)' },
+    samples: [{ code: 'TOTAL_LOSS', name: 'Total loss of the insured property', initiatedBy: 'insurer', method: 'pro-rata', description: 'Cover ends with a total loss' }],
+  },
+  {
+    type: 'claim-document-requirement', menu: 'Master > Insurance Management > Claim Document Checklist',
+    formats: { lineOfBusiness: 'Line of business code as on the policy (MOTOR, FIRE ...) or * for every line', claimType: 'Claim type as on the claim (Own Damage, Theft, Third Party ...) or * for every type',
+      required: 'Yes when the claim cannot go to the insurer without it' },
+    samples: [{ code: 'PA-MEDCERT', lineOfBusiness: 'PA', claimType: '*', documentName: 'Medical certificate and hospital bills', required: 'Yes', sortOrder: '40' }],
+  },
+  {
+    type: 'repair-shop', menu: 'Master > Insurance Management > Repair Shops',
+    formats: { accredited: 'Yes when the insurers accredit the shop (only accredited shops take estimates)', accreditedInsurers: 'Insurers that accredit the shop', labourRatePerHour: 'Labour rate per hour agreed with the insurers' },
+    samples: [{ code: 'RS-010', name: 'Quality Auto Repair Center', address: '88 E. Rodriguez Jr. Ave.', city: 'Quezon City', contactPerson: 'Service Advisor', phone: '+63 2 8911 2233',
+      email: 'service@qualityauto.example.ph', tin: '010-222-333-000', accredited: 'Yes', accreditedInsurers: 'Malayan, Pioneer', labourRatePerHour: '650' }],
+  },
 ];
 
 export const masterTemplateInfo = (code) => MASTER_TEMPLATES.find((m) => m.type === code) || null;

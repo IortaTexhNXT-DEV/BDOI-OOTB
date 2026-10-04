@@ -219,6 +219,17 @@ import InstalmentPlans from "../module/CreditControl/InstalmentPlans";
 import WarrantyMonitor from "../module/CreditControl/WarrantyMonitor";
 import CreditLimits from "../module/CreditControl/CreditLimits";
 import RemittanceAgeing from "../module/CreditControl/RemittanceAgeing";
+// operations and accounting: cover notes, cancellation, post-dated cheques, claims, payables, fixed assets
+import CoverNotes from "../module/OpsAccounting/CoverNotes";
+import PolicyCancellation from "../module/OpsAccounting/PolicyCancellation";
+import PostDatedCheques from "../module/OpsAccounting/PostDatedCheques";
+import ClaimsSettlements from "../module/OpsAccounting/ClaimsSettlements";
+import ClaimDocuments from "../module/OpsAccounting/ClaimDocuments";
+import MotorClaimRepairs from "../module/OpsAccounting/MotorClaimRepairs";
+import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
+import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
+import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
+import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
 
 // Collections Module
 import CollectionsList from "../agentModule/collectionsModule/CollectionsList";
@@ -1714,6 +1725,23 @@ const Maincomponent = () => {
           <Route path="/accounts/credit-control/warranty" element={<WarrantyMonitor />} />
           <Route path="/accounts/credit-control/limits" element={<CreditLimits />} />
           <Route path="/accounts/credit-control/remittance-ageing" element={<RemittanceAgeing />} />
+          <Route path="/operations/cover-notes" element={<CoverNotes />} />
+          <Route path="/operations/policy-cancellation" element={<PolicyCancellation />} />
+          <Route path="/operations/claim-documents" element={<ClaimDocuments />} />
+          <Route path="/operations/motor-claim-repairs" element={<MotorClaimRepairs />} />
+          <Route path="/accounts/post-dated-cheques" element={<PostDatedCheques />} />
+          <Route path="/accounts/claims-settlements" element={<ClaimsSettlements />} />
+          <Route path="/accounts/payables/invoices" element={<SupplierInvoices />} />
+          <Route path="/accounts/payables/payments" element={<SupplierPayments />} />
+          <Route path="/accounts/payables/ageing" element={<ApAgeing />} />
+          <Route path="/accounts/payables/suppliers" element={<Suppliers />} />
+          <Route path="/accounts/fixed-assets/register" element={<AssetRegister />} />
+          <Route path="/accounts/fixed-assets/depreciation" element={<DepreciationRun />} />
+          <Route path="/master/insurance/short-period-rates" element={<ShortPeriodRates />} />
+          <Route path="/master/insurance/cancellation-reasons" element={<CancellationReasons />} />
+          <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />
+          <Route path="/master/insurance/repair-shops" element={<RepairShops />} />
+          <Route path="/master/finance/asset-classes" element={<AssetClasses />} />
 
           {/* OperationalReports */}
           <Route

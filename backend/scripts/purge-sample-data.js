@@ -55,6 +55,7 @@ export const SAMPLE_MASTERS = [
   { table: 'reinsurers', label: 'sample reinsurers', where: "id IN ('RE001','RE002','RE003','RE004','RE005','RE006') AND created_by = 'seed'" },
   { table: 'incentive_programs', label: 'sample incentive programmes', where: "program_code IN ('INC-2026-001','INC-2026-002','INC-2026-003','INC-2026-004')" },
   { table: 'master_records', label: 'demo master records', where: "created_by = 'seed' AND type_code IN ('company','bank-account','employee','petty-cash','exchange-rate','commission')" },
+  { table: 'master_records', label: 'sample repair shops and suppliers', where: "created_by = 'seed' AND type_code IN ('repair-shop','supplier')" },
 ];
 export const SAMPLE_USERS = ['agent.jdelacruz', 'agent.msantos', 'agent.preyes', 'agent.agarcia', 'agent.jmartinez', 'fin.approver'];
 export const ADMIN_USERNAME = 'BrokerVerse';

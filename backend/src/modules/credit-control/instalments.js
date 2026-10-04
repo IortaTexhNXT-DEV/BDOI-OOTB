@@ -73,12 +73,34 @@ async function policyAndBill(db, policyRef, receivableId = null) {
   return { policy: p, bill, bills };
 }
 
-const planOut = (plan, lines, bill, asOf) => ({
-  id: plan.id, policyId: plan.policy_id, receivableId: plan.receivable_id, billNumber: bill?.bill_number || null, frequency: plan.frequency, instalmentCount: plan.instalment_count,
-  firstDueDate: isoDate(plan.first_due_date), downPayment: Number(plan.down_payment), status: plan.status, remarks: plan.remarks, createdAt: plan.created_at, updatedAt: plan.updated_at,
-  billAmount: bill ? Number(bill.amount) : null, billBalance: bill ? Number(bill.balance) : null,
-  instalments: allocatePaid(lines, bill ? round2(Number(bill.amount) - Number(bill.balance)) : 0, asOf),
-});
+/**
+ * Instalments of an invoiced plan: each instalment is its own bill, so what is paid and due comes from that bill.
+ * children: Map receivable id -> receivable row.
+ */
+function invoicedInstalments(lines, children, asOf) {
+  return lines.map((l) => {
+    const b = children.get(l.receivable_id);
+    const one = allocatePaid([{ ...l, due_date: b ? b.due_date : l.due_date }], b ? round2(Number(b.amount) - Number(b.balance)) : 0, asOf)[0];
+    return { ...one, receivableId: l.receivable_id, billNumber: b?.bill_number || null, billStatus: b?.status || null };
+  });
+}
+
+const planOut = (plan, lines, bill, asOf, children = new Map()) => {
+  const invoiced = !!plan.invoiced_at && lines.some((l) => l.receivable_id);
+  return {
+    id: plan.id, policyId: plan.policy_id, receivableId: plan.receivable_id, billNumber: bill?.bill_number || null, frequency: plan.frequency, instalmentCount: plan.instalment_count,
+    firstDueDate: isoDate(plan.first_due_date), downPayment: Number(plan.down_payment), status: plan.status, remarks: plan.remarks, createdAt: plan.created_at, updatedAt: plan.updated_at,
+    billAmount: bill ? Number(bill.amount) : null, billBalance: bill ? Number(bill.balance) : null, invoiced, invoicedAt: plan.invoiced_at || null,
+    instalments: invoiced ? invoicedInstalments(lines, children, asOf) : allocatePaid(lines, bill ? round2(Number(bill.amount) - Number(bill.balance)) : 0, asOf),
+  };
+};
+
+/** The instalment bills of plan lines (Map id -> receivable). */
+async function childBills(db, lines) {
+  const ids = lines.map((l) => l.receivable_id).filter(Boolean);
+  if (!ids.length) return new Map();
+  return new Map((await db.query('SELECT * FROM receivables WHERE id = ANY($1)', [ids])).rows.map((r) => [r.id, r]));
+}
 
 /** The policy's bills and their plans (active and cancelled), with the proposal for a new plan. */
 export async function policyPlans(db, policyRef) {
@@ -86,12 +108,14 @@ export async function policyPlans(db, policyRef) {
   const asOf = await today();
   const plans = (await db.query('SELECT * FROM premium_instalment_plans WHERE policy_id = $1 ORDER BY created_at DESC', [policy.id])).rows;
   const lines = plans.length ? (await db.query('SELECT * FROM premium_instalments WHERE plan_id = ANY($1) ORDER BY plan_id, seq', [plans.map((x) => x.id)])).rows : [];
+  const children = await childBills(db, lines);
+  const parents = new Map((await db.query('SELECT * FROM receivables WHERE id = ANY($1)', [plans.map((x) => x.receivable_id)])).rows.map((r) => [r.id, r]));
   const freq = await frequencies();
   const count = Math.max(1, Number(await getSetting('credit.default_instalment_count', 4)) || 4);
   return {
     policyId: policy.id, policyNumber: policy.policy_number, clientName: policy.client_name, inceptionDate: isoDate(policy.inception_date),
     bills: bills.map((b) => ({ id: b.id, billNumber: b.bill_number, amount: Number(b.amount), balance: Number(b.balance), dueDate: isoDate(b.due_date), status: b.status, source: b.source })),
-    plans: plans.map((pl) => planOut(pl, lines.filter((l) => l.plan_id === pl.id), bills.find((b) => b.id === pl.receivable_id), asOf)),
+    plans: plans.map((pl) => planOut(pl, lines.filter((l) => l.plan_id === pl.id), bills.find((b) => b.id === pl.receivable_id) || parents.get(pl.receivable_id), asOf, children)),
     frequencies: freq, maxInstalments: Number(await getSetting('credit.max_instalment_count', 12)) || 12,
     proposal: { receivableId: bill.id, frequency: Object.keys(freq)[0] || 'monthly', count, firstDueDate: isoDate(bill.due_date),
       instalments: generateSchedule({ amount: Number(bill.amount), count, months: Object.values(freq)[0] || 1, firstDueDate: isoDate(bill.due_date) }) },
@@ -150,6 +174,10 @@ export async function savePlan(db, policyRef, b, user) {
     await db.query('INSERT INTO premium_instalments(plan_id, seq, due_date, amount, remarks) VALUES ($1,$2,$3,$4,$5)', [planId, i + 1, x.dueDate, round2(x.amount), x.remarks || null]);
   }
   await syncDueDate(db, bill.id);
+  // credit.instalment_invoices_on_save: a separate bill per instalment straight away (only before any payment on the bill)
+  if ((await getSetting('credit.instalment_invoices_on_save', false)) === true && Math.abs(Number(bill.balance) - Number(bill.amount)) <= EPS && bill.source !== 'opening') {
+    await invoicePlan(db, planId, user);
+  }
   return { before, after: await getPlan(db, planId) };
 }
 
@@ -158,7 +186,52 @@ export async function getPlan(db, planId) {
   if (!plan) throw notFound('Instalment plan not found');
   const bill = (await db.query('SELECT * FROM receivables WHERE id = $1', [plan.receivable_id])).rows[0];
   const lines = (await db.query('SELECT * FROM premium_instalments WHERE plan_id = $1 ORDER BY seq', [plan.id])).rows;
-  return planOut(plan, lines, bill, await today());
+  return planOut(plan, lines, bill, await today(), await childBills(db, lines));
+}
+
+/**
+ * Separate instalment invoices: the plan's bill is replaced by one bill per instalment. The bill's booking journal is
+ * reversed and the bill cancelled; each instalment gets its own bill (invoice number, due date of the instalment, net
+ * premium, taxes and commission in proportion, its own booking journal and collection item), so the ledger, the
+ * collections, the receivable ageing and the premium warranty monitor work per instalment. Only before any payment is
+ * applied to the bill; not for go-live open items (carried by the opening balance).
+ */
+export async function invoicePlan(db, planId, user) {
+  const plan = (await db.query('SELECT * FROM premium_instalment_plans WHERE id = $1 FOR UPDATE', [planId])).rows[0];
+  if (!plan) throw notFound('Instalment plan not found');
+  if (plan.status !== 'active') throw conflict('Only an active plan is invoiced');
+  if (plan.invoiced_at) throw conflict('The instalments of this plan are already invoiced');
+  const bill = (await db.query('SELECT * FROM receivables WHERE id = $1 FOR UPDATE', [plan.receivable_id])).rows[0];
+  if (!bill || ['cancelled', 'written-off', 'credited'].includes(bill.status)) throw conflict('The bill of this plan is no longer open');
+  if (bill.source === 'opening') throw conflict(`Bill ${bill.bill_number} is a go-live open item; its instalments are followed on the plan`);
+  if (Math.abs(Number(bill.balance) - Number(bill.amount)) > EPS) {
+    throw conflict(`Bill ${bill.bill_number} already has payments applied; separate instalment invoices are issued before the first payment`);
+  }
+  const lines = (await db.query('SELECT * FROM premium_instalments WHERE plan_id = $1 ORDER BY seq', [plan.id])).rows;
+  const { createReceivable, ensureBooked, findPolicy } = await import('../receipts/receivables.js');
+  const { reverseJournal } = await import('../accounting/lib/ledger.js');
+  const { allocate } = await import('../accounting/lib/coinsurance.js');
+  const policy = await findPolicy(db, bill.policy_id);
+  const booked = await ensureBooked(db, bill, policy, user);
+  if (booked.booking_jv_id) {
+    await reverseJournal(db, booked.booking_jv_id, user, { description: `Bill ${bill.bill_number} replaced by ${lines.length} instalment invoices` });
+  }
+  await db.query('UPDATE receivables SET status = \'cancelled\', balance = 0, updated_at = now() WHERE id = $1', [bill.id]);
+  await db.query('UPDATE collection_items SET closed_at = COALESCE(closed_at, now()), updated_at = now() WHERE receivable_id = $1', [bill.id]);
+  const weights = lines.map((l) => Number(l.amount));
+  const split = (v) => allocate(Number(v) || 0, weights);
+  const parts = { net: split(bill.net_premium), vat: split(bill.vat), dst: split(bill.dst), lgt: split(bill.lgt), other: split(bill.other_charges), discount: split(bill.discount),
+    commission: split(bill.commission_amount) };
+  const created = [];
+  for (const [i, l] of lines.entries()) {
+    const rcv = await createReceivable(db, { policy, amount: Number(l.amount), source: bill.source, reference: bill.reference || bill.bill_number, dueDate: isoDate(l.due_date), user,
+      breakdown: { netPremium: parts.net[i], vat: parts.vat[i], dst: parts.dst[i], lgt: parts.lgt[i], other: parts.other[i], discount: parts.discount[i], commissionAmount: parts.commission[i] } });
+    await db.query('UPDATE receivables SET parent_receivable_id = $2, instalment_seq = $3 WHERE id = $1', [rcv.id, bill.id, l.seq]);
+    await db.query('UPDATE premium_instalments SET receivable_id = $2 WHERE id = $1', [l.id, rcv.id]);
+    created.push({ seq: l.seq, receivableId: rcv.id, billNumber: rcv.bill_number, dueDate: isoDate(l.due_date), amount: Number(l.amount) });
+  }
+  await db.query('UPDATE premium_instalment_plans SET invoiced_at = now(), invoiced_by = $2, updated_by = $2, updated_at = now() WHERE id = $1', [plan.id, user?.id ?? null]);
+  return { plan: await getPlan(db, plan.id), replacedBill: bill.bill_number, invoices: created };
 }
 
 /** Cancel a plan: the bill keeps the due date of its first unpaid instalment. */
@@ -166,6 +239,7 @@ export async function cancelPlan(db, planId, reason, user) {
   const plan = (await db.query('SELECT * FROM premium_instalment_plans WHERE id = $1 FOR UPDATE', [planId])).rows[0];
   if (!plan) throw notFound('Instalment plan not found');
   if (plan.status !== 'active') throw conflict('The plan is already cancelled');
+  if (plan.invoiced_at) throw conflict('The instalments of this plan are invoiced: each instalment is its own bill and is followed on its own');
   const before = await getPlan(db, plan.id);
   await db.query('UPDATE premium_instalment_plans SET status = \'cancelled\', cancelled_by = $2, cancelled_at = now(), cancel_reason = $3 WHERE id = $1', [plan.id, user?.id ?? null, reason || null]);
   return { before, after: await getPlan(db, plan.id) };
@@ -214,7 +288,19 @@ export async function instalmentAgeing(db, qs = {}) {
         billNumber: pl.bill_number, ...a, instalmentCount: pl.instalment_count, bucket: bucketOf(a.daysPastDue) });
     }
   }
-  const sum = (f) => round2(rows.filter(f).reduce((s, r) => s + r.outstanding, 0));
+  // invoiced plans: each open instalment bill is aged on its own due date
+  const invoiced = (await db.query(`SELECT r.*, i.seq, i.plan_id, pl.instalment_count, p.policy_number, c.display_name AS client_name, ic.name AS insurer_name
+    FROM receivables r JOIN premium_instalments i ON i.receivable_id = r.id JOIN premium_instalment_plans pl ON pl.id = i.plan_id JOIN policies p ON p.id = r.policy_id
+    LEFT JOIN clients c ON c.id = p.client_id LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id
+    WHERE r.status IN ('open', 'partial') AND r.balance > 0 AND ($1::text IS NULL OR p.client_id = $1 OR c.client_code = $1) AND ($2::text IS NULL OR p.id = $2 OR p.policy_number = $2)
+      AND ($3::text IS NULL OR ic.id::text = $3 OR ic.code = $3) ORDER BY p.policy_number, i.seq`, [qs.clientId || null, qs.policyId || null, qs.insurerId ? String(qs.insurerId) : null])).rows;
+  for (const r of invoiced) {
+    const a = allocatePaid([{ seq: r.seq, due_date: r.due_date, amount: r.amount }], round2(Number(r.amount) - Number(r.balance)), asOf)[0];
+    if (qs.overdueOnly === 'true' && !(a.daysPastDue > 0)) continue;
+    rows.push({ planId: r.plan_id, policyId: r.policy_id, policyNumber: r.policy_number, clientId: r.client_id, clientName: r.client_name, insurerName: r.insurer_name,
+      billNumber: r.bill_number, receivableId: r.id, ...a, instalmentCount: r.instalment_count, bucket: bucketOf(a.daysPastDue) });
+  }
+  const sum =(f) => round2(rows.filter(f).reduce((s, r) => s + r.outstanding, 0));
   return { asOf, bucketDays: buckets.slice(0, 3), summary: { count: rows.length, outstanding: sum(() => true), current: sum((r) => r.bucket === 'current'), b1: sum((r) => r.bucket === 'b1'),
     b2: sum((r) => r.bucket === 'b2'), b3: sum((r) => r.bucket === 'b3'), b4: sum((r) => r.bucket === 'b4') }, rows };
 }

@@ -37,6 +37,9 @@ const MASTER_SHEETS = {
   'bank-account': 'Bank Accounts', signatory: 'Signatories', 'transaction-code': 'Transaction Codes', 'write-off-reason': 'Write-off Reasons',
   'insurance-company': 'Insurers', 'line-of-business': 'Lines of Business', product: 'Products', 'policy-type': 'Policy Types', cover: 'Covers',
   'vehicle-brand': 'Vehicle Brands', 'vehicle-model': 'Vehicle Models', 'vehicle-variant': 'Vehicle Variants', vehicle: 'Vehicles',
+  // operations and accounting masters (seed 73_ops_accounting.sql)
+  supplier: 'Suppliers', 'asset-class': 'Asset Classes', 'short-period-rate': 'Short-Period Rates', 'cancellation-reason': 'Cancellation Reasons',
+  'claim-document-requirement': 'Claim Document Checklist', 'repair-shop': 'Repair Shops',
 };
 
 /** Earlier names of a sheet, still read from an uploaded workbook (the Province master was called State). */
@@ -681,6 +684,7 @@ export async function configurationSheets() {
     await m('bank'), await m('bank-account'), await m('signatory'), await m('transaction-code'), await m('write-off-reason'),
     await m('insurance-company'), await m('line-of-business'), await m('product'), await m('policy-type'), await m('cover'),
     await m('vehicle-brand'), await m('vehicle-model'), await m('vehicle-variant'), await m('vehicle'),
+    await m('supplier'), await m('asset-class'), await m('short-period-rate'), await m('cancellation-reason'), await m('claim-document-requirement'), await m('repair-shop'),
     commissionSheet(), chargesSheet(), lguSheet(), authoritySheet(), numberingSheet(),
     // integrations: bank accounts of the payees paid by bank file, COC number series of the insurers
     payeeAccountsSheet(), cocSeriesSheet(),

@@ -21,6 +21,9 @@ const OPERATIONS_ALL = [
   "Payments",
   // CTPL COC authentication (read:policies; authenticate, enter a code, COC series: write:policies)
   "CTPL Authentication",
+  // cover notes and policy cancellation (return premium computed): write:policies / write:endorsements
+  "Cover Notes",
+  "Policy Cancellation",
 ];
 
 // The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
@@ -99,7 +102,10 @@ export const roleMenuPermissions = {
   claims: {
     dashboard: ["Claims Dashboard"],
     home: true,
-    operations: ["Clients", "Policy", "Claims", "My Work"],
+    operations: ["Clients", "Policy", "Claims", "My Work",
+      // claim document checklist and motor claim repairs (write:claims); their masters below
+      "Claim Documents", "Motor Claim Repairs"],
+    master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports"],
   },
@@ -134,6 +140,11 @@ export const roleMenuPermissions = {
       "Credit Control",
       // payment vouchers paid by bank file (maker-checker approval of the batch)
       "Bank Payment Files",
+      // post-dated cheques, claims paid through the broker, accounts payable (approval: approve:payables), fixed assets
+      "Post-Dated Cheques",
+      "Claims Settlements",
+      "Payables",
+      "Fixed Assets",
     ],
     // Account Determination and Posting Rules: Accounting reads them; the Accounting Manager proposes changes and approves
     // those of another user on Configuration Approvals (the administrator configures too)
@@ -142,7 +153,9 @@ export const roleMenuPermissions = {
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
       "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
       // bank payment file layouts and payee bank accounts (write:disbursements)
-      "Finance > Bank File Layouts"],
+      "Finance > Bank File Layouts",
+      // asset classes of the fixed asset register (write:fixed-assets)
+      "Finance > Asset Classes"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts",
       // overriding, profit and contingent commission from insurers (read:commission / write:commission)
       "Insurer Overrides"],

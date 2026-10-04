@@ -12,7 +12,7 @@ import periodEndService from "../../services/periodEndService";
 import { JournalDialog, JournalLink, PageHeader, StatusTag, date, dateTime, money, showError, showSuccess } from "./common";
 import { hasPermission } from "../../utils/canOpen";
 
-const STEPS = ["accruals", "recurring", "deferral", "fx", "checks"];
+const STEPS = ["accruals", "recurring", "deferral", "fx", "depreciation", "checks"];
 
 /**
  * Month-end close run: the steps (accruals, recurring journals, commission deferral, FX revaluation, checklist), the

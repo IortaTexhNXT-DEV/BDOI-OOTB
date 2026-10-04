@@ -32,6 +32,7 @@ const creditControlService = {
   previewPlan: (policyRef, body) => post(`${R}/policies/${id(policyRef)}/instalment-plans/preview`, body),
   savePlan: (policyRef, body) => post(`${R}/policies/${id(policyRef)}/instalment-plans`, body),
   cancelPlan: (planId, reason) => post(`${R}/instalment-plans/${id(planId)}/cancel`, { reason }),
+  invoicePlan: (planId) => post(`${R}/instalment-plans/${id(planId)}/invoice`, {}),
   instalmentAgeing: (params) => request(`${R}/instalments/ageing${qs(params)}`),
   warranty: (params) => request(`${R}/warranty${qs(params)}`),
   pendingExtensions: () => request(`${R}/warranty/extensions`),

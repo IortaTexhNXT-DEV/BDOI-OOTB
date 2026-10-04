@@ -60,6 +60,7 @@ export const FILE_ROUTES = [
   { module: 'system-settings', method: 'POST', path: '/upload/:field', noTemplate: 'Logo or favicon image (single file)' },
   { module: 'uploads', method: 'POST', path: '/upload', noTemplate: 'Attachments: policy documents, IDs, vehicle photos, payment proofs, quotation responses, insurer offers, product documents, company logo' },
   { module: 'uploads', method: 'POST', path: '/upload-multiple', noTemplate: 'Several attachments at once (claim documents)' },
+  { module: 'claim-documents', method: 'POST', path: '/claims/:id/items/:itemId/upload', noTemplate: 'The copy of one document of the claim document checklist (single file)' },
 ];
 
 /** Master types that take an upload: active, not retired, not excluded (masters.noTemplateReason), in template order. */

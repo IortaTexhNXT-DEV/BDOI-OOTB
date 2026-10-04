@@ -138,3 +138,7 @@ export async function eisOutbox() {
   if (!(await tableExists('eis_submissions'))) return { skipped: 'eis_submissions table missing' };
   return (await import('../modules/bir/eis.js')).processOutbox();
 }
+// operations and accounting: cover note expiry, post-dated cheques due for deposit, missing claim documents
+export { coverNoteExpiry } from '../modules/cover-notes/jobs.js';
+export { pdcDepositDue } from '../modules/pdc/jobs.js';
+export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';

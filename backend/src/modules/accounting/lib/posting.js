@@ -99,6 +99,15 @@ export const EVENTS = {
   'override_commission.settlement': { label: 'Overriding commission settled by the insurer', module: 'commission', amounts: ['cash', 'ewt', 'applied', 'difference'],
     vars: ['computationNumber', 'insurer', 'statementReference', 'form2307'],
     sample: { amounts: { cash: 51000, ewt: 5000, applied: 56000, difference: 0 }, vars: { computationNumber: 'OVC-SAMPLE', insurer: 'Sample Insurer', statementReference: 'SOA-SAMPLE', form2307: '' }, paymentMode: 'bank-transfer' } },
+  // accounts payable and fixed assets (migration 0298): the expense line of ap.invoice is split over the invoice's accounts
+  'ap.invoice': { label: 'Supplier invoice approved', module: 'payables', amounts: ['net', 'vat', 'ewt', 'payable'], vars: ['supplierName', 'invoiceNo', 'voucherNumber'],
+    contextAccounts: ['expense', 'vat', 'ewt'],
+    sample: { amounts: { net: 10000, vat: 1200, ewt: 100, payable: 11100 }, vars: { supplierName: 'Sample Supplier', invoiceNo: 'SI-SAMPLE', voucherNumber: 'APV-SAMPLE' },
+      accounts: { expense: '4401008', vat: '1301001', ewt: '2204001' } } },
+  'ap.payment': { label: 'Supplier paid', module: 'payables', amounts: ['amount'], vars: ['supplierName', 'paymentNumber', 'memoRef'],
+    sample: { amounts: { amount: 11100 }, vars: { supplierName: 'Sample Supplier', paymentNumber: 'SPV-SAMPLE', memoRef: 'Cheque 000123' }, paymentMode: 'check' } },
+  'fa.depreciation': { label: 'Monthly depreciation', module: 'fixed-assets', amounts: ['amount'], vars: ['period', 'assetClass'], contextAccounts: ['expense', 'accumulated'],
+    sample: { amounts: { amount: 10000 }, vars: { period: '2026-09', assetClass: 'Computer equipment' }, accounts: { expense: '4406001', accumulated: '1402003' } } },
 };
 for (const e of Object.values(EVENTS)) {
   if (!e.sameAs) continue;
