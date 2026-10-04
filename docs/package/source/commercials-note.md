@@ -147,12 +147,12 @@ Infrastructure is optional and quoted separately. The broker may host BrokerVers
 
 ## Environment set by broker size
 
-| Tier | Standing environments | Temporary |
-|---|---|---|
-| Small and Medium | Dev, UAT, Production. Integration and system testing in Dev, promoted to UAT for testing, then to Production | Pre-Prod |
-| Large and Enterprise | Dev, SIT, UAT, Production with high availability. SIT and UAT are separate | Pre-Prod |
+| Tier | Standing environments |
+|---|---|
+| Small and Medium | Dev, UAT, Production. Integration and system testing in Dev, promoted to UAT for testing, then to Production |
+| Large and Enterprise | Dev, SIT, UAT, Production with high availability. SIT and UAT are separate |
 
-Pre-Prod is created from a production backup for the go-live rehearsal and for each major release, then removed. A copy used by people without production access is masked.
+Every tier also has a temporary Pre-Prod. It is created from a production backup for the go-live rehearsal and for each major release, then removed. A copy used by people without production access is masked.
 
 ## Prices
 
