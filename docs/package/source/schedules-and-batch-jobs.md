@@ -1,12 +1,12 @@
 ---
 title: BrokerVerse Schedules and Batch Jobs
 subtitle: Scheduled jobs, batch processes and the operational run book
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: 
 approved: 
-change: Every job of jobs.json, the migrations and the seeds listed (My Work, AML/CFT, IC compliance, complaints, breach deadlines, EIS, integrations, SMS, operations, distribution); support runbook per job; run book and gaps updated
+change: Version 1.1.1: release figures aligned (57 master upload templates of the 74 delivered). Version 1.1: every job of jobs.json, the migrations and the seeds listed (My Work, AML/CFT, IC compliance, complaints, breach deadlines, EIS, integrations, SMS, operations, distribution); support runbook per job; run book and gaps updated
 acronyms: OOTB=Out of the box; AML=Anti-money laundering; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; KYC=Know your customer; EIS=Electronic Invoicing System; IC=Insurance Commission; NPC=National Privacy Commission; PDC=Post-dated cheque; CTPL=Compulsory third party liability; BI=Business intelligence; CSV=Comma-separated values; BIR=Bureau of Internal Revenue; GL=General ledger; JV=Journal voucher; OR=Official receipt; PV=Payment voucher; SMTP=Simple Mail Transfer Protocol; CSV=Comma-separated values; XLSX=Excel workbook; PDF=Portable document format; API=Application programming interface; EWT=Expanded withholding tax; FX=Foreign exchange
 ---
 
@@ -458,7 +458,7 @@ Rules common to all uploads:
 | Payment vouchers | Accounts > Disbursement > Bulk upload | Row by row | Each row creates a draft voucher, then approved and paid on screen (maker-checker). |
 | Opening balances | Accounts > Period End > Period Management > Import opening balances | All or nothing | Debits must equal credits; loading again with the same go-live date replaces the earlier load; no journal is posted. |
 | Open items | Accounts > Collections > Import open items | Row by row, rows already loaded skipped | Each row becomes an open bill of a go-live policy; no journal (the GL carries them in the opening balance). |
-| Masters (29 templates) | The master screen > Upload, or the API route where the screen has no Upload button yet | Row by row | A row whose code exists is refused; edit existing records on screen. |
+| Masters (57 templates) | The master screen > Upload, or the API route where the screen has no Upload button yet | Row by row | A row whose code exists is refused; edit existing records on screen. |
 | Bank statement | Accounts > Bank Reconciliation > Reconciliation Workspace > Import statement | All or nothing | See bank statement import below. |
 | Remittance bulk | Accounts > Remittance > Bulk Processing | Validate, then process valid rows | See remittance bulk processing below. |
 | Remittance bank transactions | Accounts > Remittance > Reconciliation > Import | Read in the browser | TransDate, Reference, Amount, Description. |

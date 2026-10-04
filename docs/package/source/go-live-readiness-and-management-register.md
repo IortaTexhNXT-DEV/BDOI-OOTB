@@ -1,12 +1,12 @@
 ---
 title: Go/No-Go Recommendation and Management Register
 subtitle: iNXT BrokerVerse OOTB Release 1.0
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Conditions, notes, plans, risks and decisions for the modules merged since the release test (AML/CFT, BIR, IC and NPC registers, integrations, branding, distribution, operations and accounting, go-live tools and release pipeline)
+change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (Test Summary Report 1.3); C9 and P2 record the merge of the IC and NPC compliance package. Version 1.1: conditions, notes, plans, risks and decisions for the modules merged since the release test (AML/CFT, BIR, IC and NPC registers, integrations, branding, distribution, operations and accounting, go-live tools and release pipeline)
 open_item: Conditions C1 to C14 of the chapter Recommendation; decisions D1 to D20
 open_item_status: Open
 acronyms: OOTB=Out of the box; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; AMC=Annual maintenance contract; SOW=Statement of work; MSA=Master services agreement; DPA=Data processing agreement; DPO=Data protection officer; NPC=National Privacy Commission; IC=Insurance Commission; SMTP=Simple Mail Transfer Protocol; CI=Continuous integration; RAID=Risks, assumptions, issues and dependencies; RTO=Recovery time objective; RPO=Recovery point objective; AML/CFT=Anti-money laundering and countering the financing of terrorism; AMLC=Anti-Money Laundering Council; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; CTPL=Compulsory Third Party Liability; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes; PEP=Politically exposed person
@@ -30,6 +30,7 @@ It brings together the evidence from the Test Summary Report, the documentation 
 |---|---|---|
 | 1.0 | 03 October 2026 | Recommendation for Release 1.0 after the release test |
 | 1.1 | 04 October 2026 | Conditions C9 to C14, notes N12 to N20, actions A6 to A11, plans P13 to P20, risks R13 to R20 and decisions D15 to D20 for the modules merged since the release test; C1 restated for the release pipeline; P2 and P9 to P12 moved to the chapter Delivered since the release test |
+| 1.1.1 | 04 October 2026 | Release figures aligned with the release verification on the merged release (Test Summary Report 1.3): Evidence chapter, condition C9 and item P2 record the merge of the IC and NPC compliance package and the green regression run |
 
 # Recommendation
 
@@ -50,7 +51,7 @@ The product is functionally complete for the broking cycle of a Philippine non-l
 | C6 | Complete the company facts marked [to confirm] in the security questionnaire and the continuity plan (registration, TIN, DPO, NPC registration, hosting partner, support team location) | Management |
 | C7 | Run the restore test and the disaster recovery drill described in the Business Continuity and Disaster Recovery Plan on the production hosting | DevOps lead |
 | C8 | Client UAT sign-off on the client's own configuration and migrated data, using the UAT and Go-Live Acceptance Certificates | Client and delivery lead |
-| C9 | The release taken to the first client includes the IC and NPC compliance package (licence register, fit and proper, insurer authority, complaints, breach register, masking by role, field encryption) after its merge and a green regression run; `PII_ENCRYPTION_KEY` is set in every environment and its custody record signed with the client before Production is provisioned | CTO; DevOps lead |
+| C9 | The release taken to the first client includes the IC and NPC compliance package (licence register, fit and proper, insurer authority, complaints, breach register, masking by role, field encryption), merged on 04 October 2026 with a green regression run (1,113 of 1,113 backend tests); `PII_ENCRYPTION_KEY` is set in every environment and its custody record signed with the client before Production is provisioned | CTO; DevOps lead |
 | C10 | The client's compliance officer confirms the delivered AML/CFT values against the AMLC's current issuances, loads the screening lists (no list content is delivered) and validates a CTR test file in the AMLC portal; the BV-AMLC-TXN 1.0 layout is checked against the AMLC's current reporting format; complaints deadlines and fit and proper declarations are confirmed against the IC rules in force | Client compliance officer; delivery lead |
 | C11 | The client's tax adviser confirms the tax codes, ATC, EOPT invoice and receipt wording and the ATP or CAS details; the DAT files of the first filing are validated with the current BIR validation module; the EIS connector stays off until the client's enrolment | Client Accounting Manager and tax adviser |
 | C12 | Each connector used live at go-live is certified by its partner (bank payment file layouts, which are delivered as examples; CTPL authentication provider; insurer APIs; SMS provider), or its fallback is recorded in the go/no-go minutes | Delivery lead; client IT head |
@@ -59,15 +60,16 @@ The product is functionally complete for the broking cycle of a Philippine non-l
 
 # Evidence
 
-The figures below are those of the release test of 03 October 2026. The Test Summary Report gives the results after the merges of 04 October 2026; condition C9 requires a green regression run on the release taken to the first client.
+The figures below are those of the release verification of 04 October 2026 on the merged release (Test Summary Report 1.3, chapter Release verification on the merged release); the screen stability, access, security, API consistency and documentation checks are those of the release test of 03 October 2026.
 
-| Area | Result on 03 October 2026 |
+| Area | Result |
 |---|---|
-| Backend regression suite | 717 of 717 tests passed (72 test files) |
-| Front-end tests | 53 of 53 passed; lint without errors; production build compiles |
-| End-to-end business cycle | 371 of 371 steps passed on a fresh database: set-up, go-live migration, retail and corporate business, billing and collection, servicing, remittance, reconciliation, month-end close, reports and dashboards |
-| Release test cases | 497 cases; see the Test Summary Report version 1.1 for the status after re-test |
-| Screen stability, 173 screens | No screen with a layout shift above 0.05; no visible loading indicator; no console or API error; no horizontal scroll at 1440 and 1280 pixels |
+| Backend regression suite | 1,113 of 1,113 tests passed (104 test files, 04 October 2026, merged release); lint clean |
+| Front-end tests | 175 of 175 passed (33 suites); lint without errors; production build compiles |
+| End-to-end business cycle | 433 of 433 steps passed (12 phases, 2,168 API calls) on a fresh database of the final code: set-up, go-live migration, customer due diligence, retail and corporate business, billing and collection, servicing, remittance, reconciliation, month-end close, reports and dashboards |
+| Go-live rehearsal, masking and comparison | 52 of 52 rehearsal checks passed between two environments; data masking of a copy verified clean; environment comparison identical apart from environment-specific values |
+| Release test cases | 629 cases (617 passed, 1 failed, 3 blocked, 8 not run); the defects found in the release verification (BV-DEF-009 to BV-DEF-014) are fixed and closed; see the Test Summary Report version 1.3 |
+| Screen stability, 173 screens (03 October 2026) | No screen with a layout shift above 0.05; no visible loading indicator; no console or API error; no horizontal scroll at 1440 and 1280 pixels |
 | Role-based access | Every role opens only its permitted screens; refused calls return 401 or 403 |
 | Security checks | No SQL built from user input; security headers present; sign-in lockout after 5 failed attempts; two-step verification; backend dependency audit with no vulnerability |
 | API consistency | 868 backend routes; no screen calls a route that does not exist |
@@ -166,7 +168,7 @@ Besides conditions C1 to C14:
 
 | Former ID | Item | Status on 04 October 2026 |
 |---|---|---|
-| P2 | Field-level encryption of personal identifiers (TIN, ID numbers, bank account numbers) (BV-DEF-003) | In the IC and NPC compliance package, being merged (`PII_ENCRYPTION_KEY`, condition C9) |
+| P2 | Field-level encryption of personal identifiers (TIN, ID numbers, bank account numbers) (BV-DEF-003) | Delivered with the IC and NPC compliance package, merged on 04 October 2026 (`PII_ENCRYPTION_KEY`, condition C9) |
 | P9 | Data masking tool for production copies | Delivered: `npm run mask:data`, with `--remark-copy` and `--register-production` |
 | P10 | Release pipeline with tests before any deployment and an approval gate per environment | Delivered: `ci.yml`, `deploy.yml`, `rollback.yml`; GitHub settings to complete (C1) |
 | P11 | Comparison report between two environments | Delivered: `compare-environments.js` and Compare environments on the go-live data workbench |

@@ -1,12 +1,12 @@
 ---
 title: Test Summary Report
 subtitle: BrokerVerse OOTB release readiness
-version: 1.3
+version: 1.3.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Version 1.3: release verification of 04 October 2026 on the merged release (packages A to G and B): UAT cycle of 433 steps, go-live rehearsal of 52 checks, data masking of a copy with its verification, environment comparison, full regression run; package B and package G cases executed; defects BV-DEF-009 to BV-DEF-014 found and fixed, BV-DEF-003 closed. Version 1.2: test runs of 04 October 2026 (1,035 backend, 36 package B, 162 front-end tests); 132 test cases for the new modules; counts per test file area; coverage by module and by process (Requirements Traceability). Version 1.1: re-test after fixes
+change: Version 1.3.1: release figures aligned (front end 33 suites with 175 tests, including the IC compliance and sales activities screen suites of packages B and G). Version 1.3: release verification of 04 October 2026 on the merged release (packages A to G and B): UAT cycle of 433 steps, go-live rehearsal of 52 checks, data masking of a copy with its verification, environment comparison, full regression run; package B and package G cases executed; defects BV-DEF-009 to BV-DEF-014 found and fixed, BV-DEF-003 closed. Version 1.2: test runs of 04 October 2026 (1,035 backend, 36 package B, 162 front-end tests); 132 test cases for the new modules; counts per test file area; coverage by module and by process (Requirements Traceability). Version 1.1: re-test after fixes
 open_item: 1 defect open (Medium: BV-DEF-001); 3 cases blocked until SMTP is available; 8 cases not run (6 screen-only or timed checks from the first cycle, 2 Philippine master screen checks); see the chapter Defects and observations
 open_item_status: Open
 acronyms: OOTB=Out of the box; UAT=User acceptance test; QA=Quality assurance; API=Application programming interface; OR=Official receipt; JV=Journal voucher; PV=Payment voucher; RFQ=Request for quotation; CTPL=Compulsory third party liability; COC=Certificate of cover; APPA=Auto passenger personal accident; BIR=Bureau of Internal Revenue; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; EOPT=Ease of Paying Taxes Act; CAS=Computerized accounting system; EIS=Electronic Invoicing System; DAT=BIR validation data file; TB=Trial balance; GL=General ledger; 2FA=Two-step verification; TOTP=Time-based one-time password; SMTP=Simple Mail Transfer Protocol; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; CTR=Covered transaction report; STR=Suspicious transaction report; IC=Insurance Commission; NPC=National Privacy Commission; PSGC=Philippine Standard Geographic Code; LOA=Letter of authority; PDC=Post-dated cheque; RTM=Requirements traceability matrix
@@ -42,7 +42,7 @@ The IC and data privacy compliance package (package B) and package G (sales acti
 Each test case is written for manual execution: numbered steps on screen, concrete test data and an observable expected result. The status of each case was set from recorded evidence only:
 
 - **Backend regression run** of 04 October 2026 on the merged release: 104 test files, 1,113 tests, all passed (vitest against PostgreSQL, about 11 minutes, one file after another). The package B files (IC compliance, breach register, personal data protection: 36 tests) and the tests added with the defects of this report are part of the run. Each rule and negative case is mapped to the test that exercises it; the file and test name are in the Traceability sheet.
-- **Front-end unit tests** of 04 October 2026: 31 suites, 162 tests, all passed (jest through craco, about 49 seconds).
+- **Front-end unit tests** of 04 October 2026: 33 suites, 175 tests, all passed (jest through craco, under a minute).
 - **End-to-end UAT cycle** on a fresh database of the merged release, started with the production settings of the go-live document: 433 business steps run with one user per role through the same services the screens use, from set-up to customer due diligence, month-end close and reports (run log `docs/e2e/UAT_SCENARIO_RUN.md`).
 - **Go-live rehearsal** between two environments: 52 checks, all passed (run log `docs/e2e/GOLIVE_REHEARSAL_RUN.md`).
 - **Data masking** of a copy of the UAT database (`npm run mask:data` with `--remark-copy`): dry run, masking and verification, then the encrypted identifier columns read in clear and compared with the original.
@@ -126,7 +126,7 @@ Run again on the release branch after the merge on 04 October 2026: all passed.
 
 ## Front end by test file area
 
-Run of 04 October 2026: `CI=true npx craco test --watchAll=false` in `brokerverse/`, 31 suites, 162 tests, 0 failed.
+Run of 04 October 2026 on the merged release: `CI=true npx craco test --watchAll=false` in `brokerverse/`, 33 suites, 175 tests, 0 failed.
 
 | Area | Suites | Tests | Passed | Failed |
 |---|---|---|---|---|
@@ -135,9 +135,9 @@ Run of 04 October 2026: `CI=true npx craco test --watchAll=false` in `brokervers
 | Forms, addresses and services | 7 | 26 | 26 | 0 |
 | My Work | 2 | 14 | 14 | 0 |
 | Product Configurator | 2 | 13 | 13 | 0 |
-| Compliance, BIR, distribution and integrations screens | 5 | 24 | 24 | 0 |
+| Compliance (AML/CFT and IC registers), BIR, distribution, sales activities and integrations screens | 7 | 37 | 37 | 0 |
 | Theme engine, branding and contrast | 1 | 8 | 8 | 0 |
-| **Total** | **31** | **162** | **162** | **0** |
+| **Total** | **33** | **175** | **175** | **0** |
 
 Lint and the production build were not part of this run; CI runs them on every push.
 
@@ -367,7 +367,7 @@ No load or stress test was run. The following timings were observed during the f
 
 - UAT cycle: 2,168 API calls with database writes in 29 seconds, about 13 ms per call on average, run one after the other, against an API started with the production settings.
 - Go-live rehearsal: 260 API calls and the workbook loads in 15 seconds; data masking of the copy (168 columns of 63 tables, 156 files) in under a minute.
-- Backend regression run: 1,113 tests in about 11 minutes (04 October 2026); front-end tests: 162 tests in about 49 seconds.
+- Backend regression run: 1,113 tests in about 11 minutes (04 October 2026); front-end tests: 175 tests in under a minute.
 - Screen check: every screen loaded its data within the 2.6-second wait used per screen; no time-out was recorded.
 
 > Recommendation: run a load test with the client's expected number of concurrent users and month-end volumes on the production-sized server before go-live.
@@ -519,7 +519,7 @@ Open items by severity: Critical 0, High 0, Medium 1, Low 0. Six items were clos
 | End-to-end cycle without failed step | Met (433 of 433 on the merged release) |
 | Go-live rehearsal without failed check | Met (52 of 52) |
 | Backend regression run without failure | Met (1,113 of 1,113 on 04 October 2026, merged release) |
-| Front-end tests without failure | Met (162 of 162 on 04 October 2026) |
+| Front-end tests without failure | Met (175 of 175 on 04 October 2026) |
 | Package B compliance tests without failure | Met on the release branch (36 of 36) |
 | Data masking of a copy verified clean | Met (168 columns of 63 tables and 156 files masked; verification clean; encrypted identifiers compared in clear) |
 | Rehearsal environments mirrored after the rehearsal | Met (2,820 configuration rows identical, 0 different; 1 row added by the rehearsal's own go-live lock check; 11 environment-specific values) |

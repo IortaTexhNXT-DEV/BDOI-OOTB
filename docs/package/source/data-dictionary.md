@@ -1,12 +1,12 @@
 ---
 title: Data Dictionary
 subtitle: BrokerVerse OOTB database
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: 
 approved: 
-change: Regenerated at migration 0322 (reference data only): Philippine geography, My Work, go-live workbench, AML/CFT, IC and NPC compliance, BIR, operations and accounting, distribution, integrations, e-signatures; encryption of personal identifiers
+change: Version 1.1.1: release figures aligned (packages B and G merged; migrations to 0331, where 0330 and 0331 add a setting and a trigger and no table or column). Version 1.1: regenerated at migration 0322 (reference data only): Philippine geography, My Work, go-live workbench, AML/CFT, IC and NPC compliance, BIR, operations and accounting, distribution, integrations, e-signatures; encryption of personal identifiers
 acronyms: OOTB=Out of the box; BIR=Bureau of Internal Revenue; IC=Insurance Commission; DPA=Data Privacy Act of 2012 (Republic Act No. 10173); NPC=National Privacy Commission; FK=Foreign key; PK=Primary key; GL=General ledger; JV=Journal voucher; OR=Official receipt; PV=Payment voucher; DN=Debit note; EWT=Expanded withholding tax; WHT=Withholding tax; VAT=Value-added tax; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; LGU=Local government unit; TIN=Tax identification number; ATC=Alphanumeric tax code; TOTP=Time-based one-time password; JSON=JavaScript Object Notation; LOB=Line of business; SLA=Service level agreement; PSGC=Philippine Standard Geographic Code; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; CTR=Covered transaction report; STR=Suspicious transaction report; EDD=Enhanced due diligence; KYC=Know your customer; CAS=Computerized accounting system; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act (RA 11976); CTPL=Compulsory third party liability; COC=Certificate of cover; LOA=Letter of authority; PDC=Post-dated cheque; AP=Accounts payable
 ---
 
@@ -20,8 +20,8 @@ The column-level detail is in the companion workbook **BrokerVerse_Data_Dictiona
 
 All facts come from the application and the database:
 
-- the migration files in `backend/src/db/migrations` (139 files, `0001_core.sql` to `0314_bank_payment_files.sql`), including the comments written next to the columns;
-- the migrations of the two packages being merged into the product: package B, Insurance Commission and data privacy compliance (`0270` to `0277`), and package G, sales activities, product covers in the quotation and fixed asset disposal (`0320` to `0322`);
+- the migration files in `backend/src/db/migrations` (151 files, `0001_core.sql` to `0331_pii_client_identifiers.sql`), including the comments written next to the columns;
+- among them the migrations of package B, Insurance Commission and data privacy compliance (`0270` to `0277`), and package G, sales activities, product covers in the quotation and fixed asset disposal (`0320` to `0322`), both merged on 04 October 2026, and the two release verification migrations `0330` (EIS outbox restart safety setting) and `0331` (encryption of the client identifiers of the AML/CFT onboarding), which add no table or column;
 - the seed files in `backend/src/db/seeds` and the seed step `backend/src/db/seed.js`;
 - the module code in `backend/src/modules` (status vocabularies, validation, posting) and the scheduled jobs in `backend/src/jobs`;
 - the personal data catalogue of the client data masking tool (`backend/scripts/lib/pii-catalogue.js`) for the classification of personal data;
@@ -29,7 +29,7 @@ All facts come from the application and the database:
 
 > Row counts in this document and in the workbook are those of the reference data a new database starts with: masters, the Philippine geography, settings, posting rules, number series, report definitions and jobs. Transaction tables are empty. They show what the broker receives out of the box, not production volumes.
 
-The pipeline that regenerates the workbook and the generated parts of this document is in `docs/package/tools/data-dictionary` (`ddpaths.py` describes the steps). Migration numbers 0323 to 0329 are kept free for the rest of package G.
+The pipeline that regenerates the workbook and the generated parts of this document is in `docs/package/tools/data-dictionary` (`ddpaths.py` describes the steps). Migration numbers 0323 to 0329 are unused.
 
 ## The companion workbook
 

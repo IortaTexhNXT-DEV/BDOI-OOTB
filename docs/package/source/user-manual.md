@@ -1,10 +1,10 @@
 ---
 title: User Manual
 subtitle: BrokerVerse OOTB, by persona
-version: 1.2
+version: 1.2.1
 date: 04 October 2026
 prepared: iorta TechNXT
-change: Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
+change: Version 1.2.1: release figures aligned (eight roles on the Role screen). Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; PEP=Politically exposed person; NPC=National Privacy Commission; COC=Certificate of cover; PDC=Post-dated cheque; LOA=Letter of authority; EIS=Electronic Invoicing System; CAS=Computerized accounting system; WCAG=Web Content Accessibility Guidelines
@@ -462,7 +462,7 @@ The eye opens the user, the pencil edits the display name, e-mail and roles (a r
 
 ### Roles and role permissions
 
-**Role** lists the seven roles. **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end), which roles hold it. A role that builds on another (the Accounting Manager on Accounting) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
+**Role** lists the eight roles. **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end), which roles hold it. A role that builds on another (the Accounting Manager on Accounting) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
 
 ![Master > Users and Access > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
 

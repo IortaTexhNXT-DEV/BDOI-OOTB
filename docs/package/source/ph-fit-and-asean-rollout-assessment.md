@@ -1,12 +1,12 @@
 ---
 title: Philippine Fit and ASEAN Rollout Assessment
 subtitle: iNXT BrokerVerse OOTB (INTERNAL)
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Version 1.1: re-scored on the merged release (every package A to G); what was closed and what remains; ASEAN estimates recomputed on the new baseline
+change: Version 1.1.1: release figures aligned (migrations to 0331, 104 backend test files, UAT scenario of 433 steps, go-live rehearsal of 52 checks); scores unchanged. Version 1.1: re-scored on the merged release (every package A to G); what was closed and what remains; ASEAN estimates recomputed on the new baseline
 open_item: Two processes scored 1 pending regulator confirmation (AMLC report file layout, IC annual statement form set); partner certifications of the integrations are onboarding tasks
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; AMLC=Anti-Money Laundering Council; AMLA=Anti-Money Laundering Act; KYC=Know your customer; CDD=Customer due diligence; EDD=Enhanced due diligence; PEP=Politically exposed person; CTPL=Compulsory Third Party Liability; COC=Certificate of cover; LTO=Land Transportation Office; PSGC=Philippine Standard Geographic Code; EOPT=Ease of Paying Taxes Act (RA 11976); RR=Revenue Regulations; CAS=Computerized Accounting System; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; GST=Goods and services tax; SST=Sales and service tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; EIS=Electronic Invoicing System; DAT=BIR validation data file; RFQ=Request for quotation; L1=Level 1 process area; L2=Level 2 process; UI=User interface; MAS=Monetary Authority of Singapore; BNM=Bank Negara Malaysia; OIC=Office of Insurance Commission (Thailand); OJK=Otoritas Jasa Keuangan (Indonesia); BDCB=Brunei Darussalam Central Bank; IRC=Insurance Regulator of Cambodia; PDPA=Personal Data Protection Act
 ---
@@ -23,6 +23,7 @@ This assessment answers three questions about BrokerVerse OOTB as it is on 04 Oc
 |---|---|---|
 | 1.0 | 04 October 2026 | Pre-release assessment: overall fit 80.4%, regulatory 70.7%, 54 gaps, 12 processes in development |
 | 1.1 | 04 October 2026 | Re-score on the merged release (packages A to G): every one of the 150 processes re-verified against the code and tests; "Room to improve today" replaced by "What was closed in this release and what remains"; ASEAN change percentages recomputed on the new baseline |
+| 1.1.1 | 04 October 2026 | Release figures aligned with the release verification (Test Summary Report 1.3): migrations to 0331, 104 backend test files, UAT scenario of 433 steps, go-live rehearsal of 52 checks; scores unchanged (overall 99.3%, operational 100%, regulatory 97.8%) |
 
 ## The answers
 
@@ -51,7 +52,7 @@ For ASEAN, the configurable layer grew with this release: the integration framew
 
 ## Baseline
 
-- Code on branch `brokerverse-platform` as of 04 October 2026 with every release package merged: 73 backend modules, the database migrations to 0322, 103 backend test files, the enterprise menu (`brokerverse/src/components/SideBar/list.js`, `utils/menuPermissions.js`), the UAT scenario (`backend/scripts/uat-scenario.js`, 371 steps passed) and the go-live rehearsal (51 checks passed).
+- Code on branch `brokerverse-platform` as of 04 October 2026 with every release package merged: 73 backend modules, the database migrations to 0331, 104 backend test files, the enterprise menu (`brokerverse/src/components/SideBar/list.js`, `utils/menuPermissions.js`), the UAT scenario (`backend/scripts/uat-scenario.js`, 433 steps passed) and the go-live rehearsal (52 checks passed).
 - Documents used as evidence: the User Manual (the screen paths quoted in the workbook are its menu paths), the Philippine Regulatory Compliance Matrix, the Product Functionality document and the Test Summary Report.
 - Only what runs end to end counts. A screen that exists but does not complete the process gets no credit; nothing is counted as in development.
 
@@ -350,7 +351,7 @@ These items are included in the country percentages above. Done once as a platfo
 
 - The figures in this document are printed by the workbook builder from its catalogue of 150 processes. Each process was scored against the code on branch `brokerverse-platform` as of 04 October 2026: the module under `backend/src/modules`, the migration under `backend/src/db/migrations`, the test under `backend/test`, the menu entry in `brokerverse/src/components/SideBar/list.js` and the screen description in the User Manual. A process scores 2 only when all of these show it delivered end to end.
 - The ASEAN estimates are judgements per L1 area and country, weighted by the L1 weights of the same catalogue, as in version 1.0; the revisions since 1.0 are listed above with their reasons.
-- Sources in the repository: `backend/src/modules` (73 modules), `backend/src/db/migrations` (to 0322), `backend/test` (103 test files), `backend/scripts/uat-scenario.js` with `docs/e2e/UAT_SCENARIO_RUN.md` (371 steps passed), `docs/e2e/GOLIVE_REHEARSAL_RUN.md` (51 checks passed), `brokerverse/src/components/SideBar/list.js` and `utils/menuPermissions.js`, `brokerverse/src/locales`, and the User Manual, Regulatory Compliance Matrix, Product Functionality and Test Summary documents of this pack.
+- Sources in the repository: `backend/src/modules` (73 modules), `backend/src/db/migrations` (to 0331), `backend/test` (104 test files), `backend/scripts/uat-scenario.js` with `docs/e2e/UAT_SCENARIO_RUN.md` (433 steps passed), `docs/e2e/GOLIVE_REHEARSAL_RUN.md` (52 checks passed), `brokerverse/src/components/SideBar/list.js` and `utils/menuPermissions.js`, `brokerverse/src/locales`, and the User Manual, Regulatory Compliance Matrix, Product Functionality and Test Summary documents of this pack.
 
 ## Rebuilding the figures
 

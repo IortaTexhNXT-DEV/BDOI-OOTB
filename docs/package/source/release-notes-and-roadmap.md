@@ -1,13 +1,13 @@
 ---
 title: Release Notes and Product Roadmap
 subtitle: BrokerVerse OOTB Release 1.1
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Release 1.1 entry (migrations 0243 to 0329): Philippine masters, enterprise menu and help, My Work, Product Configurator in the flow, audit trail, go-live workbench, release pipeline, AML/CFT, IC and NPC compliance, BIR, operations and accounting, distribution, integrations, branding and e-signatures; upgrade notes; roadmap of partner certifications
-open_item: Release tag of the 1.1 build to be confirmed; packages B and G to be merged before the tag; partner certifications per broker; roadmap dates indicative
+change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (packages B and G merged, migrations to 0331, 1,113 backend tests in 104 files, 175 front-end tests in 33 suites, UAT cycle of 433 steps, rehearsal of 52 checks, defects BV-DEF-009 to 014 closed). Version 1.1: release 1.1 entry (migrations 0243 to 0329): Philippine masters, enterprise menu and help, My Work, Product Configurator in the flow, audit trail, go-live workbench, release pipeline, AML/CFT, IC and NPC compliance, BIR, operations and accounting, distribution, integrations, branding and e-signatures; upgrade notes; roadmap of partner certifications
+open_item: Release tag of the 1.1 build to be confirmed; partner certifications per broker; roadmap dates indicative
 acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); EOPT=Ease of Paying Taxes Act (RA 11976); EIS=Electronic Invoicing System; CAS=Computerized accounting system; CTPL=Compulsory Third Party Liability; COC=Certificate of cover; LTO=Land Transportation Office; LOA=Letter of authority; PDC=Post-dated cheque; PSGC=Philippine Standard Geographic Code; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; CTR=Covered transaction report; STR=Suspicious transaction report; EDD=Enhanced due diligence; PEP=Politically exposed person; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; ATC=Alphanumeric tax code; DAT=Data file format of the BIR alphalists; KYC=Know your customer; OR=Official receipt; JV=Journal voucher; GL=General ledger; SoD=Segregation of duties; TOTP=Time-based one-time password; API=Application programming interface; BI=Business intelligence; AMC=Annual Maintenance Contract; CAB=Change advisory board; CR=Change request; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test
 ---
 
@@ -19,9 +19,9 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 |---|---|
 | Product | iNXT BrokerVerse OOTB, insurance broking platform for Philippine non-life brokers |
 | Release | 1.1 |
-| Build | Branch `brokerverse-platform` of 04 October 2026 (commit "E-signature consent IP in the personal data catalogue"), plus package B (Insurance Commission and data privacy compliance) and package G (sales activities, quote covers and risk fields, supplier BIR Form 2307, fixed asset disposal) once merged. The release tag `v1.1.0` is [to confirm] |
+| Build | Branch `brokerverse-platform` of 04 October 2026 with package B (Insurance Commission and data privacy compliance) and package G (sales activities, quote covers and risk fields, supplier BIR Form 2307, fixed asset disposal) merged, verified end to end on the final code (Test Summary Report 1.3). The release tag `v1.1.0` is [to confirm] |
 | Previous release | 1.0 (03 October 2026); its content is summarised in the chapter "Release 1.0" |
-| Database migrations | `0243` to `0329`: `0243` to `0254` platform and go-live, `0260` to `0263` AML/CFT, `0270` to `0277` package B, `0280` to `0284` BIR, `0290` to `0298` operations and accounting, `0300` to `0308` distribution, `0310` to `0314` integrations, `0320` to `0322` package G (`0323` to `0329` kept for the rest of package G) |
+| Database migrations | `0243` to `0331`: `0243` to `0254` platform and go-live, `0260` to `0263` AML/CFT, `0270` to `0277` package B, `0280` to `0284` BIR, `0290` to `0298` operations and accounting, `0300` to `0308` distribution, `0310` to `0314` integrations, `0320` to `0322` package G, `0330` and `0331` release verification fixes (EIS outbox restart safety; encryption of the client identifiers of the AML/CFT onboarding); `0323` to `0329` unused |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
 | Audience | Broker management, key users, System Administrator, compliance officer, auditors, and the iorta TechNXT delivery and support teams |
 
@@ -30,16 +30,17 @@ acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal R
 | Item | Release 1.0 | Release 1.1 |
 |---|---|---|
 | Delivered roles | 7 | 8 (Compliance Officer added) |
-| Back-end modules | 45 | 70 (73 with packages B and G) |
-| Registered API routes | 868 | 1,291 (1,356 with packages B and G) |
+| Back-end modules | 45 | 73 |
+| Registered API routes | 868 | 1,356 |
 | Menu screens | 170 | 223 |
-| Database tables | 167 | 250 (260 with packages B and G) |
-| Settings | 404 | 659 (with packages B and G) |
-| Scheduled jobs (Asia/Manila time) | 18 | 32, 35 with package B; 14 delivered switched off |
+| Database tables | 167 | 260 |
+| Settings | 404 | 660 |
+| Scheduled jobs (Asia/Manila time) | 18 | 35; 14 delivered switched off |
 | Document number series | 61 | 85 |
 | Posting events with a delivered rule | 31 | 43 |
-| Automated back-end tests | 634 | 1,035 in 97 files, all passed on 04 October 2026 |
-| Front-end tests | 43 | 162 in 31 suites, all passed |
+| Automated back-end tests | 634 | 1,113 in 104 files, all passed on 04 October 2026 on the merged release |
+| Front-end tests | 43 | 175 in 33 suites, all passed |
+| End-to-end UAT cycle and go-live rehearsal | 371 steps | 433 steps in 12 phases (2,168 API calls) and 52 rehearsal checks, all passed on the final code |
 
 # Release 1.1: what is new
 
@@ -180,8 +181,8 @@ Review the number series of the new documents in Master > Document Numbering (co
 
 ## Before the release is tagged
 
-- Merge package B and package G and run the full test suites again.
-- Change the number series prefix of the complaints register: migration `0272` of package B seeds the prefix `CMP`, which the comparison report series of migration `0306` already uses; the migration stops on a database that has both.
+- Done on 04 October 2026: packages B and G merged and the full suites run again on the merged release (1,113 backend tests, 175 front-end tests, UAT cycle of 433 steps, go-live rehearsal of 52 checks, data masking verified, environment comparison identical; Test Summary Report 1.3). The defects found in that verification, BV-DEF-009 to BV-DEF-014, are fixed and closed.
+- Done: the number series prefix of the complaints register (migration `0272` of package B) is `CPT`; the comparison report series of migration `0306` keeps `CMP`.
 - Add housekeeping rules for the new operational tables (integration outbox and attempts, EIS outbox, go-live workbook rows).
 - Add the 25 translation keys reported missing by `npm run check:i18n` (audit timeline, claim audit trail, currency master, policy history).
 
@@ -198,6 +199,7 @@ Release 1.0 (03 October 2026, tag `v1.0.0`) delivered the core broking cycle: pr
 | BV-DEF-001 | react-router moderate security advisory (open redirect) | Open; navigation targets come from the application's own routes; upgrade on the roadmap |
 | BV-DEF-003 | Application-level encryption covered only two-step verification secrets | Closed with package B: TIN, ID and bank account numbers encrypted at rest |
 | BV-DEF-002, 004, 006; BV-OBS-005, 007, 008 | Data privacy module, template column, charges calculator, renewal beyond grace, menu group address, incentive card | Closed in 1.0 |
+| BV-DEF-009 to BV-DEF-014 | Found in the release verification of 04 October 2026 on the merged release (UAT scenario set-up, CTPL tariff cancellation, masking of SMS recipients and key columns, rehearsal migration headers, incentive period keys, sample data in two tests) | Fixed and closed before the tag; see the Test Summary Report 1.3 |
 
 ## Limits of release 1.0 resolved in 1.1
 
@@ -284,7 +286,7 @@ The connectors are built and tested against the fake provider. Each needs the pa
 
 | Item | Why |
 |---|---|
-| Merge of packages B and G and the rest of package G (supplier 2307, fixed asset disposal, sales activities, quote covers and risk fields) | Complete release 1.1 |
+| Done on 04 October 2026: packages B and G merged (supplier 2307, fixed asset disposal, sales activities, quote covers and risk fields included) and verified on the final code | Release 1.1 complete |
 | Housekeeping rules for the integration, EIS and workbench tables | Control database growth |
 | Upgrade react-router (BV-DEF-001) | Close the moderate advisory |
 | QR code for two-step enrolment; setup screen for scheduled report e-mails | Easier use |

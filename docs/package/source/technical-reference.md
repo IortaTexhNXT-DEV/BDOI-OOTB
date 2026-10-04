@@ -1,12 +1,12 @@
 ---
 title: Technical Reference
 subtitle: Modules, APIs and code review
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Module catalogue of all 70 modules; platform engines (registry, permissions, posting, tax, numbering, jobs, PDF, Excel and e-mail with branding, e-signatures, integrations, encryption and masking, audit, go-live workbench, release pipeline); how to review a change; figures at migration 0322
+change: Version 1.1.1: release figures aligned (packages B and G merged: 73 modules, 1,356 endpoints, migrations to 0331, 104 test files with 1,113 tests, 33 front-end suites with 175 tests). Version 1.1: module catalogue of all 70 modules; platform engines (registry, permissions, posting, tax, numbering, jobs, PDF, Excel and e-mail with branding, e-signatures, integrations, encryption and masking, audit, go-live workbench, release pipeline); how to review a change; figures at migration 0322
 acronyms: OOTB=Out of the box; API=Application programming interface; JWT=JSON Web Token; SQL=Structured Query Language; ESM=ECMAScript modules; CRA=Create React App; GL=General ledger; LGU=Local government unit; LGT=Local government tax; DST=Documentary stamp tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; BIR=Bureau of Internal Revenue; EOPT=Ease of Paying Taxes Act; EIS=Electronic Invoicing System; CAS=Computerized accounting system; IC=Insurance Commission; NPC=National Privacy Commission; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; KYC=Know your customer; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; PDC=Post-dated cheque; PSGC=Philippine Standard Geographic Code; PII=Personally identifiable information; TOTP=Time-based one-time password; HMAC=Hash-based message authentication code; AES=Advanced Encryption Standard; CORS=Cross-origin resource sharing; OWASP=Open Worldwide Application Security Project; UAT=User acceptance testing; SIT=System integration testing; CI=Continuous integration; CAB=Change advisory board; PM2=Node.js process manager used on the EC2 server
 ---
 
@@ -20,7 +20,7 @@ The business use of each screen is in the User Manual. Deployment steps are in `
 
 ## Sources and how the figures were measured
 
-Every statement in this document comes from the repository as it stood on 04 October 2026: branch `brokerverse-platform` at the commit "E-signature consent IP in the personal data catalogue", plus the two packages being merged where they are named (package B, Insurance Commission and data privacy compliance; package G, sales activities, quote covers and risk fields, supplier BIR Form 2307 and fixed asset disposal).
+Every statement in this document comes from the repository as it stood on 04 October 2026: branch `brokerverse-platform` with packages B (Insurance Commission and data privacy compliance) and G (sales activities, quote covers and risk fields, supplier BIR Form 2307 and fixed asset disposal) merged into it on 04 October 2026; the packages are still named where a feature came with them.
 
 | Figure | How it was measured |
 |---|---|
@@ -51,11 +51,11 @@ BrokerVerse is one repository with two applications and their deployment files.
 | Folder | Content |
 |---|---|
 | `backend/` | REST API and scheduled jobs: Node.js 22, ECMAScript modules, Express 4, PostgreSQL through `pg` |
-| `backend/src/modules/` | 70 business modules, one folder each (router, service, SQL) |
+| `backend/src/modules/` | 73 business modules, one folder each (router, service, SQL) |
 | `backend/src/lib/` | Shared libraries: registry, authentication, errors, validation, settings, audit, logging, PDF, Excel, e-mail, numbering, addresses, currency |
-| `backend/src/db/` | Connection pool, migration runner, seed runner, 139 migrations (`0001` to `0314`), reference and sample seeds |
+| `backend/src/db/` | Connection pool, migration runner, seed runner, 151 migrations (`0001` to `0331`), reference and sample seeds |
 | `backend/src/jobs/` | Cron scheduler, job handlers, housekeeping |
-| `backend/test/` | vitest suite (97 test files) with helpers and fixtures |
+| `backend/test/` | vitest suite (104 test files) with helpers and fixtures |
 | `backend/scripts/` | Settings check, UAT scenario, go-live rehearsal, transaction reset, sample-data purge, data masking, environment comparison, brand packs, geography loaders, upload templates |
 | `backend/docs/` | API documentation output (OpenAPI, Postman, Excel touchpoints) |
 | `brokerverse/` | Web application: React 18 built with Create React App and craco |
@@ -150,9 +150,9 @@ define({
 
 ## Database, migrations and seeds
 
-The database is PostgreSQL 16 (the version in `docker-compose.yml` and in CI). A database migrated and seeded on 04 October 2026 with the reference data and the migrations of packages B and G holds 260 tables and 2 views, 73 functions, 659 settings in 64 groups, 8 roles, 98 permissions, 69 master types, 40 report definitions, 85 document number series, 35 scheduled jobs and 43 posting events with an active rule. On the branch alone (without packages B and G) it holds 250 tables.
+The database is PostgreSQL 16 (the version in `docker-compose.yml` and in CI). A database migrated and seeded on 04 October 2026 with the reference data and the migrations of packages B and G holds 260 tables and 2 views, 73 functions, 660 settings in 64 groups (659 before migration `0330`), 8 roles, 98 permissions, 69 master types, 40 report definitions, 85 document number series, 35 scheduled jobs and 43 posting events with an active rule. On the branch alone (without packages B and G) it holds 250 tables.
 
-- **Migrations** (`backend/src/db/migrations`, 139 files from `0001_core.sql` to `0314_bank_payment_files.sql`; package B adds `0270` to `0277`, package G `0320` to `0322`, and `0323` to `0329` are kept for the rest of package G) run in file-name order. Each runs in its own transaction and is recorded in `schema_migrations`. Applied migrations are never edited; a correction is a new file.
+- **Migrations** (`backend/src/db/migrations`, 151 files from `0001_core.sql` to `0331_pii_client_identifiers.sql`; package B brought `0270` to `0277`, package G `0320` to `0322`, and the release verification of 04 October 2026 added `0330`, the EIS outbox restart safety setting, and `0331`, the encryption of the client identifiers of the AML/CFT onboarding; `0323` to `0329` are unused) run in file-name order. Each runs in its own transaction and is recorded in `schema_migrations`. Applied migrations are never edited; a correction is a new file.
 - **Seeds** (`backend/src/db/seeds`) run on every start and are idempotent: rows are inserted by natural key and existing rows and administrator edits are kept. `settings.json` holds configuration keys, `jobs.json` the scheduled jobs, the numbered SQL files the reference data: masters (`10_`, `51_`), the Philippine geography from the PSGC of the 2nd quarter 2026 (`12_ph_geography.sql`), chart of accounts, motor tariff, product templates and rules (`52_`, `53_`), report catalogue, security, Philippine practice masters such as banks, ID types, salutations, holidays and the IC insurer list (`69_ph_practice_masters.sql`), BIR forms (`72_`), operations and accounting rules (`73_`) and integration connectors (`75_`). `seeds/sample/` holds demo data, loaded only when `SEED_SAMPLE_DATA` is on.
 - **Connection pool** (`backend/src/db/pool.js`): one `pg` pool of 10 connections; `query()`, `one()`, `many()`, `withTransaction(fn)` and `runInTransaction()` (an ambient transaction used by the go-live validation). NUMERIC and BIGINT values come back as numbers and DATE values as `YYYY-MM-DD` strings. With package B every connection carries the personal data keys as session settings.
 
@@ -196,9 +196,9 @@ The Add receipt screen saving a receipt shows the full path.
 
 Every folder under `backend/src/modules` with a `router.js` is one back-end module. The tables below list each module with its purpose, its base paths under `/api` and number of endpoints, the main tables it writes, and the scheduled jobs, posting events and setting groups it uses. Facts come from the route registry, the SQL in the module's files, `backend/src/jobs/handlers.js`, the `posting_rules` rows of a seeded database and the `getSetting()` calls. The per-endpoint list is in the workbook, sheet APIs.
 
-- 70 modules on branch `brokerverse-platform`, 1,291 endpoints.
-- Package B (Insurance Commission and data privacy compliance, being merged) adds the modules `ic-compliance` (38 endpoints) and `data-breaches` (11 endpoints) and changes `clients`, `commission`, `disbursements`, `policies`, `quotations`, `placement`, `privacy` and `search` for the licence block, the insurer authority check and masking.
-- Package G (in progress, its branch will merge) adds the module `sales-activities` (8 endpoints) and extends `fixed-assets` (disposal, 6 endpoints), `period-end` (supplier BIR Form 2307) and `product-configurator` (covers and risk fields offered in the quote wizard).
+- 73 modules on branch `brokerverse-platform` with packages B and G merged, 1,356 endpoints (70 modules and 1,291 endpoints before the two packages).
+- Package B (Insurance Commission and data privacy compliance, merged on 04 October 2026) added the modules `ic-compliance` (38 endpoints) and `data-breaches` (11 endpoints) and changed `clients`, `commission`, `disbursements`, `policies`, `quotations`, `placement`, `privacy` and `search` for the licence block, the insurer authority check and masking.
+- Package G (merged on 04 October 2026) added the module `sales-activities` (8 endpoints) and extended `fixed-assets` (disposal, 6 endpoints), `period-end` (supplier BIR Form 2307) and `product-configurator` (covers and risk fields offered in the quote wizard).
 
 ## Sales, placement and policy
 
@@ -553,7 +553,7 @@ Operations that write more than one table run in `withTransaction()` (`backend/s
 
 ## Configuration through app_settings
 
-Business parameters are not written into the code. They are rows of `app_settings` (659 keys in 64 groups after seeding), read with `getSetting(key, fallback)` and edited on Master > Configuration and Master > System Settings, or on the screen that owns them (`lib/settingOwners.js`). For example (`backend/src/modules/quotations/service.js`):
+Business parameters are not written into the code. They are rows of `app_settings` (660 keys in 64 groups after seeding), read with `getSetting(key, fallback)` and edited on Master > Configuration and Master > System Settings, or on the screen that owns them (`lib/settingOwners.js`). For example (`backend/src/modules/quotations/service.js`):
 
 ```
 const validity = Number(await getSetting('limits.quote_validity_days', 30));
@@ -599,12 +599,12 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 
 | Inventory item | Count |
 |---|---|
-| Back-end module folders | 70 (72 with package B, 73 with package G) |
-| Endpoints in the route registry (plus 2 health endpoints) | 1,291 (1,340 with package B; 1,356 with packages B and G) |
+| Back-end module folders | 73 (70 before packages B and G) |
+| Endpoints in the route registry (plus 2 health endpoints) | 1,356 (1,291 before packages B and G) |
 | Menu screens / route elements in `MainRoute.js` | 223 / 473 |
 | Front-end service files / API call sites found by the checker | 57 / 1,190 |
 | Database tables / views / functions (with packages B and G) | 260 / 2 / 73 |
-| Settings / permissions / roles / master types / report definitions / number series / jobs | 659 / 98 / 8 / 69 / 40 / 85 / 35 |
+| Settings / permissions / roles / master types / report definitions / number series / jobs | 660 / 98 / 8 / 69 / 40 / 85 / 35 |
 
 ## Static checks
 
@@ -613,8 +613,8 @@ The back end logs JSON lines to standard output with pino (`backend/src/lib/logg
 
 ## Automated tests
 
-- **Back end**: vitest, 97 test files with 1,035 tests, run against a real PostgreSQL database (`TEST_DATABASE_URL`, default `brokerverse_test`) with `fileParallelism: false`. The suite covers every business module through the HTTP API with supertest (for example `receipts.test.js`, `aml.test.js`, `bir-forms.test.js`, `integrations.test.js`, `my-work.test.js`), the security controls (`security.test.js`, `hardening.test.js`, `role-access.test.js`, `scope.test.js`), configuration (`configuration.test.js`, `settings-ownership.test.js`), the data tools (`go-live-workbench.test.js`, `environment-comparison.test.js`, `reset-transactions.test.js`, `mask-data.test.js`) and the printing and branding (`printing.test.js`, `branding.test.js`). Result on 04 October 2026: all 1,035 tests passed (8 suites that stopped on an exhausted lock table of the shared test server were run again on their own and passed).
-- **Front end**: jest through `craco test`, 31 suites with 162 tests: menu tree and route permissions (`utils/menuPermissions.test.js`, `components/SideBar/menuTree.test.js`), help routes, the theme engine, the Philippine address fields, the Product Configurator rules, My Work, BIR Tax, Compliance, Distribution and Integrations screens, number and date formatting. Result on 04 October 2026: all 162 tests passed.
+- **Back end**: vitest, 104 test files with 1,113 tests, run against a real PostgreSQL database (`TEST_DATABASE_URL`, default `brokerverse_test`) with `fileParallelism: false`. The suite covers every business module through the HTTP API with supertest (for example `receipts.test.js`, `aml.test.js`, `bir-forms.test.js`, `integrations.test.js`, `my-work.test.js`), the security controls (`security.test.js`, `hardening.test.js`, `role-access.test.js`, `scope.test.js`), configuration (`configuration.test.js`, `settings-ownership.test.js`), the data tools (`go-live-workbench.test.js`, `environment-comparison.test.js`, `reset-transactions.test.js`, `mask-data.test.js`) and the printing and branding (`printing.test.js`, `branding.test.js`). Result on 04 October 2026 on the merged release: all 1,113 tests passed in one run of about 11 minutes.
+- **Front end**: jest through `craco test`, 33 suites with 175 tests: menu tree and route permissions (`utils/menuPermissions.test.js`, `components/SideBar/menuTree.test.js`), help routes, the theme engine, the Philippine address fields, the Product Configurator rules, My Work, BIR Tax, Compliance and IC compliance, Distribution, Sales Activities and Integrations screens, number and date formatting. Result on 04 October 2026: all 175 tests passed.
 
 ## Consistency checks
 
@@ -765,7 +765,7 @@ These are facts of the current design that the customer's security reviewer shou
 - Rate-limit counters are kept in memory per API instance; with several instances behind a load balancer the effective limit is multiplied by the number of instances.
 - `security.require_2fa_roles` is empty after seeding; the customer decides which roles must use two-factor sign-in.
 - Integration connector endpoints are entered by administrators; the reviewer should confirm who holds `write:integrations` and which outbound hosts the network allows.
-- Until package B is deployed, TIN, ID and bank account numbers are stored in clear and shown to every user who can open the record.
+- TIN, ID and bank account numbers are encrypted at rest since package B (migration `0277`; `0331` adds the government ID numbers of the AML/CFT onboarding); `PII_ENCRYPTION_KEY` must be set before the migrations run on an installation, or the identifiers cannot be stored.
 
 # Front end to back end dependencies
 
@@ -1008,7 +1008,7 @@ This chapter is the reviewer's guide for a pull request into `brokerverse-platfo
 
 - File name `NNNN_short_name.sql`, the next free number in the range agreed for the change. Parallel work packages reserve a range so that they do not collide (for example package B uses `0270` to `0277` and package G `0320` to `0329`); within a range numbers may leave gaps.
 - A migration is safe on a database that already has data and on a new one: `IF NOT EXISTS`, `ON CONFLICT DO NOTHING`, defaults for new mandatory columns, data conversions with a `WHERE` clause. It starts with a comment saying what it adds and which screen uses it.
-- Unique values seeded by a migration (document numbering prefixes, permission codes, master type codes, job codes, posting event codes) are checked against those already in use on the branch and in the packages being merged. Example found while writing this issue: migration `0272_complaints_register.sql` of package B seeds the series prefix `CMP`, already used by the comparison report series of `0306`; the unique index `document_numbering_active_prefix` stops the migration on a database that has both.
+- Unique values seeded by a migration (document numbering prefixes, permission codes, master type codes, job codes, posting event codes) are checked against those already in use on the branch and in the packages developed in parallel. Example found while writing issue 1.1: migration `0272_complaints_register.sql` of package B seeded the series prefix `CMP`, already used by the comparison report series of `0306`; the unique index `document_numbering_active_prefix` would have stopped the migration on a database that has both. The prefix was changed to `CPT` before the merge.
 - Never edit a migration that has left a developer's machine; a correction is a new file.
 
 ## Translations, menu, grants and help
