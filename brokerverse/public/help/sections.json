@@ -310,6 +310,42 @@
    "chapter": "System Administrator"
   },
   {
+   "id": "integrations",
+   "title": "Integrations",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "connectors",
+   "title": "Connectors",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "outbox-and-inbox",
+   "title": "Outbox and inbox",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "go-live-with-a-provider",
+   "title": "Go live with a provider",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "sms-and-message-templates",
+   "title": "SMS and message templates",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "insurer-integration",
+   "title": "Insurer integration",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
    "id": "audit-trail",
    "title": "Audit Trail",
    "level": 2,
@@ -700,6 +736,12 @@
    "chapter": "Operations (client servicing)"
   },
   {
+   "id": "ctpl-authentication",
+   "title": "CTPL authentication",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
    "id": "operations-client-servicing-renewals",
    "title": "Renewals",
    "level": 2,
@@ -870,6 +912,18 @@
   {
    "id": "disbursement-payment-vouchers-and-cheques",
    "title": "Disbursement: payment vouchers and cheques",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bank-payment-files",
+   "title": "Bank payment files",
+   "level": 2,
+   "chapter": "Accounting"
+  },
+  {
+   "id": "bank-file-layouts-and-payee-bank-accounts",
+   "title": "Bank file layouts and payee bank accounts",
    "level": 2,
    "chapter": "Accounting"
   },

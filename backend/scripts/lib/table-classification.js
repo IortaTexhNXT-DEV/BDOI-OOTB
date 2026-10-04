@@ -54,6 +54,8 @@ export const TRANSACTION_TABLES = [
   'data_subject_requests', 'privacy_consents',
   // the work diary of Operations > My Work (tasks and follow-ups on the records that go)
   'work_tasks',
+  // integrations: CTPL authentication of each cover, bank payment batches and their lines
+  'ctpl_authentications', 'bank_payment_batches', 'bank_payment_batch_lines',
 ];
 
 /**
@@ -79,6 +81,9 @@ export const SYSTEM_RESET_ACTIONS = {
   sequences: 'partial', // document number counters: transaction series restart (MASTER_SERIES keep their counter)
   opening_balances: 'optional', // go-live opening balances: removed unless --keep-opening-balances
   audit_log: 'optional', // kept unless --purge-audit; the reset is recorded in it either way
+  integration_outbox: 'remove', // integration messages (SMS, CTPL, insurer requests, bank files) go with the records they were about
+  integration_attempts: 'remove',
+  integration_inbox: 'remove',
   password_history: 'keep', // part of the user accounts (password reuse rule)
   schema_migrations: 'keep',
 };
@@ -102,6 +107,8 @@ export const MASTER_CONFIG_TABLES = [
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
   // reports and scheduled jobs
   'report_definitions', 'report_schedules', 'scheduled_jobs',
+  // integrations: connectors, message templates, insurer API mappings, COC series, bank file layouts, payee bank accounts
+  'integration_connectors', 'message_templates', 'insurer_api_mappings', 'coc_series', 'bank_file_layouts', 'payee_bank_accounts',
 ];
 
 /**
@@ -135,9 +142,12 @@ export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-
  * Tables the sample-data purge (scripts/purge-sample-data.js) also empties: technical records, and configuration the
  * sample seed fills with demo rows (bundles, insurer rate tables, treaties, petty cash funds, delegations).
  */
-export const PURGE_SYSTEM_TABLES = ['notifications', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences', 'documents', 'opening_balances'];
+export const PURGE_SYSTEM_TABLES = ['notifications', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences', 'documents', 'opening_balances',
+  'integration_outbox', 'integration_attempts', 'integration_inbox'];
 export const PURGE_DEMO_CONFIG_TABLES = ['petty_cash_funds', 'package_bundles', 'package_bundle_sections', 'insurer_rate_tables', 'reinsurance_treaties',
-  'user_delegations', 'remittance_delegations'];
+  'user_delegations', 'remittance_delegations',
+  // demo COC series, payee bank accounts and insurer API mapping of seeds/sample/75_integrations.sql
+  'coc_series', 'payee_bank_accounts', 'insurer_api_mappings'];
 
 /** Every classified table. */
 export const CLASSIFIED_TABLES = [...TRANSACTION_TABLES, ...SYSTEM_TABLES, ...MASTER_CONFIG_TABLES];

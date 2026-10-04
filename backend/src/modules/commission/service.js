@@ -285,7 +285,7 @@ async function approve(db, line, user) {
  * Direct payment (no voucher approval step) requires a payer other than the line approver (checkApprover).
  * Returns { gross, wht, net, journalId }.
  */
-export async function payLines(db, { lines, disbursement, user, checkApprover = false }) {
+export async function payLines(db, { lines, disbursement, user, checkApprover = false, bankAccount = null, paymentMode = null }) {
   if (!lines.length) throw badRequest('No approved commission lines selected');
   for (const l of lines) {
     if (l.status !== 'Approved') throw conflict(`Line ${l.policy_number} is ${l.status}; only Approved lines can be paid`);
@@ -299,6 +299,8 @@ export async function payLines(db, { lines, disbursement, user, checkApprover = 
     source: 'disbursement', entryType: 'COMMISSION_PAYMENT', referenceType: 'Disbursement', referenceId: disbursement.id, transactionCode: disbursement.voucher_number,
     description: `Comsub payout ${disbursement.voucher_number} – ${disbursement.payee_name}`,
     amounts: { gross, net, wht }, vars: { voucherNumber: disbursement.voucher_number, payeeName: disbursement.payee_name },
+    // paid by bank payment file: the cash leaves the batch's bank account
+    ...(bankAccount ? { bankAccount } : {}), ...(paymentMode ? { paymentMode } : {}),
   }, { db, user });
   await db.query(`UPDATE commissions SET status = 'Paid', paid_at = now(), paid_by = $2, disbursement_id = $3, voucher_no = $4, payment_jv_id = $5, updated_at = now()
     WHERE id = ANY($1)`, [lines.map((l) => l.id), user.id, disbursement.id, disbursement.voucher_number, jv.id]);

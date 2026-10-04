@@ -278,6 +278,13 @@ export const menuList = [
         includes: ["/agent/payments"],
         permissions: ["read:payments"],
       },
+      {
+        // CTPL certificates of cover: COC series, authentication with the IC-accredited provider, unauthenticated report
+        name: "CTPL Authentication",
+        path: "/operations/ctpl-authentication",
+        includes: ["/operations/ctpl-authentication"],
+        permissions: ["read:policies"],
+      },
     ],
   },
   {
@@ -330,6 +337,14 @@ export const menuList = [
           "/accounts/paymentvoucher/SpecificVoucher",
           "/accounts/paymentvoucher/bankdetailselection",
         ],
+        permissions: ["read:disbursements"],
+      },
+  {
+        // payment vouchers paid by a bank's bulk credit / InstaPay / PESONet upload file
+        id: 30,
+        name: "Bank Payment Files",
+        path: "/accounts/bank-payment-files",
+        includes: ["/accounts/bank-payment-files"],
         permissions: ["read:disbursements"],
       },
   {
@@ -1294,6 +1309,13 @@ export const menuList = [
             includes: ["/master/finance/insurer-statement-formats"],
           },
           {
+            // bank payment file layouts (bulk credit, InstaPay, PESONet) and payee bank accounts
+            id: 30,
+            name: "Bank File Layouts",
+            path: "/master/finance/bank-file-layouts",
+            includes: ["/master/finance/bank-file-layouts"],
+          },
+          {
             id: 10,
             name: "Remittance Master",
             path: "/master/finance/remittance",
@@ -1377,6 +1399,25 @@ export const menuList = [
             name: "E-mail Outbox",
             path: "/master/configuration/email-outbox",
             includes: ["/master/configuration/email-outbox"],
+          },
+          {
+            // integration framework: connectors, outbox and inbox; SMS / Viber templates; insurer API mappings
+            id: 30,
+            name: "Integrations",
+            path: "/master/configuration/integrations",
+            includes: ["/master/configuration/integrations"],
+          },
+          {
+            id: 31,
+            name: "Message Templates",
+            path: "/master/configuration/message-templates",
+            includes: ["/master/configuration/message-templates"],
+          },
+          {
+            id: 32,
+            name: "Insurer Integration",
+            path: "/master/configuration/insurer-integration",
+            includes: ["/master/configuration/insurer-integration"],
           },
         ],
       },

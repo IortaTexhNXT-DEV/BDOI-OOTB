@@ -19,6 +19,8 @@ const OPERATIONS_ALL = [
   "Renewals",
   "My Work",
   "Payments",
+  // CTPL COC authentication (read:policies; authenticate, enter a code, COC series: write:policies)
+  "CTPL Authentication",
 ];
 
 // The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
@@ -120,13 +122,17 @@ export const roleMenuPermissions = {
       "Insurer Reconciliation",
       // instalment plans, premium warranty, credit limits, remittance ageing (approvals: accounting-manager, approve:credit-control)
       "Credit Control",
+      // payment vouchers paid by bank file (maker-checker approval of the batch)
+      "Bank Payment Files",
     ],
     // Account Determination and Posting Rules: Accounting reads them; the Accounting Manager proposes changes and approves
     // those of another user on Configuration Approvals (the administrator configures too)
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
       "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
-      "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways"],
+      "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
+      // bank payment file layouts and payee bank accounts (write:disbursements)
+      "Finance > Bank File Layouts"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],

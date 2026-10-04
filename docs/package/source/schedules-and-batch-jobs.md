@@ -84,6 +84,9 @@ A job switched off can still be run with Run now. This is the way to use the per
 | Renewal notices (`renewal-notices`) | Daily 06:00 | On | `renewalNotices` | `notification.renewal_reminder`, `limits.renewal_notice_days` (60, 30, 15) |
 | Remittance schedules (`remittance-schedules`) | Daily 06:15 | Off | `remittanceSchedules` | the schedules of Accounts > Remittance > Scheduling (insurers, cut-off days, frequency, next run date) |
 | Overdue data subject requests (`privacy-requests-due`) | Daily 07:00 | Off | `privacyRequestsDue` | `privacy.request_due_days` (15) sets the due dates |
+| Integration outbox (`integration-outbox`) | Every 2 minutes | On | `integrationOutbox` | the connectors of Master > System Configuration > Integrations (retry policy per connector), `integrations.dispatch_batch_size`, `integrations.stuck_minutes` |
+| SMS renewal notices (`sms-renewal-notices`) | Daily 08:10 | Off | `smsRenewalNotices` | `messaging.renewal_notice_days` (30, 7), template event renewal_notice, `messaging.service_consent` |
+| SMS payment reminders (`sms-payment-reminders`) | Daily 08:20 | Off | `smsPaymentReminders` | `messaging.payment_reminder_days` (3, 0), template event payment_reminder |
 | Receivable ageing (`receivable-ageing`) | Daily 07:00 | On | `receivableAgeing` | `limits.receivable_ageing_buckets` (30, 60, 90, 120) |
 | Month-end close reminder (`month-end-reminder`) | Daily 08:00 | Off | `monthEndReminder` | job parameter `daysBefore` (3) |
 | Collection reminders (`collection-reminders`) | Daily 08:00 | On | `collectionReminders` | `collections.reminder_days_before` (7), `collections.reminder_repeat_days` (7), `collections.email_subject`, `collections.email_template` |
