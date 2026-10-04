@@ -21,6 +21,7 @@ import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { calendarDateFormat } from "../../utility/dateFormat";
 import { Field, JourneyTimeline, PageHeader, StatusTag, formatDate, round2, usePlacementOptions } from "./shared";
 import { isoDate, fromIso } from "./dates";
+import canOpen from "../../utils/canOpen";
 import "./index.scss";
 
 const OPEN = ["draft", "submitted", "responses-in"];
@@ -149,6 +150,10 @@ const BrokerSlipDetail = () => {
       <PageHeader title={`${t("placement.brokerSlip.title")} ${slip.slipNumber}`} subtitle={`${slip.insuredName || slip.customerName} - ${slip.productType || ""}`} onBack={() => navigate("/placement/broker-slips")}>
         <StatusTag status={slip.status} />
         <Button label={t("placement.actions.slipPdf")} icon="pi pi-file-pdf" severity="secondary" outlined onClick={() => placementService.openSlipPdf(slip.id).catch((e) => notify("error", e.message))} className="ml-2" />
+        {!["draft", "cancelled"].includes(slip.status) && canOpen("/sales/comparison-reports") && (
+          <Button label={t("distribution.cr.clientReport", "Client comparison report")} icon="pi pi-star" severity="secondary" outlined className="ml-2"
+            onClick={() => navigate(`/sales/comparison-reports?brokerSlipId=${encodeURIComponent(slip.id)}&slipNumber=${encodeURIComponent(slip.slipNumber)}`)} />
+        )}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.addInsurer")} icon="pi pi-plus" severity="secondary" outlined onClick={() => setAddInsurer({ insurer: null })} className="ml-2" />}
         {slip.status === "draft" && <Button label={t("placement.actions.submitToMarket")} icon="pi pi-send" onClick={() => act(() => placementService.submitSlip(slip.id), (r) => withQueuedNotice(t("placement.messages.submitted", { count: r.sent?.length || 0 }), emailSending))} loading={busy} className="ml-2" />}
         {OPEN.includes(slip.status) && <Button label={t("placement.actions.more")} icon="pi pi-times" severity="danger" text onClick={() => setClosing({ status: "cancelled", reason: "" })} className="ml-2" />}

@@ -3,6 +3,7 @@ import { audit } from '../../lib/audit.js';
 import { created, ok } from '../../lib/respond.js';
 import { canRead, canWrite } from '../masters/helpers.js';
 import * as svc from './service.js';
+import facultativeRouter from './facultativeRoutes.js';
 
 /** Reinsurance (5 screens + Treaty master). Method names mirror services/mockData/reinsuranceMockData.js. */
 const { router, define } = moduleRouter('Reinsurance', '/reinsurance');
@@ -208,3 +209,5 @@ define({
 
 export default router;
 export const mount = '/reinsurance';
+// Facultative placements (the broker as reinsurance broker): facultativeRoutes.js
+export const extraMounts = [['/reinsurance/facultative', facultativeRouter]];

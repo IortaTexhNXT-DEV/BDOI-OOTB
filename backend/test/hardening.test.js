@@ -431,6 +431,8 @@ describe('route registry', () => {
     'POST /public/payments/webhooks/:gateway', 'GET /public/payments/webhooks/:gateway',
     // messages pushed by third parties (insurer claim status, CTPL authentication result), HMAC-signed per connector
     'POST /public/integrations/inbound/:connector',
+    // marketing campaign opt-out link (signed token of one recipient; the GET page changes nothing)
+    'GET /campaigns/opt-out/:token', 'POST /campaigns/opt-out/:token',
   ]);
   it('declares only the intended public routes', () => {
     const open = ROUTES.filter((r) => !r.auth).map((r) => `${r.method} ${r.path}`);

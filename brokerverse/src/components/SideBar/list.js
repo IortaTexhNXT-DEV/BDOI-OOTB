@@ -143,6 +143,36 @@ export const menuList = [
             includes: ["/placement/placement-slips", "/placement/record-issued-policy"],
             permissions: ["read:quotations"],
           },
+          // distribution: lead assignment and team view, brand-new vehicle programmes of dealers and banks, client
+          // comparison reports and marketing campaigns to consenting clients
+          {
+            id: 36,
+            name: "Lead Assignment",
+            path: "/sales/lead-assignment",
+            includes: ["/sales/lead-assignment"],
+            permissions: ["read:leads"],
+          },
+          {
+            id: 37,
+            name: "Dealer Programmes",
+            path: "/sales/dealer-programmes",
+            includes: ["/sales/dealer-programmes"],
+            permissions: ["read:motor-programmes"],
+          },
+          {
+            id: 38,
+            name: "Comparison Reports",
+            path: "/sales/comparison-reports",
+            includes: ["/sales/comparison-reports"],
+            permissions: ["read:quotations"],
+          },
+          {
+            id: 39,
+            name: "Campaigns",
+            path: "/sales/campaigns",
+            includes: ["/sales/campaigns"],
+            permissions: ["read:campaigns"],
+          },
         ],
       },
       {
@@ -200,6 +230,19 @@ export const menuList = [
           "/agent/employee-benefit/policy-upload-policy",
         ],
         permissions: ["read:policies"],
+      },
+      // one policy for many vehicles, and marine cargo open covers with their certificates and declarations
+      {
+        name: "Fleet Schedules",
+        path: "/operations/fleet-schedules",
+        includes: ["/operations/fleet-schedules"],
+        permissions: ["read:fleet"],
+      },
+      {
+        name: "Marine Open Covers",
+        path: "/operations/open-covers",
+        includes: ["/operations/open-covers"],
+        permissions: ["read:marine"],
       },
 
       {
@@ -824,6 +867,14 @@ export const menuList = [
           "/reinsurance/analytics/performance",
         ],
       },
+      {
+        // the broker as reinsurance broker: facultative slips, signed lines, binding, settlements, bordereaux
+        id: 6,
+        name: "Facultative Placements",
+        path: "/reinsurance/facultative",
+        includes: ["/reinsurance/facultative"],
+        permissions: ["read:reinsurance"],
+      },
     ],
   },
   {
@@ -893,6 +944,14 @@ export const menuList = [
             includes: ["/reports/operationalreports/brokercommision"],
             permissions: ["read:commission-reports"],
           },
+          {
+            // business per dealer, financing bank and affinity partner, rolled up to the dealer group (catalogue report)
+            id: 6,
+            name: "Dealer Production",
+            path: "/reports/run/dealer-production",
+            includes: ["/reports/run/dealer-production"],
+            permissions: ["read:reports"],
+          },
         ],
       },
       {
@@ -955,6 +1014,14 @@ export const menuList = [
             permissions: ["read:financial-reports"],
           },
         ],
+      },
+      {
+        // ad hoc reports over curated datasets, saved and shared with roles, Excel export, BI extract
+        id: 3,
+        name: "Report Builder",
+        path: "/reports/builder",
+        includes: ["/reports/builder"],
+        permissions: ["read:reports"],
       },
     ],
   },
@@ -1081,6 +1148,14 @@ export const menuList = [
           { id: 31, name: "Cancellation Reasons", path: "/master/insurance/cancellation-reasons", includes: ["/master/insurance/cancellation-reasons"] },
           { id: 32, name: "Claim Document Checklist", path: "/master/insurance/claim-document-checklist", includes: ["/master/insurance/claim-document-checklist"] },
           { id: 33, name: "Repair Shops", path: "/master/insurance/repair-shops", includes: ["/master/insurance/repair-shops"] },
+          {
+            // dealer groups and branches, financing banks, affinity partners (hierarchy, referrer, mortgagee clause)
+            id: 13,
+            name: "Distribution Channels",
+            path: "/master/insurance/channels",
+            includes: ["/master/insurance/channels"],
+            permissions: ["read:channels"],
+          },
         ],
       },
       {

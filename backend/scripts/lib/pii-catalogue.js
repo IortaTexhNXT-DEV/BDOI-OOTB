@@ -329,6 +329,38 @@ export const CATALOGUE = {
   'supplier_payments.remarks': 'freeText',
   'fixed_assets.custodian': { rule: 'personName', party: 'staff' },
   'fixed_assets.disposal_remarks': 'freeText',
+  // ---------------------------------------------------------------- distribution, programmes and products (0300 to 0308)
+  'distribution_channels.contact_person': 'personName',
+  'distribution_channels.contact_email': 'email',
+  'distribution_channels.contact_phone': 'phone',
+  'distribution_channels.tin': 'tin',
+  'distribution_channels.address': 'address',
+  'distribution_channels.notes': 'freeText',
+  'motor_programmes.notes': 'freeText',
+  'dealer_sales_batches.file_name': 'fileName',
+  'dealer_sales.buyer_first_name': 'firstName',
+  'dealer_sales.buyer_last_name': 'lastName',
+  'dealer_sales.buyer_company_name': 'companyName',
+  'dealer_sales.buyer_email': 'email',
+  'dealer_sales.buyer_phone': 'phone',
+  'dealer_sales.buyer_address': 'street',
+  'dealer_sales.plate_number': 'plate',
+  'dealer_sales.conduction_sticker': 'plate',
+  'dealer_sales.chassis_number': 'chassis',
+  'dealer_sales.engine_number': 'engine',
+  'fleet_vehicles.plate_number': 'plate',
+  'fleet_vehicles.conduction_sticker': 'plate',
+  'fleet_vehicles.chassis_number': 'chassis',
+  'fleet_vehicles.engine_number': 'engine',
+  'open_cover_declarations.notes': 'freeText',
+  'open_cover_certificates.consignee': 'partyName',
+  'fac_placements.insured_name': 'partyName',
+  'fac_placement_shares.notes': 'freeText',
+  'comparison_reports.prepared_for': 'partyName',
+  'comparison_reports.sent_to': 'email',
+  'campaigns.notes': 'freeText',
+  'campaign_recipients.party_name': 'partyName',
+  'campaign_recipients.email': 'email',
 };
 
 /** Tables emptied: credentials, sign-in sessions and history, and messages addressed to real people. */
@@ -473,6 +505,9 @@ export const ALLOW_LIST = {
   'remittance_approvals.description': 'description of the approval step (swept)',
   'petty_cash_requests.requester_user_id': 'reference',
   'claim_document_reminders.email_id': 'reference to the e-mail outbox row',
+  'distribution_channels.letter_addressee': 'a position at a bank ("The Manager, Auto Loans"), not a person',
+  'motor_programmes.subsidy_payer': 'code: none, dealer or bank',
+  'fac_settlements.bank_account': 'code of the broker\'s own bank account (Bank Account master)',
 };
 
 /**

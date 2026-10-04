@@ -9,6 +9,7 @@ import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { isoDate } from '../../lib/dates.js';
 import { fillRegion } from '../../lib/address.js';
+import { assignNewLead } from './assignment.js';
 
 /** Fields the lead screens send, mapped to columns. Anything else is kept in `extra`. */
 const FIELD_MAP = {
@@ -16,10 +17,10 @@ const FIELD_MAP = {
   gender: 'gender', emailId: 'email', contactNumber: 'phone', houseNo: 'house_no', barangay: 'barangay',
   city: 'city', province: 'state', region: 'region', country: 'country', zipCode: 'postal_code', roadThanon: 'road', soiAlley: 'soi',
   mooVillage: 'moo', street: 'road', leadCategory: 'lead_category', taxInformationNumber: 'tax_number', source: 'source', notes: 'notes',
-  productType: 'product_interest', status: 'status',
+  productType: 'product_interest', status: 'status', channelId: 'channel_id', branchCode: 'branch_code',
 };
 const KNOWN = new Set([...Object.keys(FIELD_MAP), 'DOB', 'lob', 'email', 'mobileNumber', 'createdBy', 'updatedBy', 'leadId', 'id',
-  'generatedLeadId', 'createdAt', 'updatedAt', 'quotationsCount', 'clientId']);
+  'generatedLeadId', 'createdAt', 'updatedAt', 'quotationsCount', 'clientId', 'ownerUserId', 'ownerName', 'channelName', 'assignmentStatus', 'queueReason']);
 
 /** Row -> the lead object the screens read (leadId, generatedLeadId, emailId, contactNumber, DOB ...). */
 export function toLead(r) {
@@ -33,6 +34,8 @@ export function toLead(r) {
     street: r.road, roadThanon: r.road, soiAlley: r.soi, mooVillage: r.moo, leadCategory: r.lead_category, companyName: r.company_name,
     taxInformationNumber: r.tax_number, lob: r.lob, productType: r.product_interest, source: r.source, notes: r.notes,
     status: r.status, clientId: r.client_id, ownerUserId: r.owner_user_id, quotationsCount: r.quotations_count ?? 0,
+    channelId: r.channel_id ?? null, channelName: r.channel_name ?? null, branchCode: r.branch_code ?? null, ownerName: r.owner_name ?? null,
+    assignmentStatus: r.assignment_status ?? null, queueReason: r.queue_reason ?? null,
     createdBy: r.created_by_name || r.created_by, updatedBy: r.updated_by, createdAt: r.created_at, updatedAt: r.updated_at,
   };
 }
@@ -51,7 +54,9 @@ function columnsFrom(body) {
 }
 
 const SELECT = `SELECT l.*, (SELECT count(*)::int FROM quotes q WHERE q.lead_id = l.id AND q.deleted_at IS NULL) AS quotations_count,
-  (SELECT u.display_name FROM users u WHERE u.id = l.created_by) AS created_by_name FROM leads l`;
+  (SELECT u.display_name FROM users u WHERE u.id = l.created_by) AS created_by_name,
+  (SELECT u.display_name FROM users u WHERE u.id = l.owner_user_id) AS owner_name,
+  (SELECT ch.name FROM distribution_channels ch WHERE ch.id = l.channel_id) AS channel_name FROM leads l`;
 
 export async function getLead(id, db = null) {
   const r = (await (db || { query }).query(`${SELECT} WHERE (l.id = $1 OR l.lead_number = $1) AND l.deleted_at IS NULL`, [id])).rows[0];
@@ -71,12 +76,17 @@ export async function createLead(body, userId, db = null) {
       if (!client) throw badRequest('Validation failed', [{ path: 'clientId', message: 'The selected client does not exist' }]);
       cols.client_id = client.id;
     }
+    if (cols.channel_id) await assertChannel(c, cols.channel_id);
+    // the prospect's branch (assignment rules by branch): as given, else the creator's branch
+    if (!cols.branch_code && userId) cols.branch_code = (await c.query('SELECT branch_code FROM users WHERE id = $1', [userId])).rows[0]?.branch_code || null;
     const number = await nextDocumentNumber('lead', { db: c, unique: { table: 'leads', column: 'lead_number' } });
     const status = cols.status || await getSetting('leads.default_status', 'New');
     const data = { ...cols, status, lead_number: number, display_name: displayName(body), extra: JSON.stringify(extra),
-      lob: cols.lob || 'MOTOR', lead_category: cols.lead_category || 'Retail', created_by: userId, owner_user_id: userId };
+      lob: cols.lob || 'MOTOR', lead_category: cols.lead_category || 'Retail', created_by: userId, owner_user_id: userId, assigned_at: new Date() };
     const keys = Object.keys(data);
     const r = await c.query(`INSERT INTO leads(${keys.join(',')}) VALUES (${keys.map((_, i) => `$${i + 1}`).join(',')}) RETURNING id`, Object.values(data));
+    // lead assignment rules (Operations > Sales & Marketing > Lead Assignment) choose the account executive
+    await assignNewLead(c, r.rows[0].id, userId);
     return r.rows[0].id;
   };
   const id = db ? await run(db) : await withTransaction(run);
@@ -86,6 +96,7 @@ export async function createLead(body, userId, db = null) {
 export async function updateLead(id, body, userId) {
   const before = await getLead(id);
   const { cols, extra } = columnsFrom(body);
+  if (cols.channel_id) await assertChannel({ query }, cols.channel_id);
   await assertBirthDate(cols.birth_date);
   await fillRegion(cols);
   const merged = { first_name: before.first_name, last_name: before.last_name, company_name: before.company_name, preferred_name: before.preferred_name };
@@ -95,6 +106,13 @@ export async function updateLead(id, body, userId) {
   const keys = Object.keys(data);
   await query(`UPDATE leads SET ${keys.map((k, i) => `${k} = $${i + 2}`).join(', ')} WHERE id = $1`, [before.id, ...Object.values(data)]);
   return { before, after: await getLead(before.id) };
+}
+
+/** A distribution channel given on a prospect must exist and be active (Master > Insurance Management > Distribution Channels). */
+async function assertChannel(db, id) {
+  const ch = (await db.query('SELECT status FROM distribution_channels WHERE id = $1', [id])).rows[0];
+  if (!ch) throw badRequest('Validation failed', [{ path: 'channelId', message: 'The selected distribution channel does not exist' }]);
+  if (ch.status !== 'active') throw badRequest('Validation failed', [{ path: 'channelId', message: 'The selected distribution channel is inactive' }]);
 }
 
 /** Soft delete; a lead with a converted policy cannot be removed. */
@@ -117,6 +135,9 @@ function filters(q) {
   if (q.city) add('l.city ILIKE ?', q.city);
   if (q.status) add('l.status = ?', q.status);
   if (q.lob) add('l.lob = ?', lobOf(q.lob));
+  if (q.channelId) add('l.channel_id = ?', q.channelId);
+  if (q.ownerUserId) add('l.owner_user_id = ?', q.ownerUserId);
+  if (q.assignmentStatus) add('l.assignment_status = ?', q.assignmentStatus);
   if (q[SCOPE]) where.push(scopeSql(q[SCOPE], 'lead', 'l', params));
   const search = q.query || q.search || q.q || q.name;
   if (search) {

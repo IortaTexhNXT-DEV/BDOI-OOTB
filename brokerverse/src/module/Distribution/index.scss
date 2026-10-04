@@ -1,0 +1,91 @@
+// Distribution, programmes and products screens: the page frame is the Period End one (pe-page, pe-card, pe-header);
+// this adds the two-column form grid of the dialogs and a few list helpers.
+.dist-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.dist-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+
+  > label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #384250;
+  }
+
+  .p-inputtext,
+  .p-dropdown,
+  .p-multiselect,
+  .p-inputnumber,
+  .p-calendar {
+    width: 100%;
+  }
+}
+
+.dist-field--full {
+  grid-column: 1 / -1;
+}
+
+.dist-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.dist-summary {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+  margin: 0.5rem 0 0.75rem;
+  color: #384250;
+
+  b {
+    color: #111927;
+  }
+}
+
+.dist-actions {
+  display: flex;
+  gap: 0.25rem;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.dist-preview {
+  border: 1px solid #e5e9f0;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  background: #f8fafc;
+  max-height: 18rem;
+  overflow: auto;
+}
+
+.dist-mail-preview {
+  width: 100%;
+  min-height: 24rem;
+  border: 1px solid #e5e9f0;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.dist-filter-row {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1.2fr) minmax(8rem, 0.8fr) minmax(8rem, 1fr) minmax(8rem, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+
+  @media (max-width: 720px) {
+    grid-template-columns: 1fr;
+  }
+}

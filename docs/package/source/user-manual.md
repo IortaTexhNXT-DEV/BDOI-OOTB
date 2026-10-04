@@ -2565,6 +2565,197 @@ AML records (identification, ratings, screenings, alerts, cases, report files) a
 | Override a risk rating | Client Due Diligence > client > **Override rating** |
 | Approve a case for filing; close a case | AML Cases |
 | Record a filing with the AMLC | AMLC Reports > **Record filing** |
+# Distribution, programmes and products
+
+This chapter covers the screens that bring business in and the specialist products placed in bulk: who works each prospect, the dealers, banks and affinity partners that refer business, the brand-new vehicle programmes, fleet schedules, marine open covers, facultative reinsurance placements, the comparison report given to clients, marketing campaigns and the Report Builder.
+
+| Screen | Menu | Who uses it |
+|---|---|---|
+| Lead Assignment | Operations > Sales & Marketing > Lead Assignment | Sales managers and the lead assignment team (read / write:lead-assignment); every account executive sees the team view of their own reporting line |
+| Distribution Channels | Master > Insurance Management > Distribution Channels | Sales, Processing and Operations (read:channels to view, write:channels to change) |
+| Dealer Programmes | Operations > Sales & Marketing > Dealer Programmes | Sales and Processing (read / write:motor-programmes) |
+| Comparison Reports | Operations > Sales & Marketing > Comparison Reports | Sales and Processing (quotation permissions) |
+| Campaigns | Operations > Sales & Marketing > Campaigns | Sales and marketing (read / write:campaigns) |
+| Fleet Schedules | Operations > Fleet Schedules | Operations and Processing (read / write:fleet) |
+| Marine Open Covers | Operations > Marine Open Covers | Operations and Processing (read / write:marine) |
+| Facultative Placements | Reinsurance > Facultative Placements | Processing (reinsurance permissions) |
+| Dealer Production | Reports > Operational Reports > Dealer Production | Everyone with the reports permission |
+| Report Builder | Reports > Report Builder | Everyone with the reports permission; saving needs write:reports; the BI extract tab is for the administrator |
+
+## Lead Assignment
+
+Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Queue** and **Assignment Rules**. Users without the lead assignment permissions see only the team view.
+
+### Team view
+
+The team view lists each account executive of the reporting line (the users who report to the signed-in manager, and their own reports) with the prospects they hold: **Open**, **Converted**, **Lost**, **Last 30 days** and **In queue**. Choose a manager to see that manager's line (the default is your own team) or a **Team member** to see one person. Below the team, the open prospects of the selection are listed, with their **Assignment** status.
+
+### Assignment rules
+
+Every new prospect, whether entered on the prospect screen, uploaded or created from a dealer sale, is given an account executive by the first active rule that matches it.
+
+1. Open **Assignment Rules** and select **Add rule**.
+2. Enter the **Name** and the **Priority** (lower numbers are tried first).
+3. Choose the **Method**: **Round robin** (each matching prospect goes to the next account executive in turn), **Fewest open prospects** (to whoever holds the fewest open prospects) or **Fixed account executive** (always the first one listed).
+4. Choose the **Account executives** who share the work. Only active users can receive prospects.
+5. Set the conditions the prospect must meet: **Line of business**, **Distribution channel**, **Province**, **City / municipality**, **Branch**, **Source** and **Category**. An empty condition matches anything.
+6. Select **Save**.
+
+When rules exist but none matches, the setting **leads.assignment_fallback** decides: **creator** (the person who entered the prospect keeps it) or **queue** (the prospect waits in the reassignment queue). Assignment can be switched off with **leads.assignment_enabled**. Every assignment is written to the prospect's **Assignment history** (rule, from, to, reason, who and when).
+
+### Reassignment queue and bulk reassignment
+
+The **Queue** tab lists prospects waiting for an account executive: those no rule matched (with fallback queue), those sent to the queue by a manager, and those left untouched longer than **leads.assignment_sla_hours** (the **lead-assignment-sla** job moves them each morning once it is switched on in Master > Schedules).
+
+1. Tick one or more prospects (on the queue or on the team view).
+2. Select **Reassign**, choose **To account executive** and enter the **Reason**.
+3. Select **Save**. Each prospect changes owner, the history records a manual or bulk reassignment and the new owner is notified when **leads.assignment_notify** is on.
+
+**Send to queue** returns prospects to the queue with a reason, for example when an account executive leaves.
+
+## Distribution Channels
+
+Choose Master > Insurance Management > Distribution Channels. A channel is a dealer group or dealer branch, a financing bank or bank branch, or an affinity partner (a company whose members or homeowners are referred to the broker).
+
+1. Select **Add channel**.
+2. Choose the **Channel type**. A dealer branch **Belongs to** a dealer group and a bank branch to a financing bank; a group, bank or affinity partner stands alone.
+3. Enter the **Code**, **Name**, **Servicing branch code**, **Province**, **City / Municipality**, **Address**, **Contact person**, **Contact e-mail**, **Contact phone** and **TIN**.
+4. For dealers and affinity partners choose the **Referrer** (the referrer of the commission master) and the **Comsub %** paid to it. Policies of the channel without their own referrer pay the referrer's share at this rate.
+5. For a financing bank choose the **Bank (Bank master)**, the **Mortgagee clause** printed on its borrowers' policies ({{bankName}} is replaced by the bank's name) and the **Letter addressee** of the bank endorsement letter. A bank branch without its own clause uses the bank's.
+6. Select **Save**.
+
+The list shows each channel with its group and the **Prospects**, **Policies** and **Premium** it brought in. **Delete** removes a channel that was never used; a channel with business, branches, programmes or a billing account is made **Inactive** instead, so its history stays.
+
+The channel is recorded on prospects (field **Distribution channel**), carried to the quotation made from the prospect and to the policy issued from the quotation (setting **channels.inherit_from_lead**). The report **Dealer Production** (Reports > Operational Reports > Dealer Production) shows per dealer group and channel the prospects, quotations, policies, sum insured, premium and commission for a period, filtered by channel, dealer group or channel type, and exports to Excel and PDF like every report.
+
+## Dealer Programmes
+
+Choose Operations > Sales & Marketing > Dealer Programmes. A programme holds the terms agreed with a dealer, and optionally its financing bank, for brand-new vehicles.
+
+### Set up a programme
+
+1. Select **Add programme** and enter the **Code** and **Name**.
+2. Choose the **Dealer** (group or branch), the **Financing bank** if the buyers' loans are with one bank, and the **Insurer**.
+3. Under **Rates**, enter the **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury** and **Property damage** limits, the **Default vehicle class** and whether **CTPL** is included and for how many years (three years for a new car registered with the LTO).
+4. Under **Who pays**, tick **Free first year** when the first-year premium is paid by the dealer or the bank, or set the **Subsidy paid by** (dealer or bank), the **Subsidy** kind (percent of premium, fixed amount, full premium) and the **Subsidy value**. The buyer pays the rest.
+5. Choose what **Upload creates**: **Quotation to follow up** (draft quotations the account executive completes with the buyer) or **Policy issued** (the policy is issued and billed straight away).
+6. Enter **Effective from** and **Effective to** and select **Save**. **Premium preview** shows the premium of a sample vehicle with the programme's rates.
+
+### Upload the dealer's sales
+
+1. Select **Template** to download the Dealer Sales upload template (Excel). One row per vehicle sold: dealer branch code, date sold, sales invoice, buyer, contact details, make, model, variant, year, colour, vehicle class, plate or conduction sticker, chassis and engine numbers, invoice price, the financing bank branch code and the loan amount.
+2. On the programme, select **Upload sales** and choose the file. The system checks every row (required fields, the vehicle class, a chassis number not already uploaded) and creates, for each valid row, the prospect (channel: the dealer branch), the quotation priced with the motor tariff and, in issue mode Policy issued, the client and the policy with the financing bank as mortgagee.
+3. The result lists the rows **Created** and **Failed** with the reason of each failure. Correct the failed rows and upload them again.
+
+The premium is billed to who pays: the dealer or the bank for its subsidy, the buyer for the rest, each through its own bill with its booking journal. The commission of the policy is split in proportion.
+
+### Bank endorsement letter
+
+For every financed sale, **Bank endorsement letter** prints the letter to the bank confirming the policy, the vehicle, the loan and the mortgagee clause. **Bank letters of the batch** prints the letters of a whole upload in one PDF. **E-mail the letter to the bank** queues the letter as a PDF attachment to the bank branch's contact e-mail (or the bank's). With the setting **motor_programmes.email_bank_letter** on, the letters are queued automatically when an upload issues financed policies. The letter's subject and wording are in the settings **motor_programmes.bank_letter_subject** and **motor_programmes.bank_letter_body**.
+
+## Fleet Schedules
+
+Choose Operations > Fleet Schedules. A fleet schedule is one motor policy covering many vehicles of a client.
+
+1. Select **New fleet schedule**. Choose the **Client** and **Insurer**, the **Period from** and **Period to**, and the rates: **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury**, **Property damage**.
+2. Add the vehicles: **Add vehicle** for one, or **Template** and **Upload vehicles** for many (Fleet Vehicles upload template). For each vehicle enter the plate number or conduction sticker, chassis and engine numbers, make, model, year model, colour, **Vehicle class (CTPL tariff)**, usage, sum insured and mortgagee if any.
+3. Each vehicle is priced on its own: own damage and acts of nature on its sum insured, the excess liability premium, the CTPL of its class and the premium taxes. The totals show under **Vehicles on cover**.
+4. Select **Issue policy**. The policy is issued for the totals of the schedule and billed with its booking journal and commission, like any policy. At least **fleet.minimum_vehicles** vehicles are needed.
+
+After issue, **Add vehicle by endorsement** adds a vehicle and **Delete** (on a vehicle row) removes one. Each change is an endorsement whose premium is the vehicle's annual premium pro-rata to the days left (setting **fleet.pro_rata_basis**); completing it bills the additional premium or credits the return premium (setting **fleet.return_premium_on_delete**). **Schedule PDF** prints the schedule of vehicles on cover with each vehicle's premium and CTPL; **Excel** exports it.
+
+## Marine Open Covers
+
+Choose Operations > Marine Open Covers. An open cover insures a client's cargo shipments for a period: each shipment is certified or declared and the premium is billed per declaration period.
+
+### Set up the open cover
+
+1. Select **New open cover**. Choose the **Client** and **Insurer**, enter the **Period from** and **Period to**, the **Goods insured**, **Voyages** and **Clauses**.
+2. For each conveyance (Sea, Air, Land) covered, enter the **Rate %** and the **Limit any one conveyance**.
+3. Enter the **Mark-up on invoice %** (insured value = invoice value plus the mark-up; default in **marine.default_markup_percent**), the **Minimum premium per certificate** and the declaration frequency (monthly or quarterly).
+4. Select **Save**, then **Activate**. Activating issues the open policy without a bill; the premium is billed through the declarations.
+
+### Certificates and shipments
+
+1. On an active cover select **Issue certificate**. Enter the shipment date, the **Conveyance**, **Vessel / flight**, voyage **From** and **To**, **Bill of lading / airway bill**, consignee, packing, goods and the **Invoice value**.
+2. The system computes the **Insured value** and the premium (at least the minimum premium) and refuses a shipment over the limit of its conveyance or outside the period.
+3. **Print** produces the certificate of insurance (wording in **marine.certificate_wording**). **Cancel certificate** cancels a certificate issued in error.
+
+**Shipment without certificate** records a shipment the client declares without a certificate having been issued.
+
+### Declarations, billing and remittance
+
+1. Open **Declarations** and select **New declaration** for the period. The certificates and declared shipments of the period are gathered with their premium and the premium taxes of the marine line. A period with no shipment is a nil declaration.
+2. **Submit** the declaration, then **Bill** it. Billing raises the bill on the open policy (premium receivable, booking journal, collection item and commission). Collection, the official receipt and the remittance to the insurer follow as for any bill.
+
+Declarations are due **marine.declaration_due_days** days after the period ends.
+
+## Facultative Placements
+
+Choose Reinsurance > Facultative Placements. Here the broker acts as reinsurance broker: an insurer (the cedant) offers part of a risk to the facultative market.
+
+1. Select **New slip**. Choose the **Cedant**, enter the **Original insured**, **Original policy number**, **Class**, **Risk**, **Location**, **Period from** and **Period to**, **Currency**, **Sum insured (100%)**, **Premium (100%)** and the **Share offered**.
+2. Enter the **Reinsurance commission %** allowed to the cedant and the **Brokerage %** (defaults in **reinsurance.fac_default_ceding_commission_pct** and **reinsurance.fac_default_brokerage_pct**), the **Deductibles** and **Conditions**. Select **Save**.
+3. **Add reinsurer** for each reinsurer approached. Only reinsurers that meet the security rating set on the Reinsurers master can be added.
+4. **Send to market** marks the slip in market and can e-mail the **Slip** PDF to each reinsurer.
+5. Record each reinsurer's answer: accepted with its **Line % of share** and **Reference**, or declined. When the accepted lines reach 100% of the share offered the slip is **Placed**.
+6. **Bind** the slip. Binding posts the journal (posting rule ri.facultative.bind): the premium due from the cedant net of its reinsurance commission, the net premium due to each reinsurer, and the brokerage income.
+
+**Cover note** (to the cedant), **Debit note** (the premium due from the cedant) and **Credit note** (per reinsurer, its net premium) print once the slip is bound. **Record premium received** records the cedant's payment and **Record payment** the payment to a reinsurer, each with its own journal. The slip closes when both sides are settled. **Bordereau** lists the facultative premium of a period by reinsurer; **Generate and keep** saves it as a document of the month.
+
+## Comparison Reports
+
+Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
+
+1. Select **New report**. Choose what is **Compared**: a **Request for quotation** (its insurers' offers become the options) or two or more **Quotations** of the same client or prospect (enter their numbers). From a request for quotation the report can also be opened with the address /sales/comparison-reports?brokerSlipId= followed by the slip.
+2. Select **Prepare**. The options are ranked by total premium.
+3. Edit **Prepared for**, **Title** and **Introduction** (defaults in the **comparison.*** settings). For each option enter **What stands out**.
+4. Choose the option to **Recommend** and write **Why we recommend it**, one reason per line; the suggested reasons of **comparison.default_reasons** can be added with one click. Adjust the **Disclaimer**.
+5. Select **Save**, then **Client report (PDF)** to print it on the letterhead.
+
+**E-mail to the client** queues the report as a PDF attachment to the client's e-mail on file or to the address entered. When the client decides, **Client chose** on the chosen option records the decision and closes the report as **Accepted**.
+
+## Campaigns
+
+Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force in the consent register (Master > Data Privacy) and who have an e-mail address. Everyone else is left out and recorded with the reason.
+
+### Segments
+
+1. Open **Segments** and select **New segment**.
+2. Choose **Who** (clients, prospects or both) and narrow the audience by **Line of business**, **Province**, **City / municipality**, **Distribution channel**, **Client type**, **Prospect status** and **Policy expiring within (days)**.
+3. Select **Who is reached**. The preview shows how many match, how many are reachable and how many are **Left out because** of a missing or withdrawn consent or a missing e-mail.
+4. Select **Save**.
+
+### Templates
+
+1. Open **Templates** and select **New template**. Enter the **Code**, **Name**, **Subject** and the **Message (HTML)**.
+2. Use the placeholders {{firstName}}, {{fullName}}, {{companyName}} and {{optOutLink}}. A template without an opt-out link gets the unsubscribe paragraph of **campaigns.opt_out_text** added at the end.
+3. **Preview** shows the template filled in for a sample recipient.
+
+### Send a campaign and read the results
+
+1. On **Campaigns**, select **New campaign**, enter the **Name** and choose the **Segment** and **Template**.
+2. Select **Send now** to queue the e-mails to the E-mail Outbox, or **Schedule** to choose the date and time; the **campaign-dispatch** job sends scheduled campaigns. **Cancel campaign** stops a draft or scheduled campaign.
+3. **Results** shows the recipients, the e-mails sent, waiting and failed (from the outbox), those excluded by reason, opt-outs, and the recipients who were quoted or insured within **campaigns.conversion_window_days** days.
+
+Each e-mail carries its own opt-out link. Opening it shows an unsubscribe page; confirming records a refusal of the marketing purpose in the consent register (channel E-mail), so later campaigns leave the person out. A campaign reaches at most **campaigns.max_recipients** people.
+
+## Report Builder
+
+Choose Reports > Report Builder. The Report Builder answers ad hoc questions over curated datasets (Policies, Clients, Bills (premium receivables), Claims and Commissions); each dataset needs the read permission of its module without a new report being programmed. A user who sees only their own book (data scope) sees only their own rows here too.
+
+1. On **Build**, choose the **Dataset**.
+2. Choose the **Columns**. Without grouping each row is a record; with **Group by** (up to five text or date columns) each row is a group and the numeric columns chosen are summed (a count column counts the records).
+3. **Add filter** for each condition: the column, the operator (equals, contains, between and so on, depending on the type) and the value.
+4. Choose **Sort by** and the direction.
+5. Select **Run** to see the result with the totals of the numeric columns. The screen shows up to **report_builder.preview_rows** rows; **Export to Excel** exports all of them, up to **report_builder.max_rows**.
+6. Select **Save report**, enter the **Name** and **Description** and choose the roles to **Share with**. A report shared with no role is private.
+
+**Saved reports** lists your own reports and those shared with your roles: **Open** loads one into Build, **Export to Excel** exports it directly, and the owner or the administrator can delete it.
+
+### BI extract
+
+The administrator's **BI extract** tab lists the runs of the **bi-extract** job, which writes one CSV file per dataset listed in **bi.extract_datasets** to the storage folder **bi.extract_folder**, dated, for the BI tool to pick up. **Run now** runs it immediately. The job keeps the last **bi.extract_keep_runs** runs.
 
 # Module reference
 

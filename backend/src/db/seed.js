@@ -57,6 +57,16 @@ const ROLE_PERMS = {
   // access to the policies, claims, receipts and vouchers it reviews
   'compliance-officer': ['profile', 'aml', 'aml:approve', 'clients', 'leads:read', 'policies:read', 'claims:read', 'receipts:read', 'disbursements:read', 'reports:read', 'notifications'],
 };
+// Distribution, programmes and products (permissions of migrations 0300 to 0308): lead assignment rules and queue,
+// distribution channels, brand-new vehicle programmes, fleet schedules, marine open covers, marketing campaigns.
+const DISTRIBUTION_PERMS = {
+  sales: ['channels:read', 'motor-programmes', 'campaigns', 'fleet:read', 'marine:read'],
+  processing: ['channels:read', 'motor-programmes', 'fleet', 'marine'],
+  operations: ['lead-assignment', 'channels:read', 'motor-programmes:read', 'fleet', 'marine', 'campaigns'],
+  claims: ['fleet:read', 'marine:read'],
+  accounting: ['channels:read', 'fleet:read', 'marine:read'],
+};
+for (const [role, items] of Object.entries(DISTRIBUTION_PERMS)) ROLE_PERMS[role].push(...items);
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'] };
 

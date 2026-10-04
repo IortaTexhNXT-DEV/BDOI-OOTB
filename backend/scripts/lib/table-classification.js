@@ -68,6 +68,12 @@ export const TRANSACTION_TABLES = [
   // reminders, motor claim repairs, accounts payable, fixed assets and their depreciation (masters are generic types)
   'cover_notes', 'post_dated_cheques', 'claim_document_items', 'claim_document_reminders', 'claim_repair_estimates', 'claim_loas', 'claim_vehicle_releases',
   'supplier_invoices', 'supplier_invoice_lines', 'supplier_payments', 'supplier_payment_allocations', 'fixed_assets', 'fixed_asset_depreciation',
+  // distribution and products: lead assignments, channel billing accounts, dealer sales, fleet schedules, marine open
+  // covers, facultative reinsurance, comparison reports, marketing campaigns (assignment rules, channels, programmes,
+  // segments, templates and saved reports are masters)
+  'lead_assignment_history', 'channel_billing_accounts', 'dealer_sales_batches', 'dealer_sales', 'fleet_schedules', 'fleet_vehicles',
+  'open_covers', 'open_cover_declarations', 'open_cover_certificates', 'fac_placements', 'fac_placement_shares', 'fac_settlements',
+  'comparison_reports', 'campaigns', 'campaign_recipients',
 ];
 
 /**
@@ -98,6 +104,7 @@ export const SYSTEM_RESET_ACTIONS = {
   integration_inbox: 'remove',
   password_history: 'keep', // part of the user accounts (password reuse rule)
   schema_migrations: 'keep',
+  bi_extract_runs: 'remove', // BI extract history (the CSV files in the storage folder stay)
 };
 export const SYSTEM_TABLES = Object.keys(SYSTEM_RESET_ACTIONS);
 
@@ -125,6 +132,9 @@ export const MASTER_CONFIG_TABLES = [
   'override_agreements', 'override_agreement_tiers',
   // AML/CFT configuration: risk factors, monitoring rules, screening lists with their versions and entries
   'aml_risk_factors', 'aml_rules', 'aml_screening_lists', 'aml_list_versions', 'aml_list_entries',
+  // distribution and reporting configuration: lead assignment rules, distribution channels, brand-new vehicle
+  // programmes, campaign segments and templates, Report Builder saved reports
+  'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
 ];
 
 /**
@@ -152,6 +162,7 @@ export const TRANSACTION_FILE_FOLDERS = [
   'incentive-reports', 'reinsurance-reports', 'remittance-statements', 'remittance-bulk',
   // KYC documents of the clients (AML/CFT)
   'kyc',
+  'bi-extract',
 ];
 /** Configuration folders, never touched: logos and favicons (System Settings, Company master), product documents. */
 export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-documents'];

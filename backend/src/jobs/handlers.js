@@ -142,3 +142,8 @@ export async function eisOutbox() {
 export { coverNoteExpiry } from '../modules/cover-notes/jobs.js';
 export { pdcDepositDue } from '../modules/pdc/jobs.js';
 export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';
+// Distribution and reporting: prospects not worked in time go to the reassignment queue (lead assignment), scheduled
+// marketing campaigns are sent, the BI extract is written to the storage folder (all disabled until switched on)
+export { leadAssignmentSla } from '../modules/leads/assignment.js';
+export { campaignDispatch } from '../modules/campaigns/service.js';
+export { biExtract } from '../modules/report-builder/service.js';

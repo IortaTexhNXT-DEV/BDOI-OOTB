@@ -1336,6 +1336,144 @@
    "chapter": "Compliance Officer (AML/CFT)"
   },
   {
+   "id": "distribution-programmes-and-products",
+   "title": "Distribution, programmes and products",
+   "level": 1,
+   "chapter": null
+  },
+  {
+   "id": "lead-assignment",
+   "title": "Lead Assignment",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "team-view",
+   "title": "Team view",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "assignment-rules",
+   "title": "Assignment rules",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "reassignment-queue-and-bulk-reassignment",
+   "title": "Reassignment queue and bulk reassignment",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "distribution-channels",
+   "title": "Distribution Channels",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "dealer-programmes",
+   "title": "Dealer Programmes",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "set-up-a-programme",
+   "title": "Set up a programme",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "upload-the-dealer-s-sales",
+   "title": "Upload the dealer's sales",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "bank-endorsement-letter",
+   "title": "Bank endorsement letter",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "fleet-schedules",
+   "title": "Fleet Schedules",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "marine-open-covers",
+   "title": "Marine Open Covers",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "set-up-the-open-cover",
+   "title": "Set up the open cover",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "certificates-and-shipments",
+   "title": "Certificates and shipments",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "declarations-billing-and-remittance",
+   "title": "Declarations, billing and remittance",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "facultative-placements",
+   "title": "Facultative Placements",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "comparison-reports",
+   "title": "Comparison Reports",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "campaigns",
+   "title": "Campaigns",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "segments",
+   "title": "Segments",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "templates",
+   "title": "Templates",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "send-a-campaign-and-read-the-results",
+   "title": "Send a campaign and read the results",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "report-builder",
+   "title": "Report Builder",
+   "level": 2,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
+   "id": "bi-extract",
+   "title": "BI extract",
+   "level": 3,
+   "chapter": "Distribution, programmes and products"
+  },
+  {
    "id": "module-reference",
    "title": "Module reference",
    "level": 1,

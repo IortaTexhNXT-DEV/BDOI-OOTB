@@ -41,7 +41,7 @@ export function toQuote(r) {
     ...doc,
     id: r.id, quotationId: r.id, quotationNumber: r.quote_number, generatedQuotationId: r.quote_number,
     quotationStatus: quoteStatusOut(r.status), status: quoteStatusOut(r.status),
-    leadRefId: r.lead_id, leadId: r.lead_id, clientId: r.client_id, policyId: r.policy_id, brokerSlipId: r.broker_slip_id || null,
+    leadRefId: r.lead_id, leadId: r.lead_id, clientId: r.client_id, policyId: r.policy_id, brokerSlipId: r.broker_slip_id || null, channelId: r.channel_id ?? doc.channelId ?? null,
     productType: r.product_type || doc.productType, lob: r.lob, insuranceCompanyId: r.insurance_company_id,
     insuranceCompanyName: r.insurer_name || doc.insuranceCompanyName || doc.participantDetails?.[0]?.insuranceCompanyName,
     netPremium: Number(r.premium_base), valueAddedTax: Number(r.vat), documentaryStampTax: Number(r.dst), localGovernmentTax: Number(r.lgt),

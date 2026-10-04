@@ -83,7 +83,7 @@ export function riskSection(x, f) {
     const v = x.insuranceVehicleDetails?.[0] || {};
     return { heading: 'Vehicle', rows: kv([['Brand', v.vehicleBrand || x.vehicleBrand], ['Model', v.vehicleModel || x.vehicleModel], ['Variant', v.modelVariant || x.modelVariant],
       ['Year', v.modelYear || x.modelYear], ['Plate number', x.plateNumber], ['Chassis number', x.chassisNumber], ['Motor number', x.motorNumber],
-      ['Seating capacity', v.seatingCapacity || x.seatingCapacity], ['Colour', v.vehicleColor || x.vehicleColor], ['Mortgagee', x.mortgage]]) };
+      ['Seating capacity', v.seatingCapacity || x.seatingCapacity], ['Colour', v.vehicleColor || x.vehicleColor], ['Mortgagee', x.mortgage], ['Mortgagee clause', x.mortgageeClause]]) };
   }
   // generic risk details (broker / placement slips for any line) entered as label / value pairs
   const generic = Object.entries(x.riskDetails || {}).filter(([, v]) => present(v) && typeof v !== 'object').map(([k, v]) => [humanize(k), v]);

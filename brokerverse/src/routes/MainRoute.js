@@ -389,6 +389,16 @@ import EndorsementSummary from "../agentModule/endorsementModule/personalDetails
 import BatchRenewalModal from "../agentModule/policyModule/BatchRenewal";
 import PaymentConfirmationEmployeeBenefit from "../agentModule/endorsementModule/paymentConfirmationEmployee";
 import ProductRecommendation from "../agentModule/quoteModule/productRecommendation";
+// Distribution, motor programmes and products
+import LeadAssignment from "../module/Distribution/LeadAssignment";
+import DistributionChannels from "../module/Distribution/DistributionChannels";
+import DealerProgrammes from "../module/Distribution/DealerProgrammes";
+import FleetSchedules from "../module/Distribution/FleetSchedules";
+import OpenCovers from "../module/Distribution/OpenCovers";
+import FacultativePlacements from "../module/Distribution/FacultativePlacements";
+import ComparisonReports from "../module/Distribution/ComparisonReports";
+import Campaigns from "../module/Distribution/Campaigns";
+import ReportBuilder from "../module/Distribution/ReportBuilder";
 
 const Maincomponent = () => {
   return (
@@ -1875,6 +1885,20 @@ const Maincomponent = () => {
             path="/agent/collections/aging-report"
             element={<AgingReport />}
           />
+
+          {/* Distribution, motor programmes and products */}
+          <Route path="/sales/lead-assignment" element={<LeadAssignment />} />
+          <Route path="/sales/dealer-programmes" element={<DealerProgrammes />} />
+          <Route path="/sales/comparison-reports" element={<ComparisonReports />} />
+          <Route path="/sales/campaigns" element={<Campaigns />} />
+          <Route path="/master/insurance/channels" element={<DistributionChannels />} />
+          <Route path="/operations/fleet-schedules" element={<FleetSchedules />} />
+          <Route path="/operations/fleet-schedules/:id" element={<FleetSchedules />} />
+          <Route path="/operations/open-covers" element={<OpenCovers />} />
+          <Route path="/operations/open-covers/:id" element={<OpenCovers />} />
+          <Route path="/reinsurance/facultative" element={<FacultativePlacements />} />
+          <Route path="/reinsurance/facultative/:id" element={<FacultativePlacements />} />
+          <Route path="/reports/builder" element={<ReportBuilder />} />
 
           {/* Any other address inside the application */}
           <Route path="*" element={<NotFound />} />
