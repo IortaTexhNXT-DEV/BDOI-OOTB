@@ -87,7 +87,7 @@ export const MASTER_CONFIG_TABLES = [
   'app_settings', 'document_numbering', 'users', 'user_roles', 'roles', 'role_permissions', 'permissions',
   'authority_limits', 'authority_transaction_types', 'sod_rules', 'user_delegations', 'remittance_delegations',
   // generic and dedicated masters
-  'master_types', 'master_records', 'branches', 'signatories', 'banks', 'insurance_companies', 'reinsurers', 'commission_referrers',
+  'master_types', 'master_records', 'branches', 'signatories', 'e_signatures', 'document_signature_slots', 'banks', 'insurance_companies', 'reinsurers', 'commission_referrers',
   'countries', 'states', 'cities', 'districts', 'postal_codes', 'currencies',
   'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'write_off_reasons',
   // products and pricing: product configurator, covers, commission rate matrix, taxes and charges, packages
@@ -125,8 +125,8 @@ export const TRANSACTION_FILE_FOLDERS = [
   'claim', 'claims', 'payment-proofs', 'direct-bill-payments', 'print', 'generated', 'reports', 'bordereaux',
   'incentive-reports', 'reinsurance-reports', 'remittance-statements', 'remittance-bulk',
 ];
-/** Configuration folders, never touched: logos and favicons (System Settings, Company master), product documents. */
-export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-documents'];
+/** Configuration folders, never touched: logos and favicons (System Settings, Company master), product documents, e-signatures. */
+export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-documents', 'e-signatures'];
 
 /**
  * Tables the sample-data purge (scripts/purge-sample-data.js) also empties: technical records, and configuration the

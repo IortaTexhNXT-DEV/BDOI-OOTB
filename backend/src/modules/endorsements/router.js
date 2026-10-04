@@ -10,6 +10,8 @@ import { uploadFile } from '../documents/tabular.js';
 import { storeFile } from '../uploads/storage.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
+import { buildPdf, sendPdf } from '../documents/pdf.js';
+import { endorsementDoc } from '../documents/templates.js';
 
 const { router, define } = moduleRouter('Endorsements', '/endorsements');
 const SCREEN = 'Operations > Policy > Endorsement';
@@ -95,6 +97,15 @@ define({
     await audit(req, { entity: 'endorsement', entityId: after.id, action: 'complete', before: out(before), after: out(after) });
     await audit(req, { entity: 'policy', entityId: after.policy_id, action: 'endorse', after: { endorsementNumber: after.endorsement_number, premiumDelta: Number(after.premium_delta), status: out(after).status } });
     sendEntity(res, out(after), { message: 'Endorsement completed' });
+  },
+});
+define({
+  method: 'GET', path: '/:id/pdf', summary: 'Printable endorsement (PDF, broker letterhead and branding; authorised signature once issued)', screen: `${SCREEN} > Detailed view > Print`,
+  middleware: [...canRead, ownRecord('endorsement')], query: { download: 1 }, response: '(application/pdf)',
+  handler: async (req, res) => {
+    const row = await svc.getEndorsementRow(req.params.id);
+    const e = svc.toEndorsement(row);
+    sendPdf(res, buildPdf(await endorsementDoc(e, row)), `endorsement-${e.endorsementNumber || e.id}.pdf`, req.query.download ? 'attachment' : 'inline');
   },
 });
 define({

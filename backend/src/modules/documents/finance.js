@@ -4,11 +4,12 @@
  * particulars, account distribution, signature blocks).
  */
 import { getSetting } from '../../lib/settings.js';
+import { one as db1 } from '../../db/pool.js';
 import { round2 } from '../../lib/money.js';
 import { amountInWords, humanize } from '../../lib/pdf/format.js';
 import { buildPdfBatch } from '../../lib/pdf/index.js';
 import { today } from '../../lib/dates.js';
-import { header, formatters, kv, receiptDoc, paymentModeLabel } from './templates.js';
+import { header, formatters, kv, receiptDoc, paymentModeLabel, signatures } from './templates.js';
 import { num } from './common.js';
 
 const DEFAULT_INSTRUCTIONS = 'Please settle the total amount due on or before the due date. Make cheques payable to {{companyName}} and quote the bill number as the payment reference. For bank transfers or e-wallet payments, send the proof of payment to your account officer.';
@@ -35,7 +36,8 @@ export async function billingStatementDoc(kind, { policy: p, bills, extra = [], 
   const total = (i) => round2(rows.reduce((s, r) => s + r[i], 0));
   const due = total(5);
   const more = kv(typeof extra === 'function' ? extra(f) : extra);
-  return { ...h, dateLine: `Statement date ${f.date(await today())}`,
+  const sig = await signatures(h, 'billing-statement', { status: 'issued', date: await today() }, { blocks: [{ slot: 'authorized', label: `For ${String(h.letterhead?.name || 'the broker').replace(/\.$/, '')}` }], perRow: 2 });
+  return { ...h, watermark: sig.watermark, dateLine: `Statement date ${f.date(await today())}`,
     meta: kv([['Bill to', billTo], ['Customer code', p.client_code], ['Policy number', p.policy_number], ['Insurer', p.insurer_name], ['Product', p.product_name || p.product_type],
       ['Period of cover', `${f.date(p.inception_date) || '-'} to ${f.date(p.expiry_date) || '-'}`], ['Currency', currency]]),
     sections: [
@@ -45,6 +47,7 @@ export async function billingStatementDoc(kind, { policy: p, bills, extra = [], 
         : { heading: 'Bills', text: `No bills have been raised yet. ${unbilled?.label || 'Gross premium'}: ${f.ccy(unbilled ? unbilled.amount : p.premium_total, currency)}.` },
       { heading: 'Amount due', rows: [['Total amount due', f.ccy(rows.length ? due : (unbilled ? unbilled.amount : p.premium_total), currency), { bold: true }]], columns: 1 },
       { heading: 'Payment instructions', text: await paymentInstructions(h.letterhead?.name) },
+      sig.section,
     ] };
 }
 
@@ -80,7 +83,10 @@ export async function voucherDoc(d, { lines = [], journal = [], names = {} }, h0
   const dist = journal.length ? { columns: ['Account code', 'Account name', 'Memo', { label: 'Debit', type: 'money' }, { label: 'Credit', type: 'money' }],
     rows: [...journal.map((j) => [j.account_code, j.account_name, j.memo || '', round2(num(j.debit)), round2(num(j.credit))]),
       ['TOTAL', '', '', round2(journal.reduce((s, j) => s + num(j.debit), 0)), round2(journal.reduce((s, j) => s + num(j.credit), 0))]], totalRow: true } : null;
-  return { ...h,
+  const sig = await signatures(h, 'payment-voucher', { status: d.status, date: d.voucher_date, issuedBy: d.created_by, approvedBy: d.approved_by,
+    names: { 'issuing-user': names.prepared, 'approving-user': names.approved } },
+  { blocks: [{ slot: 'prepared-by', label: 'Prepared by', name: names.prepared }, { label: 'Checked by' }, { slot: 'approved-by', label: 'Approved by', name: names.approved }, { label: 'Received by' }] });
+  return { ...h, watermark: sig.watermark,
     meta: kv([['Voucher date', f.date(d.voucher_date)], ['Status', humanize(d.status)], ['Payee', d.payee_name || d.insurer_name || d.referrer_name, { bold: true }], ['Payee type', d.payee_type],
       ['Amount', f.ccy(net, currency), { bold: true }], ['Payment mode', paymentModeLabel(d.payment_mode)], ['Reference', d.reference_no], ['Transaction no.', d.transaction_number],
       ['Policy no.', d.policy_number], ['Customer code', d.customer_code], ['Paid on', f.date(d.paid_at)]]),
@@ -90,7 +96,7 @@ export async function voucherDoc(d, { lines = [], journal = [], names = {} }, h0
       { heading: `Amount payable (${currency})`, table: { columns: ['Item', { label: 'Amount', type: 'money' }], widths: [375, 140], rows: breakdown, totalRow: true } },
       dist ? { heading: 'Account distribution', table: dist } : null,
       d.remarks ? { heading: 'Remarks', text: d.remarks } : null,
-      { signatures: [{ label: 'Prepared by', name: names.prepared }, { label: 'Checked by' }, { label: 'Approved by', name: names.approved }, { label: 'Received by' }] },
+      sig.section,
     ] };
 }
 
@@ -108,3 +114,28 @@ export async function vouchersPdf(db, rows) {
   }
   return buildPdfBatch(specs, { title: rows.length === 1 ? `Payment Voucher ${rows[0].voucher_number}` : 'Payment Vouchers' });
 }
+
+/**
+ * Journal voucher print (Accounts > Journal Voucher > Print): header, the entries (account, memo, debit, credit,
+ * totals) and the prepared / approved signatures. `jv` is journal-vouchers#jvDetail; `row` the journal_vouchers row.
+ */
+export async function journalVoucherDoc(jv, row = {}) {
+  const h = await header('Journal Voucher', jv.transactionNumber);
+  const f = formatters(h);
+  const userName = async (id) => (id ? (await db1('SELECT display_name, username FROM users WHERE id::text = $1', [String(id)]))?.display_name || id : null);
+  const lines = jv.entries || [];
+  const dr = round2(lines.reduce((t, l) => t + num(l.debit), 0));
+  const cr = round2(lines.reduce((t, l) => t + num(l.credit), 0));
+  const sig = await signatures(h, 'journal-voucher', { status: row.status || jv.status, date: jv.voucherDate || jv.date, issuedBy: row.created_by, approvedBy: row.approved_by,
+    names: { 'issuing-user': await userName(row.created_by), 'approving-user': await userName(row.approved_by) } },
+  { blocks: [{ slot: 'prepared-by', label: 'Prepared by' }, { label: 'Checked by' }, { slot: 'approved-by', label: 'Approved by' }] });
+  return { ...h, watermark: sig.watermark,
+    meta: kv([['Voucher date', f.date(jv.voucherDate || jv.date)], ['Status', humanize(jv.status)], ['Kind', humanize(jv.kind || jv.source || '')], ['Transaction code', jv.transactionCode],
+      ['Reversal of', jv.reversalOf], ['Correction of', jv.correctionOf], ['Description', jv.description]]),
+    sections: [
+      { heading: 'Entries', table: { columns: ['Account code', 'Account name', { label: 'Memo', wrap: true }, { label: 'Debit', type: 'money' }, { label: 'Credit', type: 'money' }],
+        rows: [...lines.map((l) => [l.accountCode, l.accountName || l.mainAccountDescription, l.remarks || '', round2(num(l.debit)), round2(num(l.credit))]), ['TOTAL', '', '', dr, cr]], totalRow: true } },
+      sig.section,
+    ] };
+}
+

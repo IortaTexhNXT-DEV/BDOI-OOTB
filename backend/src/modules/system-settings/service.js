@@ -91,6 +91,17 @@ export async function updateSystemSettings(body, userId) {
   }
   if (errors.length) throw badRequest('Validation failed', errors);
   for (const [k, v] of Object.entries(changes)) await setSetting(k, v, userId);
+  // a saved broker theme (Theme and Branding) owns the colours: the two colour fields of this screen update it
+  const theme = await getSetting('branding.theme', null);
+  const lower = (v) => String(v || '').toLowerCase();
+  const p = changes['branding.primary_color'] && lower(changes['branding.primary_color']) !== lower(theme?.colors?.primary) ? changes['branding.primary_color'] : null;
+  const sec = changes['branding.secondary_color'] && lower(changes['branding.secondary_color']) !== lower(theme?.colors?.secondary) ? changes['branding.secondary_color'] : null;
+  if (theme && Object.keys(theme).length && (p || sec)) {
+    const colors = { ...(theme.colors || {}) };
+    if (p) Object.assign(colors, { primary: p, buttonBg: p, link: p, focusRing: p });
+    if (sec) Object.assign(colors, { secondary: sec, buttonHoverBg: sec, primaryDark: sec });
+    await setSetting('branding.theme', { ...theme, preset: 'custom', colors }, userId);
+  }
   return changes;
 }
 

@@ -82,11 +82,18 @@ export async function buildAttachments(list) {
   return out;
 }
 
-/** The nodemailer message of an outbox row (attachments generated now). */
+/**
+ * The nodemailer message of an outbox row (attachments generated now). The body is wrapped in the broker's e-mail
+ * layout (Theme and Branding > E-mail: header band with the logo, footer line) at send time; the inline logo follows
+ * the document attachments.
+ */
 export async function buildMessage(m) {
   const attachments = await buildAttachments(m.attachments);
-  return { from: await getSetting('notification.from_address', 'BrokerVerse <connect@iortatechnxt.com>'), to: m.to_address, cc: m.cc || undefined, subject: m.subject, html: m.body_html,
-    ...(attachments.length ? { attachments } : {}) };
+  const { emailLayout } = await import('../modules/branding/service.js');
+  const branded = await emailLayout(m.body_html).catch(() => ({ html: m.body_html, attachments: [] }));
+  const all = [...attachments, ...branded.attachments];
+  return { from: await getSetting('notification.from_address', 'BrokerVerse <connect@iortatechnxt.com>'), to: m.to_address, cc: m.cc || undefined, subject: m.subject, html: branded.html,
+    ...(all.length ? { attachments: all } : {}) };
 }
 
 /** Send queued messages (the email-outbox job); `ids` limits the run to those messages (Retry on the outbox screen). */

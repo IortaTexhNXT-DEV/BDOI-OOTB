@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (877 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (897 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -9145,6 +9145,810 @@
               ],
               "cookie": [],
               "body": "(application/pdf)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Branding",
+      "item": [
+        {
+          "name": "Branding of this environment: theme (colours, layout, font, radius, logo sizes, sign-in page, documents, e-mail), logo, favicon, names. Public (the sign-in page uses it); ETag / If-None-Match answers 304 when unchanged",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding"
+              ]
+            },
+            "description": "Branding of this environment: theme (colours, layout, font, radius, logo sizes, sign-in page, documents, e-mail), logo, favicon, names. Public (the sign-in page uses it); ETag / If-None-Match answers 304 when unchanged\n\nFront-end touchpoint: Sign-in; App shell (applied on every navigation)\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding"
+                  ]
+                },
+                "description": "Branding of this environment: theme (colours, layout, font, radius, logo sizes, sign-in page, documents, e-mail), logo, favicon, names. Public (the sign-in page uses it); ETag / If-None-Match answers 304 when unchanged\n\nFront-end touchpoint: Sign-in; App shell (applied on every navigation)\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"systemName\": \"BrokerVerse\",\n    \"companyName\": \"iorta TechNXT Insurance Brokers, Inc.\",\n    \"logoUrl\": \"/bdoi/iorta-technxt.png\",\n    \"faviconUrl\": \"/favicon.ico\",\n    \"fontUrl\": null,\n    \"fontStack\": \"\\\"Nunito\\\", Arial, sans-serif\",\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    },\n    \"version\": \"k3j...\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "A branding image (logo, favicon, login-panel) uploaded for this environment; public, versioned by ?v=",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding/assets/:name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "assets",
+                ":name"
+              ],
+              "variable": [
+                {
+                  "key": "name",
+                  "value": "",
+                  "description": "name (path parameter)"
+                }
+              ]
+            },
+            "description": "A branding image (logo, favicon, login-panel) uploaded for this environment; public, versioned by ?v=\n\nFront-end touchpoint: Sign-in; App shell\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/assets/:name",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "assets",
+                    ":name"
+                  ],
+                  "variable": [
+                    {
+                      "key": "name",
+                      "value": "",
+                      "description": "name (path parameter)"
+                    }
+                  ]
+                },
+                "description": "A branding image (logo, favicon, login-panel) uploaded for this environment; public, versioned by ?v=\n\nFront-end touchpoint: Sign-in; App shell\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(image)"
+            }
+          ]
+        },
+        {
+          "name": "Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding/brand-pack?format=zip",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "brand-pack"
+              ],
+              "query": [
+                {
+                  "key": "format",
+                  "value": "zip"
+                }
+              ]
+            },
+            "description": "Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Export brand pack\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/brand-pack?format=zip",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "brand-pack"
+                  ],
+                  "query": [
+                    {
+                      "key": "format",
+                      "value": "zip"
+                    }
+                  ]
+                },
+                "description": "Export the brand pack of this environment (theme incl. layout, sign-in page, documents and e-mail; application name; logo, favicon, sign-in picture, print logo): format=zip (default) or json\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Export brand pack\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/zip | application/json)"
+            }
+          ]
+        },
+        {
+          "name": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branding/brand-pack?dryRun=true&applyDocumentLogo=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "brand-pack"
+              ],
+              "query": [
+                {
+                  "key": "dryRun",
+                  "value": "true"
+                },
+                {
+                  "key": "applyDocumentLogo",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Import brand pack\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/brand-pack?dryRun=true&applyDocumentLogo=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "brand-pack"
+                  ],
+                  "query": [
+                    {
+                      "key": "dryRun",
+                      "value": "true"
+                    },
+                    {
+                      "key": "applyDocumentLogo",
+                      "value": "true"
+                    }
+                  ]
+                },
+                "description": "Import a brand pack (multipart \"file\": .zip or .json, or a JSON body). dryRun=true only validates; applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Import brand pack\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(binary .zip or .json)\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"name\": \"Toyota Insurance Services\",\n    \"applied\": [\n      \"theme\",\n      \"logo\",\n      \"documentLogo\"\n    ],\n    \"warnings\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sample document (PDF) printed with a theme that is not saved yet (body: { theme })",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branding/preview-document",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "preview-document"
+              ]
+            },
+            "description": "Sample document (PDF) printed with a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Sample document\n\nAccess: read:settings, write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/preview-document",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "preview-document"
+                  ]
+                },
+                "description": "Sample document (PDF) printed with a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Sample document\n\nAccess: read:settings, write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
+            }
+          ]
+        },
+        {
+          "name": "Sample e-mail (HTML) in the e-mail layout of a theme that is not saved yet (body: { theme })",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branding/preview-email",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "preview-email"
+              ]
+            },
+            "description": "Sample e-mail (HTML) in the e-mail layout of a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > E-mail\n\nAccess: read:settings, write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/preview-email",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "preview-email"
+                  ]
+                },
+                "description": "Sample e-mail (HTML) in the e-mail layout of a theme that is not saved yet (body: { theme })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > E-mail\n\nAccess: read:settings, write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"html\": \"<div data-bv-layout=\\\"1\\\">...</div>\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Theme editor: the theme in force, presets, fonts, sign-in picture library, upload rules, contrast checks, application name and images",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding/theme",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "theme"
+              ]
+            },
+            "description": "Theme editor: the theme in force, presets, fonts, sign-in picture library, upload rules, contrast checks, application name and images\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/theme",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "theme"
+                  ]
+                },
+                "description": "Theme editor: the theme in force, presets, fonts, sign-in picture library, upload rules, contrast checks, application name and images\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    },\n    \"saved\": true,\n    \"presets\": [\n      {\n        \"key\": \"classic-blue\",\n        \"name\": \"Classic Blue\",\n        \"theme\": {\n          \"preset\": \"iorta-technxt\",\n          \"name\": \"iorta TechNXT (default)\",\n          \"colors\": {\n            \"primary\": \"#0072d8\",\n            \"headerBg\": \"#ffffff\",\n            \"headerText\": \"#2e2e2e\",\n            \"tableHeaderBg\": \"#004ea8\",\n            \"tableHeaderText\": \"#ffffff\"\n          },\n          \"layout\": {\n            \"headerStyle\": \"light\",\n            \"sidebarStyle\": \"light\",\n            \"density\": \"comfortable\",\n            \"tableHeaderStyle\": \"solid\"\n          },\n          \"font\": \"nunito\",\n          \"radius\": {\n            \"sm\": 8,\n            \"md\": 12,\n            \"lg\": 16,\n            \"button\": 8\n          },\n          \"logo\": {\n            \"appHeight\": 36,\n            \"loginHeight\": 56,\n            \"documentHeight\": 46\n          },\n          \"login\": {\n            \"panel\": \"library\",\n            \"library\": \"philippines\",\n            \"panelImageUrl\": \"\",\n            \"focalX\": 50,\n            \"focalY\": 50,\n            \"overlay\": 0,\n            \"showOnMobile\": false,\n            \"headline\": \"\",\n            \"tagline\": \"\"\n          },\n          \"documents\": {\n            \"accentColor\": \"\",\n            \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n          },\n          \"email\": {\n            \"enabled\": true,\n            \"headerBg\": \"#ffffff\",\n            \"headerText\": \"#2e2e2e\",\n            \"accentColor\": \"#0072d8\",\n            \"showLogo\": true,\n            \"footerText\": \"{{companyName}} | {{address}}\"\n          }\n        }\n      }\n    ],\n    \"fonts\": [\n      {\n        \"key\": \"nunito\",\n        \"label\": \"Nunito (bundled, default)\"\n      }\n    ],\n    \"loginLibrary\": [\n      {\n        \"key\": \"motor\",\n        \"label\": \"Motor: road and city\",\n        \"file\": \"/brand/library/motor.svg\"\n      }\n    ],\n    \"checks\": [],\n    \"warnings\": [],\n    \"systemName\": \"BrokerVerse\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branding/theme",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "theme"
+              ]
+            },
+            "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/theme",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "theme"
+                  ]
+                },
+                "description": "Save the theme ({ theme, systemName? }); every signed-in user gets it on the next navigation, documents, reports and e-mails at once. Refused when text on the buttons, header or table header fails WCAG AA\n\nFront-end touchpoint: Master > System Settings > Theme and Branding\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  },\n  \"systemName\": \"BrokerVerse\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    },\n    \"warnings\": [],\n    \"checks\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Check a theme without saving it: resolved theme, errors (refused: AA failures on buttons, header, table header) and warnings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branding/theme/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "theme",
+                "validate"
+              ]
+            },
+            "description": "Check a theme without saving it: resolved theme, errors (refused: AA failures on buttons, header, table header) and warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Live preview\n\nAccess: read:settings, write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/theme/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "theme",
+                    "validate"
+                  ]
+                },
+                "description": "Check a theme without saving it: resolved theme, errors (refused: AA failures on buttons, header, table header) and warnings\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Live preview\n\nAccess: read:settings, write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"theme\": {\n    \"preset\": \"iorta-technxt\",\n    \"name\": \"iorta TechNXT (default)\",\n    \"colors\": {\n      \"primary\": \"#0072d8\",\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"tableHeaderBg\": \"#004ea8\",\n      \"tableHeaderText\": \"#ffffff\"\n    },\n    \"layout\": {\n      \"headerStyle\": \"light\",\n      \"sidebarStyle\": \"light\",\n      \"density\": \"comfortable\",\n      \"tableHeaderStyle\": \"solid\"\n    },\n    \"font\": \"nunito\",\n    \"radius\": {\n      \"sm\": 8,\n      \"md\": 12,\n      \"lg\": 16,\n      \"button\": 8\n    },\n    \"logo\": {\n      \"appHeight\": 36,\n      \"loginHeight\": 56,\n      \"documentHeight\": 46\n    },\n    \"login\": {\n      \"panel\": \"library\",\n      \"library\": \"philippines\",\n      \"panelImageUrl\": \"\",\n      \"focalX\": 50,\n      \"focalY\": 50,\n      \"overlay\": 0,\n      \"showOnMobile\": false,\n      \"headline\": \"\",\n      \"tagline\": \"\"\n    },\n    \"documents\": {\n      \"accentColor\": \"\",\n      \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n    },\n    \"email\": {\n      \"enabled\": true,\n      \"headerBg\": \"#ffffff\",\n      \"headerText\": \"#2e2e2e\",\n      \"accentColor\": \"#0072d8\",\n      \"showLogo\": true,\n      \"footerText\": \"{{companyName}} | {{address}}\"\n    }\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    },\n    \"errors\": [],\n    \"warnings\": [],\n    \"checks\": [\n      {\n        \"key\": \"headerText\",\n        \"ratio\": 12.6,\n        \"required\": 4.5,\n        \"ok\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/branding/upload/:asset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "upload",
+                ":asset"
+              ],
+              "variable": [
+                {
+                  "key": "asset",
+                  "value": "",
+                  "description": "asset (path parameter)"
+                }
+              ]
+            },
+            "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Upload\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"(binary)\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/upload/:asset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "upload",
+                    ":asset"
+                  ],
+                  "variable": [
+                    {
+                      "key": "asset",
+                      "value": "",
+                      "description": "asset (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Upload a branding image (multipart \"file\"): logo (PNG/JPG/WebP/SVG, 2 MB), favicon (PNG/ICO/SVG, 512 KB) or login-panel (sign-in picture: PNG/JPG/WebP/SVG, 5 MB); SVG must be a plain drawing\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Upload\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"(binary)\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/branding/upload/:asset",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "branding",
+                "upload",
+                ":asset"
+              ],
+              "variable": [
+                {
+                  "key": "asset",
+                  "value": "",
+                  "description": "asset (path parameter)"
+                }
+              ]
+            },
+            "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Reset image\n\nAccess: write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/branding/upload/:asset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "branding",
+                    "upload",
+                    ":asset"
+                  ],
+                  "variable": [
+                    {
+                      "key": "asset",
+                      "value": "",
+                      "description": "asset (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Go back to the default image (logo: the default logo; favicon: the default icon; login-panel: the picture library)\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Reset image\n\nAccess: write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"theme\": {\n      \"preset\": \"iorta-technxt\",\n      \"name\": \"iorta TechNXT (default)\",\n      \"colors\": {\n        \"primary\": \"#0072d8\",\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"tableHeaderBg\": \"#004ea8\",\n        \"tableHeaderText\": \"#ffffff\"\n      },\n      \"layout\": {\n        \"headerStyle\": \"light\",\n        \"sidebarStyle\": \"light\",\n        \"density\": \"comfortable\",\n        \"tableHeaderStyle\": \"solid\"\n      },\n      \"font\": \"nunito\",\n      \"radius\": {\n        \"sm\": 8,\n        \"md\": 12,\n        \"lg\": 16,\n        \"button\": 8\n      },\n      \"logo\": {\n        \"appHeight\": 36,\n        \"loginHeight\": 56,\n        \"documentHeight\": 46\n      },\n      \"login\": {\n        \"panel\": \"library\",\n        \"library\": \"philippines\",\n        \"panelImageUrl\": \"\",\n        \"focalX\": 50,\n        \"focalY\": 50,\n        \"overlay\": 0,\n        \"showOnMobile\": false,\n        \"headline\": \"\",\n        \"tagline\": \"\"\n      },\n      \"documents\": {\n        \"accentColor\": \"\",\n        \"footerText\": \"Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}\"\n      },\n      \"email\": {\n        \"enabled\": true,\n        \"headerBg\": \"#ffffff\",\n        \"headerText\": \"#2e2e2e\",\n        \"accentColor\": \"#0072d8\",\n        \"showLogo\": true,\n        \"footerText\": \"{{companyName}} | {{address}}\"\n      }\n    }\n  }\n}"
             }
           ]
         }
@@ -20536,6 +21340,506 @@
       ]
     },
     {
+      "name": "E-signatures",
+      "item": [
+        {
+          "name": "Signature versions of a signatory (read:masters / write:masters) or of the signed-in user (ownerType=user, own only unless administrator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/e-signatures?ownerType=signatory&ownerId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "e-signatures"
+              ],
+              "query": [
+                {
+                  "key": "ownerType",
+                  "value": "signatory"
+                },
+                {
+                  "key": "ownerId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Signature versions of a signatory (read:masters / write:masters) or of the signed-in user (ownerType=user, own only unless administrator)\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/e-signatures?ownerType=signatory&ownerId=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "e-signatures"
+                  ],
+                  "query": [
+                    {
+                      "key": "ownerType",
+                      "value": "signatory"
+                    },
+                    {
+                      "key": "ownerId",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Signature versions of a signatory (read:masters / write:masters) or of the signed-in user (ownerType=user, own only unless administrator)\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"ownerType\": \"signatory\",\n      \"ownerId\": \"1\",\n      \"version\": 2,\n      \"method\": \"drawn\",\n      \"effectiveFrom\": \"2026-10-01\",\n      \"effectiveTo\": null,\n      \"status\": \"active\",\n      \"consentText\": \"I confirm that Maria Regina Cruz has authorised ...\",\n      \"capturedBy\": \"BrokerVerse\",\n      \"capturedAt\": \"2026-10-01T02:00:00Z\",\n      \"imageUrl\": \"/api/e-signatures/3/image\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Capture a signature (new version): JSON { ownerType, ownerId, method: drawn, imageData: PNG data URL, effectiveFrom, consent: true } or multipart file + the same fields. A user signature only by that user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/e-signatures",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "e-signatures"
+              ]
+            },
+            "description": "Capture a signature (new version): JSON { ownerType, ownerId, method: drawn, imageData: PNG data URL, effectiveFrom, consent: true } or multipart file + the same fields. A user signature only by that user\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ownerType\": \"signatory\",\n  \"ownerId\": \"1\",\n  \"method\": \"drawn\",\n  \"imageData\": \"data:image/png;base64,iVBORw0...\",\n  \"effectiveFrom\": \"2026-10-01\",\n  \"consent\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/e-signatures",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "e-signatures"
+                  ]
+                },
+                "description": "Capture a signature (new version): JSON { ownerType, ownerId, method: drawn, imageData: PNG data URL, effectiveFrom, consent: true } or multipart file + the same fields. A user signature only by that user\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ownerType\": \"signatory\",\n  \"ownerId\": \"1\",\n  \"method\": \"drawn\",\n  \"imageData\": \"data:image/png;base64,iVBORw0...\",\n  \"effectiveFrom\": \"2026-10-01\",\n  \"consent\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"ownerType\": \"signatory\",\n    \"ownerId\": \"1\",\n    \"version\": 2,\n    \"method\": \"drawn\",\n    \"effectiveFrom\": \"2026-10-01\",\n    \"effectiveTo\": null,\n    \"status\": \"active\",\n    \"consentText\": \"I confirm that Maria Regina Cruz has authorised ...\",\n    \"capturedBy\": \"BrokerVerse\",\n    \"capturedAt\": \"2026-10-01T02:00:00Z\",\n    \"imageUrl\": \"/api/e-signatures/3/image\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The signature image (bearer only, no signed links; signatories: write:masters, users: own or administrator); not cached",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/e-signatures/:id/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "e-signatures",
+                ":id",
+                "image"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The signature image (bearer only, no signed links; signatories: write:masters, users: own or administrator); not cached\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/e-signatures/:id/image",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "e-signatures",
+                    ":id",
+                    "image"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The signature image (bearer only, no signed links; signatories: write:masters, users: own or administrator); not cached\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(image/png | image/jpeg)"
+            }
+          ]
+        },
+        {
+          "name": "Revoke a signature version (reason required): it no longer prints on any document",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/e-signatures/:id/revoke",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "e-signatures",
+                ":id",
+                "revoke"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Revoke a signature version (reason required): it no longer prints on any document\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Signatory left the company\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/e-signatures/:id/revoke",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "e-signatures",
+                    ":id",
+                    "revoke"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Revoke a signature version (reason required): it no longer prints on any document\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Signatory left the company\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"ownerType\": \"signatory\",\n    \"ownerId\": \"1\",\n    \"version\": 2,\n    \"method\": \"drawn\",\n    \"effectiveFrom\": \"2026-10-01\",\n    \"effectiveTo\": null,\n    \"status\": \"revoked\",\n    \"consentText\": \"I confirm that Maria Regina Cruz has authorised ...\",\n    \"capturedBy\": \"BrokerVerse\",\n    \"capturedAt\": \"2026-10-01T02:00:00Z\",\n    \"imageUrl\": \"/api/e-signatures/3/image\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Consent statement shown before a signature is captured (ownerType signatory | user, ownerId)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/e-signatures/consent?ownerType=signatory&ownerId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "e-signatures",
+                "consent"
+              ],
+              "query": [
+                {
+                  "key": "ownerType",
+                  "value": "signatory"
+                },
+                {
+                  "key": "ownerId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Consent statement shown before a signature is captured (ownerType signatory | user, ownerId)\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/e-signatures/consent?ownerType=signatory&ownerId=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "e-signatures",
+                    "consent"
+                  ],
+                  "query": [
+                    {
+                      "key": "ownerType",
+                      "value": "signatory"
+                    },
+                    {
+                      "key": "ownerId",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Consent statement shown before a signature is captured (ownerType signatory | user, ownerId)\n\nFront-end touchpoint: Master > Signatories > E-signature; My Profile > E-signature\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"text\": \"I confirm that ...\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Document signature mapping: document types, slot sources and conditions, and the slots",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/e-signatures/slots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "e-signatures",
+                "slots"
+              ]
+            },
+            "description": "Document signature mapping: document types, slot sources and conditions, and the slots\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: read:settings, write:settings"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/e-signatures/slots",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "e-signatures",
+                    "slots"
+                  ]
+                },
+                "description": "Document signature mapping: document types, slot sources and conditions, and the slots\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: read:settings, write:settings"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"documentTypes\": [\n      {\n        \"key\": \"policy-schedule\",\n        \"label\": \"Policy schedule\"\n      }\n    ],\n    \"sources\": [\n      {\n        \"key\": \"default-signatory\",\n        \"label\": \"The default signatory\"\n      }\n    ],\n    \"conditions\": [\n      {\n        \"key\": \"issued\",\n        \"label\": \"Once the document is issued\"\n      }\n    ],\n    \"slots\": [\n      {\n        \"id\": 1,\n        \"documentType\": \"policy-schedule\",\n        \"slot\": \"authorized\",\n        \"label\": \"For {{companyName}}\",\n        \"source\": \"default-signatory\",\n        \"condition\": \"issued\",\n        \"active\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/e-signatures/slots",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "e-signatures",
+                "slots"
+              ]
+            },
+            "description": "Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: write:settings",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"slots\": [\n    {\n      \"documentType\": \"payment-voucher\",\n      \"slot\": \"approved-by\",\n      \"label\": \"Approved by\",\n      \"source\": \"approving-user\",\n      \"condition\": \"approved\",\n      \"active\": true\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/e-signatures/slots",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "e-signatures",
+                    "slots"
+                  ]
+                },
+                "description": "Save the signature mapping of the document types sent ({ slots: [{ documentType, slot, label, source, signatoryId?, condition, active }] })\n\nFront-end touchpoint: Master > System Settings > Theme and Branding > Document signatures\n\nAccess: write:settings",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"slots\": [\n    {\n      \"documentType\": \"payment-voucher\",\n      \"slot\": \"approved-by\",\n      \"label\": \"Approved by\",\n      \"source\": \"approving-user\",\n      \"condition\": \"approved\",\n      \"active\": true\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": []\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Endorsements",
       "item": [
         {
@@ -20598,6 +21902,83 @@
               ],
               "cookie": [],
               "body": "{\n  \"endorsementId\": \"end_1\",\n  \"endorsementNumber\": \"END-2026-00001\",\n  \"policyId\": \"pol_1\",\n  \"policyNumber\": \"POL-2026-00001\",\n  \"status\": \"Draft\",\n  \"endorsementTypeIds\": [\n    1\n  ],\n  \"premiumDelta\": 0,\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Printable endorsement (PDF, broker letterhead and branding; authorised signature once issued)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/endorsements/:id/pdf?download=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "endorsements",
+                ":id",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Printable endorsement (PDF, broker letterhead and branding; authorised signature once issued)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Print\n\nAccess: read:endorsements"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/endorsements/:id/pdf?download=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "endorsements",
+                    ":id",
+                    "pdf"
+                  ],
+                  "query": [
+                    {
+                      "key": "download",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Printable endorsement (PDF, broker letterhead and branding; authorised signature once issued)\n\nFront-end touchpoint: Operations > Policy > Endorsement > Detailed view > Print\n\nAccess: read:endorsements"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
             }
           ]
         },
@@ -25858,6 +27239,83 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"jv_1\",\n    \"transactionCode\": \"JV01\",\n    \"transactionNumber\": \"JV-2026-00001\",\n    \"transactionDescription\": \"Accrual of audit fees\",\n    \"date\": \"2026-09-28\",\n    \"totalDebit\": 25000,\n    \"totalCredit\": 25000,\n    \"status\": \"posted\",\n    \"kind\": \"standard\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Printable journal voucher (PDF, broker letterhead and branding; prepared / approved signatures once posted)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/journal-vouchers/:id/pdf?download=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "journal-vouchers",
+                ":id",
+                "pdf"
+              ],
+              "query": [
+                {
+                  "key": "download",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Printable journal voucher (PDF, broker letterhead and branding; prepared / approved signatures once posted)\n\nFront-end touchpoint: Accounts > Journal Voucher > Details > Print\n\nAccess: read:journal-vouchers"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/journal-vouchers/:id/pdf?download=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "journal-vouchers",
+                    ":id",
+                    "pdf"
+                  ],
+                  "query": [
+                    {
+                      "key": "download",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Printable journal voucher (PDF, broker letterhead and branding; prepared / approved signatures once posted)\n\nFront-end touchpoint: Accounts > Journal Voucher > Details > Print\n\nAccess: read:journal-vouchers"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(application/pdf)"
             }
           ]
         },

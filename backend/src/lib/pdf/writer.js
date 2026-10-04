@@ -41,6 +41,17 @@ export class Page {
     this.ops.push(`q ${rgb(color).map(n).join(' ')} RG ${n(width)} w ${dash ? `[${dash.join(' ')}] 0 d ` : ''}${n(x1)} ${n(y1)} m ${n(x2)} ${n(y2)} l S Q`);
   }
 
+  /**
+   * Text rotated by `angle` degrees around (x, y), drawn at `opacity` (0..1) through the page's soft graphics state:
+   * the "UNSIGNED DRAFT" watermark over a page's content stays readable without hiding it.
+   */
+  rotatedText(x, y, s, { size = 48, bold = true, color = '#999999', angle = 45, opacity = 0.15 } = {}) {
+    const a = (angle * Math.PI) / 180;
+    const [cos, sin] = [Math.cos(a), Math.sin(a)];
+    this.ops.push(`q ${opacity < 1 ? '/GSw gs ' : ''}BT ${rgb(color).map(n).join(' ')} rg /${bold ? 'F2' : 'F1'} ${n(size)} Tf ${n(cos)} ${n(sin)} ${n(-sin)} ${n(cos)} ${n(x)} ${n(y)} Tm (${pdfString(s)}) Tj ET Q`);
+    this.softText = opacity;
+  }
+
   /** Draw a registered image (see PdfWriter#addImage) with its lower-left corner at (x, y). */
   image(img, x, y, w, h) {
     this.images.add(img);
@@ -85,7 +96,8 @@ export class PdfWriter {
     for (const p of this.pages) {
       const content = add(stream('', Buffer.from(p.ops.join('\n'), 'latin1')));
       const xobj = [...p.images].map((h) => `/${h.name} ${h.id} 0 R`).join(' ');
-      kids.push(add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${n(p.width)} ${n(p.height)}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >>${xobj ? ` /XObject << ${xobj} >>` : ''} /ProcSet [/PDF /Text /ImageB /ImageC] >> /Contents ${content} 0 R >>`));
+      const gs = p.softText ? ` /ExtGState << /GSw << /Type /ExtGState /ca ${n(p.softText)} /CA ${n(p.softText)} >> >>` : '';
+      kids.push(add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${n(p.width)} ${n(p.height)}] /Resources << /Font << /F1 ${f1} 0 R /F2 ${f2} 0 R >>${xobj ? ` /XObject << ${xobj} >>` : ''}${gs} /ProcSet [/PDF /Text /ImageB /ImageC] >> /Contents ${content} 0 R >>`));
     }
     const d = new Date();
     const pad = (v) => String(v).padStart(2, '0');

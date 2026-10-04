@@ -37,8 +37,11 @@ describe('e-mail attachments in the outbox', () => {
     const row = await outbox(id);
     expect(row.attachments).toEqual([{ fileName: 'or.pdf', contentType: 'application/pdf', kind: 'document', document: 'official-receipt', params: { receiptId: receipt.receiptId } }]);
     const msg = await buildMessage(row);
-    expect(msg.attachments).toHaveLength(1);
+    // the document, then the broker logo of the e-mail layout (inline, cid:brand-logo)
+    expect(msg.attachments.filter((x) => !x.cid)).toHaveLength(1);
     expect(msg.attachments[0]).toMatchObject({ filename: 'or.pdf', contentType: 'application/pdf' });
+    expect(msg.html).toContain('data-bv-layout');
+    if (msg.html.includes('cid:brand-logo')) expect(msg.attachments.some((x) => x.cid === 'brand-logo')).toBe(true);
     expect(isPdf(msg.attachments[0].content)).toBe(true);
 
     const list = await ctx.api('get', '/email/outbox?search=someone@example.ph');

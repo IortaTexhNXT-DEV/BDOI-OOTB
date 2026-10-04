@@ -20,6 +20,7 @@ import { round2 } from '../../lib/money.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { renderPdf } from '../../lib/pdf/index.js';
+import { signatureSection } from '../e-signatures/service.js';
 import { issuePolicy } from '../policies/service.js';
 import { clientFromLead } from '../clients/service.js';
 import { findPolicy, createReceivable } from '../receipts/receivables.js';
@@ -327,8 +328,9 @@ function chargesTable(x) {
 /** Client copy of a package quotation (no commission). */
 export async function packageQuotePdf(id, { scope = null } = {}) {
   const q = await getPackageQuote(id, { scope });
+  const sig = await signatureSection('quotation', { status: q.status, date: q.createdAt || q.inceptionDate }, { blocks: [{ slot: 'authorized', label: 'For {{companyName}}' }], perRow: 2 });
   return renderPdf({
-    title: 'Package Quotation', number: q.quoteNumber,
+    title: 'Package Quotation', number: q.quoteNumber, watermark: sig.watermark || undefined,
     meta: [['Package', q.bundleName], ['Insured', q.insuredName || '-'], ['Location', q.lgu ? `${q.lgu.name}` : (q.location || '-')], ['Inception', q.inceptionDate || '-'],
       ['Valid until', q.validUntil || '-'], ['Status', q.status.toUpperCase()]],
     sections: [
@@ -336,6 +338,7 @@ export async function packageQuotePdf(id, { scope = null } = {}) {
       { heading: 'Premium and charges', table: chargesTable({ ...q, otherCharges: q.otherCharges }) },
       ...q.sections.filter((s) => s.deductible || (s.benefits || []).length).map((s) => ({ heading: `${s.name}: cover`, text: [s.deductible ? `Deductible: ${s.deductible}` : null, ...(s.benefits || []).map((x) => `- ${x}`)].filter(Boolean).join('\n') })),
       { note: String(await getSetting('packages.comparison_disclaimer', DISCLAIMER)) },
+      sig.section,
     ],
   });
 }
@@ -348,8 +351,9 @@ export async function packageScheduleSpec(policyId, { scope = null } = {}) {
     vat: p.sections.reduce((a, s) => a + s.vat, 0), premiumTax: p.sections.reduce((a, s) => a + s.premiumTax, 0), dst: p.sections.reduce((a, s) => a + s.dst, 0),
     fst: p.sections.reduce((a, s) => a + s.fst, 0), lgt: p.sections.reduce((a, s) => a + s.lgt, 0), otherCharges: p.sections.reduce((a, s) => a + s.otherCharges, 0), totalAmount: p.grossPremium };
   if (q?.discountAmount) totals.basePremium = round2(p.netPremium + q.discountAmount);
+  const sig = await signatureSection('policy-schedule', { status: p.status, date: p.issuedDate || p.inceptionDate }, { blocks: [{ slot: 'authorized', label: 'For {{companyName}}' }], perRow: 2 });
   return {
-    title: 'Package Policy Schedule', number: p.policyNumber,
+    title: 'Package Policy Schedule', number: p.policyNumber, watermark: sig.watermark || undefined,
     meta: [['Package', p.bundleName], ['Insured', p.insuredName || '-'], ['Period of insurance', `${p.inceptionDate} to ${p.expiryDate}`], ['Issued', p.issuedDate || '-'],
       ['Bill number', p.billNumber || '-'], ['Status', String(p.status).toUpperCase()]],
     sections: [
@@ -358,6 +362,7 @@ export async function packageScheduleSpec(policyId, { scope = null } = {}) {
       ...p.sections.filter((s) => s.deductible || (s.benefits || []).length).map((s) => ({ heading: `${s.name} (${s.insurerName})`, text: [s.deductible ? `Deductible: ${s.deductible}` : null, ...(s.benefits || []).map((x) => `- ${x}`)].filter(Boolean).join('\n') })),
       ...(p.endorsements.length ? [{ heading: 'Endorsements', table: { columns: ['Number', 'Section', 'Effective', 'Sum insured', 'Additional premium'], rows: p.endorsements.map((e) => [e.endorsementNumber, String(e.sectionNo), e.effectiveDate, m(e.sumInsuredAfter), m(e.totalAmount)]) } }] : []),
       { note: 'Each section is insured by the insurer named against it, under that insurer\'s policy wording, conditions and exclusions.' },
+      sig.section,
     ],
   };
 }

@@ -58,6 +58,9 @@ export const FILE_ROUTES = [
   { module: 'endorsements', method: 'POST', path: '/upload-document', noTemplate: 'The endorsement document (single file)' },
   { module: 'system-settings', method: 'POST', path: '/logo-presets', noTemplate: 'Logo image (single file)' },
   { module: 'system-settings', method: 'POST', path: '/upload/:field', noTemplate: 'Logo or favicon image (single file)' },
+  { module: 'branding', method: 'POST', path: '/upload/:asset', noTemplate: 'Logo, favicon or sign-in picture (single image)' },
+  { module: 'branding', method: 'POST', path: '/brand-pack', noTemplate: 'Brand pack exported by Theme and Branding (.zip or .json)' },
+  { module: 'e-signatures', method: 'POST', path: '/', noTemplate: 'Signature image (single PNG / JPEG, or drawn on screen)' },
   { module: 'uploads', method: 'POST', path: '/upload', noTemplate: 'Attachments: policy documents, IDs, vehicle photos, payment proofs, quotation responses, insurer offers, product documents, company logo' },
   { module: 'uploads', method: 'POST', path: '/upload-multiple', noTemplate: 'Several attachments at once (claim documents)' },
 ];
