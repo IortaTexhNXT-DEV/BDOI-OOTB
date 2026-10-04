@@ -21,6 +21,7 @@ const storeUser = (user) => {
     localStorage.setItem("USER_ROLE", (user.roles || []).join(", ") || "user");
     localStorage.setItem("USER_ROLES", JSON.stringify(user.roles || []));
     localStorage.setItem("USER_PERMISSIONS", JSON.stringify(user.permissions || []));
+    if (user.displayName) localStorage.setItem("USER_NAME", user.displayName);
   } catch {
     /* storage unavailable */
   }

@@ -4462,25 +4462,6 @@
     "zipCode": "รหัสไปรษณีย์",
     "update": "อัปเดต"
   },
-  "agentProfile": {
-    "home": "หน้าแรก",
-    "profile": "โปรไฟล์",
-    "agentId": "รหัสตัวแทน",
-    "editProfile": "แก้ไขโปรไฟล์",
-    "firstName": "ชื่อ*",
-    "lastName": "นามสกุล",
-    "preferredName": "ชื่อที่ต้องการใช้*",
-    "dateOfBirth": "วันเกิด",
-    "gender": "เพศ",
-    "emailId": "อีเมล",
-    "contactNumber": "เบอร์ติดต่อ",
-    "houseNoStreet": "บ้านเลขที่ / หน่วย / ถนน",
-    "barangaySubd": "ตำบล/แขวง / ซับดิวิชัน",
-    "country": "ประเทศ",
-    "province": "จังหวัด",
-    "city": "เมือง",
-    "zipCode": "รหัสไปรษณีย์"
-  },
   "expiredPolicies": {
     "title": "กรมธรรม์หมดอายุและใกล้หมดอายุ",
     "breadcrumb": "กรมธรรม์หมดอายุ",

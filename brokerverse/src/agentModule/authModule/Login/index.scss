@@ -1,304 +1,256 @@
-.agent__container__login {
-  position: relative;
-  justify-content: center;
-  align-items: center;
+@import "../../../theme/bdoi/tokens";
 
-  .login__lang_dropdown {
-    position: absolute;
-    top: 1.25rem;
-    right: 1.25rem;
-    z-index: 10;
+// Sign-in, two-step code, forced password change / two-step set-up and password reset: the illustration on the left,
+// one full-height white panel on the right with the form card centred and the vendor footer at the bottom.
+// Narrow screens: the panel only (the illustration is hidden).
+.agent__container__login.bv-auth {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(460px, 42%);
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0;
+  background: $color-surface;
+  font-family: $font-body;
+
+  @media (max-width: 960px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  // ------------------------------------------------------------ illustration
+  .bv-auth__art {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    background: $brand-navy;
+
+    @media (max-width: 960px) {
+      display: none;
+    }
+  }
+
+  .bv-auth__art-image {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  // ------------------------------------------------------------ panel
+  .bv-auth__panel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding: 24px 48px;
+    background: $color-surface;
+    border-left: 1px solid $color-border;
+
+    @media (max-width: 960px) {
+      border-left: 0;
+      padding: 16px 20px;
+    }
+  }
+
+  .bv-auth__lang {
     display: flex;
     justify-content: flex-end;
 
-    .login-language-dropdown,
     .p-dropdown {
-      min-width: 120px;
+      min-width: 132px;
+      border-color: $color-border;
     }
   }
 
-  .logo__caption {
-    color: #9da4ae;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 300;
-    line-height: normal;
-  }
-  .left__side__login {
-    background: #192131;
-    height: 100vh;
-    display: grid;
+  .bv-auth__center {
+    flex: 1 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 0;
 
-    &.bdo-theme {
-      background: linear-gradient(
-        135deg,
-        var(--bv-primary, #0072d8) 0%,
-        var(--bv-secondary, #004ea8) 100%
-      );
-      position: relative;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 40px;
-
-      .bdo-banner-container {
-        position: relative;
-        width: 100%;
-        max-width: 500px;
-        margin-bottom: 30px;
-        z-index: 1;
-
-        .bdo-banner-image {
-          width: 100%;
-          height: auto;
-          border-radius: 20px;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
-        }
-      }
-
-      .bdo-content-overlay {
-        position: relative;
-        width: 100%;
-        max-width: 600px;
-        z-index: 2;
-        text-align: center;
-        margin-bottom: auto;
-
-        .bdo-tagline {
-          h1 {
-            color: #ffffff;
-            font-family: "Nunito", Arial, sans-serif;
-            font-size: 38px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-            line-height: 1.2;
-          }
-
-          p {
-            color: #ffffff;
-            font-family: "Nunito", Arial, sans-serif;
-            font-size: 16px;
-            font-weight: 400;
-            opacity: 0.95;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-            max-width: 450px;
-            margin: 0 auto;
-          }
-        }
-      }
-
-      .powered-by-footer {
-        position: absolute;
-        bottom: 30px;
-        left: 0;
-        right: 0;
-        text-align: center;
-        z-index: 3;
-
-        span {
-          color: #ffffff;
-          font-family: "Nunito", Arial, sans-serif;
-          font-size: 14px;
-          opacity: 0.8;
-          background: rgba(0, 0, 0, 0.2);
-          padding: 8px 20px;
-          border-radius: 20px;
-          display: inline-block;
-        }
-      }
-    }
-  }
-  .center__image__controller {
-    text-align: center;
-  }
-
-  .bdo-logo-container {
-    text-align: center;
-    margin-bottom: 32px;
-    padding-top: 20px;
-
-    .bdo-logo {
-      height: 60px;
-      width: auto;
-      object-fit: contain;
+    @media (max-width: 960px) {
+      align-items: flex-start;
+      padding: 24px 0;
     }
   }
 
-  .login__header {
-    text-align: left;
-    color: #111927;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 24px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: normal;
+  .bv-auth__card {
+    width: 100%;
+    max-width: 400px;
   }
 
-  // "Forgot password" is a real button (keyboard and screen readers) styled as a link
-  .login__link__button {
+  .bv-auth__logo {
     display: block;
-    margin-left: auto;
-    background: none;
-    border: 0;
+    height: 44px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+    margin-bottom: 32px;
+  }
+
+  h1.bv-auth__title {
+    margin: 0;
+    font-family: $font-heading;
+    font-size: 26px;
+    line-height: 34px;
+    font-weight: 800;
+    color: $color-heading;
+  }
+
+  .bv-auth__subtitle {
+    margin: 6px 0 0;
+    font-size: 15px;
+    line-height: 22px;
+    color: $color-text-muted;
+  }
+
+  .bv-auth__body {
+    margin-top: 28px;
+  }
+
+  .bv-auth__footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px 0 8px;
+    border-top: 1px solid $color-border;
+    font-size: 12px;
+    color: $color-text-muted;
+
+    img {
+      height: 22px;
+      width: auto;
+    }
+  }
+
+  // ------------------------------------------------------------ form (shared by every step)
+  .bv-security__form,
+  .bv-security__enrol {
+    gap: 18px;
+  }
+
+  .bv-security__field {
+    gap: 6px;
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: $color-text;
+    }
+  }
+
+  .bv-auth__label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .bv-auth__link {
     padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    color: $brand-blue;
+    cursor: pointer;
+
+    &:hover {
+      color: $brand-blue-600;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid $brand-blue;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+
+  .p-inputtext,
+  .p-password-input {
+    height: $control-height;
+    font-size: 15px;
+    border-color: $brand-field-blue;
+    border-radius: $radius-sm;
+
+    &:enabled:focus {
+      border-color: $brand-blue;
+      box-shadow: $focus-ring;
+    }
+  }
+
+  .bv-security__code {
+    max-width: none;
+    font-size: 22px;
+    letter-spacing: 0.5em;
+    text-align: center;
   }
 
   .login__password__wrapper {
     position: relative;
 
-    .input__field {
-      padding-right: 3rem;
+    .p-inputtext {
+      padding-right: 48px;
     }
 
-    .login__password__toggle {
+    .p-button.login__password__toggle {
       position: absolute;
       top: 50%;
-      right: 0.35rem;
+      right: 4px;
       transform: translateY(-50%);
-      z-index: 2;
+      width: 36px;
+      height: 36px;
+      padding: 0;
+      color: $color-text-muted;
     }
   }
 
-  .forget__text {
-    text-align: right;
-    color: #0072d8;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 500;
-    line-height: normal;
-    transition: color 0.3s ease;
+  // Actions: the primary button full width, the secondary action as a link centred below it
+  .bv-security__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 14px;
+    margin-top: 4px;
 
-    &:hover {
-      color: #004ea8;
-      text-decoration: underline;
-    }
-  }
+    .p-button:not(.p-button-text) {
+      width: 100%;
+      height: $control-height;
+      justify-content: center;
+      background: $brand-blue;
+      border-color: $brand-blue;
+      border-radius: $radius-sm;
+      font-family: $font-heading;
+      font-size: 15px;
+      font-weight: 700;
 
-  .welcome__text {
-    color: #fff;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 40px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: normal;
-  }
-
-  .logo__cover___white {
-    color: #fff;
-
-    font-weight: 300;
-  }
-  .top__container {
-    padding: 16px 0 0 34px;
-  }
-
-  .side__logo {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 16px;
-    padding-top: 46px;
-  }
-
-  .right__side__login {
-    display: grid;
-    justify-content: center;
-    // align-items: center;
-  }
-
-  .input__filed {
-    width: 100% !important;
-  }
-
-  .login__button {
-    width: 100%;
-    background-color: #0072d8;
-    height: 48px;
-    justify-content: center;
-
-    color: #fff;
-    font-family: "Nunito", Arial, sans-serif;
-    font-size: 14px;
-    font-style: normal;
-    font-weight: 700;
-    line-height: normal;
-
-    &.bdo-login-btn {
-      background: linear-gradient(90deg, #0072d8 0%, #004ea8 100%);
-      border: none;
-      transition: all 0.3s ease;
-      box-shadow: 0 4px 15px rgba(0, 86, 179, 0.3);
-
-      &:hover {
-        background: linear-gradient(90deg, #004ea8 0%, #002a5c 100%);
-        box-shadow: 0 6px 20px rgba(0, 86, 179, 0.4);
-        transform: translateY(-1px);
+      &:enabled:hover {
+        background: $brand-blue-600;
+        border-color: $brand-blue-600;
       }
+    }
 
-      &:active {
-        transform: translateY(0);
+    .p-button.p-button-text {
+      align-self: center;
+      padding: 2px 4px;
+      background: none;
+      color: $brand-blue;
+      font-size: 14px;
+      font-weight: 700;
+
+      &:enabled:hover {
+        background: none;
+        text-decoration: underline;
       }
     }
   }
 
-  .tech-footer {
-    margin-top: 40px;
-    text-align: center;
-
-    .tech-powered-text {
-      color: #6b7280;
-      font-family: "Nunito", Arial, sans-serif;
-      font-size: 12px;
-      font-weight: 400;
-
-      strong {
-        color: #0072d8;
-        font-weight: 600;
-      }
-    }
-  }
-
-  //   @layer primereact {
-  //     .p-input-icon-left > i,
-  //     .p-input-icon-right > i,
-  //     .p-input-icon-left > svg,
-  //     .p-input-icon-right > svg,
-  //     .p-input-icon-left > .p-input-prefix,
-  //     .p-input-icon-right > .p-input-suffix {
-  //       position: absolute;
-  //       top: 50%;
-  //       margin-top: -0.3rem;
-  //     }
-  //   }
-
-  .input__filed.p-inputtext::placeholder {
-    color: #b1b1b1;
-    font-weight: 600;
+  .bv-security__steps {
     font-size: 14px;
-  }
-}
-
-@media screen and (min-width: 320px) {
-  .logo__cover___white {
-    font-size: 25px !important;
-  }
-
-  .welcome__text {
-    font-size: 33px !important;
-  }
-}
-
-@media screen and (min-width: 767px) {
-  .logo__cover___white {
-    font-size: 30px !important;
-  }
-
-  .welcome__text {
-    font-size: 40px !important;
   }
 }

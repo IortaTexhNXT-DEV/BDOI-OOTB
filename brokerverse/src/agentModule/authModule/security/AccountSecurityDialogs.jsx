@@ -14,7 +14,7 @@ import "./security.scss";
 export const ChangePasswordDialog = ({ visible, onHide }) => {
   const { t } = useTranslation();
   return (
-    <Dialog header={t("security.changePassword")} visible={visible} onHide={onHide} style={{ width: "30rem" }} breakpoints={{ "640px": "95vw" }} modal dismissableMask={false}>
+    <Dialog header={t("security.changePassword")} visible={visible} onHide={onHide} style={{ width: "32rem" }} breakpoints={{ "640px": "95vw" }} modal dismissableMask={false} className="bv-security-dialog bv-centered">
       {visible && (
         <ChangePasswordForm
           intro={t("security.changeIntro")}
@@ -101,7 +101,7 @@ export const TwoFactorDialog = ({ visible, onHide }) => {
   }
 
   return (
-    <Dialog header={t("security.twoFactor")} visible={visible} onHide={onHide} style={{ width: "32rem" }} breakpoints={{ "640px": "95vw" }} modal>
+    <Dialog header={t("security.twoFactor")} visible={visible} onHide={onHide} style={{ width: "32rem" }} breakpoints={{ "640px": "95vw" }} modal className="bv-security-dialog bv-centered">
       {body}
     </Dialog>
   );

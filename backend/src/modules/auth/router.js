@@ -15,6 +15,7 @@ import { generateSecret, otpauthUrl, verifyTotp } from '../../lib/totp.js';
 import { decryptSecret, encryptSecret, hashCode, sameHash } from '../../lib/secrets.js';
 import { renderTemplate } from '../documents/common.js';
 import { companyName } from '../../lib/letterhead.js';
+import { loadProfile, profileSchema, saveProfile } from './profile.js';
 
 const { router, define } = moduleRouter('Auth', '/auth');
 
@@ -216,23 +217,33 @@ define({
 });
 
 define({
-  method: 'GET', path: '/profile', summary: 'Current user profile', screen: 'Profile',
-  response: { success: true, data: { userId: 'usr_1', username: 'BrokerVerse', roles: ['system-admin'] } },
+  method: 'GET', path: '/profile', summary: 'Own profile (My Profile): identity and access (read-only), contact, personal details and Philippine address', screen: 'Profile',
+  response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['underwriting'], roleNames: ['Underwriter'], branchCode: 'MNL', branchName: 'Manila Head Office', designation: 'Underwriter', reportingToName: 'Maria Reyes', email: 'juan@example.com', phone: '09171234567', dateOfBirth: '1990-05-14', gender: 'male', addressLine: '12 Rizal St.', barangay: 'San Antonio', city: 'Makati City', province: 'Metro Manila', zipCode: '1203', country: 'Philippines', status: 'active', lastLoginAt: '2026-10-01T01:00:00Z', previousLoginAt: '2026-09-30T01:00:00Z', emailEditable: false } },
   handler: async (req, res) => {
+    const profile = await loadProfile(req.user.id);
     const user = await loadUser('u.id = $1', [req.user.id]);
-    res.json({ success: true, data: { ...publicUser(user), firstName: user.first_name, lastName: user.last_name, phone: user.phone, branchCode: user.branch_code, employeeCode: user.employee_code } });
+    res.json({ success: true, data: { ...publicUser(user), ...profile } });
   },
 });
 
 define({
-  method: 'PUT', path: '/profile', summary: 'Update own profile', screen: 'Profile', middleware: [validate(z.object({ displayName: z.string().min(1).optional(), firstName: z.string().optional(), lastName: z.string().optional(), email: z.string().email().optional(), phone: z.string().optional() }))],
-  request: { displayName: 'Juan Santos', email: 'juan@example.com', phone: '+63 900 000 0000' }, response: { success: true },
+  method: 'PUT', path: '/profile',
+  summary: 'Update own profile: name, contact number (Philippine format), date of birth, gender and address. The e-mail address only when security.profile_email_editable is on; user ID, roles, branch, designation and reporting line are changed in User Management',
+  screen: 'Profile', middleware: [validate(profileSchema)],
+  request: { displayName: 'Juan Santos', phone: '0917 123 4567', dateOfBirth: '1990-05-14', gender: 'male', addressLine: '12 Rizal St.', barangay: 'San Antonio', city: 'Makati City', province: 'Metro Manila', zipCode: '1203', country: 'Philippines' },
+  response: { success: true, message: 'Profile updated' },
   handler: async (req, res) => {
-    const b = req.body;
-    await query('UPDATE users SET display_name = COALESCE($2, display_name), first_name = COALESCE($3, first_name), last_name = COALESCE($4, last_name), email = COALESCE($5, email), phone = COALESCE($6, phone), updated_by = $7 WHERE id = $1',
-      [req.user.id, b.displayName, b.firstName, b.lastName, b.email, b.phone, req.user.username]);
-    await audit(req, { entity: 'user', entityId: req.user.id, action: 'update-profile', after: b });
-    res.json({ success: true, message: 'Profile updated', data: publicUser(await loadUser('u.id = $1', [req.user.id])) });
+    const b = { ...req.body };
+    const before = await loadProfile(req.user.id);
+    if (b.email !== undefined && (b.email || null) !== (before.email || null)) {
+      if (!before.emailEditable) throw forbidden('Your e-mail address is changed by the user administrator (Master > User Management > User)');
+      if (!b.email) throw badRequest('Validation failed', [{ path: 'email', message: 'E-mail address is required' }]);
+    } else delete b.email;
+    const changed = await saveProfile(req.user.id, b, req.user.username);
+    const pick = (o) => Object.fromEntries(Object.keys(changed).map((k) => [k, o[k] ?? null]));
+    await audit(req, { entity: 'user', entityId: req.user.id, action: 'update-profile', before: pick(before), after: changed });
+    const profile = await loadProfile(req.user.id);
+    res.json({ success: true, message: 'Profile updated', data: { ...publicUser(await loadUser('u.id = $1', [req.user.id])), ...profile } });
   },
 });
 
