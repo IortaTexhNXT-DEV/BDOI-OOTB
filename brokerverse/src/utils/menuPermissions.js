@@ -115,9 +115,7 @@ export const roleMenuPermissions = {
     home: true,
     operations: ["Clients", "Policy", "Claims", "My Work", "Fleet Schedules", "Marine Open Covers",
       // claim document checklist and motor claim repairs (write:claims); their masters below
-      "Claim Documents", "Motor Claim Repairs",
-      // fleet schedules and marine open covers (read:fleet / read:marine): one operations entry, the second one hid the first
-      "Fleet Schedules", "Marine Open Covers"],
+      "Claim Documents", "Motor Claim Repairs"],
     master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
