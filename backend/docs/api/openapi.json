@@ -34645,6 +34645,1014 @@
         ]
       }
     },
+    "/data-load/compare": {
+      "get": {
+        "operationId": "getDataLoadCompare",
+        "summary": "Environment comparisons made, newest first (paging)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "kit": {
+                            "type": "string"
+                          },
+                          "mode": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "fileBName": {},
+                          "environment": {
+                            "type": "string"
+                          },
+                          "options": {
+                            "type": "object",
+                            "properties": {
+                              "includeNumbering": {
+                                "type": "boolean"
+                              }
+                            }
+                          },
+                          "verdict": {
+                            "type": "string"
+                          },
+                          "verdictText": {
+                            "type": "string"
+                          },
+                          "labels": {
+                            "type": "object",
+                            "properties": {
+                              "file": {
+                                "type": "string"
+                              },
+                              "here": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "totals": {
+                            "type": "object",
+                            "properties": {
+                              "inFile": {
+                                "type": "integer"
+                              },
+                              "here": {
+                                "type": "integer"
+                              },
+                              "identical": {
+                                "type": "integer"
+                              },
+                              "different": {
+                                "type": "integer"
+                              },
+                              "onlyInFile": {
+                                "type": "integer"
+                              },
+                              "onlyHere": {
+                                "type": "integer"
+                              },
+                              "environmentSpecific": {
+                                "type": "integer"
+                              }
+                            }
+                          },
+                          "sheets": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "sheet": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "inFile": {
+                                  "type": "integer"
+                                },
+                                "here": {
+                                  "type": "integer"
+                                },
+                                "identical": {
+                                  "type": "integer"
+                                },
+                                "different": {
+                                  "type": "integer"
+                                },
+                                "onlyInFile": {
+                                  "type": "integer"
+                                },
+                                "onlyHere": {
+                                  "type": "integer"
+                                },
+                                "environmentSpecific": {
+                                  "type": "integer"
+                                },
+                                "notes": {
+                                  "type": "array",
+                                  "items": {}
+                                }
+                              }
+                            }
+                          },
+                          "createdBy": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 3,
+                      "kit": "configuration",
+                      "mode": "environment",
+                      "fileName": "GoLive_Configuration_Workbook_2026-10-28.xlsx",
+                      "fileBName": null,
+                      "environment": "Production",
+                      "options": {
+                        "includeNumbering": false
+                      },
+                      "verdict": "differences",
+                      "verdictText": "Differences found",
+                      "labels": {
+                        "file": "File",
+                        "here": "This environment (Production)"
+                      },
+                      "totals": {
+                        "inFile": 412,
+                        "here": 413,
+                        "identical": 409,
+                        "different": 1,
+                        "onlyInFile": 1,
+                        "onlyHere": 2,
+                        "environmentSpecific": 2
+                      },
+                      "sheets": [
+                        {
+                          "sheet": "users",
+                          "name": "Users",
+                          "inFile": 12,
+                          "here": 13,
+                          "identical": 10,
+                          "different": 1,
+                          "onlyInFile": 0,
+                          "onlyHere": 1,
+                          "environmentSpecific": 0,
+                          "notes": []
+                        }
+                      ],
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Compare environments",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      },
+      "post": {
+        "operationId": "postDataLoadCompare",
+        "summary": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "mode": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "fileBName": {},
+                        "environment": {
+                          "type": "string"
+                        },
+                        "options": {
+                          "type": "object",
+                          "properties": {
+                            "includeNumbering": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "verdict": {
+                          "type": "string"
+                        },
+                        "verdictText": {
+                          "type": "string"
+                        },
+                        "labels": {
+                          "type": "object",
+                          "properties": {
+                            "file": {
+                              "type": "string"
+                            },
+                            "here": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "inFile": {
+                              "type": "integer"
+                            },
+                            "here": {
+                              "type": "integer"
+                            },
+                            "identical": {
+                              "type": "integer"
+                            },
+                            "different": {
+                              "type": "integer"
+                            },
+                            "onlyInFile": {
+                              "type": "integer"
+                            },
+                            "onlyHere": {
+                              "type": "integer"
+                            },
+                            "environmentSpecific": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "inFile": {
+                                "type": "integer"
+                              },
+                              "here": {
+                                "type": "integer"
+                              },
+                              "identical": {
+                                "type": "integer"
+                              },
+                              "different": {
+                                "type": "integer"
+                              },
+                              "onlyInFile": {
+                                "type": "integer"
+                              },
+                              "onlyHere": {
+                                "type": "integer"
+                              },
+                              "environmentSpecific": {
+                                "type": "integer"
+                              },
+                              "notes": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Differences found",
+                  "data": {
+                    "id": 3,
+                    "kit": "configuration",
+                    "mode": "environment",
+                    "fileName": "GoLive_Configuration_Workbook_2026-10-28.xlsx",
+                    "fileBName": null,
+                    "environment": "Production",
+                    "options": {
+                      "includeNumbering": false
+                    },
+                    "verdict": "differences",
+                    "verdictText": "Differences found",
+                    "labels": {
+                      "file": "File",
+                      "here": "This environment (Production)"
+                    },
+                    "totals": {
+                      "inFile": 412,
+                      "here": 413,
+                      "identical": 409,
+                      "different": 1,
+                      "onlyInFile": 1,
+                      "onlyHere": 2,
+                      "environmentSpecific": 2
+                    },
+                    "sheets": [
+                      {
+                        "sheet": "users",
+                        "name": "Users",
+                        "inFile": 12,
+                        "here": 13,
+                        "identical": 10,
+                        "different": 1,
+                        "onlyInFile": 0,
+                        "onlyHere": 1,
+                        "environmentSpecific": 0,
+                        "notes": []
+                      }
+                    ],
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Compare environments",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file [, fileB], includeNumbering=true|false"
+            }
+          }
+        }
+      }
+    },
+    "/data-load/compare/{id}": {
+      "get": {
+        "operationId": "getDataLoadCompareId",
+        "summary": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "kit": {
+                          "type": "string"
+                        },
+                        "mode": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        },
+                        "fileBName": {},
+                        "environment": {
+                          "type": "string"
+                        },
+                        "options": {
+                          "type": "object",
+                          "properties": {
+                            "includeNumbering": {
+                              "type": "boolean"
+                            }
+                          }
+                        },
+                        "verdict": {
+                          "type": "string"
+                        },
+                        "verdictText": {
+                          "type": "string"
+                        },
+                        "labels": {
+                          "type": "object",
+                          "properties": {
+                            "file": {
+                              "type": "string"
+                            },
+                            "here": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "inFile": {
+                              "type": "integer"
+                            },
+                            "here": {
+                              "type": "integer"
+                            },
+                            "identical": {
+                              "type": "integer"
+                            },
+                            "different": {
+                              "type": "integer"
+                            },
+                            "onlyInFile": {
+                              "type": "integer"
+                            },
+                            "onlyHere": {
+                              "type": "integer"
+                            },
+                            "environmentSpecific": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "sheets": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "inFile": {
+                                "type": "integer"
+                              },
+                              "here": {
+                                "type": "integer"
+                              },
+                              "identical": {
+                                "type": "integer"
+                              },
+                              "different": {
+                                "type": "integer"
+                              },
+                              "onlyInFile": {
+                                "type": "integer"
+                              },
+                              "onlyHere": {
+                                "type": "integer"
+                              },
+                              "environmentSpecific": {
+                                "type": "integer"
+                              },
+                              "notes": {
+                                "type": "array",
+                                "items": {}
+                              }
+                            }
+                          }
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdAt": {
+                          "type": "string"
+                        },
+                        "environmentSpecific": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "sheetName": {
+                                "type": "string"
+                              },
+                              "key": {
+                                "type": "string"
+                              },
+                              "column": {
+                                "type": "string"
+                              },
+                              "header": {
+                                "type": "string"
+                              },
+                              "file": {
+                                "type": "string"
+                              },
+                              "here": {
+                                "type": "string"
+                              },
+                              "rule": {
+                                "type": "string"
+                              },
+                              "reason": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "rules": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "reason": {
+                                "type": "string"
+                              },
+                              "applied": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 3,
+                    "kit": "configuration",
+                    "mode": "environment",
+                    "fileName": "GoLive_Configuration_Workbook_2026-10-28.xlsx",
+                    "fileBName": null,
+                    "environment": "Production",
+                    "options": {
+                      "includeNumbering": false
+                    },
+                    "verdict": "differences",
+                    "verdictText": "Differences found",
+                    "labels": {
+                      "file": "File",
+                      "here": "This environment (Production)"
+                    },
+                    "totals": {
+                      "inFile": 412,
+                      "here": 413,
+                      "identical": 409,
+                      "different": 1,
+                      "onlyInFile": 1,
+                      "onlyHere": 2,
+                      "environmentSpecific": 2
+                    },
+                    "sheets": [
+                      {
+                        "sheet": "users",
+                        "name": "Users",
+                        "inFile": 12,
+                        "here": 13,
+                        "identical": 10,
+                        "different": 1,
+                        "onlyInFile": 0,
+                        "onlyHere": 1,
+                        "environmentSpecific": 0,
+                        "notes": []
+                      }
+                    ],
+                    "createdBy": "BrokerVerse Administrator",
+                    "createdAt": "2026-10-28T09:00:00Z",
+                    "environmentSpecific": [
+                      {
+                        "sheet": "settings",
+                        "sheetName": "Settings",
+                        "key": "golive.cutover_date",
+                        "column": "value",
+                        "header": "Value",
+                        "file": "",
+                        "here": "2026-11-01",
+                        "rule": "cutover-date",
+                        "reason": "Each environment has its own cutover date"
+                      }
+                    ],
+                    "rules": [
+                      {
+                        "id": "cutover-date",
+                        "sheet": "settings",
+                        "label": "Cutover date (golive.cutover_date)",
+                        "reason": "Each environment has its own cutover date",
+                        "applied": true
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Compare environments",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/compare/{id}/rows": {
+      "get": {
+        "operationId": "getDataLoadCompareIdRows",
+        "summary": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "sheet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "users"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "different,only-here"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "lim"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "sheet": {
+                            "type": "string"
+                          },
+                          "sheetName": {
+                            "type": "string"
+                          },
+                          "key": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "rowFile": {
+                            "type": "integer"
+                          },
+                          "rowHere": {},
+                          "file": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "here": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "email": {
+                                "type": "string"
+                              }
+                            }
+                          },
+                          "differences": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "column": {
+                                  "type": "string"
+                                },
+                                "header": {
+                                  "type": "string"
+                                },
+                                "file": {
+                                  "type": "string"
+                                },
+                                "here": {
+                                  "type": "string"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "sheet": "users",
+                      "sheetName": "Users",
+                      "key": "andrea.lim",
+                      "status": "different",
+                      "rowFile": 7,
+                      "rowHere": null,
+                      "file": {
+                        "username": "andrea.lim",
+                        "email": "andrea.lim@broker.ph"
+                      },
+                      "here": {
+                        "username": "andrea.lim",
+                        "email": "a.lim@broker.ph"
+                      },
+                      "differences": [
+                        {
+                          "column": "email",
+                          "header": "Email",
+                          "file": "andrea.lim@broker.ph",
+                          "here": "a.lim@broker.ph"
+                        }
+                      ]
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 50,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Compare environments",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/compare/{id}/workbook": {
+      "get": {
+        "operationId": "getDataLoadCompareIdWorkbook",
+        "summary": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Compare environments > Download\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Compare environments > Download",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
     "/data-load/kits": {
       "get": {
         "operationId": "getDataLoadKits",

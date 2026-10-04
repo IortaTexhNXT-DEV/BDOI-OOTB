@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (877 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (882 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -22429,6 +22429,395 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"held\": 0,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"ignored\": 0,\n          \"skipped\": 0,\n          \"message\": null\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Environment comparisons made, newest first (paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/compare?page=1&perPage=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "compare"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/compare?page=1&perPage=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "compare"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Environment comparisons made, newest first (paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 3,\n      \"kit\": \"configuration\",\n      \"mode\": \"environment\",\n      \"fileName\": \"GoLive_Configuration_Workbook_2026-10-28.xlsx\",\n      \"fileBName\": null,\n      \"environment\": \"Production\",\n      \"options\": {\n        \"includeNumbering\": false\n      },\n      \"verdict\": \"differences\",\n      \"verdictText\": \"Differences found\",\n      \"labels\": {\n        \"file\": \"File\",\n        \"here\": \"This environment (Production)\"\n      },\n      \"totals\": {\n        \"inFile\": 412,\n        \"here\": 413,\n        \"identical\": 409,\n        \"different\": 1,\n        \"onlyInFile\": 1,\n        \"onlyHere\": 2,\n        \"environmentSpecific\": 2\n      },\n      \"sheets\": [\n        {\n          \"sheet\": \"users\",\n          \"name\": \"Users\",\n          \"inFile\": 12,\n          \"here\": 13,\n          \"identical\": 10,\n          \"different\": 1,\n          \"onlyInFile\": 0,\n          \"onlyHere\": 1,\n          \"environmentSpecific\": 0,\n          \"notes\": []\n        }\n      ],\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/compare",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "compare"
+              ]
+            },
+            "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file [, fileB], includeNumbering=true|false\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/compare",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "compare"
+                  ]
+                },
+                "description": "Compare environments (never loads): the configuration workbook exported from another environment (\"Current data\") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file [, fileB], includeNumbering=true|false\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Differences found\",\n  \"data\": {\n    \"id\": 3,\n    \"kit\": \"configuration\",\n    \"mode\": \"environment\",\n    \"fileName\": \"GoLive_Configuration_Workbook_2026-10-28.xlsx\",\n    \"fileBName\": null,\n    \"environment\": \"Production\",\n    \"options\": {\n      \"includeNumbering\": false\n    },\n    \"verdict\": \"differences\",\n    \"verdictText\": \"Differences found\",\n    \"labels\": {\n      \"file\": \"File\",\n      \"here\": \"This environment (Production)\"\n    },\n    \"totals\": {\n      \"inFile\": 412,\n      \"here\": 413,\n      \"identical\": 409,\n      \"different\": 1,\n      \"onlyInFile\": 1,\n      \"onlyHere\": 2,\n      \"environmentSpecific\": 2\n    },\n    \"sheets\": [\n      {\n        \"sheet\": \"users\",\n        \"name\": \"Users\",\n        \"inFile\": 12,\n        \"here\": 13,\n        \"identical\": 10,\n        \"different\": 1,\n        \"onlyInFile\": 0,\n        \"onlyHere\": 1,\n        \"environmentSpecific\": 0,\n        \"notes\": []\n      }\n    ],\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/compare/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "compare",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/compare/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "compare",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"kit\": \"configuration\",\n    \"mode\": \"environment\",\n    \"fileName\": \"GoLive_Configuration_Workbook_2026-10-28.xlsx\",\n    \"fileBName\": null,\n    \"environment\": \"Production\",\n    \"options\": {\n      \"includeNumbering\": false\n    },\n    \"verdict\": \"differences\",\n    \"verdictText\": \"Differences found\",\n    \"labels\": {\n      \"file\": \"File\",\n      \"here\": \"This environment (Production)\"\n    },\n    \"totals\": {\n      \"inFile\": 412,\n      \"here\": 413,\n      \"identical\": 409,\n      \"different\": 1,\n      \"onlyInFile\": 1,\n      \"onlyHere\": 2,\n      \"environmentSpecific\": 2\n    },\n    \"sheets\": [\n      {\n        \"sheet\": \"users\",\n        \"name\": \"Users\",\n        \"inFile\": 12,\n        \"here\": 13,\n        \"identical\": 10,\n        \"different\": 1,\n        \"onlyInFile\": 0,\n        \"onlyHere\": 1,\n        \"environmentSpecific\": 0,\n        \"notes\": []\n      }\n    ],\n    \"createdBy\": \"BrokerVerse Administrator\",\n    \"createdAt\": \"2026-10-28T09:00:00Z\",\n    \"environmentSpecific\": [\n      {\n        \"sheet\": \"settings\",\n        \"sheetName\": \"Settings\",\n        \"key\": \"golive.cutover_date\",\n        \"column\": \"value\",\n        \"header\": \"Value\",\n        \"file\": \"\",\n        \"here\": \"2026-11-01\",\n        \"rule\": \"cutover-date\",\n        \"reason\": \"Each environment has its own cutover date\"\n      }\n    ],\n    \"rules\": [\n      {\n        \"id\": \"cutover-date\",\n        \"sheet\": \"settings\",\n        \"label\": \"Cutover date (golive.cutover_date)\",\n        \"reason\": \"Each environment has its own cutover date\",\n        \"applied\": true\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/compare/:id/rows?sheet=users&status=different,only-here&search=lim&page=1&perPage=50",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "compare",
+                ":id",
+                "rows"
+              ],
+              "query": [
+                {
+                  "key": "sheet",
+                  "value": "users"
+                },
+                {
+                  "key": "status",
+                  "value": "different,only-here"
+                },
+                {
+                  "key": "search",
+                  "value": "lim"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "50"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/compare/:id/rows?sheet=users&status=different,only-here&search=lim&page=1&perPage=50",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "compare",
+                    ":id",
+                    "rows"
+                  ],
+                  "query": [
+                    {
+                      "key": "sheet",
+                      "value": "users"
+                    },
+                    {
+                      "key": "status",
+                      "value": "different,only-here"
+                    },
+                    {
+                      "key": "search",
+                      "value": "lim"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "50"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"sheet\": \"users\",\n      \"sheetName\": \"Users\",\n      \"key\": \"andrea.lim\",\n      \"status\": \"different\",\n      \"rowFile\": 7,\n      \"rowHere\": null,\n      \"file\": {\n        \"username\": \"andrea.lim\",\n        \"email\": \"andrea.lim@broker.ph\"\n      },\n      \"here\": {\n        \"username\": \"andrea.lim\",\n        \"email\": \"a.lim@broker.ph\"\n      },\n      \"differences\": [\n        {\n          \"column\": \"email\",\n          \"header\": \"Email\",\n          \"file\": \"andrea.lim@broker.ph\",\n          \"here\": \"a.lim@broker.ph\"\n        }\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 50,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/compare/:id/workbook",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "compare",
+                ":id",
+                "workbook"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/compare/:id/workbook",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "compare",
+                    ":id",
+                    "workbook"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules\n\nFront-end touchpoint: Master > Go-Live Data Load > Compare environments > Download\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
             }
           ]
         },

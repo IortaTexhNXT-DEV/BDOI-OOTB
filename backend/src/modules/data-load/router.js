@@ -4,15 +4,19 @@ import { audit } from '../../lib/audit.js';
 import { badRequest } from '../../lib/errors.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { uploadFile } from '../documents/tabular.js';
+import { memoryUpload } from '../../lib/uploadLimits.js';
+import { config } from '../../config.js';
 import { notify } from '../notifications/service.js';
 import { reconciliationWorkbook } from './workbook.js';
 import * as svc from './service.js';
+import * as cmp from './comparisons.js';
 
 /**
  * Go-Live Data Workbench (Master > Go-Live Data Load): the configuration and migration workbooks. Download a blank
  * template or the current data of this environment, upload (validated as a dry run, nothing saved), download the rows
- * in error, load, history and the reconciliation of a migration load. System Administrator only (read:data-load /
- * write:data-load, migration 0243).
+ * in error, load, history and the reconciliation of a migration load; the environment comparison (an export of another
+ * environment compared with this one, or two exports with each other: never loads). System Administrator only
+ * (read:data-load / write:data-load, migrations 0244 and 0247).
  */
 const { router, define } = moduleRouter('Go-Live Data Workbench', '/data-load');
 const SCREEN = 'Master > Go-Live Data Load';
@@ -52,6 +56,70 @@ define({
     sendXlsx(res, fileName, buffer);
   },
 });
+// ------------------------------------------------------------------ environment comparison
+
+/** Two workbooks at most: file (the export of the other environment, or file A) and fileB (optional). */
+const compareUpload = memoryUpload({ maxBytes: config.importMaxBytes, files: 2 }).fields([{ name: 'file', maxCount: 1 }, { name: 'fileB', maxCount: 1 }]);
+const flag = (v) => v === true || String(v || '').toLowerCase() === 'true';
+const comparisonExample = {
+  id: 3, kit: 'configuration', mode: 'environment', fileName: 'GoLive_Configuration_Workbook_2026-10-28.xlsx', fileBName: null, environment: 'Production',
+  options: { includeNumbering: false }, verdict: 'differences', verdictText: 'Differences found', labels: { file: 'File', here: 'This environment (Production)' },
+  totals: { inFile: 412, here: 413, identical: 409, different: 1, onlyInFile: 1, onlyHere: 2, environmentSpecific: 2 },
+  sheets: [{ sheet: 'users', name: 'Users', inFile: 12, here: 13, identical: 10, different: 1, onlyInFile: 0, onlyHere: 1, environmentSpecific: 0, notes: [] }],
+  createdBy: 'BrokerVerse Administrator', createdAt: '2026-10-28T09:00:00Z',
+};
+const comparisonRowExample = { sheet: 'users', sheetName: 'Users', key: 'andrea.lim', status: 'different', rowFile: 7, rowHere: null,
+  file: { username: 'andrea.lim', email: 'andrea.lim@broker.ph' }, here: { username: 'andrea.lim', email: 'a.lim@broker.ph' },
+  differences: [{ column: 'email', header: 'Email', file: 'andrea.lim@broker.ph', here: 'a.lim@broker.ph' }] };
+
+define({
+  method: 'POST', path: '/compare', summary: 'Compare environments (never loads): the configuration workbook exported from another environment ("Current data") compared with this environment, or with a second workbook (fileB: file A vs file B, this environment not read). Result per sheet: identical, different (field-level differences), only in the file, only here; environment-specific values apart',
+  screen: `${SCREEN} > Compare environments`, middleware: [...canRead, compareUpload], request: 'multipart/form-data file [, fileB], includeNumbering=true|false',
+  response: { success: true, message: 'Differences found', data: comparisonExample },
+  handler: async (req, res) => {
+    const file = req.files?.file?.[0];
+    const fileB = req.files?.fileB?.[0] || null;
+    if (String(req.body?.kit || 'configuration') !== 'configuration') throw badRequest('Only the configuration workbook is compared between environments');
+    const c = await cmp.createComparison({ file, fileB, options: { includeNumbering: flag(req.body?.includeNumbering) }, user: req.user });
+    await audit(req, { entity: 'data_load_comparison', entityId: c.id, action: 'compare', after: { mode: c.mode, fileName: c.fileName, fileBName: c.fileBName, verdict: c.verdict, totals: c.totals, options: c.options } });
+    created(res, c, c.verdictText);
+  },
+});
+define({
+  method: 'GET', path: '/compare', summary: 'Environment comparisons made, newest first (paging)', screen: `${SCREEN} > Compare environments`, middleware: canRead,
+  query: { page: 1, perPage: 20 }, response: { success: true, data: [comparisonExample], total: 1, page: 1, perPage: 20, totalPages: 1 },
+  handler: async (req, res) => {
+    const pg = paging(req.query, { page: 1, perPage: 20 });
+    const { rows, total } = await cmp.listComparisons(pg);
+    ok(res, rows, 'OK', pageMeta(total, pg));
+  },
+});
+define({
+  method: 'GET', path: '/compare/:id', summary: 'One comparison: verdict, counts per sheet, environment-specific values and the rules that set them apart',
+  screen: `${SCREEN} > Compare environments`, middleware: canRead,
+  response: { success: true, data: { ...comparisonExample, environmentSpecific: [{ sheet: 'settings', sheetName: 'Settings', key: 'golive.cutover_date', column: 'value', header: 'Value', file: '', here: '2026-11-01', rule: 'cutover-date', reason: 'Each environment has its own cutover date' }],
+    rules: [{ id: 'cutover-date', sheet: 'settings', label: 'Cutover date (golive.cutover_date)', reason: 'Each environment has its own cutover date', applied: true }] } },
+  handler: async (req, res) => ok(res, await cmp.getComparison(req.params.id)),
+});
+define({
+  method: 'GET', path: '/compare/:id/rows', summary: 'Rows of a comparison with their field-level differences (filters sheet, status = different, only-in-file, only-here, identical (comma list; default all but identical), search; paging)',
+  screen: `${SCREEN} > Compare environments`, middleware: canRead, query: { sheet: 'users', status: 'different,only-here', search: 'lim', page: 1, perPage: 50 },
+  response: { success: true, data: [comparisonRowExample], total: 1, page: 1, perPage: 50, totalPages: 1 },
+  handler: async (req, res) => {
+    const pg = paging(req.query, { page: 1, perPage: 50 });
+    const { rows, total } = await cmp.comparisonRows(req.params.id, { sheet: req.query.sheet || null, status: req.query.status || null, search: req.query.search || null }, pg);
+    ok(res, rows, 'OK', pageMeta(total, pg));
+  },
+});
+define({
+  method: 'GET', path: '/compare/:id/workbook', summary: 'Comparison workbook (XLSX): Summary with the counts per sheet and the verdict (Mirrored / Differences found), one sheet per object with a Difference column (only in the file green, only here amber, changed cells highlighted), environment-specific values and rules',
+  screen: `${SCREEN} > Compare environments > Download`, middleware: canRead, response: '(xlsx file)',
+  handler: async (req, res) => {
+    const { fileName, buffer } = await cmp.comparisonFile(req.params.id);
+    sendXlsx(res, fileName, buffer);
+  },
+});
+
 define({
   method: 'GET', path: '/batches', summary: 'Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)',
   screen: `${SCREEN} > History`, middleware: canRead, query: { kit: 'migration', page: 1, perPage: 20 }, response: { success: true, data: [batchExample], total: 1, page: 1, perPage: 20, totalPages: 1 },

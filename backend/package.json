@@ -19,6 +19,7 @@
     "reset:transactions": "node scripts/reset-transactions.js",
     "rehearsal:golive": "node scripts/golive-rehearsal.js",
     "check:settings": "node scripts/check-settings.js",
+    "compare:environments": "node scripts/compare-environments.js",
     "test": "vitest run",
     "lint": "eslint src test scripts"
   },

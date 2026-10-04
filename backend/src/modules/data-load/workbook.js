@@ -11,16 +11,14 @@
 import { many } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { colLetter, writeXlsx } from '../../lib/xlsx.js';
-import { readWorkbook } from '../documents/xlsx.js';
-import { normKey } from '../documents/tabular.js';
 import { FS_GROUPS } from '../accounting/service.js';
 import { POLICY_TYPES } from '../commission-rates/resolve.js';
 import { RULE_KINDS, RULE_METHODS } from '../premium-charges/calculator.js';
 import { RESET_RULES } from '../document-numbering/service.js';
-import { badRequest } from '../../lib/errors.js';
 import { CONFIGURATION_ON_SCREEN } from './configuration.js';
 import { MIGRATION_ON_SCREEN } from './migration.js';
-import { SAMPLE_PREFIX, cleanValue } from './common.js';
+import { SAMPLE_PREFIX } from './common.js';
+import { readSheets } from './compare.js';
 
 export const KITS = {
   configuration: { title: 'Go-live configuration workbook', file: 'GoLive_Configuration_Workbook.xlsx' },
@@ -169,39 +167,7 @@ export async function kitWorkbook(kit, sheets, { data = {}, errors = null, prefi
  * Empty rows and sample rows are skipped; unknown sheets (Instructions, Lists) and columns (Errors) are ignored.
  */
 export function readKitWorkbook(buffer, sheets) {
-  let book;
-  try {
-    book = readWorkbook(buffer);
-  } catch (e) {
-    throw badRequest(`Could not read the workbook: ${e.message}`);
-  }
-  const byName = new Map(book.map((s) => [s.name.trim().toLowerCase(), s]));
-  const out = {};
-  let found = 0;
-  for (const sheet of sheets) {
-    const ws = byName.get(sheet.name.toLowerCase());
-    if (!ws) continue;
-    found += 1;
-    const header = (ws.rows[0] || []).map((h) => normKey(h));
-    const lookup = new Map();
-    for (const c of sheet.columns) for (const name of [c.header, c.key, ...(c.aliases || [])]) if (!lookup.has(normKey(name))) lookup.set(normKey(name), c);
-    const index = header.map((h) => lookup.get(h) || null);
-    const rows = [];
-    ws.rows.slice(1).forEach((cells, i) => {
-      if (!cells.some((x) => String(x ?? '').trim() !== '')) return;
-      if (String(cells[0] ?? '').trim().toUpperCase().startsWith(SAMPLE_PREFIX)) return;
-      const values = {};
-      index.forEach((c, ci) => {
-        if (!c) return;
-        const v = cleanValue(c, cells[ci]);
-        if (v !== '' && values[c.key] === undefined) values[c.key] = v;
-      });
-      rows.push({ rowNumber: i + 2, values });
-    });
-    out[sheet.key] = rows;
-  }
-  if (!found) throw badRequest(`The workbook has none of the sheets of this kit (${sheets.map((s) => s.name).join(', ')})`);
-  return out;
+  return Object.fromEntries(Object.entries(readSheets(buffer, sheets)).map(([key, s]) => [key, s.rows]));
 }
 
 /** Reconciliation workbook of a migration batch. */
