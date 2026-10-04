@@ -65,6 +65,7 @@ DOCS = [
     ('04_Onboarding_and_Go_Live', 'BrokerVerse_Discovery_Workbook_Guide', 'docx, pdf', 'How to run the discovery and configuration workshops', [D], True, [IMP]),
     ('04_Onboarding_and_Go_Live', 'BrokerVerse_Discovery_and_Configuration_Workbook', 'xlsx', 'Configuration decisions captured in discovery', [D], True, [IMP]),
     ('04_Onboarding_and_Go_Live', 'BrokerVerse_Data_Migration_and_Cutover_Plan', 'docx, pdf', 'Go-live data, templates, mock loads, reconciliation and cutover', [D], True, [IMP, GO]),
+    ('04_Onboarding_and_Go_Live', 'BrokerVerse_Environment_Strategy_and_Production_Rollout', 'docx, pdf', 'Environments, promotion of code, scripts and configuration, cutover runbook and RACI', [D, V, P, M], True, [IMP, GO]),
     ('04_Onboarding_and_Go_Live', 'BrokerVerse_Privacy_Impact_Assessment_and_Records_of_Processing_Templates', 'docx, pdf', 'PIA and records of processing pre-filled for the broker DPO', [D, M], True, [IMP, GO]),
     # ---------------------------------------------------------------- 05_Delivery
     ('05_Delivery', 'BrokerVerse_Implementation_Approach_and_Plan', 'docx, pdf', 'Method, phases, plans by size, roles, governance and risks', [D, M], True, [PRE, IMP]),

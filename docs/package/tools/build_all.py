@@ -63,6 +63,7 @@ DOCUMENTS = [
     # 04 Onboarding and go-live
     ('discovery-workbook-guide.md', ONBOARDING, 'BrokerVerse_Discovery_Workbook_Guide', None),
     ('data-migration-and-cutover.md', ONBOARDING, 'BrokerVerse_Data_Migration_and_Cutover_Plan', None),
+    ('environment-strategy-and-production-rollout.md', ONBOARDING, 'BrokerVerse_Environment_Strategy_and_Production_Rollout', None),
     ('privacy-impact-assessment-templates.md', ONBOARDING, 'BrokerVerse_Privacy_Impact_Assessment_and_Records_of_Processing_Templates', None),
     ('security-due-diligence-questionnaire.md', ONBOARDING, 'BrokerVerse_Security_Due_Diligence_Questionnaire', None),
     # 05 Delivery
