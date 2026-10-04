@@ -1,5 +1,7 @@
 # About this manual
 
+> **Note:** The reference user manual given to brokers is the package user manual, docs/package/source/user-manual.md (BrokerVerse_User_Manual in docs/package/05_Delivery). This earlier role-based text is kept because the role decks read it; where the two differ, the package user manual applies.
+
 ## Purpose
 
 BrokerVerse OOTB is the insurance broking platform of iorta TechNXT for non-life brokers in the Philippines. One system covers the whole broking cycle: prospects and leads, placement with insurers, quotations, policy issue, billing and collection, commission, remittance to insurers, endorsements, claims, renewals, the general ledger, the month-end and year-end close, BIR reporting and bank reconciliation.
@@ -43,21 +45,21 @@ Start with Chapter 2 (Getting started) and Chapter 3 (The broking cycle). Chapte
 
 Sign in with your own user ID and password. Never share a user ID: every action is recorded against it in the audit trail.
 
-![The sign-in page with the user ID filled in and the password hidden](intro-login)
+![The sign-in page: illustration on the left, sign-in panel on the right (example values)](intro-login)
 
 1. Open the BrokerVerse address your System Administrator gave you in Chrome, Edge or Firefox.
-2. In User ID, type your user name, for example maria.sales.
+2. In User ID, type your user name.
 3. In Password, type your password. Select the eye icon to show the password while you type, and select it again to hide it.
-4. Select Login.
+4. Select Sign in.
 
-The system opens your landing page. Each role lands on the first dashboard of its menu (see *Roles and menus* below).
+A language box appears at the top of the sign-in panel only when more than one screen language is offered; the delivered system offers English only. The system opens your landing page. Each role lands on the first dashboard of its menu (see *Roles and menus* below).
 
-One more step can follow the password:
+One more step can follow the password, in the same panel:
 
 | Step | When it appears |
 |---|---|
-| Two-step verification | Two-factor authentication is on for your user. |
-| Set up two-step verification | Your role must use two-factor authentication and you have not set it up yet. |
+| Two-step verification | Two-step verification is on for your user. |
+| Set up two-step verification | Your role must use two-step verification and you have not set it up yet. |
 | Change password | You sign in with a temporary password, an administrator has reset your password, or your password is older than 90 days. |
 
 ### Password rules
@@ -73,80 +75,81 @@ Every screen where you choose a password lists these rules under the new passwor
 
 ### Change your password
 
-A new user receives a temporary password from the System Administrator. At the first sign-in the system asks for a new password before anything else. The same happens after an administrator resets your password and when your password has expired.
+A new user receives a temporary password from the System Administrator. At the first sign-in the system asks for a new password before anything else, with the subtitle You must choose a new password before you continue. The same happens after an administrator resets your password; when your password has expired the subtitle reads Your password has expired. Choose a new one to continue.
 
 ![Change password at sign-in. The rules are ticked as the new password meets them (example values)](sec-signin-change)
 
 1. In Current password, type the password you signed in with.
 2. In New password, type the new password and check that every rule is ticked.
 3. In Confirm new password, type it again.
-4. Select Change password and continue.
+4. Select Change password and continue. Back to sign in returns to the sign-in panel without a change.
 
-To change your password at any other time, select your initials at the top right, then Change password. Fill in the three fields and select Change password. The system signs you out on every other computer and browser; your current session continues.
+To change your password at any other time, select your initials at the top right, then Change password (or Change password on My Profile). Fill in the three fields and select Change password. The message Password changed. Your other sessions have been signed out. confirms it: the system signs you out on every other computer and browser; your current session continues.
 
-![Profile menu > Change password (example values)](sec-change-password)
+![Account menu > Change password (example values)](sec-change-password)
 
 ### Forgot your password
 
-1. On the sign-in page, select Forgot password?.
-2. Type your User ID or e-mail address and select Send code. If the account exists and has an e-mail address, the system e-mails a 6-digit verification code to it. The message on screen is the same whether or not the account exists.
-3. Type the Verification code (from the e-mail), the New password and Confirm new password, then select Reset password.
-4. Select Back to sign in and sign in with the new password.
+1. On the sign-in page, select Forgot password? on the line of the Password label.
+2. On Reset your password, type your User ID or e-mail address and select Send code. If the account exists and has an e-mail address, the system e-mails a 6-digit verification code to it. The message on screen is the same whether or not the account exists.
+3. On Enter the verification code, type the Verification code (from the e-mail), the New password and Confirm new password, then select Reset password. Send a new code sends another code.
+4. The sign-in panel returns with the message Password reset. Sign in with your new password. Sign in with the new password.
 
 ![Forgot password: request a code](sec-forgot-request)
 
-![Forgot password: code and new password (example values)](sec-forgot-reset)
+![Forgot password: code and new password](sec-forgot-reset)
 
 The code is valid for 15 minutes (`security.reset_code_minutes`). After 5 wrong codes it is withdrawn and you ask for a new one. Resetting the password signs you out everywhere. If your user has no e-mail address, ask the System Administrator to reset the password for you.
 
 ### Failed sign-ins and locked accounts
 
-A wrong user ID or password shows a message under the Login button. After 5 failed attempts in a row the account is locked (`limits.max_login_attempts`) and the message reads Account locked. Contact the administrator. The system also allows only 10 sign-in attempts in 5 minutes from one computer and for one user name (`security.login_rate_limit`). To release a locked user, the System Administrator uses Unlock on the user list (Chapter 23).
+A wrong user ID or password shows a message in red above the Sign in button. After 5 failed attempts in a row the account is locked (`limits.max_login_attempts`) and the message reads Account locked. Contact the administrator. The system also allows only 10 sign-in attempts in 5 minutes from one computer and for one user name (`security.login_rate_limit`). To release a locked user, the System Administrator uses Unlock on the user list (Chapter 23).
 
-### Two-factor authentication
+### Two-step verification
 
-Two-factor authentication (two-step verification) adds a 6-digit code from an authenticator app on your phone, such as Google Authenticator or Microsoft Authenticator. Anyone can turn it on for their own user. The System Administrator can make it compulsory for roles with `security.require_2fa_roles`. No role requires it in the delivered configuration; iorta TechNXT recommends it for the System Administrator, Accounting and Accounting Manager roles.
+Two-step verification adds a 6-digit code from an authenticator app on your phone, such as Google Authenticator or Microsoft Authenticator. Anyone can turn it on for their own user. The System Administrator can make it compulsory for roles with `security.require_2fa_roles`. No role requires it in the delivered configuration; iorta TechNXT recommends it for the System Administrator, Accounting and Accounting Manager roles.
 
 To turn it on:
 
-1. Select your initials at the top right, then Two-factor authentication. The dialog shows whether it is on or off.
+1. Select your initials at the top right, then Two-step verification (or Two-step verification on My Profile). The dialog says Two-step verification is off.
 2. Select Turn on.
-3. In the authenticator app, add an account and type the setup key shown on the screen. On the phone itself you can open the link to the authenticator app instead.
-4. Type the 6-digit code the app shows in Authentication code and select Turn on.
+3. In the authenticator app, add an account and scan the QR code. If you cannot scan it, type the setup key shown under Can't scan? Enter this key instead:. On the phone itself you can open the key in the authenticator app with the link under the key.
+4. Type the 6-digit code the app shows in Authentication code and select Turn on. Cancel returns to the status without turning it on.
 
-![Profile menu > Two-factor authentication: status](sec-2fa-status)
+![Account menu > Two-step verification: status](sec-2fa-status)
 
-![Turning on two-factor authentication: setup key and code (example key)](sec-2fa-enrol)
+![Turning on two-step verification: QR code, setup key and code (example key)](sec-2fa-enrol)
 
-From then on the sign-in page asks for the Authentication code after the password. The code changes every 30 seconds and the page waits 5 minutes for it.
+From then on the sign-in panel shows Two-step verification after the password. Type the code in Authentication code and select Verify. The code changes every 30 seconds and the page waits 5 minutes for it.
 
 ![Sign-in: two-step verification code (example code)](sec-signin-2fa)
 
-If your role requires two-factor authentication and you have not set it up, the sign-in page shows Set up two-step verification after the password. Follow the same steps; when the code is accepted you are signed in.
+If your role requires two-step verification and you have not set it up, the sign-in panel shows Set up two-step verification after the password, with the subtitle Your role requires two-step verification. Set it up to continue. Follow the same steps; when the code is accepted you are signed in.
 
 ![Sign-in: required set-up of two-step verification (example key)](sec-signin-enrol)
 
-To turn it off, open Two-factor authentication from the profile menu, select Turn off and enter a current code. A role that requires it cannot turn it off. If you lose your phone, the System Administrator turns it off for your user and you set it up again.
+To turn it off, open Two-step verification from the account menu, select Turn off and enter a current code. A role that requires it cannot turn it off. If you lose your phone, the System Administrator turns it off for your user and you set it up again.
 
 ### Automatic sign-out
 
 After 30 minutes without activity the system signs you out (`limits.session_idle_minutes`). A warning appears one minute before. Move the mouse or press a key to stay signed in. Anything not saved on the screen is lost at sign-out, so save before you leave your desk. Your session also ends when your password is changed or reset, when your user is deactivated or when your role changes.
 
-To sign out yourself, select your initials at the top right, then Logout.
+To sign out yourself, select your initials at the top right, then Sign out.
 
 ## The screen layout
 
-![Screen layout: sidebar menu on the left, top bar with language, notifications and profile, work area on the right](intro-layout)
+![Screen layout: sidebar menu on the left, notification bell and your initials at the top right, work area](intro-layout)
 
 | Area | What it does |
 |---|---|
 | Logo and name | The logo and application name from Master > System Settings. The delivered system shows the iorta TechNXT logo and the name BrokerVerse. |
 | Search menu... | Type part of a screen name, for example reconcil. The list shows each matching screen with its menu path. Select one to open it. |
 | Sidebar menu | The modules your role may use. Select a module to open its items. |
-| Language | The screen language. |
-| Notification bell | The number of unread notifications. Select the bell to see the latest. |
-| Profile (your initials) | Profile, Change password, Two-factor authentication, Help and Logout. |
+| Notification bell | The number of unread notifications, up to 99; above that the badge shows 99+. Select the bell to see the latest. |
+| Your initials | The account menu: your name and role, Profile, Change password, Two-step verification, Help and Sign out. |
 | Work area | The screen you opened, with its title and breadcrumb. |
+
+The top bar shows a language box only when more than one screen language is offered.
 
 ![Menu search: typing "reconcil" lists every reconciliation screen](intro-menu-search)
 
@@ -156,15 +159,19 @@ The system notifies you when something needs your action: a payment to verify, a
 
 ![Notification panel opened from the bell](intro-notifications)
 
-Select the bell to see the latest notifications with their type and time. Select See More to open the full Notification page. Select the X on a notification to remove it from the panel.
+Select the bell. The Notifications panel shows the number unread and your six latest notifications with their title, message and time; a blue dot marks an unread one. Select a notification to mark it as read, the X to remove it, Mark all as read to clear the badge, and View all notifications to open the full Notification page.
 
 ![The Notification page](intro-notification-page)
 
 ### Your profile
 
-Select your initials, then Profile, to see your name, e-mail address and contact details. Select Edit Profile to correct them.
+Select your initials, then Profile, to open My Profile. The account summary shows your initials, display name, status, User ID, Role, Branch, Designation, Reporting to, E-mail address and Last sign-in; the System Administrator maintains these. The buttons Change password and Two-step verification open the same dialogs as the account menu.
 
-![The profile menu](intro-profile-menu)
+Personal and contact details holds Personal information (First name, Last name, Display name, Employee No., Date of birth, Gender), Contact (E-mail address, Contact number) and Address (House No. / Unit No. / Street, Barangay / Subdivision, City / Municipality, Province, ZIP code, Country). Select Edit Profile, correct the fields (First name and Display name are required; the contact number must be a Philippine number; a Philippine ZIP code has 4 digits) and select Save changes. The message Your profile has been updated. confirms it and the new display name appears in the top bar. Employee No. and the e-mail address are maintained by the System Administrator.
+
+![The account menu under your initials](intro-profile-menu)
+
+![My Profile](intro-my-profile)
 
 ### Working with lists
 
@@ -2207,7 +2214,7 @@ You see every menu. Keep this role for administration and use a business role fo
 | Schedules | Master > Schedules | 23 |
 | Audit | Master > Audit Trail | 23 |
 
-Before go-live: set the company and letterhead, the SMTP mailbox (Office 365), the numbering of official receipts to match the Authority to Print, the security settings and the roles that must use two-factor authentication.
+Before go-live: set the company and letterhead, the SMTP mailbox (Office 365), the numbering of official receipts to match the Authority to Print, the security settings and the roles that must use two-step verification.
 
 # Appendices
 
@@ -2301,7 +2308,7 @@ All settings are on Master > Configuration unless noted. Changes apply at once a
 | `limits.receivable_ageing_buckets` | 30, 60, 90, 120 | Ageing buckets. |
 | `security.password_min_length`, `security.password_history_count`, `security.password_max_age_days` | 8, 5, 90 | Password rules. |
 | `limits.max_login_attempts`, `limits.session_idle_minutes` | 5, 30 | Lockout and idle sign-out. |
-| `security.require_2fa_roles` | none | Roles that must use two-factor authentication. |
+| `security.require_2fa_roles` | none | Roles that must use two-step verification. |
 | `notification.email_enabled` | as set at go-live | Sends queued e-mails through the Office 365 mailbox. |
 | `housekeeping.*` | see Appendix D | Retention of logs and queues. |
 
@@ -2390,8 +2397,7 @@ Jobs marked off are delivered switched off. Switch on those Accounting wants on 
 ## Appendix G. Known limitations in this release
 
 - The sign-in session is kept in the browser's local storage. Sign out on shared computers and keep the browser up to date.
-- Two-factor set-up shows a setup key and an app link but no QR code. Type the key into the authenticator app.
-- Filipino is configured as a language but has no translation of the screens yet.
+- Filipino is configured as a language but has no translation of the screens yet, so it is not offered and no language box is shown.
 - Sign-in and request limits are counted per application server. With several servers, add a limit at the load balancer.
 - Some database queries use the database's own date. The database time zone must be Asia/Manila.
 - Several masters have no Upload button yet (Company, Branch, Department, Line of Business, Product, Cover, Signatories, Exchange Rate, Commission, Employee Management, Write-off reasons). Their templates are loaded by the System Administrator through the API route on the template.

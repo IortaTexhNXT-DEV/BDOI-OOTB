@@ -120,7 +120,9 @@ Two-step verification adds a 6-digit code from an authenticator app on your phon
 2. Type the current 6-digit code in **Authentication code**.
 3. Select **Verify**. A wrong or expired code shows **The code is not valid. Try the current code.**; type the code the app shows now.
 
-The page waits 5 minutes for the code (`security.two_factor_challenge_minutes`); after that, select **Back to sign in** and sign in again. If your role requires two-step verification and you have not set it up, the panel shows **Set up two-step verification** with the subtitle **Your role requires two-step verification. Set it up to continue.** and the same set-up steps as in the next section; after **Turn on** you are signed in.
+The page waits 5 minutes for the code (`security.two_factor_challenge_minutes`); after that, select **Back to sign in** and sign in again. If your role requires two-step verification and you have not set it up, the panel shows **Set up two-step verification** with the subtitle **Your role requires two-step verification. Set it up to continue.** and the same set-up steps as in Set up two-step verification below; after **Turn on** you are signed in. **Cancel** returns to the sign-in panel.
+
+![Sign-in: Set up two-step verification, required by the role](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-2fa-setup-signin.png)
 
 ### Automatic sign-out
 
@@ -634,10 +636,12 @@ This chapter is for the System Administrator and the migration lead. Master > Go
 
 ## The two workbooks
 
-| Workbook | File | What it holds |
-|---|---|---|
-| **Configuration** | GoLive_Configuration_Workbook.xlsx | Everything needed to run new business: company, settings, countries, states, cities, branches, departments, hierarchy, designations, users, currencies, exchange rates, chart of accounts, banks, bank accounts, signatories, transaction codes, write-off reasons, insurers, lines of business, products, policy types, covers, vehicle brands, models, variants and vehicles, commission rates, premium taxes, LGU rates, authority limits and document numbering. |
-| **Migration** | GoLive_Migration_Workbook.xlsx | The open business of the old system at cutover: clients, in-force policies (with their old numbers), open premium receivables, open claims and the GL opening balances. |
+| Workbook | What it holds |
+|---|---|
+| **Configuration** | Everything needed to run new business: company, settings, countries, states, cities, branches, departments, hierarchy, designations, users, currencies, exchange rates, chart of accounts, banks, bank accounts, signatories, transaction codes, write-off reasons, insurers, lines of business, products, policy types, covers, vehicle brands, models, variants and vehicles, commission rates, premium taxes, LGU rates, authority limits and document numbering. |
+| **Migration** | The open business of the old system at cutover: clients, in-force policies (with their old numbers), open premium receivables, open claims and the GL opening balances. |
+
+The blank workbooks are also delivered with the upload templates as GoLive_Configuration_Workbook.xlsx and GoLive_Migration_Workbook.xlsx.
 
 Choose the workbook with **Configuration** or **Migration** at the top right of the screen. Next to it the screen shows the cutover date (**Cutover** and the date, or **No cutover date**) and, once go-live is locked, **Go-live locked**.
 
@@ -694,7 +698,7 @@ Under the sheets, **Errors** lists each error with **Sheet**, **Row** (the row n
 2. If some rows still have errors, decide whether to load the valid rows now: **Load valid rows only** is ticked by default for the configuration workbook and not for the migration workbook. Without it, a batch with errors cannot be loaded.
 3. Select **Load**. The dialog **Load the workbook** asks you to confirm the number of valid rows of the batch. Select **Load** again, or **Cancel**.
 
-The load runs in one transaction. If a row now fails because the data changed since the validation, nothing is saved and the errors are shown. The load is written to the audit trail and the batch status becomes **Loaded**.
+The load runs in one transaction. If a row now fails because the data changed since the validation, nothing is saved and the errors are shown. The load is written to the audit trail and the batch status becomes **Loaded**. After a load of the valid rows only, the rows left out keep their errors: the batch still lists them and **Download errors** still gives them, to correct and upload again.
 
 When the configuration workbook creates users, the dialog **Temporary passwords of the new users** shows each new user's temporary password once. The passwords are not stored: select **Copy**, hand each password to its user privately, then select **Done**. Each user chooses a new password at the first sign-in. A load cannot change your own account, and only a System Administrator can give the System Administrator role.
 
@@ -710,9 +714,12 @@ The migration workbook is refused until the cutover date is set: the tab **Uploa
 
 ![Master > Configuration: the Go-live settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-config-golive.png)
 
+- On the configuration workbook, a line of business on the Commission Rates sheet must be a code of the Line of Business master; a rate on an unknown line is refused.
 - Rows dated on or after the cutover date are refused: policy issue date, claim loss and reported dates, client birth date. Policies must still be in force at cutover. Open claims are registered or in review.
 - Opening balances are the trial balance of the old system at the close of the day before the cutover date. Debits must equal credits, and the fiscal year of the cutover date must have no journal posted before it.
-- Migrated records keep the numbers of the old system. New business takes the next number of its Document Numbering series, set on the Numbering sheet. Both workbooks refuse a number that the other side would also issue: raise the next number of the series above the old range first.
+- Migrated records keep the numbers of the old system. New business takes the next number of its Document Numbering series, set on the Numbering sheet. Both workbooks refuse a number that the other side would also issue: raise the next number of the series above the old range first. A reset of test transactions restarts the counters, so load the Numbering sheet again after a reset and before the migration workbook.
+- An open item gets a bill number of the BrokerVerse invoice series; the bill number of the old system is kept as the bill reference, by which the open receivables can be searched.
+- A migrated policy is renewed like any other policy; its renewal is new business in BrokerVerse.
 - Migrated records post nothing: no bill, booking journal or commission accrual for a policy, no booking journal for an open item (the GL carries it in the opening balance), no e-mail, notification or journal for an open claim. Migrated policies count as policies in force but not as premium written or new business on the Executive Dashboard.
 
 Every validation and load of the migration workbook shows a **Reconciliation**: per sheet the **Workbook rows** and **Workbook totals** (premium, sum insured, open balance, claim estimate, debits and credits) against the records and totals **In BrokerVerse**, and the checks that the trial balance balances and that the premiums receivable control account equals the open items of the cutover date, each with **Agrees** or **Difference**. Compare these totals with the old system before go-live; **Download reconciliation** gives them as a workbook.
@@ -2019,7 +2026,7 @@ This chapter lists every menu screen in menu order with its purpose, its main fi
 
 | Screen | Purpose | Main content and rules | Roles |
 |---|---|---|---|
-| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill), each change against the same number of days of the previous period; migrated policies are not premium written; trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register). Targets from `dashboard.targets`. | All but Claims |
+| Executive Dashboard | Business performance against target. | Period (This Month, This Quarter, This Year); Total Revenue, Active Policies, New Business, Claims Rate, Retention Rate, Premium Receivable (Clients), Commission Receivable (Insurers, Direct Bill), each change against the same number of days of the previous period; migrated policies are not premium written; trends, revenue by product line, regional performance, top products, top sales performance; **Export Report** (Production Register); **Settings** (roles that may open System Settings) opens Master > System Settings. Targets from `dashboard.targets`. | All but Claims |
 | Claims Dashboard | Claims workload. | Total Open Claims, Claims Overdue (`claims.sla_days`), Today's Claims, recent claims; **Export Report**. | Claims, System Administrator |
 | Processing Dashboard | Processing Workbench. | Submissions, cycle time, open alerts, workload, submissions list, open tasks; **New Submission**. | Processing Team, System Administrator |
 | Sales Dashboard | Sales team performance. | Sales person, period; prospects, quotations, conversion, policies issued, premium, open pipeline; trend and pipelines. | Sales & Marketing, System Administrator |
