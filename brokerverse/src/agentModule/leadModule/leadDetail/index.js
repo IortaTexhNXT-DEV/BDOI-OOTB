@@ -12,6 +12,7 @@ import { getLeadByIdMiddleware, deleteLeadMiddleware } from '../Store/leadMiddle
 import { isFireLob, isIarLob } from '../../endorsementModule/constants/endorsementCategories';
 import { formatDate as formatConfiguredDate } from '../../../utility/dateFormat';
 import PartyPrivacyPanel from '../../../module/DataPrivacy/PartyPrivacyPanel';
+import ActivityPanel from '../../../components/SalesActivities/ActivityPanel';
 import './index.scss';
 
 const LeadDetail = () => {
@@ -290,6 +291,10 @@ const LeadDetail = () => {
           <Card className="detail-card">
             <PartyPrivacyPanel partyType="lead" partyId={currentLeadDetails.leadId || leadId} />
           </Card>
+        </div>
+
+        <div className="col-12">
+          <ActivityPanel entity="lead" recordId={String(currentLeadDetails.leadId || leadId)} />
         </div>
       </div>
     </div>

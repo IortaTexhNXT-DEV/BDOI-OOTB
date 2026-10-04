@@ -55,7 +55,7 @@ const Form2307 = ({ c, t }) => (
  * vouchers) or payors that withheld from the broker (insurers on direct-bill commission, clients); the certificate per
  * payee and quarter can be printed and issued (numbered CWT-...).
  */
-const Bir2307 = () => {
+const Bir2307 = ({ payeeType = null }) => {
   const { t } = useTranslation();
   const toast = useRef(null);
   const now = new Date();
@@ -69,13 +69,13 @@ const Bir2307 = () => {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setData(await periodEndService.payees2307({ year, quarter, direction }));
+      setData(await periodEndService.payees2307({ year, quarter, direction, payeeType: payeeType || undefined }));
     } catch (e) {
       showError(toast, e);
     } finally {
       setLoading(false);
     }
-  }, [year, quarter, direction]);
+  }, [year, quarter, direction, payeeType]);
   useEffect(() => { load(); }, [load]);
 
   const open = async (row) => {
@@ -96,16 +96,29 @@ const Bir2307 = () => {
     }
   };
 
+  const issueAll = async () => {
+    try {
+      const r = await periodEndService.issueAll2307({ year, quarter, payeeType: payeeType || undefined });
+      showSuccess(toast, t("supplier2307.issuedAll", { count: r.issued.length }));
+      load();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
   const years = Array.from({ length: 5 }, (_, i) => now.getFullYear() - i).map((y) => ({ label: String(y), value: y }));
   const payees = data?.payees || [];
   return (
     <div className="pe-page">
       <Toast ref={toast} />
-      <PageHeader title={t("periodEnd.bir2307")} section={t("periodEnd.tax")} trail={[t("periodEnd.bir2307")]}>
-        <SelectButton value={direction} onChange={(e) => e.value && setDirection(e.value)} options={[{ label: t("periodEnd.bir.issued"), value: "issued" }, { label: t("periodEnd.bir.received"), value: "received" }]} />
+      <PageHeader title={payeeType === "Supplier" ? t("supplier2307.title") : t("periodEnd.bir2307")} section={payeeType === "Supplier" ? t("supplier2307.section") : t("periodEnd.tax")}
+        trail={[payeeType === "Supplier" ? t("supplier2307.title") : t("periodEnd.bir2307")]}>
+        {!payeeType && <SelectButton value={direction} onChange={(e) => e.value && setDirection(e.value)} options={[{ label: t("periodEnd.bir.issued"), value: "issued" }, { label: t("periodEnd.bir.received"), value: "received" }]} />}
         <Dropdown value={year} options={years} onChange={(e) => setYear(e.value)} />
         <Dropdown value={quarter} options={[1, 2, 3, 4].map((q) => ({ label: `Q${q}`, value: q }))} onChange={(e) => setQuarter(e.value)} />
+        {direction === "issued" && payees.some((p) => !p.certificateNumber) && <Button icon="pi pi-verified" label={t("supplier2307.issueAll")} onClick={issueAll} />}
       </PageHeader>
+      {payeeType === "Supplier" && <p className="mt-0">{t("supplier2307.intro")}</p>}
       <div className="pe-kpis">
         <div className="pe-kpi"><div className="pe-kpi-label">{direction === "issued" ? t("periodEnd.bir.payees") : t("periodEnd.bir.payors")}</div><div className="pe-kpi-value">{payees.length}</div></div>
         <div className="pe-kpi"><div className="pe-kpi-label">{t("periodEnd.bir.incomePayments")}</div><div className="pe-kpi-value">{money(payees.reduce((s, p) => s + p.totalIncome, 0))}</div></div>

@@ -118,11 +118,11 @@ describe("Sales & Marketing menu", () => {
 
   it("groups prospects, quick quote, insurer comparison, requests for quotation, quotations and placement slips", () => {
     expect(items(["system-admin"])).toEqual(["Prospects", "Quick Quote", "Compare Insurers", "Request for Quotation", "Quotations", "Placement Slips",
-      "Lead Assignment", "Dealer Programmes", "Comparison Reports", "Campaigns"]);
-    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(10);
+      "Lead Assignment", "Dealer Programmes", "Comparison Reports", "Campaigns", "Sales Activities"]);
+    for (const role of ["sales", "operations"]) expect(items([role])).toHaveLength(11);
   });
   it("the Processing Team works the market side but does not create quick quotes; claims has no sales menu", () => {
-    expect(items(["processing"])).toEqual(["Prospects", "Request for Quotation", "Quotations", "Placement Slips", "Dealer Programmes", "Comparison Reports"]);
+    expect(items(["processing"])).toEqual(["Prospects", "Request for Quotation", "Quotations", "Placement Slips", "Dealer Programmes", "Comparison Reports", "Sales Activities"]);
     expect(isPathAllowed("/sales/quick-quote", menuList, ["processing"])).toBe(false);
     expect(items(["claims"])).toEqual([]);
   });

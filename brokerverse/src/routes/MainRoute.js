@@ -230,6 +230,10 @@ import SupplierInvoices from "../module/OpsAccounting/SupplierInvoices";
 import { ApAgeing, SupplierPayments } from "../module/OpsAccounting/SupplierPayments";
 import { AssetRegister, DepreciationRun } from "../module/OpsAccounting/FixedAssets";
 import { AssetClasses, CancellationReasons, ClaimDocumentChecklist, RepairShops, ShortPeriodRates, Suppliers } from "../module/OpsAccounting/Masters";
+// sales activities, asset disposal and the BIR 2307 of suppliers
+import SalesActivities from "../module/SalesActivities/SalesActivities";
+import { AssetDisposals } from "../module/OpsAccounting/AssetDisposals";
+import { SalesActivityOutcomes, SalesActivityTypes } from "../module/OpsAccounting/Masters";
 
 // Collections Module
 import CollectionsList from "../agentModule/collectionsModule/CollectionsList";
@@ -1747,6 +1751,12 @@ const Maincomponent = () => {
           <Route path="/accounts/payables/suppliers" element={<Suppliers />} />
           <Route path="/accounts/fixed-assets/register" element={<AssetRegister />} />
           <Route path="/accounts/fixed-assets/depreciation" element={<DepreciationRun />} />
+          {/* sales activities, asset disposal and the BIR 2307 of suppliers */}
+          <Route path="/accounts/fixed-assets/disposals" element={<AssetDisposals />} />
+          <Route path="/accounts/payables/2307" element={<Bir2307 payeeType="Supplier" />} />
+          <Route path="/sales/activities" element={<SalesActivities />} />
+          <Route path="/master/organization/sales-activity-types" element={<SalesActivityTypes />} />
+          <Route path="/master/organization/sales-activity-outcomes" element={<SalesActivityOutcomes />} />
           <Route path="/master/insurance/short-period-rates" element={<ShortPeriodRates />} />
           <Route path="/master/insurance/cancellation-reasons" element={<CancellationReasons />} />
           <Route path="/master/insurance/claim-document-checklist" element={<ClaimDocumentChecklist />} />

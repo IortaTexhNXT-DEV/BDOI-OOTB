@@ -83,6 +83,7 @@ const periodEndService = {
   payees2307: (params) => request(`/period-end/bir/2307${qs(params)}`),
   certificate2307: (params) => request(`/period-end/bir/2307/certificate${qs(params)}`),
   issue2307: (body) => post("/period-end/bir/2307/issue", body),
+  issueAll2307: (body) => post("/period-end/bir/2307/issue-all", body),
   certificates2307: (params) => request(`/period-end/bir/2307/certificates${qs(params)}`),
   cancel2307: (id, reason) => post(`/period-end/bir/2307/certificates/${id}/cancel`, { reason }),
 };

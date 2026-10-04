@@ -116,12 +116,14 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Lead statuses New, Contacted, Qualified, QuoteGenerated, Converted, Lost.
 - Client code CL- created at first policy issue; client view with Policy, Claim, Renewal and Endorsement tabs.
 - Consent per purpose recorded on the prospect and client screens (see Data privacy).
+- Sales activities: account executives log calls, meetings, e-mails and visits on a prospect, a quotation or a client (activity type and outcome from masters the broker maintains, contact, duration, notes, next step with its date). Each prospect, client and quotation shows its activity timeline (a prospect and a client also show those of their quotations) and the open next step. The next step becomes a follow-up task in the account executive's My Work; a later activity on the same record completes it.
+- Activity report by account executive and period: activities by channel, prospects, clients and quotations worked, positive outcomes, next steps and how their follow-ups stand (done, open, overdue); Excel export.
 
 | Aspect | Detail |
 |---|---|
 | Philippine specifics | Philippine mobile number formats, 4-digit ZIP code, province, city and barangay address, TIN |
 | Personas | Sales & Marketing, Operations; Processing Team views |
-| Key reports | Lead Conversion Funnel; lead list by category |
+| Key reports | Lead Conversion Funnel; lead list by category; Sales Activity Report by account executive |
 | Controls | Changes to client details on an issued policy go through a Personal Details Change endorsement; audit trail on every change |
 | Integrations | Bulk upload (XLSX or CSV) |
 
@@ -150,6 +152,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 - Steps: policy and vehicle details, plan recommendations (CTPL, Basic, Comprehensive), coverage with Calculate, accessories and policy limits, order summary with discount, referrer and signatory.
 - Own damage, acts of nature, roadside assistance, personal accident, excess bodily injury and property damage, Auto Passenger PA per seat, accessories.
+- The product rules drive the quotation: the covers offered are those of the governing product template's Coverage Builder (mandatory covers always included, optional covers added or removed, each priced on its "Priced on quotation as" premium; the server prices on the same choice), and the wizard asks for the risk details the template's acceptance rules and rating factors test (driver's date of birth, claims in the last 3 years, fair market value, modifications, claim-free years, number of members for group risks), so every rule is evaluated. `underwriting.require_rule_fields` makes the server refuse a quotation without them.
 - Co-insurance on the quotation, with shares totalling 100% and one lead.
 - Brokerage rate from the Commission Rate Matrix, then the insurer default, then `commission.default_rate` (15%); comsub for the referrer chain; discount up to 30% taken from the broker's commission.
 - Send for Customer Approval e-mails a signed link valid for 168 hours; the client approves without signing in. Share by download, e-mail, WhatsApp, Send to Insurer or copied link.
@@ -315,17 +318,19 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 ## Accounts payable and fixed assets
 
-**What it does.** Keeps the broker's own payables and assets: supplier invoices, supplier payments and the fixed asset register with its monthly depreciation.
+**What it does.** Keeps the broker's own payables and assets: supplier invoices, supplier payments, the BIR Form 2307 of the tax withheld from suppliers, and the fixed asset register with its monthly depreciation and disposals.
 
 - Suppliers (TIN, VAT registration, EWT tax code, terms, default expense account); supplier invoices (APV-) with input VAT and expanded withholding tax, approved by a second user (approve:payables) and posted (posting rule ap.invoice); supplier payments (SPV-, posting rule ap.payment); AP ageing; AP and payment vouchers.
 - Fixed asset register (FA-): asset classes with useful life and accounts, assets from supplier invoice lines or registered by hand (with the go-live accumulated depreciation), straight-line schedule, monthly depreciation run per asset class (posting rule fa.depreciation), also a step of the month-end close.
+- Supplier 2307: BIR Form 2307 per supplier and quarter for the expanded withholding tax withheld on supplier invoices (ATC of the invoice's EWT code), from the same generator as the commission payees' certificates, issued one by one or all at once; the supplier EWT is in the QAP, the 0619-E and 1601-EQ (reconciled with the ledger), the 1604-E alphalist and the DAT files.
+- Asset disposal (FAD-): sale or write-off of an asset; cost and accumulated depreciation removed, proceeds and output VAT of a sale, gain or loss on disposal (posting rule fa.disposal); a sale issues its BIR sales invoice (received into a bank account, or collected on the invoice); disposal voucher, disposal register with Excel export; a disposal is cancelled by reversal and the asset restored.
 
 | Aspect | Detail |
 |---|---|
 | Philippine specifics | Input VAT at the VAT12-IN code; EWT codes of the BIR (WC158, WC160, WC100 ...) withheld from suppliers |
 | Personas | Accounting records and pays; Accounting Manager approves |
-| Key reports | AP Ageing, Fixed Asset Register (Excel) |
-| Controls | Maker-checker on supplier invoices (`payables.maker_checker`); one invoice number per supplier; an asset is depreciated once per period |
+| Key reports | AP Ageing, Fixed Asset Register (Excel), Disposal Register (Excel), Supplier 2307 |
+| Controls | Maker-checker on supplier invoices (`payables.maker_checker`); one invoice number per supplier; an asset is depreciated once per period; an asset is disposed only after its depreciation up to the month before (`fixed_assets.disposal_requires_depreciation_to_date`) |
 | Integrations | Upload templates and go-live sheets for suppliers and asset classes |
 
 ## Disbursement and petty cash
@@ -475,7 +480,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 **What it does.** Prepares the BIR forms and working papers from the ledger.
 
-- BIR Form 2307: Issued by us (tax withheld on payments to agents, referrers and suppliers) and Received (tax withheld by insurers and clients); certificates per payee and quarter numbered from the CWT series, printed on the BIR layout; cancel with a reason.
+- BIR Form 2307: Issued by us (tax withheld on payments to agents, referrers and suppliers, and on the supplier invoices of accounts payable) and Received (tax withheld by insurers and clients); certificates per payee and quarter numbered from the CWT series, printed on the BIR layout, issued one by one or for every payee of the quarter; cancel with a reason.
 - VAT Summary: vatable revenue, output VAT, input VAT and net VAT payable per month or quarter, the working paper for the VAT return.
 - SAWT, QAP, SLSP Sales and SLSP Purchases in the BIR column order, as CSV, Excel or PDF.
 - Withholding Returns: 0619-E per month and 1601-EQ per quarter per ATC on the BIR layout (PDF and Excel), reconciled with the QAP and the ledger withholding accounts, with filing records (date filed, reference, amount paid, penalties, amended returns); annual 1604-E with the alphalist of payees (schedules 3 and 4).
@@ -910,6 +915,10 @@ The table lists capabilities a Philippine non-life broker typically compares. Th
 | 71 | Client comparison and recommendation report | Yes |  | | |
 | 72 | E-mail marketing campaigns to consenting clients with opt-out | Yes | Sent through the e-mail outbox | | |
 | 73 | Ad hoc report builder with saved, shared reports and BI extract | Yes | CSV extract to file storage | | |
+| 74 | Sales activity log (calls, meetings, e-mails, visits) with follow-up tasks and activity report | Yes |  | | |
+| 75 | Quotation covers and risk details driven by the product rules | Yes |  | | |
+| 76 | BIR Form 2307 for suppliers, supplier EWT in QAP, 1601-EQ and 1604-E | Yes |  | | |
+| 77 | Fixed asset disposal with gain or loss and output VAT | Yes |  | | |
 
 # Points to note in this release
 

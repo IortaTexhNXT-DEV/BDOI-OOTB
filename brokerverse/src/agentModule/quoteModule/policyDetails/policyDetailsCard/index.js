@@ -24,6 +24,8 @@ import SvgTable from "../../../../assets/icons/SvgTable";
 import SvgUploadArrowIcon from "../../../../assets/icons/SvgUploadArrowIcon";
 import useMotorTariff, { findVehicleClass } from "../../utils/useMotorTariff";
 import { confirmAction, notifyWarn } from "../../../../utility/dialogs";
+import useQuoteSetup, { missingRiskFields, riskFieldsToAsk } from "../../utils/useQuoteSetup";
+import RiskFactsFields from "./RiskFactsFields";
 
 const PolicyDetailsCard = ({ action, flow, lead }) => {
   const { t } = useTranslation();
@@ -92,7 +94,28 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
   };
 
   const initialValue = getFormValues();
+  // Risk details the acceptance rules and rating factors of the governing product template test (quote set-up)
+  const quoteSetup = useQuoteSetup({ lob: "MOTOR" });
+  const [riskFacts, setRiskFacts] = useState(() => existingPolicyDetails?.riskFacts || {});
+  const [riskMissing, setRiskMissing] = useState([]);
+  // an edited quotation loads its risk details after the first render
+  useEffect(() => {
+    if (existingPolicyDetails?.riskFacts) setRiskFacts((cur) => (Object.keys(cur).length ? cur : existingPolicyDetails.riskFacts));
+  }, [existingPolicyDetails?.riskFacts]);
+  // a yes / no risk field is answered "no" until it is ticked
+  const factsWithDefaults = () => {
+    const out = { ...riskFacts };
+    for (const f of riskFieldsToAsk(quoteSetup)) if (f.type === "boolean" && out[f.field] === undefined) out[f.field] = false;
+    return out;
+  };
   const handleclick = (values) => {
+    const facts = factsWithDefaults();
+    const missing = missingRiskFields(quoteSetup, facts);
+    setRiskMissing(missing);
+    if (missing.length) {
+      notifyWarn(t("quoteRisk.completeFirst"));
+      return;
+    }
     // Validate co-insurance setup
     if (checked) {
       if (!values.InsuranceCompanyName) {
@@ -149,6 +172,8 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
       isCoInsurance: checked,
       primarySharePercentage: values.PrimarySharePercentage || null,
       participantDetails: TableList || [], // Include participant details for co-insurance
+      // risk details tested by the product's acceptance rules and rating factors (driver, claims, market value...)
+      riskFacts: facts,
     };
 
     // Save to Redux state
@@ -649,6 +674,7 @@ const PolicyDetailsCard = ({ action, flow, lead }) => {
               )}
           </div>
         </div>
+        <RiskFactsFields setup={quoteSetup} value={riskFacts} onChange={setRiskFacts} missing={riskMissing} />
         <div className="policy__details__card__btn__container">
           <div className="next__btn__container">
             <Button

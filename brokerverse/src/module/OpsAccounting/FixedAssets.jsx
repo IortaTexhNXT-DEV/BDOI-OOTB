@@ -11,6 +11,8 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
 import { Field, OpsTag, PageHeader, date, isoOf, money, numericColumn, showError, showSuccess } from "./common";
+import { DisposeAssetDialog } from "./AssetDisposals";
+import { hasPermission } from "../../utils/canOpen";
 
 /** Accounts > Fixed Assets > Asset Register: assets, cost, accumulated depreciation, book value and the depreciation schedule. */
 export const AssetRegister = () => {
@@ -18,22 +20,24 @@ export const AssetRegister = () => {
   const toast = useRef(null);
   const [search, setSearch] = useState("");
   const [classCode, setClassCode] = useState(null);
+  const [status, setStatus] = useState(null);
   const [data, setData] = useState(null);
   const [classes, setClasses] = useState([]);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState(null);
   const [view, setView] = useState(null);
+  const [disposing, setDisposing] = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      setData(await service.assets({ search: search || undefined, classCode: classCode || undefined }));
+      setData(await service.assets({ search: search || undefined, classCode: classCode || undefined, status: status || undefined }));
     } catch (e) {
       showError(toast, e);
     } finally {
       setLoading(false);
     }
-  }, [search, classCode]);
+  }, [search, classCode, status]);
   useEffect(() => { load(); }, [load]);
   useEffect(() => { service.assetClasses().then(setClasses).catch(() => {}); }, []);
 
@@ -69,6 +73,8 @@ export const AssetRegister = () => {
         <div className="flex gap-2 mb-2">
           <Dropdown value={classCode} options={classes.map((c) => ({ label: c.name, value: c.code }))} showClear placeholder={t("opsAcc.fa.allClasses")} onChange={(e) => setClassCode(e.value)} className="w-14rem" />
           <InputText value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("opsAcc.search")} className="w-20rem" />
+          <Dropdown value={status} options={["active", "fully-depreciated", "disposed"].map((v) => ({ label: t(`opsAcc.status.${v}`), value: v }))} showClear
+            placeholder={t("assetDisposal.allStatuses")} onChange={(e) => setStatus(e.value)} className="w-14rem" />
         </div>
         <DataTable value={data?.rows || []} dataKey="id" loading={loading} size="small" stripedRows paginator rows={25} emptyMessage={t("opsAcc.none")} rowHover
           onRowClick={(e) => service.asset(e.data.id).then(setView).catch((x) => showError(toast, x))}>
@@ -83,11 +89,15 @@ export const AssetRegister = () => {
           <Column header={t("opsAcc.statusLabel")} body={(r) => <OpsTag status={r.status} />} />
         </DataTable>
       </div>
-      <Dialog className="pe-dialog" header={view ? `${view.assetNumber} · ${view.name}` : ""} visible={!!view} style={{ width: "min(860px, 96vw)" }} onHide={() => setView(null)}>
+      <Dialog className="pe-dialog" header={view ? `${view.assetNumber} · ${view.name}` : ""} visible={!!view} style={{ width: "min(860px, 96vw)" }} onHide={() => setView(null)}
+        footer={view && view.status !== "disposed" && hasPermission("write:fixed-assets") ? (
+          <div><Button icon="pi pi-sign-out" label={t("assetDisposal.dispose")} severity="warning" outlined onClick={() => { setDisposing(view); setView(null); }} /></div>
+        ) : null}>
         {view && (
           <>
             <p className="mt-0">{view.className || view.classCode} · {t("opsAcc.fa.life", { months: view.usefulLifeMonths })} · {view.assetAccount} / {view.accumulatedAccount} / {view.expenseAccount}
               {view.supplierInvoiceVoucher ? ` · ${view.supplierInvoiceVoucher}` : ""}</p>
+            {view.status === "disposed" && <p className="mt-0"><OpsTag status="disposed" /> {date(view.disposedOn)}</p>}
             <DataTable value={view.schedule} dataKey="period" size="small" stripedRows scrollable scrollHeight="420px">
               <Column field="period" header={t("opsAcc.period")} />
               <Column header={t("opsAcc.amount")} body={(r) => money(r.amount)} {...numericColumn} />
@@ -99,6 +109,7 @@ export const AssetRegister = () => {
           </>
         )}
       </Dialog>
+      <DisposeAssetDialog asset={disposing} onHide={() => setDisposing(null)} onDisposed={() => { setDisposing(null); load(); }} />
       <Dialog className="pe-dialog" header={t("opsAcc.fa.newAsset")} visible={!!form} style={{ width: "min(780px, 96vw)" }} onHide={() => setForm(null)}
         footer={<div><Button label={t("opsAcc.cancel")} text onClick={() => setForm(null)} /><Button label={t("opsAcc.save")} icon="pi pi-save" onClick={save} /></div>}>
         {form && (

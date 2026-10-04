@@ -5,6 +5,7 @@ import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import SvgDot from "../../../assets/agentIcon/SvgDots";
 import ClientViewCard from "./clientViewCard";
+import ActivityPanel from "../../../components/SalesActivities/ActivityPanel";
 import { useNavigate, useParams } from "react-router-dom";
 
 const ClientView = ({ action }) => {
@@ -43,6 +44,8 @@ const ClientView = ({ action }) => {
         />
       </div>
       <ClientViewCard action={action} clientId={clientId} onClient={(c) => setClientCode(c?.clientCode || c?.generatedClientId || null)} />
+      {/* calls, meetings, e-mails and visits of the account executives with this client, and the open next step */}
+      {clientId && <ActivityPanel entity="client" recordId={String(clientId)} />}
     </div>
   );
 };
