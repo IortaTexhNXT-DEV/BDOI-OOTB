@@ -395,6 +395,23 @@ async function assertUnique(t, values, exceptId) {
   }
 }
 
+/**
+ * The record whose natural key (the first unique key of the type, e.g. the code) has the values of `values`, or null
+ * (deleted records are not matched; text compared without case). Used by the go-live configuration workbook, which
+ * updates a record when its key exists and creates it otherwise.
+ */
+export async function findRecordByKey(t, values) {
+  const key = (t.unique_keys || [])[0] || (t.code_field ? [t.code_field] : []);
+  const fields = key.map((n) => t.fields.find((f) => f.name === n)).filter(Boolean);
+  if (!fields.length || fields.length !== key.length || fields.some((f) => values[f.name] === undefined || values[f.name] === null || values[f.name] === '')) return null;
+  const p = params();
+  const alias = t.storage === 'generic' ? 'm' : 't';
+  const from = t.storage === 'generic' ? `master_records m WHERE m.type_code = ${p.add(t.code)} AND` : `${q(t.table_name)} t WHERE`;
+  const conds = fields.map((f) => `lower(${textExpr(t, f, p.add)}) = lower(${p.add(String(values[f.name]).trim())})`);
+  const hit = await one(`SELECT ${alias}.id FROM ${from} ${alias}.status <> 'deleted' AND ${conds.join(' AND ')} ORDER BY ${alias}.id LIMIT 1`, p.values);
+  return hit ? hit.id : null;
+}
+
 const pgConflict = (t) => (e) => {
   if (e.code === '23505') throw conflict(`${t.label} with the same code already exists`);
   throw e;

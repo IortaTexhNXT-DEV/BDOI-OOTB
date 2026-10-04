@@ -9,6 +9,9 @@
  *
  * The database must be migrated and seeded (reference data is enough).
  * Default output: ../docs/package/05_Delivery/Upload_Templates.
+ *
+ * Also writes the two blank go-live workbooks of Master > Go-Live Data Load (GoLive_Configuration_Workbook.xlsx and
+ * GoLive_Migration_Workbook.xlsx, src/modules/data-load), so they can be handed out without signing in.
  */
 import fs from 'node:fs';
 import path from 'node:path';
@@ -21,6 +24,7 @@ import { bulkConfig } from '../src/modules/remittance/items.js';
 import {
   insurerStatementUpload, masterUpload, remittanceUpload, staticUploads, statementUpload, templateCsv, templateWorkbook,
 } from '../src/modules/documents/uploadTemplates.js';
+import { KITS, kitSheets, template as kitTemplate } from '../src/modules/data-load/service.js';
 
 const backend = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 export const DEFAULT_OUT = path.resolve(backend, '..', 'docs', 'package', '05_Delivery', 'Upload_Templates');
@@ -47,6 +51,7 @@ export const FILE_ROUTES = [
   { module: 'insurer-reconciliation', method: 'POST', path: '/statements/import', templates: ['insurer-statement'] },
   { module: 'insurer-reconciliation', method: 'POST', path: '/statements/preview', templates: ['insurer-statement'] },
   { module: 'remittance', method: 'POST', path: '/bulk/upload', templates: ['remittance-bulk'] },
+  { module: 'data-load', method: 'POST', path: '/batches', templates: ['kit:configuration', 'kit:migration'] },
   { module: 'claims', method: 'POST', path: '/', noTemplate: 'Claim documents and photos attached to a claim (single files)' },
   { module: 'claims', method: 'PUT', path: '/:id', noTemplate: 'Claim documents and photos attached to a claim (single files)' },
   { module: 'claims', method: 'PUT', path: '/settle/:id', noTemplate: 'Settlement documents attached to a claim (single files)' },
@@ -117,6 +122,14 @@ export async function buildTemplates(outDir = DEFAULT_OUT) {
     out.push({ id: def.id, file: def.file, csv: def.csv || null, title: def.title, menu: def.menu, screen: def.screen || def.menu, button: def.button !== false, route: def.route,
       headers: def.columns.map((c) => c.header), required: def.columns.filter((c) => c.required === true).map((c) => c.header) });
   }
+  // go-live workbench kits: one workbook per kit (blank), sheets in load order
+  for (const kit of Object.keys(KITS)) {
+    const { fileName, buffer } = await kitTemplate(kit);
+    fs.writeFileSync(path.join(outDir, fileName), buffer);
+    const sheets = await kitSheets(kit);
+    out.push({ id: `kit:${kit}`, file: fileName, csv: null, title: KITS[kit].title, menu: 'Master > Go-Live Data Load', screen: 'Master > Go-Live Data Load',
+      button: true, route: 'POST /api/data-load/batches (multipart field "file", field kit)', headers: sheets.map((x) => x.name), required: [] });
+  }
   const keep = new Set(out.flatMap((t) => [t.file, t.csv].filter(Boolean)));
   const removed = fs.readdirSync(outDir).filter((f) => TEMPLATE_FILE.test(f) && !keep.has(f));
   for (const f of removed) fs.rmSync(path.join(outDir, f));
@@ -127,7 +140,7 @@ export async function buildTemplates(outDir = DEFAULT_OUT) {
 async function main() {
   const outDir = path.resolve(process.argv[2] || DEFAULT_OUT);
   const list = await buildTemplates(outDir);
-  for (const t of list) console.log(`${t.file}${t.csv ? ` + ${t.csv}` : ''}: ${t.headers.length} columns`);
+  for (const t of list) console.log(`${t.file}${t.csv ? ` + ${t.csv}` : ''}: ${t.headers.length} ${t.id.startsWith('kit:') ? 'sheets' : 'columns'}`);
   for (const f of list.removed) console.log(`removed ${f} (no longer accepted by the platform)`);
   console.log(`${list.length} templates written to ${outDir}`);
   await pool.end();

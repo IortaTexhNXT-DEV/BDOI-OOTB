@@ -87,6 +87,9 @@
       "name": "Files (S3 API)"
     },
     {
+      "name": "Go-Live Data Workbench"
+    },
+    {
       "name": "Incentive"
     },
     {
@@ -33349,6 +33352,1289 @@
         "security": []
       }
     },
+    "/data-load/batches": {
+      "get": {
+        "operationId": "getDataLoadBatches",
+        "summary": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > History\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "kit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "migration"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "kit": {
+                            "type": "string"
+                          },
+                          "fileName": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "cutoverDate": {
+                            "type": "string"
+                          },
+                          "rowsRead": {
+                            "type": "integer"
+                          },
+                          "rowsValid": {
+                            "type": "integer"
+                          },
+                          "rowsError": {
+                            "type": "integer"
+                          },
+                          "sheets": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "sheet": {
+                                  "type": "string"
+                                },
+                                "name": {
+                                  "type": "string"
+                                },
+                                "read": {
+                                  "type": "integer"
+                                },
+                                "valid": {
+                                  "type": "integer"
+                                },
+                                "errors": {
+                                  "type": "integer"
+                                },
+                                "created": {
+                                  "type": "integer"
+                                },
+                                "updated": {
+                                  "type": "integer"
+                                },
+                                "unchanged": {
+                                  "type": "integer"
+                                },
+                                "proposed": {
+                                  "type": "integer"
+                                },
+                                "skipped": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          },
+                          "loadedCounts": {},
+                          "reconciliation": {},
+                          "createdBy": {
+                            "type": "string"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "validatedAt": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 7,
+                      "kit": "migration",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "failed",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 478,
+                      "rowsError": 2,
+                      "sheets": [
+                        {
+                          "sheet": "policies",
+                          "name": "Policies",
+                          "read": 120,
+                          "valid": 118,
+                          "errors": 2,
+                          "created": 118,
+                          "updated": 0,
+                          "unchanged": 0,
+                          "proposed": 0,
+                          "skipped": 0
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z"
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > History",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      },
+      "post": {
+        "operationId": "postDataLoadBatches",
+        "summary": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Upload and validate\n\nAccess: write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "batch": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "kit": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "cutoverDate": {
+                              "type": "string"
+                            },
+                            "rowsRead": {
+                              "type": "integer"
+                            },
+                            "rowsValid": {
+                              "type": "integer"
+                            },
+                            "rowsError": {
+                              "type": "integer"
+                            },
+                            "sheets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "sheet": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "read": {
+                                    "type": "integer"
+                                  },
+                                  "valid": {
+                                    "type": "integer"
+                                  },
+                                  "errors": {
+                                    "type": "integer"
+                                  },
+                                  "created": {
+                                    "type": "integer"
+                                  },
+                                  "updated": {
+                                    "type": "integer"
+                                  },
+                                  "unchanged": {
+                                    "type": "integer"
+                                  },
+                                  "proposed": {
+                                    "type": "integer"
+                                  },
+                                  "skipped": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "loadedCounts": {},
+                            "reconciliation": {},
+                            "createdBy": {
+                              "type": "string"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "validatedAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "sheetName": {
+                                "type": "string"
+                              },
+                              "row": {
+                                "type": "integer"
+                              },
+                              "column": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Validated: 2 row(s) with errors",
+                  "data": {
+                    "batch": {
+                      "id": 7,
+                      "kit": "migration",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "failed",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 478,
+                      "rowsError": 2,
+                      "sheets": [
+                        {
+                          "sheet": "policies",
+                          "name": "Policies",
+                          "read": 120,
+                          "valid": 118,
+                          "errors": 2,
+                          "created": 118,
+                          "updated": 0,
+                          "unchanged": 0,
+                          "proposed": 0,
+                          "skipped": 0
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z"
+                    },
+                    "errors": [
+                      {
+                        "sheet": "policies",
+                        "sheetName": "Policies",
+                        "row": 14,
+                        "column": "Issue Date",
+                        "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Upload and validate",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "string"
+              },
+              "example": "multipart/form-data file, kit=configuration|migration"
+            }
+          }
+        }
+      }
+    },
+    "/data-load/batches/{id}": {
+      "get": {
+        "operationId": "getDataLoadBatchesId",
+        "summary": "One batch: result per sheet and the errors (sheet, row, column, message)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "batch": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "kit": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "cutoverDate": {
+                              "type": "string"
+                            },
+                            "rowsRead": {
+                              "type": "integer"
+                            },
+                            "rowsValid": {
+                              "type": "integer"
+                            },
+                            "rowsError": {
+                              "type": "integer"
+                            },
+                            "sheets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "sheet": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "read": {
+                                    "type": "integer"
+                                  },
+                                  "valid": {
+                                    "type": "integer"
+                                  },
+                                  "errors": {
+                                    "type": "integer"
+                                  },
+                                  "created": {
+                                    "type": "integer"
+                                  },
+                                  "updated": {
+                                    "type": "integer"
+                                  },
+                                  "unchanged": {
+                                    "type": "integer"
+                                  },
+                                  "proposed": {
+                                    "type": "integer"
+                                  },
+                                  "skipped": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "loadedCounts": {},
+                            "reconciliation": {},
+                            "createdBy": {
+                              "type": "string"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "validatedAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "sheetName": {
+                                "type": "string"
+                              },
+                              "row": {
+                                "type": "integer"
+                              },
+                              "column": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "totalErrors": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "batch": {
+                      "id": 7,
+                      "kit": "migration",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "failed",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 478,
+                      "rowsError": 2,
+                      "sheets": [
+                        {
+                          "sheet": "policies",
+                          "name": "Policies",
+                          "read": 120,
+                          "valid": 118,
+                          "errors": 2,
+                          "created": 118,
+                          "updated": 0,
+                          "unchanged": 0,
+                          "proposed": 0,
+                          "skipped": 0
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z"
+                    },
+                    "errors": [
+                      {
+                        "sheet": "policies",
+                        "sheetName": "Policies",
+                        "row": 14,
+                        "column": "Issue Date",
+                        "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
+                      }
+                    ],
+                    "totalErrors": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Validation result",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/errors": {
+      "get": {
+        "operationId": "getDataLoadBatchesIdErrors",
+        "summary": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Download errors\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Download errors",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/load": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdLoad",
+        "summary": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Load\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "batch": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "kit": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "cutoverDate": {
+                              "type": "string"
+                            },
+                            "rowsRead": {
+                              "type": "integer"
+                            },
+                            "rowsValid": {
+                              "type": "integer"
+                            },
+                            "rowsError": {
+                              "type": "integer"
+                            },
+                            "sheets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "sheet": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "read": {
+                                    "type": "integer"
+                                  },
+                                  "valid": {
+                                    "type": "integer"
+                                  },
+                                  "errors": {
+                                    "type": "integer"
+                                  },
+                                  "created": {
+                                    "type": "integer"
+                                  },
+                                  "updated": {
+                                    "type": "integer"
+                                  },
+                                  "unchanged": {
+                                    "type": "integer"
+                                  },
+                                  "proposed": {
+                                    "type": "integer"
+                                  },
+                                  "skipped": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "loadedCounts": {},
+                            "reconciliation": {},
+                            "createdBy": {
+                              "type": "string"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "validatedAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "temporaryPasswords": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "username": {
+                                "type": "string"
+                              },
+                              "displayName": {
+                                "type": "string"
+                              },
+                              "temporaryPassword": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "reconciliation": {}
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Loaded",
+                  "data": {
+                    "batch": {
+                      "id": 7,
+                      "kit": "migration",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "loaded",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 478,
+                      "rowsError": 2,
+                      "sheets": [
+                        {
+                          "sheet": "policies",
+                          "name": "Policies",
+                          "read": 120,
+                          "valid": 118,
+                          "errors": 2,
+                          "created": 118,
+                          "updated": 0,
+                          "unchanged": 0,
+                          "proposed": 0,
+                          "skipped": 0
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z"
+                    },
+                    "temporaryPasswords": [
+                      {
+                        "username": "andrea.lim",
+                        "displayName": "Andrea Lim",
+                        "temporaryPassword": "<shown once>"
+                      }
+                    ],
+                    "reconciliation": null
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Load",
+        "x-permissions": [
+          "write:data-load"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "validRowsOnly": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "validRowsOnly": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/data-load/batches/{id}/reconciliation": {
+      "get": {
+        "operationId": "getDataLoadBatchesIdReconciliation",
+        "summary": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > History > Reconciliation\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > History > Reconciliation",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/batches/{id}/validate": {
+      "post": {
+        "operationId": "postDataLoadBatchesIdValidate",
+        "summary": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: write:data-load",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "batch": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "integer"
+                            },
+                            "kit": {
+                              "type": "string"
+                            },
+                            "fileName": {
+                              "type": "string"
+                            },
+                            "status": {
+                              "type": "string"
+                            },
+                            "cutoverDate": {
+                              "type": "string"
+                            },
+                            "rowsRead": {
+                              "type": "integer"
+                            },
+                            "rowsValid": {
+                              "type": "integer"
+                            },
+                            "rowsError": {
+                              "type": "integer"
+                            },
+                            "sheets": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "sheet": {
+                                    "type": "string"
+                                  },
+                                  "name": {
+                                    "type": "string"
+                                  },
+                                  "read": {
+                                    "type": "integer"
+                                  },
+                                  "valid": {
+                                    "type": "integer"
+                                  },
+                                  "errors": {
+                                    "type": "integer"
+                                  },
+                                  "created": {
+                                    "type": "integer"
+                                  },
+                                  "updated": {
+                                    "type": "integer"
+                                  },
+                                  "unchanged": {
+                                    "type": "integer"
+                                  },
+                                  "proposed": {
+                                    "type": "integer"
+                                  },
+                                  "skipped": {
+                                    "type": "integer"
+                                  }
+                                }
+                              }
+                            },
+                            "loadedCounts": {},
+                            "reconciliation": {},
+                            "createdBy": {
+                              "type": "string"
+                            },
+                            "createdAt": {
+                              "type": "string"
+                            },
+                            "validatedAt": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "errors": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "sheet": {
+                                "type": "string"
+                              },
+                              "sheetName": {
+                                "type": "string"
+                              },
+                              "row": {
+                                "type": "integer"
+                              },
+                              "column": {
+                                "type": "string"
+                              },
+                              "message": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "batch": {
+                      "id": 7,
+                      "kit": "migration",
+                      "fileName": "GoLive_Migration_Workbook.xlsx",
+                      "status": "failed",
+                      "cutoverDate": "2026-11-01",
+                      "rowsRead": 480,
+                      "rowsValid": 478,
+                      "rowsError": 2,
+                      "sheets": [
+                        {
+                          "sheet": "policies",
+                          "name": "Policies",
+                          "read": 120,
+                          "valid": 118,
+                          "errors": 2,
+                          "created": 118,
+                          "updated": 0,
+                          "unchanged": 0,
+                          "proposed": 0,
+                          "skipped": 0
+                        }
+                      ],
+                      "loadedCounts": null,
+                      "reconciliation": null,
+                      "createdBy": "BrokerVerse Administrator",
+                      "createdAt": "2026-10-28T09:00:00Z",
+                      "validatedAt": "2026-10-28T09:00:05Z"
+                    },
+                    "errors": [
+                      {
+                        "sheet": "policies",
+                        "sheetName": "Policies",
+                        "row": 14,
+                        "column": "Issue Date",
+                        "message": "Issue Date 2026-11-02 is on or after the cutover date 2026-11-01"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Validation result",
+        "x-permissions": [
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/kits": {
+      "get": {
+        "operationId": "getDataLoadKits",
+        "summary": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load\n\nAccess: read:data-load, write:data-load",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "kits": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "kit": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "sheets": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "key": {
+                                      "type": "string"
+                                    },
+                                    "name": {
+                                      "type": "string"
+                                    },
+                                    "keyColumns": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "columns": {
+                                      "type": "array",
+                                      "items": {}
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "cutoverDate": {
+                          "type": "string"
+                        },
+                        "locked": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "kits": [
+                      {
+                        "kit": "configuration",
+                        "title": "Go-live configuration workbook",
+                        "sheets": [
+                          {
+                            "key": "users",
+                            "name": "Users",
+                            "keyColumns": [
+                              "username"
+                            ],
+                            "columns": []
+                          }
+                        ]
+                      }
+                    ],
+                    "cutoverDate": "2026-11-01",
+                    "locked": false
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
+    "/data-load/kits/{kit}/template": {
+      "get": {
+        "operationId": "getDataLoadKitsKitTemplate",
+        "summary": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)",
+        "tags": [
+          "Go-Live Data Workbench"
+        ],
+        "description": "Front-end touchpoint: Master > Go-Live Data Load > Download template\n\nAccess: read:data-load, write:data-load",
+        "parameters": [
+          {
+            "name": "kit",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "prefill",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "true"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "(xlsx file)",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Master > Go-Live Data Load > Download template",
+        "x-permissions": [
+          "read:data-load",
+          "write:data-load"
+        ]
+      }
+    },
     "/incentive/agent-programs": {
       "get": {
         "operationId": "getIncentiveAgentPrograms",
@@ -59065,6 +60351,15 @@
               "type": "string"
             },
             "example": "POL-2026"
+          },
+          {
+            "name": "source",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "go-live-migration"
           }
         ],
         "responses": {

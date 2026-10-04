@@ -1,0 +1,160 @@
+# Go-Live Data Workbench
+
+For the System Administrator and the migration lead. The workbench (**Master > Go-Live Data Load**) loads a broker's
+go-live data with two Excel workbooks instead of one upload per object:
+
+| Kit | Workbook | Content |
+|---|---|---|
+| `configuration` | `GoLive_Configuration_Workbook.xlsx` | Everything needed to run new business: company, system settings, location masters, branches, departments, hierarchy, designations, users, currencies, exchange rates, chart of accounts, banks, bank accounts, signatories, transaction codes, write-off reasons, insurers, lines of business, products, policy types, covers, vehicle brands / models / variants / vehicles, commission rate matrix, premium taxes and charges, LGU tax rates, authority limits, document numbering |
+| `migration` | `GoLive_Migration_Workbook.xlsx` | The open business of the old system at cutover: clients, in-force policies (legacy numbers kept), open premium receivables, open claims, GL opening balances |
+
+The step-by-step set-up and the controls around the migration are in `GO_LIVE_DATA_SETUP.md` and
+`docs/package/source/data-migration-and-cutover.md`; the workbench replaces the one-off uploads they list for these
+objects (the single uploads stay available).
+
+## Workbook layout
+
+Each workbook has the sheets **Instructions** (load order, rules, cutover date rule, new versus migrated data, what is
+entered on screen, every column), **Lists** (allowed values; the object sheets have drop-downs that point here) and
+one sheet per object in load order.
+
+- Row 1: headers, navy fill with white bold text. Required columns end with ` *`. Column order does not matter.
+- Row 2: a sample row (amber, italic). A row whose first cell starts with `SAMPLE` is never loaded.
+- Data from row 3. Cells are formatted as text so Excel keeps codes and dates as typed. Dates `YYYY-MM-DD`.
+
+Download from the screen (**Download Template**: *Blank template* or *Current data*) or
+`GET /api/data-load/kits/:kit/template[?prefill=true]`. The blank workbooks are also generated offline into
+`docs/package/05_Delivery/Upload_Templates` by `backend/scripts/build-upload-templates.js`.
+
+## Upload, validate, fix, load
+
+1. **Upload and validate** (`POST /api/data-load/batches`, multipart `file` and `kit`). The workbook becomes a load
+   batch (`data_load_batches`, its rows in `data_load_rows`). Validation is a dry run: every sheet runs through its
+   importer in load order inside **one database transaction that is rolled back**. Cross-sheet references therefore
+   validate as they will load: a policy may refer to a client and an insurer added by the same workbook.
+2. **Result per sheet**: rows read, valid, with errors, and new / changed / unchanged / for approval. Each error has
+   its sheet, row number, column and message (`GET /api/data-load/batches/:id`).
+3. **Download errors** (`GET /api/data-load/batches/:id/errors`): a workbook in the same layout with only the rows in
+   error and an **Errors** column. Correct those rows and upload the file again (or the whole corrected workbook).
+4. **Load** (`POST /api/data-load/batches/:id/load`): allowed when the latest validation has no error, or with
+   *Load valid rows only* (`validRowsOnly: true`; the screen ticks it by default for the configuration workbook and
+   not for the migration workbook). The load runs in one transaction; if a row fails now because the data changed
+   since the validation, nothing is saved and the errors are recorded. The load is written to the audit trail and the
+   administrator is notified.
+5. **History** (`GET /api/data-load/batches`): status `validated`, `failed` or `loaded`, who uploaded and loaded, when,
+   counts; open a batch to see its result again.
+
+### Natural keys
+
+Every sheet upserts on a natural key, so loading the same or a corrected workbook again updates and never duplicates;
+rows equal to the stored data are reported as unchanged and not written.
+
+| Sheet | Key |
+|---|---|
+| Masters | the first unique key of the master type (company code, branch code, insurer code, ...; brand + model for vehicle models) |
+| Settings | setting key |
+| Users | username |
+| Chart of Accounts | account code |
+| Commission Rates | insurer + product + line of business + policy type + effective from |
+| Premium Taxes, LGU Rates | code |
+| Authority Limits | transaction type + role |
+| Numbering | series code (series are fixed by the system; the sheet updates them) |
+| Clients | legacy client code |
+| Policies | legacy policy number |
+| Open Items | policy number + bill reference |
+| Open Claims | legacy claim number |
+| Opening Balances | account code (the sheet loads all or nothing and replaces the earlier load of the same cutover date) |
+
+### Promotion between environments
+
+Configuration moves Dev -> SIT -> UAT -> Pre-Prod -> Production with the same workbook: download **Current data** in
+the source environment and upload it into the target. Rows equal to the target are skipped, differences update it,
+missing records are created. Exported settings are those of Master > Configuration (editable, not owned by another
+screen, not under the second-user approval of Account Determination); `golive.locked` is never exported or loaded.
+
+## Rules
+
+- **Permission.** `read:data-load` (download, history) and `write:data-load` (upload, validate, load), granted to the
+  System Administrator only (migration `0243_go_live_data_workbench.sql` and the seed).
+- **Users.** Passwords are never in a workbook. A new user gets a temporary password that the load returns once to the
+  administrator (shown in a dialog, `Cache-Control: no-store`, never stored in the batch); the user changes it at the
+  first sign-in. A load cannot change the administrator's own account; only a System Administrator can grant the System
+  Administrator role. Segregation-of-duties rules apply as on the User screen.
+- **Authority limits** are proposals: another administrator approves them on Master > Generals > User Management >
+  Authority Matrix (maker-checker), as on the screen.
+- **Numbering.** *Next Number* is the next sequence number of the current period (last number used in the old system
+  plus one). It cannot go backwards.
+- **Cutover date.** `golive.cutover_date` (Settings sheet of the configuration workbook, or Master > Configuration) is
+  the first day of live transactions. The migration workbook is refused until it is set.
+- **Go-live lock.** Once `golive.locked` is on (Master > Configuration), the migration workbook is refused (upload,
+  validation and load). The configuration workbook stays available for new masters.
+
+### Migration rules
+
+- Rows dated on or after the cutover date are refused: policy issue date, claim loss and reported dates, client birth
+  date. Policies must be in force at cutover (expiry on or after the cutover date). Open claims are `registered` or
+  `in-review`.
+- Opening balances are the trial balance of the old system at the close of the day before the cutover date. Debits must
+  equal credits. The fiscal year of the cutover date must have no journal posted before it.
+- Migrated records are flagged and post nothing:
+
+| Record | Flag | Not created |
+|---|---|---|
+| Client | `source = 'go-live-migration'`, `load_batch_id` | |
+| Policy | `doc.source = 'go-live-migration'`, `doc.loadBatchId`, `load_batch_id`; insurer at 100% | bill, booking journal, commission accrual (policy migration mode of `issuePolicy`) |
+| Open item | receivable `source = 'opening'`, `go_live_date` = cutover, `load_batch_id`; a collection item | booking journal (the GL carries it in the opening balance) |
+| Open claim | `details.source = 'go-live-migration'`, `load_batch_id`, a claim history line | acknowledgement e-mail, notifications, settlement journal |
+| Opening balance | `opening_balances.source_run = 'go-live:<cutover>'` | journal |
+
+## New and migrated data side by side
+
+- **Numbers.** Migrated records keep the numbers of the old system (client code, policy number, claim number). New
+  business takes the next number of its Document Numbering series, which the Numbering sheet sets. Both workbooks refuse
+  a collision: the configuration workbook when a series' next number would issue a number that a migrated record of
+  the same format already has, the migration workbook when a legacy number has the format of a series in the current
+  period at or above its next number (e.g. `CL-2026-00500` while the client series is at 1). Raise the next number
+  above the legacy range first.
+- **Dates.** Opening balances are dated the day before cutover; every new transaction is dated on or after it.
+- **Renewals.** Migrated in-force policies are ordinary active policies: the renewal queue picks them up as they near
+  expiry. Policies expiring soon need no separate sheet; the reconciliation counts those expiring within 90 days.
+- **Reports.** The policy API and lists show `source` and filter on it (`GET /api/policies?source=go-live-migration`);
+  `load_batch_id` ties every migrated record to its batch.
+- **Money.** Open items are collected with normal official receipts. Amounts due to insurers and commission payable
+  are in the opening balances and paid with payment vouchers (Accounts > Disbursement).
+
+## Reconciliation
+
+Every validation and load of the migration workbook computes, inside the transaction, the control totals the broker
+compares with the old system (`batch.reconciliation`; download: `GET /api/data-load/batches/:id/reconciliation`):
+
+- per sheet: rows in the workbook and their totals (gross and net premium, sum insured, open balance, claim estimate,
+  debits and credits) and the records and totals in BrokerVerse after the load (all migrated records);
+- checks: trial balance debits = credits; premiums receivable control account (`accounting.account.premium_receivable`)
+  opening balance = total open balance of the open items of the cutover date.
+
+## Not in the workbooks
+
+Entered on screen (also listed on the Instructions sheet): roles and permissions; segregation of duties, delegations,
+access reviews; approval of authority limits; tax codes; account determination and posting rules; bank statement,
+bank transaction type and insurer statement formats; close checklist; product templates, rating and the motor tariff;
+package bundles; payment gateway credentials; System Settings (name, logo, colours); company logo files; schedules;
+fiscal years and periods; remittance masters, reinsurance, incentive programs; referrer accounts; petty cash funds.
+
+Not migrated: premium due to insurers and commission due to referrers (opening balances, then payment vouchers);
+direct-bill commission receivable (opening balance, cleared by journal voucher); co-insurance participants (added on the
+policy screen); expired and closed business; leads and quotations (their own bulk uploads); unreconciled bank items;
+documents of the old system.
+
+## How the dry run works (technical)
+
+`backend/src/db/pool.js` keeps an ambient transaction in an `AsyncLocalStorage`: inside `runInTransaction(fn,
+{ rollback })` the helpers `query`, `one`, `many` and `pool.query` run on the transaction's client, and
+`withTransaction` opens a `SAVEPOINT` on it instead of a new connection (sibling savepoints are serialised so they nest
+correctly). Outside an ambient transaction nothing changes. Each row of a workbook runs in its own savepoint, so a
+failing row is undone alone and the next rows carry on. A transaction-level advisory lock serialises loads.
+`getSetting` reads through the transaction and bypasses the settings cache inside it; the settings and letterhead
+caches are cleared after every dry run and load. Sequence counters advanced during a dry run are rolled back with it.
+
+Code: `backend/src/modules/data-load` (`configuration.js`, `migration.js`: the sheets; `workbook.js`: templates,
+reading, errors and reconciliation workbooks; `service.js`: batches, dry run, load; `numbering.js`: the collision
+check). Tests: `backend/test/go-live-workbench.test.js`.

@@ -7,7 +7,9 @@ import { createZip } from './zip.js';
 
 const MAX_CELL = 32767;
 // Style indexes in styles.xml cellXfs
-const STYLE = { text: 0, header: 1, money: 2, date: 3, wrap: 4, integer: 5, number: 6, percent: 6, headerRequired: 7 };
+const STYLE = { text: 0, header: 1, money: 2, date: 3, wrap: 4, integer: 5, number: 6, percent: 6, headerRequired: 7, headerNavy: 8, sample: 9, bold: 10, textCell: 11 };
+/** Whole-row styles (sheet.rowStyles): sample = italic on a light amber fill (sample rows of a workbook template); bold = a heading line. */
+const ROW_STYLE = { sample: STYLE.sample, bold: STYLE.bold };
 
 export const colLetter = (i) => {
   let s = '';
@@ -55,7 +57,12 @@ class SharedStrings {
   }
 }
 
-function cellXml(ref, value, type, sst) {
+function cellXml(ref, value, type, sst, rowStyle = null) {
+  if (rowStyle !== null) {
+    if (value === null || value === undefined || value === '') return `<c r="${ref}" s="${rowStyle}"/>`;
+    const text = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    return `<c r="${ref}" s="${rowStyle}" t="s"><v>${sst.idx(text.slice(0, MAX_CELL))}</v></c>`;
+  }
   if (value === null || value === undefined || value === '') return '';
   // 'auto': a JavaScript number stays a number, anything else is text
   if (type === 'auto' && typeof value === 'number' && Number.isFinite(value)) return `<c r="${ref}"><v>${value}</v></c>`;
@@ -76,23 +83,34 @@ function sheetXml(sheet, sst) {
   const rows = sheet.rows.map((r) => (Array.isArray(r) ? r : cols.map((c) => r[c.key])));
   const lastCol = colLetter(Math.max(cols.length - 1, 0));
   const lastRow = rows.length + 1;
-  const header = `<row r="1" spans="1:${cols.length}" ht="20" customHeight="1">${cols.map((c, i) => `<c r="${colLetter(i)}1" s="${c.required ? STYLE.headerRequired : STYLE.header}" t="s"><v>${sst.idx(String(c.header ?? c.label ?? c.key ?? ''))}</v></c>`).join('')}</row>`;
-  const body = rows.map((r, ri) => `<row r="${ri + 2}">${r.map((v, ci) => cellXml(`${colLetter(ci)}${ri + 2}`, v, cols[ci]?.type || 'text', sst)).join('')}</row>`).join('');
-  const widths = cols.map((c, i) => `<col min="${i + 1}" max="${i + 1}" width="${c.width || 15}" customWidth="1"/>`).join('');
+  const headerStyle = (c) => (sheet.headerStyle === 'navy' ? STYLE.headerNavy : c.required ? STYLE.headerRequired : STYLE.header);
+  const header = `<row r="1" spans="1:${cols.length}" ht="20" customHeight="1">${cols.map((c, i) => `<c r="${colLetter(i)}1" s="${headerStyle(c)}" t="s"><v>${sst.idx(String(c.header ?? c.label ?? c.key ?? ''))}</v></c>`).join('')}</row>`;
+  const rowStyleOf = (ri) => ROW_STYLE[sheet.rowStyles?.[ri]] ?? null;
+  const body = rows.map((r, ri) => {
+    const rs = rowStyleOf(ri) ?? (sheet.textColumns ? STYLE.textCell : null);
+    const cells = rs === null ? r : cols.map((_, ci) => r[ci]);
+    return `<row r="${ri + 2}">${cells.map((v, ci) => cellXml(`${colLetter(ci)}${ri + 2}`, v, cols[ci]?.type || 'text', sst, rs)).join('')}</row>`;
+  }).join('');
+  // textColumns: every column is formatted as text (@), so Excel keeps codes such as 0012 and dates as typed
+  const colStyle = sheet.textColumns ? ` style="${STYLE.textCell}"` : '';
+  const widths = cols.map((c, i) => `<col min="${i + 1}" max="${i + 1}" width="${c.width || 15}"${colStyle} customWidth="1"/>`).join('');
   const freeze = sheet.freeze === false ? '<sheetView workbookViewId="0"/>'
     : '<sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A2" sqref="A2"/></sheetView>';
   const filter = sheet.autoFilter === false || !cols.length ? '' : `<autoFilter ref="A1:${lastCol}${lastRow}"/>`;
-  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><dimension ref="A1:${lastCol}${lastRow}"/><sheetViews>${freeze}</sheetViews><sheetFormatPr defaultRowHeight="15"/>${widths ? `<cols>${widths}</cols>` : ''}<sheetData>${header}${body}</sheetData>${filter}<pageMargins left="0.5" right="0.5" top="0.75" bottom="0.75" header="0.3" footer="0.3"/></worksheet>`;
+  // drop-down lists: [{ sqref: 'C2:C5000', formula: 'Lists!$A$2:$A$4' }]
+  const dv = (sheet.validations || []).filter((v) => v.sqref && v.formula);
+  const validations = dv.length ? `<dataValidations count="${dv.length}">${dv.map((v) => `<dataValidation type="list" allowBlank="1" showErrorMessage="${v.strict === false ? 0 : 1}" errorStyle="${v.strict === false ? 'information' : 'stop'}" sqref="${v.sqref}"><formula1>${xmlEscape(v.formula)}</formula1></dataValidation>`).join('')}</dataValidations>` : '';
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><dimension ref="A1:${lastCol}${lastRow}"/><sheetViews>${freeze}</sheetViews><sheetFormatPr defaultRowHeight="15"/>${widths ? `<cols>${widths}</cols>` : ''}<sheetData>${header}${body}</sheetData>${filter}${validations}<pageMargins left="0.5" right="0.5" top="0.75" bottom="0.75" header="0.3" footer="0.3"/></worksheet>`;
 }
 
 const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
 <numFmts count="1"><numFmt numFmtId="164" formatCode="yyyy-mm-dd"/></numFmts>
-<fonts count="2"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/></font></fonts>
-<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F4E78"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF9C2A00"/><bgColor indexed="64"/></patternFill></fill></fills>
+<fonts count="4"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/></font><font><i/><sz val="11"/><color rgb="FF595959"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FF0B2A4A"/><name val="Calibri"/><family val="2"/></font></fonts>
+<fills count="6"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FF1F4E78"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF9C2A00"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0B2A4A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF4CC"/><bgColor indexed="64"/></patternFill></fill></fills>
 <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>
 <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-<cellXfs count="8">
+<cellXfs count="12">
 <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
 <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
 <xf numFmtId="4" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
@@ -101,6 +119,10 @@ const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <xf numFmtId="3" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
 <xf numFmtId="2" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
 <xf numFmtId="0" fontId="1" fillId="3" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="0" fontId="1" fillId="4" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="center" wrapText="1"/></xf>
+<xf numFmtId="49" fontId="2" fillId="5" borderId="1" xfId="0" applyNumberFormat="1" applyFont="1" applyFill="1" applyBorder="1"/>
+<xf numFmtId="0" fontId="3" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
+<xf numFmtId="49" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/>
 </cellXfs>
 <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
@@ -109,6 +131,8 @@ const STYLES_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
  * Build an .xlsx workbook.
  * Column type: text (default), wrap, money, integer, number, percent, date, or auto (numbers numeric, the rest text).
  * A column with required: true gets a dark red header cell instead of the blue one (upload templates).
+ * Sheet options: headerStyle 'navy' (navy header for every column), rowStyles (array by data row: 'sample' | 'bold'),
+ * validations ([{ sqref, formula, strict }]: drop-down lists).
  * @param {{sheets: {name: string, columns: {key?: string, header?: string, label?: string, width?: number, type?: string, required?: boolean}[], rows: (Array|Object)[], freeze?: boolean, autoFilter?: boolean}[], creator?: string, title?: string}} wb
  * @returns {Buffer}
  */

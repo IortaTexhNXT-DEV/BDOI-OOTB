@@ -10,6 +10,11 @@ Columns sheet and an Instructions sheet. On screens with an **Upload** button th
 **Download template**. Screens without an Upload button are marked below; for those a System Administrator loads the
 file through the API route written on the template's Instructions sheet, or enters the records on the screen.
 
+Most of the steps below can also be done with two workbooks on **Master > Go-Live Data Load**: the configuration
+workbook (steps 1 to 8: company, users, masters, chart of accounts, commission rates, numbering, settings) and the
+migration workbook (step 11: clients, in-force policies, open items, open claims, opening balances), each validated as
+a whole before anything is saved. See `GO_LIVE_DATA_WORKBENCH.md`.
+
 Agree a **go-live date** with Accounting before you start: the first day on which transactions are entered in
 BrokerVerse. Balances and open items are taken from the old system at the close of the day before.
 

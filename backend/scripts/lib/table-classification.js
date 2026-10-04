@@ -70,6 +70,8 @@ export const SYSTEM_RESET_ACTIONS = {
   login_history: 'remove',
   refresh_tokens: 'remove', // sign-in sessions: everyone signs in again
   password_resets: 'remove',
+  data_load_batches: 'remove', // Go-Live Data Load history: the loads of a smoke test go with the records they created
+  data_load_rows: 'remove',
   documents: 'partial', // uploaded and generated file records of transaction folders (TRANSACTION_FILE_FOLDERS)
   sequences: 'partial', // document number counters: transaction series restart (MASTER_SERIES keep their counter)
   opening_balances: 'optional', // go-live opening balances: removed unless --keep-opening-balances

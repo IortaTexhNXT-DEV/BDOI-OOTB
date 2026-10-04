@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (868 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (877 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -21915,6 +21915,654 @@
       ]
     },
     {
+      "name": "Go-Live Data Workbench",
+      "item": [
+        {
+          "name": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches?kit=migration&page=1&perPage=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches"
+              ],
+              "query": [
+                {
+                  "key": "kit",
+                  "value": "migration"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "perPage",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > History\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches?kit=migration&page=1&perPage=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches"
+                  ],
+                  "query": [
+                    {
+                      "key": "kit",
+                      "value": "migration"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "perPage",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Load history: batches with status (validated, failed, loaded), who, when and counts (kit, status, paging)\n\nFront-end touchpoint: Master > Go-Live Data Load > History\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches"
+              ]
+            },
+            "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: Master > Go-Live Data Load > Upload and validate\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "\"multipart/form-data file, kit=configuration|migration\"",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches"
+                  ]
+                },
+                "description": "Upload a workbook (multipart \"file\", field kit): creates a load batch and validates it without saving (all sheets in load order in one transaction that is rolled back)\n\nFront-end touchpoint: Master > Go-Live Data Load > Upload and validate\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "\"multipart/form-data file, kit=configuration|migration\"",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Validated: 2 row(s) with errors\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One batch: result per sheet and the errors (sheet, row, column, message)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One batch: result per sheet and the errors (sheet, row, column, message)\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ],\n    \"totalErrors\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/errors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "errors"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: Master > Go-Live Data Load > Download errors\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/errors",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "errors"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "The rows in error of a batch as a workbook in the kit layout with an Errors column, to fix and upload again\n\nFront-end touchpoint: Master > Go-Live Data Load > Download errors\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/load",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "load"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: Master > Go-Live Data Load > Load\n\nAccess: write:data-load",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"validRowsOnly\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/load",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "load"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Load a validated batch in one transaction (validRowsOnly: skip the rows in error). New users' temporary passwords are returned once; a migration load returns its reconciliation\n\nFront-end touchpoint: Master > Go-Live Data Load > Load\n\nAccess: write:data-load",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"validRowsOnly\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Loaded\",\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"loaded\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"temporaryPasswords\": [\n      {\n        \"username\": \"andrea.lim\",\n        \"displayName\": \"Andrea Lim\",\n        \"temporaryPassword\": \"<shown once>\"\n      }\n    ],\n    \"reconciliation\": null\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/reconciliation",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "reconciliation"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > Go-Live Data Load > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/reconciliation",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "reconciliation"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reconciliation of a migration batch (XLSX): counts and totals per sheet and the control checks (trial balance, receivables control account)\n\nFront-end touchpoint: Master > Go-Live Data Load > History > Reconciliation\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        },
+        {
+          "name": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/batches/:id/validate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "batches",
+                ":id",
+                "validate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/batches/:id/validate",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "batches",
+                    ":id",
+                    "validate"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Validate a batch again (dry run), e.g. after a correction on screen or a change of the cutover date\n\nFront-end touchpoint: Master > Go-Live Data Load > Validation result\n\nAccess: write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"batch\": {\n      \"id\": 7,\n      \"kit\": \"migration\",\n      \"fileName\": \"GoLive_Migration_Workbook.xlsx\",\n      \"status\": \"failed\",\n      \"cutoverDate\": \"2026-11-01\",\n      \"rowsRead\": 480,\n      \"rowsValid\": 478,\n      \"rowsError\": 2,\n      \"sheets\": [\n        {\n          \"sheet\": \"policies\",\n          \"name\": \"Policies\",\n          \"read\": 120,\n          \"valid\": 118,\n          \"errors\": 2,\n          \"created\": 118,\n          \"updated\": 0,\n          \"unchanged\": 0,\n          \"proposed\": 0,\n          \"skipped\": 0\n        }\n      ],\n      \"loadedCounts\": null,\n      \"reconciliation\": null,\n      \"createdBy\": \"BrokerVerse Administrator\",\n      \"createdAt\": \"2026-10-28T09:00:00Z\",\n      \"validatedAt\": \"2026-10-28T09:00:05Z\"\n    },\n    \"errors\": [\n      {\n        \"sheet\": \"policies\",\n        \"sheetName\": \"Policies\",\n        \"row\": 14,\n        \"column\": \"Issue Date\",\n        \"message\": \"Issue Date 2026-11-02 is on or after the cutover date 2026-11-01\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/kits",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "kits"
+              ]
+            },
+            "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: Master > Go-Live Data Load\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/kits",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "kits"
+                  ]
+                },
+                "description": "The two kits (configuration, migration) with their sheets in load order, columns and natural keys; the cutover date and go-live lock\n\nFront-end touchpoint: Master > Go-Live Data Load\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"kits\": [\n      {\n        \"kit\": \"configuration\",\n        \"title\": \"Go-live configuration workbook\",\n        \"sheets\": [\n          {\n            \"key\": \"users\",\n            \"name\": \"Users\",\n            \"keyColumns\": [\n              \"username\"\n            ],\n            \"columns\": []\n          }\n        ]\n      }\n    ],\n    \"cutoverDate\": \"2026-11-01\",\n    \"locked\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/data-load/kits/:kit/template?prefill=true",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "data-load",
+                "kits",
+                ":kit",
+                "template"
+              ],
+              "query": [
+                {
+                  "key": "prefill",
+                  "value": "true"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "kit",
+                  "value": "",
+                  "description": "kit (path parameter)"
+                }
+              ]
+            },
+            "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: Master > Go-Live Data Load > Download template\n\nAccess: read:data-load, write:data-load"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/data-load/kits/:kit/template?prefill=true",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "data-load",
+                    "kits",
+                    ":kit",
+                    "template"
+                  ],
+                  "query": [
+                    {
+                      "key": "prefill",
+                      "value": "true"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "kit",
+                      "value": "",
+                      "description": "kit (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Workbook of a kit (XLSX): Instructions, Lists and one sheet per object; prefill=true fills it with the current data of this environment (promotion to the next environment)\n\nFront-end touchpoint: Master > Go-Live Data Load > Download template\n\nAccess: read:data-load, write:data-load"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "(xlsx file)"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Incentive",
       "item": [
         {
@@ -37377,7 +38025,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026",
+              "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026&source=go-live-migration",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -37412,6 +38060,10 @@
                 {
                   "key": "query",
                   "value": "POL-2026"
+                },
+                {
+                  "key": "source",
+                  "value": "go-live-migration"
                 }
               ]
             },
@@ -37424,7 +38076,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026",
+                  "raw": "{{baseUrl}}/policies?page=1&pageSize=10&mine=true&paymentStatus=Pending&clientId=cl_1&expiryDateFrom=2026-10-01T00:00:00.000Z&query=POL-2026&source=go-live-migration",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -37459,6 +38111,10 @@
                     {
                       "key": "query",
                       "value": "POL-2026"
+                    },
+                    {
+                      "key": "source",
+                      "value": "go-live-migration"
                     }
                   ]
                 },

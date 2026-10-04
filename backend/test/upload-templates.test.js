@@ -7,6 +7,7 @@
  * and the go-live policy upload.
  * Reference data only (no sample ledger), so the current fiscal year has no journals before the go-live date.
  */
+import { KITS } from '../src/modules/data-load/service.js';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -145,7 +146,10 @@ describe('upload coverage', () => {
     const ids = new Set(defs.map((d) => d.id));
     for (const r of FILE_ROUTES) {
       expect(r.templates || r.noTemplate, `${r.module} ${r.path}`).toBeTruthy();
-      for (const id of r.templates || []) expect(id === 'master:*' ? defs.some((d) => d.id.startsWith('master:')) : ids.has(id), id).toBe(true);
+      for (const id of r.templates || []) {
+        const known = id === 'master:*' ? defs.some((d) => d.id.startsWith('master:')) : id.startsWith('kit:') ? Boolean(KITS[id.slice(4)]) : ids.has(id);
+        expect(known, id).toBe(true);
+      }
     }
   });
 

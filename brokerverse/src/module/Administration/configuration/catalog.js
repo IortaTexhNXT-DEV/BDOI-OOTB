@@ -12,9 +12,10 @@ export const AREAS = [
     title: "Company & Branding",
     icon: "pi pi-building",
     summary: "Time zone, date format and the look of printed documents. The application name, logo and colours are set in System Settings; the company's legal identity in the Company master.",
-    groups: ["general", "branding", "currency", "documents", "system"],
+    groups: ["general", "branding", "currency", "documents", "system", "golive"],
     links: [
       { label: "System Settings (application name, logo, colours, language, currency)", path: "/master/configuration/system-settings" },
+      { label: "Go-Live Data Load (configuration and migration workbooks)", path: "/master/go-live-data-load" },
       { label: "Company master (legal name, TIN, registered address, print logo)", path: "/master/generals/organization/companymaster" },
       { label: "Branch master", path: "/master/generals/organization/branchmaster" },
     ],
