@@ -3,6 +3,9 @@
  * Production data reset (npm run purge:sample): removes the demo / sample data from a database that was started with
  * SEED_SAMPLE_DATA on, keeping the reference data (settings, roles, permissions, scheduled jobs, masters, chart of
  * accounts, product templates, report catalogue) and the users you choose. See backend/src/db/seeds/README.md.
+ * To remove the transactions of a smoke test but keep every master, configuration table and user (including those
+ * entered by the client), use npm run reset:transactions instead (scripts/reset-transactions.js). Both scripts take
+ * their table lists from scripts/lib/table-classification.js.
  *
  * What it removes:
  *   - every business transaction: leads, clients, quotations, policies, endorsements, receivables, receipts, payments,
@@ -28,41 +31,17 @@
  */
 import { fileURLToPath } from 'node:url';
 
-/** Transaction tables, emptied completely (one TRUNCATE, so foreign keys among them are satisfied). */
-export const TRANSACTION_TABLES = [
-  'leads', 'clients', 'quotes', 'policies', 'endorsements', 'policy_payments', 'documents',
-  'broker_slips', 'insurer_offers', 'placements', 'risk_participants', 'quote_customer_responses',
-  'receivables', 'receipts', 'receipt_lines', 'receipt_applications', 'entry_matches', 'invoice_lists', 'receivable_participants', 'receivable_credits', 'remittance_allocations',
-  'collection_items', 'collection_actions', 'disbursements', 'checkbooks',
-  'petty_cash_funds', 'petty_cash_requests', 'petty_cash_request_lines', 'petty_cash_disbursements', 'petty_cash_receipts', 'petty_cash_replenishments',
-  'commissions', 'commission_debit_notes', 'commission_debit_note_lines', 'commission_debit_note_collections', 'direct_bill_items',
-  'remittances', 'remittance_lines', 'remittance_items', 'remittance_approvals', 'remittance_delegations',
-  'reinsurance_treaties', 'cessions', 'reinsurance_recoveries', 'reinsurance_bordereaux', 'reinsurance_reconciliations', 'reinsurance_exceptions',
-  'incentive_calculations', 'incentive_results',
-  'claims', 'claim_history', 'claim_field_changes',
-  'renewals', 'renewal_quotes', 'renewal_notices', 'renewal_activities', 'renewal_batches', 'renewal_batch_policies', 'winback_campaigns',
-  'journal_vouchers', 'journal_lines', 'accounting_periods',
-  'notifications', 'agent_events', 'email_outbox', 'generated_reports', 'job_runs', 'job_queue', 'sequences',
-  // period-end processing (fiscal years are regenerated from the first journal on demand)
-  'fiscal_years', 'opening_balances', 'period_status_history', 'period_close_runs', 'period_close_run_checks', 'period_close_entries',
-  'recurring_journals', 'recurring_journal_runs', 'year_end_runs', 'bir_2307_certificates',
-  // bank reconciliation (statement formats, transaction types and match rules are configuration and stay)
-  'bank_statements', 'bank_statement_lines', 'bank_rec_matches', 'bank_rec_match_items', 'bank_reconciliations', 'bank_reconciliation_history',
-  // comsub adjustments on return premium, claim settlement cash, refunds due from insurers
-  'commission_adjustments', 'claim_settlement_movements', 'insurer_refund_credits',
-  // client payments to insurers recorded on direct-bill policies
-  'direct_bill_client_payments',
-  // insurer statement reconciliation (statement formats are configuration and stay)
-  'insurer_statements', 'insurer_statement_lines', 'insurer_statement_resolutions',
-  // credit control (client credit limits are a column of clients)
-  'premium_instalment_plans', 'premium_instalments', 'premium_warranty_extensions', 'premium_warranty_actions', 'client_credit_exceptions',
-  // packaged products: bundle quotations and policies, payment links; the sample bundles and insurer rate tables are
-  // demo configuration and go too (tax and charge rules, LGU rates and gateway settings stay)
-  'package_endorsements', 'package_sections', 'package_quotes', 'package_bundle_sections', 'package_bundles', 'insurer_rate_tables',
-  'payment_events', 'payment_links',
-  // access reviews and delegations (the authority matrix and segregation-of-duties rules are configuration and stay)
-  'access_review_items', 'access_reviews', 'user_delegations',
-];
+import { PURGE_DEMO_CONFIG_TABLES, PURGE_SYSTEM_TABLES, TRANSACTION_TABLES as BUSINESS_TABLES } from './lib/table-classification.js';
+
+/**
+ * Tables emptied completely (one TRUNCATE, so foreign keys among them are satisfied): every business transaction
+ * (scripts/lib/table-classification.js, shared with npm run reset:transactions), the technical records (notifications,
+ * e-mail outbox, generated reports, job history, document records, number counters, opening balances) and the
+ * configuration tables the sample seed fills with demo rows (bundles, insurer rate tables, treaties, petty cash funds,
+ * delegations). Tax and charge rules, LGU rates, gateway settings, the authority matrix and segregation-of-duties
+ * rules stay.
+ */
+export const TRANSACTION_TABLES = [...BUSINESS_TABLES, ...PURGE_SYSTEM_TABLES, ...PURGE_DEMO_CONFIG_TABLES];
 /** With --purge-audit. */
 export const AUDIT_TABLES = ['audit_log', 'login_history'];
 

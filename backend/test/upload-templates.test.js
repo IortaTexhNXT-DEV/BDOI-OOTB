@@ -1,7 +1,10 @@
 /**
- * Upload templates and go-live imports: every generated template (scripts/build-upload-templates.js) is read back by
- * its importer's own parser and column list; the master upload, the chart of accounts upload, the GL opening
- * balances import (with the year-end carry forward), the open items import and the go-live policy upload.
+ * Upload templates and go-live imports: every route that receives a data file has a template and every template is in
+ * the delivered folder (docs/package/05_Delivery/Upload_Templates) with its README coverage table; every generated
+ * template (scripts/build-upload-templates.js) is read back by its importer's own parser and column list, and the master
+ * and insurer statement samples are loaded through the API; retired master types have no template; the master upload,
+ * the chart of accounts upload, the GL opening balances import (with the year-end carry forward), the open items import
+ * and the go-live policy upload.
  * Reference data only (no sample ledger), so the current fiscal year has no journals before the go-live date.
  */
 import fs from 'node:fs';
@@ -18,10 +21,12 @@ import { cancelJournal, createJournal } from '../src/modules/accounting/lib/ledg
 import { readXlsx } from '../src/modules/documents/xlsx.js';
 import { mapColumns, normKey, parseUploadedRows } from '../src/modules/documents/tabular.js';
 import { camel, readSheet } from '../src/modules/accounting/lib/sheet.js';
-import { parseRows } from '../src/modules/bank-reconciliation/statements.js';
+import { parseRows, readTable } from '../src/modules/bank-reconciliation/statements.js';
+import { parseRows as parseInsurerRows } from '../src/modules/insurer-reconciliation/statements.js';
 import * as masters from '../src/modules/masters/service.js';
 import { bulkConfig } from '../src/modules/remittance/items.js';
-import { buildTemplates, uploadDefinitions } from '../scripts/build-upload-templates.js';
+import { MASTER_TEMPLATES } from '../src/modules/masters/uploadSamples.js';
+import { DEFAULT_OUT, FILE_ROUTES, buildTemplates, coverageTable, uploadDefinitions } from '../scripts/build-upload-templates.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const repo = path.resolve(here, '..', '..');
@@ -30,6 +35,7 @@ let app;
 let api;
 let outDir;
 let defs;
+let built;
 
 beforeAll(async () => {
   await migrate({ reset: true, log: () => {} });
@@ -38,7 +44,7 @@ beforeAll(async () => {
   const r = await request(app).post('/api/auth/login').send({ username: 'BrokerVerse', password: process.env.ADMIN_PASSWORD });
   api = (m, p) => request(app)[m](`/api${p}`).set('Authorization', `Bearer ${r.body.accessToken}`);
   outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'bv-templates-'));
-  await buildTemplates(outDir);
+  built = await buildTemplates(outDir);
   defs = await uploadDefinitions();
 });
 afterAll(async () => {
@@ -57,11 +63,13 @@ const csvBuffer = (rows) => Buffer.from(rows.map((r) => r.join(',')).join('\r\n'
 describe('generated upload templates', () => {
   it('builds one workbook per upload, Data sheet first, with the importer headers and no duplicate header', () => {
     // commission, employee and petty cash masters are retired (Commission Rate Matrix, User Management > User, Petty Cash > Initiate)
-    expect(defs.length).toBeGreaterThanOrEqual(35);
-    for (const id of ['leads', 'quotations', 'policies', 'receipts', 'disbursements', 'chart-of-accounts', 'opening-balances', 'open-items', 'bank-statement', 'remittance-bulk',
+    expect(defs.length).toBeGreaterThanOrEqual(52);
+    for (const id of ['leads', 'quotations', 'policies', 'receipts', 'disbursements', 'chart-of-accounts', 'opening-balances', 'open-items', 'bank-statement', 'insurer-statement', 'remittance-bulk',
       'remittance-bank-transactions', 'users', 'master:insurance-company', 'master:branch', 'master:product', 'master:cover', 'master:vehicle-brand', 'master:vehicle-model',
-      'master:vehicle-variant', 'master:city', 'master:bank', 'master:bank-account']) expect(defs.map((d) => d.id)).toContain(id);
-    for (const id of ['master:commission', 'master:employee', 'master:petty-cash']) expect(defs.map((d) => d.id)).not.toContain(id);
+      'master:vehicle-variant', 'master:city', 'master:bank', 'master:bank-account', 'master:security-rating', 'master:remittance-bulk-processing']) expect(defs.map((d) => d.id)).toContain(id);
+    // retired masters (migration 0241, taxation 0233) and masters without an upload have no template
+    for (const code of [...masters.RETIRED_TYPES.keys(), ...masters.NOT_UPLOADABLE.keys()]) expect(defs.map((d) => d.id)).not.toContain(`master:${code}`);
+    expect(new Set(defs.map((d) => d.file)).size).toBe(defs.length);
     for (const d of defs) {
       const table = readXlsx(fs.readFileSync(path.join(outDir, d.file)));
       expect(table[0], d.file).toEqual(d.columns.map((c) => c.header));
@@ -72,7 +80,7 @@ describe('generated upload templates', () => {
   });
 
   it('every sample value is read back by the importer\'s own parser and column list', async () => {
-    for (const d of defs.filter((x) => x.samples?.length && !['bank-statement', 'remittance-bulk', 'remittance-bank-transactions', 'users'].includes(x.id))) {
+    for (const d of defs.filter((x) => x.samples?.length && !['bank-statement', 'insurer-statement', 'remittance-bulk', 'remittance-bank-transactions', 'users'].includes(x.id))) {
       const rows = CAMEL_IMPORTERS.has(d.id) ? readSheet(file(d.file).buffer, d.file) : parseUploadedRows(file(d.file));
       let mapped;
       if (d.id.startsWith('master:')) {
@@ -80,7 +88,12 @@ describe('generated upload templates', () => {
         mapped = rows.map((r) => masters.bodyFromRow(t, r, (row, ...names) => { for (const n of names) { const v = row[normKey(n)]; if (v !== undefined && v !== '') return v; } return undefined; }));
       } else mapped = rows.map((r) => mapColumns(r, d.columns, CAMEL_IMPORTERS.has(d.id) ? camel : normKey));
       d.samples.forEach((s, i) => {
-        for (const [k, v] of Object.entries(s)) if (v !== '' && v !== undefined) expect(String(mapped[i][k]), `${d.file} ${k}`).toBe(String(v));
+        for (const [k, v] of Object.entries(s)) {
+          if (v === '' || v === undefined) continue;
+          // JSON columns of a master are parsed by the importer
+          if (/^JSON/.test(d.columns.find((c) => c.key === k)?.format || '')) expect(mapped[i][k], `${d.file} ${k}`).toEqual(JSON.parse(v));
+          else expect(String(mapped[i][k]), `${d.file} ${k}`).toBe(String(v));
+        }
       });
     }
   });
@@ -105,6 +118,97 @@ describe('generated upload templates', () => {
     for (const c of defs.find((x) => x.id === 'users').columns) expect(script).toContain(`col('${c.header}')`);
     const screen = fs.readFileSync(path.join(repo, 'brokerverse', 'src', 'module', 'Remittance', 'Reconciliation', 'index.js'), 'utf8');
     for (const c of defs.find((x) => x.id === 'remittance-bank-transactions').columns) expect(screen).toContain(`"${c.header.toLowerCase()}"`);
+  });
+});
+
+describe('upload coverage', () => {
+  // Routes that receive a file: a define() block whose middleware takes a multipart upload.
+  const FILE_MIDDLEWARE = /\b(uploadFile|singleFile|multerAny|upload\.(single|any|array|fields)\()/;
+  function fileRoutes() {
+    const dir = path.join(here, '..', 'src', 'modules');
+    const out = [];
+    for (const m of fs.readdirSync(dir)) {
+      const f = path.join(dir, m, 'router.js');
+      if (!fs.existsSync(f)) continue;
+      for (const block of fs.readFileSync(f, 'utf8').split(/\bdefine\(\{/).slice(1)) {
+        const head = block.slice(0, 1500);
+        const mw = head.match(/middleware:\s*\[[^\]]*\]|middleware:\s*[A-Za-z]+/);
+        if (!mw || !FILE_MIDDLEWARE.test(mw[0])) continue;
+        out.push(`${m} ${head.match(/method:\s*'(\w+)'/)[1]} ${head.match(/path:\s*['`]([^'`]+)['`]/)[1]}`);
+      }
+    }
+    return out.sort();
+  }
+
+  it('every route that receives a file has a template, or is an attachment', () => {
+    expect(fileRoutes()).toEqual(FILE_ROUTES.map((r) => `${r.module} ${r.method} ${r.path}`).sort());
+    const ids = new Set(defs.map((d) => d.id));
+    for (const r of FILE_ROUTES) {
+      expect(r.templates || r.noTemplate, `${r.module} ${r.path}`).toBeTruthy();
+      for (const id of r.templates || []) expect(id === 'master:*' ? defs.some((d) => d.id.startsWith('master:')) : ids.has(id), id).toBe(true);
+    }
+  });
+
+  it('every master type that takes an upload has a template with its menu path and sample rows; retired types have none', async () => {
+    const active = (await query("SELECT code FROM master_types WHERE status = 'active' ORDER BY code")).rows.map((r) => r.code);
+    const uploadable = active.filter((c) => !masters.NOT_UPLOADABLE.has(c));
+    expect(defs.filter((d) => d.id.startsWith('master:')).map((d) => d.id.slice(7)).sort()).toEqual(uploadable.sort());
+    for (const code of uploadable) {
+      const info = MASTER_TEMPLATES.find((m) => m.type === code);
+      expect(info, `uploadSamples.js entry for ${code}`).toBeTruthy();
+      expect(info.menu, code).toBeTruthy();
+      expect(info.samples?.length, `${code} samples`).toBeGreaterThan(0);
+    }
+    for (const m of MASTER_TEMPLATES) expect(active, `${m.type} is retired or unknown`).toContain(m.type);
+    const inactive = (await query("SELECT code FROM master_types WHERE status = 'inactive'")).rows.map((r) => r.code);
+    expect(inactive.sort()).toEqual([...masters.RETIRED_TYPES.keys()].sort());
+    for (const code of [...inactive, 'main-account', 'account-setup']) {
+      const r = await api('get', `/masters/${code}/template`);
+      expect(r.status, code).toBe(400);
+      expect((await upload(`/masters/${code}/upload`, 'x.csv', {}, csvBuffer([['Code'], ['X']]))).status, code).toBe(400);
+    }
+  });
+
+  it('the delivered folder holds exactly the generated templates and the README coverage table is current', () => {
+    expect(path.relative(repo, DEFAULT_OUT)).toBe(path.join('docs', 'package', '05_Delivery', 'Upload_Templates'));
+    const delivered = fs.readdirSync(DEFAULT_OUT).filter((f) => f !== 'README.md').sort();
+    expect(delivered).toEqual(built.flatMap((t) => [t.file, t.csv].filter(Boolean)).sort());
+    expect(built.removed).toEqual([]);
+    const readme = fs.readFileSync(path.join(DEFAULT_OUT, 'README.md'), 'utf8');
+    const section = readme.match(/<!-- coverage:start[^>]*-->\n([\s\S]*?)\n<!-- coverage:end -->/);
+    expect(section, 'coverage markers in README.md').toBeTruthy();
+    expect(section[1]).toBe(coverageTable(built));
+    expect(fs.existsSync(path.join(repo, 'docs', 'templates'))).toBe(false);
+  });
+
+  it('the CSV templates the bulk upload screens offer have the importer headers', () => {
+    const src = fs.readFileSync(path.join(repo, 'brokerverse', 'src', 'agentModule', 'component', 'bulkUploadTemplate.js'), 'utf8');
+    for (const id of ['leads', 'quotations', 'policies', 'receipts', 'disbursements']) {
+      const block = src.match(new RegExp(`\\b${id}: \\{[\\s\\S]*?columns: \\[([\\s\\S]*?)\\]`))[1];
+      const headers = [...block.matchAll(/"([^"]+)"/g)].map((m) => m[1]);
+      expect(headers, id).toEqual(defs.find((d) => d.id === id).columns.map((c) => c.header));
+    }
+  });
+
+  it('the sample rows of every master template are accepted by the master upload', async () => {
+    for (const d of defs.filter((x) => x.id.startsWith('master:') && x.samples?.length)) {
+      const r = await upload(`/masters/${d.id.slice(7)}/upload`, d.file);
+      expect(r.status, `${d.file} ${JSON.stringify(r.body)}`).toBe(200);
+      expect(r.body.data, `${d.file} ${JSON.stringify(r.body.data?.errors)}`).toMatchObject({ created: d.samples.length, failed: 0 });
+    }
+  });
+
+  it('the insurer statement template is read by the GENERIC insurer format and imported', async () => {
+    const d = defs.find((x) => x.id === 'insurer-statement');
+    const fmt = (await query('SELECT * FROM insurer_statement_formats WHERE code = \'GENERIC\'')).rows[0];
+    const parsed = parseInsurerRows(readTable(file(d.file)), fmt);
+    expect(parsed.errors).toEqual([]);
+    expect(parsed.lines).toHaveLength(d.samples.length);
+    expect(parsed.lines[1]).toMatchObject({ policyNo: 'FPG-FI-2026-004417', grossPremium: 78437.5, commission: 12500, taxes: 1500, amountPaid: 64437.5, date: '2026-10-15' });
+    const insurer = (await query('SELECT id FROM insurance_companies ORDER BY id LIMIT 1')).rows[0].id;
+    const r = await upload('/insurer-reconciliation/statements/import', d.file, { insurerId: String(insurer), statementType: 'premium', periodFrom: '2026-10-01', periodTo: '2026-10-31', formatCode: 'GENERIC' });
+    expect(r.status, JSON.stringify(r.body)).toBe(201);
+    expect(r.body.data.lineCount).toBe(2);
   });
 });
 

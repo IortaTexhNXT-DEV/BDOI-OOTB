@@ -65,7 +65,7 @@ A requirement that cannot be met by configuration, master data or a change in th
 - **Product first.** The process walk-throughs use the delivered screens with the broker's own examples. The broker adapts a procedure before anyone asks for a change.
 - **Data drives the timeline.** Most of the effort sits with the broker's data: insurer agreements, commission rates, the chart of accounts, in-force policies, open receivables and the trial balance. Requests for data go out in week 1.
 - **Key users own the result.** Each team names one key user who takes part in discovery, tests the configuration, runs the UAT scripts and trains the team.
-- **Repeatable loads.** Every data load uses the delivered upload templates (`docs/templates`) and is rehearsed at least twice before cutover.
+- **Repeatable loads.** Every data load uses the delivered upload templates (`docs/package/05_Delivery/Upload_Templates`) and is rehearsed at least twice before cutover.
 - **Evidence for every acceptance.** Each phase ends with named deliverables and acceptance criteria (chapter 11). Sign-off is written.
 
 ## Implementation sizes

@@ -289,7 +289,7 @@ PERSONAS.append(dict(
              points=[('Template:', 'Download template gives a Data sheet with sample rows, a Columns sheet and Instructions.'),
                      ('Result:', 'rows created or updated, and each failed row with its problem.'),
                      ('Existing code:', 'an upload with an existing code updates the record.'),
-                     ('Templates:', 'also delivered in docs/templates.')]),
+                     ('Templates:', 'also delivered in docs/package/05_Delivery/Upload_Templates.')]),
     ],
     extras=[dict(kind='api', title='API and Postman collection', kicker='backend/docs/api',
                  stats=[('717', 'endpoints (GET 331, POST 277, PUT 74, DELETE 28, PATCH 7)'),

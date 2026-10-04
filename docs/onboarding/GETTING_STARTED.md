@@ -85,7 +85,7 @@ What each role mainly does:
 
 - Lists have a search box and filters at the top; select a row or the view icon to open the record.
 - Screens with an **Upload** button take a spreadsheet. Use **Download template** in the upload window: it gives the
-  exact columns, a sample row to delete and instructions. The templates are also in `docs/templates`.
+  exact columns, a sample row to delete and instructions. The templates are also in `docs/package/05_Delivery/Upload_Templates`.
 - Dates are shown as DD/MM/YYYY and amounts in Philippine pesos unless the record is in another currency.
 - Printed documents (policy schedule, billing statement, official receipt, payment voucher) carry the letterhead of
   the company set as primary in Master > Generals > Organization > Company.

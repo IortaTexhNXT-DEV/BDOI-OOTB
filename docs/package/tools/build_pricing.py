@@ -853,7 +853,7 @@ items = [
     ('Additional environment (training, second UAT), set-up', 'one-time', '=ROUND(Env_Setup_Days*Blended/Round_To,0)*Round_To', 'Env_Setup_Days', 'Set-up man-days x blended rate.'),
     ('Additional environment hosted by iorta TechNXT', 'per month', '=ROUND(Env_Monthly_USD*FX*(1+Infra_Margin),-3)', None, 'Cloud cost plus infrastructure margin. Customer-hosted: set-up fee only.'),
     ('Training beyond the included days', 'per trainer day', '=Rate_Trainer', None, 'Up to 15 participants per session; customer provides the room and PCs.'),
-    ('Data migration beyond the standard templates', 'per legacy source', '=ROUND(Mig_Days_Source*Blended/Round_To,0)*Round_To', 'Mig_Days_Source', 'Standard: data loaded by the broker with the BrokerVerse upload templates (docs/templates), with guidance. This item covers extraction and transformation from a legacy system.'),
+    ('Data migration beyond the standard templates', 'per legacy source', '=ROUND(Mig_Days_Source*Blended/Round_To,0)*Round_To', 'Mig_Days_Source', 'Standard: data loaded by the broker with the BrokerVerse upload templates (docs/package/05_Delivery/Upload_Templates), with guidance. This item covers extraction and transformation from a legacy system.'),
     ('Data migration, additional effort', 'per man-day', '=Blended', None, 'For volume or data-quality work beyond the estimate.'),
     ('Additional integration, standard', 'per integration', '=ROUND(Int_Std_Days*Blended/Round_To,0)*Round_To', 'Int_Std_Days', 'One documented API or file exchange, one direction.'),
     ('Additional integration, complex', 'per integration', '=ROUND(Int_Cx_Days*Blended/Round_To,0)*Round_To', 'Int_Cx_Days', 'Two-way, no API, or batch with reconciliation.'),
@@ -883,7 +883,7 @@ SUP0 = r - 3
 r += 2
 sec(op, r, 'Included in the standard implementation (no extra charge)', 6)
 for line in ['Configuration of the company, branches, users and roles, insurers, commission rates, chart of accounts, banks and the included lines of business.',
-             'Data load using the standard upload templates (about 40 templates in docs/templates), with the broker supplying clean data.',
+             'Data load using the standard upload templates (about 50 templates in docs/package/05_Delivery/Upload_Templates), with the broker supplying clean data.',
              'Training days included for the tier (train-the-trainer), UAT support, go-live support and 4 weeks of hypercare.',
              'One production and one UAT environment when iorta TechNXT hosts; deployment guidance when the broker hosts.']:
     r += 1
@@ -1112,7 +1112,7 @@ src = [
     ('S27', 'Xceedance: broking operations', 'https://www.xceedance.com/empowering-broking-operations/', 'Competitor.'),
     ('S28', 'Baker McKenzie: Guide for Insurance Sales, Advisory and Distribution, Philippines', 'https://resourcehub.bakermckenzie.com/en/resources/asia-pacific-insurance/asia-pacific/philippines/topics/guide-for-insurance-sales-advisory-and-distribution', 'Broker capital requirement.'),
     ('S29', 'Respicio & Co.: withholding tax on subscription and professional fees; HitPay withholding tax guide', 'https://www.respicio.ph/commentaries/philippine-withholding-tax-rates-on-subscription-and-professional-fees ; https://hitpayapp.com/blog/withholding-tax-philippines', 'Withholding tax note (to be confirmed by tax advisers).'),
-    ('S30', 'BrokerVerse documentation: Capacity and Performance; Go-live data set-up; docs/templates', 'docs/architecture/06_BrokerVerse_Capacity_and_Performance.pdf ; docs/onboarding/GO_LIVE_DATA_SETUP.md', 'Reference sizing and the standard upload templates.'),
+    ('S30', 'BrokerVerse documentation: Capacity and Performance; Go-live data set-up; docs/package/05_Delivery/Upload_Templates', 'docs/architecture/06_BrokerVerse_Capacity_and_Performance.pdf ; docs/onboarding/GO_LIVE_DATA_SETUP.md', 'Reference sizing and the standard upload templates.'),
 ]
 r = 4
 for s in src:

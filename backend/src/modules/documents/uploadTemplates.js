@@ -5,7 +5,7 @@
  *
  * Workbook: "Data" (header row; required columns have dark red headers; sample rows), "Columns" (required, format,
  * allowed values, example, other accepted headers) and "Instructions" (screen, file types, row limit, errors).
- * Used by scripts/build-upload-templates.js (docs/templates) and the template download routes.
+ * Used by scripts/build-upload-templates.js (docs/package/05_Delivery/Upload_Templates) and the template download routes.
  */
 import { writeXlsx } from '../../lib/xlsx.js';
 import { csvCell } from '../../lib/csv.js';
@@ -20,6 +20,7 @@ import { OPENING_BALANCE_COLUMNS } from '../period-end/opening.js';
 import { uploadColumns } from '../masters/service.js';
 import { masterTemplateInfo } from '../masters/uploadSamples.js';
 import { COLUMN_KEYS } from '../bank-reconciliation/statements.js';
+import { COLUMN_KEYS as INSURER_COLUMN_KEYS } from '../insurer-reconciliation/statements.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file (IMPORT_MAX_ROWS) and 10 MB (IMPORT_MAX_MB).';
@@ -88,7 +89,7 @@ export function staticUploads() {
       notes: ['A lead needs a First Name (individual) or a Company Name (corporate).'],
     },
     {
-      id: 'quotations', file: 'Quotations_Upload_Template.xlsx', title: 'Quotations upload', menu: 'Operations > Quotation > Bulk Upload', route: 'POST /api/quotations/bulk-upload (multipart field "file")',
+      id: 'quotations', file: 'Quotations_Upload_Template.xlsx', title: 'Quotations upload', menu: 'Operations > Sales & Marketing > Quotations > Bulk Upload', route: 'POST /api/quotations/bulk-upload (multipart field "file")',
       columns: QUOTE_UPLOAD_COLUMNS, maxRows: IMPORT_ROWS,
       samples: [
         { firstName: 'Jose', lastName: 'Reyes', emailId: 'jose.reyes@example.ph', contactNumber: '09189876543', productType: 'Motor', insurancePolicyType: 'PC', insuranceCompanyName: 'Malayan Insurance Co., Inc.',
@@ -181,6 +182,7 @@ export function staticUploads() {
     {
       id: 'users', file: 'Users_Provisioning_Template.xlsx', csv: 'Users_Provisioning_Template.csv', title: 'Users (named users and their roles)',
       menu: 'Not a screen upload: run by the System Administrator on the server with backend/scripts/provision-users.js (dry run first, then CONFIRM_PROVISION=yes). Single users are added in Master > Generals > User Management > User.',
+      screen: 'Server script backend/scripts/provision-users.js, run by the System Administrator (single users: Master > Generals > User Management > User)', button: false,
       route: 'node scripts/provision-users.js /secure/path/users.csv', fileTypes: 'CSV only. Keep the file outside the repository and delete it after use: it holds initial passwords.',
       maxRows: 'No fixed limit.', onError: 'The script runs in one transaction: an unknown role stops it and nothing is changed.',
       columns: [
@@ -203,7 +205,8 @@ export function masterUpload(t, { maxRows = BULK_ROWS, withSamples = true } = {}
   const info = masterTemplateInfo(t.code) || {};
   const columns = uploadColumns(t).map((c) => ({ ...c, ...(info.formats?.[c.key] ? { format: info.formats[c.key] } : {}), example: info.samples?.[0]?.[c.key] ?? '' }));
   return {
-    id: `master:${t.code}`, file: `${fileBase(t.label)}_Upload_Template.xlsx`, title: `${t.label} master upload`, menu: info.button ? `${info.menu} > Upload` : `${info.menu || `Master > ${t.label}`} (no Upload button on this screen yet: a System Administrator uploads the file through the API route)`,
+    id: `master:${t.code}`, file: `${fileBase(info.file || t.label)}_Upload_Template.xlsx`, title: `${t.label} master upload`, menu: info.button ? `${info.menu} > Upload` : `${info.menu || `Master > ${t.label}`} (no Upload button on this screen yet: a System Administrator uploads the file through the API route)`,
+    screen: info.menu || `Master > ${t.label}`, button: !!info.button,
     route: `POST /api/masters/${t.code}/upload (multipart field "file")`, columns, maxRows: typeof maxRows === 'number' ? `Up to ${maxRows.toLocaleString('en-US')} data rows per file and 10 MB.` : maxRows,
     samples: withSamples ? info.samples || [] : [],
     notes: [
@@ -247,6 +250,36 @@ export function statementUpload(format) {
       `Rows whose text starts with ${String(format.skip_pattern || '').replace(/^\^\(|\)$/g, '').split('|').join(', ')} are ignored (totals and balance lines).`,
       'For the BDO, BPI and Metrobank exports use the bank\'s own file with its format (BDO-SAMPLE, BPI-SAMPLE, MBT-SAMPLE) instead of this template.',
       'The opening balance is taken from the first line (balance minus amount) when not entered.',
+    ],
+  };
+}
+
+/** Insurer statement upload from an insurer statement format row (GENERIC): first alternative of each mapped column. */
+export function insurerStatementUpload(format) {
+  const map = format.columns || {};
+  const amounts = 'Gross Premium, Commission or Amount Paid on each line';
+  const REQ = { policyNo: true, grossPremium: amounts, commission: amounts, amountPaid: amounts };
+  const FORMAT = { policyNo: 'Policy number as the insurer prints it (matched to the policy number in BrokerVerse)', insured: 'Text', date: `Date ${format.date_format}`,
+    reference: 'Insurer document number (official receipt, statement line or remittance advice)', grossPremium: 'Gross premium in PHP, no sign',
+    commission: 'Commission in PHP, no sign', taxes: 'Taxes in PHP (VAT, withholding), no sign', amountPaid: 'Amount paid or remitted in PHP, no sign' };
+  const columns = INSURER_COLUMN_KEYS.filter((k) => map[k]).map((k) => {
+    const [first, ...rest] = String(map[k]).split('|');
+    return { key: k, header: titleCase(first), aliases: rest, required: REQ[k] || false, format: FORMAT[k] || 'Text' };
+  });
+  return {
+    id: 'insurer-statement', file: 'Insurer_Statement_Generic_Upload_Template.xlsx', title: `Insurer statement (${format.name})`,
+    menu: 'Accounts > Insurer Reconciliation > Insurer Statements > Import statement (format GENERIC)',
+    route: 'POST /api/insurer-reconciliation/statements/import (multipart field "file" and fields insurerId, statementType premium or commission, periodFrom, periodTo, formatCode=GENERIC; optional statementRef, tolerance)',
+    columns, maxRows: IMPORT_ROWS,
+    onError: 'Preview first (the screen shows the lines, totals and the rows that cannot be read). The import is refused as a whole when a row cannot be read or when the same file was already imported for the insurer; the imported lines are then matched to the broker\'s records automatically.',
+    samples: [
+      { policyNo: 'PC-MLY-2026-000101', insured: 'Maria Santos', date: '2026-10-15', reference: 'OR-MLY-558812', grossPremium: '35946.88', commission: '5750.00', taxes: '0', amountPaid: '30196.88' },
+      { policyNo: 'FPG-FI-2026-004417', insured: 'Visayas Cold Storage Inc.', date: '2026-10-15', reference: 'OR-FPG-220913', grossPremium: '78437.50', commission: '12500.00', taxes: '1500.00', amountPaid: '64437.50' },
+    ],
+    notes: [
+      'One statement per insurer and period: a premium remittance confirmation or a commission statement of account.',
+      `Rows whose text starts with ${String(format.skip_pattern || '').replace(/^\^\(|\)$/g, '').split('|').join(', ')} are ignored (totals).`,
+      'An insurer whose statement has other headers gets its own format (Master > Finance > Insurer Statement Formats); upload its own file with that format instead of this template.',
     ],
   };
 }
