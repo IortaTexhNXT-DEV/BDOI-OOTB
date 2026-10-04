@@ -73,7 +73,7 @@ describe("Compliance screens", () => {
   it("shows the dashboard counts", async () => {
     amlService.dashboard.mockResolvedValue({ ratings: { high: 2, normal: 3, low: 4, unrated: 1 }, openHits: 5, listsWithoutVersion: 2, coveredOpen: 1 });
     render(<MemoryRouter><AmlDashboard /></MemoryRouter>);
-    await waitFor(() => expect(screen.getByText("5")).toBeInTheDocument());
+    await screen.findByText("5");
     expect(screen.getByText("Screening hits open")).toBeInTheDocument();
     expect(screen.getByText(/2 active screening list\(s\) have no version loaded/)).toBeInTheDocument();
   });
