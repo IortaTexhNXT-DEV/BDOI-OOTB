@@ -385,7 +385,7 @@ The reconciliation gives, per sheet, the rows and totals of the workbook (gross 
 | Amounts due to insurers and referrers | In the opening balances (Due to Insurers, Commission Payable) and paid with payment vouchers (Accounts > Disbursement), not through the remittance run |
 | Executive dashboard | Premium written and new business exclude migrated policies (`doc.source = 'go-live-migration'` or a `load_batch_id`); migrated policies count as policies in force |
 | Month-end checks | The check "policies without accounting" ignores migrated policies, which were billed by the old system |
-| Lists and reports | Policy lists and `GET /api/policies?source=go-live-migration` filter on the source. The Production report selects policies by inception date and does not filter on the source: a migrated policy with an inception date on or after the cutover date appears in it **[to confirm whether a source filter is added to the production reports]** |
+| Lists and reports | Policy lists filter on the source (`GET /api/policies?source=go-live-migration`). The Production Register shows a Source column (Migrated or BrokerVerse), counts migrated policies in its summary and groups by source with the Report Criteria Source, so business written in BrokerVerse is reported apart from the migrated book. The executive dashboard leaves migrated policies out of premium written and new business |
 | Audit | `load_batch_id` ties every migrated record to its batch; the load history keeps who loaded what and when |
 
 After the go-live lock, the migration workbook is refused. A record missed by the final load is entered on its screen as an exception, agreed with the Accounting Manager.
@@ -563,4 +563,3 @@ The steering committee holds the go/no-go and rollback decisions; the PM column 
 | 4 | Whether the front end can use a relative API address so one build serves every environment | iorta TechNXT development |
 | 5 | Per-environment deployment jobs with approval gates, and restored test jobs in the deployment pipeline | iorta TechNXT DevOps lead |
 | 6 | A row-by-row difference report between two environments in the workbench | iorta TechNXT product owner |
-| 7 | A source filter on the production reports for migrated policies with an inception date on or after the cutover date | iorta TechNXT product owner |

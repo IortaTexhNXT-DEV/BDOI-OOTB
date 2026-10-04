@@ -118,7 +118,7 @@ describe('report catalogue', () => {
   });
   it('returns a definition with the screen filter schema', async () => {
     const r = await as('admin', 'get', '/reports/production-register');
-    expect(r.body.data.parameters.properties.ReportCriteria.enum).toEqual(['Overall', 'Agent', 'Principal Insurer', 'Branch', 'Billing Mode']);
+    expect(r.body.data.parameters.properties.ReportCriteria.enum).toEqual(['Overall', 'Agent', 'Principal Insurer', 'Branch', 'Billing Mode', 'Source']);
     expect(r.body.data.parameters.properties.Company['x-enabledWhen']).toEqual({ ReportCriteria: ['Principal Insurer'] });
     expect(r.body.data.parameters.properties.Agent['x-enabledWhen']).toEqual({ ReportCriteria: ['Agent'] });
     expect(r.body.data.columns.find((c) => c.key === 'premium').type).toBe('money');
@@ -132,6 +132,17 @@ describe('running reports', () => {
     expect(b.total).toBe(3);
     expect(b.data.totals.premium).toBe(45000);
     expect(b.data.summary).toMatchObject({ newBusiness: 2, renewals: 1 });
+    expect(b.data.summary.migrated).toBe(0);
+    expect(b.data.rows.every((r) => r.source === 'BrokerVerse')).toBe(true);
+    // a policy loaded by the go-live migration is shown as Migrated and grouped apart
+    await pool.query(`UPDATE policies SET doc = jsonb_set(COALESCE(doc, '{}'::jsonb), '{source}', '"go-live-migration"') WHERE policy_number = 'RPT-POL-1'`);
+    try {
+      const bySource = await run('production-register', { ...Y, ReportCriteria: 'Source' });
+      expect(bySource.data.summary.migrated).toBe(1);
+      expect(bySource.data.groups.map((g) => g.group).sort()).toEqual(['BrokerVerse', 'Migrated']);
+    } finally {
+      await pool.query(`UPDATE policies SET doc = doc - 'source' WHERE policy_number = 'RPT-POL-1'`);
+    }
     expect(b.data.rows[0]).toMatchObject({ policyNumber: 'RPT-POL-1', client: 'Dela Cruz Trading Corp', branch: 'Reports Test Branch' });
     expect(b.data.rows[0]._agent_id).toBeUndefined();
     const byAgent = await run('production-register', { ...Y, ReportCriteria: 'Agent' });

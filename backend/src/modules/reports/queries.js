@@ -44,7 +44,9 @@ const production = `SELECT p.id AS _id, p.policy_number AS "policyNumber", COALE
     p.inception_date AS "inceptionDate", p.expiry_date AS "expiryDate", to_char(p.inception_date, 'YYYY-MM') AS month,
     CASE WHEN p.renewed_from IS NULL THEN 'New Business' ELSE 'Renewal' END AS "businessType",
     ${POLICY_DIMS}, p.sum_insured AS "sumInsured", p.premium_total AS premium, p.commission_amount AS commission,
-    ${BILLING_MODE} AS "billingMode", p.currency, p.status
+    ${BILLING_MODE} AS "billingMode", p.currency, p.status,
+    -- policies of the old system loaded by the go-live migration, kept apart from business written in BrokerVerse
+    CASE WHEN p.doc->>'source' = 'go-live-migration' OR p.load_batch_id IS NOT NULL THEN 'Migrated' ELSE 'BrokerVerse' END AS "source"
   FROM policies p ${POLICY_JOINS}
   WHERE p.inception_date BETWEEN $1 AND $2`;
 
@@ -216,10 +218,10 @@ export const QUERIES = {
   },
   ...BANK_REC_QUERIES,
   production: {
-    sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' } },
+    sql: production, filters: POLICY_FILTERS, criteria: { ...STANDARD_CRITERIA, 'Billing Mode': { groupBy: 'billingMode' }, Source: { groupBy: 'source' } },
     orderBy: 'f."inceptionDate", f."policyNumber"',
     summary: { newBusiness: 'count(*) FILTER (WHERE f."businessType" = \'New Business\')', renewals: 'count(*) FILTER (WHERE f."businessType" = \'Renewal\')',
-      directBill: 'count(*) FILTER (WHERE f."billingMode" = \'Direct bill\')' },
+      directBill: 'count(*) FILTER (WHERE f."billingMode" = \'Direct bill\')', migrated: 'count(*) FILTER (WHERE f.source = \'Migrated\')' },
   },
   premiumByProduct: {
     sql: production, filters: POLICY_FILTERS,
