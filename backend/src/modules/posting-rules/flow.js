@@ -39,6 +39,9 @@ export const EVENT_FLOW = {
   'insurer_statement.adjustment': { trigger: 'Accounts > Insurer Reconciliation: reconciliation approved with adjustments', approval: 'Accounting Manager (approve:insurer-reconciliation), not the preparer' },
   'ri.cession': { trigger: 'Reinsurance: cession confirmed', approval: 'Maker-checker on cessions (always on)' },
   'ri.recovery': { trigger: 'Reinsurance: claim recovery settled', approval: 'None' },
+  'ri.facultative.bind': { trigger: 'Reinsurance > Facultative Placements: slip bound once the accepted lines reach 100%', approval: 'None' },
+  'ri.facultative.premium_received': { trigger: 'Reinsurance > Facultative Placements: premium received from the cedant recorded', approval: 'None' },
+  'ri.facultative.premium_paid': { trigger: 'Reinsurance > Facultative Placements: premium paid to a reinsurer recorded', approval: 'None' },
   'incentive.accrual': { trigger: 'Incentive: calculated incentives approved', approval: 'Maker-checker (not the calculating user)' },
   'incentive.payout': { trigger: 'Incentive: approved incentives paid', approval: 'None' },
 };

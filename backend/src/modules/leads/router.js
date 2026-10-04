@@ -9,6 +9,7 @@ import { uploadFile, parseUploadedRows, sendTable } from '../documents/tabular.j
 import { ownRecord, withScope, scopeOf } from '../../lib/scope.js';
 import * as svc from './service.js';
 import { today } from '../../lib/dates.js';
+import assignmentRouter from './assignmentRoutes.js';
 
 const { router, define } = moduleRouter('Leads', '/leads');
 const legacy = moduleRouter('Leads', '/lead');
@@ -128,4 +129,4 @@ legacy.define({
 
 export default router;
 export const mount = '/leads';
-export const extraMounts = [['/lead', legacy.router]];
+export const extraMounts = [['/lead', legacy.router], ['/lead-assignment', assignmentRouter]];

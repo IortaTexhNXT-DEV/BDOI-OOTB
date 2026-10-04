@@ -429,6 +429,8 @@ describe('route registry', () => {
     // client checkout by the payment link's random token, and the gateways' signed webhooks / postbacks
     'GET /public/payments/:token', 'POST /public/payments/:token/sandbox', 'GET /public/payments/:token/policy.pdf',
     'POST /public/payments/webhooks/:gateway', 'GET /public/payments/webhooks/:gateway',
+    // marketing campaign opt-out link (signed token of one recipient; the GET page changes nothing)
+    'GET /campaigns/opt-out/:token', 'POST /campaigns/opt-out/:token',
   ]);
   it('declares only the intended public routes', () => {
     const open = ROUTES.filter((r) => !r.auth).map((r) => `${r.method} ${r.path}`);

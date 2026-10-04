@@ -52,6 +52,12 @@ export const TRANSACTION_TABLES = [
   'access_review_items', 'access_reviews', 'agent_events',
   // data privacy: consents and data subject requests belong to the clients and leads that go
   'data_subject_requests', 'privacy_consents',
+  // distribution and products: lead assignments, channel billing accounts, dealer sales, fleet schedules, marine open
+  // covers, facultative reinsurance, comparison reports, marketing campaigns (assignment rules, channels, programmes,
+  // segments, templates and saved reports are masters)
+  'lead_assignment_history', 'channel_billing_accounts', 'dealer_sales_batches', 'dealer_sales', 'fleet_schedules', 'fleet_vehicles',
+  'open_covers', 'open_cover_declarations', 'open_cover_certificates', 'fac_placements', 'fac_placement_shares', 'fac_settlements',
+  'comparison_reports', 'campaigns', 'campaign_recipients',
 ];
 
 /**
@@ -79,6 +85,7 @@ export const SYSTEM_RESET_ACTIONS = {
   audit_log: 'optional', // kept unless --purge-audit; the reset is recorded in it either way
   password_history: 'keep', // part of the user accounts (password reuse rule)
   schema_migrations: 'keep',
+  bi_extract_runs: 'remove', // BI extract history (the CSV files in the storage folder stay)
 };
 export const SYSTEM_TABLES = Object.keys(SYSTEM_RESET_ACTIONS);
 
@@ -100,6 +107,9 @@ export const MASTER_CONFIG_TABLES = [
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
   // reports and scheduled jobs
   'report_definitions', 'report_schedules', 'scheduled_jobs',
+  // distribution and reporting configuration: lead assignment rules, distribution channels, brand-new vehicle
+  // programmes, campaign segments and templates, Report Builder saved reports
+  'lead_assignment_rules', 'distribution_channels', 'motor_programmes', 'campaign_segments', 'campaign_templates', 'report_builder_reports',
 ];
 
 /**
@@ -125,6 +135,7 @@ export const TRANSACTION_FILE_FOLDERS = [
   'vehicle-photos', 'id-cards', 'policy-documents', 'quotation-responses', 'insurer-offers', 'endorsement', 'endorsement-documents',
   'claim', 'claims', 'payment-proofs', 'direct-bill-payments', 'print', 'generated', 'reports', 'bordereaux',
   'incentive-reports', 'reinsurance-reports', 'remittance-statements', 'remittance-bulk',
+  'bi-extract',
 ];
 /** Configuration folders, never touched: logos and favicons (System Settings, Company master), product documents. */
 export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-documents'];

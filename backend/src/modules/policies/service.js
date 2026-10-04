@@ -39,7 +39,7 @@ export function toPolicy(r) {
     expiry: r.expiry_date, expiryDate: r.expiry_date, issuedDate: r.issued_date, production: doc.production || r.issued_date,
     sumInsured: Number(r.sum_insured), totalSumInsured: Number(r.sum_insured), netPremium: Number(r.net_premium), grossPremium: Number(r.premium_total),
     premiumTotal: Number(r.premium_total), commissionAmount: Number(r.commission_amount), currency: r.currency, billNumber: r.bill_number,
-    billingMode: r.billing_mode || 'broker', isDirectBilled: r.billing_mode === 'direct',
+    billingMode: r.billing_mode || 'broker', isDirectBilled: r.billing_mode === 'direct', channelId: r.channel_id ?? doc.channelId ?? null,
     // premium taxes as priced on the quotation, else as stored on the policy itself (placement slip, package, upload)
     valueAddedTax: quote?.valueAddedTax ?? doc.valueAddedTax, documentaryStampTax: quote?.documentaryStampTax ?? doc.documentaryStampTax,
     localGovernmentTax: quote?.localGovernmentTax ?? doc.localGovernmentTax, fireServiceTax: quote?.fireServiceTax ?? doc.fireServiceTax,
@@ -211,7 +211,7 @@ const addMonths = (d, m) => { const x = new Date(`${d}T00:00:00Z`); x.setUTCMont
  * instead (Dr commission receivable / Cr commission income / Cr output VAT) and { id: null, bill_number: null, directBill }
  * is returned.
  */
-export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null, date = null, split = null }) {
+export async function createReceivable(db, { policyId, amount, source = 'policy', breakdown = {}, reference = null, user = null, endorsementId = null, date = null, split = null, payerClientId = null }) {
   const policy = (await db.query(`SELECT p.*, ic.name AS insurer_name FROM policies p
     LEFT JOIN insurance_companies ic ON ic.id = p.insurance_company_id WHERE p.id = $1`, [policyId])).rows[0];
   if (policy?.billing_mode === 'direct') {
@@ -220,7 +220,30 @@ export async function createReceivable(db, { policyId, amount, source = 'policy'
     return { id: null, bill_number: null, directBill: item };
   }
   const { createReceivable: financeReceivable } = await import('../receipts/receivables.js');
-  return financeReceivable(db, { policy, amount: round2(amount), breakdown, source, reference, date, user, split });
+  // payerClientId: the bill is addressed to another party than the insured (a dealer paying the premium)
+  return financeReceivable(db, { policy: payerClientId ? { ...policy, client_id: payerClientId } : policy, amount: round2(amount), breakdown, source, reference, date, user, split });
+}
+
+/**
+ * One bill per payer of a premium split between parties ([{ clientId, amount }], amounts adding up to gross): the
+ * premium breakdown and the commission go to each bill in proportion (the last one takes the rounding). Returns the bills.
+ */
+async function billPayers(db, { policyId, payers, gross, breakdown, commission, source, reference, userId, date }) {
+  const total = round2(payers.reduce((s, p) => s + num(p.amount), 0));
+  if (Math.abs(total - round2(gross)) > 0.01) throw badRequest(`The payers' shares (${total.toFixed(2)}) do not add up to the gross premium (${round2(gross).toFixed(2)})`);
+  const keys = ['netPremium', 'vat', 'dst', 'lgt', 'discount'];
+  const used = Object.fromEntries([...keys, 'commissionAmount'].map((k) => [k, 0]));
+  const bills = [];
+  for (const [i, p] of payers.entries()) {
+    const last = i === payers.length - 1;
+    const share = num(p.amount) / total;
+    const part = {};
+    for (const k of keys) part[k] = last ? round2(num(breakdown[k]) - used[k]) : round2(num(breakdown[k]) * share);
+    part.commissionAmount = last ? round2(commission - used.commissionAmount) : round2(commission * share);
+    for (const k of Object.keys(used)) used[k] = round2(used[k] + part[k]);
+    bills.push(await createReceivable(db, { policyId, amount: num(p.amount), source, reference: p.reference || reference, user: { id: userId }, date, breakdown: part, payerClientId: p.clientId || null }));
+  }
+  return bills;
 }
 
 /** Roles that earn commission on the policies they produce (commission.eligible_roles, falling back to incentive.eligible_roles). */
@@ -319,19 +342,28 @@ export async function issuePolicy(db, src, body, userId) {
     await writeParticipants(db, 'policy', policyId, policyParts, { sumInsured: src.sumInsured, premium: src.netPremium, taxes, premiumTotal: src.grossPremium, commissionAmount: src.commissionAmount },
       { userId, commissionRate: src.commissionRate ?? null });
   }
-  const details = { commissionDetails: src.doc?.commissionDetails || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };
+  // a policy brought by a distribution channel linked to a referrer earns the referrer's comsub (channels module)
+  const { channelReferral } = await import('../channels/service.js');
+  const details = { commissionDetails: src.doc?.commissionDetails || (await channelReferral(db, policyId)) || null, netPremium: src.netPremium, grossPremium: src.grossPremium, discount: src.doc?.discount ?? null };
   // Go-live migration of an in-force policy: no bill, booking journal or commission accrual (the old system billed it;
-  // its open premium is loaded as an open item and the GL balances as opening balances).
-  if (src.migration) {
+  // its open premium is loaded as an open item and the GL balances as opening balances). An open cover's policy
+  // (src.billLater, marine module) is billed on its declarations instead.
+  if (src.migration || src.billLater) {
     await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);
     return { policyId, receivable: null, commission: null };
   }
   // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
   const renewal = src.receivableSource === 'renewal';
   // booked on the issue date, so a policy keyed in after its issue lands in the month it was issued
-  const receivable = await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId }, date: issuedOn,
-    breakdown: { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount,
-      ...(renewal ? { commissionAmount: src.commissionAmount } : {}) }, split: src.split || null });
+  const breakdown = { netPremium: src.netPremium, vat: src.doc?.valueAddedTax, dst: src.doc?.documentaryStampTax, lgt: src.doc?.localGovernmentTax, discount: src.doc?.discount,
+    ...(renewal ? { commissionAmount: src.commissionAmount } : {}) };
+  // src.payers: the premium split between bill-to parties (a dealer or bank paying a subsidy and the insured the rest,
+  // motor-programmes module); one bill each, the breakdown and commission in proportion. Otherwise one bill to the insured.
+  const payers = billingMode !== 'direct' && Array.isArray(src.payers) && src.payers.filter((p) => num(p.amount) > 0).length > 1 ? src.payers.filter((p) => num(p.amount) > 0) : null;
+  const receivable = payers
+    ? (await billPayers(db, { policyId, payers, gross: num(src.grossPremium), breakdown, commission: num(src.commissionAmount), source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, userId, date: issuedOn }))[0]
+    : await createReceivable(db, { policyId, amount: src.grossPremium, source: renewal ? 'renewal' : 'policy', reference: src.receivableReference || null, user: { id: userId }, date: issuedOn,
+      breakdown, split: src.split || null, payerClientId: src.payers?.find((p) => num(p.amount) > 0)?.clientId || null });
   await db.query('UPDATE policies SET bill_number = $2 WHERE id = $1', [policyId, receivable.bill_number]);
   await db.query('UPDATE policies SET details = details || $2::jsonb WHERE id = $1', [policyId, JSON.stringify(details)]);
   const commission = await accrueCommission(db, { policyId, quoteId: src.quoteId, agentUserId: src.agentUserId, basis: src.netPremium, rate: src.commissionRate,

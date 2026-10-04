@@ -21,6 +21,8 @@ import { uploadColumns } from '../masters/service.js';
 import { masterTemplateInfo } from '../masters/uploadSamples.js';
 import { COLUMN_KEYS } from '../bank-reconciliation/statements.js';
 import { COLUMN_KEYS as INSURER_COLUMN_KEYS } from '../insurer-reconciliation/statements.js';
+import { DEALER_SALE_COLUMNS } from '../motor-programmes/service.js';
+import { FLEET_VEHICLE_COLUMNS } from '../fleet/service.js';
 
 const XLSX_OR_CSV = 'XLSX (the first sheet, Data, is read) or CSV saved as UTF-8. The first row must be the column headers.';
 const IMPORT_ROWS = 'Up to 20,000 data rows per file (IMPORT_MAX_ROWS) and 10 MB (IMPORT_MAX_MB).';
@@ -194,6 +196,36 @@ export function staticUploads() {
       ],
       samples: [{ name: 'Andrea Lim', username: 'alim', password: '', role: 'accounting', email: 'andrea.lim@example.ph' }],
       notes: ['The password column is left empty in the template on purpose. Fill it in only in the copy kept outside the repository, and hand each password to its user privately.', 'An existing username is updated: its role is replaced and the password reset.'],
+    },
+    {
+      id: 'dealer-sales', file: 'Dealer_Sales_Upload_Template.xlsx', title: 'Dealer vehicle sales (brand-new vehicle programme)', menu: 'Operations > Sales & Marketing > Dealer Programmes > Dealer Sales Upload',
+      route: 'POST /api/motor-programmes/:id/sales/upload (multipart field "file")', columns: DEALER_SALE_COLUMNS, maxRows: 'Up to 2,000 sales per file (Configuration setting motor_programmes.max_rows) and 10 MB.',
+      onError: ROW_BY_ROW.replace('otherwise the saved rows are created a second time.', 'otherwise the saved rows are refused as already uploaded (same chassis number).'),
+      samples: [
+        { dealerBranchCode: 'TOY-MKT', saleDate: '2026-10-05', invoiceNumber: 'SI-104877', buyerFirstName: 'Ramon', buyerLastName: 'Villanueva', buyerEmail: 'ramon.villanueva@example.ph',
+          buyerMobile: '09175550123', buyerAddress: '18 Sampaguita St., Barangay Bel-Air', buyerCity: 'Makati City', buyerProvince: 'Metro Manila', make: 'Toyota', model: 'Vios',
+          variant: '1.3 XLE CVT', yearModel: '2026', color: 'Silver Metallic', vehicleType: 'private_cars', conductionSticker: 'A1B234', chassisNumber: 'MR2B29F30R1123456',
+          engineNumber: '2NR-F123456', invoicePrice: '1015000', bankCode: 'BDO-AUTO', loanAmount: '812000' },
+        { dealerBranchCode: 'TOY-MKT', saleDate: '2026-10-06', invoiceNumber: 'SI-104902', buyerCompanyName: 'Pasig Fresh Foods Inc.', buyerEmail: 'admin@pasigfresh.example.ph',
+          buyerCity: 'Pasig City', buyerProvince: 'Metro Manila', make: 'Toyota', model: 'Innova', variant: '2.8 E AT', yearModel: '2026', color: 'White Pearl',
+          vehicleType: 'private_cars', conductionSticker: 'C7D881', chassisNumber: 'MHFJW8EM5R4044455', engineNumber: '1GD-5512277', invoicePrice: '1520000' },
+      ],
+      notes: ['Choose the programme on the screen first: its insurer, rates, CTPL term, subsidy and issue mode apply to every row.',
+        'Each accepted row creates the prospect (channel: the dealer branch) and the quotation; when the programme issues policies, also the client, the policy and the bills to whoever pays the premium.',
+        'A financed sale names the bank (or the programme\'s bank applies when there is a loan amount): the bank is the mortgagee on the policy and the bank endorsement letter can be printed from the sale.'],
+    },
+    {
+      id: 'fleet-vehicles', file: 'Fleet_Vehicles_Upload_Template.xlsx', title: 'Fleet vehicles (schedule of a fleet policy)', menu: 'Operations > Fleet Schedules > Schedule > Upload Vehicles',
+      route: 'POST /api/fleet/:id/vehicles/upload (multipart field "file")', columns: FLEET_VEHICLE_COLUMNS, maxRows: 'Up to 1,000 vehicles per file (Configuration setting fleet.max_upload_rows) and 10 MB.',
+      onError: ROW_BY_ROW.replace('otherwise the saved rows are created a second time.', 'otherwise the saved rows are refused as already on the fleet (same plate or chassis number).'),
+      samples: [
+        { plateNumber: 'NBC 1234', chassisNumber: 'MPATFS86JMT004321', engineNumber: '4JJ3-778812', make: 'Isuzu', model: 'D-Max 3.0 LS-A', yearModel: '2024', color: 'White',
+          vehicleType: 'light_medium_trucks', usage: 'Commercial', sumInsured: '1450000', ownDamageRate: '1.25', actsOfNatureRate: '0.5', bodilyInjury: '200000', propertyDamage: '200000', includeCtpl: 'Yes' },
+        { plateNumber: 'NDE 5521', chassisNumber: 'JTFSS22P5R0123987', engineNumber: '1GD-8812345', make: 'Toyota', model: 'Hiace Commuter', yearModel: '2025', color: 'Silver',
+          vehicleType: 'light_medium_trucks', usage: 'Commercial', mortgagee: 'BDO Unibank, Inc.', sumInsured: '1880000', ownDamageRate: '1.25', actsOfNatureRate: '0.5', includeCtpl: 'Yes' },
+      ],
+      notes: ['Vehicles are uploaded to a draft schedule. Each one is priced on its own: own damage and acts of nature on its sum insured, excess liability, the CTPL tariff of its vehicle class and the premium taxes.',
+        'Once the schedule is issued, vehicles are added or deleted by endorsement on the schedule screen (pro-rata premium).'],
     },
   ];
 }

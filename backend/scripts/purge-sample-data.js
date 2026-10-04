@@ -47,6 +47,13 @@ export const AUDIT_TABLES = ['audit_log', 'login_history'];
 
 /** Sample master rows (seeds/sample/*.sql), by natural key. */
 export const SAMPLE_MASTERS = [
+  // distribution samples (seeds/sample/74_distribution.sql) first: the channels refer to sample referrers
+  { table: 'report_builder_reports', label: 'sample saved reports', where: "created_by = 'seed'" },
+  { table: 'campaign_templates', label: 'sample campaign templates', where: "created_by = 'seed'" },
+  { table: 'campaign_segments', label: 'sample campaign segments', where: "created_by = 'seed'" },
+  { table: 'lead_assignment_rules', label: 'sample lead assignment rules', where: "created_by = 'seed'" },
+  { table: 'motor_programmes', label: 'sample vehicle programmes', where: "created_by = 'seed'" },
+  { table: 'distribution_channels', label: 'sample distribution channels', where: "created_by = 'seed'" },
   { table: 'insurance_companies', label: 'fictional insurers', where: "code IN ('SECUREGUARD','APEX','LIBERTYSHIELD','SENTINEL','GOLDENHORIZON','INTEGRITY','EVERSAFE')" },
   { table: 'branches', label: 'demo branches', where: "code IN ('CEB','DAV')" },
   { table: 'signatories', label: 'fictional signatories', where: "name IN ('Maria Regina Cruz','Jose Antonio Reyes','Ana Patricia Lim')" },

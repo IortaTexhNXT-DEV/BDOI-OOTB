@@ -106,3 +106,9 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/items.js')).runDueSchedules();
 }
+
+// Distribution and reporting: prospects not worked in time go to the reassignment queue (lead assignment), scheduled
+// marketing campaigns are sent, the BI extract is written to the storage folder (all disabled until switched on)
+export { leadAssignmentSla } from '../modules/leads/assignment.js';
+export { campaignDispatch } from '../modules/campaigns/service.js';
+export { biExtract } from '../modules/report-builder/service.js';
