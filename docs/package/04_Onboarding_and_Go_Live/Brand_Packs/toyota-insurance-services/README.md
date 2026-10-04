@@ -5,13 +5,14 @@ the product that a System Administrator enables in one environment from Master >
 > Brand packs > Bundled packs; it is not the BrokerVerse default, nothing enables it automatically, and it is not part
 of the generic out-of-the-box seed that every broker receives.
 
-## Trademark and permission
+## Trademark and contract
 
-The Toyota name, the Toyota emblem and the Toyota Insurance Services logo are trademarks of their owners. Use this pack
-only for the Toyota Insurance Services engagement and only after the client has confirmed in writing that iorta TechNXT
-may use its marks in their BrokerVerse environments (UAT and Production). Do not use these files in demonstrations to
-other prospects, in marketing material or in another broker's environment. Remove the pack from an environment when the
-engagement or the permission ends (apply another brand pack or the iorta TechNXT preset).
+The Toyota name, the Toyota emblem and the Toyota Insurance Services logo are trademarks of their owners. Toyota
+Insurance Services (Philippines) is a client of iorta TechNXT, and the contract between them covers the use of these
+marks in the BrokerVerse environments of that engagement (UAT and Production). Use this pack in those environments
+only: not in demonstrations to other prospects, in marketing material or in another client's environment. Keep the
+contract reference with the engagement records and remove the pack from an environment when the engagement ends
+(apply another brand pack or the iorta TechNXT preset).
 
 ## Contents
 
@@ -22,7 +23,7 @@ engagement or the permission ends (apply another brand pack or the iorta TechNXT
 | `toyota-insurance-services.brandpack.zip` | The importable pack (theme.json + logo.png + this README), built by `node backend/scripts/build-brand-pack.js <this folder>` |
 
 The bundled copy of this folder is `backend/assets/brand-packs/toyota-insurance-services/`, with a `manifest.json`
-(id, name, description, trademark owner, written permission required, version) that the Bundled packs list reads. The
+(id, name, description, trademark owner, the contract covering the marks, version) that the Bundled packs list reads. The
 two copies must stay identical (a test compares them).
 
 ## The theme
@@ -52,11 +53,12 @@ the application name to "Toyota Insurance Services" (untick "Also set the applic
 
 ## Enabling it
 
-1. Get the client's written permission (see above) and keep it with the engagement records.
+1. Confirm the environment belongs to the Toyota Insurance Services engagement (see above) and keep the contract
+   reference with the engagement records.
 2. Sign in as a System Administrator: Master > System Settings > Theme and Branding > Brand packs > Bundled packs.
 3. On the Toyota Insurance Services card, check the preview (Sample document, Sample e-mail), then select Enable. The
-   dialog names the owner of the marks and checks the pack; tick "We hold the owner's written permission to use these
-   marks" (the button stays disabled until then). "Also use the logo on printed documents" sets the logo as the print
+   dialog names the owner of the marks and checks the pack; tick "This environment belongs to the client engagement wh
+   se contract with iorta TechNXT covers these marks" (the button stays disabled until then). "Also use the logo on printed documents" sets the logo as the print
    logo of the primary company (Master > Company); "Also set the application name of the pack" sets the name.
 4. Every signed-in user gets the new look on their next navigation; documents and reports printed from now on use it.
    The card shows "Enabled on <date> by <user>"; the enablement and the acknowledgement are in the audit trail.

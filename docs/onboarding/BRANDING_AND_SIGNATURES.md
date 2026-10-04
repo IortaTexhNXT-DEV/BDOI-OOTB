@@ -1,6 +1,6 @@
 # Broker branding and e-signatures
 
-Version 1.2, 04 October 2026, iorta TechNXT. Changes: bundled brand packs (shipped with the product, enabled on the
+Version 1.2.1, 04 October 2026, iorta TechNXT. Changes: client brand packs are used under the client's contract with iorta TechNXT (no separate permission letter); 1.2: bundled brand packs (shipped with the product, enabled on the
 screen with the trademark acknowledgement, Back to default), their support procedure in section 5. Version 1.1:
 section 5, support procedures for brand pack import and e-signature revocation.
 
@@ -143,8 +143,8 @@ them and checks that the built zip is in step with the folder); change the docs 
   preview and status (Enabled / Available), with **Sample document** and **Sample e-mail** (the pack's theme, unsaved),
   **Enable** and, once enabled, **Enabled on <date> by <user>** and **Back to default**.
 * **Enable** = the import logic (`importBrandPack()`), preceded by a dry run and by the acknowledgement: the dialog
-  states who owns the marks and the administrator must tick **We hold the owner's written permission to use these
-  marks** before the button activates. The API refuses the call without `acknowledgedPermission: true`
+  states who owns the marks and the contract that covers them, and the administrator must tick **This environment belongs to th
+   client engagement whose contract with iorta TechNXT covers these marks** before the button activates. The API refuses the call without `acknowledgedPermission: true`
   (`POST /api/branding/packs/bundled/<id>/enable`), so the acknowledgement cannot be skipped.
 * **Record**: table `brand_pack_enablements` (pack, version, owner, the acknowledgement text, who, when, what was
   applied, the branding before the pack; status enabled / replaced / reverted) and the audit trail (entity `branding`,
@@ -158,13 +158,15 @@ them and checks that the built zip is in step with the folder); change the docs 
 ## 4. Client brand packs and trademarks
 
 A client brand pack (for example `Brand_Packs/toyota-insurance-services/`) carries a third party's name and marks. It
-is **not** the default, is **not** in the generic seed of every broker, and may only be applied in that client's
-environments **with the client's written permission** to use its marks (keep it with the engagement records). Do not
-use it in demonstrations to other prospects. Do not copy photographs from a client's web site into the repository; the
+is **not** the default, is **not** in the generic seed of every broker, and is applied only in that client's
+environments: every such client is a client of iorta TechNXT, and **its contract with iorta TechNXT covers the use of
+its marks** there (keep the contract reference with the engagement records). Do not use it in demonstrations to other
+prospects. Do not copy photographs from a client's web site into the repository; the
 broker uploads its own sign-in picture.
 
 The Toyota Insurance Services pack is delivered as a bundled pack (section 3): it is enabled from Theme and Branding
-> Brand packs > Bundled packs, with the acknowledgement of the owner's written permission, and never by default. The
+> Brand packs > Bundled packs, with the acknowledgement that the environment belongs to that engagement, and never by
+default. The
 importable zip in `Brand_Packs/` remains for an environment that cannot reach the bundled list (an older release).
 
 The Toyota Insurance Services pack: white header and side bar, near-black text and buttons, light grey backgrounds,
@@ -187,13 +189,13 @@ an Insurance Agent, Licence No. {{licence}}". See its README.
    their next navigation; no reload or rebuild is needed.
 5. **Rollback**: import the pack exported in step 1.
 
-A client brand pack carrying third-party marks is applied only in that client's environments, with the client's
-written permission on file (section 4). Support refuses the change without it.
+A client brand pack is applied only in that client's environments, under its contract with iorta TechNXT (section 4).
+Support refuses the change in any other environment.
 
 ### Enabling a bundled brand pack
 
-1. **Permission**: confirm the client's written permission is on file (section 4). The administrator who enables the
-   pack acknowledges it on the screen; the acknowledgement is stored with the enablement and in the audit trail, so
+1. **Engagement**: confirm the environment belongs to that client's engagement, whose contract covers its marks
+   (section 4). The administrator who enables the pack acknowledges it on the screen; the acknowledgement is stored with the enablement and in the audit trail, so
    the record must be true.
 2. **Before**: export the current pack (Brand packs > Export .zip) and keep it with the change record, as for an
    import. Back to default does not restore a custom theme saved before the pack (it restores the product default),

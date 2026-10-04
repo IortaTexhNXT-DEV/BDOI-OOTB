@@ -2,7 +2,7 @@
 --
 -- A bundled pack ships with the product under backend/assets/brand-packs/<id>/ (manifest.json, theme.json, images)
 -- and is never applied by default: a System Administrator enables it on the screen after acknowledging that the
--- broker holds the written permission of the owner of the marks the pack carries. Each enablement is one row here
+-- environment belongs to the client engagement whose contract with iorta TechNXT covers the marks the pack carries. Each enablement is one row here
 -- (who, when, the acknowledgement, what the branding was before, so "Back to default" can restore the print logo of
 -- the primary company); going back to the iorta TechNXT default closes the row (status reverted) and enabling
 -- another pack closes it as replaced. The audit trail carries the same facts (entity branding, actions enable-pack

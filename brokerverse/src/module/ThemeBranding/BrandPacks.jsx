@@ -83,7 +83,7 @@ const BrandPacks = ({ notify, onImported }) => {
       </section>
       <section className="bv-tb__section">
         <h3>{t("themeBranding.importPack", "Import")}</h3>
-        <p className="bv-tb__hint">{t("themeBranding.importHint", "A brand pack .zip (theme.json and images) or .json. Client brand packs that carry a third party's marks (for example a car brand) may only be applied with the client's written permission.")}</p>
+        <p className="bv-tb__hint">{t("themeBranding.importHint", "A brand pack .zip (theme.json and images) or .json. A client brand pack carries the client's marks and is applied only in that client's environments, under its contract with iorta TechNXT.")}</p>
         <input ref={input} type="file" accept=".zip,.json,application/zip,application/json" hidden onChange={(e) => { choose(e.target.files?.[0]); e.target.value = ""; }} data-testid="brand-pack-file" />
         <Button type="button" label={t("themeBranding.choosePack", "Choose brand pack")} icon="pi pi-upload" className="p-button-outlined" onClick={() => input.current?.click()} loading={busy === "check"} />
         {check && !check.ok && <Message severity="error" className="mt-3" text={[check.message, ...(check.errors || []).map((x) => `${x.path}: ${x.message}`)].join(" | ")} />}

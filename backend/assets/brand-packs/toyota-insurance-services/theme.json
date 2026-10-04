@@ -2,7 +2,7 @@
   "format": "brokerverse-brand-pack",
   "version": 1,
   "name": "Toyota Insurance Services",
-  "note": "Client brand pack for the Toyota Insurance Services (Philippines) engagement only. Toyota marks and logo belong to their owners; apply only with the client's written permission. Not part of the generic OOTB seed.",
+  "note": "Client brand pack for the Toyota Insurance Services (Philippines) engagement only. Toyota marks and logo belong to their owners; their use is covered by the client's contract with iorta TechNXT, for that client's environments only. Not part of the generic OOTB seed.",
   "systemName": "Toyota Insurance Services",
   "theme": {
     "preset": "custom",

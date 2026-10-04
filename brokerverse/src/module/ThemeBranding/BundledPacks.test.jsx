@@ -14,7 +14,7 @@ jest.mock("../../services/brandingService", () => ({
 
 const THEME = { preset: "custom", name: "Toyota Insurance Services", colors: { primary: "#1a1a1a", accent: "#eb0a1e" }, email: { enabled: true } };
 const PACK = {
-  id: "toyota-insurance-services", name: "Toyota Insurance Services", version: "1.0.0", requiresWrittenPermission: true,
+  id: "toyota-insurance-services", name: "Toyota Insurance Services", version: "1.0.0", requiresAcknowledgement: true, permissionBasis: "Contract between iorta TechNXT and Toyota Insurance Services (Philippines)",
   description: "Client brand pack for the Toyota Insurance Services (Philippines) engagement.",
   trademarkOwner: "Toyota Motor Corporation and Toyota Insurance Services (Philippines)",
   permissionNote: "The Toyota name, the Toyota emblem and the Toyota Insurance Services logo are trademarks of their owners.",
@@ -64,7 +64,7 @@ describe("Bundled brand packs", () => {
     expect(await screen.findByTitle("bundled e-mail")).toBeInTheDocument();
   });
 
-  it("enables a pack only after the administrator ticks the written permission acknowledgement", async () => {
+  it("enables a pack only after the administrator ticks the engagement acknowledgement", async () => {
     brandingService.bundledPacks.mockResolvedValueOnce(AVAILABLE).mockResolvedValueOnce(ENABLED);
     brandingService.checkBundledPack.mockResolvedValue({ name: "Toyota Insurance Services", dryRun: true, assets: ["logo", "documentLogo"], warnings: [], theme: THEME });
     brandingService.enableBundledPack.mockResolvedValue({ name: "Toyota Insurance Services", applied: ["theme", "logo", "documentLogo", "systemName"], enablement: ENABLEMENT });
@@ -80,7 +80,7 @@ describe("Bundled brand packs", () => {
     expect(confirmButton).toBeDisabled();
     fireEvent.click(confirmButton);
     expect(brandingService.enableBundledPack).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByLabelText("We hold the owner's written permission to use these marks"));
+    fireEvent.click(screen.getByLabelText("This environment belongs to the client engagement whose contract with iorta TechNXT covers these marks"));
     await waitFor(() => expect(confirmButton).not.toBeDisabled());
     fireEvent.click(confirmButton);
     await waitFor(() => expect(brandingService.enableBundledPack).toHaveBeenCalledWith("toyota-insurance-services", { acknowledgedPermission: true, applyDocumentLogo: true, applySystemName: true }));

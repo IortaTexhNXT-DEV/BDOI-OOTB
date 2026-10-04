@@ -1,7 +1,8 @@
 /**
  * Bundled brand packs (Theme and Branding > Brand packs): the packs shipped with the product, with their status in this
  * environment. None is enabled by default. Enable opens a confirmation that names the owner of the marks and asks the
- * administrator to acknowledge the owner's written permission before the button activates; the enablement is recorded
+ * administrator to acknowledge that the environment belongs to the client engagement whose contract with iorta TechNXT
+ * covers the marks before the button activates; the enablement is recorded
  * (who, when) and shown on the card, with Back to default to return to the iorta TechNXT branding. Preview reuses the
  * sample document and sample e-mail of the theme editor with the pack's theme (nothing is saved).
  */
@@ -109,7 +110,7 @@ const BundledPacks = ({ notify, onChanged }) => {
   return (
     <section className="bv-tb__section bv-tb__bundled" data-testid="bundled-packs">
       <h3>{t("themeBranding.bundled.title", "Bundled packs")}</h3>
-      <p className="bv-tb__hint">{t("themeBranding.bundled.hint", "Brand packs shipped with the product. None is enabled by default; enabling one applies it like an import and records who enabled it and when. The marks a pack carries belong to their owner: enable it only with the owner's written permission.")}</p>
+      <p className="bv-tb__hint">{t("themeBranding.bundled.hint", "Brand packs shipped with the product. None is enabled by default; enabling one applies it like an import and records who enabled it and when. The marks a pack carries belong to a client of iorta TechNXT: enable it in that client's environments, under its contract with iorta TechNXT.")}</p>
       {error && <Message severity="error" text={error} />}
       {data && (
         <div className="bv-tb__bundled-status">
@@ -181,14 +182,15 @@ const BundledPacks = ({ notify, onChanged }) => {
         )}>
         {confirm && (
           <div className="bv-tb__pack-check">
-            <Message severity="warn" text={t("themeBranding.bundled.trademark", "The name, emblem and logo in this pack are trademarks of {{owner}}. They may only be used in this environment with the owner's written permission, kept with the engagement records.", { owner: confirm.trademarkOwner || "their owner" })} />
+            <Message severity="warn" text={t("themeBranding.bundled.trademark", "The name, emblem and logo in this pack are trademarks of {{owner}}, a client of iorta TechNXT. Their use is covered by the client's contract with iorta TechNXT for the environments of that engagement; keep the contract reference with the engagement records.", { owner: confirm.trademarkOwner || "their owner" })} />
+            {confirm.permissionBasis && <p className="bv-tb__hint"><strong>{t("themeBranding.bundled.basis", "Basis")}:</strong> {confirm.permissionBasis}</p>}
             {confirm.permissionNote && <p className="bv-tb__hint">{confirm.permissionNote}</p>}
             {check && !check.ok && <Message severity="error" text={[check.message, ...(check.errors || []).map((x) => `${x.path}: ${x.message}`)].join(" | ")} />}
             {check?.ok && <Message severity="info" text={`${check.name}: ${t("themeBranding.packValid", "valid")}. ${t("themeBranding.packContains", "Contains")}: ${["theme", ...(check.assets || [])].join(", ")}`} />}
             {(check?.warnings || []).map((w) => <Message key={w.path} severity="warn" text={w.message} />)}
             <p className="bv-tb__hint">{t("themeBranding.bundled.applies", "Enabling applies the theme, the application name and the images of the pack at once to every signed-in user, printed documents, reports and e-mails. You can go back to the default at any time.")}</p>
             <div className="bv-tb__check-row"><Checkbox inputId="bundled-ack" checked={acknowledged} onChange={(e) => setAcknowledged(!!e.checked)} />
-              <label htmlFor="bundled-ack"><strong>{t("themeBranding.bundled.acknowledge", "We hold the owner's written permission to use these marks")}</strong></label></div>
+              <label htmlFor="bundled-ack"><strong>{t("themeBranding.bundled.acknowledge", "This environment belongs to the client engagement whose contract with iorta TechNXT covers these marks")}</strong></label></div>
             <div className="bv-tb__check-row"><Checkbox inputId="bundled-doc-logo" checked={applyDocumentLogo} onChange={(e) => setApplyDocumentLogo(!!e.checked)} />
               <label htmlFor="bundled-doc-logo">{t("themeBranding.applyDocumentLogo", "Also use the logo on printed documents (print logo of the primary company)")}</label></div>
             <div className="bv-tb__check-row"><Checkbox inputId="bundled-name" checked={applySystemName} onChange={(e) => setApplySystemName(!!e.checked)} />

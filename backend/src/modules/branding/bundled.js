@@ -2,8 +2,8 @@
  * Bundled brand packs: packs that ship with the product under backend/assets/brand-packs/<id>/ (manifest.json with
  * the pack's identity and trademark terms, theme.json and the images it names, built the same way as a brand pack
  * folder of docs/package/04_Onboarding_and_Go_Live/Brand_Packs). None is applied by default: a System Administrator
- * enables one on Master > System Settings > Theme and Branding > Brand packs after acknowledging that the broker holds
- * the written permission of the owner of the marks the pack carries. The enablement is recorded (who, when, the
+ * enables one on Master > System Settings > Theme and Branding > Brand packs after acknowledging that the environment
+ * belongs to the client engagement whose contract with iorta TechNXT covers the use of the marks the pack carries. The enablement is recorded (who, when, the
  * acknowledgement, the branding before it) so the broker can go back to the iorta TechNXT default at any time.
  */
 import fs from 'node:fs';
@@ -21,7 +21,7 @@ export const BUNDLED_DIR = path.join(ASSETS_DIR, 'brand-packs');
 export const PREVIEW_COLORS = ['primary', 'headerBg', 'sidebarBg', 'tableHeaderBg', 'buttonBg', 'accent'];
 
 /** The sentence the administrator acknowledges when enabling a pack (kept with the enablement record). */
-export const ACKNOWLEDGEMENT_TEXT = 'We hold the written permission of the owner of these marks to use them in this environment.';
+export const ACKNOWLEDGEMENT_TEXT = 'This environment belongs to the client engagement whose contract with iorta TechNXT covers the use of these marks.';
 
 const str = (v) => (v === null || v === undefined ? '' : String(v).trim());
 const ID_RE = /^[a-z0-9][a-z0-9-]{1,60}$/;
@@ -37,7 +37,8 @@ function readManifest(dir) {
   if (!str(m.name)) throw new Error(`${file}: "name" is required`);
   return {
     id, name: str(m.name).slice(0, 80), description: str(m.description).slice(0, 600), trademarkOwner: str(m.trademarkOwner).slice(0, 200),
-    requiresWrittenPermission: m.requiresWrittenPermission !== false, permissionNote: str(m.permissionNote).slice(0, 600),
+    requiresAcknowledgement: m.requiresAcknowledgement !== false, permissionBasis: str(m.permissionBasis).slice(0, 300),
+    permissionNote: str(m.permissionNote).slice(0, 600),
     version: str(m.version || '1.0.0').slice(0, 20), pack: str(m.pack || 'theme.json'),
   };
 }
@@ -137,8 +138,8 @@ async function brandingSnapshot() {
  */
 export async function enableBundledPack(id, { user, acknowledgedPermission, dryRun = false, applyDocumentLogo = true, applySystemName = true, storeImage }) {
   const pack = loadBundledPack(id);
-  if (!dryRun && pack.bundled.requiresWrittenPermission && acknowledgedPermission !== true) {
-    throw badRequest('Acknowledge the permission first', [{ path: 'acknowledgedPermission', message: `Tick "${ACKNOWLEDGEMENT_TEXT}" to enable ${pack.bundled.name}; the marks of this pack belong to ${pack.bundled.trademarkOwner || 'their owner'}` }]);
+  if (!dryRun && pack.bundled.requiresAcknowledgement && acknowledgedPermission !== true) {
+    throw badRequest('Acknowledge the engagement first', [{ path: 'acknowledgedPermission', message: `Tick "${ACKNOWLEDGEMENT_TEXT}" to enable ${pack.bundled.name}; the marks of this pack belong to ${pack.bundled.trademarkOwner || 'their owner'}` }]);
   }
   // the snapshot kept is the branding before any bundled pack: replacing one pack by another keeps the first one's
   const current = dryRun ? null : await currentEnablement();

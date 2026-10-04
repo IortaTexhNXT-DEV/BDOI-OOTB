@@ -1,7 +1,7 @@
 /**
  * Bundled brand packs (Master > System Settings > Theme and Branding > Brand packs > Bundled packs): the Toyota
  * Insurance Services pack ships with the product but is never on by default; a System Administrator enables it after
- * acknowledging the owner's written permission, the enablement is recorded and audited, and Back to default returns
+ * acknowledging the client engagement whose contract covers the marks, the enablement is recorded and audited, and Back to default returns
  * the environment to the iorta TechNXT branding.
  */
 import fs from 'node:fs';
@@ -44,7 +44,7 @@ describe('bundled brand pack files', () => {
       expect(fs.readFileSync(path.join(bundledDir, f)).equals(fs.readFileSync(path.join(docsDir, f))), `${f} differs between docs and backend/assets`).toBe(true);
     }
     const { manifest, files, bundled } = loadBundledPack(TIS);
-    expect(bundled).toMatchObject({ id: TIS, name: 'Toyota Insurance Services', requiresWrittenPermission: true, version: expect.any(String) });
+    expect(bundled).toMatchObject({ id: TIS, name: 'Toyota Insurance Services', requiresAcknowledgement: true, permissionBasis: expect.stringContaining('Contract between iorta TechNXT'), version: expect.any(String) });
     expect(bundled.trademarkOwner).toMatch(/toyota/i);
     expect(bundled.description.length).toBeGreaterThan(20);
     expect(manifest.format).toBe('brokerverse-brand-pack');
@@ -73,7 +73,7 @@ describe('bundled brand packs on the screen', () => {
     expect(list.current).toBeNull();
     expect(list.acknowledgementText).toBe(ACKNOWLEDGEMENT_TEXT);
     const tis = list.packs.find((p) => p.id === TIS);
-    expect(tis).toMatchObject({ status: 'available', enablement: null, requiresWrittenPermission: true, systemName: 'Toyota Insurance Services' });
+    expect(tis).toMatchObject({ status: 'available', enablement: null, requiresAcknowledgement: true, systemName: 'Toyota Insurance Services' });
     expect(tis.preview).toMatchObject({ primary: '#1a1a1a', accent: '#eb0a1e', headerBg: '#ffffff' });
     expect(tis.theme.colors.primary).toBe('#1a1a1a');
     expect(tis.assets).toEqual(['logo', 'documentLogo']);

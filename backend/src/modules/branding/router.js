@@ -185,7 +185,7 @@ define({
 // ---------- bundled brand packs ----------
 
 const bundledExample = { id: 'toyota-insurance-services', name: 'Toyota Insurance Services', description: 'Client brand pack ...', trademarkOwner: 'Toyota Motor Corporation and Toyota Insurance Services (Philippines)',
-  requiresWrittenPermission: true, permissionNote: 'The Toyota name ... trademarks of their owners', version: '1.0.0', systemName: 'Toyota Insurance Services', assets: ['logo', 'documentLogo'],
+  requiresAcknowledgement: true, permissionBasis: 'Contract between iorta TechNXT and Toyota Insurance Services (Philippines) ...', permissionNote: 'The Toyota name ... trademarks of their owners', version: '1.0.0', systemName: 'Toyota Insurance Services', assets: ['logo', 'documentLogo'],
   preview: { primary: '#1a1a1a', headerBg: '#ffffff', sidebarBg: '#ffffff', tableHeaderBg: '#eeeeee', buttonBg: '#1a1a1a', accent: '#eb0a1e' }, theme: themeExample, warnings: [], status: 'available', enablement: null };
 const enablementExample = { id: 1, packId: 'toyota-insurance-services', packName: 'Toyota Insurance Services', acknowledgedPermission: true, acknowledgementText: bundled.ACKNOWLEDGEMENT_TEXT,
   applied: ['theme', 'logo', 'documentLogo', 'systemName'], status: 'enabled', enabledAt: '2026-10-04T08:00:00.000Z', enabledBy: 'admin', enabledByName: 'System Administrator' };
@@ -193,7 +193,7 @@ const storeBundledImage = async (file, _category, userId, ref) => storeBrandImag
 const enableOptions = (body) => ({ applyDocumentLogo: body.applyDocumentLogo === undefined ? true : truthy(body.applyDocumentLogo), applySystemName: body.applySystemName === undefined ? true : truthy(body.applySystemName) });
 
 define({
-  method: 'GET', path: '/packs/bundled', summary: 'Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, written permission required, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default',
+  method: 'GET', path: '/packs/bundled', summary: 'Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, the contract covering the marks, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default',
   screen: `${SCREEN} > Brand packs > Bundled packs`, middleware: canRead('settings'),
   response: { success: true, data: { packs: [bundledExample], current: null, defaultName: 'iorta TechNXT (default)', defaultInForce: true, acknowledgementText: bundled.ACKNOWLEDGEMENT_TEXT, history: [enablementExample] } },
   handler: async (_req, res) => ok(res, { ...(await bundled.listBundledPacks()), history: await bundled.enablementHistory() }),
@@ -209,7 +209,7 @@ define({
   },
 });
 define({
-  method: 'POST', path: '/packs/bundled/:id/enable', summary: 'Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the broker holds the written permission of the owner of the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name',
+  method: 'POST', path: '/packs/bundled/:id/enable', summary: 'Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the environment belongs to the client engagement whose contract with iorta TechNXT covers the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name',
   screen: `${SCREEN} > Brand packs > Bundled packs > Enable`, middleware: canWrite('settings'), request: { acknowledgedPermission: true, applyDocumentLogo: true, applySystemName: true },
   response: { success: true, data: { name: 'Toyota Insurance Services', applied: ['theme', 'logo', 'documentLogo', 'systemName'], warnings: [], theme: themeExample, pack: bundledExample, enablement: enablementExample } },
   handler: async (req, res) => {
