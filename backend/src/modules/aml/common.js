@@ -4,7 +4,10 @@
  */
 import { query } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
-import { addDays } from '../../lib/dates.js';
+import { addDays, addCalendarMonths } from '../../lib/dates.js';
+import { num, round2 } from '../../lib/money.js';
+
+export { num, round2 };
 
 /** Defaults of the AML settings (migration 0263 creates them in app_settings; Compliance > AML Settings changes them). */
 export const AML_DEFAULTS = {
@@ -36,8 +39,6 @@ export const amlSetting = async (key) => {
 };
 
 export const RATINGS = ['low', 'normal', 'high'];
-export const num = (v) => (v === null || v === undefined || v === '' ? 0 : Number(v));
-export const round2 = (v) => Math.round(num(v) * 100) / 100;
 export const isoDay = (v) => {
   if (!v) return null;
   if (v instanceof Date) return v.toISOString().slice(0, 10);
@@ -70,12 +71,5 @@ export const clientName = (c) => c?.display_name || [c?.first_name, c?.middle_na
 /** Lower-case trimmed text for comparisons. */
 export const lc = (v) => String(v ?? '').trim().toLowerCase();
 
-/** Months to add to a date (YYYY-MM-DD), day clamped to the end of the month. */
-export function addMonths(iso, months) {
-  const [y, m, d] = iso.split('-').map(Number);
-  const total = y * 12 + (m - 1) + Number(months);
-  const ny = Math.floor(total / 12);
-  const nm = total % 12;
-  const last = new Date(Date.UTC(ny, nm + 1, 0)).getUTCDate();
-  return `${ny}-${String(nm + 1).padStart(2, '0')}-${String(Math.min(d, last)).padStart(2, '0')}`;
-}
+/** Months added to a date (YYYY-MM-DD), the day clamped to the end of the month (lib/dates.js). */
+export const addMonths = (iso, months) => addCalendarMonths(iso, months);

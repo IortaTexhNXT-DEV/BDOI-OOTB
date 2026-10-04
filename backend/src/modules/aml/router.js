@@ -34,8 +34,8 @@ const docUpload = memoryUpload({ files: 1 }).single('file');
 const listUpload = importUpload().single('file');
 
 const reason = z.string().trim().min(5).max(2000);
-const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
-const optDate = isoDate.optional().nullable().or(z.literal(''));
+const dayString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use YYYY-MM-DD');
+const optDate = dayString.optional().nullable().or(z.literal(''));
 
 // ---------------------------------------------------------------- dashboard and settings
 
@@ -413,7 +413,7 @@ define({ method: 'POST', path: '/cases/:id/report', summary: 'Generate the STR (
 define({ method: 'GET', path: '/reports', summary: 'AMLC report files (filter reportType CTR | STR, status)', screen: `${SCREEN} > AMLC Reports`, middleware: read,
   response: { success: true, data: [{ reportNumber: 'AMR-2026-00001', reportType: 'CTR', transactions: 3, status: 'generated' }] }, handler: async (req, res) => ok(res, await rep.listReports(req.query)) });
 define({ method: 'POST', path: '/reports/ctr', summary: 'Generate the CTR file of the covered transactions of a period not yet reported', screen: `${SCREEN} > AMLC Reports`,
-  middleware: [...write, validate(z.object({ from: isoDate, to: isoDate }))], request: { from: '2026-09-01', to: '2026-09-30' }, response: { success: true },
+  middleware: [...write, validate(z.object({ from: dayString, to: dayString }))], request: { from: '2026-09-01', to: '2026-09-30' }, response: { success: true },
   handler: async (req, res) => { const r = await rep.generateCtr(req.body, req.user.id); await audit(req, { entity: 'aml_report', entityId: r.id, action: 'generate', after: { reportNumber: r.reportNumber, from: r.periodFrom, to: r.periodTo, transactions: r.transactions } }); created(res, r, `CTR file ${r.reportNumber} generated with ${r.transactions} transaction(s)`); } });
 define({ method: 'GET', path: '/reports/:id/download', summary: 'Download the report file (text, AMLC reporting layout, format version in the header)', screen: `${SCREEN} > AMLC Reports`, middleware: read,
   response: 'H|...|CTR|AMR-2026-00001|...',

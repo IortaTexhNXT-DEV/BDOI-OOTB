@@ -21,9 +21,10 @@ export async function onClientOnboarded(db, clientId, userId) {
 }
 
 /** Called by policies/service.js issuePolicy inside the issue transaction. */
-export async function atPolicyIssue(db, { clientId, policyId, policyNumber, lob, premium, paymentMode, userId }) {
+export async function atPolicyIssue(db, { clientId, policyId, policyNumber, lob, paymentMode, userId }) {
   if (!clientId) return null;
-  const assessment = await assessClient(db, clientId, { trigger: 'policy-issue', extra: { lob, premium, paymentMode }, userId, reference: policyNumber || policyId });
+  // the new policy is already in the transaction: its line, product and premium are counted with the client's other policies
+  const assessment = await assessClient(db, clientId, { trigger: 'policy-issue', extra: { lob, paymentMode }, userId, reference: policyNumber || policyId });
   await screenForEvent(clientId, 'policy-issue', { referenceType: 'policy', referenceId: policyId, userId, db });
   await assertEddForIssue(db, clientId);
   return assessment;

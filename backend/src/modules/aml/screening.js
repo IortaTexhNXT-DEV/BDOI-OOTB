@@ -164,7 +164,7 @@ export async function uploadVersion(listId, file, { publicationDate = null, note
   if (!file?.buffer?.length) throw badRequest('Upload the list file in the "file" field (XML, CSV or XLSX)');
   const name = String(file.originalname || '').toLowerCase();
   const text = file.buffer.toString('utf8');
-  const isXml = name.endsWith('.xml') || /^\s*(﻿)?<\?xml|^\s*<[A-Za-z]/.test(text.slice(0, 200));
+  const isXml = name.endsWith('.xml') || /^\s*(\ufeff)?<\?xml|^\s*<[A-Za-z]/.test(text.slice(0, 200));
   let entries;
   try {
     entries = isXml ? parseListXml(text) : parseListRows(file);

@@ -30,6 +30,9 @@
       "name": "Addresses"
     },
     {
+      "name": "AML Compliance"
+    },
+    {
       "name": "Audit Trail"
     },
     {
@@ -7191,6 +7194,4370 @@
           }
         },
         "x-screen": "Operations > Sales & Marketing > Prospects > Create Lead (address fields)"
+      }
+    },
+    "/aml/alerts": {
+      "get": {
+        "operationId": "getAmlAlerts",
+        "summary": "Transaction alerts (filter status, kind covered | suspicious, ruleCode, clientId, caseId, from, to, search)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Transaction Alerts\n\nAccess: read:aml",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "open"
+          },
+          {
+            "name": "kind",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "covered"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "alertNumber": {
+                            "type": "string"
+                          },
+                          "ruleCode": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "alertNumber": "AMA-2026-000001",
+                      "ruleCode": "CT_CASH",
+                      "amount": 600000,
+                      "status": "open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Transaction Alerts",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/alerts/{id}/close": {
+      "post": {
+        "operationId": "postAmlAlertsIdClose",
+        "summary": "Close a suspicious transaction alert after review (no report); reason required",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Transaction Alerts\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Transaction Alerts",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Refund to the parent of the insured student, documented"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/cases": {
+      "get": {
+        "operationId": "getAmlCases",
+        "summary": "AML cases (filter status, caseType, clientId, search)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "caseNumber": {
+                            "type": "string"
+                          },
+                          "caseType": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "dueOn": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "caseNumber": "AMC-2026-00001",
+                      "caseType": "STR",
+                      "status": "open",
+                      "dueOn": "2026-10-05"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "read:aml"
+        ]
+      },
+      "post": {
+        "operationId": "postAmlCases",
+        "summary": "Open a case (CTR, STR or review), optionally from alerts and hits",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "caseType": {
+                    "type": "string"
+                  },
+                  "alertIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "title": {
+                    "type": "string"
+                  },
+                  "suspicionReasons": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "caseType": "STR",
+                "alertIds": [
+                  "aal_1"
+                ],
+                "title": "Refund to third party after early cancellation",
+                "suspicionReasons": [
+                  "no-underlying-legal-or-trade-obligation"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/cases/{id}": {
+      "get": {
+        "operationId": "getAmlCasesId",
+        "summary": "One case with its alerts, hits and report files",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: read:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "caseNumber": {
+                          "type": "string"
+                        },
+                        "alertList": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "hitList": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "reports": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "caseNumber": "AMC-2026-00001",
+                    "alertList": [],
+                    "hitList": [],
+                    "reports": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "read:aml"
+        ]
+      },
+      "put": {
+        "operationId": "putAmlCasesId",
+        "summary": "Change a case: title, narrative, grounds of suspicion, date suspicion was established, assignee",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "narrative": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "narrative": "On 2 October 2026 ..."
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/cases/{id}/alerts": {
+      "post": {
+        "operationId": "postAmlCasesIdAlerts",
+        "summary": "Add open alerts to a case",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "alertIds": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "example": {
+                "alertIds": [
+                  "aal_2"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/cases/{id}/approve": {
+      "post": {
+        "operationId": "postAmlCasesIdApprove",
+        "summary": "Approve the case for filing with the AMLC (compliance officer)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: approve:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "approve:aml"
+        ]
+      }
+    },
+    "/aml/cases/{id}/close": {
+      "post": {
+        "operationId": "postAmlCasesIdClose",
+        "summary": "Close a case without a report; reason required",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: approve:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "approve:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Transactions explained by documents on file"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/cases/{id}/report": {
+      "post": {
+        "operationId": "postAmlCasesIdReport",
+        "summary": "Generate the STR (or CTR) file of an approved case",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "reportNumber": {
+                          "type": "string"
+                        },
+                        "reportType": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "reportNumber": "AMR-2026-00001",
+                    "reportType": "STR"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Cases",
+        "x-permissions": [
+          "write:aml"
+        ]
+      }
+    },
+    "/aml/clients": {
+      "get": {
+        "operationId": "getAmlClients",
+        "summary": "Clients with their risk rating, KYC status and next KYC refresh (filter rating, kycStatus, search)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Client Due Diligence\n\nAccess: read:aml",
+        "parameters": [
+          {
+            "name": "rating",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "high"
+          },
+          {
+            "name": "kycStatus",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "edd-required"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "cruz"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "clientCode": {
+                            "type": "string"
+                          },
+                          "riskRating": {
+                            "type": "string"
+                          },
+                          "kycStatus": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "clientId": "cl_1",
+                      "clientCode": "CL-2026-00001",
+                      "riskRating": "high",
+                      "kycStatus": "edd-required"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Client Due Diligence",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/clients/{id}/assess": {
+      "post": {
+        "operationId": "postAmlClientsIdAssess",
+        "summary": "Rate the client again from its current record and policies",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Client Due Diligence\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "rating": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "integer"
+                        },
+                        "factors": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "rating": "normal",
+                    "score": 4,
+                    "factors": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Client Due Diligence",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ]
+      }
+    },
+    "/aml/clients/{id}/beneficial-owners": {
+      "post": {
+        "operationId": "postAmlClientsIdBeneficialOwners",
+        "summary": "Add a beneficial owner of a juridical client (screened at once)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client (juridical)",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string"
+                  },
+                  "ownershipPercent": {
+                    "type": "integer"
+                  },
+                  "controlType": {
+                    "type": "string"
+                  },
+                  "nationality": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "fullName": "Jose Tan",
+                "ownershipPercent": 40,
+                "controlType": "ownership",
+                "nationality": "Filipino"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/clients/{id}/beneficial-owners/{rowId}": {
+      "put": {
+        "operationId": "putAmlClientsIdBeneficialOwnersRowId",
+        "summary": "Change or remove a beneficial owner",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client (juridical)",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "removed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/clients/{id}/documents": {
+      "post": {
+        "operationId": "postAmlClientsIdDocuments",
+        "summary": "Upload a KYC document (multipart: file, docType, relatedType client | signatory | beneficial-owner | edd, relatedId, description, expiryDate)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client; Compliance > EDD Reviews\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "docType": {
+                          "type": "string"
+                        },
+                        "fileName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": 1,
+                    "docType": "board-resolution",
+                    "fileName": "resolution.pdf"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client; Compliance > EDD Reviews",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "docType": {
+                    "type": "string"
+                  },
+                  "relatedType": {
+                    "type": "string"
+                  },
+                  "relatedId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "file": "<binary>",
+                "docType": "board-resolution",
+                "relatedType": "signatory",
+                "relatedId": "sig_1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/clients/{id}/kyc-refresh": {
+      "post": {
+        "operationId": "postAmlClientsIdKycRefresh",
+        "summary": "Record a completed KYC refresh: the client is rated again and the next refresh date set",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > KYC Refresh\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > KYC Refresh",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "notes": "ID and address confirmed by e-mail"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/clients/{id}/override": {
+      "post": {
+        "operationId": "postAmlClientsIdOverride",
+        "summary": "Compliance officer sets the risk rating (holds until the next KYC refresh)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Client Due Diligence\n\nAccess: approve:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Client Due Diligence",
+        "x-permissions": [
+          "approve:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "rating": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "rating": "high",
+                "reason": "Adverse media on the beneficial owner"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/clients/{id}/profile": {
+      "get": {
+        "operationId": "getAmlClientsIdProfile",
+        "summary": "AML profile of a client: identification gaps, signatories, beneficial owners, documents, rating history, screenings, hits, EDD reviews",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client; Compliance > Client Due Diligence\n\nAccess: read:aml, read:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "client": {
+                          "type": "object",
+                          "properties": {
+                            "kycStatus": {
+                              "type": "string"
+                            },
+                            "riskRating": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "signatories": {
+                          "type": "array",
+                          "items": {}
+                        },
+                        "beneficialOwners": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "client": {
+                      "kycStatus": "complete",
+                      "riskRating": "normal"
+                    },
+                    "signatories": [],
+                    "beneficialOwners": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client; Compliance > Client Due Diligence",
+        "x-permissions": [
+          "read:aml",
+          "read:clients"
+        ]
+      }
+    },
+    "/aml/clients/{id}/screen": {
+      "post": {
+        "operationId": "postAmlClientsIdScreen",
+        "summary": "Screen the client, its beneficial owners and signatories now",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Client Due Diligence\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "screenings": {
+                          "type": "integer"
+                        },
+                        "hits": {
+                          "type": "integer"
+                        },
+                        "openHits": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "screenings": 2,
+                    "hits": 0,
+                    "openHits": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Client Due Diligence",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ]
+      }
+    },
+    "/aml/clients/{id}/signatories": {
+      "post": {
+        "operationId": "postAmlClientsIdSignatories",
+        "summary": "Add a signatory of a juridical client (screened at once)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client (juridical)",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string"
+                  },
+                  "position": {
+                    "type": "string"
+                  },
+                  "authorityDocument": {
+                    "type": "string"
+                  },
+                  "authorityDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "fullName": "Maria Reyes",
+                "position": "Treasurer",
+                "authorityDocument": "secretary-certificate",
+                "authorityDate": "2026-09-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/clients/{id}/signatories/{rowId}": {
+      "put": {
+        "operationId": "putAmlClientsIdSignatoriesRowId",
+        "summary": "Change or revoke a signatory",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "rowId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client (juridical)",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "status": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "status": "revoked"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/dashboard": {
+      "get": {
+        "operationId": "getAmlDashboard",
+        "summary": "AML dashboard counts: clients by risk rating and KYC status, open hits, EDD reviews, KYC refreshes due, alerts, cases due, reports",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Dashboard\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ratings": {
+                          "type": "object",
+                          "properties": {
+                            "low": {
+                              "type": "integer"
+                            },
+                            "normal": {
+                              "type": "integer"
+                            },
+                            "high": {
+                              "type": "integer"
+                            },
+                            "unrated": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "openHits": {
+                          "type": "integer"
+                        },
+                        "eddOpen": {
+                          "type": "integer"
+                        },
+                        "eddSubmitted": {
+                          "type": "integer"
+                        },
+                        "refreshDue": {
+                          "type": "integer"
+                        },
+                        "alertsOpen": {
+                          "type": "integer"
+                        },
+                        "casesOpen": {
+                          "type": "integer"
+                        },
+                        "casesOverdue": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "ratings": {
+                      "low": 10,
+                      "normal": 4,
+                      "high": 1,
+                      "unrated": 3
+                    },
+                    "openHits": 2,
+                    "eddOpen": 1,
+                    "eddSubmitted": 0,
+                    "refreshDue": 3,
+                    "alertsOpen": 5,
+                    "casesOpen": 1,
+                    "casesOverdue": 0
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Dashboard",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/edd-reviews": {
+      "get": {
+        "operationId": "getAmlEddReviews",
+        "summary": "EDD reviews (filter status, clientId, search)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > EDD Reviews\n\nAccess: read:aml, read:clients",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "reviewNumber": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "edd_1",
+                      "reviewNumber": "EDD-2026-00001",
+                      "status": "submitted"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > EDD Reviews",
+        "x-permissions": [
+          "read:aml",
+          "read:clients"
+        ]
+      },
+      "post": {
+        "operationId": "postAmlEddReviews",
+        "summary": "Open an EDD review for a client (opened automatically when a client is rated High)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > EDD Reviews",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientId": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "clientId": "cl_1",
+                "reason": "Large single premium paid in cash"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/edd-reviews/{id}": {
+      "get": {
+        "operationId": "getAmlEddReviewsId",
+        "summary": "One EDD review with its documents",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > EDD Reviews\n\nAccess: read:aml, read:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "documents": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "edd_1",
+                    "documents": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > EDD Reviews",
+        "x-permissions": [
+          "read:aml",
+          "read:clients"
+        ]
+      },
+      "put": {
+        "operationId": "putAmlEddReviewsId",
+        "summary": "Record the EDD findings (source of wealth and funds, purpose, findings, senior management approval)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > EDD Reviews",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "sourceOfWealth": {
+                    "type": "string"
+                  },
+                  "sourceOfFunds": {
+                    "type": "string"
+                  },
+                  "purpose": {
+                    "type": "string"
+                  },
+                  "findings": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "sourceOfWealth": "Family business (rice trading)",
+                "sourceOfFunds": "Business income",
+                "purpose": "Fleet insurance",
+                "findings": "Documents seen"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/edd-reviews/{id}/decide": {
+      "post": {
+        "operationId": "postAmlEddReviewsIdDecide",
+        "summary": "Approve or reject an EDD review (compliance officer, not the preparer)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > EDD Reviews\n\nAccess: approve:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > EDD Reviews",
+        "x-permissions": [
+          "approve:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  },
+                  "notes": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "approve",
+                "notes": "Source of funds documented"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/edd-reviews/{id}/submit": {
+      "post": {
+        "operationId": "postAmlEddReviewsIdSubmit",
+        "summary": "Submit the EDD review to the compliance officer",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml, write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > EDD Reviews",
+        "x-permissions": [
+          "write:aml",
+          "write:clients"
+        ]
+      }
+    },
+    "/aml/hits": {
+      "get": {
+        "operationId": "getAmlHits",
+        "summary": "Screening hits queue (filter status open | escalated | cleared | confirmed, clientId, listCode, search)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Hits\n\nAccess: read:aml",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "open"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "partyName": {
+                            "type": "string"
+                          },
+                          "matchedName": {
+                            "type": "string"
+                          },
+                          "listCode": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "partyName": "Juan Dela Cruz",
+                      "matchedName": "JUAN DELA CRUZ",
+                      "listCode": "PEP",
+                      "score": 1,
+                      "status": "open"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Hits",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/hits/{id}/decide": {
+      "post": {
+        "operationId": "postAmlHitsIdDecide",
+        "summary": "Decide a hit: clear (false positive), escalate (to a case) or confirm (true match: client blocked and rated High); reason required",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Hits\n\nAccess: approve:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Hits",
+        "x-permissions": [
+          "approve:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "decision": "clear",
+                "reason": "Different date of birth and nationality"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/kyc-refresh": {
+      "get": {
+        "operationId": "getAmlKycRefresh",
+        "summary": "Clients due for KYC refresh (within aml.kyc_refresh_notice_days, or overdue); filter rating, overdue",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > KYC Refresh\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "clientId": {
+                            "type": "string"
+                          },
+                          "riskRating": {
+                            "type": "string"
+                          },
+                          "nextReviewOn": {
+                            "type": "string"
+                          },
+                          "overdue": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "clientId": "cl_1",
+                      "riskRating": "high",
+                      "nextReviewOn": "2026-10-15",
+                      "overdue": false
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > KYC Refresh",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/lists": {
+      "get": {
+        "operationId": "getAmlLists",
+        "summary": "Screening lists with their current version",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "versionNo": {
+                            "type": "integer"
+                          },
+                          "entries": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "code": "UNSC",
+                      "name": "UN Security Council Consolidated List",
+                      "versionNo": 3,
+                      "entries": 1000
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "read:aml"
+        ]
+      },
+      "post": {
+        "operationId": "postAmlLists",
+        "summary": "Add a screening list",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "listType": {
+                    "type": "string"
+                  },
+                  "source": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "OFAC",
+                "name": "OFAC SDN list",
+                "listType": "sanctions",
+                "source": "US Treasury"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/lists/{id}": {
+      "put": {
+        "operationId": "putAmlListsId",
+        "summary": "Rename a list or switch it on or off",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "active": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "example": {
+                "active": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/lists/{id}/entries": {
+      "get": {
+        "operationId": "getAmlListsIdEntries",
+        "summary": "Entries of the current (or a given) version of a list; search by name",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "kim"
+          },
+          {
+            "name": "versionId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "fullName": {
+                            "type": "string"
+                          },
+                          "aliases": {
+                            "type": "array",
+                            "items": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "fullName": "Name",
+                      "aliases": []
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "read:aml"
+        ]
+      },
+      "post": {
+        "operationId": "postAmlListsIdEntries",
+        "summary": "Add an entry on screen (internal negative list): a new version, then a rescreen",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string"
+                  },
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "fullName": "Juan Example",
+                "reason": "Fraudulent claim 2025"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/lists/{id}/entries/{entryId}": {
+      "delete": {
+        "operationId": "deleteAmlListsIdEntriesEntryId",
+        "summary": "Remove an entry on screen (a new version without it); reason required",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "entryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "reason",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "Entered in error"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "write:aml"
+        ]
+      }
+    },
+    "/aml/lists/{id}/versions": {
+      "get": {
+        "operationId": "getAmlListsIdVersions",
+        "summary": "Versions of a list with the rescreen result of each",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "versionNo": {
+                            "type": "integer"
+                          },
+                          "entries": {
+                            "type": "integer"
+                          },
+                          "current": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "versionNo": 1,
+                      "entries": 1000,
+                      "current": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "read:aml"
+        ]
+      },
+      "post": {
+        "operationId": "postAmlListsIdVersions",
+        "summary": "Upload a new version of a list (multipart: file XML / CSV / XLSX, publicationDate, notes, rescreen true | false); rescreens every party",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "version": {
+                          "type": "object",
+                          "properties": {
+                            "versionNo": {
+                              "type": "integer"
+                            },
+                            "entries": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "rescreen": {
+                          "type": "object",
+                          "properties": {
+                            "clients": {
+                              "type": "integer"
+                            },
+                            "newOpenHits": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "version": {
+                      "versionNo": 2,
+                      "entries": 1000
+                    },
+                    "rescreen": {
+                      "clients": 120,
+                      "newOpenHits": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string"
+                  },
+                  "publicationDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "file": "<binary>",
+                "publicationDate": "2026-10-01"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/monitoring/run": {
+      "post": {
+        "operationId": "postAmlMonitoringRun",
+        "summary": "Run the covered and suspicious transaction rules over a date range (default the last 3 days)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Transaction Alerts\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "added": {
+                          "type": "object",
+                          "properties": {
+                            "CT_CASH": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "total": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "from": "2026-09-01",
+                    "to": "2026-09-30",
+                    "added": {
+                      "CT_CASH": 1
+                    },
+                    "total": 1
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Transaction Alerts",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "from": "2026-09-01",
+                "to": "2026-09-30"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/provider": {
+      "get": {
+        "operationId": "getAmlProvider",
+        "summary": "Screening provider configuration (no secret: the API key stays in the environment) and outbox counts",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "provider": {
+                          "type": "string"
+                        },
+                        "mode": {
+                          "type": "string"
+                        },
+                        "apiKeyEnv": {
+                          "type": "string"
+                        },
+                        "apiKeySet": {
+                          "type": "boolean"
+                        },
+                        "outbox": {
+                          "type": "object",
+                          "properties": {
+                            "failed": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "provider": "lists",
+                    "mode": "sandbox",
+                    "apiKeyEnv": "AML_SCREENING_API_KEY",
+                    "apiKeySet": false,
+                    "outbox": {
+                      "failed": 0
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists > Provider",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/provider/requests": {
+      "get": {
+        "operationId": "getAmlProviderRequests",
+        "summary": "Outbox of the requests to the screening provider (filter status)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "provider": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "attempts": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "provider": "http",
+                      "status": "failed",
+                      "attempts": 2
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists > Provider",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/provider/requests/{id}/retry": {
+      "post": {
+        "operationId": "postAmlProviderRequestsIdRetry",
+        "summary": "Send a failed or abandoned provider request again",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists > Provider",
+        "x-permissions": [
+          "write:aml"
+        ]
+      }
+    },
+    "/aml/provider/test": {
+      "post": {
+        "operationId": "postAmlProviderTest",
+        "summary": "Send a test name to the configured provider (sandbox check of the connection)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "ok": {
+                          "type": "boolean"
+                        },
+                        "matches": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "ok": true,
+                    "matches": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists > Provider",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "TEST NAME"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/reports": {
+      "get": {
+        "operationId": "getAmlReports",
+        "summary": "AMLC report files (filter reportType CTR | STR, status)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AMLC Reports\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "reportNumber": {
+                            "type": "string"
+                          },
+                          "reportType": {
+                            "type": "string"
+                          },
+                          "transactions": {
+                            "type": "integer"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "reportNumber": "AMR-2026-00001",
+                      "reportType": "CTR",
+                      "transactions": 3,
+                      "status": "generated"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AMLC Reports",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/reports/{id}/download": {
+      "get": {
+        "operationId": "getAmlReportsIdDownload",
+        "summary": "Download the report file (text, AMLC reporting layout, format version in the header)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AMLC Reports\n\nAccess: read:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "H|...|CTR|AMR-2026-00001|...",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AMLC Reports",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/reports/{id}/submit": {
+      "post": {
+        "operationId": "postAmlReportsIdSubmit",
+        "summary": "Record the filing in the AMLC portal: date, AMLC reference, status submitted | acknowledged | rejected",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AMLC Reports\n\nAccess: approve:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AMLC Reports",
+        "x-permissions": [
+          "approve:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "submittedOn": {
+                    "type": "string"
+                  },
+                  "amlcReference": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "submittedOn": "2026-10-05",
+                "amlcReference": "ACK-123456"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/reports/ctr": {
+      "post": {
+        "operationId": "postAmlReportsCtr",
+        "summary": "Generate the CTR file of the covered transactions of a period not yet reported",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AMLC Reports\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AMLC Reports",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "from": {
+                    "type": "string"
+                  },
+                  "to": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "from": "2026-09-01",
+                "to": "2026-09-30"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/rescreen": {
+      "post": {
+        "operationId": "postAmlRescreen",
+        "summary": "Rescreen every client, beneficial owner and signatory against the current lists",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "clients": {
+                          "type": "integer"
+                        },
+                        "parties": {
+                          "type": "integer"
+                        },
+                        "hits": {
+                          "type": "integer"
+                        },
+                        "newOpenHits": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "clients": 120,
+                    "parties": 140,
+                    "hits": 2,
+                    "newOpenHits": 1
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Lists",
+        "x-permissions": [
+          "write:aml"
+        ]
+      }
+    },
+    "/aml/risk-factors": {
+      "get": {
+        "operationId": "getAmlRiskFactors",
+        "summary": "Risk factors of the customer risk rating",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "factor": {
+                            "type": "string"
+                          },
+                          "matchValue": {
+                            "type": "string"
+                          },
+                          "score": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "factor": "payment-mode",
+                      "matchValue": "cash",
+                      "score": 3
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings > Risk factors",
+        "x-permissions": [
+          "read:aml"
+        ]
+      },
+      "post": {
+        "operationId": "postAmlRiskFactors",
+        "summary": "Add a risk factor value and its score",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings > Risk factors",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "factor": {
+                    "type": "string"
+                  },
+                  "matchValue": {
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "integer"
+                  },
+                  "description": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "factor": "geography",
+                "matchValue": "Sulu",
+                "score": 3,
+                "description": "Province rated higher by the AML programme"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/risk-factors/{id}": {
+      "put": {
+        "operationId": "putAmlRiskFactorsId",
+        "summary": "Change a risk factor",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings > Risk factors",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "factor": {
+                    "type": "string"
+                  },
+                  "matchValue": {
+                    "type": "string"
+                  },
+                  "score": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "factor": "payment-mode",
+                "matchValue": "cash",
+                "score": 4
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteAmlRiskFactorsId",
+        "summary": "Remove a risk factor",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings > Risk factors",
+        "x-permissions": [
+          "write:aml"
+        ]
+      }
+    },
+    "/aml/rules": {
+      "get": {
+        "operationId": "getAmlRules",
+        "summary": "Covered and suspicious transaction rules",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings > Monitoring rules\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "code": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "enabled": {
+                            "type": "boolean"
+                          },
+                          "params": {
+                            "type": "object",
+                            "properties": {}
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "code": "CT_CASH",
+                      "kind": "covered",
+                      "enabled": true,
+                      "params": {}
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings > Monitoring rules",
+        "x-permissions": [
+          "read:aml"
+        ]
+      }
+    },
+    "/aml/rules/{code}": {
+      "put": {
+        "operationId": "putAmlRulesCode",
+        "summary": "Switch a monitoring rule on or off, change its parameters or severity",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings > Monitoring rules\n\nAccess: write:aml",
+        "parameters": [
+          {
+            "name": "code",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings > Monitoring rules",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "enabled": {
+                    "type": "boolean"
+                  },
+                  "params": {
+                    "type": "object",
+                    "properties": {
+                      "days": {
+                        "type": "integer"
+                      },
+                      "minCount": {
+                        "type": "integer"
+                      },
+                      "minTotal": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "enabled": true,
+                "params": {
+                  "days": 7,
+                  "minCount": 3,
+                  "minTotal": 400000
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/screen": {
+      "post": {
+        "operationId": "postAmlScreen",
+        "summary": "Screen a name that is not a client yet (prospect, payee); recorded as a manual screening",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > Screening Hits\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        },
+                        "hits": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "status": "clear",
+                    "hits": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > Screening Hits",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "name": "Juan Dela Cruz"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/aml/settings": {
+      "get": {
+        "operationId": "getAmlSettings",
+        "summary": "AML settings (aml.*) with labels and current values",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings\n\nAccess: read:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "key": {
+                            "type": "string"
+                          },
+                          "value": {
+                            "type": "integer"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "key": "aml.covered_threshold",
+                      "value": 500000,
+                      "label": "Covered transaction ...",
+                      "type": "number"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings",
+        "x-permissions": [
+          "read:aml"
+        ]
+      },
+      "put": {
+        "operationId": "putAmlSettings",
+        "summary": "Change AML settings (thresholds, risk rating limits, refresh months, retention, screening provider by environment variable name)",
+        "tags": [
+          "AML Compliance"
+        ],
+        "description": "Front-end touchpoint: Compliance > AML Settings\n\nAccess: write:aml",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Compliance > AML Settings",
+        "x-permissions": [
+          "write:aml"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "settings": {
+                    "type": "object",
+                    "properties": {
+                      "aml.covered_threshold": {
+                        "type": "integer"
+                      }
+                    }
+                  }
+                }
+              },
+              "example": {
+                "settings": {
+                  "aml.covered_threshold": 500000
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/audit/records/{entity}/{id}": {
@@ -17760,6 +22127,158 @@
         }
       }
     },
+    "/clients/{id}/kyc": {
+      "put": {
+        "operationId": "putClientsIdKyc",
+        "summary": "Update the identification of a client (onboarding screen); the client is rated again and, when the name changed, screened",
+        "tags": [
+          "Clients"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client\n\nAccess: write:clients",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "client": {
+                          "type": "object",
+                          "properties": {
+                            "clientId": {
+                              "type": "string"
+                            },
+                            "generatedClientId": {
+                              "type": "string"
+                            },
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            },
+                            "emailId": {
+                              "type": "string"
+                            },
+                            "contactNumber": {
+                              "type": "string"
+                            },
+                            "leadCategory": {
+                              "type": "string"
+                            },
+                            "policies": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "policyId": {
+                                    "type": "string"
+                                  },
+                                  "policyNumber": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "assessment": {
+                          "type": "object",
+                          "properties": {
+                            "rating": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "client": {
+                      "clientId": "cl_1",
+                      "generatedClientId": "CL-2026-00001",
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz",
+                      "emailId": "juan@example.com",
+                      "contactNumber": "09171234567",
+                      "leadCategory": "Retail",
+                      "policies": [
+                        {
+                          "policyId": "pol_1",
+                          "policyNumber": "POL-2026-00001",
+                          "status": "Active"
+                        }
+                      ]
+                    },
+                    "assessment": {
+                      "rating": "normal"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client",
+        "x-permissions": [
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "occupation": {
+                    "type": "string"
+                  },
+                  "expectedAnnualPremium": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "occupation": "Business owner",
+                "expectedAnnualPremium": 250000
+              }
+            }
+          }
+        }
+      }
+    },
     "/clients/from-lead/{leadId}": {
       "post": {
         "operationId": "postClientsFromLeadLeadId",
@@ -17877,6 +22396,248 @@
               },
               "example": {
                 "contactNumber": "09171234567"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clients/onboard": {
+      "post": {
+        "operationId": "postClientsOnboard",
+        "summary": "Onboard a client before its first policy (individual or juridical with signatories and beneficial owners); rated and screened at once",
+        "tags": [
+          "Clients"
+        ],
+        "description": "Front-end touchpoint: Operations > Clients > Onboard client\n\nAccess: write:clients",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "client": {
+                          "type": "object",
+                          "properties": {
+                            "clientId": {
+                              "type": "string"
+                            },
+                            "generatedClientId": {
+                              "type": "string"
+                            },
+                            "firstName": {
+                              "type": "string"
+                            },
+                            "lastName": {
+                              "type": "string"
+                            },
+                            "emailId": {
+                              "type": "string"
+                            },
+                            "contactNumber": {
+                              "type": "string"
+                            },
+                            "leadCategory": {
+                              "type": "string"
+                            },
+                            "policies": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "policyId": {
+                                    "type": "string"
+                                  },
+                                  "policyNumber": {
+                                    "type": "string"
+                                  },
+                                  "status": {
+                                    "type": "string"
+                                  }
+                                }
+                              }
+                            },
+                            "kycStatus": {
+                              "type": "string"
+                            },
+                            "riskRating": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "aml": {
+                          "type": "object",
+                          "properties": {
+                            "assessment": {
+                              "type": "object",
+                              "properties": {
+                                "rating": {
+                                  "type": "string"
+                                },
+                                "score": {
+                                  "type": "integer"
+                                }
+                              }
+                            },
+                            "screening": {
+                              "type": "object",
+                              "properties": {
+                                "hits": {
+                                  "type": "integer"
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "client": {
+                      "clientId": "cl_1",
+                      "generatedClientId": "CL-2026-00001",
+                      "firstName": "Juan",
+                      "lastName": "Dela Cruz",
+                      "emailId": "juan@example.com",
+                      "contactNumber": "09171234567",
+                      "leadCategory": "Retail",
+                      "policies": [
+                        {
+                          "policyId": "pol_1",
+                          "policyNumber": "POL-2026-00001",
+                          "status": "Active"
+                        }
+                      ],
+                      "kycStatus": "complete",
+                      "riskRating": "low"
+                    },
+                    "aml": {
+                      "assessment": {
+                        "rating": "low",
+                        "score": 0
+                      },
+                      "screening": {
+                        "hits": 0
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Clients > Onboard client",
+        "x-permissions": [
+          "write:clients"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "clientType": {
+                    "type": "string"
+                  },
+                  "firstName": {
+                    "type": "string"
+                  },
+                  "middleName": {
+                    "type": "string"
+                  },
+                  "lastName": {
+                    "type": "string"
+                  },
+                  "DOB": {
+                    "type": "string"
+                  },
+                  "nationality": {
+                    "type": "string"
+                  },
+                  "contactNumber": {
+                    "type": "string"
+                  },
+                  "taxNumber": {
+                    "type": "string"
+                  },
+                  "idType": {
+                    "type": "string"
+                  },
+                  "idNumber": {
+                    "type": "string"
+                  },
+                  "province": {
+                    "type": "string"
+                  },
+                  "city": {
+                    "type": "string"
+                  },
+                  "barangay": {
+                    "type": "string"
+                  },
+                  "occupation": {
+                    "type": "string"
+                  },
+                  "sourceOfFunds": {
+                    "type": "string"
+                  },
+                  "expectedLines": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "expectedPaymentMode": {
+                    "type": "string"
+                  },
+                  "expectedAnnualPremium": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "clientType": "individual",
+                "firstName": "Juan",
+                "middleName": "Santos",
+                "lastName": "Dela Cruz",
+                "DOB": "1985-04-12",
+                "nationality": "Filipino",
+                "contactNumber": "09171234567",
+                "taxNumber": "123-456-789-000",
+                "idType": "PhilSys National ID (PhilID / ePhilID)",
+                "idNumber": "1234-5678-9012-3456",
+                "province": "Metro Manila",
+                "city": "Makati City",
+                "barangay": "Poblacion",
+                "occupation": "Engineer",
+                "sourceOfFunds": "Salary",
+                "expectedLines": [
+                  "MOTOR"
+                ],
+                "expectedPaymentMode": "bank-transfer",
+                "expectedAnnualPremium": 45000
               }
             }
           }

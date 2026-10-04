@@ -66,11 +66,13 @@ export async function ratingOf(score) {
 /** The values of a client for each factor (what is scored). `extra`: { lob, premium, paymentMode } of a policy being issued. */
 export async function clientFactorValues(db, client, extra = {}) {
   const owners = (await db.query("SELECT is_pep FROM client_beneficial_owners WHERE client_id = $1 AND status = 'active'", [client.id])).rows;
-  const policies = (await db.query(`SELECT lob, product_type, premium_total, payment_method FROM policies WHERE client_id = $1
-    AND lower(COALESCE(status, '')) NOT IN ('cancelled', 'expired', 'lapsed', 'void')`, [client.id])).rows;
+  const policies = (await db.query(`SELECT p.lob, pr.code AS product_code, p.premium_total, p.payment_method FROM policies p LEFT JOIN products pr ON pr.id = p.product_id
+    WHERE p.client_id = $1 AND lower(COALESCE(p.status, '')) NOT IN ('cancelled', 'expired', 'lapsed', 'void')`, [client.id])).rows;
   const modes = (await db.query(`SELECT DISTINCT lower(payment_mode) AS m FROM receipts WHERE client_id = $1 AND received_date >= CURRENT_DATE - 365
     AND lower(COALESCE(receipt_status, '')) <> 'cancelled'`, [client.id])).rows.map((r) => r.m);
-  const lines = [...new Set([...(client.expected_lines || []), ...policies.map((p) => p.lob || p.product_type), extra.lob].filter(Boolean).map((x) => String(x).toUpperCase()))];
+  // line of business and product code of each policy (a factor may name either: MARINE, or BOND for surety bonds)
+  const lines = [...new Set([...(client.expected_lines || []), ...policies.flatMap((p) => [p.lob, p.product_code]), extra.lob, extra.productCode]
+    .filter(Boolean).map((x) => String(x).toUpperCase()))];
   const premium = Math.max(num(client.expected_annual_premium), policies.reduce((s, p) => s + num(p.premium_total), 0) + num(extra.premium));
   const pay = [...new Set([...modes, client.expected_payment_mode, extra.paymentMode, ...policies.map((p) => p.payment_method)].filter(Boolean).map(lc))];
   const pep = !!client.is_pep || owners.some((o) => o.is_pep);

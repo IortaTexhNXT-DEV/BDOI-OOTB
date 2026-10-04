@@ -115,7 +115,7 @@ describe('production start on a fresh database', () => {
     expect(await count('report_definitions')).toBeGreaterThan(10);
     expect(await count('app_settings')).toBeGreaterThan(100);
     expect(await count('app_settings', "key = 'numbering.policy.prefix'")).toBe(1);
-    expect(await count('roles')).toBe(7); // system-admin and the six broker roles
+    expect(await count('roles')).toBe(8); // system-admin, the six broker roles and the compliance officer (AML/CFT)
     expect(await count('scheduled_jobs')).toBeGreaterThan(0);
     expect(await count('gl_accounts')).toBeGreaterThan(50);
     expect(await count('product_templates')).toBeGreaterThan(0);

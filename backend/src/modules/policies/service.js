@@ -329,7 +329,7 @@ export async function issuePolicy(db, src, body, userId) {
   // AML/CFT (migration 0260 to 0263): the client is rated with this policy and screened; the issue is refused on an
   // undecided or confirmed sanctions / PEP / negative list match, or for a High-risk client without an approved EDD review
   const { atPolicyIssue } = await import('../aml/hooks.js');
-  await atPolicyIssue(db, { clientId: src.clientId, policyId, policyNumber: number, lob: src.lob || src.productType, premium: src.grossPremium, paymentMode: cols.payment_method || null, userId });
+  await atPolicyIssue(db, { clientId: src.clientId, policyId, policyNumber: number, lob: src.lob || src.productType, paymentMode: cols.payment_method || null, userId });
   // A renewal term is billed as a renewal (RENEWAL booking entry) with the commission priced on the renewal quotation.
   const renewal = src.receivableSource === 'renewal';
   // booked on the issue date, so a policy keyed in after its issue lands in the month it was issued
