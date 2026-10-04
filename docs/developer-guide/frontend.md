@@ -88,7 +88,9 @@ and make sure the backend role has the permission the screen's API calls need.
 Each file in `services/` wraps the endpoints of one area and returns plain data or
 `{ success, data, error }`. Screens do not build URLs themselves.
 
-- The API base URL is `BASE_URL` from `utility/constant.js` (`REACT_APP_BASE_URL` at build time).
+- The API base URL is `BASE_URL` from `utility/constant.js`, resolved by `config/runtimeConfig.js`: `/env-config.js`
+  at run time, else `REACT_APP_BASE_URL` of the build, else the same-origin `/api`. Read deployment settings only
+  through `config/runtimeConfig.js`, never `process.env` in a screen.
 - Two request styles exist. Older services use `fetch` with `authService.getAuthHeader()`; newer ones
   use the axios client in `utility/interceptor.js` through `getRequest` / `postRequest` /
   `putRequest` / `patchRequest` / `deleteRequest` (`utility/commonServices.js`). Prefer the axios
@@ -194,14 +196,23 @@ its data through `reportsService`.
 | --- | --- |
 | `npm ci --legacy-peer-deps` | Install dependencies |
 | `REACT_APP_BASE_URL=http://localhost:8000/api npm start` | Development server on port 3000 |
-| `REACT_APP_BASE_URL=/api npm run build` | Production build in `build/` |
+| `npm run build` | Production build in `build/`, the same for every environment |
+| `API_UPSTREAM=http://127.0.0.1:8000 ENVIRONMENT_NAME=UAT npm run serve` | Serve `build/` like the web server: `/env-config.js`, `/api` proxy, cache and security headers |
+| `npm run lint` | ESLint on `src` (errors fail CI) |
 | `CI=true npm test -- --watchAll=false` | Unit tests (Jest, Testing Library) |
 | `npm run check:api`, `npm run check:i18n` | Consistency checks described above |
 
-`REACT_APP_BASE_URL` is the only environment variable and is fixed at build time. The Docker image
-(`brokerverse/Dockerfile`) builds with `/api` and serves the files with nginx, which proxies `/api/`
-to the backend and sends unknown paths to `index.html` so that deep links work (`nginx.conf`). Build
-warnings come from ESLint (`react-app` rules plus `no-console`); keep the count from growing.
+Nothing environment-specific is compiled in. `public/index.html` loads `/env-config.js` before the
+bundle; the web server writes it at start-up or publication (`scripts/env-config.sh`: `API_BASE_URL`,
+`ENVIRONMENT_NAME`, `ENVIRONMENT_COLOR`, `ANALYTICS_ENABLED`). `ENVIRONMENT_NAME` outside production
+shows `components/EnvironmentBadge` next to the logo (sidebar and sign-in page) and prefixes the browser
+tab title. The Docker images (`brokerverse/Dockerfile`, `Dockerfile.railway`) serve the files with nginx
+(`nginx/default.conf.template`), which proxies `/api/` to `API_UPSTREAM`, sends unknown paths to
+`index.html` so that deep links work, and adds the cache and Content-Security-Policy headers
+(`scripts/nginx-snippets.sh`). `.env.production` keeps the webpack runtime out of `index.html`
+(`INLINE_RUNTIME_CHUNK=false`) so the policy needs no inline script. Build warnings come from ESLint
+(`react-app` rules plus `no-console`); keep the count from growing. Deployment:
+[deploy/RELEASE_PIPELINE.md](../../deploy/RELEASE_PIPELINE.md).
 
 Tests live next to the code they test (`*.test.js`): formatting helpers, menu permissions and route
 guard, placement helpers, the lead service and an application smoke test. End-to-end scenarios are

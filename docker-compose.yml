@@ -38,10 +38,13 @@ services:
       db:
         condition: service_healthy
   web:
-    build:
-      context: ./brokerverse
-      args:
-        REACT_APP_BASE_URL: /api
+    # one image for every environment: /env-config.js and the /api proxy are written when the container starts
+    build: ./brokerverse
+    environment:
+      API_UPSTREAM: http://api:8000
+      # label next to the logo (DEV, SIT, UAT, PREPROD...); empty or PRODUCTION shows none
+      ENVIRONMENT_NAME: ${ENVIRONMENT_NAME:-}
+      ENVIRONMENT_COLOR: ${ENVIRONMENT_COLOR:-}
     ports:
       - "8080:80"
     depends_on:

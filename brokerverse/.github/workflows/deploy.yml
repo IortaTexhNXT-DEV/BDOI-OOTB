@@ -1,18 +1,21 @@
 name: Build and deploy
 
-# Builds the BrokerVerse front end and publishes it to the S3 bucket behind the CloudFront distribution of the
-# existing BrokerVerse URL. Runs on every push to dev.
+# Used only when brokerverse/ is its own repository (GitHub reads workflows at the repository root; in the full
+# BrokerVerse repository .github/workflows/ci.yml and deploy.yml are used instead).
 #
-# Repository secrets: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID
-# Repository variable: REACT_APP_BASE_URL (the API address, e.g. https://<brokerverse-url>/api)
+# One environment-neutral build; the environment's settings go into /env-config.js at publish time, so the same
+# build can be published anywhere. Runs the tests on every push and pull request; publishes on a push to dev.
+#
+# Repository secrets:   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, S3_BUCKET, CLOUDFRONT_DISTRIBUTION_ID
+# Repository variables: API_BASE_URL (empty when CloudFront forwards /api/* to the backend, else
+#                       https://<api>/api), ENVIRONMENT_NAME (e.g. UAT; empty in production), ENVIRONMENT_COLOR
 
 on:
   push:
     branches:
+      - dev
       - brokerverse-platform
   pull_request:
-    branches:
-      - brokerverse-platform
 
 env:
   NODE_VERSION: "22"
@@ -20,7 +23,7 @@ env:
 
 jobs:
   build:
-    name: Test and build
+    name: Lint, test and build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -35,26 +38,21 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
+      - name: Lint
+        run: npm run lint
+
       - name: Run tests
         run: npx craco test --watchAll=false
         env:
           CI: true
 
-      - name: Check the API address is set
-        if: github.event_name == 'push'
-        run: |
-          if [ -z "${{ vars.REACT_APP_BASE_URL }}" ]; then
-            echo "The repository variable REACT_APP_BASE_URL is not set; the app would have no API address." >&2
-            exit 1
-          fi
-
-      - name: Build
+      - name: Build (environment-neutral)
         run: npm run build
         env:
           NODE_ENV: production
           CI: false
           GENERATE_SOURCEMAP: false
-          REACT_APP_BASE_URL: ${{ vars.REACT_APP_BASE_URL }}
+          INLINE_RUNTIME_CHUNK: false
 
       - name: Check the build output
         run: |
@@ -68,21 +66,34 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: web-build
+          name: web-${{ github.sha }}
           path: build/
-          retention-days: 1
+          retention-days: 30
 
   deploy:
     name: Publish to S3 and refresh CloudFront
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/dev' && github.event_name == 'push'
+    concurrency:
+      group: deploy-web
+      cancel-in-progress: false
     steps:
+      - name: Checkout (runtime configuration script)
+        uses: actions/checkout@v4
+
       - name: Download the build
         uses: actions/download-artifact@v4
         with:
-          name: web-build
+          name: web-${{ github.sha }}
           path: build/
+
+      - name: Write env-config.js
+        env:
+          API_BASE_URL: ${{ vars.API_BASE_URL || vars.REACT_APP_BASE_URL }}
+          ENVIRONMENT_NAME: ${{ vars.ENVIRONMENT_NAME }}
+          ENVIRONMENT_COLOR: ${{ vars.ENVIRONMENT_COLOR }}
+        run: sh scripts/env-config.sh build/env-config.js
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -91,8 +102,14 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Upload to S3
-        run: aws s3 sync build/ s3://${{ secrets.S3_BUCKET }} --delete
+      - name: Upload to S3 (hashed bundles cached, index.html and env-config.js never)
+        run: |
+          set -euo pipefail
+          aws s3 sync build/static "s3://${{ secrets.S3_BUCKET }}/static" --cache-control "public,max-age=31536000,immutable"
+          aws s3 sync build/ "s3://${{ secrets.S3_BUCKET }}" --delete --exclude "static/*" --exclude "index.html" --exclude "env-config.js" --cache-control "no-cache"
+          aws s3 cp build/env-config.js "s3://${{ secrets.S3_BUCKET }}/env-config.js" --cache-control "no-store,max-age=0" --content-type "application/javascript"
+          aws s3 cp build/index.html "s3://${{ secrets.S3_BUCKET }}/index.html" --cache-control "no-cache" --content-type "text/html"
+          aws s3 sync build/static "s3://${{ secrets.S3_BUCKET }}/static" --delete --cache-control "public,max-age=31536000,immutable"
 
       - name: Invalidate the CloudFront cache
-        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/*"
+        run: aws cloudfront create-invalidation --distribution-id ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} --paths "/index.html" "/env-config.js" "/"

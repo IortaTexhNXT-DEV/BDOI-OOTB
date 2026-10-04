@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import EnvironmentBadge from "../EnvironmentBadge";
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux";
 import { menuList } from "./list";
@@ -309,7 +310,10 @@ const NewSideBar = ({ onNavigate }) => {
       <ul className="list">
         {/* <div className="stack"> */}
         <a className="bdoi-brand" href="/" aria-label={`${systemName} home`}>
-          <img src={logoUrl} alt={`${systemName} logo`} />
+          <span className="bdoi-brand-logo-row">
+            <img src={logoUrl} alt={`${systemName} logo`} />
+            <EnvironmentBadge />
+          </span>
           <span className="bdoi-brand-product">{systemName}</span>
         </a>
 

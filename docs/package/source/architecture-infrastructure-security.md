@@ -160,7 +160,7 @@ Whatever the hosting option, BrokerVerse needs the same components.
 
 | Component | Requirement |
 |---|---|
-| Web hosting | Static files of the SPA (`npm run build`), with a fallback of every path to `index.html`; `REACT_APP_BASE_URL` compiled in |
+| Web hosting | Static files of the SPA (`npm run build`, the same build for every environment), with a fallback of every path to `index.html`; `/env-config.js` per environment (API address, environment name) and `/api` forwarded to the backend |
 | API runtime | Container from `backend/Dockerfile` (runs as user `node`, port 8000, health check `/api/health`) or Node.js 22 under a process manager |
 | Database | PostgreSQL 16, empty database and a login that may create tables; time zone Asia/Manila; TLS on the connection |
 | File store | Persistent volume at `UPLOAD_DIR`, shared between instances when there is more than one |
@@ -216,7 +216,7 @@ This is the reference deployment of `deploy/README.md` and architecture document
 
 ### Current demo deployment
 
-The repository also deploys a demo system: `.github/workflows/deploy-frontend.yml` publishes the front end to S3 and CloudFront and reloads the API on one EC2 host with PM2 (`deploy/ec2/deploy.sh`). The API runs as one PM2 process (fork mode, restart above 700 MB) on port 8001 behind an nginx site that only forwards `/api/`. This is a single-instance set-up with no redundancy; it is suitable for demonstration and DEV, not as the production form of option A.
+The repository also deploys a demo system: the release pipeline (`.github/workflows/deploy.yml`, environment `dev`) publishes the front end to S3 and CloudFront and switches the API on one EC2 host with PM2 (`deploy/ec2/release.sh`). The API runs as one PM2 process (fork mode, restart above 700 MB) on port 8001 behind an nginx site that only forwards `/api/`. This is a single-instance set-up with no redundancy; it is suitable for demonstration and UAT, not as the production form of option A.
 
 ## Option B: Microsoft Azure (Southeast Asia)
 
@@ -301,13 +301,12 @@ The largest cost items are the database with its standby, the load balancer or r
 
 | Workflow | Trigger | What it does |
 |---|---|---|
-| `.github/workflows/ci.yml` (CI) | Every pull request | Backend: `npm ci`, `npm run lint`, `npm test` against a `postgres:16` service. Front end: `npm ci --legacy-peer-deps`, `craco test`. |
-| `.github/workflows/deploy-frontend.yml` (CI/CD Pipeline) | Push to `brokerverse-platform` | Builds the front end with Node 22 (`REACT_APP_BASE_URL` from the repository variable), publishes it to S3 (hashed files cached one year, `index.html` not cached), invalidates CloudFront, then reloads the API on the EC2 host over SSH (`deploy/ec2/deploy.sh`). |
-| `brokerverse/.github/workflows/deploy.yml` | Push or pull request to `brokerverse-platform`, when the front end is its own repository | Front-end tests, check that `REACT_APP_BASE_URL` is set, build, check that `build/index.html` is a production build; the publish job runs only for a push to `dev` |
+| `.github/workflows/ci.yml` (CI) | Every pull request and push; tags `v*.*.*` | Backend: `npm ci`, `npm run lint`, `npm test` against a `postgres:16` service. Front end: `npm ci --legacy-peer-deps`, `npm run lint`, `craco test`, one environment-neutral build. Dependency audit (production dependencies, high and critical fail). Artefacts `web-<sha>` and `backend-<sha>`. Then deploys: `brokerverse-platform` to dev, `vX.Y.Z-rc.N` to UAT, `vX.Y.Z` to Production (GitHub Environments with approvals). |
+| `.github/workflows/deploy.yml` (Deploy) | Called by CI, or by hand to promote a commit or tag | Same artefacts in every environment: pre-deploy backup (Pre-Prod, Production), migrations then seeds, API switch on the EC2 host (`deploy/ec2/release.sh`), front end to S3 + CloudFront with `/env-config.js`, smoke test, automatic rollback. Skipped with a notice when the environment is not configured. |
+| `.github/workflows/rollback.yml` (Rollback) | By hand | Switches an environment back to an earlier build, without migrations |
+| `brokerverse/.github/workflows/deploy.yml` | Push or pull request, when the front end is its own repository | Front-end lint, tests and environment-neutral build; `/env-config.js` from repository variables; the publish job runs only for a push to `dev` |
 
-The EC2 deployment script checks out the pushed branch, installs production dependencies with `npm ci --omit=dev`, creates the database if missing (`scripts/create-database.js`), installs the nginx site after `nginx -t`, starts the API under PM2 and waits up to two minutes for `/api/health` to return 200; otherwise it prints the last 80 log lines and fails the job.
-
-> **Gap:** In `deploy-frontend.yml` the lint and test jobs are commented out, so a push to `brokerverse-platform` deploys without running tests. Tests run only on pull requests (`ci.yml`). **Recommended:** protect the branch so that changes arrive only through pull requests with a green CI run, and restore the test jobs as a dependency of both deploy jobs.
+Details, approvals and the GitHub settings: `deploy/RELEASE_PIPELINE.md`. The earlier git-checkout script `deploy/ec2/deploy.sh` (checks out the branch, `npm ci --omit=dev`, creates the database if missing, installs the nginx site after `nginx -t`, starts the API under PM2 and waits for `/api/health`) remains for manual use.
 
 > **Gap:** The pipelines use long-lived AWS access keys and an SSH private key stored as GitHub secrets, and the backend image is not pushed to a registry. **Recommended:** GitHub OIDC with an IAM role limited to the bucket and the distribution; build, scan and push a versioned backend image (for example to ECR) and deploy that image, so a release can be rolled back by tag.
 

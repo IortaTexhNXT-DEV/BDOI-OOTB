@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# Older, manual route: install the API from the git checkout at BROKERVERSE_ROOT and reload it under PM2.
+# The release pipeline (.github/workflows/deploy.yml) uses deploy/ec2/release.sh instead, which installs the
+# artefact CI built for a commit into releases/<sha> (deploy/RELEASE_PIPELINE.md section 13).
 # Install backend production dependencies and reload the API under PM2.
 # Expects backend/.env (from deploy/backend.env.example) and does not overwrite it, except PORT, which this script sets to 8001.
 # Run as root (the workflow uses sudo su), so the API joins root's PM2 with the other apps on this host.

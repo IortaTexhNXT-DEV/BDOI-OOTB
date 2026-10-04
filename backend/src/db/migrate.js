@@ -64,6 +64,11 @@ export async function migrate({ reset = false, log = console.log, lockTimeoutMs 
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  // Migrations are forward-only in deployed environments: --reset drops every table, so it is refused in production.
+  if (process.argv.includes('--reset') && process.env.NODE_ENV === 'production') {
+    console.error('migrate --reset drops the whole schema and is refused with NODE_ENV=production.');
+    process.exit(1);
+  }
   migrate({ reset: process.argv.includes('--reset') })
     .then(() => pool.end())
     .catch((e) => { console.error(e); process.exit(1); });

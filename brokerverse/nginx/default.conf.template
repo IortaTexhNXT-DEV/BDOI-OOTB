@@ -1,0 +1,36 @@
+# BrokerVerse web server (Docker Compose and Railway). The nginx image fills ${PORT} when the container starts;
+# /docker-entrypoint.d/40-brokerverse-runtime.sh writes /env-config.js and the two snippets included below.
+server {
+  listen ${PORT};
+  server_name _;
+  root /usr/share/nginx/html;
+  client_max_body_size 25m;
+  server_tokens off;
+
+  # same-origin API (API_UPSTREAM), empty when the API is on another origin
+  include /etc/nginx/brokerverse/api-proxy.conf;
+
+  # content-hashed bundles: cached for a year, never revalidated
+  location /static/ {
+    include /etc/nginx/brokerverse/headers.conf;
+    add_header Cache-Control "public, max-age=31536000, immutable" always;
+    try_files $uri =404;
+  }
+
+  # environment settings and the page that loads the bundles: always fetched fresh
+  location = /env-config.js {
+    include /etc/nginx/brokerverse/headers.conf;
+    add_header Cache-Control "no-store, max-age=0" always;
+  }
+  location = /index.html {
+    include /etc/nginx/brokerverse/headers.conf;
+    add_header Cache-Control "no-cache" always;
+  }
+
+  # single-page app: every other address serves index.html
+  location / {
+    include /etc/nginx/brokerverse/headers.conf;
+    add_header Cache-Control "no-cache" always;
+    try_files $uri /index.html;
+  }
+}

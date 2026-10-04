@@ -60,17 +60,28 @@ Do the steps in order. Put secrets only in Railway's variables, never in the rep
 4. **Variables:**
 
    ```
-   REACT_APP_BASE_URL=https://<api address>/api
    PORT=8080
+   API_UPSTREAM=http://api.railway.internal:8000
+   ENVIRONMENT_NAME=UAT
    ```
 
-   The address is baked into the build. The build stops if it is missing, and it must be rebuilt (Redeploy) whenever
-   the API address changes.
+   - The build holds no address: the same image serves every Railway environment. When the container starts it writes
+     `/env-config.js` and forwards `/api` to `API_UPSTREAM` over Railway's private network, so the browser calls the
+     API on the web address itself (no CORS, no public API domain needed). `api` is the API service's name; `8000`
+     its `PORT`.
+   - Instead of the proxy, `API_BASE_URL=https://<api address>/api` makes the browser call the API service directly
+     (then `CORS_ORIGINS` on `api` must list the web address).
+   - `ENVIRONMENT_NAME` (`DEV`, `SIT`, `UAT`, `PREPROD`...) shows a small label next to the logo; leave it empty on
+     production. `ENVIRONMENT_COLOR=#rrggbb` changes its colour.
+   - Changing any of these needs a restart of `web`, not a rebuild.
+   - `REACT_APP_BASE_URL` is no longer needed; delete it from older services (if kept, it is only used when no runtime
+     address is set).
 5. **Settings > Networking > Generate Domain** (target port 8080).
 
 ## 4. Connect the two
 
-1. On `api`, set `CORS_ORIGINS` to the web address and `PUBLIC_BASE_URL` to the API address. Railway redeploys.
+1. On `api`, set `CORS_ORIGINS` to the web address and `PUBLIC_BASE_URL` to the address the browser uses for the API:
+   the web address when `web` forwards `/api` (`API_UPSTREAM`), else the API's own address. Railway redeploys.
 2. Open the web address, sign in as `BrokerVerse` with the `ADMIN_PASSWORD`, and change the password when asked.
 3. Continue with the smoke tests and go-live data in [README.md](README.md) sections 4 and 6.
 
@@ -81,8 +92,9 @@ To serve BrokerVerse on the existing address (for example `brokerverse-dev.inxtu
 1. On `web`, **Settings > Networking > Custom Domain**, enter the address and create the CNAME record Railway shows at
    your DNS provider. Remove the old record that points to CloudFront.
 2. Optionally give `api` its own custom domain the same way (for example `brokerverse-api-dev.inxtuniverse.com`).
-3. Update the variables: `CORS_ORIGINS` on `api` (add the custom web address), `PUBLIC_BASE_URL` on `api` if the API
-   has a custom domain, and `REACT_APP_BASE_URL` on `web`, then redeploy `web` so the build takes the new address.
+3. Update the variables: `CORS_ORIGINS` on `api` (add the custom web address) and `PUBLIC_BASE_URL` on `api`; with
+   `API_UPSTREAM` nothing changes on `web`. With `API_BASE_URL` on `web`, set the new API address and restart `web`
+   (no rebuild).
 
 ## Loading UAT data
 
@@ -132,10 +144,12 @@ repository; no Dockerfile is added. Run it once, on a UAT environment only, neve
 | `api` deploy stays on "health check" and fails | Look at the deploy logs. Usually a missing variable (the API refuses to start in production without `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `CORS_ORIGINS`, `PUBLIC_BASE_URL`) or `DATABASE_URL` not pointing at the Postgres service. |
 | `EACCES` on `/app/uploads` in the logs | `RAILWAY_RUN_UID=0` is missing on `api`. |
 | Blank page, `%PUBLIC_URL%` errors in the browser console | The unbuilt source is served. Check the `web` service has Dockerfile path `Dockerfile.railway` and root directory `/brokerverse`, not a Railpack or static build of the folder. |
-| Login page shows but sign-in fails with a network or CORS error | `REACT_APP_BASE_URL` on `web` is wrong (must end in `/api`, rebuild after a change) or the web address is not in `CORS_ORIGINS` on `api`. |
+| Login page shows but sign-in fails with a network or CORS error | With `API_UPSTREAM`: the API service name or port is wrong (`http://<api service>.railway.internal:<PORT>`); the `web` log shows the proxy error. With `API_BASE_URL`: it must end in `/api` and the web address must be in `CORS_ORIGINS` on `api`. Open `<web address>/env-config.js` to see what the app uses. |
+| The environment label (UAT, SIT...) is missing or wrong | `ENVIRONMENT_NAME` on `web`; restart `web`. A browser keeping an old `/env-config.js` is excluded: it is sent with `no-store`. |
 | Refreshing a page other than the home page gives 404 | The `web` service is not using `Dockerfile.railway`, whose nginx serves `index.html` for every address. |
 
-Railway runs one `api` instance. The scheduler and migrations are safe with more, but documents are on the volume,
+Releases, promotion between Railway environments and rollback follow [RELEASE_PIPELINE.md](RELEASE_PIPELINE.md)
+(section 13 for Railway). Railway runs one `api` instance. The scheduler and migrations are safe with more, but documents are on the volume,
 which Railway attaches to one instance only.
 
 ## Deploys paused

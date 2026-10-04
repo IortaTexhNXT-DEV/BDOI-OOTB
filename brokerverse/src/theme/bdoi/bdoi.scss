@@ -74,6 +74,13 @@ h6 {
       width: auto;
     }
 
+    // logo with the environment label (DEV, SIT, UAT...) beside it; production shows the logo alone
+    .bdoi-brand-logo-row {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
     .bdoi-brand-product {
       font-size: 12px;
       font-weight: 700;
