@@ -20,12 +20,16 @@ export const ROLES = [
   ['claims', 'Claims', 'Claims registration, follow-up with insurers, review and settlement', false],
   ['accounting', 'Accounting', 'Billing, collection, official receipts, remittance to insurers, commission, period end and BIR reporting', false],
   ['accounting-manager', 'Accounting Manager', 'Everything Accounting does, plus approving the month-end and year-end close and bank reconciliations, posting into soft-closed periods and reopening periods', false],
+  // AML/CFT compliance officer (migration 0263): Compliance menu, EDD approval, screening decisions, AMLC reports
+  ['compliance-officer', 'Compliance Officer (AML/CFT)', 'Customer risk rating and EDD approval, sanctions and PEP screening decisions, transaction monitoring, AML cases and AMLC covered and suspicious transaction reports', false],
 ];
 /** Role codes of earlier releases (renamed or merged by migration 0140_broker_roles.sql); a fresh seed never creates them. */
 export const RETIRED_ROLES = ['it-admin', 'ba', 'user-access-admin', 'underwriting', 'customer-services', 'finance', 'finance-manager', 'agent'];
 const MODULES = ['profile', 'leads', 'clients', 'quotations', 'policies', 'endorsements', 'claims', 'renewals', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'reinsurance', 'incentive', 'products', 'masters', 'users', 'roles', 'settings', 'reports', 'schedules', 'notifications', 'journal-vouchers', 'audit', 'period-end', 'bank-reconciliation',
   // go-live data workbench (Master > Go-Live Data Load, migration 0243): System Administrator only
-  'data-load'];
+  'data-load',
+  // AML/CFT (Compliance menu, migration 0263): read:aml and write:aml; approve:aml is created by the migration
+  'aml'];
 // write:receipts (official receipts, cash posting, payment verification) is Accounting-only: segregation of duties.
 // Least privilege: the receipt register (read:receipts) is Accounting's; Sales and Operations see a policy's
 // payments through read:policies. Claims officers read the lead through the policy, not the lead register.
@@ -45,6 +49,9 @@ const ROLE_PERMS = {
   // the credit control approvals: warranty extensions and client credit limits (approve:credit-control, migration 0173),
   // and posting rule / account determination changes: propose (write) and approve another user's change (migration 0174).
   'accounting-manager': ['period-end:approve', 'bank-reconciliation:approve', 'insurer-reconciliation:approve', 'credit-control:approve', 'posting-rules:write', 'posting-rules:approve'],
+  // Compliance Officer (AML/CFT): the Compliance menu with its decisions (approve:aml), client onboarding and KYC, and read
+  // access to the policies, claims, receipts and vouchers it reviews
+  'compliance-officer': ['profile', 'aml', 'aml:approve', 'clients', 'leads:read', 'policies:read', 'claims:read', 'receipts:read', 'disbursements:read', 'reports:read', 'notifications'],
 };
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'] };

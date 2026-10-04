@@ -52,6 +52,10 @@ export const TRANSACTION_TABLES = [
   'access_review_items', 'access_reviews', 'agent_events',
   // data privacy: consents and data subject requests belong to the clients and leads that go
   'data_subject_requests', 'privacy_consents',
+  // AML/CFT: due diligence of the clients (signatories, beneficial owners, KYC documents, ratings, EDD), screenings and
+  // their hits, provider requests, transaction alerts, cases and AMLC report files
+  'client_signatories', 'client_beneficial_owners', 'client_kyc_documents', 'aml_risk_assessments', 'aml_edd_reviews', 'aml_screenings', 'aml_screening_hits',
+  'aml_provider_requests', 'aml_alerts', 'aml_cases', 'aml_reports', 'aml_report_items',
 ];
 
 /**
@@ -100,6 +104,8 @@ export const MASTER_CONFIG_TABLES = [
   'bank_statement_formats', 'bank_transaction_types', 'bank_match_rules', 'insurer_statement_formats',
   // reports and scheduled jobs
   'report_definitions', 'report_schedules', 'scheduled_jobs',
+  // AML/CFT configuration: risk factors, monitoring rules, screening lists with their versions and entries
+  'aml_risk_factors', 'aml_rules', 'aml_screening_lists', 'aml_list_versions', 'aml_list_entries',
 ];
 
 /**
@@ -125,6 +131,8 @@ export const TRANSACTION_FILE_FOLDERS = [
   'vehicle-photos', 'id-cards', 'policy-documents', 'quotation-responses', 'insurer-offers', 'endorsement', 'endorsement-documents',
   'claim', 'claims', 'payment-proofs', 'direct-bill-payments', 'print', 'generated', 'reports', 'bordereaux',
   'incentive-reports', 'reinsurance-reports', 'remittance-statements', 'remittance-bulk',
+  // KYC documents of the clients (AML/CFT)
+  'kyc',
 ];
 /** Configuration folders, never touched: logos and favicons (System Settings, Company master), product documents. */
 export const CONFIG_FILE_FOLDERS = ['logo', 'favicon', 'company-logo', 'product-documents'];
