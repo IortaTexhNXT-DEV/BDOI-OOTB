@@ -75,7 +75,7 @@ const LineDetailDrawer = ({
 
   const stepLabel = (key, dateValue) => {
     if (key === "Approved" && isApproved) {
-      return "Approved ✓";
+      return "Approved";
     }
     return `${key} ${stepDate(dateValue)}`;
   };
@@ -225,15 +225,15 @@ const LineDetailDrawer = ({
             <div className={`step-pill ${stepState("Accrued")}`}>
               {stepLabel("Accrued", lifecycle.accruedAt)}
             </div>
-            <span className="step-arrow">→</span>
+            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
             <div className={`step-pill ${stepState("Eligible")}`}>
               {stepLabel("Eligible", lifecycle.eligibleAt)}
             </div>
-            <span className="step-arrow">→</span>
+            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
             <div className={`step-pill ${stepState("Approved")}`}>
               {stepLabel("Approved", lifecycle.approvedAt)}
             </div>
-            <span className="step-arrow">→</span>
+            <i className="pi pi-angle-right step-arrow" aria-hidden="true" />
             <div className={`step-pill ${stepState("Paid")}`}>
               {stepLabel("Paid", lifecycle.paidAt)}
             </div>
@@ -263,7 +263,7 @@ const LineDetailDrawer = ({
             {canPay && (
               <Button
                 label="Pay (voucher)"
-                className="pay-line-btn"
+                className="p-button-outlined pay-line-btn"
                 disabled={actionLoading}
                 onClick={() => runLineAction(CommissionService.payLine)}
               />
@@ -271,7 +271,7 @@ const LineDetailDrawer = ({
             {canReverse && (
               <Button
                 label="Reverse (claw-back)"
-                className="reverse-line-btn"
+                className="p-button-outlined reverse-line-btn"
                 disabled={actionLoading}
                 onClick={() => runLineAction(CommissionService.reverseLine)}
               />

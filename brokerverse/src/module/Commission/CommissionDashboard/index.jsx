@@ -206,7 +206,7 @@ const CommissionDashboard = () => {
 
       <div className="two-col">
         <div className="panel">
-          <h3>COMSUB (GROSS) BY REFERRER</h3>
+          <h3>ComSub (gross) by referrer</h3>
           <div className="hbar-list">
             {data.comsubByReferrer.map((r) => (
               <div className="hbar-row" key={r.name}>
@@ -226,7 +226,7 @@ const CommissionDashboard = () => {
         </div>
 
         <div className="panel">
-          <h3>LINES BY STATUS</h3>
+          <h3>Lines by status</h3>
           <div className="status-list">
             {data.linesByStatus.map((s) => (
               <div className="status-row" key={s.status}>
@@ -260,7 +260,7 @@ const CommissionDashboard = () => {
       </div>
 
       <div className="panel trend-panel">
-        <h3>MONTHLY TREND — INCOME VS PAYABLE VS MARGIN</h3>
+        <h3>Monthly trend: income, payable and margin</h3>
         <div className="chart-wrap">
           {trendChart && (
             <Chart
@@ -275,7 +275,7 @@ const CommissionDashboard = () => {
 
       <div className="two-col">
         <div className="panel donut-panel">
-          <h3>COMSUB (GROSS) BY PRODUCT</h3>
+          <h3>ComSub (gross) by product</h3>
           <div className="donut-body">
             <div className="donut-chart-wrap">
               <Chart
@@ -307,7 +307,7 @@ const CommissionDashboard = () => {
 
         <div className="panel donut-panel">
           <div className="panel-head-row">
-            <h3>BROKERAGE INCOME BY {brokerageView.toUpperCase()}</h3>
+            <h3>Brokerage income by {brokerageView}</h3>
             <div className="toggle">
               <button
                 type="button"
@@ -356,7 +356,7 @@ const CommissionDashboard = () => {
       </div>
 
       <div className="panel funnel-panel">
-        <h3>PAYABLE FUNNEL — NET PAYABLE ({currencySymbol()}) BY LIFECYCLE STAGE</h3>
+        <h3>Payable funnel: net payable ({currencySymbol()}) by lifecycle stage</h3>
         <div className="hbar-list funnel">
           {data.payableFunnel.map((f) => (
             <div className="hbar-row" key={f.status}>

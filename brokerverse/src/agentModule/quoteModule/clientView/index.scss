@@ -229,7 +229,6 @@ $tablet-md: 1024px;
                   color: #6c757d;
                   font-weight: 600;
                   font-size: 0.8rem;
-                  text-transform: uppercase;
                   letter-spacing: 0.5px;
                   border: none;
                   padding: 1rem 0.75rem;
@@ -330,7 +329,6 @@ $tablet-md: 1024px;
                 border-radius: 12px;
                 font-size: 0.75rem;
                 font-weight: 600;
-                text-transform: uppercase;
                 letter-spacing: 0.5px;
 
                 @include mobile-sm {
@@ -339,18 +337,18 @@ $tablet-md: 1024px;
                 }
 
                 &.status-active {
-                  background: #d4edda;
-                  color: #155724;
+                  background: $color-success-050;
+                  color: $color-success;
                 }
 
                 &.status-pending {
-                  background: #fff3cd;
-                  color: #856404;
+                  background: $color-warning-050;
+                  color: $color-warning;
                 }
 
                 &.status-expired {
-                  background: #f8d7da;
-                  color: #721c24;
+                  background: $color-danger-050;
+                  color: $color-danger;
                 }
               }
             }
@@ -483,12 +481,11 @@ $tablet-md: 1024px;
     }
 
     .error-icon {
-      font-size: 3rem;
+      font-size: 1.25rem;
+      color: var(--color-text-muted);
       margin-bottom: 1rem;
-      opacity: 0.5;
 
       @include mobile-sm {
-        font-size: 2.5rem;
         margin-bottom: 0.75rem;
       }
     }
@@ -631,7 +628,6 @@ $tablet-md: 1024px;
     }
 
     &:hover {
-      transform: translateY(-1px) !important;
       box-shadow: 0 4px 12px rgba(0, 102, 204, 0.2) !important;
       background: rgba(0, 102, 204, 0.05) !important;
       border-color: #0052a3 !important;

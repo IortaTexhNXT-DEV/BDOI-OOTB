@@ -1045,7 +1045,7 @@ export default function BatchTable() {
                       Processing Renewal Notices
                     </h5>
                     <Tag
-                      value={queueProgress.status.toUpperCase()}
+                      value={queueProgress.status.charAt(0).toUpperCase() + queueProgress.status.slice(1)}
                       severity={
                         queueProgress.status === "processing"
                           ? "warning"

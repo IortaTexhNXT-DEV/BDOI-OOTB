@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .claim__details__container {
   .p-card {
     background: #ffffff;
@@ -115,8 +116,8 @@
       width: fit-content;
       padding: 4px 12px;
       border-radius: 999px;
-      background: #dcfce7;
-      color: #166534;
+      background: $color-success-050;
+      color: $color-success;
       font-size: 13px;
       font-weight: 600;
       font-family: "Nunito", Arial, sans-serif;

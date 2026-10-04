@@ -499,7 +499,7 @@ const CustomerInfo = ({ action }) => {
           <div style={{ textAlign: "center", padding: "2rem" }}>
             <i
               className="pi pi-times-circle"
-              style={{ fontSize: "2rem", color: "var(--color-danger)" }}
+              style={{ fontSize: "1.25rem", color: "var(--color-danger)" }}
             ></i>
             <p style={{ marginTop: "1rem", color: "var(--color-danger)" }}>
               {quotationLoadError}

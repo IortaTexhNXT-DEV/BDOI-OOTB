@@ -213,7 +213,7 @@ const RemittanceAnalytics = () => {
   };
 
   const severityBodyTemplate = (rowData) => {
-    return <Tag value={rowData.severity.toUpperCase()} severity={rowData.severity} />;
+    return <Tag value={rowData.severity.charAt(0).toUpperCase() + rowData.severity.slice(1)} severity={rowData.severity} />;
   };
   const performanceBodyTemplate = (rowData) => {
     const value = progressValue(rowData.performanceScore);

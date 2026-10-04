@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .quotelisting__overal__container {
@@ -336,8 +337,8 @@
         line-height: 21px !important;
       }
       .company__status__type__green {
-        background-color: #e2f6f0;
-        color: #11845f;
+        background-color: $color-success-050;
+        color: $color-success;
         text-align: center;
         border-radius: 25px;
         padding: 8px 12px;
@@ -352,8 +353,8 @@
         overflow: visible;
       }
       .company__status__type__red {
-        background-color: #fef2e1;
-        color: #c1622a;
+        background-color: $color-warning-050;
+        color: $color-warning;
         text-align: center;
         border-radius: 25px;
         padding: 8px 12px;

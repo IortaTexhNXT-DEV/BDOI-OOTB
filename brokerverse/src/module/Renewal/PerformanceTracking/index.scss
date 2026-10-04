@@ -156,7 +156,6 @@
                 display: block;
                 font-size: 14px;
                 color: $grey;
-                text-transform: uppercase;
                 font-weight: 600;
                 margin-bottom: 8px;
               }
@@ -380,7 +379,7 @@
                         }
 
                         &.warning .p-progressbar-value {
-                          background: #F59E0B;
+                          background: $color-warning;
                         }
 
                         &.danger .p-progressbar-value {
@@ -400,7 +399,7 @@
                         }
 
                         &.warning {
-                          color: #F59E0B;
+                          color: $color-warning;
                         }
 
                         &.danger {
@@ -451,8 +450,8 @@
                       }
 
                       &.p-tag-warning {
-                        background: lighten(#F59E0B, 40%);
-                        color: darken(#F59E0B, 20%);
+                        background: $color-warning-050;
+                        color: $color-warning;
                       }
 
                       &.p-tag-danger {
@@ -514,7 +513,7 @@
                     }
 
                     &.warning .p-progressbar-value {
-                      background: #F59E0B;
+                      background: $color-warning;
                     }
 
                     &.danger .p-progressbar-value {
@@ -569,7 +568,6 @@
                 .metric-label {
                   font-size: 12px;
                   color: $grey;
-                  text-transform: uppercase;
                   font-weight: 600;
                   margin-bottom: 8px;
                 }
@@ -591,7 +589,7 @@
                   }
 
                   &.warning {
-                    color: #F59E0B;
+                    color: $color-warning;
                   }
                 }
               }

@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .referrer-detail-page {
   padding: 1.5rem 2rem 2.5rem;
   background: #f7f8fa;
@@ -166,20 +167,18 @@
       color: #16a34a;
     }
 
-    .approve-btn {
-      background: #3b82f6 !important;
-      border-color: #3b82f6 !important;
+    // one filled action (generate payout); approve and mark are outlined
+    .approve-btn,
+    .mark-btn {
+      background: $color-surface !important;
+      border-color: $brand-blue !important;
+      color: $brand-blue !important;
     }
 
     .payout-btn {
-      background: #e0a800 !important;
-      border-color: #e0a800 !important;
+      background: $brand-blue !important;
+      border-color: $brand-blue !important;
       color: #fff !important;
-    }
-
-    .mark-btn {
-      border-color: #3b82f6 !important;
-      color: #3b82f6 !important;
     }
 
     .empty-past {
@@ -358,7 +357,6 @@
     font-weight: 700;
     letter-spacing: 0.08em;
     color: #94a3b8;
-    text-transform: uppercase;
   }
 
   .calc-card {
@@ -555,28 +553,24 @@
       padding: 0.65rem 1.15rem !important;
     }
 
-    .mark-eligible-btn {
-      background: #fff !important;
-      border-color: #3b82f6 !important;
-      color: #3b82f6 !important;
+    // one filled action (approve); the others are outlined, reverse in the danger colour
+    .mark-eligible-btn,
+    .pay-line-btn {
+      background: $color-surface !important;
+      border-color: $brand-blue !important;
+      color: $brand-blue !important;
     }
 
     .approve-line-btn {
-      background: #3b82f6 !important;
-      border-color: #3b82f6 !important;
-      color: #fff !important;
-    }
-
-    .pay-line-btn {
-      background: #e0a800 !important;
-      border-color: #e0a800 !important;
+      background: $brand-blue !important;
+      border-color: $brand-blue !important;
       color: #fff !important;
     }
 
     .reverse-line-btn {
-      background: #f43f5e !important;
-      border-color: #f43f5e !important;
-      color: #fff !important;
+      background: $color-surface !important;
+      border-color: $color-danger !important;
+      color: $color-danger !important;
     }
   }
 }

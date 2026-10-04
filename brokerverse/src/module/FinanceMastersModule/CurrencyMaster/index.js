@@ -161,8 +161,9 @@ const CurrencyMaster = () => {
         <div className="btn__container">
           <Button onClick={() => setShowUpload(true)}
             label={t("financeMasters.upload")}
-            icon={<SvgUploade color={"#fff"} />}
+            icon={<SvgUploade />}
             className="upload__btn"
+            outlined
           />
           <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload currencies" targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button

@@ -157,7 +157,7 @@ const AutomatedRemittanceMaster = () => {
               className="back__button"
               onClick={handleClose} aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
             <span className="page__title">{t("automatedRemittance.pageTitle")}</span>
-            <span className="mode-badge">{mode?.toUpperCase() || "ADD"}</span>
+            <span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>
           </div>
           <div className="col-12 p-0">
             <BreadCrumb

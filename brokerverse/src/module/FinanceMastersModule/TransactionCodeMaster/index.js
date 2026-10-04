@@ -49,8 +49,9 @@ const TransactionCodeMaster = () => {
           <div className="btn__container">
           <Button onClick={() => setShowUpload(true)}
               label={t("financeMasters.upload")}
-              icon={<SvgUploade color={"#fff"} />}
+              icon={<SvgUploade />}
               className="upload__btn"
+              outlined
             />
             <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload transaction codes" targets={UPLOAD_TARGETS} />
             <Button

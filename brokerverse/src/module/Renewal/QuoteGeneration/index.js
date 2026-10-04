@@ -819,7 +819,7 @@ const QuoteGeneration = () => {
         <Card className="content-card">
           {loading ? (
             <div className="loading-container">
-              <ProgressSpinner />
+              <ProgressSpinner style={{ width: "2rem", height: "2rem" }} strokeWidth="4" />
               <p>{t("renewal.processingQuoteGeneration")}</p>
             </div>
           ) : (

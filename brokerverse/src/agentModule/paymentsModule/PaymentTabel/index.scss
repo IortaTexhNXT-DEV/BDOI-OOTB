@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 // .leadlisting__overal__container {
 //     .sorbyfilter__style {
 //       height: 100%;
@@ -530,16 +531,16 @@
         align-items: center;
     }
     .status__text__pending{
-        background-color: #FFFAEB;
-        color: #C1622A;
+        background-color: $color-warning-050;
+        color: $color-warning;
         border-radius: 16px;
         display: flex;
         justify-content: center;
         align-items: center;
     }
     .status__text__reviewing{
-        background-color: #D9EDF3;
-        color: #167594;
+        background-color: $brand-blue-050;
+        color: $brand-navy;
         border-radius: 16px;
         display: flex;
         justify-content: center;

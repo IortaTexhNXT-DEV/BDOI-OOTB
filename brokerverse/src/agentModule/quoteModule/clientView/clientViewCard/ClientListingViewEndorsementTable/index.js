@@ -14,6 +14,7 @@ import endorsementService from "../../../../../services/endorsementService";
 import { Skeleton } from "primereact/skeleton";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import { notifyError } from "../../../../../utility/dialogs";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -350,7 +351,7 @@ const LeadListingAllTable = ({ clientId }) => {
 
     const description = normalized?.productType || "N/A";
 
-    return <div className="category__text">{description.toUpperCase()}</div>;
+    return <div className="category__text">{description}</div>;
   };
 
   const renderDate = (rowData) => {
@@ -380,7 +381,7 @@ const LeadListingAllTable = ({ clientId }) => {
       return <Skeleton width="4rem" />;
     }
 
-    return <div className={className}>{status.toUpperCase()}</div>;
+    return <div className={className}>{statusLabel(status)}</div>;
   };
 
   const renderPayment = (rowData) => {
@@ -393,7 +394,7 @@ const LeadListingAllTable = ({ clientId }) => {
       return <Skeleton width="4rem" />;
     }
 
-    return <div className={className}>{payment.toUpperCase()}</div>;
+    return <div className={className}>{statusLabel(payment)}</div>;
   };
 
   const ViewheaderStyle = {

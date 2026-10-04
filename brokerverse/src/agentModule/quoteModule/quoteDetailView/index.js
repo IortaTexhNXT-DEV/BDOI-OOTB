@@ -594,8 +594,8 @@ const QuoteDetailView = ({ action }) => {
                                       style={{
                                         fontSize: "10px",
                                         padding: "2px 6px",
-                                        backgroundColor: "#3b82f6",
-                                        color: "white",
+                                        backgroundColor: "var(--bv-primary-050)",
+                                        color: "var(--bv-secondary)",
                                         borderRadius: "4px",
                                         fontWeight: "500",
                                       }}

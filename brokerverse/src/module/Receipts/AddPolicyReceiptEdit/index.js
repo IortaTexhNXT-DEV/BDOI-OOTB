@@ -671,12 +671,13 @@ function PolicyReceipts() {
       {selectedRows && selectedRows.length > 0 && (
         <div
           style={{
-            backgroundColor: "#dbeafe",
+            backgroundColor: "var(--color-surface-muted)",
+            borderLeft: "3px solid var(--bv-primary)",
             padding: "8px 12px",
             borderRadius: "4px",
             marginBottom: "12px",
             fontSize: "14px",
-            color: "#1e40af",
+            color: "var(--color-text)",
             display: "flex",
             alignItems: "center",
             gap: "6px",
@@ -1063,27 +1064,25 @@ function PolicyReceipts() {
             <Button
               label={t("accounts.addReceiptEdit.goToHistory")}
               className="print"
+              outlined
               onClick={() => navigate("/accounts/receipts")}
               disabled={printLoading}
               style={{
                 minWidth: "160px",
                 padding: "10px 20px",
-                backgroundColor: "#6c757d",
-                borderColor: "#6c757d",
                 whiteSpace: "nowrap",
               }}
             />
             <Button
               label={t("accounts.addReceiptEdit.printAll")}
               className="print"
+              outlined
               onClick={handlePrintAll}
               disabled={!customerData.receiptId || printLoading || loading}
               loading={printLoading}
               style={{
                 minWidth: "150px",
                 padding: "10px 20px",
-                backgroundColor: "#28a745",
-                borderColor: "#28a745",
               }}
             />
             <Button
@@ -1101,8 +1100,6 @@ function PolicyReceipts() {
               style={{
                 minWidth: "160px",
                 padding: "10px 20px",
-                backgroundColor: "#198754",
-                borderColor: "#198754",
               }}
             />
           </div>

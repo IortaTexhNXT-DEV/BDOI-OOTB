@@ -48,7 +48,7 @@
         color: #0072d8;
 
         &:hover {
-          background: #0072d8;
+          background: $brand-blue;
           border-color: #0072d8;
           color: white;
         }
@@ -157,7 +157,6 @@
           transition: transform 0.2s ease, box-shadow 0.2s ease;
 
           &:hover {
-            transform: translateY(-2px);
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
           }
 
@@ -266,7 +265,7 @@
           }
 
           .p-badge {
-            background: #0072d8;
+            background: $brand-blue;
             font-size: 0.75rem;
             padding: 0.25rem 0.5rem;
           }

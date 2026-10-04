@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .remittance-approval {
   padding: 1rem;
 
@@ -45,7 +46,7 @@
             }
 
             &.blue {
-              background: #2196f3;
+              background: $brand-blue;
             }
 
             &.red {

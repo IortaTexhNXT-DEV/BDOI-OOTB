@@ -130,14 +130,15 @@
           gap: 16px;
 
           .card-icon {
-            font-size: 32px;
+            font-size: 1.25rem;
+            color: var(--color-text-muted);
 
             &.blue {
               color: $primary-blue;
             }
 
             &.orange {
-              color: #F59E0B;
+              color: $color-warning;
             }
 
             &.green {
@@ -172,7 +173,6 @@
           transition: transform 0.2s;
 
           &:hover {
-            transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.12);
           }
         }
@@ -205,11 +205,11 @@
               font-size: 14px;
 
               &.p-button-warning {
-                background: #F59E0B;
-                border-color: #F59E0B;
+                background: $color-warning;
+                border-color: $color-warning;
 
                 &:hover:enabled {
-                  background: darken(#F59E0B, 10%);
+                  background: $color-warning;
                 }
               }
 
@@ -375,7 +375,7 @@
                         }
 
                         &.orange {
-                          background: #F59E0B;
+                          background: $color-warning;
                         }
 
                         &.red {
@@ -700,7 +700,8 @@
               text-align: center;
 
               .pi {
-                font-size: 48px;
+                font-size: 1.25rem;
+                color: var(--color-text-muted);
                 margin-bottom: 16px;
                 opacity: 0.5;
               }

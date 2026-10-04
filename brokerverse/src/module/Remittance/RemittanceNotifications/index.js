@@ -157,7 +157,7 @@ const RemittanceNotifications = () => {
           label={(rowData.sender || "?").charAt(0)}
           className="mr-2"
           size="small"
-          style={{ backgroundColor: '#007bff', color: 'white' }}
+          style={{ backgroundColor: 'var(--bv-primary-050)', color: 'var(--bv-secondary)' }}
         />
         <span>{rowData.sender}</span>
       </div>

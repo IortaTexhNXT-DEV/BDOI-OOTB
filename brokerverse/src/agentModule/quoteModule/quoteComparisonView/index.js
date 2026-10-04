@@ -90,7 +90,7 @@ const QuoteDetailView = () => {
         <div className="header_title">{t("agent.quoteComparison")}</div>
         <Card className="mt-4">
           <div className="error-container">
-            <i className="pi pi-exclamation-triangle" style={{ fontSize: '2rem', color: 'var(--color-warning)' }}></i>
+            <i className="pi pi-exclamation-triangle" style={{ fontSize: '1.25rem', color: 'var(--color-warning)' }}></i>
             <h3>{t("agent.unableToLoadComparison")}</h3>
             <p>{error}</p>
             <Button label={t("agent.goBack")} icon="pi pi-arrow-left" onClick={handleBack} />

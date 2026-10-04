@@ -19,6 +19,7 @@ import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
+import { Tag } from "primereact/tag";
 
 function Detailview() {
   const { t } = useTranslation();
@@ -176,15 +177,10 @@ function Detailview() {
   ];
   const statusBodyTemplate = (rowData) => {
     return (
-      <div
-        style={{
-          backgroundColor: rowData.status !== "Pending" ? "#E2F6EF" : "#FFE5B4",
-          color: rowData.status !== "Pending" ? "#29CE00" : "#FFA800",
-        }}
-        className="statuslable_container"
-      >
-        {rowData.status}
-      </div>
+      <Tag
+        value={rowData.status}
+        severity={rowData.status !== "Pending" ? "success" : "warning"}
+      />
     );
   };
 

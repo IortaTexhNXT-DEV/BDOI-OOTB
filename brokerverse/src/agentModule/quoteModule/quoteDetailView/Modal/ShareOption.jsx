@@ -521,21 +521,21 @@ const ShareOption = ({ modalVisible, setModalVisible, quotationData }) => {
             >
               <strong>Quote Summary:</strong>
               <div className="mt-2">
-                • Quote ID: {quotationData?.quotationNumber || "N/A"}
+                Quote ID: {quotationData?.quotationNumber || "N/A"}
                 {isFireLOB ? (
                   <>
-                    <br />• Product: {t("shareOption.productFireAndAlliedPerils")}
-                    <br />• {t("shareOption.locationLabel")}: {fireRiskDetails.locationAddress || "N/A"}
-                    <br />• {t("shareOption.buildingTypeLabel")}: {fireRiskDetails.buildingType || "N/A"}
-                    <br />• {t("shareOption.sumInsuredBuildingLabel")}: {formatCurrency(fireSumInsured.Building ?? 0)}
-                    <br />• Total Premium: {formatCurrency(premiumValue)}
+                    <br />Product: {t("shareOption.productFireAndAlliedPerils")}
+                    <br />{t("shareOption.locationLabel")}: {fireRiskDetails.locationAddress || "N/A"}
+                    <br />{t("shareOption.buildingTypeLabel")}: {fireRiskDetails.buildingType || "N/A"}
+                    <br />{t("shareOption.sumInsuredBuildingLabel")}: {formatCurrency(fireSumInsured.Building ?? 0)}
+                    <br />Total Premium: {formatCurrency(premiumValue)}
                   </>
                 ) : (
                   <>
-                    <br />• Insurance Company:{" "}
+                    <br />Insurance Company:{" "}
                     {quotationData?.participantDetails?.[0]?.insuranceCompanyName ||
                       "N/A"}
-                    <br />• Total Premium: {formatCurrency(premiumValue)}
+                    <br />Total Premium: {formatCurrency(premiumValue)}
                   </>
                 )}
                 {useSuggestedContent && (
