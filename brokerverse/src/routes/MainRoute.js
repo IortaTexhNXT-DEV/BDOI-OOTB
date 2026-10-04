@@ -286,6 +286,19 @@ import SodRules from "../module/AccessControl/SodRules";
 import AccessReviews from "../module/AccessControl/AccessReviews";
 import DataSubjectRequests from "../module/DataPrivacy/DataSubjectRequests";
 import ConsentRegister from "../module/DataPrivacy/ConsentRegister";
+// AML/CFT: Compliance menu and client onboarding before the first policy
+import AmlDashboard from "../module/Compliance/AmlDashboard";
+import ClientDueDiligence from "../module/Compliance/ClientDueDiligence";
+import ClientAmlProfile from "../module/Compliance/ClientAmlProfile";
+import EddReviews from "../module/Compliance/EddReviews";
+import KycRefresh from "../module/Compliance/KycRefresh";
+import ScreeningHits from "../module/Compliance/ScreeningHits";
+import ScreeningLists from "../module/Compliance/ScreeningLists";
+import TransactionAlerts from "../module/Compliance/TransactionAlerts";
+import AmlCases from "../module/Compliance/AmlCases";
+import AmlReports from "../module/Compliance/AmlReports";
+import AmlSettings from "../module/Compliance/AmlSettings";
+import ClientOnboarding from "../agentModule/quoteModule/clientOnboarding";
 import GoLiveDataLoad from "../module/GoLiveDataLoad";
 import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
@@ -1116,6 +1129,20 @@ const Maincomponent = () => {
           <Route path="/master/generals/usermanagement/access-reviews" element={<AccessReviews />} />
           <Route path="/master/data-privacy/requests" element={<DataSubjectRequests />} />
           <Route path="/master/data-privacy/consents" element={<ConsentRegister />} />
+          {/* AML/CFT: Compliance menu and client onboarding */}
+          <Route path="/compliance/aml/dashboard" element={<AmlDashboard />} />
+          <Route path="/compliance/aml/clients" element={<ClientDueDiligence />} />
+          <Route path="/compliance/aml/clients/:id" element={<ClientAmlProfile />} />
+          <Route path="/compliance/aml/edd" element={<EddReviews />} />
+          <Route path="/compliance/aml/kyc-refresh" element={<KycRefresh />} />
+          <Route path="/compliance/aml/hits" element={<ScreeningHits />} />
+          <Route path="/compliance/aml/lists" element={<ScreeningLists />} />
+          <Route path="/compliance/aml/alerts" element={<TransactionAlerts />} />
+          <Route path="/compliance/aml/cases" element={<AmlCases />} />
+          <Route path="/compliance/aml/reports" element={<AmlReports />} />
+          <Route path="/compliance/aml/settings" element={<AmlSettings />} />
+          <Route path="/agent/client-onboarding" element={<ClientOnboarding />} />
+          <Route path="/agent/client-onboarding/:id" element={<ClientOnboarding />} />
           <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
           <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />

@@ -150,6 +150,8 @@ export const menuList = [
         path: "/agent/clientlisting",
         includes: [
           "/agent/clientlisting",
+          // client onboarding before the first policy (customer due diligence)
+          "/agent/client-onboarding",
           "/agent/clientedit",
           "/agent/clientview/",
           "/agent/policydetailedview",
@@ -784,6 +786,23 @@ export const menuList = [
           "/reinsurance/analytics/performance",
         ],
       },
+    ],
+  },
+  {
+    // AML/CFT programme of the broker (Compliance Officer role; read:aml, write:aml, approve:aml)
+    name: "Compliance",
+    icon: "pi pi-verified",
+    submenu: [
+      { id: 1, name: "AML Dashboard", path: "/compliance/aml/dashboard", includes: ["/compliance/aml/dashboard"] },
+      { id: 2, name: "Client Due Diligence", path: "/compliance/aml/clients", includes: ["/compliance/aml/clients"] },
+      { id: 3, name: "EDD Reviews", path: "/compliance/aml/edd", includes: ["/compliance/aml/edd"] },
+      { id: 4, name: "KYC Refresh", path: "/compliance/aml/kyc-refresh", includes: ["/compliance/aml/kyc-refresh"] },
+      { id: 5, name: "Screening Hits", path: "/compliance/aml/hits", includes: ["/compliance/aml/hits"] },
+      { id: 6, name: "Screening Lists", path: "/compliance/aml/lists", includes: ["/compliance/aml/lists"] },
+      { id: 7, name: "Transaction Alerts", path: "/compliance/aml/alerts", includes: ["/compliance/aml/alerts"] },
+      { id: 8, name: "AML Cases", path: "/compliance/aml/cases", includes: ["/compliance/aml/cases"] },
+      { id: 9, name: "AMLC Reports", path: "/compliance/aml/reports", includes: ["/compliance/aml/reports"] },
+      { id: 10, name: "AML Settings", path: "/compliance/aml/settings", includes: ["/compliance/aml/settings"] },
     ],
   },
   {

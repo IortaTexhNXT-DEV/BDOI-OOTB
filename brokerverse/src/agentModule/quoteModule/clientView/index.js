@@ -30,6 +30,8 @@ const ClientView = ({ action }) => {
           <label className="leadlisting__overal__container__title">
             {clientCode ? `${t("clients.client", { defaultValue: "Client" })} ${clientCode}` : t("clients.title")}
           </label>
+          {/* identification and due diligence of the client (onboarding screen) */}
+          <Button icon="pi pi-id-card" outlined className="ml-auto" label={t("onboarding.identification")} onClick={() => navigate(`/agent/client-onboarding/${clientId}`)} />
         </div>
       </div>
       <div>

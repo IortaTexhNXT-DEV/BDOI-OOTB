@@ -85,6 +85,16 @@ export const roleMenuPermissions = {
     reports: ["All Reports", "Operational Reports"],
     // data subject requests and the consent register (read:privacy / write:privacy)
     master: ["Data Privacy"],
+    // prepares the EDD reviews of High-risk clients (approval: compliance officer, approve:aml)
+    compliance: ["EDD Reviews"],
+  },
+  // Compliance Officer (AML/CFT): the Compliance menu (read:aml, write:aml, approve:aml), client onboarding and the client,
+  // policy and claim records it reviews
+  "compliance-officer": {
+    home: true,
+    compliance: true,
+    operations: ["Clients", "Policy", "Claims"],
+    reports: ["All Reports", "Operational Reports"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],

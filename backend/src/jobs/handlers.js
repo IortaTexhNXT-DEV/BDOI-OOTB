@@ -95,6 +95,8 @@ export const myWorkReminders = async () => {
   if (!(await pool.query("SELECT to_regclass('work_tasks') IS NOT NULL AS ok")).rows[0].ok) return { skipped: 'my work not migrated' };
   return (await import('../modules/my-work/tasks.js')).runReminders();
 };
+// AML/CFT (migration 0263): transaction monitoring (daily), KYC refresh due (weekly), screening provider retry (disabled by default)
+export { amlTransactionMonitoring, amlKycRefreshDue, amlProviderRetry } from '../modules/aml/jobs.js';
 
 // Housekeeping: purge operational rows past the retention periods in System Settings, Housekeeping tab (daily)
 export { housekeeping } from './housekeeping.js';

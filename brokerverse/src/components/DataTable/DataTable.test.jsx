@@ -1,3 +1,5 @@
+// The skeleton rows have no role or text of their own: the layout is checked through the rendered markup.
+/* eslint-disable testing-library/no-container, testing-library/no-node-access */
 import React from "react";
 import { act, render, screen } from "@testing-library/react";
 import { DataTable } from "primereact/datatable";

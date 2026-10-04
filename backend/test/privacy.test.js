@@ -222,15 +222,17 @@ describe('anonymisation', () => {
 
   it('refuses within the retention period (privacy.retention_years) and allows once it is over', async () => {
     const dry = await as('pv.ops', 'get', '/privacy/parties/client/cl_pvmid/anonymise/dry-run');
-    expect(dry.body.data.blockers.map((b) => b.code)).toEqual(['retention-period']);
+    // the AMLA records are kept 5 years (aml.record_retention_years) after the last policy expiry as well
+    expect(dry.body.data.blockers.map((b) => b.code)).toEqual(['aml-retention', 'retention-period']);
     expect(dry.body.data.retention).toMatchObject({ years: 10, lastPolicyExpiry: yearsAgo(3) });
-    await query('UPDATE app_settings SET value = \'2\' WHERE key = \'privacy.retention_years\'');
+    await query('UPDATE app_settings SET value = \'2\' WHERE key IN (\'privacy.retention_years\', \'aml.record_retention_years\')');
     clearSettingsCache();
     try {
       const again = await as('pv.ops', 'get', '/privacy/parties/client/cl_pvmid/anonymise/dry-run');
       expect(again.body.data.allowed).toBe(true);
     } finally {
       await query('UPDATE app_settings SET value = \'10\' WHERE key = \'privacy.retention_years\'');
+      await query('UPDATE app_settings SET value = \'5\' WHERE key = \'aml.record_retention_years\'');
       clearSettingsCache();
     }
   });

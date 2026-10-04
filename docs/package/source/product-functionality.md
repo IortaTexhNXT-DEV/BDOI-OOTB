@@ -581,6 +581,24 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Controls | Anonymisation refused while policies are in force, bills or claims are open, commission is unpaid, endorsements are open, or within `privacy.retention_years` (10 years) after the last policy expiry; every action in the audit trail |
 | Integrations | Excel export |
 
+## AML/CFT compliance
+
+**What it does.** Supports the broker's programme as a covered person under the AMLA (RA 9160 as amended): customer due diligence before the first policy, risk-based rating with enhanced due diligence, sanctions, PEP and negative list screening, covered and suspicious transaction monitoring, AML cases and the CTR and STR files for the AMLC.
+
+- Client onboarding before the first policy (Operations > Clients > Onboard client): individual or juridical, government ID, Philippine mobile number and TIN checked, PSGC address, authorised signatories with their board resolution or secretary's certificate, beneficial owners, KYC documents.
+- Customer risk rating Low, Normal or High from configurable factors (client type, nationality, PEP, line, payment mode, premium size, geography) at onboarding, at every policy issue and at the KYC refresh; compliance officer override; KYC refresh schedule per rating with the due list.
+- EDD reviews (EDD-) for High-risk clients, prepared and approved by a compliance officer other than the preparer; no policy to a High-risk client without one (setting).
+- Versioned screening lists (UN consolidated list XML, AMLC designations, PEP and internal lists in CSV or XLSX), fuzzy name matching with a score threshold, screening at onboarding, policy issue and payouts, rescreen after every list update, hits queue with clear, escalate and confirm; commercial provider adapter with sandbox mode and request log.
+- Transaction monitoring rules (covered cash above PHP 500,000 in one banking day, structuring, early cancellation, third-party payouts, overpayment refunds, payer differs) with alerts (AMA-), cases (AMC-) with due dates in working days, and CTR and STR files (AMR-, layout BV-AMLC-TXN 1.0).
+- AML dashboard; Compliance Officer role and Compliance menu.
+
+| Aspect | Detail |
+|---|---|
+| Philippine specifics | AMLA as amended, 2018 IRR, AMLC registration and reporting; thresholds and filing days are settings the compliance officer confirms |
+| Personas | Compliance Officer (`read:aml`, `write:aml`, `approve:aml`); Operations prepares EDD reviews; client roles onboard clients (`write:clients`) |
+| Controls | Policy issue and payouts stopped by an undecided or confirmed match; maker-checker on EDD approval; every decision with a reason in the audit trail; AML records kept `aml.record_retention_years` (5) years |
+| Integrations | List files (XML, CSV, XLSX); commercial screening provider API by configuration; report files filed by the broker in the AMLC portal |
+
 ## Administration, security and configuration
 
 **What it does.** Sets up the broker's organisation, reference data, users and rules, and keeps the record of who did what.
@@ -806,7 +824,7 @@ The table lists capabilities a Philippine non-life broker typically compares. Th
 | 58 | Bank payment file generation | No | Transfers recorded | | |
 | 59 | SMS notifications | No | E-mail and in-app | | |
 | 60 | IC-format regulatory reports | Partial | Figures from reports | | |
-| 61 | AML transaction monitoring and sanctions screening | No | KYC data held | | |
+| 61 | AML transaction monitoring and sanctions screening | Yes | Lists loaded by the broker; provider optional | | |
 | 62 | Filipino user interface | No | English | | |
 | 63 | Hosting on AWS, Azure, a Philippine partner or on-premise | Yes | | | |
 | 64 | Open API documentation | Yes | OpenAPI | | |

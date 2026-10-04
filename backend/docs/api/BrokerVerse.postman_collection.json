@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1035 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1095 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -4961,6 +4961,4399 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 2,\n      \"code\": \"CEB\",\n      \"name\": \"Cebu\",\n      \"psgcCode\": \"0702200000\",\n      \"level\": \"Province\",\n      \"regionId\": 7,\n      \"regionCode\": \"VII\",\n      \"regionName\": \"Region VII (Central Visayas)\"\n    }\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "AML Compliance",
+      "item": [
+        {
+          "name": "Transaction alerts (filter status, kind covered | suspicious, ruleCode, clientId, caseId, from, to, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/alerts?status=open&kind=covered",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "alerts"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "open"
+                },
+                {
+                  "key": "kind",
+                  "value": "covered"
+                }
+              ]
+            },
+            "description": "Transaction alerts (filter status, kind covered | suspicious, ruleCode, clientId, caseId, from, to, search)\n\nFront-end touchpoint: Compliance > Transaction Alerts\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/alerts?status=open&kind=covered",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "alerts"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "open"
+                    },
+                    {
+                      "key": "kind",
+                      "value": "covered"
+                    }
+                  ]
+                },
+                "description": "Transaction alerts (filter status, kind covered | suspicious, ruleCode, clientId, caseId, from, to, search)\n\nFront-end touchpoint: Compliance > Transaction Alerts\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"alertNumber\": \"AMA-2026-000001\",\n      \"ruleCode\": \"CT_CASH\",\n      \"amount\": 600000,\n      \"status\": \"open\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close a suspicious transaction alert after review (no report); reason required",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/alerts/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "alerts",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close a suspicious transaction alert after review (no report); reason required\n\nFront-end touchpoint: Compliance > Transaction Alerts\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Refund to the parent of the insured student, documented\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/alerts/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "alerts",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close a suspicious transaction alert after review (no report); reason required\n\nFront-end touchpoint: Compliance > Transaction Alerts\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Refund to the parent of the insured student, documented\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "AML cases (filter status, caseType, clientId, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases"
+              ]
+            },
+            "description": "AML cases (filter status, caseType, clientId, search)\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases"
+                  ]
+                },
+                "description": "AML cases (filter status, caseType, clientId, search)\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"caseNumber\": \"AMC-2026-00001\",\n      \"caseType\": \"STR\",\n      \"status\": \"open\",\n      \"dueOn\": \"2026-10-05\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Open a case (CTR, STR or review), optionally from alerts and hits",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases"
+              ]
+            },
+            "description": "Open a case (CTR, STR or review), optionally from alerts and hits\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"caseType\": \"STR\",\n  \"alertIds\": [\n    \"aal_1\"\n  ],\n  \"title\": \"Refund to third party after early cancellation\",\n  \"suspicionReasons\": [\n    \"no-underlying-legal-or-trade-obligation\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases"
+                  ]
+                },
+                "description": "Open a case (CTR, STR or review), optionally from alerts and hits\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"caseType\": \"STR\",\n  \"alertIds\": [\n    \"aal_1\"\n  ],\n  \"title\": \"Refund to third party after early cancellation\",\n  \"suspicionReasons\": [\n    \"no-underlying-legal-or-trade-obligation\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "One case with its alerts, hits and report files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One case with its alerts, hits and report files\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One case with its alerts, hits and report files\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"caseNumber\": \"AMC-2026-00001\",\n    \"alertList\": [],\n    \"hitList\": [],\n    \"reports\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a case: title, narrative, grounds of suspicion, date suspicion was established, assignee",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a case: title, narrative, grounds of suspicion, date suspicion was established, assignee\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"narrative\": \"On 2 October 2026 ...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a case: title, narrative, grounds of suspicion, date suspicion was established, assignee\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"narrative\": \"On 2 October 2026 ...\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add open alerts to a case",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases/:id/alerts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases",
+                ":id",
+                "alerts"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Add open alerts to a case\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"alertIds\": [\n    \"aal_2\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases/:id/alerts",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases",
+                    ":id",
+                    "alerts"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Add open alerts to a case\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"alertIds\": [\n    \"aal_2\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve the case for filing with the AMLC (compliance officer)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases/:id/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases",
+                ":id",
+                "approve"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve the case for filing with the AMLC (compliance officer)\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: approve:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases/:id/approve",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases",
+                    ":id",
+                    "approve"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve the case for filing with the AMLC (compliance officer)\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: approve:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Close a case without a report; reason required",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases/:id/close",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases",
+                ":id",
+                "close"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Close a case without a report; reason required\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: approve:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Transactions explained by documents on file\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases/:id/close",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases",
+                    ":id",
+                    "close"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Close a case without a report; reason required\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: approve:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Transactions explained by documents on file\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Generate the STR (or CTR) file of an approved case",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/cases/:id/report",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "cases",
+                ":id",
+                "report"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Generate the STR (or CTR) file of an approved case\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/cases/:id/report",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "cases",
+                    ":id",
+                    "report"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Generate the STR (or CTR) file of an approved case\n\nFront-end touchpoint: Compliance > AML Cases\n\nAccess: write:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reportNumber\": \"AMR-2026-00001\",\n    \"reportType\": \"STR\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Clients with their risk rating, KYC status and next KYC refresh (filter rating, kycStatus, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients?rating=high&kycStatus=edd-required&search=cruz",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients"
+              ],
+              "query": [
+                {
+                  "key": "rating",
+                  "value": "high"
+                },
+                {
+                  "key": "kycStatus",
+                  "value": "edd-required"
+                },
+                {
+                  "key": "search",
+                  "value": "cruz"
+                }
+              ]
+            },
+            "description": "Clients with their risk rating, KYC status and next KYC refresh (filter rating, kycStatus, search)\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients?rating=high&kycStatus=edd-required&search=cruz",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients"
+                  ],
+                  "query": [
+                    {
+                      "key": "rating",
+                      "value": "high"
+                    },
+                    {
+                      "key": "kycStatus",
+                      "value": "edd-required"
+                    },
+                    {
+                      "key": "search",
+                      "value": "cruz"
+                    }
+                  ]
+                },
+                "description": "Clients with their risk rating, KYC status and next KYC refresh (filter rating, kycStatus, search)\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"clientId\": \"cl_1\",\n      \"clientCode\": \"CL-2026-00001\",\n      \"riskRating\": \"high\",\n      \"kycStatus\": \"edd-required\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rate the client again from its current record and policies",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/assess",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "assess"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Rate the client again from its current record and policies\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: write:aml, write:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/assess",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "assess"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Rate the client again from its current record and policies\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: write:aml, write:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"rating\": \"normal\",\n    \"score\": 4,\n    \"factors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a beneficial owner of a juridical client (screened at once)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/beneficial-owners",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "beneficial-owners"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Add a beneficial owner of a juridical client (screened at once)\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jose Tan\",\n  \"ownershipPercent\": 40,\n  \"controlType\": \"ownership\",\n  \"nationality\": \"Filipino\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/beneficial-owners",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "beneficial-owners"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Add a beneficial owner of a juridical client (screened at once)\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Jose Tan\",\n  \"ownershipPercent\": 40,\n  \"controlType\": \"ownership\",\n  \"nationality\": \"Filipino\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change or remove a beneficial owner",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/beneficial-owners/:rowId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "beneficial-owners",
+                ":rowId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "rowId",
+                  "value": "",
+                  "description": "rowId (path parameter)"
+                }
+              ]
+            },
+            "description": "Change or remove a beneficial owner\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"removed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/beneficial-owners/:rowId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "beneficial-owners",
+                    ":rowId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "rowId",
+                      "value": "",
+                      "description": "rowId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change or remove a beneficial owner\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"removed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload a KYC document (multipart: file, docType, relatedType client | signatory | beneficial-owner | edd, relatedId, description, expiryDate)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/documents",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "documents"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Upload a KYC document (multipart: file, docType, relatedType client | signatory | beneficial-owner | edd, relatedId, description, expiryDate)\n\nFront-end touchpoint: Operations > Clients > Onboard client; Compliance > EDD Reviews\n\nAccess: write:aml, write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"<binary>\",\n  \"docType\": \"board-resolution\",\n  \"relatedType\": \"signatory\",\n  \"relatedId\": \"sig_1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/documents",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "documents"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Upload a KYC document (multipart: file, docType, relatedType client | signatory | beneficial-owner | edd, relatedId, description, expiryDate)\n\nFront-end touchpoint: Operations > Clients > Onboard client; Compliance > EDD Reviews\n\nAccess: write:aml, write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"<binary>\",\n  \"docType\": \"board-resolution\",\n  \"relatedType\": \"signatory\",\n  \"relatedId\": \"sig_1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 1,\n    \"docType\": \"board-resolution\",\n    \"fileName\": \"resolution.pdf\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record a completed KYC refresh: the client is rated again and the next refresh date set",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/kyc-refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "kyc-refresh"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record a completed KYC refresh: the client is rated again and the next refresh date set\n\nFront-end touchpoint: Compliance > KYC Refresh\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notes\": \"ID and address confirmed by e-mail\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/kyc-refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "kyc-refresh"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record a completed KYC refresh: the client is rated again and the next refresh date set\n\nFront-end touchpoint: Compliance > KYC Refresh\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"notes\": \"ID and address confirmed by e-mail\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Compliance officer sets the risk rating (holds until the next KYC refresh)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/override",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "override"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Compliance officer sets the risk rating (holds until the next KYC refresh)\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: approve:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"rating\": \"high\",\n  \"reason\": \"Adverse media on the beneficial owner\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/override",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "override"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Compliance officer sets the risk rating (holds until the next KYC refresh)\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: approve:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rating\": \"high\",\n  \"reason\": \"Adverse media on the beneficial owner\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "AML profile of a client: identification gaps, signatories, beneficial owners, documents, rating history, screenings, hits, EDD reviews",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "profile"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "AML profile of a client: identification gaps, signatories, beneficial owners, documents, rating history, screenings, hits, EDD reviews\n\nFront-end touchpoint: Operations > Clients > Onboard client; Compliance > Client Due Diligence\n\nAccess: read:aml, read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/profile",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "profile"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "AML profile of a client: identification gaps, signatories, beneficial owners, documents, rating history, screenings, hits, EDD reviews\n\nFront-end touchpoint: Operations > Clients > Onboard client; Compliance > Client Due Diligence\n\nAccess: read:aml, read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"client\": {\n      \"kycStatus\": \"complete\",\n      \"riskRating\": \"normal\"\n    },\n    \"signatories\": [],\n    \"beneficialOwners\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Screen the client, its beneficial owners and signatories now",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/screen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "screen"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Screen the client, its beneficial owners and signatories now\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: write:aml, write:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/screen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "screen"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Screen the client, its beneficial owners and signatories now\n\nFront-end touchpoint: Compliance > Client Due Diligence\n\nAccess: write:aml, write:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"screenings\": 2,\n    \"hits\": 0,\n    \"openHits\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a signatory of a juridical client (screened at once)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/signatories",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "signatories"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Add a signatory of a juridical client (screened at once)\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Maria Reyes\",\n  \"position\": \"Treasurer\",\n  \"authorityDocument\": \"secretary-certificate\",\n  \"authorityDate\": \"2026-09-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/signatories",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "signatories"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Add a signatory of a juridical client (screened at once)\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Maria Reyes\",\n  \"position\": \"Treasurer\",\n  \"authorityDocument\": \"secretary-certificate\",\n  \"authorityDate\": \"2026-09-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change or revoke a signatory",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/clients/:id/signatories/:rowId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "clients",
+                ":id",
+                "signatories",
+                ":rowId"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "rowId",
+                  "value": "",
+                  "description": "rowId (path parameter)"
+                }
+              ]
+            },
+            "description": "Change or revoke a signatory\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"revoked\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/clients/:id/signatories/:rowId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "clients",
+                    ":id",
+                    "signatories",
+                    ":rowId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "rowId",
+                      "value": "",
+                      "description": "rowId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change or revoke a signatory\n\nFront-end touchpoint: Operations > Clients > Onboard client (juridical)\n\nAccess: write:aml, write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"status\": \"revoked\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "AML dashboard counts: clients by risk rating and KYC status, open hits, EDD reviews, KYC refreshes due, alerts, cases due, reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/dashboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "dashboard"
+              ]
+            },
+            "description": "AML dashboard counts: clients by risk rating and KYC status, open hits, EDD reviews, KYC refreshes due, alerts, cases due, reports\n\nFront-end touchpoint: Compliance > AML Dashboard\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/dashboard",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "dashboard"
+                  ]
+                },
+                "description": "AML dashboard counts: clients by risk rating and KYC status, open hits, EDD reviews, KYC refreshes due, alerts, cases due, reports\n\nFront-end touchpoint: Compliance > AML Dashboard\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"ratings\": {\n      \"low\": 10,\n      \"normal\": 4,\n      \"high\": 1,\n      \"unrated\": 3\n    },\n    \"openHits\": 2,\n    \"eddOpen\": 1,\n    \"eddSubmitted\": 0,\n    \"refreshDue\": 3,\n    \"alertsOpen\": 5,\n    \"casesOpen\": 1,\n    \"casesOverdue\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "EDD reviews (filter status, clientId, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/edd-reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "edd-reviews"
+              ]
+            },
+            "description": "EDD reviews (filter status, clientId, search)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: read:aml, read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/edd-reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "edd-reviews"
+                  ]
+                },
+                "description": "EDD reviews (filter status, clientId, search)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: read:aml, read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"edd_1\",\n      \"reviewNumber\": \"EDD-2026-00001\",\n      \"status\": \"submitted\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Open an EDD review for a client (opened automatically when a client is rated High)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/edd-reviews",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "edd-reviews"
+              ]
+            },
+            "description": "Open an EDD review for a client (opened automatically when a client is rated High)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientId\": \"cl_1\",\n  \"reason\": \"Large single premium paid in cash\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/edd-reviews",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "edd-reviews"
+                  ]
+                },
+                "description": "Open an EDD review for a client (opened automatically when a client is rated High)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientId\": \"cl_1\",\n  \"reason\": \"Large single premium paid in cash\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "One EDD review with its documents",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/edd-reviews/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "edd-reviews",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One EDD review with its documents\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: read:aml, read:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/edd-reviews/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "edd-reviews",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One EDD review with its documents\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: read:aml, read:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"edd_1\",\n    \"documents\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Record the EDD findings (source of wealth and funds, purpose, findings, senior management approval)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/edd-reviews/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "edd-reviews",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the EDD findings (source of wealth and funds, purpose, findings, senior management approval)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml, write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sourceOfWealth\": \"Family business (rice trading)\",\n  \"sourceOfFunds\": \"Business income\",\n  \"purpose\": \"Fleet insurance\",\n  \"findings\": \"Documents seen\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/edd-reviews/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "edd-reviews",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the EDD findings (source of wealth and funds, purpose, findings, senior management approval)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml, write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"sourceOfWealth\": \"Family business (rice trading)\",\n  \"sourceOfFunds\": \"Business income\",\n  \"purpose\": \"Fleet insurance\",\n  \"findings\": \"Documents seen\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve or reject an EDD review (compliance officer, not the preparer)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/edd-reviews/:id/decide",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "edd-reviews",
+                ":id",
+                "decide"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Approve or reject an EDD review (compliance officer, not the preparer)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: approve:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"approve\",\n  \"notes\": \"Source of funds documented\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/edd-reviews/:id/decide",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "edd-reviews",
+                    ":id",
+                    "decide"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Approve or reject an EDD review (compliance officer, not the preparer)\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: approve:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"approve\",\n  \"notes\": \"Source of funds documented\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Submit the EDD review to the compliance officer",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/edd-reviews/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "edd-reviews",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Submit the EDD review to the compliance officer\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml, write:clients"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/edd-reviews/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "edd-reviews",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Submit the EDD review to the compliance officer\n\nFront-end touchpoint: Compliance > EDD Reviews\n\nAccess: write:aml, write:clients"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Screening hits queue (filter status open | escalated | cleared | confirmed, clientId, listCode, search)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/hits?status=open",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "hits"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "open"
+                }
+              ]
+            },
+            "description": "Screening hits queue (filter status open | escalated | cleared | confirmed, clientId, listCode, search)\n\nFront-end touchpoint: Compliance > Screening Hits\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/hits?status=open",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "hits"
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "open"
+                    }
+                  ]
+                },
+                "description": "Screening hits queue (filter status open | escalated | cleared | confirmed, clientId, listCode, search)\n\nFront-end touchpoint: Compliance > Screening Hits\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"partyName\": \"Juan Dela Cruz\",\n      \"matchedName\": \"JUAN DELA CRUZ\",\n      \"listCode\": \"PEP\",\n      \"score\": 1,\n      \"status\": \"open\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Decide a hit: clear (false positive), escalate (to a case) or confirm (true match: client blocked and rated High); reason required",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/hits/:id/decide",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "hits",
+                ":id",
+                "decide"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Decide a hit: clear (false positive), escalate (to a case) or confirm (true match: client blocked and rated High); reason required\n\nFront-end touchpoint: Compliance > Screening Hits\n\nAccess: approve:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"decision\": \"clear\",\n  \"reason\": \"Different date of birth and nationality\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/hits/:id/decide",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "hits",
+                    ":id",
+                    "decide"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Decide a hit: clear (false positive), escalate (to a case) or confirm (true match: client blocked and rated High); reason required\n\nFront-end touchpoint: Compliance > Screening Hits\n\nAccess: approve:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"decision\": \"clear\",\n  \"reason\": \"Different date of birth and nationality\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Clients due for KYC refresh (within aml.kyc_refresh_notice_days, or overdue); filter rating, overdue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/kyc-refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "kyc-refresh"
+              ]
+            },
+            "description": "Clients due for KYC refresh (within aml.kyc_refresh_notice_days, or overdue); filter rating, overdue\n\nFront-end touchpoint: Compliance > KYC Refresh\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/kyc-refresh",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "kyc-refresh"
+                  ]
+                },
+                "description": "Clients due for KYC refresh (within aml.kyc_refresh_notice_days, or overdue); filter rating, overdue\n\nFront-end touchpoint: Compliance > KYC Refresh\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"clientId\": \"cl_1\",\n      \"riskRating\": \"high\",\n      \"nextReviewOn\": \"2026-10-15\",\n      \"overdue\": false\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Screening lists with their current version",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists"
+              ]
+            },
+            "description": "Screening lists with their current version\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists"
+                  ]
+                },
+                "description": "Screening lists with their current version\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"UNSC\",\n      \"name\": \"UN Security Council Consolidated List\",\n      \"versionNo\": 3,\n      \"entries\": 1000\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a screening list",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists"
+              ]
+            },
+            "description": "Add a screening list\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"OFAC\",\n  \"name\": \"OFAC SDN list\",\n  \"listType\": \"sanctions\",\n  \"source\": \"US Treasury\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists"
+                  ]
+                },
+                "description": "Add a screening list\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"OFAC\",\n  \"name\": \"OFAC SDN list\",\n  \"listType\": \"sanctions\",\n  \"source\": \"US Treasury\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rename a list or switch it on or off",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Rename a list or switch it on or off\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Rename a list or switch it on or off\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"active\": false\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Entries of the current (or a given) version of a list; search by name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists/:id/entries?search=kim&versionId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists",
+                ":id",
+                "entries"
+              ],
+              "query": [
+                {
+                  "key": "search",
+                  "value": "kim"
+                },
+                {
+                  "key": "versionId",
+                  "value": "1"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Entries of the current (or a given) version of a list; search by name\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists/:id/entries?search=kim&versionId=1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists",
+                    ":id",
+                    "entries"
+                  ],
+                  "query": [
+                    {
+                      "key": "search",
+                      "value": "kim"
+                    },
+                    {
+                      "key": "versionId",
+                      "value": "1"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Entries of the current (or a given) version of a list; search by name\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"fullName\": \"Name\",\n      \"aliases\": []\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add an entry on screen (internal negative list): a new version, then a rescreen",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists/:id/entries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists",
+                ":id",
+                "entries"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Add an entry on screen (internal negative list): a new version, then a rescreen\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Juan Example\",\n  \"reason\": \"Fraudulent claim 2025\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists/:id/entries",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists",
+                    ":id",
+                    "entries"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Add an entry on screen (internal negative list): a new version, then a rescreen\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"fullName\": \"Juan Example\",\n  \"reason\": \"Fraudulent claim 2025\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remove an entry on screen (a new version without it); reason required",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists/:id/entries/:entryId?reason=Entered in error",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists",
+                ":id",
+                "entries",
+                ":entryId"
+              ],
+              "query": [
+                {
+                  "key": "reason",
+                  "value": "Entered in error"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                },
+                {
+                  "key": "entryId",
+                  "value": "",
+                  "description": "entryId (path parameter)"
+                }
+              ]
+            },
+            "description": "Remove an entry on screen (a new version without it); reason required\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists/:id/entries/:entryId?reason=Entered in error",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists",
+                    ":id",
+                    "entries",
+                    ":entryId"
+                  ],
+                  "query": [
+                    {
+                      "key": "reason",
+                      "value": "Entered in error"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    },
+                    {
+                      "key": "entryId",
+                      "value": "",
+                      "description": "entryId (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remove an entry on screen (a new version without it); reason required\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Versions of a list with the rescreen result of each",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists/:id/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists",
+                ":id",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Versions of a list with the rescreen result of each\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists/:id/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists",
+                    ":id",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Versions of a list with the rescreen result of each\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"versionNo\": 1,\n      \"entries\": 1000,\n      \"current\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Upload a new version of a list (multipart: file XML / CSV / XLSX, publicationDate, notes, rescreen true | false); rescreens every party",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/lists/:id/versions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "lists",
+                ":id",
+                "versions"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Upload a new version of a list (multipart: file XML / CSV / XLSX, publicationDate, notes, rescreen true | false); rescreens every party\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"file\": \"<binary>\",\n  \"publicationDate\": \"2026-10-01\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/lists/:id/versions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "lists",
+                    ":id",
+                    "versions"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Upload a new version of a list (multipart: file XML / CSV / XLSX, publicationDate, notes, rescreen true | false); rescreens every party\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"file\": \"<binary>\",\n  \"publicationDate\": \"2026-10-01\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"version\": {\n      \"versionNo\": 2,\n      \"entries\": 1000\n    },\n    \"rescreen\": {\n      \"clients\": 120,\n      \"newOpenHits\": 1\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the covered and suspicious transaction rules over a date range (default the last 3 days)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/monitoring/run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "monitoring",
+                "run"
+              ]
+            },
+            "description": "Run the covered and suspicious transaction rules over a date range (default the last 3 days)\n\nFront-end touchpoint: Compliance > Transaction Alerts\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"2026-09-01\",\n  \"to\": \"2026-09-30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/monitoring/run",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "monitoring",
+                    "run"
+                  ]
+                },
+                "description": "Run the covered and suspicious transaction rules over a date range (default the last 3 days)\n\nFront-end touchpoint: Compliance > Transaction Alerts\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"2026-09-01\",\n  \"to\": \"2026-09-30\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"from\": \"2026-09-01\",\n    \"to\": \"2026-09-30\",\n    \"added\": {\n      \"CT_CASH\": 1\n    },\n    \"total\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Screening provider configuration (no secret: the API key stays in the environment) and outbox counts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/provider",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "provider"
+              ]
+            },
+            "description": "Screening provider configuration (no secret: the API key stays in the environment) and outbox counts\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/provider",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "provider"
+                  ]
+                },
+                "description": "Screening provider configuration (no secret: the API key stays in the environment) and outbox counts\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"provider\": \"lists\",\n    \"mode\": \"sandbox\",\n    \"apiKeyEnv\": \"AML_SCREENING_API_KEY\",\n    \"apiKeySet\": false,\n    \"outbox\": {\n      \"failed\": 0\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Outbox of the requests to the screening provider (filter status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/provider/requests",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "provider",
+                "requests"
+              ]
+            },
+            "description": "Outbox of the requests to the screening provider (filter status)\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/provider/requests",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "provider",
+                    "requests"
+                  ]
+                },
+                "description": "Outbox of the requests to the screening provider (filter status)\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"provider\": \"http\",\n      \"status\": \"failed\",\n      \"attempts\": 2\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send a failed or abandoned provider request again",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/provider/requests/:id/retry",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "provider",
+                "requests",
+                ":id",
+                "retry"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Send a failed or abandoned provider request again\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: write:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/provider/requests/:id/retry",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "provider",
+                    "requests",
+                    ":id",
+                    "retry"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Send a failed or abandoned provider request again\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: write:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Send a test name to the configured provider (sandbox check of the connection)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/provider/test",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "provider",
+                "test"
+              ]
+            },
+            "description": "Send a test name to the configured provider (sandbox check of the connection)\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"TEST NAME\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/provider/test",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "provider",
+                    "test"
+                  ]
+                },
+                "description": "Send a test name to the configured provider (sandbox check of the connection)\n\nFront-end touchpoint: Compliance > Screening Lists > Provider\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"TEST NAME\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"ok\": true,\n    \"matches\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "AMLC report files (filter reportType CTR | STR, status)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/reports",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "reports"
+              ]
+            },
+            "description": "AMLC report files (filter reportType CTR | STR, status)\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/reports",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "reports"
+                  ]
+                },
+                "description": "AMLC report files (filter reportType CTR | STR, status)\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"reportNumber\": \"AMR-2026-00001\",\n      \"reportType\": \"CTR\",\n      \"transactions\": 3,\n      \"status\": \"generated\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download the report file (text, AMLC reporting layout, format version in the header)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/reports/:id/download",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "reports",
+                ":id",
+                "download"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Download the report file (text, AMLC reporting layout, format version in the header)\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/reports/:id/download",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "reports",
+                    ":id",
+                    "download"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Download the report file (text, AMLC reporting layout, format version in the header)\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "H|...|CTR|AMR-2026-00001|..."
+            }
+          ]
+        },
+        {
+          "name": "Record the filing in the AMLC portal: date, AMLC reference, status submitted | acknowledged | rejected",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/reports/:id/submit",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "reports",
+                ":id",
+                "submit"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Record the filing in the AMLC portal: date, AMLC reference, status submitted | acknowledged | rejected\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: approve:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"submittedOn\": \"2026-10-05\",\n  \"amlcReference\": \"ACK-123456\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/reports/:id/submit",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "reports",
+                    ":id",
+                    "submit"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Record the filing in the AMLC portal: date, AMLC reference, status submitted | acknowledged | rejected\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: approve:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"submittedOn\": \"2026-10-05\",\n  \"amlcReference\": \"ACK-123456\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Generate the CTR file of the covered transactions of a period not yet reported",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/reports/ctr",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "reports",
+                "ctr"
+              ]
+            },
+            "description": "Generate the CTR file of the covered transactions of a period not yet reported\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"from\": \"2026-09-01\",\n  \"to\": \"2026-09-30\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/reports/ctr",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "reports",
+                    "ctr"
+                  ]
+                },
+                "description": "Generate the CTR file of the covered transactions of a period not yet reported\n\nFront-end touchpoint: Compliance > AMLC Reports\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"from\": \"2026-09-01\",\n  \"to\": \"2026-09-30\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Rescreen every client, beneficial owner and signatory against the current lists",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/rescreen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "rescreen"
+              ]
+            },
+            "description": "Rescreen every client, beneficial owner and signatory against the current lists\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/rescreen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "rescreen"
+                  ]
+                },
+                "description": "Rescreen every client, beneficial owner and signatory against the current lists\n\nFront-end touchpoint: Compliance > Screening Lists\n\nAccess: write:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"clients\": 120,\n    \"parties\": 140,\n    \"hits\": 2,\n    \"newOpenHits\": 1\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Risk factors of the customer risk rating",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/risk-factors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "risk-factors"
+              ]
+            },
+            "description": "Risk factors of the customer risk rating\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/risk-factors",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "risk-factors"
+                  ]
+                },
+                "description": "Risk factors of the customer risk rating\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"factor\": \"payment-mode\",\n      \"matchValue\": \"cash\",\n      \"score\": 3\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Add a risk factor value and its score",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/risk-factors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "risk-factors"
+              ]
+            },
+            "description": "Add a risk factor value and its score\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"factor\": \"geography\",\n  \"matchValue\": \"Sulu\",\n  \"score\": 3,\n  \"description\": \"Province rated higher by the AML programme\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/risk-factors",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "risk-factors"
+                  ]
+                },
+                "description": "Add a risk factor value and its score\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"factor\": \"geography\",\n  \"matchValue\": \"Sulu\",\n  \"score\": 3,\n  \"description\": \"Province rated higher by the AML programme\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a risk factor",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/risk-factors/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "risk-factors",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a risk factor\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"factor\": \"payment-mode\",\n  \"matchValue\": \"cash\",\n  \"score\": 4\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/risk-factors/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "risk-factors",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a risk factor\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"factor\": \"payment-mode\",\n  \"matchValue\": \"cash\",\n  \"score\": 4\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Remove a risk factor",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/risk-factors/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "risk-factors",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Remove a risk factor\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/risk-factors/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "risk-factors",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Remove a risk factor\n\nFront-end touchpoint: Compliance > AML Settings > Risk factors\n\nAccess: write:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Covered and suspicious transaction rules",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/rules",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "rules"
+              ]
+            },
+            "description": "Covered and suspicious transaction rules\n\nFront-end touchpoint: Compliance > AML Settings > Monitoring rules\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/rules",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "rules"
+                  ]
+                },
+                "description": "Covered and suspicious transaction rules\n\nFront-end touchpoint: Compliance > AML Settings > Monitoring rules\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"code\": \"CT_CASH\",\n      \"kind\": \"covered\",\n      \"enabled\": true,\n      \"params\": {}\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Switch a monitoring rule on or off, change its parameters or severity",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/rules/:code",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "rules",
+                ":code"
+              ],
+              "variable": [
+                {
+                  "key": "code",
+                  "value": "",
+                  "description": "code (path parameter)"
+                }
+              ]
+            },
+            "description": "Switch a monitoring rule on or off, change its parameters or severity\n\nFront-end touchpoint: Compliance > AML Settings > Monitoring rules\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"enabled\": true,\n  \"params\": {\n    \"days\": 7,\n    \"minCount\": 3,\n    \"minTotal\": 400000\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/rules/:code",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "rules",
+                    ":code"
+                  ],
+                  "variable": [
+                    {
+                      "key": "code",
+                      "value": "",
+                      "description": "code (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Switch a monitoring rule on or off, change its parameters or severity\n\nFront-end touchpoint: Compliance > AML Settings > Monitoring rules\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"enabled\": true,\n  \"params\": {\n    \"days\": 7,\n    \"minCount\": 3,\n    \"minTotal\": 400000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Screen a name that is not a client yet (prospect, payee); recorded as a manual screening",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/screen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "screen"
+              ]
+            },
+            "description": "Screen a name that is not a client yet (prospect, payee); recorded as a manual screening\n\nFront-end touchpoint: Compliance > Screening Hits\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Juan Dela Cruz\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/screen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "screen"
+                  ]
+                },
+                "description": "Screen a name that is not a client yet (prospect, payee); recorded as a manual screening\n\nFront-end touchpoint: Compliance > Screening Hits\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Juan Dela Cruz\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"status\": \"clear\",\n    \"hits\": 0\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "AML settings (aml.*) with labels and current values",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/aml/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "settings"
+              ]
+            },
+            "description": "AML settings (aml.*) with labels and current values\n\nFront-end touchpoint: Compliance > AML Settings\n\nAccess: read:aml"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "settings"
+                  ]
+                },
+                "description": "AML settings (aml.*) with labels and current values\n\nFront-end touchpoint: Compliance > AML Settings\n\nAccess: read:aml"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"key\": \"aml.covered_threshold\",\n      \"value\": 500000,\n      \"label\": \"Covered transaction ...\",\n      \"type\": \"number\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change AML settings (thresholds, risk rating limits, refresh months, retention, screening provider by environment variable name)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/aml/settings",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "aml",
+                "settings"
+              ]
+            },
+            "description": "Change AML settings (thresholds, risk rating limits, refresh months, retention, screening provider by environment variable name)\n\nFront-end touchpoint: Compliance > AML Settings\n\nAccess: write:aml",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"settings\": {\n    \"aml.covered_threshold\": 500000\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/aml/settings",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "aml",
+                    "settings"
+                  ]
+                },
+                "description": "Change AML settings (thresholds, risk rating limits, refresh months, retention, screening provider by environment variable name)\n\nFront-end touchpoint: Compliance > AML Settings\n\nAccess: write:aml",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"settings\": {\n    \"aml.covered_threshold\": 500000\n  }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true\n}"
             }
           ]
         }
@@ -15558,6 +19951,99 @@
           ]
         },
         {
+          "name": "Update the identification of a client (onboarding screen); the client is rated again and, when the name changed, screened",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/:id/kyc",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                ":id",
+                "kyc"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Update the identification of a client (onboarding screen); the client is rated again and, when the name changed, screened\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"occupation\": \"Business owner\",\n  \"expectedAnnualPremium\": 250000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clients/:id/kyc",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clients",
+                    ":id",
+                    "kyc"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Update the identification of a client (onboarding screen); the client is rated again and, when the name changed, screened\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"occupation\": \"Business owner\",\n  \"expectedAnnualPremium\": 250000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"client\": {\n      \"clientId\": \"cl_1\",\n      \"generatedClientId\": \"CL-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"leadCategory\": \"Retail\",\n      \"policies\": [\n        {\n          \"policyId\": \"pol_1\",\n          \"policyNumber\": \"POL-2026-00001\",\n          \"status\": \"Active\"\n        }\n      ]\n    },\n    \"assessment\": {\n      \"rating\": \"normal\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Convert a lead into a client (returns the existing client when already converted)",
           "request": {
             "method": "POST",
@@ -15647,6 +20133,83 @@
               ],
               "cookie": [],
               "body": "{\n  \"clientId\": \"cl_1\",\n  \"generatedClientId\": \"CL-2026-00001\",\n  \"firstName\": \"Juan\",\n  \"lastName\": \"Dela Cruz\",\n  \"emailId\": \"juan@example.com\",\n  \"contactNumber\": \"09171234567\",\n  \"leadCategory\": \"Retail\",\n  \"policies\": [\n    {\n      \"policyId\": \"pol_1\",\n      \"policyNumber\": \"POL-2026-00001\",\n      \"status\": \"Active\"\n    }\n  ],\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Onboard a client before its first policy (individual or juridical with signatories and beneficial owners); rated and screened at once",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/clients/onboard",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "clients",
+                "onboard"
+              ]
+            },
+            "description": "Onboard a client before its first policy (individual or juridical with signatories and beneficial owners); rated and screened at once\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: write:clients",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"clientType\": \"individual\",\n  \"firstName\": \"Juan\",\n  \"middleName\": \"Santos\",\n  \"lastName\": \"Dela Cruz\",\n  \"DOB\": \"1985-04-12\",\n  \"nationality\": \"Filipino\",\n  \"contactNumber\": \"09171234567\",\n  \"taxNumber\": \"123-456-789-000\",\n  \"idType\": \"PhilSys National ID (PhilID / ePhilID)\",\n  \"idNumber\": \"1234-5678-9012-3456\",\n  \"province\": \"Metro Manila\",\n  \"city\": \"Makati City\",\n  \"barangay\": \"Poblacion\",\n  \"occupation\": \"Engineer\",\n  \"sourceOfFunds\": \"Salary\",\n  \"expectedLines\": [\n    \"MOTOR\"\n  ],\n  \"expectedPaymentMode\": \"bank-transfer\",\n  \"expectedAnnualPremium\": 45000\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/clients/onboard",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "clients",
+                    "onboard"
+                  ]
+                },
+                "description": "Onboard a client before its first policy (individual or juridical with signatories and beneficial owners); rated and screened at once\n\nFront-end touchpoint: Operations > Clients > Onboard client\n\nAccess: write:clients",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"clientType\": \"individual\",\n  \"firstName\": \"Juan\",\n  \"middleName\": \"Santos\",\n  \"lastName\": \"Dela Cruz\",\n  \"DOB\": \"1985-04-12\",\n  \"nationality\": \"Filipino\",\n  \"contactNumber\": \"09171234567\",\n  \"taxNumber\": \"123-456-789-000\",\n  \"idType\": \"PhilSys National ID (PhilID / ePhilID)\",\n  \"idNumber\": \"1234-5678-9012-3456\",\n  \"province\": \"Metro Manila\",\n  \"city\": \"Makati City\",\n  \"barangay\": \"Poblacion\",\n  \"occupation\": \"Engineer\",\n  \"sourceOfFunds\": \"Salary\",\n  \"expectedLines\": [\n    \"MOTOR\"\n  ],\n  \"expectedPaymentMode\": \"bank-transfer\",\n  \"expectedAnnualPremium\": 45000\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"client\": {\n      \"clientId\": \"cl_1\",\n      \"generatedClientId\": \"CL-2026-00001\",\n      \"firstName\": \"Juan\",\n      \"lastName\": \"Dela Cruz\",\n      \"emailId\": \"juan@example.com\",\n      \"contactNumber\": \"09171234567\",\n      \"leadCategory\": \"Retail\",\n      \"policies\": [\n        {\n          \"policyId\": \"pol_1\",\n          \"policyNumber\": \"POL-2026-00001\",\n          \"status\": \"Active\"\n        }\n      ],\n      \"kycStatus\": \"complete\",\n      \"riskRating\": \"low\"\n    },\n    \"aml\": {\n      \"assessment\": {\n        \"rating\": \"low\",\n        \"score\": 0\n      },\n      \"screening\": {\n        \"hits\": 0\n      }\n    }\n  }\n}"
             }
           ]
         },
