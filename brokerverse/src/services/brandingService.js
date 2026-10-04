@@ -57,6 +57,12 @@ const brandingService = {
     form.append("applySystemName", String(applySystemName));
     return json(await fetch(`${BASE_URL}/branding/brand-pack?dryRun=${dryRun ? "true" : "false"}`, { method: "POST", headers: headers(), body: form }), "Import failed");
   },
+  // bundled brand packs (shipped with the product, enabled on the screen with the trademark acknowledgement)
+  bundledPacks: async () => json(await fetch(`${BASE_URL}/branding/packs/bundled`, { headers: headers() }), "Failed to load the bundled brand packs"),
+  checkBundledPack: async (id) => json(await fetch(`${BASE_URL}/branding/packs/bundled/${encodeURIComponent(id)}/check`, send("POST", {})), "Check failed"),
+  enableBundledPack: async (id, { acknowledgedPermission = false, applyDocumentLogo = true, applySystemName = true } = {}) =>
+    json(await fetch(`${BASE_URL}/branding/packs/bundled/${encodeURIComponent(id)}/enable`, send("POST", { acknowledgedPermission: acknowledgedPermission === true, applyDocumentLogo, applySystemName })), "Enable failed"),
+  resetDefaultBranding: async () => json(await fetch(`${BASE_URL}/branding/packs/reset-default`, send("POST", {})), "Reset failed"),
 
   // e-signatures
   consent: async (ownerType, ownerId) => json(await fetch(`${BASE_URL}/e-signatures/consent?ownerType=${ownerType}&ownerId=${encodeURIComponent(ownerId || "")}`, { headers: headers() }), "Failed to load the consent statement"),

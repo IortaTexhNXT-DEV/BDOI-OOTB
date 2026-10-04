@@ -1,0 +1,10 @@
+{
+  "id": "toyota-insurance-services",
+  "name": "Toyota Insurance Services",
+  "description": "Client brand pack for the Toyota Insurance Services (Philippines) engagement: white header and side bar, near-black text and buttons, light grey backgrounds, Toyota red as a small accent, Inter font, the Toyota Insurance Services logo on screens and printed documents.",
+  "trademarkOwner": "Toyota Motor Corporation and Toyota Insurance Services (Philippines)",
+  "requiresWrittenPermission": true,
+  "permissionNote": "The Toyota name, the Toyota emblem and the Toyota Insurance Services logo are trademarks of their owners. Enable this pack only in the environments of that engagement and only when the broker holds the owner's written permission to use these marks.",
+  "version": "1.0.0",
+  "pack": "theme.json"
+}

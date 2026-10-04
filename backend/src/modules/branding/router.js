@@ -1,7 +1,8 @@
 /**
  * Broker branding (Master > System Settings > Theme and Branding): the public branding payload (sign-in page and app
  * shell, with ETag), the branding images, the theme editor endpoints, a sample document and e-mail with an unsaved
- * theme, and brand pack export / import (onboarding a broker, promoting branding between environments).
+ * theme, brand pack export / import (onboarding a broker, promoting branding between environments) and the bundled
+ * brand packs shipped with the product (listed, checked, enabled with the trademark acknowledgement, back to default).
  */
 import { moduleRouter } from '../../lib/registry.js';
 import { audit } from '../../lib/audit.js';
@@ -13,6 +14,7 @@ import { createZip } from '../../lib/zip.js';
 import { canRead, canWrite, saveFile } from '../masters/helpers.js';
 import { sendPdf } from '../../lib/pdf/index.js';
 import * as svc from './service.js';
+import * as bundled from './bundled.js';
 import { samplePdf } from './sample.js';
 
 const { router, define } = moduleRouter('Branding', '/branding');
@@ -177,6 +179,58 @@ define({
       applySystemName: opt.applySystemName === undefined ? true : truthy(opt.applySystemName), storeImage });
     if (!result.dryRun) await audit(req, { entity: 'branding', entityId: 'brand-pack', action: 'import', before, after: { name: result.name, applied: result.applied, theme: result.theme } });
     ok(res, result, result.dryRun ? 'Brand pack checked (nothing applied)' : `Brand pack ${result.name} applied`);
+  },
+});
+
+// ---------- bundled brand packs ----------
+
+const bundledExample = { id: 'toyota-insurance-services', name: 'Toyota Insurance Services', description: 'Client brand pack ...', trademarkOwner: 'Toyota Motor Corporation and Toyota Insurance Services (Philippines)',
+  requiresWrittenPermission: true, permissionNote: 'The Toyota name ... trademarks of their owners', version: '1.0.0', systemName: 'Toyota Insurance Services', assets: ['logo', 'documentLogo'],
+  preview: { primary: '#1a1a1a', headerBg: '#ffffff', sidebarBg: '#ffffff', tableHeaderBg: '#eeeeee', buttonBg: '#1a1a1a', accent: '#eb0a1e' }, theme: themeExample, warnings: [], status: 'available', enablement: null };
+const enablementExample = { id: 1, packId: 'toyota-insurance-services', packName: 'Toyota Insurance Services', acknowledgedPermission: true, acknowledgementText: bundled.ACKNOWLEDGEMENT_TEXT,
+  applied: ['theme', 'logo', 'documentLogo', 'systemName'], status: 'enabled', enabledAt: '2026-10-04T08:00:00.000Z', enabledBy: 'admin', enabledByName: 'System Administrator' };
+const storeBundledImage = async (file, _category, userId, ref) => storeBrandImage(String(ref).endsWith('favicon') ? 'favicon' : String(ref).endsWith('loginPanel') ? 'login-panel' : 'logo', file, userId);
+const enableOptions = (body) => ({ applyDocumentLogo: body.applyDocumentLogo === undefined ? true : truthy(body.applyDocumentLogo), applySystemName: body.applySystemName === undefined ? true : truthy(body.applySystemName) });
+
+define({
+  method: 'GET', path: '/packs/bundled', summary: 'Brand packs shipped with the product (backend/assets/brand-packs): manifest (name, description, trademark owner, written permission required, version), the theme, a colour preview and the status in this environment (enabled, with who and when, or available). None is enabled by default',
+  screen: `${SCREEN} > Brand packs > Bundled packs`, middleware: canRead('settings'),
+  response: { success: true, data: { packs: [bundledExample], current: null, defaultName: 'iorta TechNXT (default)', defaultInForce: true, acknowledgementText: bundled.ACKNOWLEDGEMENT_TEXT, history: [enablementExample] } },
+  handler: async (_req, res) => ok(res, { ...(await bundled.listBundledPacks()), history: await bundled.enablementHistory() }),
+});
+define({
+  method: 'POST', path: '/packs/bundled/:id/check', summary: 'Check a bundled brand pack without applying it (dry run): the same checks as an import (theme rules, WCAG AA contrast, image types), the resolved theme and contrast warnings',
+  screen: `${SCREEN} > Brand packs > Bundled packs > Check`, middleware: canRead('settings'),
+  response: { success: true, data: { name: 'Toyota Insurance Services', dryRun: true, assets: ['logo', 'documentLogo'], warnings: [], theme: themeExample, pack: bundledExample } },
+  handler: async (req, res) => {
+    const pack = bundled.loadBundledPack(req.params.id);
+    for (const [role, file] of Object.entries(pack.manifest.assets || {})) if (file) svc.assertBrandImage(role === 'favicon' ? 'favicon' : role === 'loginPanel' ? 'login-panel' : 'logo', { buffer: pack.files.get(file), originalname: file });
+    ok(res, await bundled.enableBundledPack(req.params.id, { user: req.user, dryRun: true, storeImage: storeBundledImage }), 'Brand pack checked (nothing applied)');
+  },
+});
+define({
+  method: 'POST', path: '/packs/bundled/:id/enable', summary: 'Enable a bundled brand pack through the import logic. The body must carry acknowledgedPermission: true (the administrator confirms the broker holds the written permission of the owner of the marks); the enablement is recorded (who, when, acknowledgement) and audited. applyDocumentLogo=false keeps the print logo of Master > Company; applySystemName=false keeps the application name',
+  screen: `${SCREEN} > Brand packs > Bundled packs > Enable`, middleware: canWrite('settings'), request: { acknowledgedPermission: true, applyDocumentLogo: true, applySystemName: true },
+  response: { success: true, data: { name: 'Toyota Insurance Services', applied: ['theme', 'logo', 'documentLogo', 'systemName'], warnings: [], theme: themeExample, pack: bundledExample, enablement: enablementExample } },
+  handler: async (req, res) => {
+    const body = req.body || {};
+    const pack = bundled.loadBundledPack(req.params.id);
+    for (const [role, file] of Object.entries(pack.manifest.assets || {})) if (file) svc.assertBrandImage(role === 'favicon' ? 'favicon' : role === 'loginPanel' ? 'login-panel' : 'logo', { buffer: pack.files.get(file), originalname: file });
+    const before = await svc.currentTheme();
+    const result = await bundled.enableBundledPack(req.params.id, { user: req.user, acknowledgedPermission: body.acknowledgedPermission === true, ...enableOptions(body), storeImage: storeBundledImage });
+    await audit(req, { entity: 'branding', entityId: `bundled-pack:${pack.bundled.id}`, action: 'enable-pack', before,
+      after: { pack: pack.bundled.id, name: pack.bundled.name, version: pack.bundled.version, trademarkOwner: pack.bundled.trademarkOwner, acknowledgedPermission: true, acknowledgementText: bundled.ACKNOWLEDGEMENT_TEXT, applied: result.applied, theme: result.theme } });
+    ok(res, result, `Brand pack ${result.name} enabled`);
+  },
+});
+define({
+  method: 'POST', path: '/packs/reset-default', summary: 'Back to the iorta TechNXT default: default theme, default logo and favicon; when a bundled pack is enabled, also the application name and the print logo of the primary company as they were before it, and the enablement is closed (status reverted). Audited',
+  screen: `${SCREEN} > Brand packs > Back to default`, middleware: canWrite('settings'), response: { success: true, data: { theme: themeExample, restored: ['theme', 'logo', 'favicon', 'systemName', 'documentLogo'], enablement: enablementExample } },
+  handler: async (req, res) => {
+    const before = await svc.currentTheme();
+    const result = await bundled.resetToDefault({ user: req.user });
+    await audit(req, { entity: 'branding', entityId: result.enablement ? `bundled-pack:${result.enablement.packId}` : 'theme', action: 'reset-default', before, after: { restored: result.restored, theme: result.theme, enablementId: result.enablement?.id || null } });
+    ok(res, { ...result, ...(await editorPayload()) }, 'Default branding restored');
   },
 });
 

@@ -11499,7 +11499,35 @@
     "appLogoHeight": "Logo height in the side bar (px)",
     "printLogoHint": "The logo on printed documents is the logo of the primary company in Master > Company (a brand pack import can set it).",
     "livePreview": "Live preview",
-    "contrast": "Contrast (WCAG AA 4.5:1)"
+    "contrast": "Contrast (WCAG AA 4.5:1)",
+    "bundled": {
+      "title": "Bundled packs",
+      "hint": "Brand packs shipped with the product. None is enabled by default; enabling one applies it like an import and records who enabled it and when. The marks a pack carries belong to their owner: enable it only with the owner's written permission.",
+      "none": "No bundled brand pack is shipped with this release.",
+      "owner": "Marks owned by",
+      "version": "Version",
+      "statusEnabled": "Enabled",
+      "statusAvailable": "Available",
+      "enabledOnBy": "Enabled on {{date}} by {{user}}",
+      "defaultInForce": "The iorta TechNXT default branding is in force.",
+      "previewDocument": "Sample document",
+      "previewEmail": "Sample e-mail",
+      "enable": "Enable",
+      "backToDefault": "Back to default",
+      "backToDefaultConfirm": "Return to the iorta TechNXT default branding? The default theme, logo and favicon are restored; the application name and the print logo of the primary company go back to what they were before the pack was enabled. Every signed-in user gets it on their next page.",
+      "confirmTitle": "Enable {{name}}",
+      "trademark": "The name, emblem and logo in this pack are trademarks of {{owner}}. They may only be used in this environment with the owner's written permission, kept with the engagement records.",
+      "acknowledge": "We hold the owner's written permission to use these marks",
+      "applies": "Enabling applies the theme, the application name and the images of the pack at once to every signed-in user, printed documents, reports and e-mails. You can go back to the default at any time.",
+      "enabled": "Brand pack enabled",
+      "reset": "Default branding restored",
+      "history": "History",
+      "historyStatus": {
+        "enabled": "Enabled",
+        "reverted": "Back to default",
+        "replaced": "Replaced"
+      }
+    }
   },
   "salesActivities": {
     "title": "Activities",

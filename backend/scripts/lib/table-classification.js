@@ -118,7 +118,7 @@ export const MASTER_CONFIG_TABLES = [
   'app_settings', 'document_numbering', 'users', 'user_roles', 'roles', 'role_permissions', 'permissions',
   'authority_limits', 'authority_transaction_types', 'sod_rules', 'user_delegations', 'remittance_delegations',
   // generic and dedicated masters
-  'master_types', 'master_records', 'branches', 'signatories', 'e_signatures', 'document_signature_slots', 'banks', 'insurance_companies', 'reinsurers', 'commission_referrers',
+  'master_types', 'master_records', 'branches', 'signatories', 'e_signatures', 'document_signature_slots', 'brand_pack_enablements', 'banks', 'insurance_companies', 'reinsurers', 'commission_referrers',
   'countries', 'regions', 'states', 'cities', 'districts', 'postal_codes', 'currencies',
   'vehicle_brands', 'vehicle_models', 'vehicle_variants', 'write_off_reasons',
   // products and pricing: product configurator, covers, commission rate matrix, taxes and charges, packages

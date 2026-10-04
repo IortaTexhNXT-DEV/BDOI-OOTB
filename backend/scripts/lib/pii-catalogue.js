@@ -443,6 +443,7 @@ export const ALLOW_LIST = {
   'password_resets.*': 'table emptied (TABLE_ACTIONS)',
   'password_history.*': 'table emptied (TABLE_ACTIONS)',
   'email_outbox.*': 'table emptied (TABLE_ACTIONS)',
+  'brand_pack_enablements.trademark_owner': 'owner of the trademarks of a bundled brand pack (a company named in the pack manifest, not a person)',
   'audit_log.username': 'staff username (kept like users.username)',
   'claim_field_changes.username': 'staff username (kept like users.username)',
   'claim_field_changes.field_name': 'name of the field changed, not a value',
