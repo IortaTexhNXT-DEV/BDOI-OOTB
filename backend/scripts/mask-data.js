@@ -510,6 +510,8 @@ const redact = (s) => (s.length <= 4 ? '****' : `${s.slice(0, 3)}${'*'.repeat(Ma
  * code and TINs outside the masked prefix. Returns { findings: [{ table, column, kind, count, examples }], kept, clean }.
  */
 const PII_TOKEN_RE = /pii:1:[0-9a-f]{8}:[A-Za-z0-9+/=]+:[A-Za-z0-9+/=]+/g;
+/** A mobile number pattern inside an identifier (doc_a09123456789b, a hash, a storage key) is not a phone number. */
+const phoneLike = (s, m) => !/[A-Za-z_]/.test(s[m.index - 1] || ' ') && !/[A-Za-z_]/.test(s[m.index + m[0].length] || ' ');
 
 export async function verifyMasked(client, { keptEmails = null, inTransaction = false } = {}) {
   if (!inTransaction) {
@@ -533,6 +535,7 @@ export async function verifyMasked(client, { keptEmails = null, inTransaction = 
     if (SKIP_TABLES.has(table)) continue;
     for (const c of cols) {
       if (!TEXT_TYPES.has(c.udt)) continue;
+      if (c.name === 'id' || c.name.endsWith('_id')) continue; // keys are generated identifiers, not personal data
       const counts = {};
       const keptCount = { n: 0 };
       await forEachBatch(client, `SELECT ${ident(c.name)}::text AS v FROM ${ident(table)} WHERE ${ident(c.name)}::text ~ $1`, [prefilter], async (rows) => {
@@ -545,7 +548,7 @@ export async function verifyMasked(client, { keptEmails = null, inTransaction = 
             if (keptEmails.has(k) || /username/.test(c.name)) keptCount.n += 1;
             else add('email', e);
           }
-          for (const p of v.match(MOBILE_RE) || []) if (!isMaskedMobile(p)) add('mobile', p);
+          for (const m of v.matchAll(MOBILE_RE)) if (phoneLike(v, m) && !isMaskedMobile(m[0])) add('mobile', m[0]);
           for (const t of v.match(TIN_RE) || []) if (!isMaskedTin(t)) add('tin', t);
         }
       });

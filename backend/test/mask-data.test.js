@@ -301,6 +301,8 @@ describe('masking a copy', () => {
   });
 
   it('masks every personal value, everywhere', async () => {
+    // a generated identifier that happens to contain a mobile-number-like run of digits is not personal data
+    await query(`UPDATE leads SET extra = COALESCE(extra, '{}'::jsonb) || '{"documentId": "doc_a09123456789b"}'::jsonb WHERE id = $1`, [ids.lead]);
     const lines = [];
     result = await withClient((c) => maskData(c, { environment: 'uat', salt: SALT, execute: true, adminPassword: ADMIN_PASSWORD, actor: 'dpo', now: new Date('2026-10-04T08:00:00Z') }));
     expect(result.executed).toBe(true);
