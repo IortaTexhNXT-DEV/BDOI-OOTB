@@ -65,6 +65,11 @@ would issue a code that already exists:
 The **client code** series restarts: clients are business records of the smoke test and are removed with it; the go-live
 migration loads the real clients.
 
+The next numbers set by the **Numbering** sheet of the go-live configuration workbook (the last numbers of the old
+system plus one) are counters too, so the reset sets them back to the start number. Load the Numbering sheet (or the
+whole configuration workbook: every other row is reported unchanged) again after the reset and before the migration
+workbook; otherwise the migration refuses the legacy numbers that fall in the range the series has still to issue.
+
 ### Accounting
 
 Journals and journal lines, accounting periods and their status history, fiscal years, month-end and year-end close

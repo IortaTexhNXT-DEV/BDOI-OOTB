@@ -311,7 +311,7 @@ const GoLiveDataLoad = () => {
             <Column header="" style={{ width: "9rem" }} body={(r) => (
               <div className="access__row-actions">
                 {iconButton("pi pi-eye", t("goLiveData.viewResult"), () => openBatch(r), { disabled: !!busy, loading: busy === `open-${r.id}` })}
-                {iconButton("pi pi-file-excel", t("goLiveData.downloadErrors"), () => downloadErrors(r.id), { disabled: !r.rowsError || r.status === "loaded" || !!busy, loading: busy === `errors-${r.id}` })}
+                {iconButton("pi pi-file-excel", t("goLiveData.downloadErrors"), () => downloadErrors(r.id), { disabled: !r.rowsError || !!busy, loading: busy === `errors-${r.id}` })}
                 {r.kit === "migration" ? iconButton("pi pi-chart-bar", t("goLiveData.downloadReconciliation"), () => downloadReconciliation(r.id), { disabled: !r.reconciliation || !!busy, loading: busy === `recon-${r.id}` }) : null}
               </div>
             )} />

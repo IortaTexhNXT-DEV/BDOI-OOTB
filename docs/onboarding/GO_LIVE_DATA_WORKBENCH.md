@@ -40,7 +40,8 @@ Download from the screen (**Download Template**: *Blank template* or *Current da
    *Load valid rows only* (`validRowsOnly: true`; the screen ticks it by default for the configuration workbook and
    not for the migration workbook). The load runs in one transaction; if a row fails now because the data changed
    since the validation, nothing is saved and the errors are recorded. The load is written to the audit trail and the
-   administrator is notified.
+   administrator is notified. After a load of the valid rows only, the rows left out keep their errors: the batch still
+   lists them and **Download errors** still gives them, to fix and upload again.
 5. **History** (`GET /api/data-load/batches`): status `validated`, `failed` or `loaded`, who uploaded and loaded, when,
    counts; open a batch to see its result again.
 
@@ -83,7 +84,11 @@ screen, not under the second-user approval of Account Determination); `golive.lo
 - **Authority limits** are proposals: another administrator approves them on Master > Generals > User Management >
   Authority Matrix (maker-checker), as on the screen.
 - **Numbering.** *Next Number* is the next sequence number of the current period (last number used in the old system
-  plus one). It cannot go backwards.
+  plus one). It cannot go backwards. The transaction reset (`SMOKE_TEST_AND_RESET.md`) restarts the counters of the
+  transaction series, so load the Numbering sheet (or the whole configuration workbook) again after a reset and before
+  the migration workbook.
+- **Commission rates.** A Line of Business on the Commission Rates sheet must be a code of the Line of Business master
+  (Lines of Business sheet or Master > Line of Business); a rate on an unknown line would never apply.
 - **Cutover date.** `golive.cutover_date` (Settings sheet of the configuration workbook, or Master > Configuration) is
   the first day of live transactions. The migration workbook is refused until it is set.
 - **Go-live lock.** Once `golive.locked` is on (Master > Configuration), the migration workbook is refused (upload,
@@ -116,9 +121,12 @@ screen, not under the second-user approval of Account Determination); `golive.lo
   above the legacy range first.
 - **Dates.** Opening balances are dated the day before cutover; every new transaction is dated on or after it.
 - **Renewals.** Migrated in-force policies are ordinary active policies: the renewal queue picks them up as they near
-  expiry. Policies expiring soon need no separate sheet; the reconciliation counts those expiring within 90 days.
+  expiry. Policies expiring soon need no separate sheet; the reconciliation counts those expiring within 90 days. The
+  renewal term is new business: it does not carry the `go-live-migration` source or the load batch of the expiring term.
 - **Reports.** The policy API and lists show `source` and filter on it (`GET /api/policies?source=go-live-migration`);
   `load_batch_id` ties every migrated record to its batch.
+- **Open items** get a bill number of the invoice series; the bill number of the old system is kept as the bill
+  reference (search the open receivables by it).
 - **Money.** Open items are collected with normal official receipts. Amounts due to insurers and commission payable
   are in the opening balances and paid with payment vouchers (Accounts > Disbursement).
 
@@ -131,6 +139,16 @@ compares with the old system (`batch.reconciliation`; download: `GET /api/data-l
   debits and credits) and the records and totals in BrokerVerse after the load (all migrated records);
 - checks: trial balance debits = credits; premiums receivable control account (`accounting.account.premium_receivable`)
   opening balance = total open balance of the open items of the cutover date.
+
+## Go-live rehearsal
+
+`npm run rehearsal:golive` (`backend/scripts/golive-rehearsal.js`) rehearses the whole sequence between two running
+environments, SOURCE (configuration and business data, e.g. UAT) and TARGET (the environment going live, e.g. Pre-Prod):
+configuration promoted with three deliberate errors, smoke test and transaction reset, migration workbook filled from
+SOURCE's open book at cutover - 1 with injected errors and the reconciliation against SOURCE, new and migrated business
+side by side, the go-live lock, and the promotion check. Its run log is `docs/e2e/GOLIVE_REHEARSAL_RUN.md`; the
+environment variables are in the header of the script. It changes TARGET (reset included, `CONFIRM_RESET=yes`), so
+never point it at a live database.
 
 ## Not in the workbooks
 

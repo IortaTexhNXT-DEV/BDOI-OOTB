@@ -322,6 +322,10 @@ const commissionSheet = () => ({
     const effectiveTo = dateValue('effectiveTo', v.effectiveTo, 'Effective To');
     const active = toBool(v.active);
     if (active === null) fail('active', 'Active must be Yes or No');
+    // a rate on an unknown line of business would never apply: the code must be in the Line of Business master
+    if (v.lineOfBusiness && !(await one(`SELECT 1 FROM master_records WHERE type_code = 'line-of-business' AND status <> 'deleted' AND lower(code) = lower($1)`, [v.lineOfBusiness]))) {
+      fail('lineOfBusiness', `Line of Business ${v.lineOfBusiness} is not in the Line of Business master (Lines of Business sheet or Master > Line of Business)`);
+    }
     const body = { insuranceCompanyId: await insurerOf('insurer', v.insurer), productId: await productOf('product', v.product), lineOfBusiness: v.lineOfBusiness || null,
       policyType, rate, effectiveFrom, effectiveTo: effectiveTo || null, active: active ?? true, remarks: v.remarks || null };
     const hit = await one(`SELECT id FROM commission_rates WHERE insurance_company_id IS NOT DISTINCT FROM $1::int AND product_id IS NOT DISTINCT FROM $2::int

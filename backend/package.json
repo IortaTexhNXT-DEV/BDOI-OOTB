@@ -17,6 +17,7 @@
     "export:api": "node src/tools/export-api.js",
     "purge:sample": "node scripts/purge-sample-data.js",
     "reset:transactions": "node scripts/reset-transactions.js",
+    "rehearsal:golive": "node scripts/golive-rehearsal.js",
     "check:settings": "node scripts/check-settings.js",
     "test": "vitest run",
     "lint": "eslint src test scripts"
