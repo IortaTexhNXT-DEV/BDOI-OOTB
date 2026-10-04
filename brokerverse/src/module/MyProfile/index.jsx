@@ -17,6 +17,8 @@ import { calendarDateFormat, formatDate } from "../../utility/dateFormat";
 import { notifyError, notifySuccess } from "../../utility/dialogs";
 import { displayNameOf, roleLabel } from "../../utility/userIdentity";
 import { DEFAULT_COUNTRY, GENDERS, formatPhone, isPhilippines, toFormValues, toPayload, validateProfile } from "./profileForm";
+import SignatureCapture from "../../components/SignatureCapture";
+import { getUserData } from "../../utility/tokenManager";
 import "./index.scss";
 
 const STATUS_CLASS = { active: "is-active", locked: "is-locked", inactive: "is-inactive" };
@@ -292,6 +294,7 @@ const MyProfile = () => {
               <div className="myprofile__summary-actions">
                 <Button type="button" icon="pi pi-key" label={t("security.changePassword")} className="p-button-outlined p-button-secondary p-button-sm" onClick={() => setDialog("password")} />
                 <Button type="button" icon="pi pi-shield" label={t("myProfile.twoStep")} className="p-button-outlined p-button-secondary p-button-sm" onClick={() => setDialog("2fa")} />
+                <Button type="button" icon="pi pi-pencil" label={t("signature.mySignature", "My e-signature")} className="p-button-outlined p-button-secondary p-button-sm" onClick={() => setDialog("signature")} />
               </div>
             </div>
             <dl className="myprofile__facts">
@@ -413,6 +416,7 @@ const MyProfile = () => {
 
       <ChangePasswordDialog visible={dialog === "password"} onHide={() => setDialog("")} />
       <TwoFactorDialog visible={dialog === "2fa"} onHide={() => setDialog("")} />
+      <SignatureCapture visible={dialog === "signature"} onHide={() => setDialog("")} ownerType="user" ownerId={getUserData()?.id || getUserData()?.userId} ownerName={t("signature.mine", "my signature")} />
     </div>
   );
 };

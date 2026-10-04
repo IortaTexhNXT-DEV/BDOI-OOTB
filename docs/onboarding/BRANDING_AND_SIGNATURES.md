@@ -52,7 +52,9 @@ settings, and texts with `<` or `>`.
   visible and every 5 minutes. `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
   as before when no theme is loaded). A PostCSS step (`brokerverse/scripts/postcss-brand-vars.js`, wired in
   `craco.config.js`) turns every literal brand colour in the compiled CSS into `var(--bv-..., <same colour>)`, so screen
-  stylesheets follow the theme without being edited.
+  stylesheets follow the theme without being edited. Older stylesheets use other blues (#0066cc, #001e60, #1976d2 ...): saturated blues are mapped
+  by lightness to `--bv-alt-*` variables that only a brand theme sets, so the default theme keeps every original
+  shade. Not themed: colours written inline in JavaScript (chart series, a few status chips) and status colours.
 * Documents: every PDF goes through `lib/pdf` `printContext()` (letterhead of the primary company + `documentBranding()`
   of the theme). A backend test fails when a module builds a PDF without it.
 
@@ -131,6 +133,6 @@ use it in demonstrations to other prospects. Do not copy photographs from a clie
 broker uploads its own sign-in picture.
 
 The Toyota Insurance Services pack: white header and side bar, near-black text and buttons, light grey backgrounds,
-Toyota red only as a small accent (active marker, focus ring, document rule, e-mail line), links in a darker red that
+Toyota red only as a small accent (active marker, document rule, e-mail line), links in a darker red that
 passes AA, Inter font, the TIS logo on screens and documents, footer "Authorized by the Insurance Commission to act as
 an Insurance Agent, Licence No. {{licence}}". See its README.

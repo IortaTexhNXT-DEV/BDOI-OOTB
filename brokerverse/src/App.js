@@ -11,6 +11,7 @@ import { fetchSystemSettings } from "./module/SystemSettings/store/systemSetting
 import { applyAppTitle } from "./utility/applySystemSettings";
 import AppDialogs from "./components/AppDialogs";
 import InAppLinks from "./components/InAppLinks";
+import { BrandingProvider } from "./theme/runtime/BrandingProvider";
 
 const App = () => {
   const [authState, setAuthState] = useState(() => {
@@ -64,6 +65,7 @@ const App = () => {
   }, [hasToken, userName, appTitle]);
 
   return (
+    <BrandingProvider>
     <NotificationProvider>
       <div className="App">
         <AppDialogs />
@@ -89,6 +91,7 @@ const App = () => {
         </Routes>
       </div>
     </NotificationProvider>
+    </BrandingProvider>
   );
 };
 

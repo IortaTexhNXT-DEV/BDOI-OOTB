@@ -11,6 +11,7 @@ import SvgDot from "../../../assets/icons/SvgDot";
 import "../DetailsJournalVocture/index.scss";
 import ArrowLeftIcon from "../../../assets/icons/ArrowLeftIcon";
 import { useNavigate, useParams } from "react-router-dom";
+import brandingService from "../../../services/brandingService";
 import { Toast } from "primereact/toast";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -468,6 +469,10 @@ const DetailsJournalVocture = () => {
           </div>
         </div>
       </form>
+      <div className="col-12 btn__view__details__JV mt-2">
+        <Button label={t("accounts.journalVoucherDetails.print", "Print")} icon="pi pi-print" className="p-button-outlined"
+          onClick={() => brandingService.printJournalVoucher(id).catch(() => {})} data-testid="print-jv" />
+      </div>
       {voucherStatus === AWAITING_APPROVAL && (
         <div className="col-12 btn__view__details__JV mt-2">
           <Button

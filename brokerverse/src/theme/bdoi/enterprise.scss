@@ -9,8 +9,8 @@
 @import "./tokens";
 
 $shell: ".protected__layout__container .main__content";
-$row-height: 44px;
-$cell-pad-y: 10px;
+$row-height: var(--bv-row-height, 44px); // density of the theme (comfortable 44px / compact 36px)
+$cell-pad-y: var(--bv-cell-pad-y, 10px);
 $cell-pad-x: 14px;
 $page-gutter: 24px;
 $text-strong: #1f2937;

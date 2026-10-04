@@ -33,7 +33,7 @@ copyright): the broker uploads its own sign-in picture in Theme and Branding if 
 | Header and side bar | White, near-black text; active menu item light grey `#F2F2F2` with black text | |
 | Table headers on screen | Light grey `#EEEEEE`, near-black text | |
 | Page background | Light grey `#F5F5F5` | |
-| Accent (active tab marker, focus ring, document rule, e-mail header line) | Toyota red `#EB0A1E` | Decorative only, never text |
+| Accent (active menu and tab marker, document rule, e-mail header line) | Toyota red `#EB0A1E` | Decorative only, never text; the focus ring is near black so a focused field never looks like an error |
 | Links | Dark red `#B40514` | 7.06:1 on white (Toyota red as text would be only 4.57:1) |
 | Document and Excel table headers | Near black `#1A1A1A`, white text | |
 | Font | Inter (Google Fonts, falls back to Arial) | Toyota's corporate typeface is licensed |

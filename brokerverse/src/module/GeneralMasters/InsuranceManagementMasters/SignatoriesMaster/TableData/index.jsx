@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import "./index.scss";
 import { DataTable } from "primereact/datatable";
@@ -6,6 +6,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
+import SignatureCapture from "../../../../../components/SignatureCapture";
 import SvgIconeye from "../../../../../assets/icons/SvgIconeye";
 import SvgEdit from "../../../../../assets/icons/SvgEdits";
 import SvgTable from "../../../../../assets/icons/SvgTable";
@@ -20,6 +21,8 @@ const TableData = ({ navigate }) => {
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const statusToast = useRef(null);
+  // E-signature of a signatory (capture, versions, revoke): components/SignatureCapture
+  const [signatureOf, setSignatureOf] = useState(null);
   const reloadList = () => dispatch(getInsuranceSignatoriesMiddleWare());
   const showStatusError = (error) =>
     statusToast.current?.show({ severity: "error", detail: error.message });
@@ -83,6 +86,10 @@ const TableData = ({ navigate }) => {
           icon={<SvgEdit />}
           onClick={() => handleEdit(rowData.id)}
           className="action__button p-0 w-auto" aria-label="Edit" tooltip="Edit" tooltipOptions={{ position: "top" }} />
+        <Button
+          icon="pi pi-pencil"
+          onClick={() => setSignatureOf(rowData)}
+          className="action__button p-0 w-auto" aria-label={t("signature.title", "E-signature")} tooltip={t("signature.title", "E-signature")} tooltipOptions={{ position: "top" }} />
       </div>
     );
   };
@@ -187,6 +194,7 @@ const TableData = ({ navigate }) => {
           className="fieldvalue_container"
         ></Column>
       </DataTable>
+      <SignatureCapture visible={!!signatureOf} onHide={() => setSignatureOf(null)} ownerType="signatory" ownerId={signatureOf?.id} ownerName={signatureOf?.signatoryName} />
     </div>
   );
 };

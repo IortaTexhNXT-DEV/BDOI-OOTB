@@ -15,6 +15,7 @@ export const AREAS = [
     groups: ["general", "branding", "currency", "documents", "system", "golive"],
     links: [
       { label: "System Settings (application name, logo, colours, language, currency)", path: "/master/configuration/system-settings" },
+      { label: "Theme and Branding (theme, sign-in page, documents, e-mail, signatures, brand packs)", path: "/master/configuration/theme-branding" },
       { label: "Go-Live Data Load (configuration and migration workbooks)", path: "/master/go-live-data-load" },
       { label: "Company master (legal name, TIN, registered address, print logo)", path: "/master/generals/organization/companymaster" },
       { label: "Branch master", path: "/master/generals/organization/branchmaster" },

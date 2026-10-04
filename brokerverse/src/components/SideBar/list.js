@@ -884,7 +884,7 @@ export const menuList = [
         id: 0,
         name: "System Settings",
         path: "/master/configuration/system-settings",
-        includes: ["/master/configuration/system-settings"],
+        includes: ["/master/configuration/system-settings", "/master/configuration/theme-branding"],
       },
       {
         id: 20,

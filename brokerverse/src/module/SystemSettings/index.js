@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
@@ -506,8 +507,12 @@ const SystemSettingsPage = () => {
             </div>
           </div>
 
-          <div className="main__tabel__title mb-3 mt-4">
+          <div className="main__tabel__title mb-3 mt-4 flex align-items-center justify-content-between flex-wrap gap-2">
             {t("systemSettings.theme", "Theme")}
+            <Link to="/master/configuration/theme-branding" className="p-button p-button-sm p-button-outlined no-underline" data-testid="open-theme-branding">
+              <i className="pi pi-palette mr-2" />
+              {t("systemSettings.openThemeBranding", "Theme and Branding (full theme, sign-in page, documents, e-mail, signatures, brand packs)")}
+            </Link>
           </div>
           <div className="grid">
             <div className="col-12 md:col-6 lg:col-4 field">

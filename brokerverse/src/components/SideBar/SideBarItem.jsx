@@ -67,12 +67,14 @@ const SidebarItem = ({
           padding: "4px 8px",
           margin: "0px",
           borderRadius: "6px",
-          backgroundColor: isPathIncluded ? "#e5f5ff" : "transparent",
+          // theme colours (Theme and Branding): active item background and the accent marker of brand themes
+          backgroundColor: isPathIncluded ? "var(--bv-sidebar-active-bg, #e5f5ff)" : "transparent",
+          boxShadow: isPathIncluded ? "inset 3px 0 0 var(--bv-sidebar-marker, transparent)" : "none",
           transition: "all 0.2s ease",
         }}
         onMouseEnter={(e) => {
           if (!isPathIncluded) {
-            e.currentTarget.style.backgroundColor = "#f6f6f6";
+            e.currentTarget.style.backgroundColor = "var(--bv-sidebar-hover-bg, #f6f6f6)";
           }
         }}
         onMouseLeave={(e) => {

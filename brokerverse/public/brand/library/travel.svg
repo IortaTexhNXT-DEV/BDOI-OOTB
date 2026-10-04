@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 900" preserveAspectRatio="xMidYMid slice">
+  <!-- BrokerVerse sign-in library: travel and accident. Original line art (islands, sea, a plane), drawn in white. -->
+  <defs>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.04"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0.14"/>
+    </linearGradient>
+  </defs>
+  <!-- sun -->
+  <circle cx="720" cy="260" r="90" fill="#ffffff" fill-opacity="0.10"/>
+  <circle cx="720" cy="260" r="130" fill="none" stroke="#ffffff" stroke-opacity="0.12" stroke-width="2"/>
+  <!-- sea -->
+  <rect y="560" width="960" height="340" fill="url(#sea)"/>
+  <g fill="none" stroke="#ffffff" stroke-opacity="0.3" stroke-width="3" stroke-linecap="round">
+    <path d="M60 640 q30 -14 60 0 t60 0"/>
+    <path d="M620 700 q30 -14 60 0 t60 0 t60 0"/>
+    <path d="M260 780 q30 -14 60 0 t60 0"/>
+    <path d="M700 820 q30 -14 60 0 t60 0"/>
+  </g>
+  <!-- islands -->
+  <path d="M120 570 Q260 470 420 570 Z" fill="#ffffff" fill-opacity="0.18"/>
+  <path d="M480 575 Q600 500 760 575 Z" fill="#ffffff" fill-opacity="0.12"/>
+  <!-- palm -->
+  <g fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round" stroke-opacity="0.85">
+    <path d="M280 540 Q270 440 300 380"/>
+    <path d="M300 380 Q250 360 220 390"/>
+    <path d="M300 380 Q340 350 380 370"/>
+    <path d="M300 380 Q290 330 250 320"/>
+    <path d="M300 380 Q330 330 370 330"/>
+  </g>
+  <!-- plane with a dashed route -->
+  <path d="M60 300 Q300 140 560 210" fill="none" stroke="#ffffff" stroke-opacity="0.45" stroke-width="3" stroke-dasharray="10 12"/>
+  <g transform="translate(560 190) rotate(12)" fill="#ffffff" fill-opacity="0.9">
+    <path d="M0 18 L80 14 Q96 14 96 20 Q96 26 80 26 L0 22 Z"/>
+    <path d="M36 16 L22 -16 L32 -16 L56 16 Z"/>
+    <path d="M36 24 L22 56 L32 56 L56 24 Z"/>
+    <path d="M4 18 L-6 4 L2 4 L14 18 Z"/>
+  </g>
+</svg>
