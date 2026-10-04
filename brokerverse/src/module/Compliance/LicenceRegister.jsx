@@ -118,7 +118,7 @@ const LicenceRegister = () => {
   );
   const licenceTable = (value, opts = {}) => (
     <DataTable value={value} dataKey="id" loading={loading} size="small" stripedRows paginator={!opts.compact} rows={20} className="access__table" emptyMessage={t("compliance.lic.none")}>
-      <Column header={t("compliance.lic.holder")} body={(r) => (
+      <Column header={t("compliance.lic.holderColumn")} body={(r) => (
         <div className="access__user">
           <span className="access__user-name">{r.holderName}</span>
           <span className="access__muted">{t(`compliance.lic.holder.${r.holderType}`)}{r.referrerType ? ` · ${r.referrerType}` : ""}{r.position ? ` · ${r.position}` : ""}</span>

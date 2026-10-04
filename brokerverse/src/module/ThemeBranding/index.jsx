@@ -331,7 +331,7 @@ const ThemeBrandingPage = () => {
                 </div>
               </Section>
               <Section title={t("themeBranding.loginTexts", "Texts")}>
-                <div className="bv-tb__field"><label htmlFor="login-headline">{t("themeBranding.headline", "Headline (empty: \"Sign in to <application name>\")")}</label>
+                <div className="bv-tb__field"><label htmlFor="login-headline">{t("themeBranding.headline", "Headline (empty: the sign-in page shows Welcome to the application name)")}</label>
                   <InputText id="login-headline" value={theme.login?.headline || ""} maxLength={80} onChange={(e) => set("login", "headline", e.target.value)} /></div>
                 <div className="bv-tb__field"><label htmlFor="login-tagline">{t("themeBranding.tagline", "Tagline")}</label>
                   <InputText id="login-tagline" value={theme.login?.tagline || ""} maxLength={160} onChange={(e) => set("login", "tagline", e.target.value)} /></div>
