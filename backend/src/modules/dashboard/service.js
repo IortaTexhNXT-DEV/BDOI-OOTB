@@ -15,7 +15,8 @@ export const ownBook = (user) => (user ? { userId: user.id, ids: [user.id, user.
 const inBook = (book, entity, alias, params) => scopeSql(book, entity, alias, params);
 
 const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 : 0);
-const change = (cur, prev) => (prev ? Math.round(((cur - prev) / prev) * 1000) / 10 : (cur ? 100 : 0));
+/** Change against the previous period in percent; none when the previous period had nothing to compare with. */
+const change = (cur, prev) => (prev ? Math.round(((cur - prev) / prev) * 1000) / 10 : null);
 /** Product label of a policy: its product type, else the product master name, else the LOB. */
 /** Window of the "renewals due" counters and lists (dashboard.renewals_due_days). */
 const renewalsDueDays = async () => Number(await getSetting('dashboard.renewals_due_days', 60)) || 0;
@@ -24,14 +25,18 @@ const PRODUCT = "COALESCE(p.product_type, pr.name, p.lob, 'Other')";
 /**
  * Premium written in the current and previous period, policies in force, new business, claims ratio, retention.
  * The period is the calendar month / quarter / year to date in the configured time zone (1 September to today for
- * "This Month"), compared with the whole previous period (August).
+ * "This Month"), compared with the same number of days of the previous period (1 to 4 August when today is
+ * 4 September), so a period that has just started is not compared with a whole one.
  */
 export async function executive(period = 'month') {
   const range = await calendarPeriod(period);
   // premium is written on the policy's issue date (a policy keyed in later still counts in the month it was issued)
   const written = 'COALESCE(issued_date, (created_at AT TIME ZONE $4)::date)';
-  const cur = `${written} >= $1::date AND ${written} < $2::date`;
-  const prev = `${written} >= $3::date AND ${written} < $1::date`;
+  // policies loaded by the go-live migration were written in the old system: they count as in force, not as premium
+  // written or new business in BrokerVerse
+  const live = "COALESCE(doc->>'source', '') <> 'go-live-migration' AND load_batch_id IS NULL";
+  const cur = `${live} AND ${written} >= $1::date AND ${written} < $2::date`;
+  const prev = `${live} AND ${written} >= $3::date AND ${written} < LEAST($1::date, $3::date + ($5::date - $1::date + 1))`;
   const k = await one(`SELECT
       COALESCE(sum(premium_total) FILTER (WHERE ${cur}), 0) AS premium_cur,
       COALESCE(sum(premium_total) FILTER (WHERE ${prev}), 0) AS premium_prev,
@@ -39,6 +44,7 @@ export async function executive(period = 'month') {
       count(*) FILTER (WHERE ${cur})::int AS new_cur,
       count(*) FILTER (WHERE ${prev})::int AS new_prev,
       COALESCE(sum(premium_total) FILTER (WHERE renewed_from IS NULL AND ${cur}), 0) AS new_business,
+      COALESCE(sum(premium_total) FILTER (WHERE renewed_from IS NULL AND ${prev}), 0) AS new_business_prev,
       COALESCE(sum(premium_total), 0) AS premium_all
     FROM policies`, [range.from, range.next, range.prevFrom, range.timeZone, range.to]);
   const claims = await one(`SELECT count(*)::int AS total, count(*) FILTER (WHERE status NOT IN ('settled','closed','rejected'))::int AS open,
@@ -51,7 +57,7 @@ export async function executive(period = 'month') {
     executiveKPIs: {
       totalRevenue: kpi(round2(k.premium_cur), round2(k.premium_prev), targets.totalRevenue),
       activePolicies: kpi(k.active, k.active - k.new_cur + k.new_prev, targets.activePolicies),
-      newBusiness: kpi(round2(k.new_business), round2(k.premium_prev), targets.newBusiness),
+      newBusiness: kpi(round2(k.new_business), round2(k.new_business_prev), targets.newBusiness),
       claimsRatio: { value: claimsRatio, target: targets.claimsRatio ?? null, trend: claimsRatio <= (targets.claimsRatio ?? 100) ? 'down' : 'up' },
       retentionRate: { value: pct(ret.renewed, ret.closed), target: targets.retentionRate ?? null },
       customerSatisfaction: { value: null, target: targets.customerSatisfaction ?? null, note: 'No survey data captured' },

@@ -60,8 +60,12 @@ const CLAIM_STATUS_COLORS = ["#00C851", "#FFA500", "#2196F3", "#FF5252", "#9C27B
 const CURRENCY_KPIS = ["totalRevenue", "newBusiness"];
 const PERCENT_KPIS = ["claimsRatio", "retentionRate", "customerSatisfaction"];
 
-const formatChange = (change) =>
-  change === undefined || change === null ? null : `${change >= 0 ? "+" : ""}${formatPercent(change)}`;
+// a change beyond 999% (a period compared with an almost empty one) is shown as "> 999%" rather than in full
+const formatChange = (change) => {
+  if (change === undefined || change === null) return null;
+  if (Math.abs(change) > 999) return change > 0 ? "> +999%" : "< -999%";
+  return `${change >= 0 ? "+" : ""}${formatPercent(change)}`;
+};
 
 const ExecutiveDashboard = () => {
   const { t } = useTranslation();
@@ -139,7 +143,10 @@ const ExecutiveDashboard = () => {
   };
 
   const executiveKPIs = Object.fromEntries(
-    Object.entries(dashboard?.executiveKPIs || {}).map(([key, kpi]) => [
+    Object.entries(dashboard?.executiveKPIs || {})
+      // a measure the system does not capture yet (customer satisfaction without survey data) is not shown
+      .filter(([, kpi]) => kpi.value !== null && kpi.value !== undefined)
+      .map(([key, kpi]) => [
       key,
       {
         value: formatKpiValue(key, kpi.value),

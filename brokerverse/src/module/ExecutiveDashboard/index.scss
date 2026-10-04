@@ -152,6 +152,15 @@
         gap: 1rem;
       }
 
+      // four columns with seven cards: the last card takes the empty place so the row stays complete
+      @media (min-width: 1200px) {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+
+        .kpi-card:last-child:nth-child(4n + 3) {
+          grid-column: span 2;
+        }
+      }
+
       @include mobile-sm {
         gap: 0.75rem;
       }

@@ -108,3 +108,27 @@ describe('dashboards', () => {
     expect((await request(ctx.app).get('/api/dashboard/executive')).status).toBe(401);
   });
 });
+
+describe('dashboard: premium written excludes the go-live migration', () => {
+  it('a policy loaded by the migration this month does not add to premium written or new business', async () => {
+    const { calendarPeriod } = await import('../src/lib/dates.js');
+    const range = await calendarPeriod('month');
+    const id = (await pool.query('SELECT id FROM policies ORDER BY id LIMIT 1')).rows[0].id;
+    const saved = (await pool.query('SELECT doc, issued_date FROM policies WHERE id = $1', [id])).rows[0];
+    const kpis = async () => (await ctx.api('get', '/dashboard/executive?period=month')).body.data.executiveKPIs;
+    try {
+      // the policy written in BrokerVerse this month: counted
+      await pool.query('UPDATE policies SET issued_date = $2::date WHERE id = $1', [id, range.from]);
+      const live = await kpis();
+      // the same policy as a migrated one: not counted
+      await pool.query(`UPDATE policies SET doc = jsonb_set(COALESCE(doc, '{}'::jsonb), '{source}', '"go-live-migration"') WHERE id = $1`, [id]);
+      const migrated = await kpis();
+      const premium = Number((await pool.query('SELECT premium_total FROM policies WHERE id = $1', [id])).rows[0].premium_total);
+      expect(premium).toBeGreaterThan(0);
+      expect(migrated.totalRevenue.value).toBeCloseTo(live.totalRevenue.value - premium, 2);
+      expect(migrated.activePolicies.value).toBe(live.activePolicies.value);
+    } finally {
+      await pool.query('UPDATE policies SET doc = $2, issued_date = $3 WHERE id = $1', [id, saved.doc, saved.issued_date]);
+    }
+  });
+});
