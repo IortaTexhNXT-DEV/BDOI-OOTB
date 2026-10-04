@@ -71,7 +71,7 @@ The test case prefixes refer to the sheet Test Cases of the Test Cases workbook.
 | Branding | Theme and Branding, logo, sign-in picture, brand packs, branded documents, reports and e-mails, e-signatures mapped to documents | BV-BRD | A14, A15 |
 | Reinsurance | Treaties, cessions, recoveries, facultative placements | BV-RIN, BV-DST | P8 |
 | Reports and dashboards | Report catalogue, dashboards, scheduled reports, report builder | BV-RPT, BV-DSH, BV-DST | S6, S11, C5 |
-| Features in development (package G) | Sales activity log, quote wizard covers and risk fields from the Product Configurator, supplier BIR 2307, fixed asset disposal | BV-PKG | Added when the release that carries them is deployed |
+| Sales activities, product covers and risk fields, supplier BIR 2307, asset disposal | Sales activity log and report, quote wizard covers and risk fields from the Product Configurator, supplier BIR 2307 and supplier EWT in the returns, fixed asset disposal | BV-PKG | Delivered; cases run in UAT cycle 1 |
 
 ## Out of scope
 
