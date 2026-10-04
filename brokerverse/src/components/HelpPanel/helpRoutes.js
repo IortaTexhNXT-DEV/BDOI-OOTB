@@ -106,6 +106,17 @@ export const HELP_ROUTES = [
   ["/master/data-privacy", "data-privacy"],
   ["/master/go-live-data-load", "go-live-data-load"],
   ["/product-configurator", "module-reference-product-configurator"],
+  // distribution, programmes and products
+  ["/sales/lead-assignment", "lead-assignment"],
+  ["/master/insurance/channels", "distribution-channels"],
+  ["/sales/dealer-programmes", "dealer-programmes"],
+  ["/operations/fleet-schedules", "fleet-schedules"],
+  ["/operations/open-covers", "marine-open-covers"],
+  ["/reinsurance/facultative", "facultative-placements"],
+  ["/sales/comparison-reports", "comparison-reports"],
+  ["/sales/campaigns", "campaigns"],
+  ["/reports/run/dealer-production", "distribution-channels"],
+  ["/reports/builder", "report-builder"],
   // the user's own pages
   ["/account/profile", "my-profile"],
   ["/agent/notification", "notifications"],

@@ -19,6 +19,9 @@ const OPERATIONS_ALL = [
   "Renewals",
   "Open Items",
   "Payments",
+  // fleet schedules and marine open covers (read:fleet / read:marine; processing and operations also write)
+  "Fleet Schedules",
+  "Marine Open Covers",
 ];
 
 // The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
@@ -29,6 +32,9 @@ const OPERATIONS_PROCESSING = [
   "Sales & Marketing > Request for Quotation",
   "Sales & Marketing > Quotations",
   "Sales & Marketing > Placement Slips",
+  // brand-new vehicle programmes (write:motor-programmes) and client comparison reports from the insurers' offers
+  "Sales & Marketing > Dealer Programmes",
+  "Sales & Marketing > Comparison Reports",
 ];
 
 /** The administrator role (System Administrator, Super Admin Access): every menu. The one place the front end names it. */
@@ -46,7 +52,8 @@ export const roleMenuPermissions = {
     home: true,
     operations: OPERATIONS_ALL,
     commission: ["Commission Dashboard"],
-    reports: ["All Reports", "Operational Reports"],
+    reports: ["All Reports", "Operational Reports", "Report Builder"],
+    master: ["Insurance Management > Distribution Channels"],
   },
   // Processing Team (Placement & Policy Processing): broker slips, offer comparison, quotation / placement slips,
   // insurer confirmation, policy checking and issuance, endorsement processing, reinsurance, product templates
@@ -71,8 +78,10 @@ export const roleMenuPermissions = {
       "Claims Recovery",
       "Reconciliation",
       "Analytics",
+      "Facultative Placements",
     ],
-    reports: ["All Reports", "Operational Reports"],
+    reports: ["All Reports", "Operational Reports", "Report Builder"],
+    master: ["Insurance Management > Distribution Channels"],
   },
   // Operations (Client Servicing): client servicing, endorsement requests, renewals, open items, documents
   operations: {
@@ -80,16 +89,16 @@ export const roleMenuPermissions = {
     "product configurator": ["Dashboard", "Product Templates"],
     home: true,
     operations: OPERATIONS_ALL,
-    reports: ["All Reports", "Operational Reports"],
-    // data subject requests and the consent register (read:privacy / write:privacy)
-    master: ["Data Privacy"],
+    reports: ["All Reports", "Operational Reports", "Report Builder"],
+    // data subject requests and the consent register (read:privacy / write:privacy); distribution channels (read:channels)
+    master: ["Data Privacy", "Insurance Management > Distribution Channels"],
   },
   claims: {
     dashboard: ["Claims Dashboard"],
     home: true,
-    operations: ["Clients", "Policy", "Claims"],
+    operations: ["Clients", "Policy", "Claims", "Fleet Schedules", "Marine Open Covers"],
     reinsurance: ["Claims Recovery"],
-    reports: ["All Reports", "Operational Reports"],
+    reports: ["All Reports", "Operational Reports", "Report Builder"],
   },
   // Accounting: billing, collection, official receipts, remittance, commission, period end, BIR. The Accounting Manager
   // inherits Accounting (the server returns both roles), so it needs no entry of its own.
@@ -131,7 +140,7 @@ export const roleMenuPermissions = {
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],
     // the production, claims and renewal registers are not accounting reports (report catalogue roles)
-    reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission"],
+    reports: ["All Reports", "Financial Reports", "Operational Reports > Remittance", "Operational Reports > Broker Commission", "Report Builder"],
   },
 };
 

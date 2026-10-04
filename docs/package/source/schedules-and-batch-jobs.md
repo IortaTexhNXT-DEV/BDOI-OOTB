@@ -88,6 +88,9 @@ A job switched off can still be run with Run now. This is the way to use the per
 | Month-end close reminder (`month-end-reminder`) | Daily 08:00 | Off | `monthEndReminder` | job parameter `daysBefore` (3) |
 | Collection reminders (`collection-reminders`) | Daily 08:00 | On | `collectionReminders` | `collections.reminder_days_before` (7), `collections.reminder_repeat_days` (7), `collections.email_subject`, `collections.email_template` |
 | Scheduled report (`report-<id>`) | As set on the report schedule | Created per schedule | `scheduledReport` | the report schedule; `reports.email_subject`, `reports.email_body` |
+| Prospects not worked in time (`lead-assignment-sla`) | Daily 07:30 | Off | `leadAssignmentSla` | `leads.assignment_sla_hours` (48) |
+| Scheduled campaigns (`campaign-dispatch`) | Every 15 minutes | Off | `campaignDispatch` | the campaigns scheduled on Operations > Sales & Marketing > Campaigns; `campaigns.max_recipients` |
+| BI extract (`bi-extract`) | Daily 02:00 | Off | `biExtract` | `bi.extract_datasets`, `bi.extract_folder`, `bi.extract_keep_runs` |
 
 The five finance jobs (accrual reversal, recurring journals, period auto soft-close, bank auto-match, month-end reminder) ship switched off. The finance team decides at go-live whether to switch them on or to run them from the screens.
 
@@ -221,6 +224,36 @@ Notifies the holders of `read:privacy` (high priority, link to Master > Data Pri
 Runs the automatic matching rules (adjustment, contra, reference, amount and date, one-to-many, many-to-one) on every active bank account linked to a GL cash account that has unmatched statement lines. Each account is processed on its own; an error on one account does not stop the others. It never matches into a period whose reconciliation is approved. Output: accounts, matches per account. Safe to rerun: it only looks at unmatched lines. Matching also runs right after each statement import when `bank_reconciliation.auto_match_on_import` is on (default), which is why the job ships switched off.
 
 # Monitoring and failure handling
+
+## Prospects not worked in time (off)
+
+| Item | Detail |
+|---|---|
+| Purpose | Returns to the reassignment queue the prospects still New more than `leads.assignment_sla_hours` hours after they were assigned, so that a manager gives them to someone else. |
+| Reads | `leads` with status New and assignment status assigned, assigned (or created) more than the limit ago. |
+| Writes | The prospect's assignment status becomes queued with the reason; a row in `lead_assignment_history`; a notification to the users with `write:lead-assignment`. |
+| Switch | Off in the seed. Switch it on once the assignment rules are set up. Setting `leads.assignment_sla_hours` to 0 stops it. |
+| Restart safety | A queued prospect is not queued again; a rerun only picks up prospects that crossed the limit since. |
+
+## Scheduled campaigns (off)
+
+| Item | Detail |
+|---|---|
+| Purpose | Sends the marketing campaigns whose scheduled time has come. |
+| Reads | `campaigns` with status scheduled and a scheduled time up to now; the segment's clients and prospects and their marketing consent in `privacy_consents`. |
+| Writes | One `campaign_recipients` row per person (queued, or excluded with the reason); one e-mail per consenting recipient in `email_outbox`; the campaign becomes sent with its counts. |
+| Switch | Off in the seed. Campaigns sent with Send now do not need it. Nothing leaves the system until the e-mail outbox job sends it. |
+| Restart safety | A recipient is recorded once per campaign; a campaign already sent is skipped. |
+
+## BI extract (off)
+
+| Item | Detail |
+|---|---|
+| Purpose | Writes one CSV file per Report Builder dataset listed in `bi.extract_datasets` to the storage folder `bi.extract_folder`, in a sub-folder of the business date, for the data warehouse or BI tool to collect. |
+| Reads | The curated datasets of the Report Builder (all rows; no user scope). |
+| Writes | The CSV files in file storage and a `bi_extract_runs` row (folder, files with their row counts, status). Only the last `bi.extract_keep_runs` runs are kept in the list. |
+| Switch | Off in the seed. The administrator can also run it from Reports > Report Builder > BI extract > Run now. |
+| Restart safety | A rerun on the same day overwrites the files of that day. |
 
 ## What to watch
 

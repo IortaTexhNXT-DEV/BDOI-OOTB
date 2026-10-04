@@ -482,6 +482,58 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Controls | New treaty approved by a second user (`reinsurance.treaty_requires_approval`); minimum reinsurer security rating A- |
 | Integrations | Bordereaux and reconciliation files as CSV |
 
+## Distribution channels and lead assignment
+
+**What it does.** Records the dealers, financing banks and affinity partners that bring business, and gives every new prospect an account executive.
+
+- Distribution Channels master: dealer groups and branches, financing banks and bank branches, affinity partners; hierarchy, referrer and comsub, mortgagee clause and letter addressee per bank. The channel is carried from the prospect to the quotation and the policy.
+- Lead Assignment: rules by branch, line, source, category, channel and territory (Province, City / Municipality) with round robin, fewest open prospects or a fixed account executive; reassignment queue, single and bulk reassignment with history, team view by reporting line.
+- Dealer Production report by dealer group and channel: prospects, quotations, policies, sum insured, premium and commission.
+
+| Aspect | Detail |
+|---|---|
+| Personas | Sales & Marketing (team view, prospects), sales managers and the lead assignment team (rules, queue), Processing and Operations (channels) |
+| Controls | Permissions read / write:lead-assignment and read / write:channels; every assignment written to the prospect's history and the audit trail |
+| Settings | `leads.assignment_enabled`, `leads.assignment_fallback`, `leads.assignment_sla_hours`, `leads.assignment_notify`, `channels.inherit_from_lead`, `channels.default_mortgagee_clause` |
+
+## Motor programmes, fleets and marine open covers
+
+**What it does.** Places motor and cargo business in bulk: brand-new vehicles sold by dealers, company fleets on one policy, and cargo shipments under an open cover.
+
+- Dealer Programmes: terms per dealer and financing bank (insurer, rates, CTPL term, free or subsidised first year and who pays); the Dealer Sales upload creates the prospect, quotation and, if chosen, the policy with the bank as mortgagee; each payer billed its share; bank endorsement letter printed or e-mailed per sale or per batch.
+- Fleet Schedules: one motor policy with a premium and CTPL per vehicle, upload of the vehicles, schedule PDF and Excel; vehicles added or deleted by endorsement at the pro-rata premium.
+- Marine Open Covers: rate and limit per conveyance, mark-up and minimum premium; certificates printed per shipment; monthly or quarterly declarations billed on the open policy with the premium taxes, then collected and remitted as any bill.
+
+| Aspect | Detail |
+|---|---|
+| Philippine specifics | CTPL from the tariff of the vehicle class (3-year CTPL for new cars); premium taxes of the motor and marine lines from the tax engine |
+| Personas | Sales & Marketing and Processing (programmes), Operations and Processing (fleets, open covers) |
+| Ledger | Every bill raised (programme payers, fleet issue and endorsements, declarations) books the premium receivable, the amount due to the insurer and the commission through the posting rules |
+| Uploads | Dealer Sales and Fleet Vehicles templates (Excel), validated row by row with the reason of each rejection |
+
+## Facultative reinsurance placement
+
+**What it does.** Supports the broker acting as reinsurance broker for an insurer that cedes part of a risk to the facultative market.
+
+- Slip with the risk, the 100% terms, share offered, reinsurance commission and brokerage; reinsurers approached (security rating gate) and their lines; placed when the lines reach 100%.
+- Binding posts the premium due from the cedant, the net premium due to each reinsurer and the brokerage income (posting rule ri.facultative.bind); premium received and paid recorded with their journals.
+- Slip, cover note, debit note and credit notes as PDF; bordereau per period, kept as a document.
+
+## Client comparison report and marketing campaigns
+
+**What it does.** Gives the client a branded comparison of the insurers' offers with the broker's recommendation, and e-mails offers to consenting clients and prospects.
+
+- Comparison Reports from a request for quotation or from quotations: options ranked by premium, highlights, the recommended option and the reasons, disclaimer; printed on the letterhead, e-mailed as PDF, the client's choice recorded. Commission is never shown.
+- Campaigns: segments (clients, prospects, line, territory, channel, renewals due), HTML templates with placeholders, send now or scheduled, only to people whose marketing consent is in force; opt-out link per e-mail recorded in the consent register; results by delivery, exclusion reason, opt-out and conversion.
+
+## Report Builder and BI extract
+
+**What it does.** Answers ad hoc questions without a new report being programmed.
+
+- Curated datasets (Policies, Clients, Bills, Claims, Commissions) with columns, filters, grouping and sort; totals of the numeric columns; export to Excel.
+- Saved reports, private or shared with roles; each user sees only the rows of their data scope.
+- Scheduled BI extract: one CSV per dataset written daily to file storage for the BI tool or data warehouse.
+
 ## Product Configurator
 
 **What it does.** Holds the products the broker places and the rules that price them, including the motor tariff.
@@ -787,6 +839,15 @@ The table lists capabilities a Philippine non-life broker typically compares. Th
 | 62 | Filipino user interface | No | English | | |
 | 63 | Hosting on AWS, Azure, a Philippine partner or on-premise | Yes | | | |
 | 64 | Open API documentation | Yes | OpenAPI | | |
+| 65 | Lead assignment rules by territory, line and source, with reassignment queue | Yes |  | | |
+| 66 | Dealer, bank and affinity channels with production report | Yes |  | | |
+| 67 | Brand-new vehicle programmes with dealer upload and bank endorsement letter | Yes |  | | |
+| 68 | Fleet policy with per-vehicle premium and CTPL, pro-rata endorsements | Yes |  | | |
+| 69 | Marine open cover with certificates and declarations | Yes |  | | |
+| 70 | Facultative reinsurance placement with slip and bordereau | Yes |  | | |
+| 71 | Client comparison and recommendation report | Yes |  | | |
+| 72 | E-mail marketing campaigns to consenting clients with opt-out | Yes | Sent through the e-mail outbox | | |
+| 73 | Ad hoc report builder with saved, shared reports and BI extract | Yes | CSV extract to file storage | | |
 
 # Points to note in this release
 
