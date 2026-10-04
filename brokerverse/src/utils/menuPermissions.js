@@ -111,11 +111,10 @@ export const roleMenuPermissions = {
   claims: {
     dashboard: ["Claims Dashboard"],
     home: true,
-    operations: ["Clients", "Policy", "Claims", "My Work",
+    operations: ["Clients", "Policy", "Claims", "My Work", "Fleet Schedules", "Marine Open Covers",
       // claim document checklist and motor claim repairs (write:claims); their masters below
       "Claim Documents", "Motor Claim Repairs"],
     master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
-    operations: ["Clients", "Policy", "Claims", "Fleet Schedules", "Marine Open Covers"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
   },
