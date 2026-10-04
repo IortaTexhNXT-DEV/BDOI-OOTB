@@ -183,7 +183,7 @@ The Controller:
 - Confidentiality undertakings for staff and contractors.
 - Access to production Personal Data only for named support and operations staff who need it, under change and ticket control.
 - Incident and breach response procedure with defined roles and timelines.
-- Production Personal Data is not copied to development or test environments without masking.
+- Production Personal Data is not copied to development or test environments. It is copied only into a temporary pre-production environment restored from a production backup for a cutover or release rehearsal, used under the production access rules, masked before anyone without production access uses it, and deleted after use.
 
 ## Physical
 

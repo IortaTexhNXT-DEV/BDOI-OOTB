@@ -8,7 +8,7 @@ reviewed: To be completed
 approved: To be completed
 change: Initial issue for management review
 open_item: Owner decisions listed in the last chapter
-acronyms: AM=Account manager; AMC=Annual Maintenance Contract; AML=Anti-money laundering; API=Application programming interface; ARR=Annual recurring revenue; BIR=Bureau of Internal Revenue; CAB=Change advisory board; CEO=Chief executive officer; CR=Change request; DPA=Data Processing Agreement; DPO=Data protection officer; DSO=Days sales outstanding; eFPS=Electronic Filing and Payment System; IC=Insurance Commission; KPI=Key performance indicator; L1/L2/L3=Support levels 1, 2 and 3; LOB=Line of business; LoA=Letter of Award; MSA=Master Services Agreement; NDA=Non-disclosure agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PM=Project manager; RACI=Responsible, Accountable, Consulted, Informed; RCA=Root-cause analysis; SaaS=Software as a service; SH=Sales head; SIT=System integration test; SLA=Service level agreement; SMS=Short message service; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+acronyms: AM=Account manager; AMC=Annual Maintenance Contract; AML=Anti-money laundering; API=Application programming interface; ARR=Annual recurring revenue; BIR=Bureau of Internal Revenue; CAB=Change advisory board; CEO=Chief executive officer; CR=Change request; DPA=Data Processing Agreement; Dev=Development environment; DPO=Data protection officer; DSO=Days sales outstanding; eFPS=Electronic Filing and Payment System; IC=Insurance Commission; KPI=Key performance indicator; L1/L2/L3=Support levels 1, 2 and 3; LOB=Line of business; LoA=Letter of Award; MSA=Master Services Agreement; NDA=Non-disclosure agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PM=Project manager; RACI=Responsible, Accountable, Consulted, Informed; RCA=Root-cause analysis; SaaS=Software as a service; SH=Sales head; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SMS=Short message service; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # Purpose and how to use this playbook
@@ -165,22 +165,23 @@ Each line of business above the included number adds 6 man-days at the blended r
 | Option | Data location | Small | Medium | Large | Enterprise |
 |---|---|---|---|---|---|
 | Hosted by the broker (cloud account or data centre) | Broker's choice | No fee | No fee | No fee | No fee |
-| iorta TechNXT on AWS (ap-southeast-1) | Singapore | 30,000.00 | 62,000.00 | 112,000.00 | 244,000.00 |
-| iorta TechNXT on Azure (Southeast Asia) | Singapore | 31,000.00 | 65,000.00 | 118,000.00 | 256,000.00 |
-| iorta TechNXT with a local partner | Philippines | 28,000.00 | 59,000.00 | 107,000.00 | 232,000.00 |
+| iorta TechNXT on AWS (ap-southeast-1) | Singapore | 43,000.00 | 69,000.00 | 143,000.00 | 256,000.00 |
+| iorta TechNXT on Azure (Southeast Asia) | Singapore | 46,000.00 | 73,000.00 | 150,000.00 | 269,000.00 |
+| iorta TechNXT with a local partner | Philippines | 42,000.00 | 67,000.00 | 135,000.00 | 242,000.00 |
+| Pre-Prod on AWS, per month of use | Singapore | 21,000.00 | 47,000.00 | 86,000.00 | 169,000.00 |
 
-Per month, production and one UAT environment. Hosting in Singapore is a transfer of personal data outside the Philippines that the broker documents under the Data Privacy Act. Hosting is always quoted separately so the software price stays comparable.
+Per month, the standing environment set of the size: Dev, UAT and Production for Small and Medium brokers (integration in Dev, then UAT, then Production); Dev, SIT, UAT and Production with high availability for Large and Enterprise brokers. Pre-Prod is temporary for every size: created from a production backup (masked when used by people without production access) for the go-live rehearsal and each major release, then removed, and billed per month of use. Hosting fees do not increase yearly (pass-through clause). Hosting in Singapore is a transfer of personal data outside the Philippines that the broker documents under the Data Privacy Act. Hosting is always quoted separately so the software price stays comparable.
 
 ## Packages
 
 | Package | Model | Hosting | Support | Small, Year 1 (PHP) | Medium, Year 1 (PHP) |
 |---|---|---|---|---|---|
 | Essentials | Subscription | By the broker | Standard | 1,706,000.00 | 4,226,000.00 |
-| Standard | Subscription | AWS Singapore | Standard | 2,066,000.00 | 4,970,000.00 |
-| Ownership | Perpetual with AMC | AWS Singapore | Standard | 2,840,000.00 | 7,814,000.00 |
-| Ownership Plus | Perpetual with AMC | Local partner, Philippines | Standard and 24x7 Severity 1 | 3,356,000.00 | 8,558,000.00 |
+| Standard | Subscription | AWS Singapore | Standard | 2,264,000.00 | 5,148,000.00 |
+| Ownership | Perpetual with AMC | AWS Singapore | Standard | 3,038,000.00 | 7,992,000.00 |
+| Ownership Plus | Perpetual with AMC | Local partner, Philippines | Standard and 24x7 Severity 1 | 3,564,000.00 | 8,744,000.00 |
 
-Year 1 at list for the reference users (Small 15 users and 5 lines of business; Medium 60 users and 8 lines). The Rate Card gives all four sizes and the 5-year totals.
+Year 1 at list for the reference users (Small 15 users and 5 lines of business; Medium 60 users and 8 lines), including 2 months of Pre-Prod for hosted packages. The Rate Card gives all four sizes and the 5-year totals.
 
 ## Optional services
 
@@ -250,7 +251,7 @@ Legal counsel reviews before release when the deal changes: the limitation of li
 |---|---|---|
 | 1 | Mobilisation | Kick-off, team and governance, plan confirmed, data requests issued, environments ordered |
 | 2 | Discovery and fit-gap | Walk-through of each process on the delivered system; configuration decisions; fit-gap register |
-| 3 | Environment set-up | Test (UAT) and production environments, e-mail account, backups, monitoring |
+| 3 | Environment set-up | Environment set of the broker size (Dev, UAT and Production; SIT as well for a large broker), e-mail account, backups, monitoring |
 | 4 | Configuration | Masters, products and rates, numbering, chart of accounts, posting rules, approvals, security |
 | 5 | Data migration | Extraction by the broker, mapping to the templates, mock loads, reconciliation |
 | 6 | Integrations | E-mail, bank statement files, payment gateway |
@@ -290,7 +291,7 @@ The average team size below is derived from the base man-days and the duration. 
 
 - Templates only: every load uses the delivered upload templates. The broker owns, extracts, cleanses and signs off its data; iorta TechNXT advises on mapping, runs the loads with the broker and reports the results.
 - Open positions, not history: in-force policies, open receivables, the trial balance and masters at the go-live date. Closed history stays in the old system, kept read-only.
-- Mock loads: two for Small (the second is the cutover rehearsal), three for Medium, four for Large. Exit criteria rise from "all files load" to "all control figures reconcile and UAT on migrated data passes".
+- Mock loads: two for Small followed by the cutover rehearsal, three for Medium, four for Large (the last one is the cutover rehearsal). The rehearsal runs in a temporary Pre-Prod created from a production backup. Exit criteria rise from "all files load" to "all control figures reconcile and UAT on migrated data passes".
 - Go/no-go: UAT signed with no open severity 1 or 2 defect; final load reconciled exactly or differences accepted in writing by the Accounting Manager; users trained; cutover checklist done; hypercare team ready; rollback plan confirmed. Rollback is planned up to the end of the first business week; after that, fix forward.
 
 ## Training
@@ -346,7 +347,7 @@ Service credits apply for missed P1 and P2 restore targets and for response and 
 |---|---|
 | Planned release | Monthly, when there are fixes or changes; release notes at least 10 Business Days before deployment to UAT |
 | Emergency release | For a P1 or a security issue, approved by the support manager and the broker's IT head |
-| Testing | Installed in the test environment first; the broker runs the UAT scripts that cover the change; iorta TechNXT runs the regression set |
+| Testing | Installed in Dev, then SIT for a large broker, then UAT; the broker runs the UAT scripts that cover the change; iorta TechNXT runs the regression set; a major release is also rehearsed in a temporary Pre-Prod |
 | Deployment | In the maintenance window (default Saturday 20:00 to Sunday 06:00 PHT), announced at least 5 business days ahead; database snapshot before; smoke test after |
 | Rollback | Previous image and front-end build; migrations only add, so the previous version runs on the newer schema |
 | Supported versions | The current release and the two previous planned releases |

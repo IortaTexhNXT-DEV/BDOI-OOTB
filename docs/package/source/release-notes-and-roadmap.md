@@ -7,7 +7,7 @@ prepared: iorta TechNXT
 reviewed:
 approved:
 open_item: Release tag of the final 1.0 build to be confirmed; re-test of the data privacy cases after the release test; roadmap dates indicative
-acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); EOPT=Ease of Paying Taxes Act (RA 11976); CTPL=Compulsory Third Party Liability; LTO=Land Transportation Office; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; LGU=Local government unit; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; KYC=Know your customer; RFQ=Request for quotation; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; GL=General ledger; SoD=Segregation of duties; TOTP=Time-based one-time password; API=Application programming interface; AMC=Annual Maintenance Contract; CR=Change request; UAT=User acceptance test
+acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); EOPT=Ease of Paying Taxes Act (RA 11976); CTPL=Compulsory Third Party Liability; LTO=Land Transportation Office; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; LGU=Local government unit; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; KYC=Know your customer; RFQ=Request for quotation; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; GL=General ledger; SoD=Segregation of duties; TOTP=Time-based one-time password; API=Application programming interface; AMC=Annual Maintenance Contract; CR=Change request; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test
 ---
 
 # About this release
@@ -182,7 +182,7 @@ Releases are numbered MAJOR.MINOR.PATCH and tagged in the repository (for exampl
 - Database changes only add to the schema; they are applied automatically when the API starts, under a lock, and recorded. The previous release runs on the newer schema, so a release can be rolled back by redeploying the previous image.
 - Settings and master data changed by the broker are kept: the seed inserts only what is missing.
 - Every release has release notes: fixes, changes, migrations and anything the System Administrator must do by hand.
-- Each release is installed in the test environment first; the broker runs the UAT scripts for the changed areas; iorta TechNXT runs the regression; the CAB approves.
+- Each release is installed in Dev, then in SIT for a large broker, then in UAT, before production; a major release is also rehearsed in a temporary Pre-Prod restored from a production backup; the broker runs the UAT scripts for the changed areas; iorta TechNXT runs the regression; the CAB approves.
 - A database snapshot is taken before deployment; deployment happens in the agreed maintenance window, announced at least 5 business days ahead.
 
 ## Entitlement and support of versions

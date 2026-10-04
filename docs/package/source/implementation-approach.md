@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; SIT=System integration test; UAT=User acceptance test; RACI=Responsible, Accountable, Consulted, Informed; RAID=Risks, Assumptions, Issues, Dependencies; PM=Project manager; SteerCo=Steering committee; CR=Change request; GL=General ledger; CoA=Chart of accounts; SMTP=Simple Mail Transfer Protocol; CTPL=Compulsory Third Party Liability; PHT=Philippine time; TTT=Train the trainer
+acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; RACI=Responsible, Accountable, Consulted, Informed; RAID=Risks, Assumptions, Issues, Dependencies; PM=Project manager; SteerCo=Steering committee; CR=Change request; GL=General ledger; CoA=Chart of accounts; SMTP=Simple Mail Transfer Protocol; CTPL=Compulsory Third Party Liability; PHT=Philippine time; TTT=Train the trainer
 ---
 
 # Introduction
@@ -88,7 +88,7 @@ An import file holds at most 20,000 data rows (`IMPORT_MAX_ROWS`). Larger books 
 |---|---|---|
 | 1 | Mobilisation | Kick-off, team and governance, plan confirmed, data requests issued, environments ordered |
 | 2 | Discovery and fit-gap | Walk-through of each process on the delivered system; configuration decisions; fit-gap register limited to configuration |
-| 3 | Environment set-up | Test (UAT) and production environments, e-mail account, backups, monitoring |
+| 3 | Environment set-up | Environment set of the broker size (Dev, UAT and Production; SIT as well for a large broker), e-mail account, backups, monitoring |
 | 4 | Configuration | Masters, products and rates, numbering, chart of accounts, posting rules, approvals, security |
 | 5 | Data migration | Extraction by the broker, mapping to the templates, mock loads, reconciliation |
 | 6 | Integrations | E-mail, bank statement files, payment gateway |
@@ -126,8 +126,16 @@ Output: the configuration workbook and the fit-gap register. Each register line 
 
 ## Environment set-up
 
-- iorta TechNXT provisions a test environment (used for configuration, SIT, mock loads, training and UAT) and the production environment following `deploy/README.md`. Assumption: iorta TechNXT hosts both on AWS in region ap-southeast-1; a broker-hosted installation is a separate option.
-- Production starts with reference data only (`SEED_SAMPLE_DATA=false`). The test environment may carry the delivered sample data for training.
+- iorta TechNXT provisions the environment set of the broker size following `deploy/README.md` and the Environment Strategy and Production Rollout Plan:
+
+| Broker size | Environments | Use |
+|---|---|---|
+| Small and medium | Dev, UAT, Production | Configuration and system integration test in Dev (synthetic data only); mock loads, training and UAT in UAT |
+| Large | Dev, SIT, UAT, Production with high availability | Development and integration in Dev; configuration, system integration test and the first mock loads in SIT; later mock loads, training and UAT in UAT |
+| Every size | Pre-Prod, temporary | Created from a Production backup for the cutover rehearsal in the last two weeks before go-live; removed after hypercare |
+
+- Assumption: iorta TechNXT hosts the environments on AWS in region ap-southeast-1, priced per environment in the Rate Card; a broker-hosted installation is a separate option and provides the same set.
+- Production starts with reference data only (`SEED_SAMPLE_DATA=false`). Dev and UAT may carry the delivered sample data for training until the first mock load.
 - Database time zone Asia/Manila, daily database snapshots with at least 30 days' retention, backup of the upload volume and the encryption key, a restore test before go-live.
 - Health checks (`/api/health`, `/api/health/live`) wired to the load balancer and monitoring.
 - SMTP mailbox for outgoing e-mail.
@@ -135,7 +143,7 @@ Output: the configuration workbook and the fit-gap register. Each register line 
 
 ## Configuration
 
-Configuration follows the order of `GO_LIVE_DATA_SETUP.md`, steps 1 to 10, first in the test environment. Once accepted in UAT, the same values are applied to production, by upload where a template exists and on the screen otherwise.
+Configuration follows the order of `GO_LIVE_DATA_SETUP.md`, steps 1 to 10, first in Dev (small and medium broker) or SIT (large broker), and is promoted to UAT with the configuration workbook. Once frozen and accepted in UAT, the same values are applied to production, by upload where a template exists and on the screen otherwise.
 
 | Item | Screen | Template |
 |---|---|---|
@@ -163,7 +171,7 @@ The detail is in the Data Migration and Cutover Plan. In outline:
 
 - Masters, in-force policies and clients, open premium receivables, GL opening balances (which carry the amounts due to insurers), and optionally leads and quotations in progress.
 - The broker extracts and cleanses the data; iorta TechNXT advises on mapping, runs the loads with the broker and checks the results.
-- Three mock loads for medium and large brokers, two for small brokers, each reconciled on counts and totals. The last mock load is the cutover rehearsal.
+- Mock loads in UAT (small and medium) or SIT and UAT (large), each reconciled on counts and totals: two for small brokers, followed by the cutover rehearsal as a third load; three for medium brokers and four for large brokers, the last one being the cutover rehearsal. The cutover rehearsal always runs in the temporary Pre-Prod.
 
 ## Integrations
 
@@ -183,7 +191,7 @@ Train-the-trainer for the key users first, then end-user training per role, deli
 
 ## System integration test
 
-iorta TechNXT runs the end-to-end flows across all roles in the test environment with the configured masters and the migrated data of the latest mock load. The test follows the end-to-end plan in `docs/e2e/E2E_TEST_PLAN.md` (one motor policy through its whole life, plus a co-insured placement and the month-end close) and the scripted scenario `backend/scripts/uat-scenario.js`, which drives the full broking cycle through the API with one user per role. Defects are logged with the request ID shown in error messages.
+iorta TechNXT runs the end-to-end flows across all roles with the configured masters: in Dev with synthetic data for a small or medium broker, in SIT with the migrated data of the latest mock load for a large broker. The test follows the end-to-end plan in `docs/e2e/E2E_TEST_PLAN.md` (one motor policy through its whole life, plus a co-insured placement and the month-end close) and the scripted scenario `backend/scripts/uat-scenario.js`, which drives the full broking cycle through the API with one user per role. Defects are logged with the request ID shown in error messages.
 
 ## User acceptance test
 
@@ -203,14 +211,14 @@ Go-live is at the start of week 7. Hypercare runs in weeks 7 and 8.
 
 | Week | Activities | Milestones |
 |---|---|---|
-| 1 | Kick-off; governance set up; data requests issued; test environment provisioned; discovery workshops start | Kick-off held; plan and go-live date confirmed |
+| 1 | Kick-off; governance set up; data requests issued; Dev and UAT provisioned; discovery workshops start | Kick-off held; plan and go-live date confirmed |
 | 2 | Discovery and fit-gap completed; production environment provisioned; configuration of company, branches, users, insurers, commission | Configuration workbook and fit-gap register signed |
-| 3 | Configuration of products, motor tariff, taxes, chart of accounts, account determination, posting rules, numbering, approvals; e-mail set-up; bank statement formats; mock load 1 | Mock load 1 reconciled |
-| 4 | Configuration completed; payment gateway sandbox test; SIT; train-the-trainer for key users | SIT exit report; configuration frozen for UAT |
-| 5 | UAT with the UAT scripts; end-user training; configuration fixes; mock load 2 (cutover rehearsal) | Mock load 2 reconciled; trained users listed |
-| 6 | UAT sign-off; configuration copied to production; production smoke test; go/no-go; cutover at the close of the last day of week 6 | UAT sign-off; go decision |
+| 3 | Configuration of products, motor tariff, taxes, chart of accounts, account determination, posting rules, numbering, approvals; e-mail set-up; bank statement formats; configuration promoted from Dev to UAT; mock load 1 in UAT | Mock load 1 reconciled |
+| 4 | Configuration completed; payment gateway sandbox test; SIT in Dev; train-the-trainer for key users | SIT exit report; configuration frozen for UAT |
+| 5 | UAT with the UAT scripts; end-user training; configuration fixes; mock load 2 in UAT; release and frozen configuration promoted to production; production smoke test; Pre-Prod created from a production backup | Mock load 2 reconciled; trained users listed |
+| 6 | UAT sign-off; cutover rehearsal in Pre-Prod; go/no-go; cutover at the close of the last day of week 6 | UAT sign-off; rehearsal reconciled; go decision |
 | 7 | Go-live; daily hypercare check-ins; first official receipts, remittances and bank imports watched | Go-live |
-| 8 | Hypercare; weekly review; knowledge transfer to support; handover | Hypercare exit and handover (or extension to the first month-end) |
+| 8 | Hypercare; weekly review; knowledge transfer to support; handover; Pre-Prod removed | Hypercare exit and handover (or extension to the first month-end) |
 
 # Timeline: medium broker (12 weeks)
 
@@ -218,18 +226,18 @@ Go-live is at the start of week 10. Hypercare runs in weeks 10 to 12.
 
 | Week | Activities | Milestones |
 |---|---|---|
-| 1 | Kick-off; governance; data requests; test environment provisioned | Kick-off held |
+| 1 | Kick-off; governance; data requests; Dev and UAT provisioned | Kick-off held |
 | 2 | Discovery workshops (organisation, sales and placement, servicing, claims); production environment provisioned | Environments ready |
 | 3 | Discovery workshops (billing, remittance, commission, ledger, tax); fit-gap register; configuration of organisation, users, insurers | Configuration workbook and fit-gap register signed |
 | 4 | Configuration of products, product templates, motor tariff, commission, taxes; data mapping to templates | Data mapping agreed |
-| 5 | Configuration of chart of accounts, account determination, posting rules, numbering, approvals, schedules; e-mail; mock load 1 | Mock load 1 reconciled |
-| 6 | Configuration completed; bank statement formats; payment gateway sandbox; SIT cycle 1 | Configuration complete |
-| 7 | SIT cycle 2; mock load 2; train-the-trainer for key users | SIT exit report; mock load 2 reconciled |
-| 8 | UAT cycle 1; end-user training starts | UAT cycle 1 results |
-| 9 | UAT cycle 2 and sign-off; end-user training completed; mock load 3 (cutover rehearsal); configuration copied to production; go/no-go; cutover at the close of week 9 | UAT sign-off; go decision |
+| 5 | Configuration of chart of accounts, account determination, posting rules, numbering, approvals, schedules; e-mail; configuration promoted from Dev to UAT; mock load 1 in UAT | Mock load 1 reconciled |
+| 6 | Configuration completed; bank statement formats; payment gateway sandbox; SIT cycle 1 in Dev | Configuration complete |
+| 7 | SIT cycle 2 in Dev; mock load 2 in UAT; train-the-trainer for key users | SIT exit report; mock load 2 reconciled |
+| 8 | UAT cycle 1; end-user training starts; release and frozen configuration promoted to production; production smoke test | UAT cycle 1 results |
+| 9 | UAT cycle 2 and sign-off; end-user training completed; Pre-Prod created from a production backup; mock load 3 as the cutover rehearsal in Pre-Prod; go/no-go; cutover at the close of week 9 | UAT sign-off; go decision |
 | 10 | Go-live; daily hypercare check-ins | Go-live |
 | 11 | Hypercare; first remittance run and bank reconciliations | Weekly hypercare review |
-| 12 | Hypercare; first month-end close supported where it falls; knowledge transfer; handover | Hypercare exit and handover |
+| 12 | Hypercare; first month-end close supported where it falls; knowledge transfer; handover; Pre-Prod removed | Hypercare exit and handover |
 
 # Timeline: large broker (16 to 20 weeks)
 
@@ -237,28 +245,28 @@ The plan below is the 20-week version. Go-live is at the start of week 15 for al
 
 | Week | Activities | Milestones |
 |---|---|---|
-| 1 | Kick-off; governance; data requests; test environment ordered | Kick-off held |
-| 2 | Mobilisation completed; test environment provisioned; discovery starts (organisation and access) | Plan baselined |
-| 3 | Discovery: sales, placement, co-insurance, servicing, claims, renewals; production environment provisioned | Environments ready |
+| 1 | Kick-off; governance; data requests; Dev, SIT, UAT and production environments ordered | Kick-off held |
+| 2 | Mobilisation completed; Dev and SIT provisioned; discovery starts (organisation and access) | Plan baselined |
+| 3 | Discovery: sales, placement, co-insurance, servicing, claims, renewals; UAT and the production environment provisioned | Environments ready |
 | 4 | Discovery: billing, remittance, direct bill, commission and incentives, ledger, close, tax; configuration of organisation and users starts | |
 | 5 | Fit-gap register completed; configuration of insurers, commission, products | Configuration workbook and fit-gap register signed |
 | 6 | Configuration of product templates, motor tariff, rating, acceptance rules; data mapping; e-mail set-up | Data mapping agreed |
-| 7 | Configuration of chart of accounts, account determination, posting rules, numbering; mock load 1 | Mock load 1 reconciled |
+| 7 | Configuration of chart of accounts, account determination, posting rules, numbering; mock load 1 in SIT | Mock load 1 reconciled |
 | 8 | Configuration of approvals, authority matrix, schedules, bank accounts and statement formats; payment gateway sandbox | |
 | 9 | Configuration completed; SIT cycle 1 | Configuration complete |
-| 10 | SIT cycle 2; mock load 2; train-the-trainer starts | Mock load 2 reconciled |
-| 11 | SIT exit; train-the-trainer completed; UAT preparation with broker-specific scenarios | SIT exit report |
+| 10 | SIT cycle 2; mock load 2 in SIT; train-the-trainer starts | Mock load 2 reconciled |
+| 11 | SIT exit; configuration promoted from SIT to UAT; train-the-trainer completed; UAT preparation with broker-specific scenarios | SIT exit report |
 | 12 | UAT cycle 1; end-user training (head office) | UAT cycle 1 results |
-| 13 | UAT cycle 2; mock load 3; end-user training (branches) | UAT sign-off |
-| 14 | Mock load 4 (cutover rehearsal); configuration copied to production; production smoke test; go/no-go; cutover at the close of week 14 | Go decision |
+| 13 | UAT cycle 2; mock load 3 in UAT; end-user training (branches); release and frozen configuration promoted to production; production smoke test | UAT sign-off |
+| 14 | Pre-Prod created from a production backup; mock load 4 as the cutover rehearsal in Pre-Prod; go/no-go; cutover at the close of week 14 | Go decision |
 | 15 | Go-live; daily hypercare check-ins at head office; floor walkers in the branches | Go-live |
 | 16 | Hypercare; first remittance runs and bank reconciliations across all bank accounts | Weekly hypercare review |
 | 17 | Hypercare; collection, commission payout and renewal cycles watched | Weekly hypercare review |
 | 18 | Hypercare; first month-end close supported (timing depends on the go-live date) | First close completed |
 | 19 | Hypercare; BIR working papers of the first month; settings review after the first close | Settings review held |
-| 20 | Knowledge transfer; handover to production support | Hypercare exit and handover |
+| 20 | Knowledge transfer; handover to production support; Pre-Prod removed | Hypercare exit and handover |
 
-A large broker with one office cluster and a simple product mix can follow a 16-week variant: discovery ends in week 4, configuration in week 8, three mock loads, go-live at the start of week 13 and hypercare in weeks 13 to 16 (extended to the first month-end close if needed).
+A large broker with one office cluster and a simple product mix can follow a 16-week variant: discovery ends in week 4, configuration in week 8, three mock loads (the last one as the cutover rehearsal in Pre-Prod), go-live at the start of week 13 and hypercare in weeks 13 to 16 (extended to the first month-end close if needed).
 
 # Roles and responsibilities
 
@@ -335,8 +343,8 @@ Items rated high go to the steering committee.
 |---|---|---|
 | Mobilisation | Project charter, baselined plan, RAID log, data request list, governance calendar | Charter and plan signed by both project managers and the sponsor |
 | Discovery and fit-gap | Configuration workbook, fit-gap register | Every process walked through; every register line classed and owned; signed by the process owners |
-| Environment set-up | Test and production environments, environment sheet (addresses, backups, monitoring) | Smoke test of `deploy/README.md` section 4 passed on each; restore test done once |
-| Configuration | Configured test environment; configuration workbook updated with the values set | Each workbook item set and checked as in `GO_LIVE_DATA_SETUP.md` steps 1 to 10; test quotation premiums and taxes agree with manual calculations |
+| Environment set-up | Environment set of the broker size (Dev, UAT, Production; SIT for a large broker), environment sheet (addresses, backups, monitoring) | Smoke test of `deploy/README.md` section 4 passed on each; restore test done once |
+| Configuration | Configured Dev (small, medium) or SIT (large) environment, promoted to UAT; configuration workbook updated with the values set | Each workbook item set and checked as in `GO_LIVE_DATA_SETUP.md` steps 1 to 10; test quotation premiums and taxes agree with manual calculations |
 | Data migration | Mapping sheets, filled templates, load logs, reconciliation reports for each mock load | Counts and totals agree within the agreed tolerance (default: exact); trial balance as at go-live agrees with the old system |
 | Integrations | E-mail, bank statement formats, payment gateway set up | Password reset e-mail and quotation approval link received; one statement per bank account imported with a balancing preview; one sandbox payment receipted |
 | Training | Training schedule, attendance lists, assessment results | Every user trained in the role before go-live; key users pass the assessment |
@@ -354,12 +362,12 @@ A deliverable is deemed accepted when the broker has not raised a written object
 - The broker names a project manager and one key user per team, available at least 50% of their time during discovery, UAT and cutover, and an Accounting Manager available for the ledger, tax and opening balance decisions.
 - The broker provides complete and cleansed data in the delivered templates by the dates in the plan.
 - Decisions in discovery are made within 3 business days of each workshop.
-- iorta TechNXT hosts the test and production environments on AWS (region ap-southeast-1). Other hosting is priced separately.
+- iorta TechNXT hosts the environment set of the broker size and the temporary Pre-Prod on AWS (region ap-southeast-1), priced per environment. Other hosting is priced separately.
 - Workshops and training are delivered on site in Metro Manila or online, in English, during Philippine business hours.
 - One legal entity and one fiscal year are migrated; opening balances are taken at a single go-live date.
 - The broker uses the delivered roles: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting and Accounting Manager.
 - The delivered tax codes, rates and BIR working papers are confirmed by the broker's tax adviser before go-live.
-- Testing uses the test environment; production is used only after the go decision.
+- Testing uses Dev, SIT (large broker), UAT and the temporary Pre-Prod; production receives the release and the frozen configuration before the cutover rehearsal and is used for business only after the go decision.
 
 # Exclusions
 

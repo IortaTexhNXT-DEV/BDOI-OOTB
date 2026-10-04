@@ -8,7 +8,7 @@ reviewed: Legal counsel (to be completed)
 approved: To be completed
 change: Template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
-acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; Dev=Development environment; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SIT=System integration test; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # About this template
@@ -45,7 +45,9 @@ This Order Form records one purchase of iNXT BrokerVerse OOTB under the Master S
 | Training days included | [4 / 6 / 10 / 15] |
 | Hosting | [Client hosted / iorta TechNXT on AWS Singapore / Azure Southeast Asia / local partner: name, city] |
 | Data location | [Philippines / Singapore] |
-| Environments | [Production, UAT, additional: list] |
+| Environment set | [Small or Medium: Dev, UAT, Production / Large or Enterprise: Dev, SIT, UAT, Production with high availability] |
+| Pre-Prod (temporary) | Created from a production backup for the cutover rehearsal and each major release, then removed; planned months of use: [2] around go-live, [1] per major release |
+| Additional environments | [None / number and purpose: training, second UAT] |
 | 24x7 Severity 1 support | [Yes / No] |
 | Source code escrow (perpetual only) | [Yes / No] |
 
@@ -84,8 +86,9 @@ All amounts in PHP, excluding VAT. VAT at 12% is added on each invoice.
 |---|---|---|---|---|---|
 | Subscription, per month | [billable users] users, graduated slabs | [amount] | [amount] ([lever]) | [amount] | 5% at each anniversary |
 | AMC, per year from Year 2 | 22% of the licence fee | [amount] | Not discounted | [amount] | 5% at each anniversary |
-| Hosting, per month | [provider], [size], production and UAT | [amount] | [amount] | [amount] | As in the Hosting Agreement |
-| Additional environments hosted, per month | [number] x PHP 11,000.00 | [amount] | | [amount] | As in the Hosting Agreement |
+| Hosting, per month | [provider], [size], standing environment set: Dev [amount], SIT [amount or not used], UAT [amount], Production [amount] | [amount] | [amount] | [amount] | None: pass-through clause of the Hosting Agreement |
+| Pre-Prod, per month of use | [provider], [size]; [number] months planned in Year 1 | [amount] | [amount] | [amount] | None: pass-through clause of the Hosting Agreement |
+| Additional environments hosted, per month | [number] x PHP 11,000.00 | [amount] | | [amount] | None: pass-through clause of the Hosting Agreement |
 | 24x7 Severity 1 support, per year | [size] | [amount] | [amount] | [amount] | 5% a year |
 
 ## Contract value
@@ -106,7 +109,8 @@ All amounts in PHP, excluding VAT. VAT at 12% is added on each invoice.
 | Perpetual licence fee, 100% | [amount] | On go-live |
 | One-time optional services | [amount] | On delivery |
 | Subscription | [amount] a month | Monthly in advance from go-live |
-| Hosting | [amount] a month | Monthly in advance from environment handover |
+| Hosting | [amount] a month | Monthly in advance from the handover of each environment |
+| Pre-Prod | [amount] a month of use | Monthly in advance for each month of use |
 | AMC | [amount] a year | Yearly in advance from the start of Year 2 |
 | 24x7 Severity 1 support | [amount] a year | Yearly in advance |
 

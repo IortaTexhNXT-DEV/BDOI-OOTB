@@ -8,7 +8,7 @@ reviewed: Legal counsel (to be completed)
 approved: To be completed
 change: Template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
-acronyms: AWS=Amazon Web Services; DPA=Data Privacy Act of 2012 (RA 10173); DR=Disaster recovery; MSA=Master Services Agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; PITR=Point-in-time recovery; RPO=Recovery point objective; RTO=Recovery time objective; TLS=Transport Layer Security; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax; WAF=Web application firewall
+acronyms: AWS=Amazon Web Services; Dev=Development environment; DPA=Data Privacy Act of 2012 (RA 10173); DR=Disaster recovery; MSA=Master Services Agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; PITR=Point-in-time recovery; Pre-Prod=Pre-production environment; RPO=Recovery point objective; RTO=Recovery time objective; SIT=System integration test; TLS=Transport Layer Security; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax; WAF=Web application firewall
 ---
 
 # About this template
@@ -37,14 +37,24 @@ The cloud or data centre provider is a sub-processor of iorta TechNXT under the 
 
 ## Environments
 
+The environment set follows the Client's size, stated in the Order Form:
+
+| Size | Standing environments | Temporary environment |
+|---|---|---|
+| Small and Medium | Dev, UAT, Production | Pre-Prod |
+| Large and Enterprise | Dev, SIT, UAT, Production | Pre-Prod |
+
 | Environment | Purpose | Form |
 |---|---|---|
-| Production | Live operations | Highly available: at least two API instances, managed PostgreSQL with standby, shared file store |
-| UAT | Testing, acceptance and training | Same topology as production at a smaller size |
+| Dev | Development, configuration and integration; for Small and Medium also the system integration test | Small single-zone environment; no Client personal data |
+| SIT (Large and Enterprise) | System integration test and mock loads | Single-zone environment, medium size |
+| UAT | Testing, acceptance, training and mock loads | Single-zone environment: small size for Small and Medium, medium size for Large and Enterprise |
+| Production | Live operations | At least two API instances, managed PostgreSQL and shared file store, sized by size; Large and Enterprise with a standby database (high availability) |
+| Pre-Prod (temporary) | Cutover rehearsal before go-live and rehearsal of each major release | Restored from a Production backup at production topology and size; removed after use |
 | Additional environment (optional) | Training or second UAT | Small single-zone environment, priced as an optional service |
 | DR (Enterprise size, or optional) | Recovery after a regional or site outage | Restored from cross-region or off-site backups |
 
-Production personal data is not copied into UAT or another non-production environment without masking. Each environment has its own secrets.
+Production personal data is not copied into another environment except Pre-Prod. Pre-Prod is masked before anyone without access to Production uses it. Each environment has its own secrets. When Pre-Prod is removed, its database, file store, backups and secrets are deleted and the deletion is recorded.
 
 # Services
 
@@ -52,7 +62,7 @@ Production personal data is not copied into UAT or another non-production enviro
 
 iorta TechNXT provides, for each environment in the Order Form:
 
-1. provisioning and configuration of the infrastructure, sized for the Client's size and confirmed by the UAT performance test;
+1. provisioning and configuration of the infrastructure, sized for the Client's size and confirmed by the UAT performance test, and creation and removal of Pre-Prod when the Client or a major release needs it;
 2. deployment of iNXT BrokerVerse releases under the release process of the Support Agreement;
 3. operating system, database and middleware patching (monthly; critical security patches within 14 days and high within 30 days);
 4. TLS certificates for the iorta TechNXT-provided domain [or the Client's domain, with the Client's DNS cooperation];
@@ -105,7 +115,7 @@ The regional objectives apply only when the Order Form includes a DR environment
 | Test | Frequency |
 |---|---|
 | Check that backup jobs succeeded and the latest restorable time is within 15 minutes | Daily |
-| Point-in-time restore to a new instance, application started against it, smoke test | Quarterly and before go-live |
+| Point-in-time restore to a new instance, application started against it, smoke test (each creation of Pre-Prod from a Production backup counts as one) | Quarterly and before go-live |
 | Logical dump restore into a clean PostgreSQL 16 with row counts compared | Twice a year |
 | Secret escrow check under dual control | Yearly |
 | Tabletop DR exercise with the Client | Yearly |
@@ -158,20 +168,35 @@ The Client may ask for the provider's certifications (for example ISO/IEC 27001 
 
 ## Monthly hosting fee
 
-The monthly hosting fee (production plus one UAT environment) is stated in the Order Form. List prices of the price book dated 03 October 2026, excluding VAT:
+The hosting fee is the sum of the monthly fees of the environments in the Order Form. List prices of the price book dated 03 October 2026, excluding VAT, for the standing environment set:
+
+| Size | Environments | AWS (PHP a month) | Azure (PHP a month) | Local partner (PHP a month) |
+|---|---|---|---|---|
+| Small | Dev, UAT, Production | 43,000.00 | 46,000.00 | 42,000.00 |
+| Medium | Dev, UAT, Production | 69,000.00 | 73,000.00 | 67,000.00 |
+| Large | Dev, SIT, UAT, Production | 143,000.00 | 150,000.00 | 135,000.00 |
+| Enterprise | Dev, SIT, UAT, Production | 256,000.00 | 269,000.00 | 242,000.00 |
+
+Annex A gives the fee of each environment.
+
+## Pre-Prod fee
+
+Pre-Prod is billed for each calendar month [or part of a month] in which it exists, at the following list prices, excluding VAT:
 
 | Size | AWS (PHP a month) | Azure (PHP a month) | Local partner (PHP a month) |
 |---|---|---|---|
-| Small | 30,000.00 | 31,000.00 | 28,000.00 |
-| Medium | 62,000.00 | 65,000.00 | 59,000.00 |
-| Large | 112,000.00 | 118,000.00 | 107,000.00 |
-| Enterprise | 244,000.00 | 256,000.00 | 232,000.00 |
+| Small | 21,000.00 | 22,000.00 | 20,000.00 |
+| Medium | 47,000.00 | 49,000.00 | 45,000.00 |
+| Large | 86,000.00 | 90,000.00 | 82,000.00 |
+| Enterprise | 169,000.00 | 177,000.00 | 160,000.00 |
 
-The fee includes the provider's charges for the sized resources and a margin for exchange rate movement, monitoring, patching and backup checks. Additional environments are PHP 11,000.00 a month each, with a one-time set-up fee of PHP 100,000.00. The hosting fee and the fee for additional environments do not increase at each anniversary; they change only under the Pass-through and adjustments clause.
+iorta TechNXT creates Pre-Prod for the cutover rehearsal and for each major release, and tells the Client the expected months of use in advance. The price book budgets 2 months around go-live and 1 month for each major release.
+
+The fees include the provider's charges for the sized resources and a margin for exchange rate movement, monitoring, patching and backup checks. Additional environments are PHP 11,000.00 a month each, with a one-time set-up fee of PHP 100,000.00. The hosting fee, the Pre-Prod fee and the fee for additional environments do not increase at each anniversary; they change only under the Pass-through and adjustments clause.
 
 ## Billing
 
-The hosting fee is invoiced monthly in advance from the date the environment is handed over to the Client, and is payable within 30 days. VAT is added and withholding tax is handled under the MSA.
+The fee of each standing environment is invoiced monthly in advance from the date that environment is handed over to the Client. The Pre-Prod fee is invoiced monthly in advance for each month of use. Invoices are payable within 30 days. VAT is added and withholding tax is handled under the MSA.
 
 ## Pass-through and adjustments
 
@@ -220,12 +245,36 @@ The Exit and Transition Plan sets out the steps, formats, timelines and forms of
 |---|---|
 | Option | [A: AWS Singapore / B: Azure Southeast Asia / C: local partner, name and city] |
 | Size | [Small / Medium / Large / Enterprise] |
-| Environments | [Production, UAT, additional environments] |
+| Environment set | [Small and Medium: Dev, UAT, Production / Large and Enterprise: Dev, SIT, UAT, Production] |
+| Additional environments | [number and purpose, or none] |
+| Pre-Prod | [Temporary; months planned around go-live: number; per major release: number] |
 | DR | [Included (Enterprise) / optional / none] |
-| Monthly hosting fee (excluding VAT) | PHP [amount] |
+| Monthly hosting fee, standing environment set (excluding VAT) | PHP [amount] |
+| Pre-Prod fee per month of use (excluding VAT) | PHP [amount] |
 | Discount, if any ([lever]) | PHP [amount] |
 | Exchange rate basis | PHP [62.75] per USD on [25 September 2026] |
 | Hosting term | [12 / 36 / 60] months from handover |
 | Data location approved by the Client | [Singapore / Philippines] |
 | Client's privacy impact assessment reference | [reference] |
 | Recovery objectives accepted | [Yes, as in the Recovery objectives chapter / as amended: details] |
+
+# Annex A: fee per environment
+
+List prices of the price book dated 03 October 2026, PHP a month, excluding VAT. "Not used" means the environment is not part of the set of that size.
+
+| Provider and size | Dev | SIT | UAT | Production | Pre-Prod, per month of use |
+|---|---|---|---|---|---|
+| AWS, Small | 11,000.00 | Not used | 11,000.00 | 21,000.00 | 21,000.00 |
+| AWS, Medium | 11,000.00 | Not used | 11,000.00 | 47,000.00 | 47,000.00 |
+| AWS, Large | 11,000.00 | 23,000.00 | 23,000.00 | 86,000.00 | 86,000.00 |
+| AWS, Enterprise | 11,000.00 | 23,000.00 | 23,000.00 | 199,000.00 | 169,000.00 |
+| Azure, Small | 12,000.00 | Not used | 12,000.00 | 22,000.00 | 22,000.00 |
+| Azure, Medium | 12,000.00 | Not used | 12,000.00 | 49,000.00 | 49,000.00 |
+| Azure, Large | 12,000.00 | 24,000.00 | 24,000.00 | 90,000.00 | 90,000.00 |
+| Azure, Enterprise | 12,000.00 | 24,000.00 | 24,000.00 | 209,000.00 | 177,000.00 |
+| Local partner, Small | 11,000.00 | Not used | 11,000.00 | 20,000.00 | 20,000.00 |
+| Local partner, Medium | 11,000.00 | Not used | 11,000.00 | 45,000.00 | 45,000.00 |
+| Local partner, Large | 11,000.00 | 21,000.00 | 21,000.00 | 82,000.00 | 82,000.00 |
+| Local partner, Enterprise | 11,000.00 | 21,000.00 | 21,000.00 | 189,000.00 | 160,000.00 |
+
+The Enterprise Production fee includes the cross-region copy of the backups (DR); Pre-Prod does not.

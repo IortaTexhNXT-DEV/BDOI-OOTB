@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; GL=General ledger; TB=Trial balance; CoA=Chart of accounts; OR=Official receipt; ATP=Authority to Print; BIR=Bureau of Internal Revenue; UAT=User acceptance test; API=Application programming interface; XLSX=Excel workbook; CSV=Comma-separated values; PM=Project manager
+acronyms: OOTB=Out of the box; GL=General ledger; TB=Trial balance; CoA=Chart of accounts; OR=Official receipt; ATP=Authority to Print; BIR=Bureau of Internal Revenue; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; API=Application programming interface; XLSX=Excel workbook; CSV=Comma-separated values; PM=Project manager
 ---
 
 # Introduction
@@ -24,7 +24,7 @@ It applies the step-by-step set-up of `docs/onboarding/GO_LIVE_DATA_SETUP.md` to
 - **Open positions, not history.** BrokerVerse receives what is open at the go-live date: in-force policies, unpaid premium, the trial balance. Closed history stays in the old system, which is kept read-only.
 - **One go-live date.** The go-live date is the first day of transactions in BrokerVerse. Balances and open items are taken from the old system at the close of the day before.
 - **Reconcile everything.** Every load is checked on counts and totals against control figures produced from the old system before the load.
-- **Rehearse.** The full sequence runs in the test environment at least twice before cutover (mock loads).
+- **Rehearse.** The full sequence runs at least twice before cutover (mock loads in UAT, or SIT and UAT for a large broker), and the last run is the cutover rehearsal in a temporary Pre-Prod created from a production backup.
 
 ## Roles
 
@@ -194,7 +194,7 @@ Counts and totals agree even when data is wrong in the detail, so the key users 
 
 - 20 policies per line of business opened on the screen: insured, insurer, dates, sum insured, premium, plate number for motor.
 - 20 open items: policy, bill reference, due date, balance, ageing bucket.
-- One receipt posted in the test environment on a migrated open item (UAT script F1) and a claim registered on a migrated policy without open premium (UAT script C1).
+- One receipt posted in UAT on a migrated open item (UAT script F1) and a claim registered on a migrated policy without open premium (UAT script C1).
 - Trial balance reviewed line by line by the Accounting Manager (UAT script F7); the ageing compared bucket by bucket (UAT script F6).
 - Document numbers: one test document of each series shows the next number set from the old system, including the official receipt series registered with the BIR.
 
@@ -208,10 +208,10 @@ Each load produces a reconciliation report: control figures, figures from Broker
 |---|---|---|---|
 | Mock 1 | Prove mapping and templates; find data quality issues | Full extract from the old system at a recent date | All files load; failures listed and assigned for cleansing |
 | Mock 2 | Prove cleansing; measure load times; reconcile | Fresh extract after cleansing | Failures below 1% of rows and explained; all control figures reconcile |
-| Mock 3 (medium and large) | Full rehearsal on fresh data | Fresh extract at a month-end | All control figures reconcile; UAT on migrated data passes |
-| Mock 4 or final rehearsal (large) | Cutover rehearsal with the cutover timetable | Fresh extract | Done inside the cutover window; reconciliation signed |
+| Mock 3 (large) | Full rehearsal on fresh data | Fresh extract at a month-end | All control figures reconcile; UAT on migrated data passes |
+| Cutover rehearsal (small: third load; medium: mock 3; large: mock 4) | Cutover rehearsal with the cutover timetable, in Pre-Prod | Fresh extract | Done inside the cutover window; reconciliation signed |
 
-Each mock load runs in the test environment on a database reset to reference data plus the agreed configuration. The time of each step is recorded and used for the cutover timetable. Small brokers run two mock loads; the second is the cutover rehearsal.
+Each mock load runs in UAT (small and medium broker) or in SIT and UAT (large broker) on a database reset to reference data plus the agreed configuration. The cutover rehearsal runs in a temporary Pre-Prod restored from a backup of the configured Production environment (Environment Strategy and Production Rollout Plan). The time of each step is recorded and used for the cutover timetable. Small brokers run two mock loads and then the rehearsal.
 
 # Cutover
 
@@ -238,7 +238,7 @@ Each mock load runs in the test environment on a database reset to reference dat
 | 2 | Security settings reviewed; administrator password changed; two-step verification on for the required roles | |
 | 3 | Company, letterhead and System Settings set; a PDF checked | |
 | 4 | Users created with the right roles; each user signed in once | |
-| 5 | Configuration copied from the accepted test environment and compared item by item with the configuration workbook | |
+| 5 | Configuration promoted from the accepted UAT environment and compared item by item with the configuration workbook | |
 | 6 | Tax codes, premium taxes and LGU rates confirmed by the broker's tax adviser | |
 | 7 | Document numbering set to the last number used plus one; official receipt series matches the BIR registration | |
 | 8 | E-mail sending on; password reset e-mail received | |

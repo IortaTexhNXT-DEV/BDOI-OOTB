@@ -7,7 +7,7 @@ prepared: iorta TechNXT
 reviewed:
 approved:
 open_item: Recovery objectives become binding only when accepted in the Order Form; DR environment, partner details and contact lists to be completed per broker
-acronyms: OOTB=Out of the box; BCP=Business continuity plan; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; WAL=Write-ahead log; AZ=Availability zone; DNS=Domain Name System; CDN=Content delivery network; PHT=Philippine time (UTC+8); DPO=Data Protection Officer; NPC=National Privacy Commission; IC=Insurance Commission; BIR=Bureau of Internal Revenue; OR=Official receipt; CAB=Change advisory board; L1, L2, L3=Support levels 1, 2 and 3; P1=Severity 1 (critical)
+acronyms: OOTB=Out of the box; BCP=Business continuity plan; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; WAL=Write-ahead log; AZ=Availability zone; DNS=Domain Name System; CDN=Content delivery network; PHT=Philippine time (UTC+8); DPO=Data Protection Officer; NPC=National Privacy Commission; IC=Insurance Commission; BIR=Bureau of Internal Revenue; OR=Official receipt; CAB=Change advisory board; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; L1, L2, L3=Support levels 1, 2 and 3; P1=Severity 1 (critical)
 ---
 
 # Introduction
@@ -95,7 +95,7 @@ The same objectives apply on every option only if the option is built to the rec
 | Region or site outage, pilot light | RPO 24 hours, RTO 24 hours from cross-region copies | Same, from geo-redundant backup storage | Same, from the off-site copy in a second Philippine site | Broker's own DR site |
 | Region or site outage, warm standby | RPO 24 hours or better, RTO 8 hours | Same | Same | Broker's own DR site |
 
-- **When iorta TechNXT hosts**, the price includes production, one UAT environment, daily backups, monitoring and patching. A DR environment or cross-region backups are included for the Enterprise size and are an Order Form option for the other sizes. Without them, the regional objectives do not apply and a region or site loss means rebuilding production from the last backup held in the same region, if it survives.
+- **When iorta TechNXT hosts**, the price includes the environment set of the broker size (Dev, UAT and Production; SIT as well for a large broker), the temporary Pre-Prod per month of use, daily backups, monitoring and patching. A DR environment or cross-region backups are included for the Enterprise size and are an Order Form option for the other sizes. Without them, the regional objectives do not apply and a region or site loss means rebuilding production from the last backup held in the same region, if it survives.
 - **The demo deployment** on one EC2 host with PM2 has no redundancy and does not meet these objectives. It is for demonstration and UAT only.
 - **When the broker hosts**, the broker owns the objectives. iorta TechNXT supplies this plan, the deployment guide and support at day rates.
 
@@ -319,13 +319,16 @@ Contact list (to be completed for each broker and reviewed every six months):
 |---|---|---|
 | Backup jobs succeeded; latest restorable time within 15 minutes | Daily | Recorded in the daily health check |
 | PITR to a new instance, API started against it in isolation, smoke test | Quarterly and before go-live | Restore completed within 4 hours; smoke test passed |
+| Pre-Prod created from a Production backup (cutover rehearsal and each major release) | Each time Pre-Prod is created | Database and file store restored in full; API started; smoke test passed; restore time recorded |
 | File restore with a sample of documents | Quarterly | Sample opens |
 | Logical dump restore into a clean PostgreSQL 16, row counts compared | Twice a year | Counts equal |
 | Secret escrow check under dual control | Yearly | Escrow key matches the live key (compared by hash, not by reading it out) |
 | Tabletop exercise of a region loss and of ransomware with the broker | Yearly | Roles, contacts and decision points confirmed; actions logged |
 | Full recovery in the recovery region or site | Every two years (where a DR option is in the Order Form) | Achieved RTO and RPO recorded against the objectives |
 
-> **Recommended:** Hold the first tabletop before go-live, in the cutover rehearsal week, so the contact list and the decision thresholds are agreed before they are needed.
+Pre-Prod is temporary for every broker size (Environment Strategy and Production Rollout Plan). It is always created by restoring a full Production backup, database and file store, at production topology. Each creation is therefore run and recorded as a DR drill: the restore test record notes the backup used, the recovery point, the start and end times and the achieved restore time, and the result counts as the quarterly PITR test of that quarter when the restore used PITR. The Pre-Prod copy is masked before people without production access use it, and it is deleted when the rehearsal or release is over.
+
+> **Recommended:** Hold the first tabletop before go-live, in the cutover rehearsal week, so the contact list and the decision thresholds are agreed before they are needed. The creation of Pre-Prod for the cutover rehearsal is the first full restore drill.
 
 ## Evidence kept
 

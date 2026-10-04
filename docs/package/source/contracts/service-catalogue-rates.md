@@ -8,7 +8,7 @@ reviewed: Legal counsel (to be completed)
 approved: To be completed
 change: Template for discussion; subject to review by the parties' legal counsel
 open_item: Rates to be confirmed against the price book at each issue; review by the parties' legal counsel before signature
-acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; DR=Disaster recovery; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; SLA=Service level agreement; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; DR=Disaster recovery; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # About this annex
@@ -37,7 +37,7 @@ Text in [square brackets] is a placeholder or an option. Capitalised terms have 
 | S04 | Maintenance and standard support (AMC) | Perpetual, from Year 2 | Annual Maintenance and Support Agreement and SLA |
 | S05 | Standard support included in the subscription | Subscription | Annual Maintenance and Support Agreement and SLA |
 | S06 | 24x7 Severity 1 support (extended P1 support) | Both, optional | Annual Maintenance and Support Agreement and SLA |
-| S07 | Hosting of production and one UAT environment | Both, optional | Hosting and Infrastructure Services Agreement |
+| S07 | Hosting of the environment set of the size and the temporary Pre-Prod | Both, optional | Hosting and Infrastructure Services Agreement |
 | S08 | Optional services: environments, training, data migration, integrations, lines of business, reports, on-site days | Both | Order Form and this Rate Annex |
 | S09 | Change requests | Both | Change Request Procedure |
 | S10 | Exit and transition assistance | Subscription and hosting | Exit and Transition Plan |
@@ -127,16 +127,25 @@ Standard support hours: 08:00 to 18:00 PHT, Monday to Friday, except Philippine 
 
 ## S07: hosting
 
-Production and one UAT environment, daily backups, monitoring, patching and certificates. Per month, monthly in advance from the date the environment is handed over.
+Hosting is priced per environment set. Small and Medium: Dev, UAT and Production. Large and Enterprise: Dev, SIT, UAT and Production with high availability. Daily backups, monitoring, patching and certificates are included. Per month, monthly in advance from the date each environment is handed over.
 
 | Size | Hosted by the Client | AWS Singapore (PHP) | Azure Southeast Asia (PHP) | Local partner, Philippines (PHP) |
 |---|---|---|---|---|
-| Small | No fee | 30,000.00 | 31,000.00 | 28,000.00 |
-| Medium | No fee | 62,000.00 | 65,000.00 | 59,000.00 |
-| Large | No fee | 112,000.00 | 118,000.00 | 107,000.00 |
-| Enterprise | No fee | 244,000.00 | 256,000.00 | 232,000.00 |
+| Small | No fee | 43,000.00 | 46,000.00 | 42,000.00 |
+| Medium | No fee | 69,000.00 | 73,000.00 | 67,000.00 |
+| Large | No fee | 143,000.00 | 150,000.00 | 135,000.00 |
+| Enterprise | No fee | 256,000.00 | 269,000.00 | 242,000.00 |
 
-Cloud and local partner prices are confirmed with the provider before the Order Form is signed. When the Client hosts, iorta TechNXT supplies the deployment guide and charges set-up support at day rates.
+Pre-Prod is temporary for every size: created from a production backup for the cutover rehearsal and for each major release, then removed. It is billed per month of use, monthly in advance:
+
+| Size | Hosted by the Client | AWS Singapore (PHP) | Azure Southeast Asia (PHP) | Local partner, Philippines (PHP) |
+|---|---|---|---|---|
+| Small | No fee | 21,000.00 | 22,000.00 | 20,000.00 |
+| Medium | No fee | 47,000.00 | 49,000.00 | 45,000.00 |
+| Large | No fee | 86,000.00 | 90,000.00 | 82,000.00 |
+| Enterprise | No fee | 169,000.00 | 177,000.00 | 160,000.00 |
+
+The fee of each environment is in Annex A of the Hosting Agreement. Cloud and local partner prices are confirmed with the provider before the Order Form is signed. When the Client hosts, it provides the same environment set; iorta TechNXT supplies the deployment guide and charges set-up support at day rates.
 
 ## S08: optional services
 

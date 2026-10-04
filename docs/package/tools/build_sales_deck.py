@@ -901,8 +901,11 @@ Four hosting options. On AWS and Azure the region is Singapore, which is a cross
 under the Data Privacy Act; AWS has a Manila Local Zone with a limited set of services. A broker that wants the system of
 record in the Philippines uses a local partner or its own data centre.
 Infrastructure is optional and priced separately; the broker may host itself at no fee, with our deployment guide and
-set-up support at day rates. The monthly prices are indicative estimates from public list prices and include production
-and one UAT environment, daily backups, monitoring and patching; confirm with the provider before quoting.""")
+set-up support at day rates. The monthly prices are indicative estimates from public list prices and cover the standing
+environment set of the tier: Dev, UAT and Production for small and medium brokers; Dev, SIT, UAT and Production with high
+availability for large brokers. A temporary Pre-Prod, restored from a production backup for the go-live rehearsal and
+each major release, is billed per month of use. Daily backups, monitoring and patching are included; hosting fees do not
+increase yearly. Confirm with the provider before quoting.""")
     stack = [('Web application', 'React 18 single-page application in the browser; no client install'),
              ('API', 'Node.js 22 with Express; stateless REST API, OpenAPI and Postman collection'),
              ('Database', 'PostgreSQL 16, time zone Asia/Manila; file store for documents'),
@@ -926,21 +929,21 @@ and one UAT environment, daily backups, monitoring and patching; confirm with th
         text(s, x, 1.65, 1.78, 0.42, h, size=12.5, bold=True, color=WHITE, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
         text(s, x + 0.08, 2.12, 1.62, 0.5, sub, size=10.5, bold=True, color=BLUE, align=PP_ALIGN.CENTER)
         text(s, x + 0.08, 2.65, 1.62, 1.15, body, size=10, align=PP_ALIGN.CENTER)
-    text(s, 5.3, 4.05, 7.5, 0.3, 'Indicative hosting price per month (optional, PHP, excl. VAT, estimates)', size=12,
+    text(s, 5.3, 4.05, 7.5, 0.3, 'Indicative hosting per month, full environment set (optional, PHP, excl. VAT)', size=12,
          bold=True, color=NAVY)
     table(s, 5.3, 4.4, 7.53, [
         ['Tier (named users)', 'AWS', 'Azure', 'Local partner'],
-        ['Small (1 to 25)', '30,000.00', '31,000.00', '28,000.00'],
-        ['Medium (26 to 100)', '62,000.00', '65,000.00', '59,000.00'],
-        ['Large (101 to 300)', '112,000.00', '118,000.00', '107,000.00'],
-        ['Enterprise (above 300)', '244,000.00', '256,000.00', '232,000.00'],
+        ['Small (1 to 25)', '43,000.00', '46,000.00', '42,000.00'],
+        ['Medium (26 to 100)', '69,000.00', '73,000.00', '67,000.00'],
+        ['Large (101 to 300)', '143,000.00', '150,000.00', '135,000.00'],
+        ['Enterprise (above 300)', '256,000.00', '269,000.00', '242,000.00'],
     ], [2.43, 1.7, 1.7, 1.7], size=11, row_h=0.36, bold_first=True)
     text(s, 0.5, 5.25, 4.5, 1.6, [[('Every option  ', {'bold': True, 'color': NAVY}),
-                                   ('separate UAT and production environments, HTTPS, daily backups with point-in-time '
+                                   ('separate Dev, UAT and production environments (and SIT for large brokers), HTTPS, daily backups with point-in-time '
                                     'restore, monitoring, and production with two API instances and a standby database.',
                                     {})]], size=11)
-    text(s, 5.3, 6.3, 7.5, 0.6, 'Production, one UAT environment, daily backups, monitoring, patching and certificates '
-         'included. Self-hosting has no hosting fee.', size=10.5, color=MUTED)
+    text(s, 5.3, 6.3, 7.5, 0.6, 'Small and medium: Dev, UAT, Production. Large: Dev, SIT, UAT, Production. Temporary Pre-Prod '
+         'billed per month of use. Self-hosting has no hosting fee.', size=10.5, color=MUTED)
 
     # 23. Implementation ------------------------------------------------------------
     s = d.slide('Implementation approach and timeline', 'Delivery', notes="""

@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-acronyms: AM=Account manager; AMC=Annual Maintenance Contract; CEO=Chief executive officer; CR=Change request; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; SH=Sales head; SLA=Service level agreement; SOW=Statement of work; VAT=Value-added tax
+acronyms: AM=Account manager; AMC=Annual Maintenance Contract; CEO=Chief executive officer; CR=Change request; Dev=Development environment; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SH=Sales head; SIT=System integration test; SLA=Service level agreement; SOW=Statement of work; UAT=User acceptance test; VAT=Value-added tax
 ---
 
 # Purpose and handling
@@ -43,7 +43,7 @@ All figures are in PHP and exclude 12% VAT. List prices are the recommended pric
 - The approver is set by the highest discount on any component. A deal with 4% on subscription and 7% on implementation needs the sales head.
 - Levers that "count toward the limit" (chapter 5) add to the discretionary discount. The total may not pass the CEO limit.
 - AMC follows the quoted (net) licence fee. A discount on the licence therefore also lowers the AMC. This is why the licence discount needs care.
-- Hosting carries a 20% margin over the estimated cloud cost. At 10% off, about 8% remains for exchange rate movement and operations. Never discount hosting to win the software deal.
+- Hosting carries a 20% margin over the estimated cloud cost of each environment. At 10% off, about 8% remains for exchange rate movement and operations. Never discount hosting to win the software deal, and never drop an environment of the set (Dev, UAT, SIT for large brokers) or the Pre-Prod months to lower the price: the environment set by broker size is a product owner decision, not a lever.
 
 ## Recording the approval
 
@@ -58,35 +58,35 @@ All figures are in PHP and exclude 12% VAT. List prices are the recommended pric
 
 | Size | Perpetual licence per user, slab rate (list / floor) | Subscription per user per month, slab rate (list / floor) | Implementation, reference scope (list / floor) | AWS hosting per month (list / floor) |
 |---|---|---|---|---|
-| Small | 90,000 / 76,500 | 3,200 / 2,720 | 1,130,000 / 960,500 | 30,000 / 27,000 |
-| Medium | 78,000 / 66,300 | 2,800 / 2,380 | 2,090,000 / 1,776,500 | 62,000 / 55,800 |
-| Large | 66,000 / 56,100 | 2,400 / 2,040 | 3,700,000 / 3,145,000 | 112,000 / 100,800 |
-| Enterprise | 54,000 / 45,900 | 2,000 / 1,700 | 5,800,000 / 4,930,000 | 244,000 / 219,600 |
+| Small | 90,000 / 76,500 | 3,200 / 2,720 | 1,130,000 / 960,500 | 43,000 / 38,700 |
+| Medium | 78,000 / 66,300 | 2,800 / 2,380 | 2,090,000 / 1,776,500 | 69,000 / 62,100 |
+| Large | 66,000 / 56,100 | 2,400 / 2,040 | 3,700,000 / 3,145,000 | 143,000 / 128,700 |
+| Enterprise | 54,000 / 45,900 | 2,000 / 1,700 | 5,800,000 / 4,930,000 | 256,000 / 230,400 |
 
-The graduated slabs still apply at the floor: each slab rate is reduced by the floor discount.
+The graduated slabs still apply at the floor: each slab rate is reduced by the floor discount. AWS hosting is the standing environment set of the size: Dev, UAT and Production for Small and Medium; Dev, SIT, UAT and Production with high availability for Large and Enterprise. The temporary Pre-Prod (AWS list PHP 21,000, 47,000, 86,000 and 169,000 per month of use by size) follows the same hosting floor.
 
 ## Pre-set packages at list and at the floor
 
-Year 1 and 5-year totals, reference users and lines of business, all components at the floor.
+Year 1 and 5-year totals, reference users and lines of business, all components at the floor. Hosted packages include 2 months of Pre-Prod in Year 1 and 1 month a year after.
 
 | Size and package | Year 1, list | Year 1, floor | 5-year, list | 5-year, floor |
 |---|---|---|---|---|
 | Small: Essentials | 1,706,000 | 1,450,100 | 4,312,764 | 3,665,849 |
-| Small: Standard | 2,066,000 | 1,774,100 | 6,112,764 | 5,285,849 |
-| Small: Ownership | 2,840,000 | 2,432,000 | 5,560,107 | 4,816,091 |
-| Small: Ownership Plus | 3,356,000 | 2,869,400 | 7,066,259 | 6,090,320 |
+| Small: Standard | 2,264,000 | 1,952,300 | 7,018,764 | 6,101,249 |
+| Small: Ownership | 3,038,000 | 2,610,200 | 6,466,107 | 5,631,491 |
+| Small: Ownership Plus | 3,564,000 | 3,056,600 | 8,026,259 | 6,954,320 |
 | Medium: Essentials | 4,226,000 | 3,592,100 | 13,892,748 | 11,808,836 |
-| Medium: Standard | 4,970,000 | 4,261,700 | 17,612,748 | 15,156,836 |
-| Medium: Ownership | 7,814,000 | 6,679,100 | 15,512,173 | 13,371,347 |
-| Medium: Ownership Plus | 8,558,000 | 7,309,700 | 18,284,476 | 15,718,805 |
+| Medium: Standard | 5,148,000 | 4,421,900 | 18,314,748 | 15,788,636 |
+| Medium: Ownership | 7,992,000 | 6,839,300 | 16,214,173 | 14,003,147 |
+| Medium: Ownership Plus | 8,744,000 | 7,477,100 | 19,034,476 | 16,393,805 |
 | Large: Essentials | 9,484,000 | 8,061,400 | 35,660,251 | 30,311,213 |
-| Large: Standard | 10,828,000 | 9,271,000 | 42,380,251 | 36,359,213 |
-| Large: Ownership | 18,424,000 | 15,727,600 | 36,487,284 | 31,350,191 |
-| Large: Ownership Plus | 19,564,000 | 16,693,600 | 41,460,352 | 35,562,299 |
+| Large: Standard | 11,372,000 | 9,760,600 | 44,756,251 | 38,497,613 |
+| Large: Ownership | 18,968,000 | 16,217,200 | 38,863,284 | 33,488,591 |
+| Large: Ownership Plus | 20,064,000 | 17,143,600 | 43,632,352 | 37,517,099 |
 | Enterprise: Essentials | 17,440,000 | 14,824,000 | 70,118,348 | 59,600,596 |
-| Enterprise: Standard | 20,368,000 | 17,459,200 | 84,758,348 | 72,776,596 |
-| Enterprise: Ownership | 35,428,000 | 30,260,200 | 72,457,674 | 62,321,023 |
-| Enterprise: Ownership Plus | 37,084,000 | 31,660,600 | 80,326,121 | 68,973,203 |
+| Enterprise: Standard | 20,850,000 | 17,893,000 | 86,492,348 | 74,337,196 |
+| Enterprise: Ownership | 35,910,000 | 30,694,000 | 74,191,674 | 63,881,623 |
+| Enterprise: Ownership Plus | 37,524,000 | 32,056,600 | 81,886,121 | 70,377,203 |
 
 In the floor figures, the one-time services and the 24x7 Severity 1 support of Ownership Plus are also at 85% of list, and hosting at 90% of list.
 

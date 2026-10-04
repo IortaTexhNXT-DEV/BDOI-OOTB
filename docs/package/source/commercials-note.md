@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; BSP=Bangko Sentral ng Pilipinas; CR=Change request; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; SaaS=Software as a service; TCO=Total cost of ownership; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; BSP=Bangko Sentral ng Pilipinas; CR=Change request; Dev=Development environment; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; TCO=Total cost of ownership; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # Purpose and scope
@@ -143,18 +143,33 @@ The position is deliberate: a localised full broking platform priced for a marke
 
 # Infrastructure
 
-Infrastructure is optional and quoted separately. The broker may host BrokerVerse itself at no fee; iorta TechNXT then supplies the deployment guide and charges set-up support at day rates.
+Infrastructure is optional and quoted separately. The broker may host BrokerVerse itself at no fee; iorta TechNXT then supplies the deployment guide and charges set-up support at day rates. A self-hosting broker provides the same environment set.
 
-| Tier | AWS, per month | Azure, per month | Local partner, per month |
-|---|---|---|---|
-| Small | PHP 30,000.00 | PHP 31,000.00 | PHP 28,000.00 |
-| Medium | PHP 62,000.00 | PHP 65,000.00 | PHP 59,000.00 |
-| Large | PHP 112,000.00 | PHP 118,000.00 | PHP 107,000.00 |
-| Enterprise | PHP 244,000.00 | PHP 256,000.00 | PHP 232,000.00 |
+## Environment set by broker size
 
-- The prices cover a production and one UAT environment, daily backups, monitoring, patching and certificates, and include a 20% margin over estimated cloud cost for FX movement and operations effort.
+| Tier | Standing environments | Temporary |
+|---|---|---|
+| Small and Medium | Dev, UAT, Production. Integration and system testing in Dev, promoted to UAT for testing, then to Production | Pre-Prod |
+| Large and Enterprise | Dev, SIT, UAT, Production with high availability. SIT and UAT are separate | Pre-Prod |
+
+Pre-Prod is created from a production backup for the go-live rehearsal and for each major release, then removed. A copy used by people without production access is masked.
+
+## Prices
+
+| Tier | AWS, per month | Azure, per month | Local partner, per month | Pre-Prod on AWS, per month of use |
+|---|---|---|---|---|
+| Small | PHP 43,000.00 | PHP 46,000.00 | PHP 42,000.00 | PHP 21,000.00 |
+| Medium | PHP 69,000.00 | PHP 73,000.00 | PHP 67,000.00 | PHP 47,000.00 |
+| Large | PHP 143,000.00 | PHP 150,000.00 | PHP 135,000.00 | PHP 86,000.00 |
+| Enterprise | PHP 256,000.00 | PHP 269,000.00 | PHP 242,000.00 | PHP 169,000.00 |
+
+Each monthly price is the sum of the environments of the set. On AWS, Dev is PHP 11,000.00 for every tier; UAT is PHP 11,000.00 (Small, Medium) or PHP 23,000.00 (Large, Enterprise); SIT is PHP 23,000.00 (Large, Enterprise); Production is PHP 21,000.00, 47,000.00, 86,000.00 and 199,000.00 by tier. The Infrastructure sheet of the workbook gives every environment for every provider.
+
+- The prices cover each environment of the set, daily backups, monitoring, patching and certificates, and include a 20% margin over estimated cloud cost for FX movement and operations effort.
+- Pre-Prod runs at production size and is billed per month of use. The workbook budgets 2 months around go-live and 1 month a year for a major release: on AWS, hosting is PHP 558,000.00 in Year 1 and PHP 537,000.00 a year after for a Small broker, and PHP 1,888,000.00 and PHP 1,802,000.00 for a Large broker.
+- Hosting fees do not increase each year. Provider price changes are passed through at cost under the Hosting and Infrastructure Services Agreement.
 - AWS and Azure are priced on their Singapore regions. AWS also has a Local Zone in Manila. The local partner option keeps data in the Philippines.
-- The cloud costs are estimates from public on-demand list prices. The Large tier is close to the sizing in the BrokerVerse capacity document (200 named users, 80 concurrent, two API containers and a Multi-AZ PostgreSQL 16 database). Confirm with the provider before quoting.
+- The cloud costs are estimates from public on-demand list prices. The Large tier production is close to the sizing in the BrokerVerse capacity document (200 named users, 80 concurrent, two API containers and a Multi-AZ PostgreSQL 16 database). Confirm with the provider before quoting.
 
 # Change requests
 
@@ -198,7 +213,7 @@ Work above 60 man-days is a separate project with its own statement of work.
 | On-site day in Metro Manila | PHP 20,000.00 per consultant day |
 | 24x7 Severity 1 support, per year | Small PHP 240,000.00; Medium PHP 480,000.00; Large PHP 900,000.00; Enterprise PHP 1,500,000.00 |
 
-Standard support is business hours, Monday to Friday, excluding Philippine holidays, under the severity levels in the support and escalation guide. The 24x7 option adds round-the-clock response for Severity 1 incidents. Recurring optional items increase 5% a year. Travel outside Metro Manila is billed at cost.
+Standard support is business hours, Monday to Friday, excluding Philippine holidays, under the severity levels in the support and escalation guide. The 24x7 option adds round-the-clock response for Severity 1 incidents and increases 5% a year. Hosted environments do not increase. Travel outside Metro Manila is billed at cost.
 
 # Sample quotes
 
@@ -206,11 +221,11 @@ The workbook works out three brokers over five years, including the optional ite
 
 | Example | Perpetual, 5 years | Subscription, 5 years | Year 1 cash, perpetual / subscription |
 |---|---|---|---|
-| Small: 15 users, 5 lines, AWS hosting | PHP 5,560,107.00 | PHP 6,112,764.00 | PHP 2,840,000.00 / PHP 2,066,000.00 |
-| Medium: 60 users, 8 lines, Azure, 24x7 support, extras | PHP 18,964,476.00 | PHP 21,065,051.00 | PHP 8,950,000.00 / PHP 6,106,000.00 |
-| Large: 180 users, 12 lines, local partner, 24x7 support, extras | PHP 42,400,352.00 | PHP 48,293,319.00 | PHP 20,504,000.00 / PHP 12,908,000.00 |
+| Small: 15 users, 5 lines, AWS hosting | PHP 6,466,107.00 | PHP 7,018,764.00 | PHP 3,038,000.00 / PHP 2,264,000.00 |
+| Medium: 60 users, 8 lines, Azure, 24x7 support, extras | PHP 19,738,476.00 | PHP 21,839,051.00 | PHP 9,144,000.00 / PHP 6,300,000.00 |
+| Large: 180 users, 12 lines, local partner, 24x7 support, extras | PHP 44,572,352.00 | PHP 50,465,319.00 | PHP 21,004,000.00 / PHP 13,408,000.00 |
 
-Figures exclude VAT. The extras are training days, legacy data sources and integrations set in the workbook.
+Figures exclude VAT. Hosting covers the environment set of the tier and the temporary Pre-Prod months. The extras are training days, legacy data sources and integrations set in the workbook.
 
 # Payment terms
 
@@ -220,7 +235,7 @@ Figures exclude VAT. The extras are training days, legacy data sources and integ
 | Perpetual licence fee | 100% on go-live |
 | AMC | Yearly in advance, from the AMC start year |
 | Subscription | Monthly in advance, from go-live |
-| Infrastructure | Monthly in advance, from the date the environment is handed over |
+| Infrastructure | Monthly in advance, from the date each environment is handed over; Pre-Prod for each month of use |
 | Change requests | Small: on delivery. Medium: 50% on approval, 50% on UAT sign-off. Large: 30% on approval, 50% on UAT sign-off, 20% on deployment |
 | Optional services | Monthly in arrears at actual days, or as quoted for fixed-price items |
 

@@ -8,7 +8,7 @@ reviewed:
 approved:
 open_item: Conditions C1 to C8 of the chapter Recommendation; decisions D1 to D14
 open_item_status: Open
-acronyms: OOTB=Out of the box; UAT=User acceptance test; AMC=Annual maintenance contract; SOW=Statement of work; MSA=Master services agreement; DPA=Data processing agreement; DPO=Data protection officer; NPC=National Privacy Commission; IC=Insurance Commission; SMTP=Simple Mail Transfer Protocol; CI=Continuous integration; RAID=Risks, assumptions, issues and dependencies; RTO=Recovery time objective; RPO=Recovery point objective
+acronyms: OOTB=Out of the box; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; AMC=Annual maintenance contract; SOW=Statement of work; MSA=Master services agreement; DPA=Data processing agreement; DPO=Data protection officer; NPC=National Privacy Commission; IC=Insurance Commission; SMTP=Simple Mail Transfer Protocol; CI=Continuous integration; RAID=Risks, assumptions, issues and dependencies; RTO=Recovery time objective; RPO=Recovery point objective
 ---
 
 # Purpose and audience
@@ -82,6 +82,8 @@ The release test was run earlier on 03 October 2026. These changes followed it a
 | N7 | The Railway test site deploys the brokerverse-platform branch automatically; it is a test site and must not hold client data | All |
 | N8 | Pull request 2 (brokerverse-platform) carries all of Release 1.0. Its "Deploy API to EC2" check fails for the reason in C1; the build and test checks pass | Development, DevOps |
 | N9 | The two INTERNAL documents with prices and negotiation limits (Negotiation Playbook, Price Book) and the Battlecard must not be sent to prospects | Sales |
+| N10 | Environment model decided by the product owner (04 October 2026): small and medium brokers have Dev, UAT and Production, with integration in Dev; large brokers have Dev, SIT, UAT and Production, with SIT and UAT separate; Pre-Prod is temporary for every size, created from a production backup for the go-live rehearsal and each major release, then removed | Sales, Delivery, DevOps, Support |
+| N11 | Hosting is priced per environment set, with Pre-Prod per month of use (Rate Card, pricing workbook, Hosting Agreement Annex A). On AWS the standing set is PHP 43,000.00 (Small), 69,000.00 (Medium), 143,000.00 (Large) and 256,000.00 (Enterprise) a month; hosting fees do not increase yearly | Sales, Finance |
 
 # To address before the first go-live
 
@@ -107,6 +109,10 @@ Besides conditions C1 to C8:
 | P6 | Product manager role and product council, versioning scheme and release calendar (OOTB Strategy and Playbook) | Next quarter |
 | P7 | Responsive layout for tablets; no mobile application commitment | Roadmap, indicative |
 | P8 | Reference client programme: first pilot, case study and reference call script | After the first go-live |
+| P9 | Data masking tool for production copies used by people without production access (Pre-Prod for a release rehearsal, training copies), decided by the product owner | In development; release date to be set |
+| P10 | Release pipeline built to current practice, with the tests before any deployment and an approval gate per environment (Dev, SIT, UAT, Pre-Prod, Production), decided by the product owner; replaces the manual deployment and closes C1 for the chosen hosting | In development; release date to be set |
+| P11 | Comparison report between two environments (configuration differences row by row), decided by the product owner | In development; release date to be set |
+| P12 | One front-end build promoted through all environments, with runtime configuration, decided by the product owner | In development; release date to be set |
 
 # Risks foreseen
 

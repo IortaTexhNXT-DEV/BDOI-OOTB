@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; L1, L2, L3=Support levels 1, 2 and 3; PHT=Philippine time (UTC+8); SLA=Service level agreement; KPI=Key performance indicator; RCA=Root-cause analysis; CAB=Change advisory board; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; NPC=National Privacy Commission; DPO=Data protection officer; PITR=Point-in-time restore; UAT=User acceptance test; ITIL=IT Infrastructure Library; PR=Pull request
+acronyms: OOTB=Out of the box; L1, L2, L3=Support levels 1, 2 and 3; PHT=Philippine time (UTC+8); SLA=Service level agreement; KPI=Key performance indicator; RCA=Root-cause analysis; CAB=Change advisory board; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; NPC=National Privacy Commission; DPO=Data protection officer; PITR=Point-in-time restore; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; ITIL=IT Infrastructure Library; PR=Pull request
 ---
 
 # Introduction
@@ -40,7 +40,7 @@ The broker's System Administrator, key users and IT management; the iorta TechNX
 | Level | Who | Scope |
 |---|---|---|
 | L1 | Broker super users: one trained key user per team, and the broker's System Administrator | How-to questions; checks that a role, setting or master record is not the cause; users, roles, password and two-step verification resets, settings and master data; logging the ticket with the evidence |
-| L2 | iorta TechNXT application support | Ticket triage and classification; reproduction in the test environment; analysis with request IDs, logs, Audit Trail and job runs; configuration and data corrections under change control; workarounds; known-error records; release coordination |
+| L2 | iorta TechNXT application support | Ticket triage and classification; reproduction in UAT (or SIT for a large broker); analysis with request IDs, logs, Audit Trail and job runs; configuration and data corrections under change control; workarounds; known-error records; release coordination |
 | L3 | iorta TechNXT engineering (development and DevOps) | Code defects, database corrections that need a script, performance, infrastructure, security incidents, root-cause analysis, fixes and releases |
 
 This model maps to the levels users see in the user manual (Appendix H) and in `SUPPORT_AND_ESCALATION.md`: the key user is the first line, the broker's System Administrator the second line inside the broker, and iorta TechNXT the third line. Inside iorta TechNXT, application support (L2) and engineering (L3) split the work.
@@ -130,7 +130,7 @@ Passwords, two-step codes, environment settings and full client ID numbers are n
 4. Find the route from the screen in the API touchpoint workbook and follow it to the module and tables.
 5. Check the usual suspects of the area (`docs/developer-guide/backend.md`, section 7): sign-in and lockouts (`login_history`), document numbering, postings and closed periods, scheduled jobs (`job_runs`), PDFs, the e-mail outbox.
 6. Check configuration before code: the setting in Master > Configuration and its history in Master > Audit Trail.
-7. Reproduce in the test environment where possible.
+7. Reproduce in UAT (or SIT for a large broker) where possible.
 8. Classify the cause: user or training, configuration, master or transaction data, code defect, infrastructure, third party.
 9. Resolve at L2 or pass to L3 with the evidence.
 
@@ -179,7 +179,7 @@ Aligned with ITIL problem management.
 
 ## Data corrections
 
-A correction of business data through the database is a normal change. It needs: the ticket, the script, a dry run on a copy of production in the test environment with the before and after counts, the broker's approval, a database snapshot just before it runs, and the result attached to the ticket. Financial data is corrected through the screens (correction or reversal journals) whenever the screens allow it, so the ledger keeps its trail.
+A correction of business data through the database is a normal change. It needs: the ticket, the script, a dry run on a restored copy of production, under the Pre-Prod rules of the Environment Strategy (restored from a Production backup, masked if people without production access use it, deleted afterwards), with the before and after counts, the broker's approval, a database snapshot just before it runs, and the result attached to the ticket. Financial data is corrected through the screens (correction or reversal journals) whenever the screens allow it, so the ledger keeps its trail.
 
 # Release management and patching
 
@@ -189,7 +189,8 @@ A correction of business data through the database is a normal change. It needs:
 |---|---|
 | Release types | Planned release (monthly, when there are fixes or changes); emergency release (P1 or security) |
 | Content | Release notes list the fixes, changes, migrations and anything an administrator must do by hand |
-| Test | Each release is installed in the test environment first; the broker runs the UAT scripts that cover the change; iorta TechNXT runs the regression of chapter 19 |
+| Environments | Small and medium broker: Dev, UAT, Production. Large broker: Dev, SIT, UAT, Production. Pre-Prod is temporary: created from a Production backup for each major release and removed after it (Environment Strategy and Production Rollout Plan) |
+| Test | Each release goes through Dev (and SIT for a large broker) to UAT first; the broker runs the UAT scripts that cover the change; iorta TechNXT runs the regression of chapter 19. A major release is also rehearsed in Pre-Prod on a copy of production data |
 | Approval | CAB approval with the test evidence |
 | Window | The maintenance window, announced at least 5 business days ahead (emergency releases: as agreed) |
 | Back end | New image deployed; on start the API applies new migrations (they only add) and the idempotent seed, then reports ready on `/api/health`; with migrations, one instance first, then scale out |
@@ -236,7 +237,7 @@ The daily health check is recorded (date, checker, result, tickets raised). Moni
 | Upload volume (documents, ID images, generated reports) | Daily backup |
 | Secrets | `DATA_ENCRYPTION_KEY` and `JWT_SECRET` held in the secret store, with a sealed escrow copy; without the same `DATA_ENCRYPTION_KEY` users with two-step verification cannot sign in after a restore |
 | Daily | Backup jobs succeeded; latest restorable time within 15 minutes |
-| Quarterly | Point-in-time restore to a new instance, API started against it in an isolated environment, smoke test; document restore and sample check |
+| Quarterly | Point-in-time restore to a new instance, API started against it in an isolated environment, smoke test; document restore and sample check. A Pre-Prod created from a Production backup in the quarter counts as this test |
 | Twice a year | Logical dump restore into a clean PostgreSQL 16; row counts compared with the source |
 | Yearly | Secret escrow check under dual control |
 
@@ -298,7 +299,7 @@ Production support takes over from the project team when these criteria are met:
 | No open P1 or P2 issue | Hypercare log |
 | First month-end close completed with the Accounting Manager's approval | Month-End Close run approved; trial balance reviewed |
 | Known issues and workarounds documented | Known-error records in the knowledge base |
-| Environment documentation current | Environment sheet: addresses, versions, release tag, backups, monitoring, secrets owners |
+| Environment documentation current | Environment sheet: addresses, versions, release tag, backups, monitoring, secrets owners; removal of the go-live Pre-Prod recorded |
 | Configuration baseline recorded | Export or copy of the configuration workbook as built in production |
 | Contacts and escalation matrix agreed | Support agreement annex |
 | L1 super users trained on raising tickets | Attendance and a test ticket |
@@ -354,7 +355,7 @@ RCAs are blameless: they look at systems and processes, not at individuals.
 
 # Regression testing
 
-Before any release reaches production, iorta TechNXT runs the regression below in the test environment and attaches the results to the change.
+Before any release reaches production, iorta TechNXT runs the regression below in UAT (and in SIT for a large broker) and attaches the results to the change.
 
 1. The backend vitest suite and the front-end tests (chapter 18).
 2. The UAT data scenario on a fresh database, migrated and seeded with reference data only:

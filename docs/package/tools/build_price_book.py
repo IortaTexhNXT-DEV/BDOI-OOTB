@@ -56,6 +56,9 @@ G = {
     'AMC_Start': by_label(inp, 'AMC starts in contract year'),
     'Onboard_Pct': by_label(inp, 'Subscription onboarding fee as % of implementation fee'),
     'Infra_Esc': by_label(inp, 'Infrastructure annual change'),
+    'PP_GoLive': by_label(inp, 'Pre-Prod months of use around go-live'),
+    'PP_Rel': by_label(inp, 'Pre-Prod months of use per major release'),
+    'Rel_Year': by_label(inp, 'Major releases per year (yearly hosting view only)'),
     'Days_per_LOB': by_label(inp, 'Extra implementation man-days per line of business above the included count'),
     'Round_To': by_label(inp, 'Round implementation and service fees to'),
     'Validity': by_label(inp, 'Quotation validity'),
@@ -74,10 +77,12 @@ for row in inp.iter_rows(values_only=True):
                           lobinc=row[7], train=row[8], ref=row[9], reflob=row[10], sup=row[11]))
 assert [t['name'] for t in TIERS] == ['Small', 'Medium', 'Large', 'Enterprise'], TIERS
 
-HOST = {}
+HOST, PREPROD, ENVS = {}, {}, {}
 for row in src['Infrastructure'].iter_rows(min_row=5, values_only=True):
     if row[0] in ('AWS', 'Azure', 'Local partner', 'Customer') and row[1] in ('Small', 'Medium', 'Large', 'Enterprise'):
-        HOST[(row[0], row[1])] = row[5]
+        HOST[(row[0], row[1])] = row[7]      # standing environments per month
+        PREPROD[(row[0], row[1])] = row[8]   # Pre-Prod per month of use
+        ENVS[(row[0], row[1])] = (row[2], row[3], row[4], row[5], row[6])  # set, Dev, SIT, UAT, Production
 OPT = {}
 for row in src['Optional Services'].iter_rows(min_row=5, values_only=True):
     if row[0] and isinstance(row[2], (int, float)):
@@ -219,7 +224,8 @@ rows = [
      'Withholding tax deducted by the client does not reduce the invoice price; the client issues BIR Form 2307.'),
     ('Year convention', 'Years are contract years counted from go-live, as in the pricing workbook. Implementation and the perpetual licence fall in Year 1. '
      'Subscription, hosting and 24x7 support are priced for 12 months in each year; AMC starts in the AMC start year (default Year 2, after a 12-month warranty). '
-     'Recurring prices increase 5% at each anniversary; hosting follows the infrastructure change rate (default 0%).'),
+     'Recurring prices increase 5% at each anniversary; hosting does not (infrastructure change rate 0%, pass-through of provider price changes). '
+     'Hosting covers the standing environment set of the tier for 12 months a year plus the temporary Pre-Prod: 2 months in Year 1 (go-live) and 1 month a year after (one major release a year assumed).'),
     ('Colour key', 'Yellow cell with blue text: input. Green: result. Light orange: internal only (discounts, floors). Navy header: column titles.'),
 ]
 head(rm, 4, ['Topic', 'Notes'])
@@ -242,7 +248,10 @@ gen = [('FX', 'Exchange rate (reference only)', G['FX'], 'PHP per USD', '0.00'),
        ('Esc', 'Annual escalation (AMC, subscription, 24x7 support)', G['Esc'], '%', PCT),
        ('AMC_Start', 'AMC starts in contract year', G['AMC_Start'], 'year', '0'),
        ('Onboard_Pct', 'Subscription onboarding fee as % of implementation fee', G['Onboard_Pct'], '%', PCT),
-       ('Infra_Esc', 'Infrastructure annual change', G['Infra_Esc'], '%', PCT),
+       ('Infra_Esc', 'Infrastructure annual change (hosting fees do not escalate)', G['Infra_Esc'], '%', PCT),
+       ('PP_GoLive', 'Pre-Prod months of use around go-live', G['PP_GoLive'], 'months', '0'),
+       ('PP_Rel', 'Pre-Prod months of use per major release', G['PP_Rel'], 'months', '0'),
+       ('Rel_Year', 'Major releases per year (yearly view only)', G['Rel_Year'], 'releases', '0'),
        ('Days_per_LOB', 'Extra implementation man-days per line of business above the included count', G['Days_per_LOB'], 'man-days', '0'),
        ('Round_To', 'Rounding of implementation fees', G['Round_To'], 'PHP', PHP),
        ('Validity', 'Quotation validity', G['Validity'], 'days', '0'),
@@ -286,10 +295,11 @@ text_row(pb, r, 'Graduated slabs: the first 25 users are charged at the Small ra
          'The tier, set by the total user count, decides the implementation effort, the minimum billable users for subscription, the training days included and the hosting size.', 12, 30)
 
 r += 2
-sec(pb, r, 'Hosting per month (production plus one UAT environment, PHP)', 12)
+sec(pb, r, 'Hosting per month: standing environment set of the tier (PHP)', 12)
 r += 1
 HOSTS = ['Self-hosted', 'AWS', 'Azure', 'Local partner']
-head(pb, r, ['Tier'] + HOSTS)
+head(pb, r, ['Tier'] + HOSTS + ['Environment set'])
+pb.merge_cells(start_row=r, start_column=6, end_row=r, end_column=12)
 name('Host_Hdr', f"'Price Basis'!$B${r}:$E${r}")
 H0 = r + 1
 for t in TIERS:
@@ -297,10 +307,37 @@ for t in TIERS:
     put(pb, r, 1, t['name'], bold=True)
     for j, h in enumerate(HOSTS):
         put(pb, r, 2 + j, HOST[('Customer' if h == 'Self-hosted' else h, t['name'])], PHP, inp=True)
+    put(pb, r, 6, ENVS[('AWS', t['name'])][0])
+    pb.merge_cells(start_row=r, start_column=6, end_row=r, end_column=12)
 name('Host_Tbl', f"'Price Basis'!$B${H0}:$E${r}")
+r += 2
+sec(pb, r, 'Pre-Prod per month of use (temporary, PHP)', 12)
 r += 1
-text_row(pb, r, 'Self-hosted: the client hosts in its own cloud account or data centre; no hosting fee, deployment guide supplied, set-up support at day rates. '
-         'AWS and Azure are priced on their Singapore regions; the local partner option keeps data in the Philippines. Cloud prices are estimates to be confirmed with the provider before a binding offer.', 12, 30)
+head(pb, r, ['Tier'] + HOSTS)
+P0 = r + 1
+for t in TIERS:
+    r += 1
+    put(pb, r, 1, t['name'], bold=True)
+    for j, h in enumerate(HOSTS):
+        put(pb, r, 2 + j, PREPROD[('Customer' if h == 'Self-hosted' else h, t['name'])], PHP, inp=True)
+name('PP_Tbl', f"'Price Basis'!$B${P0}:$E${r}")
+r += 2
+sec(pb, r, 'Hosting per environment, per month (PHP)', 12)
+r += 1
+head(pb, r, ['Provider and tier', 'Dev', 'SIT', 'UAT', 'Production', 'Pre-Prod (per month of use)'])
+for h in HOSTS[1:]:
+    for t in TIERS:
+        r += 1
+        _, dev, sit, uat, prod = ENVS[(h, t['name'])]
+        put(pb, r, 1, f"{h}, {t['name']}", bold=t['name'] == 'Small')
+        for j, v in enumerate((dev, sit, uat, prod, PREPROD[(h, t['name'])])):
+            put(pb, r, 2 + j, v if v else 'None', PHP)
+r += 1
+text_row(pb, r, 'Small and Medium: Dev, UAT and Production; integration and system testing in Dev, then promoted to UAT for testing. Large and Enterprise: Dev, SIT, UAT and Production with high availability. '
+         'Pre-Prod is temporary for every size: created from a production backup for the go-live rehearsal and each major release, then removed; billed per month of use. '
+         'Self-hosted: the client hosts the same environment set in its own cloud account or data centre; no hosting fee, deployment guide supplied, set-up support at day rates. '
+         'AWS and Azure are priced on their Singapore regions; the local partner option keeps data in the Philippines. Cloud prices are estimates to be confirmed with the provider before a binding offer. '
+         'Hosting fees do not increase yearly; provider price changes are passed through at cost.', 12, 75)
 
 r += 2
 sec(pb, r, 'Optional services (PHP)', 12)
@@ -355,6 +392,8 @@ ENGINE = [
     ('eff', 'Effective price per user (licence one-time, or subscription per month)', PHP),
     ('host_list', 'Hosting per month, list', PHP),
     ('host_net', 'Hosting per month, quoted', PHP),
+    ('pp_list', 'Pre-Prod per month of use, list', PHP),
+    ('pp_net', 'Pre-Prod per month of use, quoted', PHP),
     ('env_m', 'Additional hosted environments per month', PHP),
     ('month', 'Monthly recurring at go-live (subscription, hosting, environments)', PHP),
     ('once_list', 'One-time optional services, list', PHP),
@@ -391,6 +430,8 @@ def engine(ws, col, r0, I, labels=True):
         'eff': f"IF({m}=\"Perpetual\",{R['lic_net']}/{I['users']},{R['sub_net']}/{R['bill']})",
         'host_list': f"INDEX(Host_Tbl,{R['idx']},MATCH({I['host']},Host_Hdr,0))",
         'host_net': f"{R['host_list']}*(1-{I['dhost']})",
+        'pp_list': f"INDEX(PP_Tbl,{R['idx']},MATCH({I['host']},Host_Hdr,0))",
+        'pp_net': f"{R['pp_list']}*(1-{I['dhost']})",
         'env_m': f"IF({I['host']}=\"Self-hosted\",0,{I['env']}*Env_Month)",
         'month': f"{R['sub_net']}+{R['host_net']}+{R['env_m']}",
         'once_list': f"{I['trn']}*Rate_Trainer+{I['mig']}*Mig_Source+{I['ints']}*Int_Std+{I['intc']}*Int_Cx+{I['env']}*Env_Setup+{I['onsite']}*Rate_Onsite",
@@ -401,7 +442,8 @@ def engine(ws, col, r0, I, labels=True):
     for y in range(1, 6):
         F[f'amc{y}'] = f"IF(AND({m}=\"Perpetual\",{y}>=AMC_Start),{R['lic_net']}*AMC_Rate*(1+Esc)^({y}-AMC_Start),0)"
         F[f'sub{y}'] = f"{R['sub_net']}*12*(1+Esc)^({y}-1)"
-        F[f'host{y}'] = f"{R['host_net']}*12*(1+Infra_Esc)^({y}-1)+{R['env_m']}*12*(1+Esc)^({y}-1)"
+        pp_months = 'PP_GoLive' if y == 1 else 'PP_Rel*Rel_Year'
+        F[f'host{y}'] = f"({R['host_net']}+{R['env_m']})*12*(1+Infra_Esc)^({y}-1)+{R['pp_net']}*{pp_months}"
         F[f'sup{y}'] = f"{R['sup_list']}*(1-{I['dsvc']})*(1+Esc)^({y}-1)"
         one = f"{R['impl_net']}+{R['lic_net']}+{R['once_net']}+" if y == 1 else ''
         F[f'tot{y}'] = f"{one}{R[f'amc{y}']}+{R[f'sub{y}']}+{R[f'host{y}']}+{R[f'sup{y}']}"
@@ -505,7 +547,8 @@ res = [
     ('Perpetual licence fee (one-time, on go-live)', f"={RS['lic_net']}", PHP, True, f"=IF({QI['model']}=\"Perpetual\",TEXT({RS['eff']},\"#,##0\")&\" per user on average, graduated slabs\",\"Not applicable to subscription\")"),
     ('Subscription per month, Year 1', f"={RS['sub_net']}", PHP, True, f"=IF({QI['model']}=\"Subscription\",{RS['bill']}&\" billable users, \"&TEXT({RS['eff']},\"#,##0\")&\" per user per month on average\",\"Not applicable to perpetual\")"),
     ('AMC per year, first AMC year', f"=CHOOSE(MIN(AMC_Start,5),{RS['amc1']},{RS['amc2']},{RS['amc3']},{RS['amc4']},{RS['amc5']})", PHP, True, f"=IF({QI['model']}=\"Perpetual\",\"22% of the licence fee from Year \"&AMC_Start&\", then +5% a year\",\"Not applicable: support is in the subscription\")"),
-    ('Hosting per month', f"={RS['host_net']}+{RS['env_m']}", PHP, True, f"={QI['host']}&IF({QI['env']}>0,\", including \"&{QI['env']}&\" additional environment(s)\",\"\")"),
+    ('Hosting per month', f"={RS['host_net']}+{RS['env_m']}", PHP, True, f"={QI['host']}&\": standing environment set of the tier\"&IF({QI['env']}>0,\", including \"&{QI['env']}&\" additional environment(s)\",\"\")"),
+    ('Pre-Prod per month of use', f"={RS['pp_net']}", PHP, True, f"=IF({QI['host']}=\"Self-hosted\",\"Client hosts Pre-Prod itself\",\"Temporary: \"&PP_GoLive&\" months at go-live, \"&PP_Rel&\" per major release\")"),
     ('One-time optional services', f"={RS['once_net']}", PHP, True, 'Training, migration, integrations, environment set-up, on-site days chosen above.'),
     ('24x7 Severity 1 support per year, Year 1', f"={RS['sup1']}", PHP, True, 'Optional; +5% a year.'),
     ('Year 1 total', f"={RS['tot1']}", PHP, True, 'Everything payable in the first contract year.'),
@@ -546,7 +589,7 @@ head(qq, r, ['Item', 'Year 1', 'Year 2', 'Year 3', 'Year 4', 'Year 5', '5-year t
 lines = [('Implementation or onboarding, licence and one-time services', lambda y: f"={RS['impl_net']}+{RS['lic_net']}+{RS['once_net']}" if y == 1 else '=0'),
          ('AMC', lambda y: f"={RS[f'amc{y}']}"),
          ('Subscription', lambda y: f"={RS[f'sub{y}']}"),
-         ('Hosting and additional environments', lambda y: f"={RS[f'host{y}']}"),
+         ('Hosting, additional environments and Pre-Prod', lambda y: f"={RS[f'host{y}']}"),
          ('24x7 Severity 1 support', lambda y: f"={RS[f'sup{y}']}"),
          ('Total excl. VAT', lambda y: f"={RS[f'tot{y}']}"),
          ('VAT 12%', None),
@@ -578,7 +621,8 @@ pays = [
     ('Perpetual licence fee: 100% on go-live', f"={RS['lic_net']}", 'On go-live (perpetual model only)'),
     ('One-time optional services', f"={RS['once_net']}", 'On delivery, or as quoted for fixed-price items'),
     ('Subscription, per month (Year 1 rate)', f"={RS['sub_net']}", 'Monthly in advance from go-live; +5% at each anniversary'),
-    ('Hosting and environments, per month', f"={RS['host_net']}+{RS['env_m']}", 'Monthly in advance from environment handover'),
+    ('Hosting and environments, per month', f"={RS['host_net']}+{RS['env_m']}", 'Monthly in advance from environment handover; no yearly increase'),
+    ('Pre-Prod, per month of use', f"={RS['pp_net']}", 'Monthly in advance for each month of use (go-live rehearsal, major releases)'),
     ('AMC, per year (first AMC year)', f"=CHOOSE(MIN(AMC_Start,5),{RS['amc1']},{RS['amc2']},{RS['amc3']},{RS['amc4']},{RS['amc5']})", f"=\"Yearly in advance from Year \"&AMC_Start&\"; +5% a year\""),
     ('24x7 Severity 1 support, per year (Year 1)', f"={RS['sup1']}", 'Yearly in advance; +5% a year'),
 ]
@@ -792,7 +836,7 @@ for ti, t in enumerate(TIERS):
         put(pp, sum_r, 8, f"={Rl['tot5y']}", PHP, fill=F_TOT)
         put(pp, sum_r, 9, f"={Rf['tot5y']}", PHP, fill=F_INT)
         sum_r += 1
-text_row(pp, sum_r, 'One-time fees: implementation or onboarding, perpetual licence and one-time services. Monthly fees: subscription, hosting and additional environments. '
+text_row(pp, sum_r, 'One-time fees: implementation or onboarding, perpetual licence and one-time services. Monthly fees: subscription, hosting of the standing environment set and additional environments; Pre-Prod months are in the yearly totals. '
          'AMC (perpetual) and 24x7 support are yearly and are in the Year 1 and 5-year totals. Floor = CEO limit on every component.', 9, 30, ITAL)
 pp.freeze_panes = 'B4'
 
@@ -813,7 +857,9 @@ terms = [
     ('Perpetual licence fee', '100% on go-live.'),
     ('AMC', '22% of the licence fee a year, yearly in advance from the AMC start year (Year 2, after a 12-month warranty from go-live). Increases 5% at each anniversary.'),
     ('Subscription', 'Monthly in advance from go-live. Increases 5% at each contract anniversary. Minimum term 12 months; minimum billable users by tier.'),
-    ('Hosting', 'Monthly in advance from the date the environment is handed over. Cloud prices are estimates confirmed with the provider before a binding offer.'),
+    ('Hosting', 'Priced per environment set: Dev, UAT and Production for Small and Medium; Dev, SIT, UAT and Production with high availability for Large and Enterprise. '
+     'Monthly in advance from the date each environment is handed over. Pre-Prod is temporary and billed per month of use (go-live rehearsal, major releases). '
+     'Hosting fees do not increase yearly; provider price changes are passed through at cost. Cloud prices are estimates confirmed with the provider before a binding offer.'),
     ('Change requests', 'Small: on delivery. Medium: 50% on approval, 50% on UAT sign-off. Large: 30% on approval, 50% on UAT sign-off, 20% on deployment.'),
     ('Optional services', 'Monthly in arrears at actual days, or as quoted for fixed-price items. Travel outside Metro Manila at cost.'),
     ('Payment', 'Invoices are payable within 30 days. Subscription and hosting may be suspended after 60 days of non-payment, with written notice.'),

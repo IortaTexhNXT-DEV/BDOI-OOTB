@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; IC=Insurance Commission; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (Republic Act 10173); IRR=Implementing Rules and Regulations; DPO=Data Protection Officer; PIC=Personal information controller; PIP=Personal information processor; SPA=Single-page application; API=Application programming interface; RDS=Amazon Relational Database Service; EFS=Amazon Elastic File System; WAF=Web application firewall; CDN=Content delivery network; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; TOTP=Time-based one-time password; JWT=JSON Web Token; SoD=Segregation of duties; BIR=Bureau of Internal Revenue; DR=Disaster recovery; UAT=User acceptance testing
+acronyms: OOTB=Out of the box; IC=Insurance Commission; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (Republic Act 10173); IRR=Implementing Rules and Regulations; DPO=Data Protection Officer; PIC=Personal information controller; PIP=Personal information processor; SPA=Single-page application; API=Application programming interface; RDS=Amazon Relational Database Service; EFS=Amazon Elastic File System; WAF=Web application firewall; CDN=Content delivery network; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; TOTP=Time-based one-time password; JWT=JSON Web Token; SoD=Segregation of duties; BIR=Bureau of Internal Revenue; DR=Disaster recovery; DEV=Development environment; SIT=System integration test; PRE-PROD=Pre-production environment; PROD=Production environment; UAT=User acceptance testing
 ---
 
 # Introduction
@@ -171,14 +171,18 @@ Whatever the hosting option, BrokerVerse needs the same components.
 
 ## Environment layout
 
+**Decision (product owner, 04 October 2026):** the environment set follows the broker size. Small and medium brokers have DEV, UAT and PROD: integration is done in DEV and the release is pushed to UAT for testing, then to PROD. Large brokers have DEV, SIT, UAT and PROD, with SIT and UAT separate. PRE-PROD is temporary for every size.
+
 | Environment | Purpose | Data | Recommended form |
 |---|---|---|---|
-| DEV | Development and integration by iorta TechNXT | Sample data (`SEED_SAMPLE_DATA=true`) | Single server or Docker Compose |
-| UAT | Business acceptance, training, performance test | Synthetic UAT data (`backend/scripts/uat-scenario.js`) or masked copies | Same topology as PROD at smaller size |
-| PROD | Live operations | Reference data only, then go-live imports | Highly available (two API instances, managed PostgreSQL with standby) |
-| DR | Recovery after a regional or site disaster | Restored from cross-region or off-site backups | Pilot light or warm standby (chapter on resilience) |
+| DEV | Development and integration by iorta TechNXT; for small and medium brokers also configuration and the system integration test | Sample and synthetic data (`SEED_SAMPLE_DATA=true`, `backend/scripts/uat-scenario.js`); never client data | Small single-zone environment: one API instance, small managed PostgreSQL without standby |
+| SIT (large broker) | System integration test, configuration build and first mock loads | Synthetic data; client data during mock loads | Single-zone environment, medium size |
+| UAT | Business acceptance, training, mock loads, performance test | Mock-load data from the broker's extracts | Same components as PROD at a smaller size, single zone (small size for small and medium brokers, medium size for large) |
+| PRE-PROD (temporary) | Cutover rehearsal before go-live; rehearsal of each major release | Restored from a PROD backup; masked when used by people without production access | Same topology and size as PROD; removed after use |
+| PROD | Live operations | Reference data only, then go-live imports | Two API instances and managed PostgreSQL sized by tier (sizing below); high availability with a standby database required for large brokers |
+| DR | Recovery after a regional or site disaster | Restored from cross-region or off-site backups | Pilot light or warm standby (chapter on resilience); included for the Enterprise size |
 
-> **Recommended:** Never copy production personal data into DEV or UAT without masking. Each environment has its own secrets; `DATA_ENCRYPTION_KEY` and `JWT_SECRET` must differ between environments.
+> **Recommended:** Never copy production personal data into DEV, SIT or UAT. A PRE-PROD restored from a production backup is masked with the data masking tool before anyone without production access uses it (the masking tool is described in the Environment Strategy and Production Rollout Plan when it is released). Each environment has its own secrets; `DATA_ENCRYPTION_KEY` and `JWT_SECRET` must differ between environments.
 
 ## Network zones
 
@@ -212,7 +216,7 @@ This is the reference deployment of `deploy/README.md` and architecture document
 
 ### Current demo deployment
 
-The repository also deploys a demo system: `.github/workflows/deploy-frontend.yml` publishes the front end to S3 and CloudFront and reloads the API on one EC2 host with PM2 (`deploy/ec2/deploy.sh`). The API runs as one PM2 process (fork mode, restart above 700 MB) on port 8001 behind an nginx site that only forwards `/api/`. This is a single-instance set-up with no redundancy; it is suitable for demonstration and UAT, not as the production form of option A.
+The repository also deploys a demo system: `.github/workflows/deploy-frontend.yml` publishes the front end to S3 and CloudFront and reloads the API on one EC2 host with PM2 (`deploy/ec2/deploy.sh`). The API runs as one PM2 process (fork mode, restart above 700 MB) on port 8001 behind an nginx site that only forwards `/api/`. This is a single-instance set-up with no redundancy; it is suitable for demonstration and DEV, not as the production form of option A.
 
 ## Option B: Microsoft Azure (Southeast Asia)
 
@@ -268,22 +272,28 @@ The sizes below extend the recommendation of architecture document 06 (200 named
 
 ## Indicative monthly cost
 
-> **Indicative:** Estimates of on-demand list prices for the PROD environment only, converted at an assumed PHP 58.00 to USD 1.00, before tax, support plans and data transfer above normal use. Reserved capacity or savings plans reduce them by roughly 25% to 40%. Obtain a quotation from the provider or partner before ordering.
+> **Indicative:** Hosting prices when iorta TechNXT hosts, from the commercials and pricing workbook (Infrastructure sheet) and the Rate Card: estimates of on-demand list prices at PHP 62.75 to USD 1.00 plus a 20% margin for exchange rate movement and operations, excluding VAT. Reserved capacity or savings plans reduce the cloud cost by roughly 20% to 40%. Obtain a quotation from the provider or partner before ordering.
 
-| Option | Small | Medium | Large |
-|---|---|---|---|
-| A: AWS Singapore | PHP 15,000 to 25,000 | PHP 30,000 to 50,000 | PHP 65,000 to 100,000 |
-| B: Azure Southeast Asia | PHP 15,000 to 27,000 | PHP 30,000 to 55,000 | PHP 65,000 to 105,000 |
-| C: Philippine partner (managed VMs) | PHP 25,000 to 45,000 | PHP 45,000 to 80,000 | PHP 90,000 to 160,000 |
+| Environment (AWS Singapore, PHP a month) | Small | Medium | Large | Enterprise |
+|---|---|---|---|---|
+| DEV | 11,000.00 | 11,000.00 | 11,000.00 | 11,000.00 |
+| SIT | Not used | Not used | 23,000.00 | 23,000.00 |
+| UAT | 11,000.00 | 11,000.00 | 23,000.00 | 23,000.00 |
+| PROD | 21,000.00 | 47,000.00 | 86,000.00 | 199,000.00 (with cross-region backups) |
+| Standing set | 43,000.00 | 69,000.00 | 143,000.00 | 256,000.00 |
+| PRE-PROD, per month of use | 21,000.00 | 47,000.00 | 86,000.00 | 169,000.00 |
 
-| Additional environment | Indicative share of the PROD cost |
+| Standing set, other options (PHP a month) | Small | Medium | Large | Enterprise |
+|---|---|---|---|---|
+| B: Azure Southeast Asia | 46,000.00 | 73,000.00 | 150,000.00 | 269,000.00 |
+| C: Philippine partner | 42,000.00 | 67,000.00 | 135,000.00 | 242,000.00 |
+
+| DR option | Indicative share of the PROD cost |
 |---|---|
-| UAT (single API instance, database without standby) | 30% to 40% |
-| DEV (single small server or Compose) | 10% to 15% |
 | DR as pilot light (backups and images in the second region or site, nothing running) | 5% to 10% |
 | DR as warm standby (small database replica and one API instance running) | 30% to 50% |
 
-The largest cost items are the database with its standby, the load balancer or reverse proxy, the WAF and the log volume. The file store and the backups grow with the number of uploaded documents.
+The largest cost items are the database with its standby, the load balancer or reverse proxy, the WAF and the log volume. The file store and the backups grow with the number of uploaded documents. PRE-PROD is billed only for the months it exists: the workbook budgets 2 months around go-live and 1 month per major release.
 
 # CI/CD and release management
 
@@ -305,11 +315,11 @@ The EC2 deployment script checks out the pushed branch, installs production depe
 
 ## Release process
 
-**Recommended** release steps for UAT and PROD:
+**Recommended** release steps (the release pipeline with an approval gate per environment, decided by the product owner, is described when it is released):
 
 1. Merge to the release branch through a reviewed pull request with a green CI run.
 2. Tag the release (for example `v1.0.0`, as named in `deploy/README.md`) and record `GIT_COMMIT` in the build so `GET /api/version` shows it.
-3. Deploy to UAT, run the UAT scripts in `docs/onboarding/UAT_SCRIPTS.md` for the changed areas and obtain business sign-off.
+3. Deploy to DEV, then SIT for a large broker, then UAT; run the UAT scripts in `docs/onboarding/UAT_SCRIPTS.md` for the changed areas and obtain business sign-off. For a major release, rehearse it in a PRE-PROD restored from a PROD backup, then remove PRE-PROD.
 4. Before PROD: take a manual database snapshot when the release contains migrations.
 5. Deploy one API instance first; when `/api/health` is ready, roll the others.
 6. Smoke test as in `deploy/README.md` section 4; keep the previous image and front-end build for rollback.
@@ -340,7 +350,7 @@ If a rule fails, the API logs `Refusing to start in production: ...` with the re
 3. It applies each pending migration in its own transaction and records it in `schema_migrations`, then runs the idempotent seed (roles, permissions, settings, chart of accounts, product templates, jobs, masters, administrator).
 4. It starts HTTP and the scheduler and reports ready.
 
-Migrations only add to the schema (project convention), so the previous release normally runs on the newer schema. A failed migration stops the start-up; the release is not rolled back automatically. **Recommended:** test every migration on a UAT copy and keep a pre-release snapshot.
+Migrations only add to the schema (project convention), so the previous release normally runs on the newer schema. A failed migration stops the start-up; the release is not rolled back automatically. **Recommended:** test every migration in DEV, SIT (large broker) and UAT, and for a major release in PRE-PROD, and keep a pre-release snapshot.
 
 # High availability, backup and recovery
 

@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-acronyms: AMC=Annual Maintenance Contract; AMLA=Anti-Money Laundering Act; API=Application programming interface; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; CR=Change request; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EOPT=Ease of Paying Taxes Act; EWT=Expanded withholding tax; IC=Insurance Commission; NPC=National Privacy Commission; OOTB=Out of the box; SoD=Segregation of duties; UAT=User acceptance test; VAT=Value-added tax
+acronyms: AMC=Annual Maintenance Contract; AMLA=Anti-Money Laundering Act; API=Application programming interface; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; CR=Change request; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EOPT=Ease of Paying Taxes Act; EWT=Expanded withholding tax; IC=Insurance Commission; NPC=National Privacy Commission; OOTB=Out of the box; SoD=Segregation of duties; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; VAT=Value-added tax
 ---
 
 # How to use this document
@@ -133,7 +133,7 @@ A React web application, a Node.js 22 API and a PostgreSQL 16 database, with a f
 
 ## Where can it be hosted?
 
-Four options: AWS (Singapore region), Microsoft Azure (Southeast Asia, Singapore), a Philippine hosting partner, or the broker's own data centre. Hosting by iorta TechNXT is optional and priced separately; a broker that hosts itself pays no hosting fee and receives the deployment guide, with set-up support at day rates.
+Four options: AWS (Singapore region), Microsoft Azure (Southeast Asia, Singapore), a Philippine hosting partner, or the broker's own data centre. Hosting by iorta TechNXT is optional and priced separately, per environment set: Dev, UAT and Production for a small or medium broker; Dev, SIT, UAT and Production for a large broker. A temporary Pre-Prod, restored from a production backup for the go-live rehearsal and each major release, is billed only for the months it exists. On AWS the standing set costs PHP 43,000.00 a month for a small broker and PHP 143,000.00 for a large one (Rate Card). A broker that hosts itself pays no hosting fee and receives the deployment guide, with set-up support at day rates.
 
 ## Our data must stay in the Philippines. Can it?
 

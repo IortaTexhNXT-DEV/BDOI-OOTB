@@ -101,7 +101,7 @@ rows = [
      '2. To price a prospect, enter its user count and number of lines of business in Inputs (Calculator section). '
      'The calculators on Perpetual Model and Subscription Model update, with the break-even year.\n'
      '3. To change the three worked examples, edit the Sample quote scenarios table in Inputs.\n'
-     '4. Infrastructure is optional and separate. Pick AWS, Azure or Local partner per scenario; the customer may host itself at no fee.\n'
+     '4. Infrastructure is optional and separate. Pick AWS, Azure or Local partner per scenario; the customer may host itself at no fee. Hosting is priced per environment set (Infrastructure sheet).\n'
      '5. Recalculate (F9) if your spreadsheet tool does not recalculate on open.'),
     ('Size tiers and user slabs', 'Small 1 to 25 users, Medium 26 to 100, Large 101 to 300, Enterprise above 300. '
      'User prices are graduated: the first 25 users are charged at the Small slab rate, users 26 to 100 at the Medium rate, and so on. '
@@ -128,6 +128,9 @@ rows = [
     ('Estimates and assumptions', 'Rows and cells shaded light orange, and figures marked "Estimate" or "Assumption", are not published facts. '
      'They are the basis stated beside them and must be confirmed before a binding quotation. '
      'Competitor prices in Market Benchmark are mostly third-party estimates because the vendors do not publish list prices.'),
+    ('Environments and hosting', 'Small and Medium brokers: Dev, UAT and Production. Large and Enterprise: Dev, SIT, UAT and Production with high availability. '
+     'Pre-Prod is temporary for every size, created from a production backup for the go-live rehearsal and for each major release, then removed; it is billed per month of use. '
+     'Each environment is priced on its own line (Inputs and Infrastructure). Hosting fees do not increase yearly: provider price changes are passed through at cost.'),
     ('Validity', 'Prices are valid for 90 days from the quotation date and for contracts signed in that period. Day rates are fixed for 12 months from signing.'),
     ('Colour key', 'Yellow cell with blue text: input. Green: total. Light orange: estimate or assumption. Navy header: column titles.'),
     ('Sheets', 'Inputs, Size Tiers, Perpetual Model, Subscription Model, Infrastructure, Change Requests, Optional Services, Sample Quotes, Market Benchmark, Sources.'),
@@ -156,7 +159,7 @@ gen = [
     ('AMC_Start', 'AMC starts in contract year', 2, 'year', '0', 'Assumption: Year 1 after go-live is covered by a 12-month warranty. Set to 1 to bill AMC from go-live.'),
     ('Onboard_Pct', 'Subscription onboarding fee as % of implementation fee', 1.0, '%', PCT, 'Assumption: same set-up work in both models.'),
     ('Infra_Margin', 'Infrastructure margin on cloud cost', 0.20, '%', PCT, 'Assumption: covers FX movement, monitoring, patching and backup checks.'),
-    ('Infra_Esc', 'Infrastructure annual change', 0.0, '%', PCT, 'Assumption: cloud list prices are flat; review yearly against FX.'),
+    ('Infra_Esc', 'Infrastructure annual change', 0.0, '%', PCT, 'Hosting fees do not escalate yearly: provider price changes are passed through at cost under the Hosting Agreement. Keep at 0%.'),
     ('Days_per_LOB', 'Extra implementation man-days per line of business above the included count', 6, 'man-days', '0', 'Estimate: product and cover set-up, rating and tax lines, 2 to 3 document templates, insurer commission rates, UAT cases.'),
     ('Round_To', 'Round implementation and service fees to', 10000, 'PHP', PHP, 'Presentation.'),
     ('IT_Low', 'IT budget benchmark, low (share of revenue)', 0.03, '%', PCT1, 'Gartner insurance IT spend 3.1% of revenue (2010); later benchmarks 4% to 7% (sources S10, S11).'),
@@ -296,7 +299,6 @@ head(ws, r, ['Driver', 'Value', 'Unit', 'Basis'])
 ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=14)
 for n, lab, v, unit, fmt, basis in [
     ('Env_Setup_Days', 'Additional environment: set-up man-days', 6, 'man-days', '0', 'Estimate: provisioning, deployment, configuration copy, smoke test.'),
-    ('Env_Monthly_USD', 'Additional non-production environment: cloud cost per month', 150, 'USD', USD, 'Estimate: 1 small container, small single-zone database, storage (S3 for compute and database pricing references).'),
     ('Mig_Days_Source', 'Data migration beyond templates: man-days per additional legacy source', 15, 'man-days', '0', 'Estimate: mapping, extraction scripts, 2 trial loads, reconciliation.'),
     ('Int_Std_Days', 'Additional integration, standard (documented API or file)', 20, 'man-days', '0', 'Estimate: e.g. one insurer API, SMS gateway, payment gateway variant.'),
     ('Int_Cx_Days', 'Additional integration, complex (no API, two-way, or batch reconciliation)', 45, 'man-days', '0', 'Estimate.'),
@@ -310,18 +312,17 @@ for n, lab, v, unit, fmt, basis in [
     name(n, f'Inputs!$B${r}')
 
 r += 2
-sec(ws, r, 'Infrastructure: AWS reference cost per month (USD, production plus one UAT environment)', 14)
+sec(ws, r, 'Infrastructure: AWS reference cost per month of the Production environment (USD)', 14)
 r += 1
 head(ws, r, ['Component', 'Small', 'Medium', 'Large', 'Enterprise', 'Basis'])
 ws.merge_cells(start_row=r, start_column=6, end_row=r, end_column=14)
 infra = [
     ('Application containers (API, web, scheduler)', 90, 135, 180, 360, 'Estimate: 2/3/4/8 containers of 1 vCPU, 2 GB (Fargate, Singapore).'),
-    ('Managed PostgreSQL 16 (instance and storage)', 85, 320, 640, 1280, 'Estimate: db.t4g.medium single-AZ / db.m7g.large Multi-AZ / m7g.xlarge Multi-AZ / m7g.2xlarge Multi-AZ (S20).'),
+    ('Managed PostgreSQL 16 (instance and storage)', 85, 320, 640, 1280, 'Estimate: db.t4g.medium single-AZ / db.m7g.large Multi-AZ / m7g.xlarge Multi-AZ / m7g.2xlarge Multi-AZ (S20). Large and Enterprise: high availability.'),
     ('Object storage and backups (documents, snapshots)', 20, 40, 90, 180, 'Estimate: S3 and snapshot storage, growing with policies and uploads.'),
     ('Network (load balancer, CDN, data transfer)', 45, 70, 120, 220, 'Estimate.'),
     ('Security and monitoring (WAF, logs, alarms, secrets, keys)', 35, 60, 110, 200, 'Estimate.'),
-    ('UAT environment (scaled down)', 120, 200, 350, 600, 'Estimate.'),
-    ('Disaster recovery copy (cross-region backups)', 0, 0, 0, 400, 'Estimate: Enterprise only; optional for others.'),
+    ('Disaster recovery copy (cross-region backups)', 0, 0, 0, 400, 'Estimate: Enterprise only; optional for others. Not part of Pre-Prod.'),
 ]
 I0 = r + 1
 for comp in infra:
@@ -333,11 +334,65 @@ for comp in infra:
     ws.merge_cells(start_row=r, start_column=6, end_row=r, end_column=14)
 I1 = r
 r += 1
-put(ws, r, 1, 'Total AWS reference cost per month (USD)', bold=True)
+put(ws, r, 1, 'Production reference cost per month (USD)', bold=True)
 for j in range(4):
     col = L(2 + j)
     put(ws, r, 2 + j, f'=SUM({col}{I0}:{col}{I1})', USD, fill=F_TOT)
-INFRA_TOT = r
+PROD_TOT = r
+
+r += 2
+sec(ws, r, 'Infrastructure: non-production environment sizes and Pre-Prod use', 14)
+r += 1
+head(ws, r, ['Driver', 'Value', 'Unit', 'Basis'])
+ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=14)
+for n, lab, v, unit, fmt, basis in [
+    ('NP_Small_USD', 'Non-production environment, small: cloud cost per month', 150, 'USD', USD,
+     'Estimate: 1 container of 1 vCPU, 2 GB; PostgreSQL db.t4g.medium single-AZ, 50 GB; file store; backups 7 to 14 days. Dev in every tier; UAT of Small and Medium brokers.'),
+    ('NP_Med_USD', 'Non-production environment, medium: cloud cost per month', 300, 'USD', USD,
+     'Estimate: 2 containers of 1 vCPU, 2 GB (the second for the UAT performance test); db.t4g.large single-AZ, 100 GB; file store; load balancer. SIT and UAT of Large and Enterprise brokers.'),
+    ('PreProd_Factor', 'Pre-Prod cloud cost relative to Production (without the DR copy)', 1.0, '%', PCT,
+     'Assumption: Pre-Prod is restored from a production backup and runs at production topology and size, so the rehearsal measures real timings.'),
+    ('PreProd_GoLive_Months', 'Pre-Prod months of use around go-live', 2, 'months', '0',
+     'Assumption: created before the cutover rehearsal and removed after hypercare (1 to 2 months). Billed per month of use.'),
+    ('PreProd_Rel_Months', 'Pre-Prod months of use per major release', 1, 'months', '0',
+     'Assumption: created from a production backup for the release rehearsal and removed after the release.'),
+    ('Major_Rel_Year', 'Major releases per year (yearly hosting view only)', 1, 'releases', '0',
+     'Assumption for budgeting. Major releases are announced at least 6 months ahead (Release Notes and Roadmap); the invoice follows the actual months of use.')]:
+    r += 1
+    put(ws, r, 1, lab)
+    put(ws, r, 2, v, fmt, inp=True)
+    put(ws, r, 3, unit)
+    put(ws, r, 4, basis, fill=F_EST)
+    ws.merge_cells(start_row=r, start_column=4, end_row=r, end_column=14)
+    name(n, f'Inputs!$B${r}')
+
+r += 2
+sec(ws, r, 'Infrastructure: environment set by tier, AWS reference cost per month (USD)', 14)
+r += 1
+head(ws, r, ['Tier', 'Dev', 'SIT', 'UAT', 'Production', 'Standing environments', 'Pre-Prod per month of use', 'Environment set and basis'])
+ws.merge_cells(start_row=r, start_column=8, end_row=r, end_column=14)
+ws.row_dimensions[r].height = 30
+ENVSET = {
+    'Small': (False, 'NP_Small_USD', 'Dev, UAT, Production, temporary Pre-Prod. Integration and SIT in Dev, then promoted to UAT for testing.'),
+    'Medium': (False, 'NP_Small_USD', 'Dev, UAT, Production, temporary Pre-Prod. As Small.'),
+    'Large': (True, 'NP_Med_USD', 'Dev, SIT, UAT, Production with high availability, temporary Pre-Prod. SIT and UAT are separate.'),
+    'Enterprise': (True, 'NP_Med_USD', 'As Large, with the cross-region DR copy in Production.'),
+}
+E0 = r + 1
+for j, tname in enumerate(['Small', 'Medium', 'Large', 'Enterprise']):
+    sit, uat, note = ENVSET[tname]
+    col = L(2 + j)
+    r += 1
+    put(ws, r, 1, f'=A{T0 + j}', bold=True)
+    put(ws, r, 2, '=NP_Small_USD', USD)
+    put(ws, r, 3, '=NP_Med_USD' if sit else 0, USD)
+    put(ws, r, 4, f'={uat}', USD)
+    put(ws, r, 5, f'={col}{PROD_TOT}', USD)
+    put(ws, r, 6, f'=SUM(B{r}:E{r})', USD, bold=True, fill=F_TOT)
+    put(ws, r, 7, f'=SUM({col}{I0}:{col}{I1 - 1})*PreProd_Factor', USD, fill=F_TOT)
+    put(ws, r, 8, note, wrap=True)
+    ws.merge_cells(start_row=r, start_column=8, end_row=r, end_column=14)
+E1 = r
 r += 1
 put(ws, r, 1, 'Azure cost relative to AWS')
 put(ws, r, 2, 1.05, '0.00', inp=True)
@@ -726,48 +781,61 @@ put(sm, r, 8, f'=IF(MIN(C{r+2}:G{r+2})=99,"Beyond Year 5","Break-even Year "&MIN
 sm.freeze_panes = 'C5'
 
 # ------------------------------------------------------------------ Infrastructure
-inf = sheet('Infrastructure', [20, 14, 18, 18, 18, 20, 20, 16, 50], 'Infrastructure (optional and separate)',
-            'Indicative monthly cost by provider and tier, with margin. Production plus one UAT environment. The customer may host BrokerVerse itself at no fee.')
-head(inf, 4, ['Provider', 'Tier', 'Cloud cost per month (USD)', 'Cloud cost per month (PHP)', 'Margin (PHP)', 'Price per month (PHP)',
-              'Price per year, Year 1 (PHP)', 'Price per month (USD)', 'Notes'])
-inf.row_dimensions[4].height = 45
+inf = sheet('Infrastructure', [14, 11, 30, 12, 12, 12, 13, 15, 15, 15, 15, 13, 44], 'Infrastructure (optional and separate): hosting per environment set',
+            'Price per month by provider, tier and environment, with margin. Standing environments run all the time; Pre-Prod is temporary and billed per month of use. The customer may host BrokerVerse itself at no fee.')
+head(inf, 4, ['Provider', 'Tier', 'Environment set', 'Dev per month (PHP)', 'SIT per month (PHP)', 'UAT per month (PHP)', 'Production per month (PHP)',
+              'Standing environments per month (PHP)', 'Pre-Prod per month of use (PHP)', 'Hosting Year 1 (PHP, incl. Pre-Prod at go-live)',
+              'Hosting each later year (PHP, incl. Pre-Prod per major release)', 'Standing per month (USD)', 'Notes'])
+inf.row_dimensions[4].height = 60
 provs = [('AWS', '1', 'Singapore region (ap-southeast-1); a Manila Local Zone exists for latency-sensitive parts (S22).'),
          ('Azure', 'Azure_Factor', 'Southeast Asia region (Singapore).'),
          ('Local partner', 'Local_Factor', 'Philippine data centre or partner cloud; data stays in the Philippines.')]
+SETNAME = ['Dev, UAT, Production', 'Dev, UAT, Production', 'Dev, SIT, UAT, Production (HA)', 'Dev, SIT, UAT, Production (HA, DR copy)']
 r = 4
 for p, fac, note in provs:
     for j in range(4):
         r += 1
+        e = E0 + j
         put(inf, r, 1, p, bold=(j == 0))
         put(inf, r, 2, f'=Inputs!A{T0+j}')
-        put(inf, r, 3, f'=Inputs!{L(2+j)}{INFRA_TOT}*{fac}', USD, fill=F_EST)
-        put(inf, r, 4, f'=C{r}*FX', PHP)
-        put(inf, r, 5, f'=D{r}*Infra_Margin', PHP)
-        put(inf, r, 6, f'=ROUND(D{r}+E{r},-3)', PHP, bold=True, fill=F_TOT)
-        put(inf, r, 7, f'=F{r}*12', PHP)
-        put(inf, r, 8, f'=F{r}/FX', USD)
-        put(inf, r, 9, note if j == 0 else '', wrap=True)
+        put(inf, r, 3, SETNAME[j] + ' + Pre-Prod when used', wrap=True)
+        for k, src in enumerate(['B', 'C', 'D', 'E']):
+            put(inf, r, 4 + k, f'=ROUND(Inputs!{src}{e}*{fac}*FX*(1+Infra_Margin),-3)', PHP, fill=F_EST)
+        put(inf, r, 8, f'=SUM(D{r}:G{r})', PHP, bold=True, fill=F_TOT)
+        put(inf, r, 9, f'=ROUND(Inputs!G{e}*{fac}*FX*(1+Infra_Margin),-3)', PHP, bold=True, fill=F_TOT)
+        put(inf, r, 10, f'=H{r}*12+I{r}*PreProd_GoLive_Months', PHP)
+        put(inf, r, 11, f'=H{r}*12+I{r}*PreProd_Rel_Months*Major_Rel_Year', PHP)
+        put(inf, r, 12, f'=H{r}/FX', USD)
+        put(inf, r, 13, note if j == 0 else '', wrap=True)
+        inf.row_dimensions[r].height = 30
 for j in range(4):
     r += 1
     put(inf, r, 1, 'Customer', bold=(j == 0))
     put(inf, r, 2, f'=Inputs!A{T0+j}')
-    for c in range(3, 9):
+    put(inf, r, 3, SETNAME[j] + ' + Pre-Prod when used', wrap=True)
+    for c in range(4, 13):
         put(inf, r, c, 0, PHP)
-    put(inf, r, 9, 'Broker hosts itself (cloud account or own data centre). Deployment guide supplied; set-up support at day rates.' if j == 0 else '', wrap=True)
+    put(inf, r, 13, 'Broker hosts itself (cloud account or own data centre) with the same environment set. Deployment guide supplied; set-up support at day rates.' if j == 0 else '', wrap=True)
+    inf.row_dimensions[r].height = 30
 INF0, INF1 = 5, r
 r += 2
-sec(inf, r, 'What the infrastructure price covers', 9)
-for line in ['Covers: cloud resources for production and one UAT environment, daily backups, monitoring and alarms, operating system and database patching, TLS certificates.',
+sec(inf, r, 'Environment model and what the price covers', 13)
+for line in ['Environment model: Small and Medium brokers have Dev, UAT and Production. Integration and system testing are done in Dev and the release is promoted to UAT for testing, then to Production. '
+             'Large and Enterprise brokers have Dev, SIT, UAT and Production, with SIT and UAT separate and Production highly available.',
+             'Pre-Prod is temporary for every size: created from a production backup (masked when used by people without production access) for the go-live rehearsal and for each major release, then removed. '
+             'It is billed per month of use at the Pre-Prod rate: by default 2 months around go-live and 1 month per major release (Inputs).',
+             'Covers: cloud resources of each environment, daily backups, monitoring and alarms, operating system and database patching, TLS certificates.',
              'Reference sizing: the BrokerVerse capacity document sizes 200 named users (80 concurrent) at 2 API containers of 1 vCPU, 2 GB and Amazon RDS for PostgreSQL 16 db.m7g.large Multi-AZ, 100 GB gp3 storage.',
-             'Excludes: e-mail sending service charges above normal volumes, SMS, payment gateway fees, domain names, extra environments (see Optional Services) and disaster-recovery copies for tiers other than Enterprise.',
+             'Excludes: e-mail sending service charges above normal volumes, SMS, payment gateway fees, domain names, extra environments such as a training environment (see Optional Services) and disaster-recovery copies for tiers other than Enterprise.',
              'All cloud figures are estimates from public on-demand list prices, rounded up. Confirm with the provider pricing calculator and a partner quotation before a binding offer. Reserved instances or savings plans can lower cost 20% to 40% for a 1 to 3 year commitment.',
-             'Billing: monthly in advance in PHP. The margin line covers FX movement between USD cloud billing and PHP invoicing, and the operations effort.']:
+             'Billing: monthly in advance in PHP from the handover of each environment; Pre-Prod monthly for each month or part month of use. Hosting fees do not increase yearly; provider price changes are passed through at cost (Hosting Agreement). '
+             'The margin covers FX movement between USD cloud billing and PHP invoicing, and the operations effort.']:
     r += 1
     inf.cell(r, 1, line).alignment = WRAP
-    inf.merge_cells(start_row=r, start_column=1, end_row=r, end_column=9)
+    inf.merge_cells(start_row=r, start_column=1, end_row=r, end_column=13)
     inf.row_dimensions[r].height = 30
-inf.freeze_panes = 'C5'
-INF_REF = (f"Infrastructure!$F${INF0}:$F${INF1}", f"Infrastructure!$A${INF0}:$A${INF1}", f"Infrastructure!$B${INF0}:$B${INF1}")
+inf.freeze_panes = 'D5'
+INF_REF = (f"Infrastructure!$J${INF0}:$J${INF1}", f"Infrastructure!$A${INF0}:$A${INF1}", f"Infrastructure!$B${INF0}:$B${INF1}", f"Infrastructure!$K${INF0}:$K${INF1}")
 
 # ------------------------------------------------------------------ Change Requests
 cr = sheet('Change Requests', [34, 16, 16, 16, 16, 16, 16, 50], 'Change requests (CR)',
@@ -847,11 +915,11 @@ cr.freeze_panes = 'B5'
 
 # ------------------------------------------------------------------ Optional Services
 op = sheet('Optional Services', [46, 22, 18, 16, 13, 62], 'Optional services',
-           'Priced on request in addition to either model. PHP, exclusive of VAT. Recurring items escalate 5% a year.')
+           'Priced on request in addition to either model. PHP, exclusive of VAT. 24x7 support escalates 5% a year; hosted environments do not.')
 head(op, 4, ['Item', 'Unit', 'Price (PHP)', 'Price (USD)', 'Man-days', 'Basis and notes'])
 items = [
     ('Additional environment (training, second UAT), set-up', 'one-time', '=ROUND(Env_Setup_Days*Blended/Round_To,0)*Round_To', 'Env_Setup_Days', 'Set-up man-days x blended rate.'),
-    ('Additional environment hosted by iorta TechNXT', 'per month', '=ROUND(Env_Monthly_USD*FX*(1+Infra_Margin),-3)', None, 'Cloud cost plus infrastructure margin. Customer-hosted: set-up fee only.'),
+    ('Additional environment hosted by iorta TechNXT', 'per month', '=ROUND(NP_Small_USD*FX*(1+Infra_Margin),-3)', None, 'Small non-production size (as Dev) on AWS, cloud cost plus infrastructure margin; no yearly increase. Customer-hosted: set-up fee only.'),
     ('Training beyond the included days', 'per trainer day', '=Rate_Trainer', None, 'Up to 15 participants per session; customer provides the room and PCs.'),
     ('Data migration beyond the standard templates', 'per legacy source', '=ROUND(Mig_Days_Source*Blended/Round_To,0)*Round_To', 'Mig_Days_Source', 'Standard: data loaded by the broker with the BrokerVerse upload templates (docs/package/05_Delivery/Upload_Templates), with guidance. This item covers extraction and transformation from a legacy system.'),
     ('Data migration, additional effort', 'per man-day', '=Blended', None, 'For volume or data-quality work beyond the estimate.'),
@@ -885,7 +953,7 @@ sec(op, r, 'Included in the standard implementation (no extra charge)', 6)
 for line in ['Configuration of the company, branches, users and roles, insurers, commission rates, chart of accounts, banks and the included lines of business.',
              'Data load using the standard upload templates (about 50 templates in docs/package/05_Delivery/Upload_Templates), with the broker supplying clean data.',
              'Training days included for the tier (train-the-trainer), UAT support, go-live support and 4 weeks of hypercare.',
-             'One production and one UAT environment when iorta TechNXT hosts; deployment guidance when the broker hosts.']:
+             'Set-up of the environment set of the tier (Dev, UAT and Production; SIT as well for Large and Enterprise) and of Pre-Prod for the go-live rehearsal; hosting is billed separately. Deployment guidance when the broker hosts.']:
     r += 1
     op.cell(r, 1, line).alignment = WRAP
     op.merge_cells(start_row=r, start_column=1, end_row=r, end_column=6)
@@ -937,15 +1005,16 @@ for j in range(3):
     sq.cell(r, 1, 'Optional items (same in both models)').font = B
     r += 1
     o0 = r
-    put(sq, r, 1, f'="Infrastructure: "&{g("prov")}')
+    put(sq, r, 1, f'="Hosting, environment set and Pre-Prod: "&{g("prov")}')
     put(sq, r + 1, 1, '24x7 Severity 1 support')
     put(sq, r + 2, 1, 'Extra training, migration and integrations (one-time)')
     put(sq, r + 3, 1, 'Optional subtotal', bold=True)
-    infra_m = f'SUMIFS({INF_REF[0]},{INF_REF[1]},{g("prov")},{INF_REF[2]},{tier})'
+    infra_y1 = f'SUMIFS({INF_REF[0]},{INF_REF[1]},{g("prov")},{INF_REF[2]},{tier})'
+    infra_yn = f'SUMIFS({INF_REF[3]},{INF_REF[1]},{g("prov")},{INF_REF[2]},{tier})'
     one_time = (f'{g("train")}*Rate_Trainer+ROUND(Mig_Days_Source*Blended/Round_To,0)*Round_To*{g("mig")}'
                 f'+ROUND(Int_Std_Days*Blended/Round_To,0)*Round_To*{g("int")}')
     for y, yc in enumerate(['B', 'C', 'D', 'E', 'F'], 1):
-        put(sq, r, 1 + y, f'={infra_m}*12*(1+Infra_Esc)^({y}-1)', PHP)
+        put(sq, r, 1 + y, f'=({infra_y1 if y == 1 else infra_yn})*(1+Infra_Esc)^({y}-1)', PHP)
         put(sq, r + 1, 1 + y, f'=IF({g("sup")}="Yes",{tget("L", N)}*(1+Esc)^({y}-1),0)', PHP)
         put(sq, r + 2, 1 + y, f'={one_time}' if y == 1 else 0, PHP)
         put(sq, r + 3, 1 + y, f'=SUM({yc}{r}:{yc}{r+2})', PHP, bold=True)

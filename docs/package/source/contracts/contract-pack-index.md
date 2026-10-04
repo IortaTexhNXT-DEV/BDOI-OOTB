@@ -50,7 +50,7 @@ The contract is built in layers. The **Master Services Agreement** sets the gene
 | 4 | Implementation Statement of Work | Scope, phases, deliverables, acceptance and milestone payments of the implementation |
 | 5 | Change Request Procedure and Form | How changes are requested, priced and approved |
 | 6 | Annual Maintenance and Support Agreement and SLA | Maintenance, support hours, severity levels and response and restore targets |
-| 7 | [Hosting and Infrastructure Services Agreement] | [Hosting of the production and UAT environments by iorta TechNXT on [provider and region]] |
+| 7 | [Hosting and Infrastructure Services Agreement] | [Hosting of the environment set of the size (Dev, UAT and Production; SIT as well for a large broker) and the temporary Pre-Prod by iorta TechNXT on [provider and region]] |
 | 8 | Data Processing Agreement | Processing of personal data under the Data Privacy Act of 2012 |
 | 9 | Service Catalogue and Rate Annex | Services, units and rates; out-of-scope list |
 | 10 | Customer Responsibilities and RACI Annex | What each party provides and does |

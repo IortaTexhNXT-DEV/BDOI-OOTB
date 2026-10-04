@@ -6,7 +6,7 @@ date: 03 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; SaaS=Software as a service; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # About this rate card
@@ -32,16 +32,16 @@ Each broker size has four ready packages. They are priced for the reference numb
 
 Ownership Plus also includes 2 extra training days and the migration of 1 legacy data source.
 
-The figures below are list prices, excluding VAT. "One-time" is the implementation or onboarding fee, the perpetual licence fee and one-time services. "Monthly" is the subscription and the hosting from go-live. Year 1 and 5-year totals include the AMC and the yearly support where they apply, with the 5% yearly increase. The 5-year total assumes the contract continues to Year 5.
+The figures below are list prices, excluding VAT. "One-time" is the implementation or onboarding fee, the perpetual licence fee and one-time services. "Monthly" is the subscription and the hosting of the standing environment set of the size (see Hosting). Year 1 and 5-year totals include the AMC and the yearly support where they apply, with the 5% yearly increase, and the temporary Pre-Prod environment: 2 months in Year 1 for the go-live rehearsal and 1 month a year after for a major release. The 5-year total assumes the contract continues to Year 5.
 
 ## Small broker: 15 users, 5 lines of business
 
 | Package | One-time (PHP) | Monthly (PHP) | Year 1 total (PHP) | 5-year total (PHP) | 5-year total (USD) |
 |---|---|---|---|---|---|
 | Essentials | 1,130,000.00 | 48,000.00 | 1,706,000.00 | 4,312,764.00 | 68,729 |
-| Standard | 1,130,000.00 | 78,000.00 | 2,066,000.00 | 6,112,764.00 | 97,415 |
-| Ownership | 2,480,000.00 | 30,000.00 | 2,840,000.00 | 5,560,107.00 | 88,607 |
-| Ownership Plus | 2,780,000.00 | 28,000.00 | 3,356,000.00 | 7,066,259.00 | 112,610 |
+| Standard | 1,130,000.00 | 91,000.00 | 2,264,000.00 | 7,018,764.00 | 111,853 |
+| Ownership | 2,480,000.00 | 43,000.00 | 3,038,000.00 | 6,466,107.00 | 103,046 |
+| Ownership Plus | 2,780,000.00 | 42,000.00 | 3,564,000.00 | 8,026,259.00 | 127,909 |
 
 Ownership: AMC PHP 297,000.00 in Year 2. Ownership Plus: AMC PHP 297,000.00 in Year 2 and 24x7 Severity 1 support PHP 240,000.00 a year.
 
@@ -50,9 +50,9 @@ Ownership: AMC PHP 297,000.00 in Year 2. Ownership Plus: AMC PHP 297,000.00 in Y
 | Package | One-time (PHP) | Monthly (PHP) | Year 1 total (PHP) | 5-year total (PHP) | 5-year total (USD) |
 |---|---|---|---|---|---|
 | Essentials | 2,090,000.00 | 178,000.00 | 4,226,000.00 | 13,892,748.00 | 221,398 |
-| Standard | 2,090,000.00 | 240,000.00 | 4,970,000.00 | 17,612,748.00 | 280,681 |
-| Ownership | 7,070,000.00 | 62,000.00 | 7,814,000.00 | 15,512,173.00 | 247,206 |
-| Ownership Plus | 7,370,000.00 | 59,000.00 | 8,558,000.00 | 18,284,476.00 | 291,386 |
+| Standard | 2,090,000.00 | 247,000.00 | 5,148,000.00 | 18,314,748.00 | 291,868 |
+| Ownership | 7,070,000.00 | 69,000.00 | 7,992,000.00 | 16,214,173.00 | 258,393 |
+| Ownership Plus | 7,370,000.00 | 67,000.00 | 8,744,000.00 | 19,034,476.00 | 303,338 |
 
 Ownership: AMC PHP 1,095,600.00 in Year 2. Ownership Plus: AMC PHP 1,095,600.00 in Year 2 and 24x7 Severity 1 support PHP 480,000.00 a year.
 
@@ -61,9 +61,9 @@ Ownership: AMC PHP 1,095,600.00 in Year 2. Ownership Plus: AMC PHP 1,095,600.00 
 | Package | One-time (PHP) | Monthly (PHP) | Year 1 total (PHP) | 5-year total (PHP) | 5-year total (USD) |
 |---|---|---|---|---|---|
 | Essentials | 3,700,000.00 | 482,000.00 | 9,484,000.00 | 35,660,251.00 | 568,291 |
-| Standard | 3,700,000.00 | 594,000.00 | 10,828,000.00 | 42,380,251.00 | 675,382 |
-| Ownership | 17,080,000.00 | 112,000.00 | 18,424,000.00 | 36,487,284.00 | 581,471 |
-| Ownership Plus | 17,380,000.00 | 107,000.00 | 19,564,000.00 | 41,460,352.00 | 660,723 |
+| Standard | 3,700,000.00 | 625,000.00 | 11,372,000.00 | 44,756,251.00 | 713,247 |
+| Ownership | 17,080,000.00 | 143,000.00 | 18,968,000.00 | 38,863,284.00 | 619,335 |
+| Ownership Plus | 17,380,000.00 | 135,000.00 | 20,064,000.00 | 43,632,352.00 | 695,336 |
 
 Ownership: AMC PHP 2,943,600.00 in Year 2. Ownership Plus: AMC PHP 2,943,600.00 in Year 2 and 24x7 Severity 1 support PHP 900,000.00 a year.
 
@@ -72,9 +72,9 @@ Ownership: AMC PHP 2,943,600.00 in Year 2. Ownership Plus: AMC PHP 2,943,600.00 
 | Package | One-time (PHP) | Monthly (PHP) | Year 1 total (PHP) | 5-year total (PHP) | 5-year total (USD) |
 |---|---|---|---|---|---|
 | Essentials | 5,800,000.00 | 970,000.00 | 17,440,000.00 | 70,118,348.00 | 1,117,424 |
-| Standard | 5,800,000.00 | 1,214,000.00 | 20,368,000.00 | 84,758,348.00 | 1,350,731 |
-| Ownership | 32,500,000.00 | 244,000.00 | 35,428,000.00 | 72,457,674.00 | 1,154,704 |
-| Ownership Plus | 32,800,000.00 | 232,000.00 | 37,084,000.00 | 80,326,121.00 | 1,280,098 |
+| Standard | 5,800,000.00 | 1,226,000.00 | 20,850,000.00 | 86,492,348.00 | 1,378,364 |
+| Ownership | 32,500,000.00 | 256,000.00 | 35,910,000.00 | 74,191,674.00 | 1,182,337 |
+| Ownership Plus | 32,800,000.00 | 242,000.00 | 37,524,000.00 | 81,886,121.00 | 1,304,958 |
 
 Ownership: AMC PHP 5,874,000.00 in Year 2. Ownership Plus: AMC PHP 5,874,000.00 in Year 2 and 24x7 Severity 1 support PHP 1,500,000.00 a year.
 
@@ -116,7 +116,9 @@ The implementation size and the plan are confirmed at mobilisation once the data
 
 ## Hosting (when iorta TechNXT hosts)
 
-- A production and one UAT environment, daily backups, monitoring, patching of the operating system and database, and TLS certificates.
+- The environment set of the size: Dev, UAT and Production for Small and Medium brokers; Dev, SIT, UAT and Production with high availability for Large and Enterprise brokers.
+- A temporary Pre-Prod environment for the go-live rehearsal and for each major release, billed per month of use.
+- Daily backups, monitoring, patching of the operating system and database, and TLS certificates.
 
 # Licence models
 
@@ -167,18 +169,62 @@ The fee is the man-days of the size plus 6 man-days for each additional line of 
 
 # Hosting
 
-Hosting is optional. The price covers a production and one UAT environment, daily backups, monitoring, patching and certificates.
+## Environments by broker size
+
+Hosting is optional and is priced per environment set. The set depends on the broker size.
+
+| Size | Environments | How a release moves |
+|---|---|---|
+| Small and Medium | Dev, UAT, Production | Integration and system testing in Dev, promoted to UAT for the broker's testing, then to Production |
+| Large and Enterprise | Dev, SIT, UAT, Production with high availability | Dev, then the system integration test in SIT, then UAT, then Production |
+| Every size | Pre-Prod, temporary | Created from a production backup for the go-live rehearsal and for each major release, then removed |
+
+A Pre-Prod copy used by people who have no access to Production is masked first.
+
+## Standing environments, per month
 
 | Size | Hosted by the broker | AWS, per month (PHP) | Azure, per month (PHP) | Local partner, per month (PHP) |
 |---|---|---|---|---|
-| Small | No fee | 30,000.00 | 31,000.00 | 28,000.00 |
-| Medium | No fee | 62,000.00 | 65,000.00 | 59,000.00 |
-| Large | No fee | 112,000.00 | 118,000.00 | 107,000.00 |
-| Enterprise | No fee | 244,000.00 | 256,000.00 | 232,000.00 |
+| Small | No fee | 43,000.00 | 46,000.00 | 42,000.00 |
+| Medium | No fee | 69,000.00 | 73,000.00 | 67,000.00 |
+| Large | No fee | 143,000.00 | 150,000.00 | 135,000.00 |
+| Enterprise | No fee | 256,000.00 | 269,000.00 | 242,000.00 |
+
+The price is the sum of the environments of the set. On AWS:
+
+| Size | Dev (PHP) | SIT (PHP) | UAT (PHP) | Production (PHP) |
+|---|---|---|---|---|
+| Small | 11,000.00 | Not used | 11,000.00 | 21,000.00 |
+| Medium | 11,000.00 | Not used | 11,000.00 | 47,000.00 |
+| Large | 11,000.00 | 23,000.00 | 23,000.00 | 86,000.00 |
+| Enterprise | 11,000.00 | 23,000.00 | 23,000.00 | 199,000.00 |
+
+Production of Large and Enterprise brokers runs with a standby database; Enterprise also keeps a cross-region copy of the backups.
+
+## Pre-Prod, per month of use
+
+| Size | AWS (PHP) | Azure (PHP) | Local partner (PHP) |
+|---|---|---|---|
+| Small | 21,000.00 | 22,000.00 | 20,000.00 |
+| Medium | 47,000.00 | 49,000.00 | 45,000.00 |
+| Large | 86,000.00 | 90,000.00 | 82,000.00 |
+| Enterprise | 169,000.00 | 177,000.00 | 160,000.00 |
+
+Pre-Prod runs at production size, so the rehearsal measures real timings. It is billed only for the months it exists. For budgeting, plan 1 to 2 months around go-live and 1 month for each major release.
+
+## Hosting per year on AWS, for budgeting
+
+| Size | Year 1: standing set and 2 months of Pre-Prod (PHP) | Each later year: standing set and 1 month of Pre-Prod (PHP) |
+|---|---|---|
+| Small | 558,000.00 | 537,000.00 |
+| Medium | 922,000.00 | 875,000.00 |
+| Large | 1,888,000.00 | 1,802,000.00 |
+| Enterprise | 3,410,000.00 | 3,241,000.00 |
 
 - AWS and Azure are priced on their Singapore regions. Hosting in Singapore is a transfer of personal data outside the Philippines, which the broker documents under the Data Privacy Act.
 - The local partner option keeps the data in the Philippines.
-- When the broker hosts, iorta TechNXT supplies the deployment guide and charges set-up support at day rates.
+- When the broker hosts, it provides the same environment set. iorta TechNXT supplies the deployment guide and charges set-up support at day rates.
+- Hosting fees do not increase each year. They change only under the pass-through clause of the Hosting and Infrastructure Services Agreement.
 - Cloud prices are confirmed with the provider before the Order Form is signed.
 
 # Support and maintenance
@@ -261,7 +307,7 @@ Work above 60 man-days is a separate project with its own statement of work.
 | Perpetual licence fee | 100% on go-live |
 | AMC | Yearly in advance, from the start of Year 2 |
 | Subscription | Monthly in advance, from go-live |
-| Hosting | Monthly in advance, from the date the environment is handed over |
+| Hosting | Monthly in advance, from the date each environment is handed over; Pre-Prod monthly in advance for each month of use |
 | 24x7 Severity 1 support | Yearly in advance |
 | Change requests | Small: on delivery. Medium: 50% on approval, 50% on UAT sign-off. Large: 30% on approval, 50% on UAT sign-off, 20% on deployment |
 | Optional services | Monthly in arrears at actual days, or as quoted for fixed-price items |

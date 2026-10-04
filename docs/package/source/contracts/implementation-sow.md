@@ -8,7 +8,7 @@ reviewed: Legal counsel (to be completed)
 approved: To be completed
 change: Template for discussion; subject to review by the parties' legal counsel
 open_item: Review and completion by the parties' legal counsel before signature
-acronyms: ATP=Authority to Print; BIR=Bureau of Internal Revenue; CR=Change request; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; RAID=Risks, assumptions, issues and dependencies; SIT=System integration test; SOW=Statement of work; UAT=User acceptance testing; VAT=Value-added tax
+acronyms: ATP=Authority to Print; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; MSA=Master Services Agreement; OOTB=Out of the box; PHP=Philippine peso; Pre-Prod=Pre-production environment; RAID=Risks, assumptions, issues and dependencies; SIT=System integration test; SOW=Statement of work; UAT=User acceptance testing; VAT=Value-added tax
 ---
 
 # About this template
@@ -29,7 +29,7 @@ Bring iNXT BrokerVerse OOTB into production use for the Client's non-life brokin
 2. Configuration of [number] lines of business: [list, for example motor, fire, marine cargo, engineering, casualty, bonds]. The price includes the number of lines of business of the Client's size (Small 5, Medium 8, Large 12, Enterprise 16); additional lines are priced at 6 man-days each.
 3. Data migration of open items with the delivered upload templates: in-force policies, open receivables, amounts due to insurers, opening trial balance, masters (clients, insurers, products, referrers, users), as at the go-live date, for one legal entity and one fiscal year.
 4. Set-up of the delivered integrations: outgoing e-mail through the Client's SMTP mailbox; bank statement formats for the Client's bank accounts; the delivered payment gateways (PayMongo and Dragonpay) in sandbox and production, where the Client has a merchant account.
-5. Environments: a test (UAT) and a production environment, hosted as stated in the Order Form.
+5. Environments: the environment set of the broker size stated in the Order Form (Dev, UAT and Production for a small or medium broker; Dev, SIT, UAT and Production for a large broker) and a temporary Pre-Prod created from a production backup for the cutover rehearsal and removed after hypercare, hosted as stated in the Order Form.
 6. Training: train-the-trainer for key users for the training days of the Client's size (Small 4, Medium 6, Large 10, Enterprise 15), and support of end-user training run by the key users.
 7. System integration test, UAT support, cutover, go-live support and hypercare until the first month-end close.
 
@@ -55,7 +55,7 @@ The implementation follows the iorta TechNXT Implementation Approach and Plan: c
 |---|---|---|
 | 1 | Mobilisation | Kick-off, team and governance, plan confirmed, data requests issued, environments ordered |
 | 2 | Discovery and fit-gap | Walk-through of each process on the delivered system; configuration decisions; fit-gap register limited to configuration |
-| 3 | Environment set-up | Test (UAT) and production environments, e-mail account, backups, monitoring |
+| 3 | Environment set-up | Environment set of the broker size (Dev, UAT and Production; SIT as well for a large broker), e-mail account, backups, monitoring |
 | 4 | Configuration | Masters, products and rates, numbering, chart of accounts, posting rules, approvals, security |
 | 5 | Data migration | Extraction by the Client, mapping to the templates, mock loads, reconciliation |
 | 6 | Integrations | E-mail, bank statement files, payment gateway |
@@ -74,8 +74,8 @@ The implementation follows the iorta TechNXT Implementation Approach and Plan: c
 |---|---|---|
 | Mobilisation | Project charter, baselined plan, RAID log, data request list, governance calendar | Charter and plan signed by both project managers and the sponsor |
 | Discovery and fit-gap | Configuration workbook, fit-gap register | Every process walked through; every register line classed and owned; signed by the process owners |
-| Environment set-up | Test and production environments, environment sheet | Smoke test passed on each; one restore test done |
-| Configuration | Configured test environment; configuration workbook updated | Each workbook item set and checked; test quotation premiums and taxes agree with manual calculations |
+| Environment set-up | Environment set of the broker size (Dev, UAT, Production; SIT for a large broker), environment sheet | Smoke test passed on each; one restore test done |
+| Configuration | Configured Dev (small, medium) or SIT (large) environment, promoted to UAT; configuration workbook updated | Each workbook item set and checked; test quotation premiums and taxes agree with manual calculations |
 | Data migration | Mapping sheets, filled templates, load logs, reconciliation reports for each mock load | Counts and totals agree within the agreed tolerance (default: exact); trial balance as at go-live agrees with the old system |
 | Integrations | E-mail, bank statement formats, payment gateway set up | Password reset e-mail and quotation approval link received; one statement per bank account imported; one sandbox payment receipted |
 | Training | Training schedule, attendance lists, assessment results | Every user trained in the role before go-live; key users pass the assessment |
@@ -132,7 +132,7 @@ The Customer Responsibilities and RACI Annex gives the full list of Client respo
 4. Workshops and training are delivered on site in Metro Manila or online, in English, during Philippine business hours. On-site work outside Metro Manila is billed with travel at cost.
 5. One legal entity and one fiscal year are migrated; opening balances are taken at a single go-live date.
 6. The Client uses the delivered roles: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting and Accounting Manager.
-7. Testing uses the test environment; production is used only after the go decision.
+7. Testing uses Dev, SIT (large broker), UAT and the temporary Pre-Prod; production receives the release and the frozen configuration before the cutover rehearsal and is used for business only after the go decision.
 8. An import file holds at most 20,000 data rows; larger books are loaded in several files.
 9. The man-days in the fee are estimates for the OOTB scope of this SOW. Effort caused by a change of scope or by late Client dependencies is a Change Request.
 
