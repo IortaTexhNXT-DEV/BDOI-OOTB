@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS complaint_reminders (
 );
 
 INSERT INTO document_numbering(code, name, module, prefix, pattern, seq_width, reset_rule, description, created_by) VALUES
- ('complaint', 'Complaint', 'compliance', 'CMP', '{PREFIX}-{YYYY}-{SEQ}', 5, 'yearly',
+ ('complaint', 'Complaint', 'compliance', 'CPT', '{PREFIX}-{YYYY}-{SEQ}', 5, 'yearly',
   'Complaint of a client or claimant under RA 11765 (Compliance > Insurance Commission > Complaints)', 'migration')
 ON CONFLICT (code) DO NOTHING;
 

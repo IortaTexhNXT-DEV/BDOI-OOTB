@@ -239,7 +239,7 @@ define({
 const C = `${S} > Complaints`;
 const cRead = [requirePermission('read:complaints')];
 const cWrite = [requirePermission('write:complaints')];
-const complaintExample = { id: 'cmp_1', complaintNumber: 'CMP-2026-00001', receivedOn: '2026-10-01', channel: 'E-mail', complainantName: 'Juan Dela Cruz', category: 'Claims handling',
+const complaintExample = { id: 'cmp_1', complaintNumber: 'CPT-2026-00001', receivedOn: '2026-10-01', channel: 'E-mail', complainantName: 'Juan Dela Cruz', category: 'Claims handling',
   complexity: 'simple', subject: 'Delay in claim payment', status: 'acknowledged', ackDueOn: '2026-10-03', resolutionDueOn: '2026-10-08', ageDays: 3, ackOverdue: false, resolutionOverdue: false };
 const complaintBody = z.object({
   receivedAt: z.string().max(40).optional(), channel: z.string().trim().min(1).max(80), complainantName: z.string().trim().min(2).max(200), complainantContact: optText(200),

@@ -252,7 +252,7 @@ describe('complaints register (14.08)', () => {
       policyId: pol.policy_number, category: 'Claims handling', subject: 'Delay in claim payment', assignedTo: ctx.userIds.sales });
     expect(r.status, JSON.stringify(r.body)).toBe(201);
     c = r.body.data;
-    expect(c.complaintNumber).toMatch(/^CMP-2026-\d{5}$/);
+    expect(c.complaintNumber).toMatch(/^CPT-2026-\d{5}$/);
     expect(c).toMatchObject({ clientId: pol.client_id, ackDueOn: '2026-10-03', resolutionDueOn: '2026-10-08', status: 'received' });
     expect((await query("SELECT 1 FROM notifications WHERE entity = 'complaint' AND user_id = $1", [ctx.userIds.sales])).rows).toHaveLength(1);
     expect((await admin('post', '/compliance/complaints').send({ channel: 'Pigeon', complainantName: 'A B', category: 'Other', subject: 'Test' })).status).toBe(400);
