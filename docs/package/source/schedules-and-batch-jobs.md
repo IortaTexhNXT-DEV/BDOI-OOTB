@@ -1,19 +1,20 @@
 ---
 title: BrokerVerse Schedules and Batch Jobs
 subtitle: Scheduled jobs, batch processes and the operational run book
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: 
 approved: 
-acronyms: OOTB=Out of the box; BIR=Bureau of Internal Revenue; GL=General ledger; JV=Journal voucher; OR=Official receipt; PV=Payment voucher; SMTP=Simple Mail Transfer Protocol; CSV=Comma-separated values; XLSX=Excel workbook; PDF=Portable document format; API=Application programming interface; EWT=Expanded withholding tax; FX=Foreign exchange
+change: Every job of jobs.json, the migrations and the seeds listed (My Work, AML/CFT, IC compliance, complaints, breach deadlines, EIS, integrations, SMS, operations, distribution); support runbook per job; run book and gaps updated
+acronyms: OOTB=Out of the box; AML=Anti-money laundering; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; KYC=Know your customer; EIS=Electronic Invoicing System; IC=Insurance Commission; NPC=National Privacy Commission; PDC=Post-dated cheque; CTPL=Compulsory third party liability; BI=Business intelligence; CSV=Comma-separated values; BIR=Bureau of Internal Revenue; GL=General ledger; JV=Journal voucher; OR=Official receipt; PV=Payment voucher; SMTP=Simple Mail Transfer Protocol; CSV=Comma-separated values; XLSX=Excel workbook; PDF=Portable document format; API=Application programming interface; EWT=Expanded withholding tax; FX=Foreign exchange
 ---
 
 # About this document
 
 This document describes everything BrokerVerse OOTB runs on a timetable and every batch process an operator starts by hand: what each one reads and writes, the setting that controls it, the e-mails and notifications it produces, how to run it on demand, how to watch it and what happens when it fails or runs twice. It closes with the daily and month-end run book.
 
-It is written for the operations and finance supervisors who own the processes and for the support team that runs the platform. All facts come from the application code (`backend/src/jobs`, `backend/src/modules/*/jobs.js`, the module services), the seeded `scheduled_jobs` table and the upload templates in `docs/package/05_Delivery/Upload_Templates`.
+It is written for the operations and finance supervisors who own the processes and for the support team that runs the platform. All facts come from the application code (`backend/src/jobs`, `backend/src/modules/*/jobs.js`, the module services), the jobs registered in `backend/src/db/seeds/jobs.json`, in the migrations (`INSERT INTO scheduled_jobs`) and in the seed `73_ops_accounting.sql`, and the upload templates in `docs/package/05_Delivery/Upload_Templates`. The three jobs of the IC and NPC compliance registers (`compliance-reminders`, `complaints-deadlines`, `privacy-breach-deadlines`) arrive with the IC and NPC compliance package (migrations 0270, 0272 and 0273); they appear on Master > Schedules once that package is deployed.
 
 ## Terms used
 
@@ -67,38 +68,48 @@ A job switched off can still be run with Run now. This is the way to use the per
 
 ## Summary
 
-| Job (code) | Default timing (Asia/Manila) | OOTB | Handler | Setting that controls it |
-|---|---|---|---|---|
-| E-mail outbox (`email-outbox`) | Every 5 minutes | On | `emailOutbox` | `notification.email_enabled`, `notification.from_address`, `SMTP_URL` |
-| Renewal notice queue (`renewal-queue`) | Every minute | On | `processRenewalQueue` | none |
-| Policy expiry (`policy-expiry`) | Daily 00:15 | On | `policyExpiry` | none |
-| Quotation expiry (`quote-expiry`) | Daily 00:30 | On | `quoteExpiry` | `limits.quote_validity_days` (30) |
-| Accrual auto-reversal (`accrual-reversal`) | 00:30 on day 1 of each month | Off | `accrualReversal` | none |
-| Recurring journals (`recurring-journals`) | Daily 01:15 | Off | `recurringJournals` | the recurring journal templates |
-| Dormant accounts (`dormant-users`) | Daily 01:45 | On | `dormantUsers` | `access.dormant_days` (90) |
-| Period auto soft-close (`period-auto-soft-close`) | Daily 02:00 | Off | `periodAutoSoftClose` | job parameter `graceDays` (5) |
-| Housekeeping (`housekeeping`) | Daily 02:45 | On | `housekeeping` | `housekeeping.*` |
-| Daily reports (`daily-reports`) | Daily 05:00 | On | `dailyReports` | job parameter `reports` |
-| Renewal pipeline (`renewal-pipeline`) | Daily 05:30 | On | `renewalPipeline` | `renewals.pipeline_days` (90), `renewals.grace_period_days` (30) |
-| Bank reconciliation auto-match (`bank-auto-match`) | Daily 05:45 | Off | `bankAutoMatch` | `bank_reconciliation.date_window_days`, `bank_reconciliation.group_max_lines`, match rules |
-| Renewal notices (`renewal-notices`) | Daily 06:00 | On | `renewalNotices` | `notification.renewal_reminder`, `limits.renewal_notice_days` (60, 30, 15) |
-| Remittance schedules (`remittance-schedules`) | Daily 06:15 | Off | `remittanceSchedules` | the schedules of Accounts > Remittance > Scheduling (insurers, cut-off days, frequency, next run date) |
-| Cover note expiry (`cover-note-expiry`) | Daily 06:20 | On | `coverNoteExpiry` | `cover_note.reminder_days_before` (7); links issued policies and expires cover notes past their end date |
-| Post-dated cheques due (`pdc-deposit-due`) | Daily 06:25 | On | `pdcDepositDue` | `pdc.due_window_days` (3) |
-| Missing claim documents (`claim-document-reminders`) | Daily 06:35 | On | `claimDocumentReminders` | `claims.document_reminder_days` (3; 0 = off), e-mail template `claim_missing_documents` |
-| Overdue data subject requests (`privacy-requests-due`) | Daily 07:00 | Off | `privacyRequestsDue` | `privacy.request_due_days` (15) sets the due dates |
-| Integration outbox (`integration-outbox`) | Every 2 minutes | On | `integrationOutbox` | the connectors of Master > System Configuration > Integrations (retry policy per connector), `integrations.dispatch_batch_size`, `integrations.stuck_minutes` |
-| SMS renewal notices (`sms-renewal-notices`) | Daily 08:10 | Off | `smsRenewalNotices` | `messaging.renewal_notice_days` (30, 7), template event renewal_notice, `messaging.service_consent` |
-| SMS payment reminders (`sms-payment-reminders`) | Daily 08:20 | Off | `smsPaymentReminders` | `messaging.payment_reminder_days` (3, 0), template event payment_reminder |
-| Receivable ageing (`receivable-ageing`) | Daily 07:00 | On | `receivableAgeing` | `limits.receivable_ageing_buckets` (30, 60, 90, 120) |
-| Month-end close reminder (`month-end-reminder`) | Daily 08:00 | Off | `monthEndReminder` | job parameter `daysBefore` (3) |
-| Collection reminders (`collection-reminders`) | Daily 08:00 | On | `collectionReminders` | `collections.reminder_days_before` (7), `collections.reminder_repeat_days` (7), `collections.email_subject`, `collections.email_template` |
-| Scheduled report (`report-<id>`) | As set on the report schedule | Created per schedule | `scheduledReport` | the report schedule; `reports.email_subject`, `reports.email_body` |
-| Prospects not worked in time (`lead-assignment-sla`) | Daily 07:30 | Off | `leadAssignmentSla` | `leads.assignment_sla_hours` (48) |
-| Scheduled campaigns (`campaign-dispatch`) | Every 15 minutes | Off | `campaignDispatch` | the campaigns scheduled on Operations > Sales & Marketing > Campaigns; `campaigns.max_recipients` |
-| BI extract (`bi-extract`) | Daily 02:00 | Off | `biExtract` | `bi.extract_datasets`, `bi.extract_folder`, `bi.extract_keep_runs` |
+Thirty-five jobs are registered (thirty-two in the current build and three with the IC and NPC compliance package), plus one job per report schedule. "Where registered" names the file that creates the job; a job is never registered twice (`ON CONFLICT (code) DO NOTHING`), so a value the broker changed on Master > Schedules is kept at every upgrade.
 
-The five finance jobs (accrual reversal, recurring journals, period auto soft-close, bank auto-match, month-end reminder) ship switched off. The finance team decides at go-live whether to switch them on or to run them from the screens.
+| Job (code) | Default timing (Asia/Manila) | OOTB | Handler | Setting that controls it | Where registered |
+|---|---|---|---|---|---|
+| Renewal notice queue (`renewal-queue`) | Every minute | On | `processRenewalQueue` | none | jobs.json |
+| Integration outbox (`integration-outbox`) | Every 2 minutes | On | `integrationOutbox` | the connectors of Master > System Configuration > Integrations (retry policy per connector), `integrations.dispatch_batch_size` (50), `integrations.stuck_minutes` (10) | 0310 |
+| E-mail outbox (`email-outbox`) | Every 5 minutes | On | `emailOutbox` | `notification.email_enabled`, `notification.from_address`, `SMTP_URL` | jobs.json |
+| My Work reminders (`my-work-reminders`) | Every 15 minutes | On | `myWorkReminders` | `myWork.auto_tasks`, `myWork.overdue_task_alert` | jobs.json, 0253 |
+| Screening provider retry (`aml-provider-retry`) | Every 15 minutes | Off | `amlProviderRetry` | `aml.screening_provider` (provider, maxAttempts 5) | 0263 |
+| EIS outbox (`eis-outbox`) | Every 15 minutes | Off | `eisOutbox` | `eis.enabled` (off), `eis.mode`, `eis.max_attempts` (5), `eis.retry_minutes` (15) | 0283 |
+| Scheduled campaigns (`campaign-dispatch`) | Every 15 minutes | Off | `campaignDispatch` | the campaigns scheduled on Operations > Sales & Marketing > Campaigns; `campaigns.max_recipients` (5,000) | 0307 |
+| Breach notification deadlines (`privacy-breach-deadlines`) | Hourly at :15 | On | `privacyBreachDeadlines` | `privacy.breach_reminder_hours` (48, 24, 6), `privacy.breach_notify_hours` (72) | 0273 (compliance package) |
+| Policy expiry (`policy-expiry`) | Daily 00:15 | On | `policyExpiry` | none | jobs.json |
+| Quotation expiry (`quote-expiry`) | Daily 00:30 | On | `quoteExpiry` | `limits.quote_validity_days` (30) | jobs.json |
+| Accrual auto-reversal (`accrual-reversal`) | 00:30 on day 1 of each month | Off | `accrualReversal` | none | 0135 |
+| Recurring journals (`recurring-journals`) | Daily 01:15 | Off | `recurringJournals` | the recurring journal templates | 0135 |
+| Dormant accounts (`dormant-users`) | Daily 01:45 | On | `dormantUsers` | `access.dormant_days` (90) | jobs.json |
+| Period auto soft-close (`period-auto-soft-close`) | Daily 02:00 | Off | `periodAutoSoftClose` | job parameter `graceDays` (5) | 0135 |
+| BI extract (`bi-extract`) | Daily 02:00 | Off | `biExtract` | `bi.extract_datasets`, `bi.extract_folder`, `bi.extract_keep_runs` (30) | 0308 |
+| Housekeeping (`housekeeping`) | Daily 02:45 | On | `housekeeping` | `housekeeping.*` | jobs.json |
+| Daily reports (`daily-reports`) | Daily 05:00 | On | `dailyReports` | job parameter `reports` | jobs.json |
+| Renewal pipeline (`renewal-pipeline`) | Daily 05:30 | On | `renewalPipeline` | `renewals.pipeline_days` (90), `renewals.grace_period_days` (30) | jobs.json |
+| Bank reconciliation auto-match (`bank-auto-match`) | Daily 05:45 | Off | `bankAutoMatch` | `bank_reconciliation.date_window_days`, `bank_reconciliation.group_max_lines`, match rules | 0116 |
+| Renewal notices (`renewal-notices`) | Daily 06:00 | On | `renewalNotices` | `notification.renewal_reminder`, `limits.renewal_notice_days` (60, 30, 15) | jobs.json |
+| Remittance schedules (`remittance-schedules`) | Daily 06:15 | Off | `remittanceSchedules` | the schedules of Accounts > Remittance > Scheduling | jobs.json |
+| Cover note expiry (`cover-note-expiry`) | Daily 06:20 | On | `coverNoteExpiry` | `cover_note.reminder_days_before` (7) | seed 73 |
+| Post-dated cheques due (`pdc-deposit-due`) | Daily 06:25 | On | `pdcDepositDue` | `pdc.due_window_days` (3) | seed 73 |
+| AML transaction monitoring (`aml-transaction-monitoring`) | Daily 06:30 | On | `amlTransactionMonitoring` | job parameter `days` (3); the monitoring rules of Compliance > AML Settings | 0263 |
+| Missing claim documents (`claim-document-reminders`) | Daily 06:35 | On | `claimDocumentReminders` | `claims.document_reminder_days` (3; 0 = off), e-mail template `claim_missing_documents` | seed 73 |
+| Compliance reminders (`compliance-reminders`) | Daily 06:45 | On | `complianceReminders` | `compliance.licence_reminder_days` (90, 60, 30, 15, 7), `compliance.fit_proper_reminder_days` (30), `compliance.insurer_authority_expiring_days` (60) | 0270 (compliance package) |
+| Receivable ageing (`receivable-ageing`) | Daily 07:00 | On | `receivableAgeing` | `limits.receivable_ageing_buckets` (30, 60, 90, 120) | jobs.json |
+| Overdue data subject requests (`privacy-requests-due`) | Daily 07:00 | Off | `privacyRequestsDue` | `privacy.request_due_days` (15) | 0221 |
+| KYC refresh due (`aml-kyc-refresh-due`) | Mondays 07:00 | On | `amlKycRefreshDue` | KYC refresh months per rating (Compliance > AML Settings) | 0263 |
+| Prospects not worked in time (`lead-assignment-sla`) | Daily 07:30 | Off | `leadAssignmentSla` | `leads.assignment_sla_hours` (48) | 0300 |
+| Collection reminders (`collection-reminders`) | Daily 08:00 | On | `collectionReminders` | `collections.reminder_days_before` (7), `collections.reminder_repeat_days` (7), `collections.email_subject`, `collections.email_template` | jobs.json |
+| Month-end close reminder (`month-end-reminder`) | Daily 08:00 | Off | `monthEndReminder` | job parameter `daysBefore` (3) | 0135 |
+| Complaint deadlines (`complaints-deadlines`) | Daily 08:00 | On | `complaintsDeadlines` | `complaints.ack_days` (2), `complaints.resolution_days_simple` (7), `complaints.resolution_days_complex` (45), `complaints.auto_escalate` | 0272 (compliance package) |
+| SMS renewal notices (`sms-renewal-notices`) | Daily 08:10 | Off | `smsRenewalNotices` | `messaging.renewal_notice_days` (30, 7), template event renewal_notice, `messaging.service_consent` | 0311 |
+| SMS payment reminders (`sms-payment-reminders`) | Daily 08:20 | Off | `smsPaymentReminders` | `messaging.payment_reminder_days` (3, 0), template event payment_reminder | 0311 |
+| Scheduled report (`report-<id>`) | As set on the report schedule | Created per schedule | `scheduledReport` | the report schedule; `reports.email_subject`, `reports.email_body` | per schedule |
+
+The five finance jobs (accrual reversal, recurring journals, period auto soft-close, bank auto-match, month-end reminder) ship switched off; the finance team decides at go-live whether to switch them on or to run them from the screens. The jobs that send to a third party (SMS, EIS, screening provider) and the distribution jobs (lead assignment, campaigns, BI extract) also ship switched off: switch each one on when its connector or set-up is live (see Switching jobs on at go-live in the operational run book).
 
 ## E-mail outbox
 
@@ -229,8 +240,6 @@ Notifies the holders of `read:privacy` (high priority, link to Master > Data Pri
 
 Runs the automatic matching rules (adjustment, contra, reference, amount and date, one-to-many, many-to-one) on every active bank account linked to a GL cash account that has unmatched statement lines. Each account is processed on its own; an error on one account does not stop the others. It never matches into a period whose reconciliation is approved. Output: accounts, matches per account. Safe to rerun: it only looks at unmatched lines. Matching also runs right after each statement import when `bank_reconciliation.auto_match_on_import` is on (default), which is why the job ships switched off.
 
-# Monitoring and failure handling
-
 ## Prospects not worked in time (off)
 
 | Item | Detail |
@@ -261,6 +270,88 @@ Runs the automatic matching rules (adjustment, contra, reference, amount and dat
 | Switch | Off in the seed. The administrator can also run it from Reports > Report Builder > BI extract > Run now. |
 | Restart safety | A rerun on the same day overwrites the files of that day. |
 
+## Integration outbox
+
+| Item | Detail |
+|---|---|
+| Purpose | Sends the messages queued for third parties: SMS and Viber messages, CTPL authentication requests, LTO feeds, insurer requests and bank payment files. |
+| Reads | `integration_outbox` rows in status queued or retry whose next attempt time has come, oldest first, at most `integrations.dispatch_batch_size` (50) per run. Rows left in processing longer than `integrations.stuck_minutes` (10) (the server stopped while sending) are put back to retry first. Rows are picked with a row lock that other servers skip, so two instances never send the same message. |
+| Writes | One `integration_attempts` row per attempt (mode, result, HTTP status, duration, error). The message becomes sent (with the provider's reference and answer), retry with the next attempt time (first wait of the connector, doubled at each attempt, up to the longest wait), or failed after the last attempt or when the provider refuses the request. Last success and last failure on the connector. |
+| Sends | Through the connector's adapter. A connector in test mode answers from the built-in test provider and nothing leaves the system. A switched-off connector keeps its messages queued without counting an attempt. A live connector with a missing endpoint or credential variable fails the attempt with the reason "not ready for live use". |
+| On demand | Master > System Configuration > Integrations > Outbox: Send due messages; Resend on a failed, cancelled or not sent message (fresh attempt count, sent at once); Cancel message. |
+| Output | sent, retry, failed, held. |
+| Restart safety | A message is marked sent in the same transaction as the provider's answer; a message whose answer could not be applied stays failed with "Sent, but the answer could not be applied" in Last error. The idempotency key of each business event stops the same event from being queued twice. A crash during the provider call can send that one message twice. |
+
+## SMS renewal notices and SMS payment reminders (off)
+
+`sms-renewal-notices` queues the renewal notice SMS (template event renewal_notice) for policies expiring in each of `messaging.renewal_notice_days` (30 and 7) days; `sms-payment-reminders` queues the payment reminder SMS (event payment_reminder) for open bills due in each of `messaging.payment_reminder_days` (3 and 0) days. Before queueing, each message passes the consent check (`messaging.service_consent`) and needs a valid mobile number; a message that fails is recorded as Not sent with the reason. The integration outbox then sends the messages. Each notice is queued once per policy or bill and day, so a rerun sends nothing twice. Both jobs ship switched off: switch them on when the SMS connector is live.
+
+## My Work reminders
+
+| Item | Detail |
+|---|---|
+| Purpose | Keeps the follow-up tasks of Operations > My Work in line with the records and reminds their owners. |
+| Reads | Collection promises to pay, renewal next steps and claim follow-up dates (when `myWork.auto_tasks` is on); open tasks whose reminder time has come; open tasks past their due date and time. |
+| Writes | Creates the follow-up tasks of new promises, next steps and follow-up dates and closes those whose record is closed; marks reminded and overdue-notified tasks. |
+| Sends | An in-app reminder "Task due: <title>" at the reminder time, and one alert "Task overdue: <title>" per task when `myWork.overdue_task_alert` is on. No e-mail. |
+| Restart safety | A task is reminded once and alerted once. Safe to rerun. |
+
+## Cover note expiry
+
+Links each active cover note to the policy issued for it, expires the cover notes past their end date, and reminds the owner (the placement owner, the account executive of the quotation or the creator; else the holders of `write:policies`) of each active cover note ending within `cover_note.reminder_days_before` (7) days with no policy issued yet: "Cover note <number> expires on <date>". A cover note is reminded once. Safe to rerun.
+
+## Post-dated cheques due
+
+Tells Accounting (holders of `write:receipts`) in one notification how many post-dated cheques are due for deposit today or earlier and within `pdc.due_window_days` (3) days, with the total amount, linked to Accounts > Post-Dated Cheques. It writes nothing else. A rerun sends the notification again.
+
+## Missing claim documents
+
+E-mails the claimant of every open claim (statuses in `claims.open_statuses`) that has a client e-mail address and at least one required document still pending, when the last reminder (or the registration of the claim) is more than `claims.document_reminder_days` (3) days old, with the template `claim_missing_documents`. It records the reminder on the claim and tells the holders of `write:claims` how many reminders were sent. Setting the days to 0 switches the reminders off. Safe to rerun: a claim reminded within the period is skipped.
+
+## AML transaction monitoring
+
+| Item | Detail |
+|---|---|
+| Purpose | Runs the active covered and suspicious transaction rules of Compliance > AML Settings over the last `days` (3) days up to the business date. |
+| Reads | Receipts, payment links, cancellations with return premium, refund vouchers, claim payments and overpayments of the period, per rule. |
+| Writes | One alert (AMA number) per rule and transaction; an alert already raised for the same rule and transaction is not raised again. |
+| Sends | When alerts were added, one high-priority notification to the compliance officer (`read:aml`): "<n> new AML transaction alert(s)", linked to Compliance > Transaction Alerts. |
+| On demand | Compliance > Transaction Alerts > Run monitoring, for any period. After an outage longer than 3 days, run it for the missed dates. |
+| Restart safety | Safe to rerun: the window overlaps on purpose and duplicates are not created. |
+
+## KYC refresh due
+
+Every Monday at 07:00, marks Refresh due the clients whose KYC refresh date has come (deleted and anonymised clients excepted), then notifies the compliance officer (`read:aml`) of the number of KYC refreshes due and overdue and of the EDD reviews open or awaiting approval, linked to Compliance > KYC Refresh; high priority when a refresh is overdue. A rerun sends the summary again but marks nothing twice.
+
+## Screening provider retry (off)
+
+Sends again the requests to the commercial screening provider (`aml.screening_provider`) that failed, until the provider's maximum attempts (5). A successful answer applies the provider's matches to the screening hits. When a request is abandoned after its last attempt, the compliance officer is notified ("Screening provider request abandoned ... screen the party manually"). Ships switched off: switch it on when the provider is set to Provider API. The uploaded lists are always screened as well, so screening continues while the provider is down. Safe to rerun.
+
+## EIS outbox (off)
+
+| Item | Detail |
+|---|---|
+| Purpose | Sends the e-invoices queued for the BIR Electronic Invoicing System: each sales invoice issued, and each cancellation of an invoice already sent. |
+| Switch | Does nothing while `eis.enabled` is off (the run reports "the EIS connector is switched off"). `eis.mode` test uses the built-in test provider; live uses `eis.endpoint` with the credentials held in the environment variables named in `eis.client_id_env`, `eis.client_secret_env` and `eis.signing_key_env`. |
+| Reads | Submissions queued or failed with fewer than `eis.max_attempts` (5) attempts whose next attempt time has come, at most 50 per run. |
+| Writes | Accepted (with the EIS reference), rejected (final: cancel and reissue the invoice) or failed with the error and the next attempt after `eis.retry_minutes` (15), doubled at each attempt. |
+| On demand | Accounts > Tax > E-Invoicing (EIS): Send now, Retry, Queue earlier invoices, Export payloads and Uploaded manually (fallback). |
+| Restart safety | A submission is set to sending before the call. A crash during the call leaves it in sending, which the job does not pick up again: support checks with the EIS whether it arrived, then uses Retry or Uploaded manually. |
+
+## Compliance reminders (compliance package)
+
+Daily at 06:45, reminds the compliance team (`read:compliance`) of: each licence of the Licence Register at each threshold of `compliance.licence_reminder_days` (90, 60, 30, 15 and 7 days before expiry, and once expired), once per threshold, together with the user who holds the licence; fit and proper reviews overdue or due within `compliance.fit_proper_reminder_days` (30); insurers whose IC certificate of authority expires within `compliance.insurer_authority_expiring_days` (60) or has expired (at most once a week per insurer and state). It does nothing until the compliance registers are migrated. Safe to rerun.
+
+## Complaint deadlines (compliance package)
+
+Daily at 08:00, reminds the person assigned to each complaint of the acknowledgement and resolution deadlines that have come (`complaints.ack_days`, `complaints.resolution_days_simple`, `complaints.resolution_days_complex`, counted in calendar days from the date received) and, when `complaints.auto_escalate` is on, escalates the complaints whose resolution is overdue to the complaints officers (`approve:complaints`). Every reminder and escalation is kept in the complaint history. Safe to rerun.
+
+## Breach notification deadlines (compliance package)
+
+Hourly at :15, reminds the data privacy team (`read:privacy`) of every personal data breach of the Breach Register not yet notified to the NPC, at each mark of `privacy.breach_reminder_hours` (48, 24 and 6 hours before the deadline of `privacy.breach_notify_hours`, 72 hours from discovery) and once the deadline has passed. Each mark is reminded once. Because the clock runs in hours, this job must stay on and the scheduler must run on at least one server at all times.
+
+# Monitoring and failure handling
+
 ## What to watch
 
 | Where | What it shows |
@@ -269,8 +360,12 @@ Runs the automatic matching rules (adjustment, contra, reference, amount and dat
 | Master > Schedules > Run history | Each run with its output or error message. |
 | Master > E-mail Outbox | Queued, sent and failed e-mails, with the last error and Retry. A banner tells whether sending is enabled. |
 | Operations > Renewals > Renewal Batch | Per batch: queued, sent, failed counts; Retry Failed. |
+| Master > System Configuration > Integrations | Connectors tab: Waiting, Failed and Sent today per connector, last success and last failure, what is missing before going live. Outbox tab: status counts, Last error, Next attempt. Inbox tab: failed and ignored inbound messages. |
+| Accounts > Tax > E-Invoicing (EIS) | Banner (connector on, mode, credentials set) and the counters queued, accepted, failed, rejected, uploaded manually. |
+| Compliance > AML Dashboard | Failed requests to the screening provider, hits and alerts open, cases overdue, reports to file; a warning when an active screening list has no version loaded. |
+| Compliance > Insurance Commission and Data Privacy (NPC) screens (compliance package) | Licences expiring, reviews due, complaints past a deadline, breaches with the 72-hour Clock. |
 | Server log | "scheduled job <code> failed" with the run id and error; "scheduler: N job(s) scheduled (time zone Asia/Manila)" at start and after each reload. |
-| Database | `job_runs` (status, error), `job_queue` (status, error, attempts), `email_outbox` (status, attempts, error). |
+| Database | `job_runs` (status, error), `job_queue` (status, error, attempts), `email_outbox` (status, attempts, error), `integration_outbox` and `integration_attempts`, `eis_submissions`. |
 
 ## When a job fails
 
@@ -290,8 +385,49 @@ A failed run is recorded with status failed and the error text, and the job's La
 | Renewal pipeline, month-end reminder, renewal notices | Yes | Nothing (existing records and notifications are detected) |
 | Recurring journals, accrual reversal, bank auto-match | Yes | Nothing (one journal per occurrence; reversed entries skipped; matched lines skipped) |
 | Collection reminders | Yes | Nothing within the repeat window |
-| E-mail outbox, renewal notice queue | Yes | At most the one message being sent at the moment of a crash |
-| Daily reports, scheduled reports | Yes | Another file; a scheduled report e-mails its recipients again |
+| E-mail outbox, renewal notice queue, integration outbox | Yes | At most the one message being sent at the moment of a crash |
+| EIS outbox | Yes | Nothing; a submission left in sending after a crash needs Retry by support |
+| Daily reports, scheduled reports, BI extract | Yes | Another file; a scheduled report e-mails its recipients again; the BI extract overwrites the files of the day |
+| My Work reminders, cover note expiry, missing claim documents, SMS renewal notices, SMS payment reminders, campaigns, prospects not worked in time | Yes | Nothing (reminded, queued or sent records are detected) |
+| AML transaction monitoring, KYC refresh due, screening provider retry | Yes | Nothing, except the KYC summary notification |
+| Compliance reminders, complaint deadlines, breach notification deadlines | Yes | Nothing (each threshold or mark is reminded once) |
+| Post-dated cheques due | Yes | The summary notification |
+
+## Support runbook by job
+
+Use this table when a job shows Last status failed, when its Next run is blank, or when users report that its effect is missing. The first checks for every job are the same: Run history (the error), the server log line with the run id, and whether the scheduler runs on at least one server (`SCHEDULER_ENABLED`). The table gives what is specific to each job. "Owner" is who decides on the business side; support (L2) does the technical checks.
+
+| Job | Symptom | Check | Fix or workaround | Owner |
+|---|---|---|---|---|
+| `renewal-queue` | Renewal Batch stays Processing | `job_queue` rows in processing or failed with their error; the client e-mail address | Retry Failed on the batch; correct the client e-mail | Operations |
+| `integration-outbox` | Messages stay Queued or Retry scheduled; Failed count grows | Connectors tab: Enabled, Mode, credential ticks, Before going live; Outbox Last error and attempt log; provider status | Fix the endpoint or credential variable (server restart after a secret change), then Resend; Cancel messages that must not go; see Integrations outbox monitoring in the Production Support document | System Administrator |
+| `email-outbox` | E-mails stay Queued | `notification.email_enabled`, `SMTP_URL`, Last error | Fix SMTP, then Retry; see the E-mail outbox section | System Administrator |
+| `my-work-reminders` | No task reminders; follow-up tasks missing | `myWork.auto_tasks`, `myWork.overdue_task_alert`; the task's reminder time | Run now; correct the setting | Operations |
+| `aml-provider-retry` | Failed provider requests on the AML Dashboard | `aml.screening_provider` (provider, endpoint, API key variable set on the server); Provider tab call log | Fix the provider settings, then Retry on the request; screen manually the parties of abandoned requests | Compliance officer |
+| `eis-outbox` | Failed or rejected count grows; submissions stuck in sending | `eis.enabled`, `eis.mode`, credential variables; Last error | Failed: fix and Retry. Rejected: cancel and reissue the invoice. Stuck in sending: confirm with the EIS, then Retry or Uploaded manually. EIS down: Export payloads and upload manually | Accounting Manager |
+| `campaign-dispatch` | Scheduled campaign still Scheduled after its time | Job enabled; campaign status; segment consent results | Run now, or Send now on the campaign | Marketing |
+| `privacy-breach-deadlines` | No reminders on an open breach | Job enabled; breach status (already notified?); `privacy.breach_*` settings | Run now. Never leave this job off: the NPC 72-hour deadline runs in hours | DPO |
+| `policy-expiry`, `quote-expiry` | Expired policies or quotations still active | Business date, `general.timezone` | Run now (both catch up) | Operations |
+| `accrual-reversal`, `recurring-journals`, `period-auto-soft-close` | Journals or soft-close missing | Error text: closed period, missing GL account, failing checks | Open the period or correct the account, Run now; or run from Accounts > Period End | Accounting Manager |
+| `dormant-users` | Active user deactivated unexpectedly | `access.dormant_days`, the user's last sign-in | Reactivate on User Management; adjust the days | System Administrator |
+| `bi-extract` | No files for the BI tool | `bi.extract_folder`, storage space and permissions; BI extract tab | Run now on Reports > Report Builder > BI extract | BI owner |
+| `housekeeping` | Tables grow; job slow | Run output per table; retention settings | Run now; it works in batches of 5,000 rows | Support |
+| `daily-reports`, `report-<id>` | Report files or e-mails missing | Generated-file history; e-mail outbox | Run now; correct recipients | Report owner |
+| `renewal-pipeline`, `renewal-notices` | Renewals not enrolled; reminders missing | `renewals.*`, `notification.renewal_reminder`; Renewal notices only looks at exact days | Run now; for a missed day of renewal notices, send from the Renewal Queue | Operations |
+| `bank-auto-match` | Statement lines not matched | Statements imported; match rules; approved periods | Run now or Auto-match on the workspace | Accounting |
+| `remittance-schedules` | Draft remittances not created | Job enabled; schedule active and its next run date | Run Now on the schedule | Accounting |
+| `cover-note-expiry` | Cover note still active after its end date | Business date; issued policy linked | Run now | Processing |
+| `pdc-deposit-due` | No deposit reminder | `pdc.due_window_days`; holders of `write:receipts` | Run now; open Accounts > Post-Dated Cheques | Accounting |
+| `aml-transaction-monitoring` | No alerts after a known cash payment | Rule enabled and its parameters; the receipt's payment mode in the cash list | Run monitoring for the dates concerned | Compliance officer |
+| `claim-document-reminders` | Claimants not reminded | `claims.document_reminder_days` (0 = off); client e-mail; e-mail outbox | Run now; Remind on the claim | Claims |
+| `compliance-reminders` | Licence or authority reminders missing | Licence and insurer dates entered; compliance package deployed | Run now; complete the register | Compliance team |
+| `receivable-ageing` | Ageing buckets out of date | Business date | Run now | Accounting |
+| `privacy-requests-due` | No overdue alerts | Job enabled; holders of `read:privacy` | Switch the job on; Run now | DPO |
+| `aml-kyc-refresh-due` | Refresh dates passed but status unchanged | Client's next KYC refresh date | Run now; Complete KYC refresh on the profile | Compliance officer |
+| `lead-assignment-sla` | Untouched prospects not queued | Job enabled; `leads.assignment_sla_hours` | Run now; reassign from the Queue tab | Sales manager |
+| `collection-reminders`, `month-end-reminder` | Reminders missing | Repeat window; client e-mail; job enabled (month-end) | Run now, or Send Payment Reminders Now | Accounting |
+| `complaints-deadlines` | Deadlines passed without reminder | Complaint assigned to someone; `complaints.auto_escalate` | Run now; assign the complaint | Complaints officer |
+| `sms-renewal-notices`, `sms-payment-reminders` | No SMS sent | Job enabled; SMS connector Live; template active; Not sent reasons (consent, mobile number) | Correct the connector or the client data; Run now (nothing is sent twice) | Operations |
 
 # Batch processes
 
@@ -413,30 +549,58 @@ The run book lists what happens on its own and what the team checks or starts. T
 | Time | Job | Depends on |
 |---|---|---|
 | Every minute | Renewal notice queue | |
+| Every 2 minutes | Integration outbox | Connectors enabled and live |
 | Every 5 minutes | E-mail outbox | `notification.email_enabled`, SMTP |
+| Every 15 minutes | My Work reminders; EIS outbox, screening provider retry and scheduled campaigns (if switched on) | `eis.enabled`; screening provider; campaigns scheduled |
+| Hourly at :15 | Breach notification deadlines (compliance package) | Breaches logged |
 | 00:15 | Policy expiry | |
 | 00:30 | Quotation expiry | |
 | 00:30, day 1 | Accrual auto-reversal (if switched on) | Month-end close run of the previous month |
 | 01:15 | Recurring journals (if switched on) | Open period for the journal date |
 | 01:45 | Dormant accounts | |
-| 02:00 | Period auto soft-close (if switched on) | Blocking checks pass |
+| 02:00 | Period auto soft-close and BI extract (if switched on) | Blocking checks pass; storage folder |
 | 02:45 | Housekeeping | |
 | 05:00 | Daily reports | |
 | 05:30 | Renewal pipeline | Policy expiry has run |
 | 05:45 | Bank auto-match (if switched on) | Statements imported |
 | 06:00 | Renewal notices (in-app) | Renewal pipeline |
 | 06:15 | Remittance schedules (if switched on) | Collected premium up to the cut-off date |
-| 07:00 | Receivable ageing; overdue data subject requests (if switched on) | |
-| 08:00 | Collection reminders; month-end reminder (if switched on) | E-mail outbox for delivery |
+| 06:20 | Cover note expiry | |
+| 06:25 | Post-dated cheques due | |
+| 06:30 | AML transaction monitoring | Receipts and payments of the last 3 days posted |
+| 06:35 | Missing claim documents | E-mail outbox for delivery |
+| 06:45 | Compliance reminders (compliance package) | Licence register and insurer certificates entered |
+| 07:00 | Receivable ageing; overdue data subject requests (if switched on); KYC refresh due (Mondays) | |
+| 07:30 | Prospects not worked in time (if switched on) | Assignment rules |
+| 08:00 | Collection reminders; month-end reminder (if switched on); complaint deadlines (compliance package) | E-mail outbox for delivery |
+| 08:10, 08:20 | SMS renewal notices, SMS payment reminders (if switched on) | SMS connector live; integration outbox |
 
 ## Daily checklist
 
-1. **Master > Schedules:** every enabled job shows Last status success and a Next run. Open Run history for any failure and rerun after fixing.
+1. **Master > Schedules:** every enabled job shows Last status success and a Next run. Open Run history for any failure and rerun after fixing (Support runbook by job).
 2. **Master > E-mail Outbox:** no growing queue; resolve failed e-mails (wrong address, SMTP) and Retry.
-3. **Operations > Renewals > Renewal Batch:** batches in Processing have moved on; Retry Failed where needed. Send the day's notices from the Renewal Queue.
-4. **Accounts > Receipts and Collections:** post receipts; review overdue items after the 08:00 reminders.
-5. **Accounts > Bank Reconciliation:** import yesterday's statements; review the auto-matches and match the rest.
-6. **Accounts > Remittance:** run Automated Processing or Bulk Processing on the agreed days; approve submitted remittances.
+3. **Master > System Configuration > Integrations:** Failed and Waiting per connector; nothing in Retry scheduled for more than an hour; failed inbound messages.
+4. **Operations > Renewals > Renewal Batch:** batches in Processing have moved on; Retry Failed where needed. Send the day's notices from the Renewal Queue.
+5. **Accounts > Receipts and Collections:** post receipts; review overdue items after the 08:00 reminders; deposit the post-dated cheques due.
+6. **Accounts > Bank Reconciliation:** import yesterday's statements; review the auto-matches and match the rest.
+7. **Accounts > Remittance:** run Automated Processing or Bulk Processing on the agreed days; approve submitted remittances.
+8. **Accounts > Tax > E-Invoicing (EIS)** (when switched on): no failed or rejected submission left without action.
+9. **Compliance:** the compliance officer works the new transaction alerts and screening hits; the compliance team reads the licence, complaint and breach reminders (compliance package).
+
+## Switching jobs on at go-live
+
+| Job | Switch on when | Who decides |
+|---|---|---|
+| `sms-renewal-notices`, `sms-payment-reminders` | The SMS connector is Live and the templates are approved | Operations head |
+| `eis-outbox` | The broker is enrolled with the EIS and `eis.enabled` is on | Accounting Manager with the tax adviser |
+| `aml-provider-retry` | A commercial screening provider is contracted and set to Provider API | Compliance officer |
+| `lead-assignment-sla` | Assignment rules are set up | Sales head |
+| `campaign-dispatch` | Campaigns will be scheduled rather than sent with Send now | Marketing |
+| `bi-extract` | The BI tool reads the storage folder | BI owner |
+| `privacy-requests-due` | The privacy team uses Data Subject Requests | DPO |
+| `remittance-schedules`, finance jobs | The finance team chooses the job over the screens | Accounting Manager |
+
+The jobs delivered switched on (including AML transaction monitoring, KYC refresh due, My Work reminders and the three compliance package jobs) stay on. Switching off `privacy-breach-deadlines`, `compliance-reminders` or `aml-transaction-monitoring` needs the written agreement of the DPO or the compliance officer, recorded in the change.
 
 ## Month-end sequence
 
@@ -451,7 +615,10 @@ The run book lists what happens on its own and what the team checks or starts. T
 | Day 3 to 5 | Start the month-end close run, execute, review checks, sign, submit; manager approves. | Accounts > Period End > Month-End Close |
 | After approval | Run Trial Balance (Opening / Movement / Closing), Income Statement, Balance Sheet, Month-End Close Status. | Reports > Financial Reports |
 | Day 1 of next month | Accrual auto-reversal (job if on, otherwise it runs when a run is executed and the reversals are due). | Master > Schedules |
-| Monthly / quarterly | VAT Summary, SLSP, QAP, SAWT and BIR Form 2307 for the BIR returns. | Accounts > Tax |
+| Monthly / quarterly | VAT Summary, SLSP, QAP, SAWT and BIR Form 2307 for the BIR returns; 0619-E by day `bir.withholding_due_day` (10) of the next month, 1601-EQ and 2551Q after the quarter, with Record filing after payment; BIR DAT files validated with the BIR module before submission. | Accounts > Tax > Withholding Returns, BIR DAT Files |
+| Monthly | Print the CAS books of the month (General Journal, General Ledger, Cash Receipts, Cash Disbursements, Sales, Purchase), in month order. | Accounts > Tax > CAS Books and Documents |
+| Within 5 working days of a covered transaction | Generate, file and record the CTR file (`aml.ctr_due_working_days`). | Compliance > AMLC Reports |
+| Yearly (January to March) | 1604-E with the alphalist and DAT file; IC annual statement workbook and IC production report for the accountant (compliance package). | Accounts > Tax > Annual Alphalist 1604-E; Compliance > Insurance Commission |
 | Month end + grace (5 days) | Period auto soft-close (if on) soft-closes periods whose checks pass. | Master > Schedules |
 
 # Gaps and observations
@@ -464,4 +631,7 @@ The run book lists what happens on its own and what the team checks or starts. T
 | 4 | The Receivable ageing job description says it notifies collections; it does not. | Correct the description or add the notification. |
 | 5 | Quotation expiry counts from the creation date, not from Valid Until. | Decide which rule the broker wants. |
 | 6 | Report schedules have no screen (API only). | See the Reports Book. |
-| 7 | Missed runs during downtime are not caught up by the scheduler. | After an outage, use Run now for the daily jobs of the missed day. |
+| 7 | Missed runs during downtime are not caught up by the scheduler. | After an outage, use Run now for the daily jobs of the missed day; for AML transaction monitoring use Run monitoring with the missed dates. |
+| 8 | Housekeeping does not purge `integration_outbox`, `integration_attempts` or `eis_submissions`; they grow without limit. | Add retention settings for them; meanwhile watch their size in the monthly service review. |
+| 9 | An EIS submission left in sending after a crash is not picked up again by the job. | Support checks the EIS and uses Retry or Uploaded manually (Support runbook by job). |
+| 10 | The user manual names the EIS job's screen as Master > Configuration > Schedules; the screen is Master > Schedules. | Correct the manual at its next update. |

@@ -1,12 +1,12 @@
 ---
 title: Release Notes
 subtitle: BrokerVerse OOTB release or patch [x.y.z], template
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Template; one copy per release or patch
+change: Template; one copy per release or patch. 1.1: sections for scheduled jobs, integration connectors, environment variables and keys, and regulatory settings to confirm
 open_item: Replace every [placeholder] and delete the sections that do not apply before issue
 open_item_owner: iorta TechNXT release manager
 acronyms: OOTB=Out of the box; CAB=Change advisory board; CR=Change request; UAT=User acceptance test; API=Application programming interface; PHT=Philippine time (UTC+8); P1, P2=Incident priorities 1 and 2
@@ -68,9 +68,33 @@ Security patches follow the agreed timelines: critical within 14 days and high w
 
 | Item | Change | Setting or master | Delivered value | Broker to confirm |
 |---|---|---|---|---|
-| [for example premium tax rule, BIR form layout, number series] | [ ] | [key or screen] | [value] | [yes / no] |
+| [for example premium tax rule, BIR form layout, DAT file layout version, AMLC transaction codes, IC complaint deadlines, number series] | [ ] | [key or screen] | [value] | [yes / no: the tax adviser, compliance officer or DPO confirms] |
 
 Settings and master data changed by the broker are kept: a release adds what is missing and never overwrites a value the broker has changed, unless this section says so.
+
+# Scheduled jobs
+
+| Job (code) | Change | Delivered | Action for the broker |
+|---|---|---|---|
+| [for example `eis-outbox`] | [new job / new timing / new parameter] | [On / Off, timing Asia/Manila] | [switch on in Master > Schedules when ... / none] |
+
+A new job is registered without changing the jobs the broker already edited. The Schedules and Batch Jobs document lists every job; update its support runbook for each new job.
+
+# Integrations and connectors
+
+| Connector or interface | Change | Mode delivered | Partner action |
+|---|---|---|---|
+| [for example SMS_SEMAPHORE, CTPL_AUTH, INSURER_API, BANK_FILES, BIR EIS, screening provider] | [new connector / new message type / new adapter option] | [Test mode / Live / Switched off] | [none / partner to certify / credentials to issue] |
+
+A connector delivered in test mode sends nothing outside the system. The partner's certification and the credentials stay with the partner and the broker.
+
+# Environment variables and keys
+
+| Variable | Change | Required | Who sets it |
+|---|---|---|---|
+| [for example `PII_ENCRYPTION_KEY`] | [new / renamed / new rule] | [yes: the API refuses to start without it / optional] | [DevOps of the hosting party, in the secret store; never in the release notes] |
+
+Never write a key value in the release notes. A new key is backed up with the database and added to the sealed escrow copy.
 
 # Database changes
 
@@ -89,7 +113,8 @@ Migrations are applied automatically when the API starts, under a lock. A databa
 
 ## After deployment
 
-- [for example: switch on the job ... in Master > Schedules; check the E-mail Outbox]
+- [for example: switch on the job ... in Master > Schedules; check the E-mail Outbox and the Integrations outbox]
+- [for example: import the brand pack exported from UAT; check a sample document]
 - Check the smoke test result sent by iorta TechNXT.
 
 # Known issues in this release

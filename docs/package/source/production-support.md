@@ -1,12 +1,13 @@
 ---
 title: Production Support
 subtitle: Approach and Standards
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; L1, L2, L3=Support levels 1, 2 and 3; PHT=Philippine time (UTC+8); SLA=Service level agreement; KPI=Key performance indicator; RCA=Root-cause analysis; CAB=Change advisory board; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; NPC=National Privacy Commission; DPO=Data protection officer; PITR=Point-in-time restore; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; ITIL=IT Infrastructure Library; PR=Pull request
+change: Support procedures for the integrations outbox, the EIS outbox, the compliance deadline jobs, encryption key custody and rotation, brand pack import and e-signature revocation; monitoring, backups and references updated
+acronyms: OOTB=Out of the box; AML=Anti-money laundering; AMLC=Anti-Money Laundering Council; EIS=Electronic Invoicing System; EDD=Enhanced due diligence; PII=Personal identifiable information; SMS=Short message service; CTPL=Compulsory third party liability; COC=Certificate of cover; L1, L2, L3=Support levels 1, 2 and 3; PHT=Philippine time (UTC+8); SLA=Service level agreement; KPI=Key performance indicator; RCA=Root-cause analysis; CAB=Change advisory board; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; NPC=National Privacy Commission; DPO=Data protection officer; PITR=Point-in-time restore; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; ITIL=IT Infrastructure Library; PR=Pull request
 ---
 
 # Introduction
@@ -32,6 +33,8 @@ The broker's System Administrator, key users and IT management; the iorta TechNX
 | Architecture documents 07 to 11 (`docs/architecture`) | High availability, RTO and RPO, backup and recovery, archival and housekeeping, monitoring |
 | User manual and role decks | Expected behaviour of each screen; known limitations (manual Appendix G) |
 | `docs/onboarding/UAT_SCRIPTS.md`, `backend/scripts/uat-scenario.js` | Business regression scripts |
+| Schedules and Batch Jobs (05_Delivery), chapter Support runbook by job | What each scheduled job does, its switch, and the checks and fixes when it fails |
+| `docs/onboarding/BRANDING_AND_SIGNATURES.md`, `DATA_MASKING.md`, `SUPPORT_AND_ESCALATION.md` | Brand packs and e-signatures; masking of non-production copies; what users send with a report |
 
 # Support model
 
@@ -166,8 +169,8 @@ Aligned with ITIL problem management.
 
 | Type | Examples | Approval |
 |---|---|---|
-| Standard | Adding a user, resetting a password, adding a master record, changing an e-mail text | Pre-approved; done by the broker's System Administrator; recorded in the Audit Trail |
-| Normal | A release; a change of tax rate, account determination or posting rule; a new document number series; a new scheduled job time; a data correction script | Change request with impact, test evidence and rollback; approved by the broker's change owner and iorta TechNXT support manager (CAB) |
+| Standard | Adding a user, resetting a password, adding a master record, changing an e-mail or SMS template text, uploading a new screening list version, capturing or revoking an e-signature on request | Pre-approved; done by the broker's System Administrator or compliance officer; recorded in the Audit Trail |
+| Normal | A release; a change of tax rate, account determination or posting rule; a new document number series; a new scheduled job time or switching a job on or off; switching a connector or the EIS to live; a brand pack import in Production; an encryption key rotation; a data correction script | Change request with impact, test evidence and rollback; approved by the broker's change owner and iorta TechNXT support manager (CAB) |
 | Emergency | Fix for a P1; security patch | Approved by the support manager and the broker's IT head by telephone or e-mail; recorded afterwards and reviewed at the next CAB |
 
 ## Configuration changes in production
@@ -222,10 +225,91 @@ The monitoring design is in architecture document 11. The standard checks are:
 | HTTP 5xx rate, response time, container CPU and memory, database CPU, storage and connections | Continuous, alarms as in document 11 | DevOps |
 | Scheduled jobs: last status of each job in Master > Schedules; failed runs in `job_runs` | Daily, 09:00 PHT | L2 |
 | E-mail Outbox: queued older than 15 minutes, failed messages | Daily, and alarm | L2 |
+| Integrations outbox: Failed and Waiting per connector, messages in Retry scheduled for more than an hour, failed inbound messages | Daily, and alarm on growth | L2 |
+| EIS outbox (when switched on): failed, rejected, submissions in sending | Daily | L2, with the broker's Accounting Manager |
+| Compliance deadline jobs: last status of `aml-transaction-monitoring`, `aml-kyc-refresh-due`, `compliance-reminders`, `complaints-deadlines`, `privacy-breach-deadlines` | Daily; `privacy-breach-deadlines` hourly by alarm | L2 |
 | Failed sign-ins, locked accounts, refresh-token reuse | Daily, and alarm | L2, security |
 | Backup status and latest restorable time | Daily | DevOps |
 
 The daily health check is recorded (date, checker, result, tickets raised). Monitoring alarms raise tickets with the severity of document 11 (P1 immediate, P2 same business day, P3 next business day).
+
+# Operational procedures for the new capabilities
+
+These procedures cover the parts of BrokerVerse that talk to third parties, run against regulatory deadlines or hold keys and signatures. Each scheduled job also has a line in the support runbook of the Schedules and Batch Jobs document.
+
+## Integrations outbox monitoring
+
+Every message to a third party (SMS and Viber, CTPL authentication, LTO feed, insurer requests, bank payment files) goes through the integration outbox on Master > System Configuration > Integrations; the job `integration-outbox` sends what is due every 2 minutes. The screens need `read:integrations` (System Administrator).
+
+| Step | What support does |
+|---|---|
+| Daily check | Connectors tab: Waiting, Failed and Sent today per connector; last success and last failure. Outbox tab filtered on Failed and Retry scheduled. Inbox tab filtered on Failed and Ignored. |
+| A connector shows failures | Open a failed message (eye icon): the attempt log gives the HTTP status, duration and error. Classify: provider down or slow (timeouts, 5xx), credentials (401, 403), request refused by the provider (4xx with a reason, not retried), configuration (endpoint, adapter options). |
+| Provider down | Leave the messages in Retry: they are retried with the connector's backoff until the attempt limit. Tell the broker which business is waiting (for example COCs not yet authenticated). When the provider is back, select Send due messages, then Resend the messages that reached Failed. |
+| Credentials rejected | The credential values are environment variables on the server, never on the screen. DevOps checks the secret store, sets the value and restarts the API; the Credentials tick on the connector turns green. Then Resend. Treat a leaked credential as a security incident. |
+| Request refused | Correct the business data (for example the client's mobile number, the vehicle details of a COC), then Resend. Cancel message for anything that must not be sent. |
+| Messages stuck in Sending | The job puts back to retry any message left in processing longer than `integrations.stuck_minutes` (10). If many are stuck, check that the scheduler runs (`SCHEDULER_ENABLED`) and the server log. |
+| Inbound message Ignored | An unsigned or wrongly signed push from a third party: confirm the webhook secret with the provider; never reprocess an unsigned message. A Failed inbound message is processed again with Process again once its cause is fixed. |
+| Switching a connector to Live | Normal change: endpoint and credential variables set, Test connection in live mode, one real message checked in the outbox, then the related jobs switched on (`sms-renewal-notices`, `sms-payment-reminders`). The partner's certification of the interface stays with the partner and the broker. |
+
+The EIS outbox (Accounts > Tax > E-Invoicing (EIS)) works the same way with its own queue: a failed submission is retried after `eis.retry_minutes`, doubled each time, up to `eis.max_attempts`; a rejected submission is final (the broker cancels and reissues the invoice); a submission left in sending after a crash is confirmed with the EIS and then retried or recorded as Uploaded manually. When the EIS is unavailable for long, Export payloads gives the file for a manual upload. EIS enrolment and certification stay with the BIR and the broker.
+
+## Compliance deadline jobs
+
+These jobs remind people of legal deadlines. A failure is handled as P2 at least, and as P1 when a deadline falls within the next working day.
+
+| Job | Deadline it protects | Who is reminded | Support action when it fails |
+|---|---|---|---|
+| `aml-transaction-monitoring` (daily 06:30) | Covered transaction report within `aml.ctr_due_working_days` (5) working days; suspicious transaction report within `aml.str_due_working_days` (1) | Compliance officer (`read:aml`) | Fix the cause, then ask the compliance officer to use Run monitoring for the missed dates (the job only looks back 3 days) |
+| `aml-kyc-refresh-due` (Mondays 07:00) | KYC refresh by risk rating | Compliance officer | Run now; nothing is lost, the clients are marked at the next run |
+| `aml-provider-retry` (when on) | Screening of new parties | Compliance officer (abandoned requests) | Check the provider settings and API key variable; the uploaded lists keep screening meanwhile |
+| `compliance-reminders` (daily 06:45, compliance package) | Licence renewals, fit and proper reviews, insurer certificates of authority | Compliance team (`read:compliance`), licence holder | Run now; check the licence and insurer dates entered |
+| `complaints-deadlines` (daily 08:00, compliance package) | Acknowledgement and resolution of complaints (RA 11765) | Person assigned; complaints officers when escalated | Run now; confirm every open complaint is assigned |
+| `privacy-breach-deadlines` (hourly, compliance package) | NPC notification within 72 hours of discovery | Data privacy team (`read:privacy`) | Restore the scheduler at once; tell the DPO the hours left from the Clock column of the Breach Register |
+
+The deadlines themselves stay with the broker: the compliance officer files with the AMLC, the DPO notifies the NPC, the complaints officer answers the complainant. iorta TechNXT keeps the reminders running and does not file on the broker's behalf.
+
+## Encryption key custody and rotation
+
+| Key | What it protects | Custody | Rotation |
+|---|---|---|---|
+| `JWT_SECRET` | Session tokens and signed file links | Secret store of each environment; sealed escrow copy | At a suspected leak, or yearly. Changing it signs every user out and voids file links already sent |
+| `DATA_ENCRYPTION_KEY` | Two-step verification secrets, reset-code hashes | Secret store; escrow copy kept with the backups | Planned change only: users with two-step verification enrol again after it |
+| `PII_ENCRYPTION_KEY` | TIN, government ID and bank account numbers of clients, prospects and referrers, ID numbers captured at issue, payee TIN of BIR Form 2307 (field encryption, compliance package) | Secret store; escrow copy kept with the backups under dual control (broker and iorta TechNXT); a different value in each environment | `npm run pii:rotate` procedure below; yearly or at a suspected leak |
+| Connector, EIS and screening provider credentials | Access to SMS gateways, CTPL provider, insurers, BIR EIS, screening provider | Secret store; only the variable name is in the system | When the provider issues new credentials or at a suspected leak; restart the API after the change |
+
+Rules: keys are generated with `openssl rand -hex 32` (at least 32 characters, each key different); they are never written in a ticket, an e-mail, a document or the repository; production refuses to start with a missing, placeholder or reused key; the escrow copy is checked yearly under dual control.
+
+Rotation of `PII_ENCRYPTION_KEY` (normal change, in the maintenance window, after a database snapshot):
+
+1. Generate the new key.
+2. Set `PII_ENCRYPTION_KEY` to the new key and `PII_ENCRYPTION_KEY_PREVIOUS` to the old one; restart the API. New and changed identifiers are written with the new key; values written with the old key stay readable.
+3. Run `npm run pii:rotate` (dry run: count per column of the values still encrypted with the old key), then `npm run pii:rotate -- --execute`. It works in batches and can be run again.
+4. When the dry run reports 0 for every column, remove `PII_ENCRYPTION_KEY_PREVIOUS` and restart.
+5. Keep the old key with the backups taken before the rotation: they can only be read with it. Record the rotation in the change with the date, the operator and the dry-run counts (never the keys).
+
+A copy of production restored in another environment is masked with production's key (`npm run mask:data`), then rotated to the key of its own environment with the same steps.
+
+## Brand pack import
+
+A brand pack carries the theme, application name, logo, favicon, sign-in picture and print logo of an environment. Importing one in Production is a normal change; in UAT it is a standard change.
+
+1. Export the current pack first (Master > System Settings > Theme and Branding > Brand packs > Export .zip) and attach it to the change: it is the rollback.
+2. Import the new pack. The check runs before anything is saved (theme rules, contrast of text on buttons, header and table headers to WCAG AA, image types, SVG safety) and shows the colours and the contents.
+3. Choose the options (also set the print logo of the primary company; also set the application name), then Apply. The import is in the audit trail (entity branding, action import).
+4. Check a printed document (Sample document), a sample e-mail and the sign-in page.
+5. A client brand pack that carries a third party's marks (for example the Toyota Insurance Services pack) is applied only in that client's environments and only with the client's written permission on file. Support refuses the change without it.
+
+Rollback: import the pack exported in step 1.
+
+## E-signature revocation
+
+A signature version is revoked when a signatory leaves, a signature was captured in error, or misuse is suspected. Revocation is immediate and final for that version: it no longer prints on any document, including reprints of older documents.
+
+1. The request comes from the broker's System Administrator or the signatory, in writing, with the reason.
+2. Company signatory: Master > Generals > Insurance Management > Signatories, E-signature, Revoke with the reason (`write:masters`). User signature: the administrator revokes it from the user (a user's own signature can be captured only by that user).
+3. Check the audit trail (entity e-signature, action revoke) and the document signature mapping of Theme and Branding: a slot that pointed to the revoked signatory prints the name without an image until a new signatory or version is set.
+4. If misuse is suspected, handle it as a security incident: preserve the audit trail and list the documents issued with that version since the suspected date.
 
 # Backup verification and DR drills
 
@@ -235,7 +319,7 @@ The daily health check is recorded (date, checker, result, tickets raised). Moni
 |---|---|
 | Database | Daily automated snapshots and point-in-time restore; retention at least 30 days (35 recommended) |
 | Upload volume (documents, ID images, generated reports) | Daily backup |
-| Secrets | `DATA_ENCRYPTION_KEY` and `JWT_SECRET` held in the secret store, with a sealed escrow copy; without the same `DATA_ENCRYPTION_KEY` users with two-step verification cannot sign in after a restore |
+| Secrets | `JWT_SECRET`, `DATA_ENCRYPTION_KEY` and `PII_ENCRYPTION_KEY` held in the secret store, with a sealed escrow copy; without the same `DATA_ENCRYPTION_KEY` users with two-step verification cannot sign in after a restore, and without the same `PII_ENCRYPTION_KEY` the TIN, government ID and bank account numbers cannot be read. Key custody and rotation: chapter Operational procedures for the new capabilities |
 | Daily | Backup jobs succeeded; latest restorable time within 15 minutes |
 | Quarterly | Point-in-time restore to a new instance, API started against it in an isolated environment, smoke test; document restore and sample check. A Pre-Prod created from a Production backup in the quarter counts as this test |
 | Twice a year | Logical dump restore into a clean PostgreSQL 16; row counts compared with the source |
@@ -377,7 +461,7 @@ A failed step blocks the release until it is fixed or the CAB accepts the risk i
 
 A suspected security incident (unauthorised access, credential attack, data exposed, malware, a leaked secret) is handled as a P1.
 
-1. Contain: disable affected users, rotate exposed secrets (`JWT_SECRET` signs every user out; `DATA_ENCRYPTION_KEY` rotation is planned with the restore impact in mind), block addresses at the load balancer, isolate affected components.
+1. Contain: disable affected users, rotate exposed secrets (`JWT_SECRET` signs every user out; `DATA_ENCRYPTION_KEY` rotation is planned with the restore impact in mind; `PII_ENCRYPTION_KEY` with the rotation procedure of the operational procedures chapter; connector credentials with the provider), revoke e-signature versions that may have been misused, block addresses at the load balancer, isolate affected components.
 2. Preserve evidence: logs, `login_history`, `audit_log`, monitoring data, database snapshot.
 3. Assess what data and which data subjects are affected.
 4. Recover and verify.
@@ -396,7 +480,7 @@ BrokerVerse holds personal data of prospects, clients, claimants and users (name
 | Full report and evidence | iorta TechNXT and the broker | As requested by the NPC |
 | Breach register entry and annual report of breaches | Broker's DPO | As required by the NPC rules |
 
-iorta TechNXT supports the broker with the facts (what, when, which records, which users, containment) but does not notify the NPC or data subjects on the broker's behalf unless the agreement says so. The broker's DPO confirms the current NPC rules on breach notification.
+With the compliance package, the broker's DPO logs the incident at once in Compliance > Data Privacy (NPC) > Breach Register: the 72-hour clock runs from the time discovered, and the hourly job `privacy-breach-deadlines` reminds the data privacy team at 48, 24 and 6 hours before the deadline. iorta TechNXT supports the broker with the facts (what, when, which records, which users, containment) but does not notify the NPC or data subjects on the broker's behalf unless the agreement says so. The broker's DPO confirms the current NPC rules on breach notification.
 
 ## Data subject requests
 

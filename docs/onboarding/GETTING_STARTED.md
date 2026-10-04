@@ -1,5 +1,8 @@
 # Getting started with BrokerVerse
 
+Version 1.1, 04 October 2026, iorta TechNXT. Changes: the Compliance Officer role, My Work, the Help panel, the
+enterprise side menu and the masking of personal identifiers.
+
 This guide is for everyone who uses BrokerVerse day to day. It explains how to sign in the first time, what you see
 after signing in, which menus your role opens and how to ask for help. The user manual
 (`docs/package/05_Delivery/BrokerVerse_User_Manual.pdf`) describes every screen in detail.
@@ -52,8 +55,16 @@ it up again at the next sign-in.
 ## 2. The home screen and the menu
 
 After signing in you land on the first dashboard your role may open. The menu on the left lists only the screens your
-role may use. Your name and the profile menu (change password, two-step verification, sign out) are at the top right.
-The bell shows notifications, for example a payment waiting for verification or a claim document received.
+role may use, in business order (Home, Dashboard, Operations, Accounts, Commission, Reinsurance, Compliance, Reports,
+Master, Product Configurator). Master lists its screens under headings (Organization, Insurance, Location, Employees,
+Users and Access, Finance, System, Data Privacy, Go-Live and Data). Type part of a screen name in **Search menu...**
+(or press **/**) to jump to it. Your initials at the top right open the account menu (Profile, Change password,
+Two-step verification, Help, Sign out). The bell shows notifications, for example a payment waiting for verification,
+a task reminder or a claim document received.
+
+**My Work** (Operations > My Work) is where you find what is waiting for you: your open items by category (quotations,
+renewals, premiums due, claims, approvals, missing documents), your team's items if you manage people, your tasks with
+reminders, and a calendar of what falls due. Start your day there.
 
 The menus below are those granted to each role in BrokerVerse. A user may hold more than one role and then sees the
 menus of all of them. The server checks the same permissions on every action, so a button you cannot use is either
@@ -68,6 +79,7 @@ hidden or refused with a message.
 | Claims | Dashboard: Claims Dashboard. Operations: Home, Clients, Policy, Claims. Reinsurance: Claims Recovery. Reports: All Reports, Operational Reports |
 | Accounting | Dashboard: Executive Dashboard. Operations: Open Items, Payments. Accounts: Receipts, Collections, Accounting Query, All Clients Accounting, Open Entry Matching, Open Entry Un-Matching, Disbursement, Petty Cash, Journal Voucher, Correction JV, Reversal JV, Remittance, Incentive, Period End, Tax, Bank Reconciliation. Master: Finance > Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types. Commission: Commission Dashboard, Agents/Referrer Accounts. Reinsurance: Reconciliation. Reports: All Reports, Financial Reports, Operational Reports > Remittance and Broker Commission |
 | Accounting Manager | Everything Accounting has, plus the approvals: month-end and year-end close, reopening a period, posting into a soft-closed period, bank reconciliation approval |
+| Compliance Officer (AML/CFT) | Home. Operations: Clients (with Onboard client), Policy, Claims (read). Compliance: AML Dashboard, Client Due Diligence, EDD Reviews, KYC Refresh, Screening Hits, Screening Lists, Transaction Alerts, AML Cases, AMLC Reports, AML Settings. Reports: All Reports, Operational Reports |
 
 What each role mainly does:
 
@@ -80,6 +92,16 @@ What each role mainly does:
 - **Accounting** bills and collects premium, issues official receipts, remits to insurers, pays commission and
   incentives, reconciles banks and prepares the month-end and year-end close and BIR reports.
 - **Accounting Manager** approves what Accounting prepares.
+- **Compliance Officer** runs the anti-money laundering programme: client risk ratings and enhanced due diligence,
+  screening hits, transaction alerts, cases and the report files filed with the AMLC.
+
+The registers of the Insurance Commission and the National Privacy Commission (licences, fit and proper, insurer
+authority, complaints, breach register) are under Compliance for the roles that hold the compliance, complaints or
+privacy permissions. Your System Administrator can tell you which you hold.
+
+**Personal identifiers.** If your role does not hold the permission to view full personal identifiers, TIN, ID numbers,
+mobile numbers, e-mail addresses, bank account numbers and birth dates show partly masked on lists, screens and
+exports (for example j***@example.ph). This is intended; ask your System Administrator if your work needs the full value.
 
 ## 3. Everyday tips
 
@@ -91,6 +113,11 @@ What each role mainly does:
   the company set as primary in Master > Generals > Organization > Company.
 
 ## 4. Getting help
+
+Press **F1** (or **?** outside a text box), or choose **Help** in the account menu: the Help panel opens the section of
+the user manual for the screen you are on, the full manual as PDF, the support desk's e-mail, telephone and hours,
+**Raise a support ticket**, the keyboard shortcuts and **About BrokerVerse** (version and environment, useful in a
+report).
 
 First ask the colleague in your team who was trained as the key user. If the problem remains, report it to support
 (see `SUPPORT_AND_ESCALATION.md` for the contact and response targets). Please send:

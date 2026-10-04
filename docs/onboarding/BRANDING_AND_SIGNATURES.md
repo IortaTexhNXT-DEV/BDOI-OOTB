@@ -1,5 +1,8 @@
 # Broker branding and e-signatures
 
+Version 1.1, 04 October 2026, iorta TechNXT. Changes: section 5, support procedures for brand pack import and
+e-signature revocation.
+
 How to brand a broker's BrokerVerse environment, what changes automatically, how signatures are captured and mapped
 to documents, how brand packs move branding between environments, and the trademark rule for client brand packs.
 
@@ -47,7 +50,7 @@ settings, and texts with `<` or `>`.
 * Backend: `backend/src/modules/branding/` (presets, schema, contrast, service, router). `GET /api/branding` is public,
   cached with an ETag (`If-None-Match` answers 304); images are served by `GET /api/branding/assets/:name?v=` (public,
   versioned, sandbox CSP).
-* Front end: `brokerverse/src/theme/runtime/` — `themeEngine.js` sets the `--bv-*` CSS custom properties on `<html>`,
+* Front end: `brokerverse/src/theme/runtime/`: `themeEngine.js` sets the `--bv-*` CSS custom properties on `<html>`,
   `BrandingProvider.jsx` revalidates the branding on every navigation (at most every 15 s), when the tab becomes
   visible and every 5 minutes. `tokens.scss` defines the defaults (the iorta TechNXT preset, so the app looks exactly
   as before when no theme is loaded). A PostCSS step (`brokerverse/scripts/postcss-brand-vars.js`, wired in
@@ -136,3 +139,34 @@ The Toyota Insurance Services pack: white header and side bar, near-black text a
 Toyota red only as a small accent (active marker, document rule, e-mail line), links in a darker red that
 passes AA, Inter font, the TIS logo on screens and documents, footer "Authorized by the Insurance Commission to act as
 an Insurance Agent, Licence No. {{licence}}". See its README.
+
+## 5. Support procedures
+
+### Brand pack import in an environment in use
+
+1. **Before**: export the current pack (Theme and Branding > Brand packs > Export .zip) and keep it with the change
+   record. In Production the import is a normal change approved by the broker.
+2. **Import** the new pack. Nothing is saved until **Apply**: the check shows the colours, the contents and any
+   refusal (contrast below WCAG AA on buttons, primary colour, header, table header or document table header; unsafe
+   SVG; unknown image type).
+3. **Apply** with the options chosen (print logo of the primary company, application name). The import is in the
+   audit trail (entity `branding`, action `import`).
+4. **Check** the sign-in page, one screen, **Sample document** and **Show a sample e-mail**. Users see the new theme on
+   their next navigation; no reload or rebuild is needed.
+5. **Rollback**: import the pack exported in step 1.
+
+A client brand pack carrying third-party marks is applied only in that client's environments, with the client's
+written permission on file (section 4). Support refuses the change without it.
+
+### Revoking an e-signature
+
+1. The request comes in writing from the broker's System Administrator or the signatory, with the reason (signatory
+   left, captured in error, suspected misuse).
+2. **Company signatory**: Master > Generals > Insurance Management > Signatories, pencil "E-signature", **Revoke**,
+   reason. **User**: the administrator revokes it from the user; only the user can capture a new one.
+3. The version stops printing at once on every document, including reprints of older documents. A slot mapped to that
+   signatory prints the name without an image until a new version is captured or the slot is mapped to someone else
+   (Theme and Branding > Document signatures).
+4. Check the audit trail (entity `e-signature`, action `revoke`). For suspected misuse, open a security incident and
+   list the documents issued with the version since the suspected date.
+

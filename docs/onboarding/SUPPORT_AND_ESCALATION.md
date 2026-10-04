@@ -1,5 +1,8 @@
 # Support and escalation
 
+Version 1.1, 04 October 2026, iorta TechNXT. Changes: the Help panel, the usual suspects of the new areas, and the
+support procedures for integrations, the compliance deadline jobs, keys, brand packs and e-signatures (section 6).
+
 How users report a problem with BrokerVerse, how it is graded, the response targets and what production support
 checks first. Contacts, hours and targets marked "to be agreed with the customer" are settled in the support agreement
 before go-live; fill them in here once agreed.
@@ -25,7 +28,8 @@ A report must contain:
 3. the request ID shown in the error message, if any;
 4. what was done, what happened and what was expected;
 5. a screenshot, with client personal data covered;
-6. the username (never the password) and the role;
+6. the username (never the password), the role, and the version and environment shown under **About BrokerVerse**
+   in the Help panel (F1);
 7. how many users are affected and whether work can continue.
 
 Do not send passwords, two-step codes, the environment settings or full client ID numbers.
@@ -57,7 +61,9 @@ The developer and production support guide is `docs/developer-guide/README.md`; 
    (`backend/docs/api/BrokerVerse_API_Touchpoints.csv`) and follow it to the module and tables
    ([backend.md, section 5](../developer-guide/backend.md#5-tracing-a-defect-from-a-screen-to-the-database)).
 4. **The usual suspects** for the area: sign-in and lockouts (`login_history`), document numbers, postings and
-   closed periods, scheduled jobs, PDFs, the e-mail outbox
+   closed periods, scheduled jobs, PDFs, the e-mail outbox, the integrations outbox (SMS, CTPL authentication,
+   insurer requests, bank files), the EIS outbox, and personal identifiers shown masked because the role lacks
+   `view:pii`
    ([backend.md, section 7](../developer-guide/backend.md#7-common-production-issues-and-where-to-look)).
 5. **Configuration before code.** Rates, account codes, limits, e-mail texts and switches are settings in Master >
    Configuration. Check the setting and the Audit Trail (Master > Audit Trail) for a recent change.
@@ -70,3 +76,19 @@ Fixes and changes are delivered as a new release of the front end and the back e
 `deploy/README.md` (sections 2 to 4 and the rollback in section 8). Database migrations only add; a
 database snapshot is taken before each release. The customer tests a release in a test environment before it goes to
 production, using the scripts in `UAT_SCRIPTS.md`.
+
+## 6. Support procedures by area
+
+The full procedures are in the Production Support Approach and Standards (06_Support), chapter "Operational
+procedures for the new capabilities", and the support runbook of each scheduled job is in the Schedules and Batch
+Jobs document (05_Delivery). In short:
+
+| Area | First line (key user, System Administrator) | Third line (iorta TechNXT) |
+|---|---|---|
+| SMS, CTPL authentication, insurer requests, bank files not going out | Master > System Configuration > Integrations: is the connector Enabled and Live, what does Last error say? Correct the client data and **Resend**; **Cancel message** what must not go | Provider down, credentials rejected, messages stuck; credentials are set by DevOps in the secret store, never on the screen |
+| E-invoices to the BIR EIS failed or rejected | Accounts > Tax > E-Invoicing (EIS): rejected means cancel and reissue the invoice; failed is retried | Connector settings, submissions stuck in sending, manual upload fallback |
+| Compliance reminders missing (AML alerts, KYC refresh, licences, complaints, breach deadlines) | Master > Schedules: is the job on and did its last run succeed? Tell the compliance officer or the DPO at once when a deadline is near | Restore the job the same day; the breach deadline job runs hourly and is treated as urgent |
+| Personal identifiers unreadable for everyone (TIN, ID, bank numbers) | Report as severity 1 | Wrong or missing `PII_ENCRYPTION_KEY` after a deployment or restore; key custody and rotation follow the documented procedure |
+| Branding wrong after a brand pack import | Master > System Settings > Theme and Branding: import the pack exported before the change | Brand pack checks; a client brand pack only with the client's written permission |
+| A signature must stop printing | Master > Generals > Insurance Management > Signatories (or the user), E-signature, **Revoke** with the reason | Audit of the documents issued with the version when misuse is suspected |
+

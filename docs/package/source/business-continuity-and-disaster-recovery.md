@@ -1,13 +1,14 @@
 ---
 title: Business Continuity and Disaster Recovery Plan
 subtitle: BrokerVerse OOTB
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
+change: PII_ENCRYPTION_KEY and connector credentials in the keys to recover; integration and EIS outboxes, compliance deadline jobs and brand packs in the restore checks; outages of the SMS, CTPL, insurer, EIS and screening providers
 open_item: Recovery objectives become binding only when accepted in the Order Form; DR environment, partner details and contact lists to be completed per broker
-acronyms: OOTB=Out of the box; BCP=Business continuity plan; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; WAL=Write-ahead log; AZ=Availability zone; DNS=Domain Name System; CDN=Content delivery network; PHT=Philippine time (UTC+8); DPO=Data Protection Officer; NPC=National Privacy Commission; IC=Insurance Commission; BIR=Bureau of Internal Revenue; OR=Official receipt; CAB=Change advisory board; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; L1, L2, L3=Support levels 1, 2 and 3; P1=Severity 1 (critical)
+acronyms: OOTB=Out of the box; EIS=Electronic Invoicing System; AMLC=Anti-Money Laundering Council; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; SMS=Short message service; BCP=Business continuity plan; DR=Disaster recovery; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; WAL=Write-ahead log; AZ=Availability zone; DNS=Domain Name System; CDN=Content delivery network; PHT=Philippine time (UTC+8); DPO=Data Protection Officer; NPC=National Privacy Commission; IC=Insurance Commission; BIR=Bureau of Internal Revenue; OR=Official receipt; CAB=Change advisory board; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; L1, L2, L3=Support levels 1, 2 and 3; P1=Severity 1 (critical)
 ---
 
 # Introduction
@@ -60,11 +61,11 @@ The broker ranks its processes at the start of the engagement. The ranking below
 |---|---|---|---|
 | 1 | Core transactions: clients, policies, bills, receipts, journals, remittances, claims, the audit trail | PostgreSQL | Standby, PITR, snapshots, logical dumps |
 | 2 | Documents: KYC images, claim photos, uploaded statements, generated PDFs | File store at `UPLOAD_DIR` | File store backups |
-| 3 | Derived data: notifications, e-mail outbox, generated reports | PostgreSQL and file store | Recreated by the jobs; not restored on their own |
+| 3 | Derived data: notifications, e-mail outbox, integration outbox and inbox, EIS submissions, generated reports and BI extract files | PostgreSQL and file store | Restored with the database; the jobs resume sending from the restored state (see the checks after a restore) |
 | 4 | Code and configuration as code: front-end build, API image, deployment scripts | Git repository, image registry, front-end bucket | Rebuilt from the release tag |
-| Keys | `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, database and SMTP credentials, payment gateway keys | Secret store | Versioned secret store and the sealed escrow copy |
+| Keys | `JWT_SECRET`, `DATA_ENCRYPTION_KEY`, `PII_ENCRYPTION_KEY` (and `PII_ENCRYPTION_KEY_PREVIOUS` during a rotation), database and SMTP credentials, payment gateway keys, the credentials of the integration connectors, the BIR EIS and the screening provider | Secret store | Versioned secret store and the sealed escrow copy |
 
-Settings, number series, posting rules and master data live in the database (Tier 1), so a database restore brings the configuration back with the data.
+Settings, number series, posting rules and master data live in the database (Tier 1), so a database restore brings the configuration back with the data. The branding (theme, logos, sign-in picture) is in the settings and the file store; the latest brand pack export kept with the change records is a second copy. E-signature images are in the file store under `e-signatures/`.
 
 # Recovery objectives
 
@@ -125,7 +126,9 @@ Hosted production has an availability target of 99.5% a month, measured in servi
 
 `DATA_ENCRYPTION_KEY` encrypts the two-step verification secrets. A database restored without the same key works, but every user with two-step verification must have it reset by an administrator and enrol again. No business data is lost. The key is therefore backed up with the database: versioned in the secret store, with a sealed escrow copy held under dual control by the broker and iorta TechNXT.
 
-`JWT_SECRET` signs sessions and file links. Restoring with a new value only signs every user out.
+`PII_ENCRYPTION_KEY` encrypts the TIN, government ID and bank account numbers of clients, prospects and referrers (field encryption of the compliance package). A database restored without the same key cannot show or search those identifiers, and BIR Form 2307, the alphalists and the AMLC report files cannot be produced with them. This key is business-critical: it is versioned in the secret store, held in the sealed escrow with the other keys, and the key in force at the time of each backup is kept for as long as that backup is kept. After a key rotation, the previous key stays with the backups taken before the rotation.
+
+`JWT_SECRET` signs sessions and file links. Restoring with a new value only signs every user out. Connector credentials are only referred to by name in the database; they are restored from the secret store.
 
 # Restore procedures
 
@@ -141,7 +144,7 @@ Detailed command-level steps are in architecture document 09. The procedures bel
 6. Start one API instance. On start it checks the configuration, applies any pending migration under the advisory lock and runs the idempotent seed; `/api/health` answers 200 when ready.
 7. Check `GET /api/version`: expected commit, no pending migration.
 8. Run the smoke test of `deploy/README.md` section 4 and the business checks below.
-9. Re-enable the scheduler on one instance, scale out, open traffic.
+9. Review the integration and EIS outboxes (business checks below), then re-enable the scheduler on one instance, scale out, open traffic.
 10. Tell users what was restored to which point and what must be re-entered.
 
 ## Business checks after a restore
@@ -154,6 +157,11 @@ Detailed command-level steps are in architecture document 09. The procedures bel
 | Document Numbering counters are past the last numbers used; no number is reused | System Administrator |
 | A sample of KYC images and claim documents opens | Operations |
 | E-mail Outbox has no flood of old messages queued for resend | System Administrator |
+| Integrations outbox: messages restored as queued or retry are reviewed before the scheduler restarts; SMS already received by clients, CTPL authentications and insurer requests already answered by the provider after the recovery point are cancelled, not resent | System Administrator with Operations |
+| EIS outbox: submissions restored as queued, failed or sending are checked against the EIS before resending, so no invoice is submitted twice | Accounting Manager |
+| Compliance deadlines: open breaches (72-hour clock), complaints and AML cases due are reviewed; the hourly breach job runs again | DPO, compliance officer |
+| TIN and ID numbers display unmasked for a user with `view:pii` (proves the right `PII_ENCRYPTION_KEY`) | System Administrator |
+| Branding, logo and e-signatures print on a sample document | System Administrator |
 | Sign-in works for a user with two-step verification | System Administrator |
 
 > **Recommended:** Transactions entered after the recovery point are re-entered from source documents. Official receipt numbers issued in that window are re-entered with the same numbers where the series allows, or recorded with a cross-reference memo approved by the Accounting Manager, so the BIR sequence stays explainable.
@@ -258,7 +266,11 @@ Migrations only add to the schema, so the previous API image runs on the newer s
 | SMTP mailbox | E-mails wait in the E-mail Outbox; transactions continue | Resend from the outbox when the mailbox is back; send urgent documents from a normal mailbox |
 | Payment gateway | Payment links fail; no automatic receipts | Clients pay by bank transfer or cheque; Accounting records the receipt |
 | Bank portal | Transfers to insurers cannot be executed | Approved remittances wait; cheques where the insurer accepts them |
-| Insurer systems | No effect on BrokerVerse (exchange is by file and e-mail) | Not applicable |
+| Insurer systems | Insurer requests (issuance, premium data, claim status) stay in Retry; policies and claims continue | Record the insurer's policy number by hand; import the claim status file when the API is back |
+| SMS or Viber gateway | Renewal notices, reminders and claim updates wait in the integrations outbox | Resend after recovery; e-mail notices continue |
+| CTPL authentication provider or LTO feed | COCs wait for their authentication code | Authenticate through the provider's own portal and record the code; cancel the queued request |
+| BIR EIS | E-invoices wait in the EIS outbox; invoicing continues | Export payloads and upload manually; record Uploaded manually |
+| Screening provider | Requests fail and are retried; the uploaded lists are still screened | Screen the parties of abandoned requests manually |
 
 # Manual workarounds while the system is down
 

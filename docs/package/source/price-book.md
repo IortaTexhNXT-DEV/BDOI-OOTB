@@ -1,21 +1,22 @@
 ---
 title: Rate Card
 subtitle: iNXT BrokerVerse OOTB
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-acronyms: AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
+change: Software list completed with the AML/CFT toolkit, IC compliance registers, BIR pack, integration connectors, dealer programmes and branding, all included; new optional lines for their activation and for connector go-live, to confirm by management
+acronyms: AMC=Annual Maintenance Contract; AML=Anti-money laundering; CFT=Countering the financing of terrorism; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; CTPL=Compulsory third party liability; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
 # About this rate card
 
 This rate card sets out the list prices of iNXT BrokerVerse OOTB, the out-of-the-box version of the iNXT BrokerVerse insurance broking platform of iorta TechNXT Corp., for Philippine non-life insurance brokers. It shows ready packages for each broker size, what each package includes, the two licence models, implementation, hosting, support, optional services, change request rates, payment terms and taxes.
 
-iNXT BrokerVerse OOTB covers sales and quotation, placement with insurers, policy issuance and servicing, endorsements, claims, renewals, billing, official receipts, remittance to insurers, commission, general ledger, bank and insurer reconciliation, BIR tax working papers, reinsurance and incentives. The prices are for the product as delivered. Changes to the product are change requests, priced at the day rates in this rate card.
+iNXT BrokerVerse OOTB covers sales and quotation, placement with insurers, policy issuance and servicing, endorsements, claims, renewals, billing, official receipts and sales invoices, remittance to insurers, commission, general ledger, bank and insurer reconciliation, BIR forms and returns, anti-money laundering, the Insurance Commission and privacy registers, integrations with SMS gateways, the CTPL provider, insurers and banks, dealer programmes, reinsurance and incentives. The prices are for the product as delivered. Changes to the product are change requests, priced at the day rates in this rate card.
 
-> All prices are in PHP and exclude 12% VAT. USD figures are for reference only, at PHP 62.75 per USD (BSP reference rate, 25 September 2026). This rate card is valid for 90 days from 03 October 2026. A binding price is the price in a signed Order Form.
+> All prices are in PHP and exclude 12% VAT. USD figures are for reference only, at PHP 62.75 per USD (BSP reference rate, 25 September 2026). This rate card is valid for 90 days from 04 October 2026. Lines marked "to confirm by management" are proposals and are not quoted to a broker until iorta TechNXT management confirms them. A binding price is the price in a signed Order Form.
 
 # Packages at a glance
 
@@ -88,8 +89,10 @@ Ownership: AMC PHP 5,874,000.00 in Year 2. Ownership Plus: AMC PHP 5,874,000.00 
 
 ## Software
 
-- iNXT BrokerVerse OOTB with all its modules: sales and quotation, placement, policy issuance and servicing, endorsements, claims, renewals, billing, official receipts, collections, remittance to insurers, direct bill, commission and referrer sharing, petty cash, journals, general ledger, bank and insurer reconciliation, month-end and year-end close, BIR working papers (Form 2307, VAT Summary, SAWT, QAP, SLSP), reinsurance and incentives.
-- The seven delivered roles, maker-checker approvals, the authority matrix, segregation of duties checks, two-step verification and the audit trail.
+- iNXT BrokerVerse OOTB with all its modules: sales and quotation, lead assignment, distribution channels, dealer programmes, fleets, marine open covers, campaigns, placement, cover notes, policy issuance and servicing, endorsements and cancellations, claims, renewals, billing, official receipts, collections, post-dated cheques, remittance to insurers, direct bill, commission and referrer sharing, overriding commission from insurers, accounts payable, bank payment files, fixed assets, petty cash, journals, general ledger, bank and insurer reconciliation, month-end and year-end close, BIR forms and returns (2307, 0619-E, 1601-EQ, 1604-E, 2551Q, VAT Summary, SAWT, QAP, SLSP, DAT files), EOPT sales invoices, the EIS connector and the CAS books pack, the AML/CFT toolkit, the IC and NPC compliance registers, reinsurance and facultative placements, incentives, My Work, the Report Builder and BI extract, broker branding and e-signatures.
+- The integration framework with the delivered connectors (SMS and Viber, CTPL authentication and the LTO feed, insurer API, bank payment files), delivered in test mode.
+- The eight delivered roles, maker-checker approvals, the authority matrix, segregation of duties checks, two-step verification, masking of personal identifiers by role and the audit trail.
+- No module is priced as an add-on. The set-up of the regulatory modules and the go-live of each connector with its partner are optional services (below).
 - Updates of the OOTB version and regulatory form updates released for all customers, while the subscription or the AMC is in force.
 
 ## Implementation
@@ -262,12 +265,21 @@ This option adds round-the-clock response to P1 incidents reported by telephone.
 | Data migration, additional effort | 16,100.00 per man-day | 257 |
 | Additional integration, standard | 320,000.00 per integration | 5,100 |
 | Additional integration, complex | 720,000.00 per integration | 11,474 |
+| Connector go-live with a partner (to confirm by management) | 80,000.00 per connector | 1,275 |
+| Activation of the AML/CFT toolkit (to confirm by management) | 130,000.00 one-time | 2,072 |
+| Activation of the IC compliance registers (to confirm by management) | 100,000.00 one-time | 1,594 |
+| Activation of the BIR pack (to confirm by management) | 130,000.00 one-time | 2,072 |
+| Dealer programme set-up (to confirm by management) | 50,000.00 per programme | 797 |
+| Client brand pack (to confirm by management) | 30,000.00 per pack | 478 |
 | Additional line of business after go-live | 100,000.00 per line | 1,594 |
 | New report or document template (typical) | 60,000.00 per item | 956 |
 | On-site consultant day in Metro Manila | 20,000.00 per day | 319 |
 
 - A trainer day covers up to 15 participants. The broker provides the room and the devices.
-- A standard integration is one documented API or file exchange in one direction. A complex integration is two-way, has no API, or is a batch with reconciliation.
+- A standard integration is one documented API or file exchange in one direction, of a kind the delivered connectors do not cover. A complex integration is two-way, has no API, or is a batch with reconciliation.
+- Connector go-live takes one delivered connector live with one partner (one SMS gateway, the CTPL provider and LTO feed, one insurer's API mapping, one bank's file layout, or the BIR EIS): configuration, credential check, live test and support of the partner's acceptance. The partner's certification of its interface, its fees and the broker's contract with it are outside this price.
+- The activation lines cover the set-up workshops and configuration of a module already included in the software: AML/CFT (risk factors, rules, lists, provider and a test AMLC file with the compliance officer), IC compliance registers (licences, fit and proper records, insurer certificates, complaints and breach settings, mapping of the IC statement to the broker's chart), BIR pack (BIR and EOPT invoice settings, ATCs and a DAT file dry run with the tax adviser, CAS books pack). The compliance officer and the tax adviser confirm the settings; filings stay with the broker.
+- A client brand pack that carries another company's marks is built and applied only with that company's written permission.
 - Travel, lodging and meals outside Metro Manila are billed at cost. The recurring 24x7 Severity 1 support option increases 5% a year, like the AMC and the subscription. Hosting fees do not increase each year; they change only under the pass-through clause of the Hosting and Infrastructure Services Agreement.
 
 # Change requests
@@ -323,7 +335,7 @@ Work above 60 man-days is a separate project with its own statement of work.
 
 # Validity and conditions
 
-- This rate card is valid for 90 days from 03 October 2026. A quotation is valid for 90 days from its date.
+- This rate card is valid for 90 days from 04 October 2026. A quotation is valid for 90 days from its date.
 - The contract currency is PHP. USD figures are for reference only.
 - Prices assume the OOTB version as delivered, the broker's data supplied in the standard templates, a named project manager and key users, and sign-offs on time. Delays on the broker's side may move milestones and the related payments.
 - Cloud prices and the local partner price are confirmed with the provider before signing.

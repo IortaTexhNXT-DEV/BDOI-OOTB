@@ -96,6 +96,12 @@ O = {
     'Int_Cx': OPT['Additional integration, complex'],
     'LOB_After': OPT['Additional line of business after go-live'],
     'Report_Item': OPT['New report or document template'],
+    'Conn_Golive': OPT['Connector go-live with a partner'],
+    'AML_Act': OPT['Activation of the AML/CFT toolkit'],
+    'IC_Act': OPT['Activation of the IC compliance registers'],
+    'BIR_Act': OPT['Activation of the BIR pack'],
+    'Dealer_Prog': OPT['Dealer programme set-up'],
+    'Brand_Pack': OPT['Client brand pack'],
 }
 SRCNOTE = 'Read from BrokerVerse_Commercials_and_Pricing.xlsx (recommended price points) when this book was built.'
 
@@ -350,7 +356,13 @@ for n, lab, unit in [('Env_Setup', 'Additional environment, set-up', 'one-time')
                      ('Int_Std', 'Additional integration, standard', 'per integration'),
                      ('Int_Cx', 'Additional integration, complex', 'per integration'),
                      ('LOB_After', 'Additional line of business after go-live', 'per line'),
-                     ('Report_Item', 'New report or document template (typical)', 'per item')]:
+                     ('Report_Item', 'New report or document template (typical)', 'per item'),
+                     ('Conn_Golive', 'Connector go-live with a partner (to confirm by management)', 'per connector'),
+                     ('AML_Act', 'Activation of the AML/CFT toolkit (to confirm by management)', 'one-time'),
+                     ('IC_Act', 'Activation of the IC compliance registers (to confirm by management)', 'one-time'),
+                     ('BIR_Act', 'Activation of the BIR pack (to confirm by management)', 'one-time'),
+                     ('Dealer_Prog', 'Dealer programme set-up (to confirm by management)', 'per programme'),
+                     ('Brand_Pack', 'Client brand pack (to confirm by management)', 'per pack')]:
     r += 1
     put(pb, r, 1, lab)
     put(pb, r, 2, O[n], PHP, inp=True)
