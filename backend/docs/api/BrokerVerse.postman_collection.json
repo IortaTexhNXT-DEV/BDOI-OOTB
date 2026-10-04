@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (910 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (924 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -28989,6 +28989,1083 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 2 rows: 2 created, 0 failed\",\n    \"total\": 2,\n    \"created\": 2,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "My Work",
+      "item": [
+        {
+          "name": "Open items due between from and to (at most 6 weeks) for the calendar; tasks come from GET /my-work/tasks with from / to",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/agenda?from=2026-10-04&to=2026-10-10&scope=me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "agenda"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-04"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-10"
+                },
+                {
+                  "key": "scope",
+                  "value": "me"
+                }
+              ]
+            },
+            "description": "Open items due between from and to (at most 6 weeks) for the calendar; tasks come from GET /my-work/tasks with from / to\n\nFront-end touchpoint: Operations > My Work > Calendar\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/agenda?from=2026-10-04&to=2026-10-10&scope=me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "agenda"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-04"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-10"
+                    },
+                    {
+                      "key": "scope",
+                      "value": "me"
+                    }
+                  ]
+                },
+                "description": "Open items due between from and to (at most 6 weeks) for the calendar; tasks come from GET /my-work/tasks with from / to\n\nFront-end touchpoint: Operations > My Work > Calendar\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"from\": \"2026-10-04\",\n    \"to\": \"2026-10-10\",\n    \"items\": [\n      {\n        \"category\": \"quotes\",\n        \"kind\": \"Awaiting customer response\",\n        \"id\": \"qt_1\",\n        \"ref\": \"QT-2026-00012\",\n        \"title\": \"Private Car\",\n        \"clientName\": \"Maria Santos\",\n        \"dueDate\": \"2026-10-08\",\n        \"overdue\": false,\n        \"dueToday\": false,\n        \"priority\": \"normal\",\n        \"status\": \"sent\",\n        \"nextAction\": \"Follow up the customer's response\",\n        \"ownerId\": \"usr_1\",\n        \"ownerName\": \"Maria Rivera\",\n        \"queue\": false,\n        \"link\": \"/agent/quotedetailview/qt_1\",\n        \"amount\": 18250.5,\n        \"createdAt\": \"2026-09-28T02:00:00Z\",\n        \"reassign\": null\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "People the signed-in user may assign work to: themselves and their team (administrators: every active user)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/assignees",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "assignees"
+              ]
+            },
+            "description": "People the signed-in user may assign work to: themselves and their team (administrators: every active user)\n\nFront-end touchpoint: Operations > My Work > Task / Reassign\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/assignees",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "assignees"
+                  ]
+                },
+                "description": "People the signed-in user may assign work to: themselves and their team (administrators: every active user)\n\nFront-end touchpoint: Operations > My Work > Task / Reassign\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"username\": \"maria.rivera\",\n      \"displayName\": \"Maria Rivera\",\n      \"designation\": \"Account Executive\",\n      \"self\": true\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Open items, paged and sorted on the server (scope me | team | all; category, due overdue | today | soon | later | none, priority, kind, search, assignee; sort due | priority | client | category | amount, order asc | desc)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/items?scope=me&category=approvals&due=overdue&sort=due&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "items"
+              ],
+              "query": [
+                {
+                  "key": "scope",
+                  "value": "me"
+                },
+                {
+                  "key": "category",
+                  "value": "approvals"
+                },
+                {
+                  "key": "due",
+                  "value": "overdue"
+                },
+                {
+                  "key": "sort",
+                  "value": "due"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Open items, paged and sorted on the server (scope me | team | all; category, due overdue | today | soon | later | none, priority, kind, search, assignee; sort due | priority | client | category | amount, order asc | desc)\n\nFront-end touchpoint: Operations > My Work > My Items / My Team\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/items?scope=me&category=approvals&due=overdue&sort=due&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "items"
+                  ],
+                  "query": [
+                    {
+                      "key": "scope",
+                      "value": "me"
+                    },
+                    {
+                      "key": "category",
+                      "value": "approvals"
+                    },
+                    {
+                      "key": "due",
+                      "value": "overdue"
+                    },
+                    {
+                      "key": "sort",
+                      "value": "due"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Open items, paged and sorted on the server (scope me | team | all; category, due overdue | today | soon | later | none, priority, kind, search, assignee; sort due | priority | client | category | amount, order asc | desc)\n\nFront-end touchpoint: Operations > My Work > My Items / My Team\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"category\": \"quotes\",\n      \"kind\": \"Awaiting customer response\",\n      \"id\": \"qt_1\",\n      \"ref\": \"QT-2026-00012\",\n      \"title\": \"Private Car\",\n      \"clientName\": \"Maria Santos\",\n      \"dueDate\": \"2026-10-08\",\n      \"overdue\": false,\n      \"dueToday\": false,\n      \"priority\": \"normal\",\n      \"status\": \"sent\",\n      \"nextAction\": \"Follow up the customer's response\",\n      \"ownerId\": \"usr_1\",\n      \"ownerName\": \"Maria Rivera\",\n      \"queue\": false,\n      \"link\": \"/agent/quotedetailview/qt_1\",\n      \"amount\": 18250.5,\n      \"createdAt\": \"2026-09-28T02:00:00Z\",\n      \"reassign\": null\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/items/reassign",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "items",
+                "reassign"
+              ]
+            },
+            "description": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"category\": \"claims\",\n  \"id\": \"clm_1\",\n  \"assignTo\": \"usr_3\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/items/reassign",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "items",
+                    "reassign"
+                  ]
+                },
+                "description": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"category\": \"claims\",\n  \"id\": \"clm_1\",\n  \"assignTo\": \"usr_3\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Reassigned\",\n  \"data\": {\n    \"category\": \"claims\",\n    \"id\": \"clm_1\",\n    \"ownerId\": \"usr_3\",\n    \"ownerName\": \"Joy Macaraeg\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Records a task can be related to, by number or name (type client | lead | policy | quote | claim | renewal | endorsement | placement | broker_slip | collection)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/records?type=policy&search=POL-2026",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "records"
+              ],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "policy"
+                },
+                {
+                  "key": "search",
+                  "value": "POL-2026"
+                }
+              ]
+            },
+            "description": "Records a task can be related to, by number or name (type client | lead | policy | quote | claim | renewal | endorsement | placement | broker_slip | collection)\n\nFront-end touchpoint: Operations > My Work > My Tasks > New task\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/records?type=policy&search=POL-2026",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "records"
+                  ],
+                  "query": [
+                    {
+                      "key": "type",
+                      "value": "policy"
+                    },
+                    {
+                      "key": "search",
+                      "value": "POL-2026"
+                    }
+                  ]
+                },
+                "description": "Records a task can be related to, by number or name (type client | lead | policy | quote | claim | renewal | endorsement | placement | broker_slip | collection)\n\nFront-end touchpoint: Operations > My Work > My Tasks > New task\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"entity\": \"policy\",\n      \"id\": \"pol_1\",\n      \"ref\": \"POL-2026-00031\",\n      \"label\": \"Maria Santos\",\n      \"link\": \"/agent/policydetail/pol_1\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Header figures (open, overdue, due today, due soon) and the count of each category for scope me | team | all",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/summary?scope=me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "summary"
+              ],
+              "query": [
+                {
+                  "key": "scope",
+                  "value": "me"
+                }
+              ]
+            },
+            "description": "Header figures (open, overdue, due today, due soon) and the count of each category for scope me | team | all\n\nFront-end touchpoint: Operations > My Work\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/summary?scope=me",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "summary"
+                  ],
+                  "query": [
+                    {
+                      "key": "scope",
+                      "value": "me"
+                    }
+                  ]
+                },
+                "description": "Header figures (open, overdue, due today, due soon) and the count of each category for scope me | team | all\n\nFront-end touchpoint: Operations > My Work\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-04\",\n    \"scope\": \"me\",\n    \"dueSoonDays\": 7,\n    \"totals\": {\n      \"open\": 14,\n      \"overdue\": 3,\n      \"dueToday\": 2,\n      \"dueSoon\": 5,\n      \"high\": 4\n    },\n    \"categories\": [\n      {\n        \"code\": \"quotes\",\n        \"label\": \"Quotations\",\n        \"icon\": \"pi pi-file-edit\",\n        \"count\": 4,\n        \"overdue\": 1,\n        \"dueToday\": 0,\n        \"dueSoon\": 2,\n        \"high\": 1,\n        \"nextDue\": \"2026-10-06\"\n      }\n    ],\n    \"team\": {\n      \"size\": 2,\n      \"isManager\": true\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Tasks, paged (scope mine | created | team | all; status open | done | cancelled | all, due overdue | today | soon | later, priority, source, search, assignee, from / to, entity + entityId; sort due | priority | created)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/tasks?scope=mine&status=open&page=1&pageSize=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "tasks"
+              ],
+              "query": [
+                {
+                  "key": "scope",
+                  "value": "mine"
+                },
+                {
+                  "key": "status",
+                  "value": "open"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Tasks, paged (scope mine | created | team | all; status open | done | cancelled | all, due overdue | today | soon | later, priority, source, search, assignee, from / to, entity + entityId; sort due | priority | created)\n\nFront-end touchpoint: Operations > My Work > My Tasks / Calendar\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/tasks?scope=mine&status=open&page=1&pageSize=20",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "tasks"
+                  ],
+                  "query": [
+                    {
+                      "key": "scope",
+                      "value": "mine"
+                    },
+                    {
+                      "key": "status",
+                      "value": "open"
+                    },
+                    {
+                      "key": "page",
+                      "value": "1"
+                    },
+                    {
+                      "key": "pageSize",
+                      "value": "20"
+                    }
+                  ]
+                },
+                "description": "Tasks, paged (scope mine | created | team | all; status open | done | cancelled | all, due overdue | today | soon | later, priority, source, search, assignee, from / to, entity + entityId; sort due | priority | created)\n\nFront-end touchpoint: Operations > My Work > My Tasks / Calendar\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"tsk_1\",\n      \"title\": \"Call Mr. Santos about the fire renewal\",\n      \"notes\": \"Bring the revised schedule\",\n      \"dueDate\": \"2026-10-06\",\n      \"dueTime\": \"10:30\",\n      \"priority\": \"high\",\n      \"status\": \"open\",\n      \"overdue\": false,\n      \"dueToday\": false,\n      \"assignedTo\": \"usr_1\",\n      \"assignedToName\": \"Maria Rivera\",\n      \"createdBy\": \"usr_9\",\n      \"createdByName\": \"Ana Reyes\",\n      \"source\": \"manager\",\n      \"sourceLabel\": \"Assigned by manager\",\n      \"automatic\": false,\n      \"entity\": \"policy\",\n      \"entityId\": \"pol_1\",\n      \"entityRef\": \"POL-2026-00031\",\n      \"entityLabel\": \"Maria Santos\",\n      \"link\": \"/agent/policydetail/pol_1\",\n      \"remindAt\": \"2026-10-06T01:30:00Z\",\n      \"reminderMinutes\": 60,\n      \"canEdit\": true,\n      \"canReassign\": true,\n      \"canDelete\": true\n    }\n  ],\n  \"total\": 1,\n  \"page\": 1,\n  \"perPage\": 20,\n  \"totalPages\": 1,\n  \"counts\": {\n    \"open\": 4,\n    \"overdue\": 1,\n    \"today\": 2\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Create a task for yourself or, as a manager, for someone reporting to you; reminderMinutes before the due time (null: none; default myWork.default_reminder_minutes)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/tasks",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "tasks"
+              ]
+            },
+            "description": "Create a task for yourself or, as a manager, for someone reporting to you; reminderMinutes before the due time (null: none; default myWork.default_reminder_minutes)\n\nFront-end touchpoint: Operations > My Work > My Tasks > New task\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Call Mr. Santos about the fire renewal\",\n  \"dueDate\": \"2026-10-06\",\n  \"dueTime\": \"10:30\",\n  \"priority\": \"high\",\n  \"entity\": \"policy\",\n  \"entityId\": \"pol_1\",\n  \"reminderMinutes\": 60\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/tasks",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "tasks"
+                  ]
+                },
+                "description": "Create a task for yourself or, as a manager, for someone reporting to you; reminderMinutes before the due time (null: none; default myWork.default_reminder_minutes)\n\nFront-end touchpoint: Operations > My Work > My Tasks > New task\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Call Mr. Santos about the fire renewal\",\n  \"dueDate\": \"2026-10-06\",\n  \"dueTime\": \"10:30\",\n  \"priority\": \"high\",\n  \"entity\": \"policy\",\n  \"entityId\": \"pol_1\",\n  \"reminderMinutes\": 60\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Task created\",\n  \"data\": {\n    \"id\": \"tsk_1\",\n    \"title\": \"Call Mr. Santos about the fire renewal\",\n    \"notes\": \"Bring the revised schedule\",\n    \"dueDate\": \"2026-10-06\",\n    \"dueTime\": \"10:30\",\n    \"priority\": \"high\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"dueToday\": false,\n    \"assignedTo\": \"usr_1\",\n    \"assignedToName\": \"Maria Rivera\",\n    \"createdBy\": \"usr_9\",\n    \"createdByName\": \"Ana Reyes\",\n    \"source\": \"manager\",\n    \"sourceLabel\": \"Assigned by manager\",\n    \"automatic\": false,\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_1\",\n    \"entityRef\": \"POL-2026-00031\",\n    \"entityLabel\": \"Maria Santos\",\n    \"link\": \"/agent/policydetail/pol_1\",\n    \"remindAt\": \"2026-10-06T01:30:00Z\",\n    \"reminderMinutes\": 60,\n    \"canEdit\": true,\n    \"canReassign\": true,\n    \"canDelete\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One task (assignee, creator, a manager of the assignee or an administrator)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/tasks/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "tasks",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One task (assignee, creator, a manager of the assignee or an administrator)\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/tasks/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "tasks",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One task (assignee, creator, a manager of the assignee or an administrator)\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"tsk_1\",\n    \"title\": \"Call Mr. Santos about the fire renewal\",\n    \"notes\": \"Bring the revised schedule\",\n    \"dueDate\": \"2026-10-06\",\n    \"dueTime\": \"10:30\",\n    \"priority\": \"high\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"dueToday\": false,\n    \"assignedTo\": \"usr_1\",\n    \"assignedToName\": \"Maria Rivera\",\n    \"createdBy\": \"usr_9\",\n    \"createdByName\": \"Ana Reyes\",\n    \"source\": \"manager\",\n    \"sourceLabel\": \"Assigned by manager\",\n    \"automatic\": false,\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_1\",\n    \"entityRef\": \"POL-2026-00031\",\n    \"entityLabel\": \"Maria Santos\",\n    \"link\": \"/agent/policydetail/pol_1\",\n    \"remindAt\": \"2026-10-06T01:30:00Z\",\n    \"reminderMinutes\": 60,\n    \"canEdit\": true,\n    \"canReassign\": true,\n    \"canDelete\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change a task: title, notes, due date / time, priority, reminder, related record; reassign (creator or manager)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/tasks/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "tasks",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change a task: title, notes, due date / time, priority, reminder, related record; reassign (creator or manager)\n\nFront-end touchpoint: Operations > My Work > My Tasks > Edit\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dueDate\": \"2026-10-07\",\n  \"dueTime\": \"14:00\",\n  \"reminderMinutes\": 30\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/tasks/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "tasks",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change a task: title, notes, due date / time, priority, reminder, related record; reassign (creator or manager)\n\nFront-end touchpoint: Operations > My Work > My Tasks > Edit\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dueDate\": \"2026-10-07\",\n  \"dueTime\": \"14:00\",\n  \"reminderMinutes\": 30\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Task updated\",\n  \"data\": {\n    \"id\": \"tsk_1\",\n    \"title\": \"Call Mr. Santos about the fire renewal\",\n    \"notes\": \"Bring the revised schedule\",\n    \"dueDate\": \"2026-10-06\",\n    \"dueTime\": \"10:30\",\n    \"priority\": \"high\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"dueToday\": false,\n    \"assignedTo\": \"usr_1\",\n    \"assignedToName\": \"Maria Rivera\",\n    \"createdBy\": \"usr_9\",\n    \"createdByName\": \"Ana Reyes\",\n    \"source\": \"manager\",\n    \"sourceLabel\": \"Assigned by manager\",\n    \"automatic\": false,\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_1\",\n    \"entityRef\": \"POL-2026-00031\",\n    \"entityLabel\": \"Maria Santos\",\n    \"link\": \"/agent/policydetail/pol_1\",\n    \"remindAt\": \"2026-10-06T01:30:00Z\",\n    \"reminderMinutes\": 60,\n    \"canEdit\": true,\n    \"canReassign\": true,\n    \"canDelete\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel an open task (its creator or a manager; follow-up tasks are completed instead)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/tasks/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "tasks",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel an open task (its creator or a manager; follow-up tasks are completed instead)\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/tasks/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "tasks",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel an open task (its creator or a manager; follow-up tasks are completed instead)\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Task cancelled\",\n  \"data\": {\n    \"id\": \"tsk_1\",\n    \"title\": \"Call Mr. Santos about the fire renewal\",\n    \"notes\": \"Bring the revised schedule\",\n    \"dueDate\": \"2026-10-06\",\n    \"dueTime\": \"10:30\",\n    \"priority\": \"high\",\n    \"status\": \"cancelled\",\n    \"overdue\": false,\n    \"dueToday\": false,\n    \"assignedTo\": \"usr_1\",\n    \"assignedToName\": \"Maria Rivera\",\n    \"createdBy\": \"usr_9\",\n    \"createdByName\": \"Ana Reyes\",\n    \"source\": \"manager\",\n    \"sourceLabel\": \"Assigned by manager\",\n    \"automatic\": false,\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_1\",\n    \"entityRef\": \"POL-2026-00031\",\n    \"entityLabel\": \"Maria Santos\",\n    \"link\": \"/agent/policydetail/pol_1\",\n    \"remindAt\": \"2026-10-06T01:30:00Z\",\n    \"reminderMinutes\": 60,\n    \"canEdit\": true,\n    \"canReassign\": true,\n    \"canDelete\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Mark a task done (optional note)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/tasks/:id/complete",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "tasks",
+                ":id",
+                "complete"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Mark a task done (optional note)\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Client confirmed by phone\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/tasks/:id/complete",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "tasks",
+                    ":id",
+                    "complete"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Mark a task done (optional note)\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Client confirmed by phone\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Task completed\",\n  \"data\": {\n    \"id\": \"tsk_1\",\n    \"title\": \"Call Mr. Santos about the fire renewal\",\n    \"notes\": \"Bring the revised schedule\",\n    \"dueDate\": \"2026-10-06\",\n    \"dueTime\": \"10:30\",\n    \"priority\": \"high\",\n    \"status\": \"done\",\n    \"overdue\": false,\n    \"dueToday\": false,\n    \"assignedTo\": \"usr_1\",\n    \"assignedToName\": \"Maria Rivera\",\n    \"createdBy\": \"usr_9\",\n    \"createdByName\": \"Ana Reyes\",\n    \"source\": \"manager\",\n    \"sourceLabel\": \"Assigned by manager\",\n    \"automatic\": false,\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_1\",\n    \"entityRef\": \"POL-2026-00031\",\n    \"entityLabel\": \"Maria Santos\",\n    \"link\": \"/agent/policydetail/pol_1\",\n    \"remindAt\": \"2026-10-06T01:30:00Z\",\n    \"reminderMinutes\": 60,\n    \"canEdit\": true,\n    \"canReassign\": true,\n    \"canDelete\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reopen a done or cancelled task",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/tasks/:id/reopen",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "tasks",
+                ":id",
+                "reopen"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Reopen a done or cancelled task\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/tasks/:id/reopen",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "tasks",
+                    ":id",
+                    "reopen"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Reopen a done or cancelled task\n\nFront-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Task reopened\",\n  \"data\": {\n    \"id\": \"tsk_1\",\n    \"title\": \"Call Mr. Santos about the fire renewal\",\n    \"notes\": \"Bring the revised schedule\",\n    \"dueDate\": \"2026-10-06\",\n    \"dueTime\": \"10:30\",\n    \"priority\": \"high\",\n    \"status\": \"open\",\n    \"overdue\": false,\n    \"dueToday\": false,\n    \"assignedTo\": \"usr_1\",\n    \"assignedToName\": \"Maria Rivera\",\n    \"createdBy\": \"usr_9\",\n    \"createdByName\": \"Ana Reyes\",\n    \"source\": \"manager\",\n    \"sourceLabel\": \"Assigned by manager\",\n    \"automatic\": false,\n    \"entity\": \"policy\",\n    \"entityId\": \"pol_1\",\n    \"entityRef\": \"POL-2026-00031\",\n    \"entityLabel\": \"Maria Santos\",\n    \"link\": \"/agent/policydetail/pol_1\",\n    \"remindAt\": \"2026-10-06T01:30:00Z\",\n    \"reminderMinutes\": 60,\n    \"canEdit\": true,\n    \"canReassign\": true,\n    \"canDelete\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Open items of each user reporting to the signed-in manager (users.reporting_to, any depth): totals, overdue, due today and per category",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/my-work/team?category=claims",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "my-work",
+                "team"
+              ],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "claims"
+                }
+              ]
+            },
+            "description": "Open items of each user reporting to the signed-in manager (users.reporting_to, any depth): totals, overdue, due today and per category\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/my-work/team?category=claims",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "my-work",
+                    "team"
+                  ],
+                  "query": [
+                    {
+                      "key": "category",
+                      "value": "claims"
+                    }
+                  ]
+                },
+                "description": "Open items of each user reporting to the signed-in manager (users.reporting_to, any depth): totals, overdue, due today and per category\n\nFront-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"asOf\": \"2026-10-04\",\n    \"categories\": [\n      {\n        \"code\": \"claims\",\n        \"label\": \"Claims\"\n      }\n    ],\n    \"members\": [\n      {\n        \"userId\": \"usr_2\",\n        \"name\": \"Carlo Estrada\",\n        \"designation\": \"Claims Officer\",\n        \"total\": 6,\n        \"overdue\": 2,\n        \"dueToday\": 1,\n        \"high\": 2,\n        \"byCategory\": {\n          \"claims\": {\n            \"count\": 4,\n            \"overdue\": 2\n          }\n        },\n        \"managerName\": \"Joy Macaraeg\"\n      }\n    ]\n  }\n}"
             }
           ]
         }

@@ -261,17 +261,16 @@ export const menuList = [
         ],
       },
       {
-        name: "Open Items",
-        path: "/agent/openitemslistdata",
+        // the work management area (formerly Open Items, whose old addresses redirect here)
+        name: "My Work",
+        path: "/operations/my-work",
         includes: [
-          "/agent/openitemslistdata",
+          "/operations/my-work",
           "/agent/openitemslistdata",
           "/agent/openitems/expiringpolicy",
           "/agent/openitems/quotepending",
-
           "/agent/openitems/renewalrequest",
         ],
-        permissions: ["read:openitems"],
       },
       {
         name: "Payments",
