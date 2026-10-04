@@ -102,6 +102,16 @@ O = {
     'BIR_Act': OPT['Activation of the BIR pack'],
     'Dealer_Prog': OPT['Dealer programme set-up'],
     'Brand_Pack': OPT['Client brand pack'],
+    'AMLC_Val': OPT['AMLC reporting file validation and portal test'],
+    'IC_Form': OPT['IC annual statement form alignment'],
+    'EOPT_Rev': OPT['EOPT invoicing review with the broker tax adviser'],
+    'CAS_Reg': OPT['BIR CAS registration support'],
+    'EIS_Enrol': OPT['BIR EIS enrolment and certification'],
+    'CTPL_Cert': OPT['CTPL authentication and LTO interface certification'],
+    'Insurer_Onb': OPT['Insurer API onboarding, per insurer'],
+    'Bank_Cert': OPT['Bank payment file certification, per bank'],
+    'SMS_Act': OPT['SMS or Viber gateway activation'],
+    'Screen_Prov': OPT['Screening list provider onboarding'],
 }
 SRCNOTE = 'Read from BrokerVerse_Commercials_and_Pricing.xlsx (recommended price points) when this book was built.'
 
@@ -209,7 +219,7 @@ def dv_list(ws, formula, ref):
 
 # ------------------------------------------------------------------ Read Me
 rm = sheet('Read Me', [24, 120], 'iNXT BrokerVerse OOTB: price book',
-           'iorta TechNXT Corp. Prepared 03 October 2026. INTERNAL: contains discount limits and floor prices. Do not send this workbook to a client.')
+           'iorta TechNXT Corp. Prepared 03 October 2026, revised 04 October 2026 (optional modules and partner services confirmed). INTERNAL: contains discount limits and floor prices. Do not send this workbook to a client.')
 rows = [
     ('Purpose', 'Pre-set commercials for presentations and first quotations of iNXT BrokerVerse OOTB (the out-of-the-box, as-is version) '
      'to Philippine non-life insurance brokers. The presenter picks the size, licence model, hosting, term and options and the client sees the price on the spot.'),
@@ -356,13 +366,7 @@ for n, lab, unit in [('Env_Setup', 'Additional environment, set-up', 'one-time')
                      ('Int_Std', 'Additional integration, standard', 'per integration'),
                      ('Int_Cx', 'Additional integration, complex', 'per integration'),
                      ('LOB_After', 'Additional line of business after go-live', 'per line'),
-                     ('Report_Item', 'New report or document template (typical)', 'per item'),
-                     ('Conn_Golive', 'Connector go-live with a partner (to confirm by management)', 'per connector'),
-                     ('AML_Act', 'Activation of the AML/CFT toolkit (to confirm by management)', 'one-time'),
-                     ('IC_Act', 'Activation of the IC compliance registers (to confirm by management)', 'one-time'),
-                     ('BIR_Act', 'Activation of the BIR pack (to confirm by management)', 'one-time'),
-                     ('Dealer_Prog', 'Dealer programme set-up (to confirm by management)', 'per programme'),
-                     ('Brand_Pack', 'Client brand pack (to confirm by management)', 'per pack')]:
+                     ('Report_Item', 'New report or document template (typical)', 'per item')]:
     r += 1
     put(pb, r, 1, lab)
     put(pb, r, 2, O[n], PHP, inp=True)
@@ -376,6 +380,32 @@ r += 1
 put(pb, r, 1, 'On-site consultant day (Metro Manila)')
 put(pb, r, 2, '=Rate_Onsite', PHP)
 put(pb, r, 3, 'per day')
+r += 2
+sec(pb, r, 'Optional modules and partner services (PHP): add-on items confirmed by management on 04 October 2026; the regulator\'s or partner\'s own fees are not included', 12)
+r += 1
+head(pb, r, ['Item', 'Price', 'Unit', 'Man-days'])
+for n, lab, unit, days in [('Conn_Golive', 'Connector go-live with a partner', 'per connector', 5),
+                           ('AML_Act', 'Activation of the AML/CFT toolkit', 'one-time', 8),
+                           ('IC_Act', 'Activation of the IC compliance registers', 'one-time', 6),
+                           ('BIR_Act', 'Activation of the BIR pack', 'one-time', 8),
+                           ('Dealer_Prog', 'Dealer programme set-up', 'per programme', 3),
+                           ('Brand_Pack', 'Client brand pack', 'per pack', 2),
+                           ('AMLC_Val', 'AMLC reporting file validation and portal test', 'one-time', 3),
+                           ('IC_Form', 'IC annual statement form alignment', 'one-time', 3),
+                           ('EOPT_Rev', 'EOPT invoicing review with the broker tax adviser', 'one-time', 2),
+                           ('CAS_Reg', 'BIR CAS registration support', 'one-time', 4),
+                           ('EIS_Enrol', 'BIR EIS enrolment and certification', 'one-time', 5),
+                           ('CTPL_Cert', 'CTPL authentication and LTO interface certification', 'one-time', 4),
+                           ('Insurer_Onb', 'Insurer API onboarding, per insurer', 'per insurer', 3),
+                           ('Bank_Cert', 'Bank payment file certification, per bank', 'per bank', 2),
+                           ('SMS_Act', 'SMS or Viber gateway activation', 'one-time', 1),
+                           ('Screen_Prov', 'Screening list provider onboarding', 'one-time', 2)]:
+    r += 1
+    put(pb, r, 1, lab)
+    put(pb, r, 2, O[n], PHP, inp=True)
+    put(pb, r, 3, unit)
+    put(pb, r, 4, days, '0')
+    name(n, f"'Price Basis'!$B${r}")
 r += 2
 text_row(pb, r, SRCNOTE + ' Pricing workbook state: recalculated with LibreOffice before reading.', 12, 18, ITAL)
 pb.freeze_panes = 'B4'

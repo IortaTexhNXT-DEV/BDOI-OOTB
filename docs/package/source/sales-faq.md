@@ -1,12 +1,12 @@
 ---
 title: FAQ and Objection Handling
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1.1
+version: 1.1.2
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (test cases, automated tests, UAT cycle, go-live rehearsal). Version 1.1: answers updated for AML/CFT, the IC and NPC compliance registers, BIR forms and EOPT invoices, integrations, dealer programmes, branding, My Work and the Report Builder; known limits revised
+change: Version 1.1.2: answer on add-on modules and optional services added (optional modules and partner services confirmed by management on 04 October 2026). Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (test cases, automated tests, UAT cycle, go-live rehearsal). Version 1.1: answers updated for AML/CFT, the IC and NPC compliance registers, BIR forms and EOPT invoices, integrations, dealer programmes, branding, My Work and the Report Builder; known limits revised
 acronyms: AMC=Annual Maintenance Contract; AMLA=Anti-Money Laundering Act; AMLC=Anti-Money Laundering Council; CTR=Covered transaction report; STR=Suspicious transaction report; EDD=Enhanced due diligence; PEP=Politically exposed person; EIS=Electronic Invoicing System; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; SMS=Short message service; API=Application programming interface; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; CR=Change request; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EOPT=Ease of Paying Taxes Act; EWT=Expanded withholding tax; IC=Insurance Commission; NPC=National Privacy Commission; OOTB=Out of the box; SoD=Segregation of duties; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; VAT=Value-added tax
 ---
 
@@ -203,6 +203,10 @@ Regulatory form updates released for all customers are covered by the AMC or the
 ## How is iNXT BrokerVerse priced?
 
 Per named user, on graduated slabs, in two models. Perpetual: a one-time licence (PHP 90,000.00 per user for the first 25 users, PHP 78,000.00 for users 26 to 100, PHP 66,000.00 for 101 to 300, PHP 54,000.00 above 300), with AMC at 22% of the licence fee a year from Year 2, increasing 5% a year. Subscription: PHP 3,200.00, PHP 2,800.00, PHP 2,400.00 and PHP 2,000.00 per user per month for the same slabs, with a minimum of billable users per tier, increasing 5% at each anniversary. Implementation (or onboarding for subscription) is calculated from base man-days per tier plus 6 man-days per extra line of business at PHP 16,100.00 a day. All prices exclude 12% VAT.
+
+## Are the AML/CFT, IC compliance and BIR modules add-ons? What costs extra?
+
+No module is an add-on: every module, including the AML/CFT toolkit, the IC and NPC compliance registers, the BIR pack, the integration connectors, dealer programmes and branding, is in every package at no module price. What is optional is the service around them, listed in the Rate Card under "Optional modules and partner services" and confirmed by iorta TechNXT management on 04 October 2026: activation of the AML/CFT toolkit (PHP 130,000.00), of the IC compliance registers (PHP 100,000.00) and of the BIR pack (PHP 130,000.00); connector go-live with a partner (PHP 80,000.00 per connector); dealer programme set-up (PHP 50,000.00 per programme); client brand pack (PHP 30,000.00 per pack); and the regulator and partner steps: AMLC reporting file validation and portal test (PHP 50,000.00), IC annual statement form alignment (PHP 50,000.00), EOPT invoicing review with the broker's tax adviser (PHP 30,000.00), BIR CAS registration support (PHP 60,000.00), BIR EIS enrolment and certification (PHP 80,000.00), CTPL authentication and LTO interface certification (PHP 60,000.00), insurer API onboarding (PHP 50,000.00 per insurer), bank payment file certification (PHP 30,000.00 per bank), SMS or Viber gateway activation (PHP 20,000.00) and screening list provider onboarding (PHP 30,000.00). Each is man-days times the blended rate, is ordered only if the broker wants it, and does not change the package price. The fees of the regulator or the partner (AMLC, IC, BIR, CTPL provider, insurers, banks, gateways, list providers) are not included: the broker contracts and pays them directly, and files in its own name. Proof: the Rate Card, section "Optional modules and partner services".
 
 ## Which model should we choose?
 

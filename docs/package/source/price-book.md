@@ -1,12 +1,12 @@
 ---
 title: Rate Card
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-change: Software list completed with the AML/CFT toolkit, IC compliance registers, BIR pack, integration connectors, dealer programmes and branding, all included; new optional lines for their activation and for connector go-live, to confirm by management
+change: Version 1.1.1: optional services confirmed by management on 04 October 2026: the activation and connector go-live lines are standard optional services, and the regulator and partner items are added under "Optional modules and partner services"; package totals unchanged. Version 1.1: software list completed with the AML/CFT toolkit, IC compliance registers, BIR pack, integration connectors, dealer programmes and branding, all included; optional lines for their activation and for connector go-live
 acronyms: AMC=Annual Maintenance Contract; AML=Anti-money laundering; CFT=Countering the financing of terrorism; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; CTPL=Compulsory third party liability; BIR=Bureau of Internal Revenue; CR=Change request; Dev=Development environment; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; PHP=Philippine peso; PHT=Philippine time; Pre-Prod=Pre-production environment; SaaS=Software as a service; SIT=System integration test; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
 
@@ -16,7 +16,7 @@ This rate card sets out the list prices of iNXT BrokerVerse OOTB, the out-of-the
 
 iNXT BrokerVerse OOTB covers sales and quotation, placement with insurers, policy issuance and servicing, endorsements, claims, renewals, billing, official receipts and sales invoices, remittance to insurers, commission, general ledger, bank and insurer reconciliation, BIR forms and returns, anti-money laundering, the Insurance Commission and privacy registers, integrations with SMS gateways, the CTPL provider, insurers and banks, dealer programmes, reinsurance and incentives. The prices are for the product as delivered. Changes to the product are change requests, priced at the day rates in this rate card.
 
-> All prices are in PHP and exclude 12% VAT. USD figures are for reference only, at PHP 62.75 per USD (BSP reference rate, 25 September 2026). This rate card is valid for 90 days from 04 October 2026. Lines marked "to confirm by management" are proposals and are not quoted to a broker until iorta TechNXT management confirms them. A binding price is the price in a signed Order Form.
+> All prices are in PHP and exclude 12% VAT. USD figures are for reference only, at PHP 62.75 per USD (BSP reference rate, 25 September 2026). This rate card is valid for 90 days from 04 October 2026. A binding price is the price in a signed Order Form.
 
 # Packages at a glance
 
@@ -265,22 +265,40 @@ This option adds round-the-clock response to P1 incidents reported by telephone.
 | Data migration, additional effort | 16,100.00 per man-day | 257 |
 | Additional integration, standard | 320,000.00 per integration | 5,100 |
 | Additional integration, complex | 720,000.00 per integration | 11,474 |
-| Connector go-live with a partner (to confirm by management) | 80,000.00 per connector | 1,275 |
-| Activation of the AML/CFT toolkit (to confirm by management) | 130,000.00 one-time | 2,072 |
-| Activation of the IC compliance registers (to confirm by management) | 100,000.00 one-time | 1,594 |
-| Activation of the BIR pack (to confirm by management) | 130,000.00 one-time | 2,072 |
-| Dealer programme set-up (to confirm by management) | 50,000.00 per programme | 797 |
-| Client brand pack (to confirm by management) | 30,000.00 per pack | 478 |
 | Additional line of business after go-live | 100,000.00 per line | 1,594 |
 | New report or document template (typical) | 60,000.00 per item | 956 |
 | On-site consultant day in Metro Manila | 20,000.00 per day | 319 |
 
 - A trainer day covers up to 15 participants. The broker provides the room and the devices.
 - A standard integration is one documented API or file exchange in one direction, of a kind the delivered connectors do not cover. A complex integration is two-way, has no API, or is a batch with reconciliation.
-- Connector go-live takes one delivered connector live with one partner (one SMS gateway, the CTPL provider and LTO feed, one insurer's API mapping, one bank's file layout, or the BIR EIS): configuration, credential check, live test and support of the partner's acceptance. The partner's certification of its interface, its fees and the broker's contract with it are outside this price.
-- The activation lines cover the set-up workshops and configuration of a module already included in the software: AML/CFT (risk factors, rules, lists, provider and a test AMLC file with the compliance officer), IC compliance registers (licences, fit and proper records, insurer certificates, complaints and breach settings, mapping of the IC statement to the broker's chart), BIR pack (BIR and EOPT invoice settings, ATCs and a DAT file dry run with the tax adviser, CAS books pack). The compliance officer and the tax adviser confirm the settings; filings stay with the broker.
-- A client brand pack that carries another company's marks is built and applied only with that company's written permission.
 - Travel, lodging and meals outside Metro Manila are billed at cost. The recurring 24x7 Severity 1 support option increases 5% a year, like the AMC and the subscription. Hosting fees do not increase each year; they change only under the pass-through clause of the Hosting and Infrastructure Services Agreement.
+
+## Optional modules and partner services
+
+Every module is included in the software price and in every package. The services below are optional, add-on items: they cover the set-up of a module with the broker's officers and advisers, the go-live of a delivered connector with its partner, and the validation or certification steps that a regulator or a partner requires before first use. Each is priced at its man-days times the blended day rate of PHP 16,100.00, rounded to PHP 10,000.00. The regulator's or partner's own fees (AMLC, IC, BIR, the CTPL provider, insurers, banks, gateways and list providers) are not included; the broker contracts and pays the partner directly.
+
+| Item | Man-days | Price (PHP) | USD reference | Scope |
+|---|---|---|---|---|
+| Connector go-live with a partner | 5 | 80,000.00 per connector | 1,275 | One delivered connector (one SMS gateway, the CTPL provider and LTO feed, one insurer's API mapping, one bank's file layout, or the BIR EIS) taken live: configuration, credential check, live test and support of the partner's acceptance |
+| Activation of the AML/CFT toolkit | 8 | 130,000.00 one-time | 2,072 | Risk factors and rules workshop with the compliance officer, settings, first list loads, provider set-up and a test AMLC file |
+| Activation of the IC compliance registers | 6 | 100,000.00 one-time | 1,594 | Licence and fit and proper register load, insurer certificates, complaints and breach settings, mapping of the IC statement to the broker's chart |
+| Activation of the BIR pack | 8 | 130,000.00 one-time | 2,072 | BIR and EOPT invoice settings with the tax adviser, ATC mapping, DAT file dry run, CAS books pack |
+| Dealer programme set-up | 3 | 50,000.00 per programme | 797 | Channels, rates, subsidy, bank letter and the first upload of one programme |
+| Client brand pack | 2 | 30,000.00 per pack | 478 | Theme, sign-in picture, document and e-mail branding, e-signature mapping and the exported pack |
+| AMLC reporting file validation and portal test | 3 | 50,000.00 one-time | 797 | CTR and STR layout, institution and transaction codes confirmed with the AMLC, test file accepted in the AMLC portal |
+| IC annual statement form alignment | 3 | 50,000.00 one-time | 797 | The accountant's working paper mapped to the IC form set in force for the year |
+| EOPT invoicing review with the broker's tax adviser | 2 | 30,000.00 one-time | 478 | Registered invoice documents, supplementary wording, VAT treatment, ATP or CAS |
+| BIR CAS registration support | 4 | 60,000.00 one-time | 956 | Books, system description and the Permit to Use filing prepared with the broker |
+| BIR EIS enrolment and certification | 5 | 80,000.00 one-time | 1,275 | EIS enrolment, signing certificate, final field list, production endpoint and certification of the connector |
+| CTPL authentication and LTO interface certification | 4 | 60,000.00 one-time | 956 | Acceptance of the live requests by the accredited provider, COC series and the LTO interface where the provider does not transmit |
+| Insurer API onboarding | 3 | 50,000.00 per insurer | 797 | Endpoint, credentials, field mapping and live test with one insurer |
+| Bank payment file certification | 2 | 30,000.00 per bank | 478 | Layout validated against the bank's specification and a test file accepted by the bank |
+| SMS or Viber gateway activation | 1 | 20,000.00 one-time | 319 | Sender name or short code, live credentials, templates and consent check tested with the gateway |
+| Screening list provider onboarding | 2 | 30,000.00 one-time | 478 | Provider contract data, API key, adapter test and first screening run |
+
+- The compliance officer, the accountant and the tax adviser confirm the settings and the treatment; every filing, registration and enrolment with a regulator stays with the broker, in its name.
+- A client brand pack that carries another company's marks is built and applied only with that company's written permission.
+- These services do not change any package price. They are quoted on the Order Form as separate one-time lines and are invoiced on delivery.
 
 # Change requests
 
