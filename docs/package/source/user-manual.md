@@ -742,7 +742,7 @@ The account executive (role Sales & Marketing (Account Executive)) finds and rec
 | Menu | Items |
 |---|---|
 | Dashboard | Executive Dashboard, Sales Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); Open Items; Payments |
+| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments |
 | Commission | Commission Dashboard |
 | Reports | All Reports; Operational Reports (Production, Claims, Renewal, Remittance, Broker Commission) |
 | Product Configurator | Dashboard, Product Templates |
@@ -755,7 +755,7 @@ The account executive (role Sales & Marketing (Account Executive)) finds and rec
 | Daily | Quote motor and other package products | Quick Quote, Quotations |
 | Daily | Send quotations for customer approval; record the answers received | Quotations |
 | Daily | Record the client's payment | Policy > **Proceed to Payment** |
-| Daily | Work the quotations still with the customer and the pending payments | Open Items |
+| Daily | Work the quotations still with the customer and the pending payments | My Work |
 | Weekly | Follow up the renewals of your clients | Renewals > Renewal Queue, At-Risk Policies, Negotiations |
 | Monthly | Check your production, commission and incentives | Sales Dashboard, Commission Dashboard, Reports > Operational Reports > Production |
 
@@ -979,7 +979,7 @@ The eye on a row (**View policy**) opens the policy; the three dots (**More acti
 
 ## Renewals, open items, payments and clients
 
-The account executive uses the same renewal screens as Operations (Operations chapter) for his or her own clients: the **Renewal Queue** filtered by **Sales person**, **At-Risk Policies**, and **Negotiations** to record contacts and request approval of renewal terms. **Open Items** shows the daily worklist (expiring policies, pending payments, quotations pending, renewal requests); **Payments** shows the premium of your policies by **Paid**, **Pending** and **Reviewing**; **Clients** opens the client record with its policies, claims, renewals and endorsements.
+The account executive uses the same renewal screens as Operations (Operations chapter) for his or her own clients: the **Renewal Queue** filtered by **Sales person**, **At-Risk Policies**, and **Negotiations** to record contacts and request approval of renewal terms. **My Work** shows your daily worklist (quotations, renewals, premiums due, collection follow-ups, claims, approvals and your tasks); **Payments** shows the premium of your policies by **Paid**, **Pending** and **Reviewing**; **Clients** opens the client record with its policies, claims, renewals and endorsements.
 
 ## Commission and reports
 
@@ -1013,7 +1013,7 @@ The Processing Team (role Processing Team (Placement & Policy Processing)) works
 | Menu | Items |
 |---|---|
 | Dashboard | Processing Dashboard, Executive Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (all items); Open Items; Payments |
+| Operations | Home; Sales & Marketing (Prospects, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (all items); My Work; Payments |
 | Reinsurance | Treaty Dashboard, Cession Tracking, Claims Recovery, Reconciliation, Analytics |
 | Reports | All Reports; Operational Reports |
 | Product Configurator | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping, Product Analytics |
@@ -1244,7 +1244,7 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 | Menu | Items |
 |---|---|
 | Dashboard | Executive Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); Open Items; Payments |
+| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments |
 | Reports | All Reports; Operational Reports |
 | Product Configurator | Dashboard, Product Templates |
 
@@ -1252,7 +1252,7 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 
 | When | Task | Screen |
 |---|---|---|
-| Daily | Work expiring policies, pending payments, pending quotations and renewal requests | Open Items |
+| Daily | Work expiring policies, pending payments, pending quotations and renewal requests | My Work |
 | Daily | Answer client requests: policy details, documents, changes | Clients, Policy |
 | Daily | Raise endorsement requests | Policy > **More actions** > **Endorsement** |
 | Daily | Record client payments | Policy > **Proceed to Payment** |
@@ -1264,7 +1264,37 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 
 **Home** (the first item of the menu), titled Dashboard, shows **Create Quote**, the counts of prospects, clients and policies sold with **See More**, the commission chart, upcoming events from the activity monitor, and earned commission, collected premium, receivables and gross premium of the user's own book.
 
-**Open Items** (Operations > Open Items) is the daily worklist. Four boxes show a count and the first records: **Expiring Policy**, **Quote Pending**, **Pending Payments** and **Renewal Request**. Select **See More** to open the full list of a box, and a record to open it.
+**Upcoming events** on Home lists the events of the coming days. The daily worklist is **My Work** (next section).
+
+## My Work
+
+**My Work** (Operations > My Work) is the one place where each user finds what is waiting for them. It replaces the former Open Items screen; its old addresses open My Work.
+
+The header shows five figures: **Overdue**, **Due today**, **Next 7 days** (the number of days is the setting `myWork.due_soon_days`), **Open items** (with the number of high-priority items) and **Open tasks**. Select a figure to filter the list.
+
+The screen has four tabs:
+
+| Tab | What it shows |
+|---|---|
+| My Items | Every open item you own or may act on, by category: quotations, Requests for Quotation, placement slips, renewals and expiring policies, premiums due, collection follow-ups, endorsements, claims, approvals waiting for you, missing documents and your tasks. Only the categories your role may read appear. |
+| My Team | For managers only: one row per person reporting to you (directly or below), with open, overdue and due-today counts, and the team's items. **Reassign** moves a claim, a data subject request or a task to yourself or to someone in your team. |
+| My Tasks | Your work diary: tasks you created, tasks given to you and, for managers, tasks given to others. |
+| Calendar | The tasks and items falling due by day, for one day or the next 7 days, with an **Overdue** strip above. |
+
+To work your items:
+
+1. Choose Operations > My Work. **My Items** opens with **Mine** selected; a manager can switch to **Everyone** for the team.
+2. Pick a category on the left (the red badge is the number overdue), or use **Search**, **Due**, **Priority** and **Sort**.
+3. Select a row to open the record (quotation, bill, claim, approval) and act on it there. When the record is done it leaves the list.
+
+To add a task:
+
+1. Select **New task**.
+2. Enter **Title**, **Due date** and optional **Time**, **Priority**, **Reminder** (minutes before) and **Notes**. A manager can choose **Assigned to** from the team.
+3. Optionally link a **Related record** (search by number or client name).
+4. Select **Save**. The reminder arrives as a notification at the time chosen; the notification opens the task.
+
+Mark a task **Done** when finished (**Reopen** if needed). Follow-up tasks are also created by the system from collection promises to pay, renewal next steps and claim follow-up dates, and close by themselves when the record closes (setting `myWork.auto_tasks`). An overdue task sends one alert to its owner (setting `myWork.overdue_task_alert`).
 
 ## Clients
 
@@ -1553,7 +1583,7 @@ Accounting (role Accounting) runs the money side of the business: it verifies cl
 | Menu | Items |
 |---|---|
 | Dashboard | Executive Dashboard |
-| Operations | Open Items, Payments |
+| Operations | My Work, Payments |
 | Accounts | Receipts; Collections; Credit Control (Instalment Plans, Premium Warranty Monitor, Client Credit Limits, Remittance Ageing); Disbursement; Remittance (Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, Notifications, History, Analytics); Journal Voucher; Correction JV; Reversal JV; Open Entry Matching; Open Entry Unmatching; Accounting Query; All Clients Accounting; Petty Cash (Initiate, Request, Disbursement, Receipts, Replenish); Bank Reconciliation (Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines, Bank Book); Insurer Reconciliation (Insurer Statements); Tax (BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases); Period End (Period Management, Month-End Close, Year-End Close, Recurring Journals, Financial Statements); Incentive (My Programs, Calculations, Approvals, Statement) |
 | Commission | Commission Dashboard, Agents/Referrer Accounts |
 | Reinsurance | Reconciliation |

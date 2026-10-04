@@ -670,6 +670,12 @@
    "chapter": "Operations (client servicing)"
   },
   {
+   "id": "my-work",
+   "title": "My Work",
+   "level": 2,
+   "chapter": "Operations (client servicing)"
+  },
+  {
    "id": "clients",
    "title": "Clients",
    "level": 2,
