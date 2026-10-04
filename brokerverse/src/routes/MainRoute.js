@@ -115,8 +115,7 @@ import AddCountry from "../module/GeneralMasters/LocationMasters/CountryMaster/A
 import AddCity from "../module/GeneralMasters/LocationMasters/CityMaster/AddCity";
 import AddState from "../module/GeneralMasters/LocationMasters/StateMaster/AddState";
 import Dashboard from "../agentModule/dashBoardModule/home";
-import AgentViewProfile from "../agentModule/dashBoardModule/agentViewProfile";
-import AgentEditProfile from "../agentModule/dashBoardModule/agentEditProfile";
+import MyProfile from "../module/MyProfile";
 import Notification from "../agentModule/dashBoardModule/notification";
 import LeadCreation from "../agentModule/leadModule/leadCreation";
 import LeadListing from "../agentModule/leadModule/leadListing";
@@ -1286,8 +1285,9 @@ const Maincomponent = () => {
           {/* // Agent Dashboard, Notification & agent profile */}
           <Route path="/agent/home" element={<Dashboard />} />
           <Route path="/agent/notification" element={<Notification />} />
-          <Route path="/agent/viewprofile" element={<AgentViewProfile />} />
-          <Route path="/agent/editprofile" element={<AgentEditProfile />} />
+          <Route path="/account/profile" element={<MyProfile />} />
+          <Route path="/agent/viewprofile" element={<Navigate to="/account/profile" replace />} />
+          <Route path="/agent/editprofile" element={<Navigate to="/account/profile" replace />} />
           {/* // Lead Creation, edit lead & Lead listing */}
           <Route
             path="/agent/createlead"

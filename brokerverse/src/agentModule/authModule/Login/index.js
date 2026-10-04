@@ -4,14 +4,14 @@ import "../security/security.scss";
 import { Button } from "primereact/button";
 import { useFormik } from "formik";
 import CustomToast from "../../../components/Toast";
-import InputTextField from "../../component/inputText";
+import { InputText } from "primereact/inputtext";
 import authService from "../../../services/authService";
 import { useTranslation } from "react-i18next";
 import { Dropdown } from "primereact/dropdown";
 import { useSelector } from "react-redux";
 import i18n from "../../../i18n";
 import { DEFAULT_SYSTEM_SETTINGS } from "../../../utility/systemCurrencies";
-import { useLanguageOptions } from "../../../utility/languages";
+import { showLanguagePicker, useLanguageOptions } from "../../../utility/languages";
 import TwoFactorCodeForm from "../security/TwoFactorCodeForm";
 import TwoFactorEnrolment from "../security/TwoFactorEnrolment";
 import ChangePasswordForm from "../security/ChangePasswordForm";
@@ -38,6 +38,8 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState("signin");
   const [stepData, setStepData] = useState(null);
+  // sub-step of the password reset: request | reset | done
+  const [forgotStep, setForgotStep] = useState("request");
   const [notice, setNotice] = useState(() =>
     new URLSearchParams(window.location.search).get("session") === "ended" ? "sessionEnded" : ""
   );
@@ -120,47 +122,81 @@ const Login = () => {
   };
 
   const headings = {
-    twoFactor: [t("security.twoFactorTitle"), t("security.twoFactorSubtitle")],
+    twoFactor: [t("security.twoFactorTitle"), t("security.twoFactorIntro")],
     enrol2fa: [t("security.enrolTitle"), t("security.enrolRequiredSubtitle")],
     changePassword: [
       t("security.changePassword"),
       stepData?.passwordExpired ? t("security.passwordExpiredSubtitle") : t("security.mustChangeSubtitle"),
     ],
-    forgot: [t("security.forgotTitle"), ""],
+    forgot: {
+      request: [t("security.forgotTitle"), t("security.forgotIntro")],
+      reset: [t("security.resetTitle"), t("security.resetIntro")],
+      done: [t("security.resetDoneTitle"), ""],
+    }[forgotStep] || [t("security.forgotTitle"), ""],
   };
+
+  const fieldError = (field) =>
+    formik.touched[field] && formik.errors[field] ? (
+      <small id={`bv-login-${field}-error`} className="bv-security__error">
+        {formik.errors[field]}
+      </small>
+    ) : null;
 
   const signInForm = (
     <form
-      className="w-full"
+      className="bv-security__form"
       onSubmit={(e) => {
         e.preventDefault();
         formik.handleSubmit();
       }}
       noValidate
     >
-      <div className="col-12 md:col-12 lg:col-12  ">
-        <InputTextField
-          label={t("login.userId")}
+      {notice && (
+        <div className="bv-security__success" role="status">
+          {t(`security.notice.${notice}`)}
+        </div>
+      )}
+      <div className="bv-security__field">
+        <label htmlFor="bv-login-user">{t("login.userId")}</label>
+        <InputText
+          id="bv-login-user"
           value={formik.values.EmailAddress}
           onChange={formik.handleChange("EmailAddress")}
           autoComplete="username"
           name="username"
+          autoFocus
+          className={`w-full${formik.touched.EmailAddress && formik.errors.EmailAddress ? " p-invalid" : ""}`}
+          aria-invalid={formik.touched.EmailAddress && formik.errors.EmailAddress ? true : undefined}
+          aria-describedby={formik.touched.EmailAddress && formik.errors.EmailAddress ? "bv-login-EmailAddress-error" : undefined}
         />
-        {formik.touched.EmailAddress && formik.errors.EmailAddress && (
-          <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-1">
-            {formik.errors.EmailAddress}
-          </div>
-        )}
+        {fieldError("EmailAddress")}
       </div>
-      <div className="col-12 md:col-12 lg:col-12  ">
+      <div className="bv-security__field">
+        <div className="bv-auth__label-row">
+          <label htmlFor="bv-login-password">{t("login.password")}</label>
+          <button
+            type="button"
+            className="bv-auth__link"
+            onClick={() => {
+              setErrorMessage("");
+              setNotice("");
+              setStep("forgot");
+            }}
+          >
+            {t("login.forgotPassword")}
+          </button>
+        </div>
         <div className="login__password__wrapper">
-          <InputTextField
-            label={t("login.password")}
+          <InputText
+            id="bv-login-password"
             value={formik.values.Password}
             onChange={formik.handleChange("Password")}
             type={showPassword ? "text" : "password"}
             autoComplete="current-password"
             name="password"
+            className={`w-full${formik.touched.Password && formik.errors.Password ? " p-invalid" : ""}`}
+            aria-invalid={formik.touched.Password && formik.errors.Password ? true : undefined}
+            aria-describedby={formik.touched.Password && formik.errors.Password ? "bv-login-Password-error" : undefined}
           />
           <Button
             type="button"
@@ -168,42 +204,18 @@ const Login = () => {
             className="p-button-text p-button-rounded login__password__toggle"
             aria-label={showPassword ? t("security.hidePassword") : t("security.showPassword")}
             aria-pressed={showPassword}
-            onClick={() => setShowPassword((v) => !v)} tooltip={showPassword ? t("security.hidePassword") : t("security.showPassword")} tooltipOptions={{ position: "top" }}
+            onClick={() => setShowPassword((v) => !v)}
           />
         </div>
-        {formik.touched.Password && formik.errors.Password && (
-          <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-1">
-            {formik.errors.Password}
-          </div>
-        )}
+        {fieldError("Password")}
       </div>
-      <div className="col-12 md:col-12 lg:col-12  ">
-        {notice && (
-          <div className="bv-security__success mb-2" role="status">
-            {t(`security.notice.${notice}`)}
-          </div>
-        )}
-        {errorMessage && (
-          <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mb-2" role="alert">
-            {errorMessage}
-          </div>
-        )}
-        <Button type="submit" className="login__button bdo-login-btn" disabled={isLoading} loading={isLoading}>
-          {isLoading ? t("login.loggingIn") : t("login.login")}
-        </Button>
-      </div>
-      <div className="col-12 md:col-12 lg:col-12  ">
-        <button
-          type="button"
-          className="forget__text cursor-pointer login__link__button"
-          onClick={() => {
-            setErrorMessage("");
-            setNotice("");
-            setStep("forgot");
-          }}
-        >
-          {t("login.forgotPassword")}
-        </button>
+      {errorMessage && (
+        <div className="bv-security__alert" role="alert">
+          {errorMessage}
+        </div>
+      )}
+      <div className="bv-security__actions">
+        <Button type="submit" label={isLoading ? t("login.loggingIn") : t("login.login")} disabled={isLoading} loading={isLoading} />
       </div>
     </form>
   );
@@ -212,7 +224,6 @@ const Login = () => {
   if (step === "twoFactor") {
     stepBody = (
       <TwoFactorCodeForm
-        intro={t("security.twoFactorIntro")}
         onSubmit={async (code) => handleResult(await authService.verifyTwoFactor(stepData.challengeToken, code))}
         onBack={() => backToSignIn()}
         backLabel={t("security.backToSignIn")}
@@ -224,8 +235,8 @@ const Login = () => {
     stepBody = (
       <ChangePasswordForm
         token={stepData.accessToken}
-        intro={t("security.changeAtSignInIntro")}
         submitLabel={t("security.changeAndContinue")}
+        cancelLabel={t("security.backToSignIn")}
         onDone={handleResult}
         onCancel={() => backToSignIn()}
       />
@@ -234,6 +245,8 @@ const Login = () => {
     stepBody = (
       <ForgotPassword
         initialUser={formik.values.EmailAddress}
+        showIntro={false}
+        onStepChange={setForgotStep}
         onBack={() => backToSignIn()}
         onDone={(user) => {
           formik.setFieldValue("EmailAddress", user || formik.values.EmailAddress, false);
@@ -243,45 +256,44 @@ const Login = () => {
     );
   }
 
+  const title = step === "signin" ? t("login.title", { name: systemName }) : headings[step][0];
+  const subtitle = step === "signin" ? t("login.subtitle") : headings[step][1];
+
   return (
-    <div className="grid m-0 agent__container__login">
+    <div className="agent__container__login bv-auth">
       <CustomToast ref={toastRef} message={t("login.loginSuccess")} />
-      <div className="login__lang_dropdown">
-        <Dropdown
-          value={currentLanguage}
-          options={languageOptions}
-          onChange={(e) => i18n.changeLanguage(e.value)}
-          className="login-language-dropdown"
-          placeholder={t("common.language")}
-          aria-label={t("common.language")}
-        />
-      </div>
       <div
-        className="col-12 md:col-8 left__side__login bdo-theme"
-        style={{
-          background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`,
-        }}
+        className="bv-auth__art"
+        aria-hidden="true"
+        style={{ background: `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)` }}
       >
-        <div className="bdo-banner-container">
-          <img src={bdoBannerImage} alt="" className="bdo-banner-image" />
-        </div>
+        <img src={bdoBannerImage} alt="" className="bv-auth__art-image" />
       </div>
-      <div className="col-12 md:col-4 login__side__screen p-5">
-        <div className="col-12 md:col-12 lg:col-12 bdo-logo-container">
-          <img src={logoUrl} alt="Logo" className="bdo-logo" />
-        </div>
-        <div className="col-12 md:col-12 lg:col-12  ">
-          <div className="login__header">{step === "signin" ? t("login.title", { name: systemName }) : headings[step][0]}</div>
-          <div className="login__subtitle">{step === "signin" ? t("login.subtitle") : headings[step][1]}</div>
-        </div>
-        {step === "signin" ? signInForm : <div className="col-12 md:col-12 lg:col-12">{stepBody}</div>}
-        <div className="col-12 md:col-12 lg:col-12 tech-footer">
-          <div className="tech-powered-text">
-            <span>{t("login.poweredBy")}</span>
-            <img src="/bdoi/iorta-technxt.png" alt="iorta TechNXT" />
+      <main className="bv-auth__panel">
+        {showLanguagePicker(languageOptions) && (
+          <div className="bv-auth__lang">
+            <Dropdown
+              value={currentLanguage}
+              options={languageOptions}
+              onChange={(e) => i18n.changeLanguage(e.value)}
+              className="login-language-dropdown"
+              aria-label={t("common.language")}
+            />
+          </div>
+        )}
+        <div className="bv-auth__center">
+          <div className="bv-auth__card" data-step={step}>
+            <img src={logoUrl} alt={systemName} className="bv-auth__logo" />
+            <h1 className="bv-auth__title">{title}</h1>
+            {subtitle && <p className="bv-auth__subtitle">{subtitle}</p>}
+            <div className="bv-auth__body">{step === "signin" ? signInForm : stepBody}</div>
           </div>
         </div>
-      </div>
+        <footer className="bv-auth__footer">
+          <span>{t("login.poweredBy")}</span>
+          <img src="/bdoi/iorta-technxt.png" alt="iorta TechNXT" />
+        </footer>
+      </main>
     </div>
   );
 };

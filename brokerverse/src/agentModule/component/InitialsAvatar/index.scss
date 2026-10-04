@@ -1,0 +1,16 @@
+@import "../../../theme/bdoi/tokens";
+
+.bv-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: $brand-navy;
+  color: #ffffff;
+  font-family: $font-heading;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  user-select: none;
+}

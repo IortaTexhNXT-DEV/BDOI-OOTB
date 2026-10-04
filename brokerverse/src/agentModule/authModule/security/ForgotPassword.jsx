@@ -12,7 +12,7 @@ import "./security.scss";
  * Forgot password: 1) username or e-mail -> POST /auth/forgot-password (a code is e-mailed; the answer is the same
  * whether or not the account exists); 2) code + new password -> POST /auth/reset-password; 3) back to sign-in.
  */
-const ForgotPassword = ({ initialUser = "", onBack, onDone }) => {
+const ForgotPassword = ({ initialUser = "", onBack, onDone, onStepChange, showIntro = true }) => {
   const { t } = useTranslation();
   const [step, setStep] = useState("request");
   const [user, setUser] = useState(initialUser);
@@ -27,6 +27,11 @@ const ForgotPassword = ({ initialUser = "", onBack, onDone }) => {
   useEffect(() => {
     authService.getPasswordPolicy().then(setPolicy).catch(() => setPolicy({}));
   }, []);
+
+  // The sign-in page shows the step's title and helper text above the form
+  useEffect(() => {
+    onStepChange?.(step);
+  }, [step, onStepChange]);
 
   const run = async (fn) => {
     setError("");
@@ -71,7 +76,8 @@ const ForgotPassword = ({ initialUser = "", onBack, onDone }) => {
     return (
       <div className="bv-security__form">
         <div className="bv-security__success" role="status">
-          <i className="pi pi-check-circle" aria-hidden="true" /> {t("security.passwordResetDone")}
+          <i className="pi pi-check-circle" aria-hidden="true" />
+          <span>{t("security.passwordResetDone")}</span>
         </div>
         <div className="bv-security__actions">
           <Button type="button" label={t("security.backToSignIn")} onClick={() => (onDone || onBack)?.(user)} />
@@ -83,7 +89,7 @@ const ForgotPassword = ({ initialUser = "", onBack, onDone }) => {
   if (step === "request") {
     return (
       <form className="bv-security__form" onSubmit={requestCode} noValidate>
-        <p className="bv-security__intro">{t("security.forgotIntro")}</p>
+        {showIntro && <p className="bv-security__intro">{t("security.forgotIntro")}</p>}
         <div className="bv-security__field">
           <label htmlFor="bv-forgot-user">{t("security.userOrEmail")}</label>
           <InputText id="bv-forgot-user" value={user} onChange={(e) => setUser(e.target.value)} autoComplete="username" autoFocus className="w-full" />
@@ -99,7 +105,7 @@ const ForgotPassword = ({ initialUser = "", onBack, onDone }) => {
 
   return (
     <form className="bv-security__form" onSubmit={reset} noValidate>
-      {info && <p className="bv-security__intro">{info}</p>}
+      {showIntro && info && <p className="bv-security__intro">{info}</p>}
       <div className="bv-security__field">
         <label htmlFor="bv-reset-code">{t("security.verificationCode")}</label>
         <InputText

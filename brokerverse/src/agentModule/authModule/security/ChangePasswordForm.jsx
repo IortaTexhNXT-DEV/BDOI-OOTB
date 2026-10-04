@@ -12,7 +12,7 @@ import "./security.scss";
  * `token` is the restricted token of a sign-in that requires a new password; without it the signed-in session is used.
  * onDone receives the authService result ({ step, data }).
  */
-const ChangePasswordForm = ({ token, onDone, onCancel, intro, submitLabel }) => {
+const ChangePasswordForm = ({ token, onDone, onCancel, intro, submitLabel, cancelLabel }) => {
   const { t } = useTranslation();
   const [policy, setPolicy] = useState(null);
   const [values, setValues] = useState({ current: "", next: "", confirm: "" });
@@ -97,7 +97,7 @@ const ChangePasswordForm = ({ token, onDone, onCancel, intro, submitLabel }) => 
         </div>
       )}
       <div className="bv-security__actions">
-        {onCancel && <Button type="button" label={t("security.cancel")} className="p-button-text" onClick={onCancel} disabled={busy} />}
+        {onCancel && <Button type="button" label={cancelLabel || t("security.cancel")} className="p-button-text" onClick={onCancel} disabled={busy} />}
         <Button type="submit" label={submitLabel || t("security.changePassword")} loading={busy} disabled={busy} />
       </div>
     </form>

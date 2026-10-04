@@ -37,15 +37,27 @@ const loadConfigured = () => {
   return configuredPromise;
 };
 
-/** Hook: language options for a picker (configured and translated). */
+/**
+ * Hook: language options for a picker (configured and translated). Empty until the configuration is known, so a
+ * picker is never shown for a moment and then hidden; pickers are shown only when there are two or more languages.
+ * When a single language remains, the interface switches to it.
+ */
 export const useLanguageOptions = () => {
-  const [options, setOptions] = useState(() => languageOptions(null));
+  const [options, setOptions] = useState([]);
   useEffect(() => {
     let live = true;
-    loadConfigured().then((configured) => live && setOptions(languageOptions(configured)));
+    loadConfigured().then((configured) => {
+      if (!live) return;
+      const list = languageOptions(configured);
+      setOptions(list);
+      if (list.length === 1 && i18n.language && !i18n.language.startsWith(list[0].value)) i18n.changeLanguage(list[0].value);
+    });
     return () => {
       live = false;
     };
   }, []);
   return options;
 };
+
+/** A language picker is worth showing only when there is a choice. */
+export const showLanguagePicker = (options) => Array.isArray(options) && options.length > 1;

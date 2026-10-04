@@ -56,7 +56,6 @@ import policyMainReducers from "../agentModule/policyModule/store/policyReducers
 import quotationMainReducers from "../agentModule/quotationModule/store/quotationReducers";
 import quotationReducers from "../agentModule/quoteModule/Store/quotationReducer";
 import agentCoverageDetailsReducers from "../agentModule/quoteModule/coverageDetails/store/coverageDetailsReducer";
-import profileReducers from "../agentModule/dashBoardModule/agentViewProfile/agentProfileCard/store/profileReducers";
 import policydetailreducer from "../agentModule/quoteModule/policyDetails/store/policyDetailsReducer";
 import auditTrailReducers from "../agentModule/claimModule/claimAuditTrail/store/auditTrailReducers";
 import quotationAuditTrailReducers from "../agentModule/quoteModule/quotationAuditTrail/store/auditTrailReducers";
@@ -121,7 +120,6 @@ const reducers = {
   policyMainReducers,
   quotationMainReducers,
   quotationReducers,
-  profileReducers,
   // openitemTabelMainReducers
   policydetailreducer,
   auditTrailReducers,

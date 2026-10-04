@@ -59,6 +59,10 @@
 }
 
 .bv-security__success {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  line-height: 1.45;
   border-left: 4px solid var(--green-500, #12b76a);
   background: var(--green-50, #ecfdf3);
   color: var(--green-800, #05603a);
@@ -95,6 +99,7 @@
 }
 
 .bv-security__steps {
+  grid-template-columns: minmax(0, 1fr);
   margin: 0;
   padding-left: 1.2rem;
   display: grid;
@@ -109,12 +114,95 @@
   margin-top: 0.35rem;
 
   code {
-    font-size: 1rem;
-    letter-spacing: 0.05rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.02rem;
+    min-width: 0;
     padding: 0.35rem 0.5rem;
     border-radius: 6px;
     background: var(--surface-100, #f3f4f6);
-    word-break: break-all;
+    overflow-wrap: anywhere;
+  }
+}
+
+// Two-step set-up: QR code to scan, the setup key below as the fallback
+.bv-security__qr {
+  display: flex;
+  width: fit-content;
+  margin: 10px 0 4px;
+  padding: 8px;
+  border: 1px solid var(--color-border, #e4e4e4);
+  border-radius: 8px;
+  background: #ffffff;
+
+  img {
+    display: block;
+    width: 176px;
+    height: 176px;
+  }
+}
+
+.bv-security__manual {
+  margin-top: 6px;
+
+  a {
+    color: var(--brand-blue, #0072d8);
+    font-weight: 600;
+  }
+}
+
+.bv-security__manual-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text, #4b4b4b);
+}
+
+// Account security dialogs (Change password, Two-factor authentication): the same frame, spacing and button order
+// (secondary on the left, primary on the right) as each other.
+.p-dialog.bv-security-dialog {
+  .p-dialog-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--color-border, #e4e4e4);
+  }
+
+  .p-dialog-content {
+    padding: 20px 24px 24px !important;
+  }
+
+  .bv-security__form,
+  .bv-security__enrol {
+    gap: 16px;
+  }
+
+  .bv-security__actions {
+    margin-top: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border, #e4e4e4);
+    gap: 8px;
+
+    .p-button.p-button-text {
+      color: var(--color-heading, #2e2e2e);
+      border: 1px solid var(--color-border-strong, #c2c2c1);
+      background: #ffffff;
+
+      &:enabled:hover {
+        background: #f7f8fa;
+      }
+    }
+  }
+
+  .bv-security__enrol > .bv-security__form > .bv-security__actions {
+    margin-top: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .p-dialog.bv-security-dialog .bv-security__actions {
+    flex-direction: column-reverse;
+
+    .p-button {
+      width: 100%;
+      justify-content: center;
+    }
   }
 }
 
