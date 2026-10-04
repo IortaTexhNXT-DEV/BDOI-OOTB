@@ -97,8 +97,7 @@ DOCS = [
     ('05_Delivery', 'BrokerVerse_Schedules_and_Batch_Jobs', 'docx, pdf', 'Every scheduled job and batch process, the operational run book and the support runbook per job', [P, U, D], True, [IMP, GO, SUP]),
     ('05_Delivery', 'BrokerVerse_Test_Strategy', 'docx, pdf', 'How the product and each implementation are tested: levels, types, environments, test data and masking, entry and exit criteria, defects, CI gates', [Q, D, V, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Test_Plan', 'docx, pdf', 'Test plan of a broker implementation: scope per module, schedule by size, cycles from SIT to hypercare, resourcing, sign-off', [Q, D, M], True, [IMP, GO]),
-    ('05_Delivery', 'BrokerVerse_Test_Cases', 'xlsx', 'Release test cases with regulatory references, traceability to automated tests and to the process catalogue, defects', [Q, V], True, [IMP, GO]),
-    ('05_Delivery', 'BrokerVerse_Requirements_Traceability_Matrix', 'xlsx', 'Requirements traced to processes, screens, test cases and regulatory references', [Q, B, D], True, [IMP, GO]),
+    ('05_Delivery', 'BrokerVerse_Test_Cases', 'xlsx', 'Release test cases with regulatory references, the requirements traceability matrix (sheet Requirements Traceability: the 150 processes to test cases and automated tests), defects', [Q, V], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Test_Summary_Report', 'docx, pdf', 'Results of the release test', [Q, D, V, M], True, [PRE, GO]),
     ('05_Delivery', 'BrokerVerse_Philippine_Regulatory_Compliance_Matrix', 'docx, pdf', 'How the product supports IC, BIR, premium tax, CTPL, DPA and AMLA obligations', [S, B, Q, M], True, [PRE, IMP]),
     # ---------------------------------------------------------------- 06_Support
@@ -122,9 +121,6 @@ DOCS = [
 PENDING = {
     ('05_Delivery', 'BrokerVerse_Business_Requirements_Document'),
     ('05_Delivery', 'BrokerVerse_Process_Flow_Document'),
-    ('05_Delivery', 'BrokerVerse_Test_Strategy'),
-    ('05_Delivery', 'BrokerVerse_Test_Plan'),
-    ('05_Delivery', 'BrokerVerse_Requirements_Traceability_Matrix'),
     ('05_Delivery', 'BrokerVerse_Dependency_Map_and_Critical_Path'),
 }
 
