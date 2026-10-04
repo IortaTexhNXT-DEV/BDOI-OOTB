@@ -1,7 +1,7 @@
 {
  "title": "BrokerVerse User Manual",
- "version": "1.0",
- "date": "03 October 2026",
+ "version": "1.2",
+ "date": "04 October 2026",
  "sections": [
   {
    "id": "about-this-manual",
@@ -301,6 +301,60 @@
    "id": "configuration",
    "title": "Configuration",
    "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "theme-and-branding",
+   "title": "Theme and Branding",
+   "level": 2,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "theme-presets-layout-and-colours",
+   "title": "Theme: presets, layout and colours",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "contrast-check",
+   "title": "Contrast check",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "sign-in-page",
+   "title": "Sign-in page",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "documents-and-reports",
+   "title": "Documents and reports",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "e-mail",
+   "title": "E-mail",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "name-and-images",
+   "title": "Name and images",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "document-signatures",
+   "title": "Document signatures",
+   "level": 3,
+   "chapter": "System Administrator"
+  },
+  {
+   "id": "brand-packs",
+   "title": "Brand packs",
+   "level": 3,
    "chapter": "System Administrator"
   },
   {
@@ -1270,94 +1324,100 @@
    "chapter": "Accounting Manager"
   },
   {
-   "id": "compliance-officer-aml-cft",
-   "title": "Compliance Officer (AML/CFT)",
+   "id": "compliance-officer",
+   "title": "Compliance Officer",
    "level": 1,
    "chapter": null
   },
   {
-   "id": "compliance-officer-aml-cft-role-summary",
+   "id": "compliance-officer-role-summary",
    "title": "Role summary",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
-   "id": "compliance-officer-aml-cft-menus-available",
+   "id": "compliance-officer-menus-available",
    "title": "Menus available",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
-   "id": "compliance-officer-aml-cft-daily-and-periodic-tasks",
+   "id": "compliance-officer-daily-and-periodic-tasks",
    "title": "Daily and periodic tasks",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "aml-dashboard",
    "title": "AML dashboard",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "client-due-diligence-and-risk-rating",
    "title": "Client due diligence and risk rating",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "enhanced-due-diligence-edd-reviews",
    "title": "Enhanced due diligence (EDD) reviews",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "kyc-refresh",
    "title": "KYC refresh",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "screening-hits",
    "title": "Screening hits",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "screening-lists-and-the-screening-provider",
    "title": "Screening lists and the screening provider",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "transaction-alerts",
    "title": "Transaction alerts",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "aml-cases",
    "title": "AML cases",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "amlc-reports",
    "title": "AMLC reports",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
    "id": "aml-settings",
    "title": "AML settings",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
   },
   {
-   "id": "compliance-officer-aml-cft-approvals",
+   "id": "compliance-officer-approvals",
    "title": "Approvals",
    "level": 2,
-   "chapter": "Compliance Officer (AML/CFT)"
+   "chapter": "Compliance Officer"
+  },
+  {
+   "id": "insurance-commission-registers-complaints-and-the-breach-register",
+   "title": "Insurance Commission registers, complaints and the breach register",
+   "level": 2,
+   "chapter": "Compliance Officer"
   },
   {
    "id": "distribution-programmes-and-products",
@@ -1588,8 +1648,8 @@
    "chapter": "Module reference"
   },
   {
-   "id": "open-items-and-payments",
-   "title": "Open Items and Payments",
+   "id": "my-work-payments-ctpl-authentication-cover-notes-and-policy-cancellation",
+   "title": "My Work, Payments, CTPL Authentication, Cover Notes and Policy Cancellation",
    "level": 3,
    "chapter": "Module reference"
   },
@@ -1614,6 +1674,12 @@
   {
    "id": "module-reference-reinsurance",
    "title": "Reinsurance",
+   "level": 2,
+   "chapter": "Module reference"
+  },
+  {
+   "id": "module-reference-compliance",
+   "title": "Compliance",
    "level": 2,
    "chapter": "Module reference"
   },

@@ -1,12 +1,13 @@
 ---
 title: User Manual
 subtitle: BrokerVerse OOTB, by persona
-version: 1.0
-date: 03 October 2026
+version: 1.2
+date: 04 October 2026
 prepared: iorta TechNXT
+change: Version 1.2 (release 1.1): Theme and Branding, the menus of every persona as delivered, My Work, the Compliance Officer with the Insurance Commission registers, the complaints register and the breach register, the operational masters, Help panel sections for every screen, screenshots recaptured
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties
+acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; LTO=Land Transportation Office; RFQ=Request for quotation; CTPL=Compulsory third party liability; DST=Documentary stamp tax; LGT=Local government tax; LGU=Local government unit; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; OR=Official receipt; SOA=Statement of account; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DN=Debit note; KYC=Know your customer; TIN=Taxpayer identification number; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial all risks; PA=Personal accident; APPA=Auto passenger personal accident; SoD=Segregation of duties; AMLC=Anti-Money Laundering Council; EDD=Enhanced due diligence; PEP=Politically exposed person; NPC=National Privacy Commission; COC=Certificate of cover; PDC=Post-dated cheque; LOA=Letter of authority; EIS=Electronic Invoicing System; CAS=Computerized accounting system; WCAG=Web Content Accessibility Guidelines
 ---
 
 # About this manual
@@ -23,8 +24,10 @@ This manual tells each user how to do his or her work in BrokerVerse. It is orga
 |---|---|
 | Getting started | Signing in, passwords, two-step verification, the screen layout, notifications, My Profile and account security, lists, forms, statuses and approvals, the audit trail. |
 | The business process end to end | The broking cycle from prospect to reports, with who does each step and on which screen. |
-| One chapter per persona | System Administrator; Sales & Marketing (Account Executive); Processing Team; Operations (client servicing); Claims; Accounting; Accounting Manager. |
+| One chapter per persona | System Administrator; Sales & Marketing (Account Executive); Processing Team; Operations (client servicing); Claims; Accounting; Accounting Manager; Compliance Officer. |
 | Go-Live Data Load | The configuration and migration workbooks the System Administrator loads before go-live. |
+| Distribution, programmes and products | Lead assignment, distribution channels, dealer programmes, fleet schedules, marine open covers, facultative placements, comparison reports, campaigns and the Report Builder: screens shared by Sales, Processing and Operations. |
+| Compliance | The Insurance Commission registers and reports (licences, fit and proper, insurer authority, complaints, annual statement, production report) and the NPC breach register. |
 | Module reference | Every menu screen in menu order: purpose, main fields and rules. |
 | Reports, dashboards, schedules and notifications | A short guide; the Reports Book and the Schedules and Batch Jobs document hold the detail. |
 | Troubleshooting, FAQ and glossary | Common messages and what to do, and the Philippine insurance and accounting terms used on the screens. |
@@ -136,7 +139,7 @@ After 30 minutes without activity BrokerVerse signs you out (`limits.session_idl
 |---|---|
 | Logo and name | The logo and application name set on Master > System Settings. |
 | **Search menu...** | Type part of a screen name, for example quot. The list shows each matching screen of your menu with its path; select one to open it. |
-| Sidebar menu | The menus of your role, in business order: Home, Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, Master, Product Configurator. Select a menu to open its items; the menu you used last stays open. Master lists its screens under headings (Organization, Insurance, Location, Employees, Users and Access, Finance, System, Data Privacy, Go-Live and Data). A shortened name shows in full when you point at it. Press **/** to jump to **Search menu...**. |
+| Sidebar menu | The menus of your role, in business order: Home, Dashboard, Operations, Accounts, Commission, Reinsurance, Compliance, Reports, Master, Product Configurator. Select a menu to open its items; the menu you used last stays open. Master lists its screens under headings (Organization, Insurance, Location, Employees, Users and Access, Finance, System, Data Privacy, Go-Live and Data). A shortened name shows in full when you point at it. Press **/** to jump to **Search menu...**. |
 | Notification bell | The red badge shows the number of unread notifications, up to 99; above that it shows 99+. Select the bell to see the latest. |
 | Your initials | The initials of your display name in a circle. Select them for the account menu. |
 | Work area | The screen you opened, with its title and the breadcrumb (for example Operations • Prospects). |
@@ -158,6 +161,8 @@ Select your initials at the top right. The menu shows your initials, your displa
 | **Sign out** | Ends your session and returns to the sign-in page. |
 
 ![The account menu under your initials](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-profile.png)
+
+![The Help panel: Help for this screen, the manual, the support desk and About BrokerVerse](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-help.png)
 
 ### Notifications
 
@@ -241,13 +246,13 @@ Your role decides which menus you see and which screens you may open. The server
 | Persona (role) | Users in the screenshots | Top-level menus |
 |---|---|---|
 | System Administrator (Super Admin Access) | BrokerVerse, beatriz.lacson | Every menu |
-| Sales & Marketing (Account Executive) | maria.rivera, paolo.dizon | Dashboard, Operations, Commission, Reports, Product Configurator |
-| Processing Team (Placement & Policy Processing) | jose.bernardo, rica.fernandez | Dashboard, Operations, Reinsurance, Reports, Product Configurator |
-| Operations (Client Servicing) | ana.buenaventura | Dashboard, Operations, Reports, Product Configurator |
-| Claims | carlo.estrada, joy.macaraeg | Dashboard, Operations, Reinsurance, Reports |
-| Accounting | liza.quiambao, nestor.pangilinan | Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, Master |
+| Sales & Marketing (Account Executive) | maria.rivera, paolo.dizon | Dashboard, Operations, Commission, Compliance (Complaints), Reports, Master (Distribution Channels), Product Configurator |
+| Processing Team (Placement & Policy Processing) | jose.bernardo, rica.fernandez | Dashboard, Operations, Reinsurance, Reports, Master (Distribution Channels), Product Configurator |
+| Operations (Client Servicing) | ana.buenaventura | Dashboard, Operations, Compliance (EDD Reviews, Insurance Commission, Data Privacy (NPC)), Reports, Master (Distribution Channels, Data Privacy), Product Configurator |
+| Claims | carlo.estrada, joy.macaraeg | Dashboard, Operations, Reinsurance, Compliance (Complaints), Reports, Master (Claim Document Checklist, Repair Shops) |
+| Accounting | liza.quiambao, nestor.pangilinan | Dashboard, Operations, Accounts, Commission, Reinsurance, Compliance (Licence Register, Insurer Authority, IC reports), Reports, Master |
 | Accounting Manager | teresa.villaroman, ramon.almario | The menus of Accounting |
-| Compliance Officer (AML/CFT) | (none) | Home, Operations (Clients, Policy, Claims), Compliance, Reports |
+| Compliance Officer | dolores.santiago | Home, Operations (Clients, Policy, Claims), Compliance (every item), Reports, Master (Data Privacy) |
 
 Each persona chapter lists the exact items of each menu. The Accounting Manager holds the Accounting role as well, so the menus are the same; the difference is in the approvals.
 
@@ -402,9 +407,11 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 
 | Menu | Items |
 |---|---|
-| Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration, Go-Live Data Load, Data Privacy (Data Subject Requests, Consent Register) |
-| Master | Organization (Company, Branch); Insurance (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Reinsurance Treaty); Location (Country, Province, City / Municipality); Employees (Hierarchy, Designation); Users and Access (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
-| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Bank File Layouts, Remittance Master, Incentive Programs, Reinsurance Treaty |
+| Master > System | System Settings (with Theme and Branding), Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Integrations, Message Templates, Insurer Integration |
+| Master > Data Privacy, Go-Live and Data | Data Subject Requests, Consent Register; Go-Live Data Load |
+| Master | Organization (Company, Branch, Sales Activity Types, Sales Activity Outcomes); Insurance (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle, Reinsurance Treaty, Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops, Distribution Channels); Location (Country, Province, City / Municipality); Employees (Hierarchy, Designation); Users and Access (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
+| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Asset Classes, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Bank File Layouts, Remittance Master, Incentive Programs |
+| Compliance | Every item (the AML programme, the Insurance Commission registers and reports, the breach register), to support the Compliance Officer |
 
 ## Daily and periodic tasks
 
@@ -416,6 +423,8 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 | On request | Add a user, change a role, deactivate a leaver | Users and Access > User |
 | On request | Add or change insurers, products, covers, banks and other masters | Master > Insurance, Master > Finance |
 | On request | Change a business setting agreed with the process owner | Master > Configuration |
+| On request | Change the theme, the sign-in page, the document and e-mail branding, the signature mapping; import a brand pack | Master > System Settings > Theme and Branding |
+| On request | Set up or switch on a connector (SMS, CTPL authentication, insurer API, bank files) with the server administrator | Master > Integrations |
 | Monthly | Review users without two-step verification, dormant users and segregation-of-duties conflicts | Users and Access > User Access Matrix |
 | Quarterly | Run an access review | Users and Access > Access Reviews |
 | Before go-live | Company and letterhead, official receipt numbering to match the Authority to Print, security settings, e-mail settings | Company, Document Numbering, Configuration |
@@ -535,14 +544,16 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 
 | Master | Menu | Maintained by |
 |---|---|---|
-| Short-Period Rates | Master > Insurance Management | System Administrator |
-| Cancellation Reasons | Master > Insurance Management | System Administrator |
-| Claim Document Checklist | Master > Insurance Management | Claims, System Administrator |
-| Repair Shops | Master > Insurance Management | Claims, System Administrator |
+| Short-Period Rates | Master > Insurance | System Administrator |
+| Cancellation Reasons | Master > Insurance | System Administrator |
+| Claim Document Checklist | Master > Insurance | Claims, System Administrator |
+| Repair Shops | Master > Insurance | Claims, System Administrator |
 | Asset Classes | Master > Finance | Accounting, System Administrator |
 | Suppliers | Accounts > Payables > Suppliers | Accounting, System Administrator |
 
-Each screen lists the records with **Add**, the edit icon and activate / deactivate. The six masters are also in the go-live configuration workbook and have upload templates.
+Each screen lists the records with **Add**, the edit icon and activate / deactivate. The six masters are also in the go-live configuration workbook and have upload templates. **Sales Activity Types** and **Sales Activity Outcomes** (Master > Organization) work the same way and are described under Sales activities in the Sales & Marketing chapter; **Distribution Channels** (Master > Insurance) in the chapter Distribution, programmes and products.
+
+![Master > Insurance > Short-Period Rates, one of the operational masters](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-ops-masters.png)
 
 ### Uploads
 
@@ -582,9 +593,80 @@ The group **Go-live** (area Company & Branding) holds the cutover date `golive.c
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
-**System Settings** (Master > System Settings) holds the branding, localisation and theme: **Application name** (shown on the sign-in page, the sidebar and the browser tab), **Application logo (screen)** with **Upload Logo** or **Add Company Logo**, **Favicon** with **Upload Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. Printed documents use the logo of the letterhead company in Master > Organization > Company. **Save** applies them to every user, including the sign-in page.
+**System Settings** (Master > System > System Settings) holds the quick branding and localisation: **Application name** (shown on the sign-in page, the sidebar and the browser tab), **Application logo (screen)** with **Upload Logo** or **Add Company Logo**, **Favicon** with **Upload Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. **Save** applies them to every user, including the sign-in page. The **Theme** group links to **Theme and Branding (full theme, sign-in page, documents, e-mail, signatures, brand packs)**, described in the next section. Printed documents use the logo of the letterhead company in Master > Organization > Company.
 
 ![Master > System Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-system-settings.png)
+
+## Theme and Branding
+
+Master > System > System Settings > **Theme and Branding** sets the look of the screens, the sign-in page, the printed documents, the report files and the e-mails of the broker, as data: no new release is needed. Opening the page needs the settings permission of the System Administrator; a saved theme reaches every signed-in user on their next page and the documents, reports and e-mails at once.
+
+![Master > System Settings > Theme and Branding: the Theme tab, the live preview and the contrast list](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme.png)
+
+The editor on the left has seven tabs: **Theme**, **Sign-in page**, **Documents and reports**, **E-mail**, **Name and images**, **Document signatures** and **Brand packs**. The right-hand side shows the **Live preview** (the header, side bar, a table, buttons and the sign-in panel in the colours being edited) and the **Contrast (WCAG AA 4.5:1)** list. At the top, **Sample document** opens a PDF printed with the theme as it is on the screen, saved or not; **Discard changes** returns to the saved theme; **Save** stores the theme. Save is disabled while a blocking contrast check fails, and the red message **Cannot save** names the check.
+
+### Theme: presets, layout and colours
+
+1. On **Theme**, select a preset under **Presets**: **iorta TechNXT (default)**, **Classic Blue**, **Corporate Grey** or **Teal**. The preset fills every colour, the layout and the font; the sign-in picture already uploaded is kept. As soon as a value is changed the preset reads **Custom**. Enter a **Theme name**.
+2. Under **Layout**, choose the **Header style** (**White** or **Coloured (secondary colour)**), the **Side bar style** (**White** or **Dark**), the **Density** (**Comfortable** or **Compact**), the **Table header style** (**Solid (secondary colour)** or **Light**) and the **Font**: Nunito (bundled, the default), Arial / Helvetica and System UI from the user's computer, or Roboto, Open Sans, Lato, Source Sans 3, Inter, Montserrat, Poppins and Noto Sans from Google Fonts, only through this list. The sliders set the corner radius of fields, cards, panels and buttons in pixels.
+3. Under **Colours**, set each colour of the groups **Brand** (primary, primary hover, text on primary, light tint, secondary, accent), **Header**, **Side bar**, **Tables**, **Buttons, links and fields** and **Page**, with the colour picker or by typing the hex value (#rrggbb). The badge next to a text colour shows its contrast against its background: green from 4.5:1, red below. **Reset to default** on a group returns the values of the preset.
+4. Select **Save**. The message confirms that every signed-in user gets the theme on the next page and that documents, reports and e-mails use it from now on.
+
+### Contrast check
+
+The server checks the theme while it is edited, with the rules it applies on Save. Text on the buttons (normal and hover), on the primary colour, in the header, in the table headers and in the document table headers must reach WCAG AA, 4.5:1; below that the theme cannot be saved and the message reads, for example, Button text on button colour: contrast 2.1:1 is below WCAG AA 4.5:1. The other pairs (side bar text and active item, links on white cards, page headings, the e-mail header and the document section headings) only warn: the theme is saved and the warning is shown after Save. The list on the right shows every pair with its ratio and a tick, a warning triangle or a cross.
+
+### Sign-in page
+
+![Theme and Branding: the Sign-in page tab](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme-login.png)
+
+1. On **Sign-in page**, choose the **Picture**: **Picture library** (the pictures delivered with the product: Philippine insurance (default), Motor: road and city, Property: homes and buildings, Travel and accident: islands, Neutral pattern), **Own picture (upload)** or **Colour only**.
+2. For an own picture select **Upload picture**: JPG, PNG, WebP or SVG (a plain drawing), up to 5 MB, at least 1600 x 1200 px for sharp desktops. Set the **Focal point** sliders (left to right, top to bottom) so that the important part of the picture stays visible on a narrow screen. **Remove picture** goes back to the library.
+3. Set **Gradient from** and **Gradient to** (the colours behind the picture), **Darken the picture** (0 to 80%) and **Show the picture on phones (as a banner)**. The frame below shows the panel as a desktop or, with **Phone**, as a phone.
+4. Under **Texts**, enter the **Headline** (empty: the delivered title, Welcome to followed by the application name), the **Tagline** (empty: Sign in with your user ID and password.), whether to **Show "Powered by iorta TechNXT"** and the **Logo height on the sign-in page (px)** (24 to 140).
+5. Select **Save**.
+
+### Documents and reports
+
+Every printed document (quotation, policy schedule, slips, endorsement, receipts, billing statements, vouchers, debit notes, claim letters) and every report PDF or Excel file is printed with these values together with the logo, legal name, TIN, licence and address of the primary company (Master > Organization > Company).
+
+1. Under **Print colours**, set the **Accent (rules, marker)**, the **Titles and section headings**, the **Section heading band**, the **Table header** and the **Table header text** (an empty colour follows the accent), the **Logo height on documents (pt)** (24 to 80) and whether to **Print the logo on documents**.
+2. Under **Footer lines**, write the **Footer on every document and report**, with the placeholders {{licence}}, {{tin}} and {{companyName}} (delivered: Authorized by the Insurance Commission to act as an Insurance Broker, Licence No. {{licence}}), and an optional **Extra line on report files**.
+3. Under **Excel report files**, set the colour and text of the **Header row** and whether the **Logo and company banner above the table** are printed (the header row then moves down).
+4. Select **Sample document** to check the result as a PDF, then **Save**.
+
+### E-mail
+
+On **E-mail**, switch **Send e-mails in the branded layout (header with the logo, footer line)** on or off, set the **Header background**, the **Header text** and the **Line under the header**, whether the **Logo in the header** is shown, and the **Footer** with the placeholders {{companyName}}, {{address}}, {{licence}} and {{tin}}. **Show a sample e-mail** renders a sample message in the layout. Every e-mail the system sends (quotation links, notices, receipts, reminders, debit notes) uses it.
+
+### Name and images
+
+On **Name and images**, enter the **Application name (sign-in page, side bar, browser tab)** and keep the images: the **Application logo (side bar, sign-in page)** (PNG, JPG, WebP or SVG, up to 2 MB) and the **Favicon (browser tab)** (PNG, ICO or SVG, up to 512 KB), each with **Upload** and **Use default**, and the **Logo height in the side bar (px)** (20 to 80). An uploaded image applies at once; an SVG must be a plain drawing, so a file with scripts or links is refused. The logo on printed documents is the logo of the primary company in Master > Organization > Company; a brand pack import can set it.
+
+### Document signatures
+
+Signatures are captured in Master > Insurance > Signatories (the company's signatories: the **E-signature** icon on the row opens the capture: **Draw** the signature or **Upload image**, PNG with a transparent background or JPEG up to 512 KB, set **Effective from**, tick the consent statement and select **Save signature**; every version is kept under **Versions** and **Revoke** ends one with a reason) and on My Profile (**My e-signature**: a user's own signature, printed where a document is signed by the user who issued or approved it).
+
+![Theme and Branding: the Document signatures tab](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme-signatures.png)
+
+The tab **Document signatures** says which signature prints on which document:
+
+1. Choose the **Document**: Quotation slip, Policy schedule, Endorsement, Official receipt, Acknowledgement receipt, Payment voucher, Commission debit note, Billing statement / invoice, Statement of account, Journal voucher or Claim settlement letter.
+2. For each slot set the **Slot** code (lower-case letters, digits and hyphens; fixed once saved), the **Label** printed under the signature (for example Prepared by, Approved by), **Signed by** (Signatory chosen on the document (else the default signatory); A named signatory, with the signatory chosen next to it; The default signatory (documents.default_signatory); The user who approved the document; The user who issued / prepared the document) and **Prints** (Once the document is issued; Once the document is approved; Always (also on drafts)). **Active** switches a slot off without deleting it; the bin removes it.
+3. **Add slot** adds one more; **Save** stores the mapping of the document chosen.
+
+A draft prints its slots unsigned with an UNSIGNED DRAFT watermark; a cancelled document prints a CANCELLED watermark and no signature. In an uploaded document template (Product Configurator > Document Manager) a signature is placed with {{signature:slot}}, slot being the slot code.
+
+### Brand packs
+
+A brand pack is the whole branding of an environment in one file: the theme (colours, layout, sign-in page, documents, e-mail), the application name, the logo, the favicon, the sign-in picture and the print logo.
+
+![Theme and Branding: the Brand packs tab](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-theme-packs.png)
+
+- **Export .zip** or **Export .json** downloads the pack of this environment. Import it in another environment to promote the branding, for example from UAT to Production.
+- **Choose brand pack** checks the file first without changing anything: the message says that the pack is valid, what it contains (theme, logo, favicon, sign-in picture, document logo) and any contrast warnings, with swatches of its main colours. Tick **Also use the logo on printed documents (print logo of the primary company)** and **Also set the application name of the pack** as needed, then select **Apply brand pack**. The message lists what was applied, and the theme, images and name are in force at once.
+
+A pack that the application would refuse (a colour that is not a hex value, a font outside the list, text on buttons, header or table headers below WCAG AA) is refused at the check. The optional Toyota Insurance Services pack delivered with the product carries a third party's marks and may only be applied with the client's written permission; the same holds for any client pack. Every save, upload and import of this screen is in the audit trail.
 
 ## Schedules
 
@@ -608,7 +690,9 @@ Every e-mail the system queues (quotation approval links, requests for quotation
 
 ## Integrations
 
-Master > System Configuration > Integrations is where every connection to a third party is set up and watched: the SMS gateways and the optional Viber business messages, the CTPL authentication provider accredited by the Insurance Commission and the LTO feed, the insurers' systems and the bank payment files. The screen needs `read:integrations` (changes: `write:integrations`); both are held by the System Administrator only.
+Master > System > Integrations is where every connection to a third party is set up and watched: the SMS gateways and the optional Viber business messages, the CTPL authentication provider accredited by the Insurance Commission and the LTO feed, the insurers' systems and the bank payment files. The screen needs `read:integrations` (changes: `write:integrations`); both are held by the System Administrator only.
+
+![Master > System > Integrations: the Connectors tab](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-integrations.png)
 
 ### Connectors
 
@@ -663,7 +747,9 @@ What is certified with each partner (the provider's acceptance of the requests, 
 
 ## SMS and message templates
 
-Master > System Configuration > Message Templates holds the texts sent to clients by SMS (or Viber).
+Master > System > Message Templates holds the texts sent to clients by SMS (or Viber).
+
+![Master > System > Message Templates](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-message-templates.png)
 
 | Template | Event | Sent |
 |---|---|---|
@@ -686,7 +772,9 @@ The jobs `sms-renewal-notices` and `sms-payment-reminders` are delivered switche
 
 ## Insurer integration
 
-Master > System Configuration > Insurer Integration connects BrokerVerse to the insurers' systems.
+Master > System > Insurer Integration connects BrokerVerse to the insurers' systems.
+
+![Master > System > Insurer Integration](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-insurer-integration.png)
 
 **Mappings.** Select **New mapping** (or the pencil of an insurer):
 
@@ -717,6 +805,8 @@ Use it for investigations, access reviews and to show that maker and checker wer
 The Data Privacy menu supports the broker's Data Protection Officer under the Data Privacy Act. The System Administrator and Operations roles hold the privacy permissions (`read:privacy`, `write:privacy`).
 
 **Consent.** Consent is recorded on the client (tab **Data privacy**) and on the prospect view, per purpose: **Processing** (privacy notice acknowledged), **Marketing** and **Sharing with insurers**. Select **Record consent**, choose the purpose, **Given** or **Refused**, the channel (Form, E-mail, Phone, Portal, In person), the evidence and the notice version (the version in force, `privacy.notice_version`, by default). **Withdraw** ends a consent with a reason; the record stays in the history. Master > Data Privacy > Consent Register lists every consent of every client and prospect, with **Current status only** to see the latest per purpose.
+
+![Master > Data Privacy > Data Subject Requests](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-privacy-requests.png)
 
 **Requests.** Master > Data Privacy > Data Subject Requests is the register of requests:
 
@@ -856,21 +946,26 @@ The account executive (role Sales & Marketing (Account Executive)) finds and rec
 | Menu | Items |
 |---|---|
 | Dashboard | Executive Dashboard, Sales Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments |
+| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips, Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
 | Commission | Commission Dashboard |
-| Reports | All Reports; Operational Reports (Production, Claims, Renewal, Remittance, Broker Commission) |
+| Compliance | Insurance Commission > Complaints (read only) |
+| Reports | All Reports; Operational Reports (Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production); Report Builder |
+| Master | Insurance > Distribution Channels |
 | Product Configurator | Dashboard, Product Templates |
+
+Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Fleet Schedules and Marine Open Covers are described in the chapter Distribution, programmes and products; Cover Notes, Policy Cancellation and CTPL Authentication in the Operations chapter; the complaints register in the chapter Compliance.
 
 ## Daily and periodic tasks
 
 | When | Task | Screen |
 |---|---|---|
-| Daily | Record new prospects and follow them up | Prospects |
+| Daily | Record new prospects and follow them up; log every call, meeting, e-mail and visit | Prospects, Sales Activities |
 | Daily | Quote motor and other package products | Quick Quote, Quotations |
 | Daily | Send quotations for customer approval; record the answers received | Quotations |
 | Daily | Record the client's payment | Policy > **Proceed to Payment** |
 | Daily | Work the quotations still with the customer and the pending payments | My Work |
 | Weekly | Follow up the renewals of your clients | Renewals > Renewal Queue, At-Risk Policies, Negotiations |
+| Weekly | Give the client the comparison of the insurers' offers; follow up the campaigns | Comparison Reports, Campaigns |
 | Monthly | Check your production, commission and incentives | Sales Dashboard, Commission Dashboard, Reports > Operational Reports > Production |
 
 ## Sales Dashboard
@@ -907,9 +1002,9 @@ Choose Operations > Sales & Marketing > Prospects. The cards count **Total Prosp
 | **Select Gender** | Yes | **Male** or **Female**. |
 | **Email ID** | Yes | A valid e-mail address. Quotations and approval links are sent there. |
 | **Contact Number** | Yes | A Philippine mobile number: 0917 123 4567 or +63 917 123 4567. |
-| **Country**, **Province**, **City** | Yes | From the location masters; choose the country first, then the province, then the city. |
-| **ZIP Code** | Yes | 4 digits. |
-| **Barangay / Subd**, **House No / Unit No / Street** | Yes | The street address. |
+| **Country**, **Region**, **Province**, **City / Municipality**, **Barangay** | Yes (Region optional) | From the PSGC address masters; choose the country first (Philippines by default), then the region or the province, then the city or municipality, then the barangay. |
+| **ZIP Code** | Yes | 4 digits; filled in from the barangay or city when known. |
+| **House / Unit No.**, **Street / Subdivision** | House / Unit No. yes | The street address. |
 
 The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, for a motor prospect, opens **Create Quote** for it. Fire and Allied Perils and Industrial All Risks prospects also ask for the risk location and the sums insured.
 
@@ -1084,6 +1179,8 @@ To log an activity:
 
 The follow-up task priority is `sales_activities.follow_up_priority` (normal). The activity types (channel and default days to the next step) and outcomes (positive, neutral or negative, used by the report) are kept by the System Administrator on Master > Organization > **Sales Activity Types** and **Sales Activity Outcomes**.
 
+![Operations > Sales & Marketing > Sales Activities](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-activities.png)
+
 Operations > Sales & Marketing > **Sales Activities** lists the activities of a period (**From**, **To**) with filters for the account executive, type and outcome and a search; select a row to open the prospect, client or quotation. The **Activity Report** tab sums, per account executive, the activities by channel (calls, meetings, e-mails, visits), the prospects, clients and quotations worked, the positive outcomes, the next steps set and their follow-ups done, open and overdue, with the totals by activity type and by outcome. **Export to Excel** downloads the list or the report.
 
 ## Request a quotation from the market
@@ -1144,7 +1241,7 @@ The account executive uses the same renewal screens as Operations (Operations ch
 
 Commission > Commission Dashboard shows live figures from the commission ledger: brokerage income, comsub (gross), net margin and margin %, outstanding payable and the withholding tax withheld, with comsub by referrer, lines by status (Accrued, Eligible, Approved, Paid) and the monthly trend. **Accounting** and **Management** switch the view.
 
-Reports > Operational Reports > Production opens the Production Register; All Reports lists every report the role may run (Production Register, Claims Position, Renewal Retention, Remittance Summary, Broker Commission Statement, Premium by Product / Month / Insurer, New Business vs Renewals, Claims Ageing, Lead Conversion Funnel, Placement Pipeline, Market Response, Co-insurance Register, SOA / Premium Receivable, Receivables Ageing, Incentive Results). The chapter Reports, dashboards, schedules and notifications explains how to run them.
+Reports > Operational Reports > Production opens the Production Register; Reports > Report Builder answers ad hoc questions over the policies, clients, bills, claims and commissions of your own book (chapter Distribution, programmes and products); All Reports lists every report the role may run (Production Register, Claims Position, Renewal Retention, Remittance Summary, Broker Commission Statement, Premium by Product / Month / Insurer, New Business vs Renewals, Claims Ageing, Lead Conversion Funnel, Placement Pipeline, Market Response, Co-insurance Register, SOA / Premium Receivable, Receivables Ageing, Incentive Results). The chapter Reports, dashboards, schedules and notifications explains how to run them.
 
 ## Approvals
 
@@ -1170,12 +1267,13 @@ The Processing Team (role Processing Team (Placement & Policy Processing)) works
 | Menu | Items |
 |---|---|
 | Dashboard | Processing Dashboard, Executive Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (all items); My Work; Payments |
-| Reinsurance | Treaty Dashboard, Cession Tracking, Claims Recovery, Reconciliation, Analytics |
-| Reports | All Reports; Operational Reports |
+| Operations | Home; Sales & Marketing (Prospects, Request for Quotation (Broker Slip), Quotations, Placement Slips, Dealer Programmes, Comparison Reports, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (all items); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
+| Reinsurance | Treaty Dashboard, Cession Tracking, Claims Recovery, Reconciliation, Analytics, Facultative Placements |
+| Reports | All Reports; Operational Reports; Report Builder |
+| Master | Insurance > Distribution Channels |
 | Product Configurator | Dashboard, Product Templates, Coverage Builder, Rating Engine, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping, Product Analytics |
 
-The Processing Team reads prospects but does not create them, and has no Quick Quote: Quick Quote creates prospects and quotations, which is Sales and Operations work.
+The Processing Team reads prospects and their sales activities but does not create them, and has no Quick Quote: Quick Quote creates prospects and quotations, which is Sales and Operations work. Dealer Programmes, Comparison Reports, Fleet Schedules, Marine Open Covers and Facultative Placements are described in the chapter Distribution, programmes and products.
 
 ## Daily and periodic tasks
 
@@ -1188,7 +1286,8 @@ The Processing Team reads prospects but does not create them, and has no Quick Q
 | Daily | Complete endorsements with the insurer's document | Policy > endorsement |
 | Daily | Approve renewal terms | Notification; Renewals > Negotiations |
 | On request | Record a policy the insurer issued | Placement Slips > **Record Issued Policy** |
-| Monthly | Cessions and bordereaux | Reinsurance > Cession Tracking |
+| Monthly | Cessions and bordereaux; facultative placements | Reinsurance > Cession Tracking, Facultative Placements |
+| On request | Issue a cover note while the insurer issues the policy; issue a fleet schedule or a marine open cover | Operations > Cover Notes, Fleet Schedules, Marine Open Covers |
 | When rates change | Maintain the motor tariff and product templates | Product Configurator |
 
 ## Processing Dashboard
@@ -1392,18 +1491,22 @@ A confirmed cession and a settled recovery are posted through their posting rule
 
 ## Role summary
 
-Operations (role Operations (Client Servicing)) looks after the clients once they are on the books: client records, endorsement requests, recording the client's payment, the daily open items, renewals and the documents sent to clients. Operations can also record prospects and quote package products in the same way as Sales & Marketing.
+Operations (role Operations (Client Servicing)) looks after the clients once they are on the books: client onboarding and due diligence, client records, endorsement requests, cover notes, cancellations, CTPL authentication, recording the client's payment, the daily worklist, renewals and the documents sent to clients. Operations can also record prospects and quote package products in the same way as Sales & Marketing, keeps the Insurance Commission registers with the Compliance Officer and supports the Data Protection Officer.
 
-![Operations > Open Items](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-open-items.png)
+![Operations > My Work, the daily worklist of the role](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-my-work.png)
 
 ## Menus available
 
 | Menu | Items |
 |---|---|
 | Dashboard | Executive Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips); Clients; Policy; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments |
-| Reports | All Reports; Operational Reports |
+| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips, Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
+| Compliance | EDD Reviews; Insurance Commission (Licence Register, Fit and Proper, Insurer Authority, Complaints, IC Annual Statement, IC Production Report); Data Privacy (NPC) (Breach Register) |
+| Reports | All Reports; Operational Reports; Report Builder |
+| Master | Insurance > Distribution Channels; Data Privacy (Data Subject Requests, Consent Register) |
 | Product Configurator | Dashboard, Product Templates |
+
+The Insurance Commission registers and the breach register are described in the chapter Compliance, the EDD reviews in the Compliance Officer chapter, Data Privacy in the System Administrator chapter, and Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Fleet Schedules and Marine Open Covers in the chapter Distribution, programmes and products.
 
 ## Daily and periodic tasks
 
@@ -1411,11 +1514,16 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 |---|---|---|
 | Daily | Work expiring policies, pending payments, pending quotations and renewal requests | My Work |
 | Daily | Answer client requests: policy details, documents, changes | Clients, Policy |
-| Daily | Raise endorsement requests | Policy > **More actions** > **Endorsement** |
+| Daily | Onboard new clients and complete their identification | Clients > **Onboard client** |
+| Daily | Raise endorsement requests; compute cancellations | Policy > **More actions** > **Endorsement**; Policy Cancellation |
+| Daily | Issue cover notes while the insurer issues the policy | Cover Notes |
+| Daily | Check that every CTPL certificate of cover is authenticated | CTPL Authentication |
 | Daily | Record client payments | Policy > **Proceed to Payment** |
 | Daily | Work the renewal queue and record contacts | Renewals > Renewal Queue, Negotiations |
+| Daily | Log complaints received and work their deadlines | Compliance > Insurance Commission > Complaints |
 | Weekly | Batch renewal notices; at-risk and lapsed policies | Renewal Batch, At-Risk Policies, Lapse Management |
 | Monthly | Retention and renewal performance | Retention Analytics, Performance |
+| Monthly | Licences expiring, fit and proper reviews due, insurer certificates of authority | Compliance > Insurance Commission |
 
 ## Home and Open Items
 
@@ -1443,6 +1551,8 @@ To work your items:
 1. Choose Operations > My Work. **My Items** opens with **Mine** selected; a manager can switch to **Everyone** for the team.
 2. Pick a category on the left (the red badge is the number overdue), or use **Search**, **Due**, **Priority** and **Sort**.
 3. Select a row to open the record (quotation, bill, claim, approval) and act on it there. When the record is done it leaves the list.
+
+![My Work: New task](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-my-work-task.png)
 
 To add a task:
 
@@ -1478,6 +1588,8 @@ To correct the name, address or contact details of a client with an issued polic
 ### Onboard a client before the first policy
 
 A client can be created, identified and checked before any quotation or policy, as customer due diligence requires. A client created by the first policy (a prospect converted, a direct placement) is completed the same way, from **Identification and due diligence** on the client view.
+
+![Operations > Clients > Onboard client](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-onboard-client.png)
 
 1. Choose Operations > Clients and select **Onboard client** (or, on a client view, **Identification and due diligence**).
 2. Choose the **Client type**: **Individual**, or **Juridical** for a company, cooperative, partnership or sole proprietorship.
@@ -1533,6 +1645,8 @@ After sending, the endorsement waits for the insurer (**Waiting for Update**). T
 
 ## Cover notes (binders)
 
+![Operations > Cover Notes](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-cover-notes.png)
+
 A cover note is temporary evidence of cover that the broker gives the client while the insurer issues the policy. It is issued from a quotation the customer accepted or from a placement slip sent to (or bound by) the insurers, and it stays in force for the cover period (30 days by default, setting `cover_note.validity_days`).
 
 1. Choose Operations > Cover Notes and select **Issue cover note**.
@@ -1555,14 +1669,16 @@ The daily job **Cover note expiry** (Master > Schedules) reminds the owner of th
 
 The return premium of a cancellation is computed from the days left, never typed in (setting `endorsements.compute_cancellation_return`).
 
+![Operations > Policy Cancellation](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-policy-cancellation.png)
+
 | Method | When | Return net premium |
 |---|---|---|
 | Pro-rata | The insurer cancels (reason initiated by the insurer, for example non-payment) | Net premium x days left / days of the policy period. |
-| Short-period | The insured cancels (`endorsements.short_period_for_insured`) | Net premium less the percentage the insurer keeps for the days in force, from Master > Insurance Management > Short-Period Rates (a shorter term is scaled to a year). |
+| Short-period | The insured cancels (`endorsements.short_period_for_insured`) | Net premium less the percentage the insurer keeps for the days in force, from Master > Insurance > Short-Period Rates (a shorter term is scaled to a year). |
 | Flat | Cancelled from inception, or a reason whose method is flat (not taken up, duplicate) | The whole net premium. |
 
 1. Choose Operations > Policy Cancellation and enter the policy number.
-2. Enter the **Cancellation date** and choose the **Reason** (Master > Insurance Management > Cancellation Reasons says who initiates it and the method). **Return premium method** = From the reason, unless you choose another one.
+2. Enter the **Cancellation date** and choose the **Reason** (Master > Insurance > Cancellation Reasons says who initiates it and the method). **Return premium method** = From the reason, unless you choose another one.
 3. For a cancellation of part of the cover choose **Part of the cover** and enter the percentage or the net premium of the part cancelled; the policy stays in force.
 4. Select **Compute return premium**. The page shows the days in force and left, the premium kept by the insurer, the return net premium, the premium taxes returned (from Master > Finance > Premium Taxes & LGU Rates on the return premium; the taxes returned are set in `endorsements.cancellation_returned_taxes`, documentary stamp tax is not refundable by default), the return premium and the commission taken back.
 5. Select **Create cancellation endorsement**. The endorsement summary opens; send it to the customer and complete it as any cancellation (Processing Team chapter). The server computes the same figures again, so a figure changed on the screen is not used.
@@ -1582,6 +1698,8 @@ Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivab
 ## CTPL authentication
 
 Every CTPL certificate of cover (COC) must be authenticated with the IC-accredited authentication provider before it is released. Operations > CTPL Authentication does it for every CTPL cover issued.
+
+![Operations > CTPL Authentication](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-ctpl.png)
 
 **COC series.** On the **COC series** tab, record each series of COC numbers received from an insurer: **New COC series**, the **Insurer**, the **Branch** (empty for every branch), the **Prefix**, the first and last number and the number of digits. Numbers may not overlap another series of the insurer. The list shows the numbers **Used** and **Left**, in orange below the low-stock threshold; a series whose numbers are all used becomes **Used up**. **Make inactive** stops a series (for example numbers returned to the insurer).
 
@@ -1677,11 +1795,13 @@ The Claims team registers losses under the policies, sends the Preliminary Loss 
 | Menu | Items |
 |---|---|
 | Dashboard | Claims Dashboard |
-| Operations | Home, Clients, Policy, Claims |
+| Operations | Home, Clients, Policy, Fleet Schedules, Marine Open Covers, Claims, My Work, Claim Documents, Motor Claim Repairs |
 | Reinsurance | Claims Recovery |
-| Reports | All Reports; Operational Reports |
+| Compliance | Insurance Commission > Complaints |
+| Reports | All Reports; Operational Reports; Report Builder |
+| Master | Insurance > Claim Document Checklist, Repair Shops |
 
-The Claims role lands on the Claims Dashboard.
+The Claims role lands on the Claims Dashboard. Fleet Schedules and Marine Open Covers are read only, to see the vehicles and shipments on cover when a loss is reported; the complaints register is described in the chapter Compliance.
 
 ## Daily and periodic tasks
 
@@ -1690,9 +1810,13 @@ The Claims role lands on the Claims Dashboard.
 | Daily | Register new losses | Policy > **More actions** > **Claim** |
 | Daily | Follow open claims with the insurer and adjuster | Operations > Claims |
 | Daily | Approve settlements entered by another Claims user | Notification; claim in Pending Approval |
-| Daily | Watch overdue claims | Claims Dashboard |
+| Daily | Watch overdue claims and your own worklist | Claims Dashboard; My Work |
+| Daily | Chase missing claim documents; submit complete files to the insurer | Claim Documents |
+| Daily | Record repair estimates, adjuster decisions and letters of authority | Motor Claim Repairs |
+| Daily | Log and handle complaints about claims | Compliance > Insurance Commission > Complaints |
 | Weekly | Review the claims position and ageing | Reports > Operational Reports > Claims; Reports > All Reports > Claims Ageing |
 | As needed | Register reinsurance recoveries | Reinsurance > Claims Recovery |
+| As needed | Keep the claim document checklist and the accredited repair shops | Master > Insurance > Claim Document Checklist, Repair Shops |
 
 ## Claims Dashboard
 
@@ -1787,7 +1911,9 @@ When the settlement is paid through the broker, the insurer pays the broker and 
 
 ## Claim document checklist
 
-Each claim has the list of documents it needs, taken from Master > Insurance Management > Claim Document Checklist by line of business and claim type (* for all), each one required or optional.
+Each claim has the list of documents it needs, taken from Master > Insurance > Claim Document Checklist by line of business and claim type (* for all), each one required or optional.
+
+![Operations > Claim Documents](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-documents.png)
 
 1. Choose Operations > Claim Documents and select the claim on the left.
 2. For each document: **Received** (or upload a copy with the upload icon; an uploaded claim document with the same name is marked received by itself), **Waive** with a reason when it does not apply, or **Reopen**. **Add document** adds one the checklist does not list.
@@ -1798,7 +1924,9 @@ Each claim has the list of documents it needs, taken from Master > Insurance Man
 
 Operations > Motor Claim Repairs lists the motor claims with the stage of their repair: no estimate yet, awaiting approval, approved, in repair, released. Select a claim to open its repair file.
 
-1. **Record estimate**: the repair shop (Master > Insurance Management > Repair Shops; only active, accredited shops), its estimate number and date, and the parts, labour, paint, other and VAT amounts. The first estimate is the initial one; an estimate recorded after one is approved is supplementary. One estimate at a time waits for the adjuster.
+![Operations > Motor Claim Repairs](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-motor-repairs.png)
+
+1. **Record estimate**: the repair shop (Master > Insurance > Repair Shops; only active, accredited shops), its estimate number and date, and the parts, labour, paint, other and VAT amounts. The first estimate is the initial one; an estimate recorded after one is approved is supplementary. One estimate at a time waits for the adjuster.
 2. **Record adjuster decision**: approve with the approved amount (at most the estimate) or reject with the reason, the adjuster and adjusting company, and the insurer's approval reference.
 3. **Issue letter of authority**: covers the approved estimates not yet on a letter. The participation of the insured comes from `motor_claims.participation` (PHP 2,000 or 0.5% of the sum insured, whichever is higher) on the original letter only, and the depreciation on parts from `motor_claims.parts_depreciation_percent`; both can be changed. The letter (LOA-YYYY-NNNNN, valid `motor_claims.loa_validity_days`) shows the approved repair cost, the amount payable by the insurer and the amount the insured settles with the shop. **Print** opens it with the letterhead; a supplementary estimate gets a supplementary letter.
 4. **Release vehicle**: who took the vehicle back, the dates, the participation paid to the shop and the odometer. **Print** gives the release acknowledgement the insured signs.
@@ -1834,11 +1962,12 @@ Accounting (role Accounting) runs the money side of the business: it verifies cl
 |---|---|
 | Dashboard | Executive Dashboard |
 | Operations | My Work, Payments |
-| Accounts | Receipts; Collections; Credit Control (Instalment Plans, Premium Warranty Monitor, Client Credit Limits, Remittance Ageing); Disbursement; Remittance (Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, Notifications, History, Analytics); Journal Voucher; Correction JV; Reversal JV; Open Entry Matching; Open Entry Unmatching; Accounting Query; All Clients Accounting; Petty Cash (Initiate, Request, Disbursement, Receipts, Replenish); Bank Reconciliation (Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines, Bank Book); Insurer Reconciliation (Insurer Statements); Tax (BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases); Period End (Period Management, Month-End Close, Year-End Close, Recurring Journals, Financial Statements); Incentive (My Programs, Calculations, Approvals, Statement) |
-| Commission | Commission Dashboard, Agents/Referrer Accounts |
+| Accounts | Receipts; Collections; Credit Control (Instalment Plans, Premium Warranty Monitor, Client Credit Limits, Remittance Ageing); Post-Dated Cheques; Claims Settlements; Payables (Supplier Invoices, Supplier Payments, AP Ageing, Suppliers, Supplier 2307); Fixed Assets (Asset Register, Depreciation Run, Disposals); Disbursement; Bank Payment Files; Remittance (Automated Processing, Tracking, Statements, Settlement, Reconciliation, Bulk Processing, Scheduling, Electronic Transfer, Approval Workflow, Exception Management, Agency Bill Processing, Direct Bill Processing, Adjustments, Notifications, History, Analytics); Journal Voucher; Correction JV; Reversal JV; Open Entry Matching; Open Entry Unmatching; Accounting Query; All Clients Accounting; Petty Cash (Initiate, Request, Disbursement, Receipts, Replenish); Bank Reconciliation (Reconciliation Workspace, Reconciliations, Reconciliation Statement Report, Outstanding Cheques, Deposits in Transit, Unmatched Bank Lines, Bank Book); Insurer Reconciliation (Insurer Statements); Tax (BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases, Withholding Returns, Annual Alphalist 1604-E, Percentage Tax 2551Q, BIR DAT Files, Sales Invoices, E-Invoicing (EIS), CAS Books and Documents); Period End (Period Management, Month-End Close, Year-End Close, Recurring Journals, Financial Statements); Incentive (My Programs, Calculations, Approvals, Statement) |
+| Commission | Commission Dashboard, Agents/Referrer Accounts, Insurer Overrides (Agreements, Computations) |
 | Reinsurance | Reconciliation |
-| Reports | All Reports; Operational Reports (Remittance, Broker Commission); Financial Reports (SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers by Co-insurer) |
-| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Premium Taxes & LGU Rates, Payment Gateways, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats |
+| Compliance | Insurance Commission > Licence Register, Insurer Authority, IC Annual Statement, IC Production Report (read only) |
+| Reports | All Reports; Operational Reports (Remittance, Broker Commission); Financial Reports (SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers by Co-insurer); Report Builder |
+| Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Premium Taxes & LGU Rates, Payment Gateways, Taxation, Close Checklist, Asset Classes, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Bank File Layouts |
 
 ## Daily and periodic tasks
 
@@ -1847,15 +1976,21 @@ Accounting (role Accounting) runs the money side of the business: it verifies cl
 | Daily | Verify recorded payments and post official receipts | Notification; Accounts > Receipts |
 | Daily | Follow overdue premium; send reminders | Accounts > Collections; Credit Control |
 | Daily | Approve vouchers, journals and remittances of colleagues | The approval screens of each module |
+| Daily | Deposit the post-dated cheques due; record cleared and bounced cheques | Accounts > Post-Dated Cheques |
+| Daily | Record supplier invoices; pay approved invoices | Accounts > Payables |
+| Daily | Record insurer funds and claimant payments of settlements paid through the broker | Accounts > Claims Settlements |
 | Weekly | Remit collected premium to insurers | Accounts > Remittance |
-| Weekly | Pay commission to referrers | Commission > Agents/Referrer Accounts |
-| Monthly | Raise commission debit notes for direct-bill policies | Remittance > Direct Bill Processing |
+| Weekly | Pay commission to referrers; pay by bank file where the bank accepts one | Commission > Agents/Referrer Accounts; Accounts > Bank Payment Files |
+| Monthly | Raise commission debit notes for direct-bill policies; issue the sales invoices | Remittance > Direct Bill Processing; Tax > Sales Invoices |
+| Monthly | Post depreciation; register and dispose of assets | Accounts > Fixed Assets |
+| Monthly / quarterly | 0619-E and 1601-EQ with their filing records; 2551Q for a non-VAT broker; the BIR DAT files; BIR Form 2307 to suppliers | Accounts > Tax > Withholding Returns, Percentage Tax 2551Q, BIR DAT Files; Payables > Supplier 2307 |
+| Per agreement period | Compute, approve and settle overriding and contingent commission | Commission > Insurer Overrides |
 | Monthly | Import bank statements, match, prepare the reconciliation | Accounts > Bank Reconciliation |
 | Monthly | Import insurer statements and reconcile | Accounts > Insurer Reconciliation |
 | Monthly | Recurring journals, accruals, month-end close run | Accounts > Period End |
 | Monthly / quarterly | VAT summary, QAP, SAWT, SLSP, BIR Form 2307 | Accounts > Tax |
 | Per programme period | Incentive calculations | Accounts > Incentive |
-| Yearly | Year-end close (prepare) | Accounts > Period End > Year-End Close |
+| Yearly | Year-end close (prepare); the annual information return 1604-E; the CAS books of the year | Accounts > Period End > Year-End Close; Tax > Annual Alphalist 1604-E, CAS Books and Documents |
 
 ## Verify payments and post official receipts
 
@@ -1918,6 +2053,8 @@ By default an instalment plan splits the follow-up of one bill. To bill each ins
 
 Accounts > Post-Dated Cheques is the register of cheques received from clients before their date.
 
+![Accounts > Post-Dated Cheques](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-pdc.png)
+
 1. **Register cheque**: the bill (or policy) it pays, the drawee bank (Bank master, or typed), cheque number, date and amount, and where it is kept (**Kept in**). The cheques on hand of a bill cannot exceed its balance. Nothing is posted yet.
 2. The **Deposit due** tab lists the cheques dated within `pdc.due_window_days` days (3); the daily job **Post-dated cheques due** tells Accounting.
 3. **Deposit** on or after the cheque date: choose the bank account. The official receipt is created and posted on that bank account (posting rule receipt.apply) and its number is shown.
@@ -1927,6 +2064,8 @@ Accounts > Post-Dated Cheques is the register of cheques received from clients b
 **Export to Excel** downloads the register.
 
 ## Claims settlements paid through the broker
+
+![Accounts > Claims Settlements](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-claims-settlements.png)
 
 Accounts > Claims Settlements lists the claims whose settlement through the broker is booked, with what is still to receive from the insurers and what is payable to the claimant. Select a claim:
 
@@ -1963,6 +2102,8 @@ A second Accounting user opens the voucher, reviews the cheque details and appro
 
 Insurer remittances, referrer commission payouts, refunds and supplier payments can be paid by a bank upload file instead of cheques: bulk credit, InstaPay (up to `bank_payments.instapay_limit`, PHP 50,000 per payment) or PESONet.
 
+![Accounts > Bank Payment Files](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-bank-payment-files.png)
+
 1. Prepare the payment vouchers as usual (Accounts > Disbursement, insurer remittance, bulk referrer payout) and submit them for approval. Every payee needs a bank account: Master > Finance > Bank File Layouts, **Payee bank accounts** (a referrer's account on the referrer record is used too).
 2. Choose Accounts > Bank Payment Files and select **New batch**. Choose the **Layout** of the bank, the bank account to **Pay from**, the **Channel** and the **Value date**, tick the vouchers (a voucher without a bank account cannot be ticked) and select **Create batch**. The batch takes a number from the BPB series.
 3. Open the batch and select **Submit for approval**. A second user opens it and selects **Approve**, or **Return to draft** with the reason. The approver may not be the maker of the batch or of one of its vouchers, and the total must be within the approver's Authority Matrix limit for payment vouchers.
@@ -1970,9 +2111,11 @@ Insurer remittances, referrer commission payouts, refunds and supplier payments 
 5. When the bank returns its payment status file, select **Import status file**. Each paid payment posts the voucher's payment journal (Dr payable of the payee / Cr cash in bank of the bank account paid from, or for a referrer payout Dr commission payable / Cr cash and withholding tax) dated the value date, and the voucher becomes Paid. A rejected payment keeps its reason; its voucher is free for another batch or a cheque. Rows the system could not apply are listed with the reason.
 6. Without a status file, use **Record result** on a payment to enter what the bank portal shows: paid with the bank reference, or rejected with the reason.
 
-The batch is **Completed** when every payment has a result. A batch with no paid payment can be cancelled; its vouchers become free again. Every step is in the audit trail, and the file and status file are in Master > System Configuration > Integrations (outbox and inbox).
+The batch is **Completed** when every payment has a result. A batch with no paid payment can be cancelled; its vouchers become free again. Every step is in the audit trail, and the file and status file are in Master > System > Integrations (outbox and inbox).
 
 ## Bank file layouts and payee bank accounts
+
+![Master > Finance > Bank File Layouts](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-bank-file-layouts.png)
 
 Master > Finance > Bank File Layouts says how each bank's upload file is written and how its status file is read. The system is delivered with starter layouts for BDO, BPI, Metrobank, Landbank and UnionBank and a generic CSV. **The starter layouts are examples: each must be validated against the bank's current file specification, and a test file accepted by the bank, during onboarding.** They are marked **Test mode** until changed.
 
@@ -2050,6 +2193,8 @@ A referrer without a bank account on file cannot be approved or paid (`commissio
 ### Overriding, profit and contingent commission from insurers
 
 Commission > Insurer Overrides has two screens: **Agreements** and **Computations**. Accounting maintains and computes them (read:commission, write:commission).
+
+![Commission > Insurer Overrides > Agreements](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-insurer-overrides.png)
 
 Set up an agreement:
 
@@ -2193,6 +2338,8 @@ The other tax reports work like every report: choose the criteria and dates, **P
 
 ### Withholding returns: 0619-E, 1601-EQ and their filing records
 
+![Accounts > Tax > Withholding Returns](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-tax-withholding.png)
+
 1. Choose Accounts > Tax > Withholding Returns and the year. The list shows each return with its **Period**, **Due date** (0619-E: day `bir.withholding_due_day` of the next month, default 10; quarterly returns: the last day of the month after the quarter), **Status** (Filed or Not filed), **Date filed**, **Filing reference** and **Amount paid**.
 2. Select **Open** on a return. It shows Part I (TIN with branch code, RDO, name, address, category of withholding agent from Master > Company and the `bir.*` settings) and Part II with the BIR item numbers: for 1601-EQ one line per ATC (tax base, rate, tax withheld), the total for the quarter, less the 0619-E remittances of the first and second month (from their filing records), the tax still due and the penalties. The schedules show the tax per ATC and, for 1601-EQ, the QAP attached.
 3. Read **Reconciliation**. The return total is compared with the QAP report and with the tax withheld credited in the ledger to the withholding accounts (`bir.withholding_ledger_accounts`, else Expanded Withholding Tax Payable 2204001). A difference means a withholding booked outside a payment voucher (for example a journal voucher or petty cash) or a voucher without a journal: explain it before filing.
@@ -2200,6 +2347,8 @@ The other tax reports work like every report: choose the criteria and dates, **P
 5. After filing and paying, select **Record filing** and enter the **Date filed**, the **Filing reference** (eFPS / eBIRForms confirmation), the **Amount paid**, the **Penalties**, the **Payment date**, the **Payment reference** and the **Payment channel**. The figures as computed are kept with the record. **Edit filing** corrects the references; **Amended return** records a new filing that supersedes the earlier one; a record entered in error is cancelled with a reason.
 
 ### Annual information return 1604-E and alphalist of payees
+
+![Accounts > Tax > Annual Alphalist 1604-E](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-tax-1604e.png)
 
 Choose Accounts > Tax > Annual Alphalist 1604-E and the year. The return shows the remittances per month (from the 0619-E and 1601-EQ filing records), schedule 3 (each payee subject to expanded withholding per ATC: TIN, branch, registered name or last, first and middle name, nature of income payment, rate, income payments and tax withheld for the year) and schedule 4 (payees whose income payments are exempt). **Excel**, **Print** and **DAT file** produce the outputs; **Record filing** works as for the other returns. The reconciliation compares the tax in schedule 3 with the tax remitted on the filing records.
 
@@ -2209,6 +2358,8 @@ A broker or agent that is not VAT registered (`direct_bill.broker_vat_registered
 
 ### BIR DAT files
 
+![Accounts > Tax > BIR DAT Files](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-tax-dat.png)
+
 Choose Accounts > Tax > BIR DAT Files, the file (**QAP (1601-EQ)**, **SAWT**, **SLSP sales**, **SLSP purchases** or **1604-E alphalist**), the year and the quarter (for the SAWT also the return it is attached to, `bir.sawt_form`, default 1702Q). The screen shows the layout version, the file name, the number of records, the totals, the record layout, the content and the warnings (for example a payee without TIN). Select **Download** and validate the file with the current BIR validation module before submitting it.
 
 The files follow the record layouts of the BIR Alphalist Data Entry and Validation Module version 7.x (QAP, SAWT, 1604-E) and the RELIEF data file layout (SLSP): a header record, one detail record per payee, customer or supplier, and a control record with the totals; text in capitals between double quotes, amounts with two decimals, CR LF line ends. The broker's TIN must be filled in on Master > Company first.
@@ -2216,6 +2367,8 @@ The files follow the record layouts of the BIR Alphalist Data Entry and Validati
 ### Sales invoices (EOPT Act)
 
 Under the Ease of Paying Taxes Act (RA 11976) and RR 7-2024 the sales invoice is the primary document of the broker's sale of services. Before the first invoice, fill in the **Sales invoices (EOPT)** group in Master > Configuration (area Accounting & Tax): `invoice.atp_number` or `invoice.cas_permit_number` and their dates, the registered serial range `invoice.serial_from` / `invoice.serial_to`, `invoice.printer_details` and `invoice.buyer_details_threshold`; and the TIN branch code `bir.tin_branch_code` and trade name `bir.trade_name` in the BIR forms group.
+
+![Accounts > Tax > Sales Invoices](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-tax-sales-invoices.png)
 
 1. Choose Accounts > Tax > Sales Invoices and select **New invoice**.
 2. Choose **Invoice for**: **Commission debit note** or **Overriding commission** (pick the approved document from the list), **Broker-billed policy commission** (type the policy number) or **Fees and other services (manual)**.
@@ -2233,6 +2386,8 @@ Premium collection receipts (Accounts > Receipts) print the title in `receipts.d
 
 The connector to the BIR Electronic Invoicing System is switched off by default (`eis.enabled`). When the broker is enrolled with the EIS, set the **E-invoicing (EIS)** group in Master > Configuration: `eis.mode` (test: the built-in fake provider, nothing leaves the system; live: the configured endpoint), `eis.endpoint`, `eis.token_endpoint`, `eis.accreditation_id`, and the names of the environment variables that hold the client id, the client secret and the signing key (`eis.client_id_env`, `eis.client_secret_env`, `eis.signing_key_env`; the values are set on the server by IT, never in the system).
 
+![Accounts > Tax > E-Invoicing (EIS)](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-tax-eis.png)
+
 1. Choose Accounts > Tax > E-Invoicing (EIS). The banner shows whether the connector is on, the mode, the endpoint and whether the credentials are set; the counters show the queued, accepted, failed, rejected and manually uploaded submissions.
 2. Each invoice issued (and each cancellation of an invoice already sent) is queued with its payload, a SHA-256 hash and the signature. The eis-outbox job (Master > Schedules, every 15 minutes, switched off by default) or **Send now** sends what is due. A failure is retried after `eis.retry_minutes`, doubled at each attempt, up to `eis.max_attempts`; a rejection is final (cancel and reissue the invoice). A submission left in **Sending** longer than `eis.sending_stale_minutes` (15; the server stopped during the call) counts as a failed attempt and is sent again at the next run.
 3. **Retry** puts a failed or rejected submission back in the queue. **Queue earlier invoices** queues the invoices of a date range issued before the connector was switched on.
@@ -2243,6 +2398,8 @@ The EIS enrolment and certification of the broker, the final field list and sign
 ### CAS books and documents
 
 Choose Accounts > Tax > CAS Books and Documents.
+
+![Accounts > Tax > CAS Books and Documents](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-tax-cas.png)
 
 1. **Readiness** lists what the registration pack needs: the taxpayer details and RDO (Master > Company), the CAS permit number (`cas.permit_number`), the invoice ATP or acknowledgement, the backup custodian (`cas.backup_custodian`), the system contact (`cas.system_contact`) and at least one book printed.
 2. Choose the **Book** (General Journal, General Ledger, Cash Receipts Book, Cash Disbursements Book, Sales Book or Purchase Book) and the month. The entries show on screen; **Excel** exports them.
@@ -2301,6 +2458,8 @@ The year-end close needs all twelve periods closed. Choose the fiscal year and s
 
 ## Accounts payable
 
+![Accounts > Payables > Supplier Invoices](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-payables.png)
+
 Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registration, the EWT tax code withheld (Master > Finance > Taxation, for example WC158 goods, WC160 services, WC100 rentals), payment terms and the default expense account.
 
 1. Accounts > Payables > Supplier Invoices > **New supplier invoice**: supplier, the supplier's invoice number and date, description, and one line per expense account (or an **Asset class** for an asset bought). Input VAT is computed on the vatable lines of a VAT-registered supplier at the rate of `payables.input_vat_code`; the EWT at the rate of the supplier's EWT tax code on the amount net of VAT. The due date follows the payment terms. The same supplier invoice number cannot be recorded twice.
@@ -2313,6 +2472,8 @@ Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registr
 
 The expanded withholding tax withheld from a supplier on an approved supplier invoice (the supplier's EWT tax code, on the amount net of VAT) is creditable tax of the supplier: the broker issues BIR Form 2307 for it each quarter.
 
+![Accounts > Payables > Supplier 2307](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-supplier-2307.png)
+
 1. Choose Accounts > Payables > **Supplier 2307**, the **Year** and the **Quarter**. The screen lists every supplier with EWT in the quarter: TIN, ATC (the ATC of the invoice's EWT tax code, for example WC160 services, WC158 goods, WI010 professional fees), the number of invoices, the income payments and the tax withheld, and the certificate number once issued. Cancelled invoices do not count; an invoice counts in the quarter of its journal date.
 2. **View** shows the certificate on the BIR layout: the payee (the supplier's registered name, TIN and address from the Supplier master), the payor (the broker, from the primary company of Master > Company), and per ATC the income of each month of the quarter, the total and the tax withheld. **Issue** numbers it from the CWT series; **Print** prints it.
 3. **Issue all certificates** numbers the certificates of every supplier of the quarter that has none yet.
@@ -2320,6 +2481,8 @@ The expanded withholding tax withheld from a supplier on an approved supplier in
 The same generator issues the certificates of the commission payees on Accounts > Tax > BIR Form 2307, where the suppliers are listed with the other payees. The supplier EWT is also included in the QAP (Accounts > Tax > QAP), in the 0619-E and the 1601-EQ per ATC (reconciled with the QAP and with the EWT payable account of the ledger), in the 1604-E alphalist of payees (schedule 3; a supplier with an EWT code for individuals is listed by last, first and middle name) and in the QAP and 1604-E DAT files.
 
 ## Fixed assets and depreciation
+
+![Accounts > Fixed Assets > Asset Register](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-fixed-assets.png)
 
 Accounts > Fixed Assets > Asset Register lists the assets with their cost, accumulated depreciation and book value. **Register asset** for an asset not bought through a supplier invoice: name, asset class (Master > Finance > Asset Classes gives the useful life and the asset, accumulated depreciation and depreciation expense accounts), dates, cost, salvage value, location, custodian and serial number. For an asset carried at go-live enter the accumulated depreciation at go-live and the first period to depreciate here. Select an asset to see its straight-line schedule: each month's depreciation, accumulated depreciation and book value, and whether the month is posted.
 
@@ -2347,6 +2510,8 @@ The disposal (FAD-YYYY-NNNNN) posts one journal (posting rule fa.disposal, Maste
 | Cr | Gain on disposal (`accounting.account.gain_on_disposal`, 3301004) | Selling price above the book value |
 
 A sale also issues the BIR sales invoice to the buyer (Accounts > Tax > Sales Invoices, source Asset disposal; `fixed_assets.disposal_sales_invoice`). A sale received into a bank account is issued paid; a sale on credit is collected by recording the payment on the sales invoice. The asset becomes **Disposed** and is no longer depreciated.
+
+![Accounts > Fixed Assets > Disposals](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-fa-disposals.png)
 
 Accounts > Fixed Assets > **Disposals** is the disposal register of a period: number, date, sale or write-off, asset, buyer, book value, selling price, output VAT, gain or loss, sales invoice, journal and status, with the totals; **Export to Excel**. The printer button prints the disposal voucher with its journal. **Cancel disposal** (with a reason) reverses the journal, cancels the sales invoice and restores the asset; a disposal whose sales invoice has a payment recorded cannot be cancelled.
 
@@ -2496,22 +2661,27 @@ Supplier invoices sent for approval are announced in the notifications (approve:
 | Approve posting configuration changes | Configuration Approvals |
 | Approve vouchers, journals, remittances, debit notes and incentive batches of other users | The approval screens of each module |
 
-# Compliance Officer (AML/CFT)
+# Compliance Officer
 
 ## Role summary
 
-The Compliance Officer (role Compliance Officer (AML/CFT)) runs the broker's money laundering and terrorist financing prevention programme in BrokerVerse under the AMLA (RA 9160 as amended), its implementing rules, the AMLC's rules for covered persons and the IC's circulars for insurance intermediaries: customer risk rating and enhanced due diligence, sanctions, PEP and negative list screening, covered and suspicious transaction monitoring, AML cases and the report files filed with the AMLC. The decisions reserved to the compliance officer (permission approve:aml) are: clearing, escalating or confirming a screening match, approving or rejecting an EDD review, overriding a risk rating, approving a case for filing and recording a filing. Every decision asks for a reason and is kept in the audit trail.
+The Compliance Officer (role Compliance Officer (AML/CFT)) is the broker's compliance function in BrokerVerse. The role runs the money laundering and terrorist financing prevention programme under the AMLA (RA 9160 as amended), its implementing rules, the AMLC's rules for covered persons and the IC's circulars for insurance intermediaries: customer risk rating and enhanced due diligence, sanctions, PEP and negative list screening, covered and suspicious transaction monitoring, AML cases and the report files filed with the AMLC. The decisions reserved to the compliance officer (permission approve:aml) are: clearing, escalating or confirming a screening match, approving or rejecting an EDD review, overriding a risk rating, approving a case for filing and recording a filing. Every decision asks for a reason and is kept in the audit trail.
+
+The same role keeps the registers the broker holds for the Insurance Commission and the National Privacy Commission (permissions read and write:compliance, read and write:complaints, read and write:privacy): the licence register, the fit and proper records, the insurer certificates of authority, the complaints register, the IC annual statement and production report, the personal data breach register, and the data subject requests and consent register of Master > Data Privacy. Those screens are described in the chapter Compliance and in the System Administrator chapter (Data privacy); this chapter tells the officer when to use them.
+
+![Compliance > AML Dashboard](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-aml-dashboard.png)
 
 ## Menus available
 
 | Menu | Items |
 |---|---|
-| Home | Home and Open Items |
+| Home | Home |
 | Operations | Clients (with Onboard client), Policy, Claims (to read the client's records) |
-| Compliance | AML Dashboard, Client Due Diligence, EDD Reviews, KYC Refresh, Screening Hits, Screening Lists, Transaction Alerts, AML Cases, AMLC Reports, AML Settings |
+| Compliance | AML Dashboard, Client Due Diligence, EDD Reviews, KYC Refresh, Screening Hits, Screening Lists, Transaction Alerts, AML Cases, AMLC Reports, AML Settings; Insurance Commission (Licence Register, Fit and Proper, Insurer Authority, Complaints, IC Annual Statement, IC Production Report); Data Privacy (NPC) (Breach Register) |
 | Reports | All Reports, Operational Reports |
+| Master | Data Privacy (Data Subject Requests, Consent Register) |
 
-Operations (client servicing) sees Compliance > EDD Reviews to prepare the reviews of its clients; the approval stays with the compliance officer. The System Administrator sees every menu.
+Operations (client servicing) sees Compliance > EDD Reviews to prepare the reviews of its clients, and keeps the Insurance Commission registers, the complaints and the breach register with the officer; Claims and Sales see the complaints register; Accounting reads the licence register and the IC reports. The System Administrator sees every menu.
 
 ## Daily and periodic tasks
 
@@ -2520,10 +2690,16 @@ Operations (client servicing) sees Compliance > EDD Reviews to prepare the revie
 | Daily | Decide the open screening hits | Compliance > Screening Hits |
 | Daily | Review the new transaction alerts (the monitoring job runs every morning) | Compliance > Transaction Alerts |
 | Daily | Approve or reject submitted EDD reviews | Compliance > EDD Reviews |
+| Daily | Check the complaints past a deadline and the escalated complaints | Compliance > Insurance Commission > Complaints |
 | Within 1 working day of suspicion (`aml.str_due_working_days`) | Approve the STR case and file the STR | AML Cases, AMLC Reports |
 | Within 5 working days (`aml.ctr_due_working_days`) | Generate and file the CTR file of the covered transactions | AMLC Reports |
+| Within 72 hours of discovery (`privacy.breach_notify_hours`) | Assess a personal data breach and notify the NPC and the data subjects | Compliance > Data Privacy (NPC) > Breach Register |
+| Within 15 days (`privacy.request_due_days`) | Answer the data subject requests | Master > Data Privacy > Data Subject Requests |
 | Weekly | Work the KYC refreshes due | Compliance > KYC Refresh |
+| Monthly | Licences expiring (the firm, officers, agents and referrers), renewals filed and received; insurer certificates of authority expiring | Compliance > Insurance Commission > Licence Register, Insurer Authority |
+| Quarterly | Complaints report for the period; fit and proper reviews due | Complaints > **Download report**; Fit and Proper |
 | When a list is published | Upload the new version of the UN, AMLC, PEP or internal list | Compliance > Screening Lists |
+| Yearly | IC annual statement workbook with the accountant; IC production report; annual security incident report to the NPC | IC Annual Statement, IC Production Report, Breach Register > **Annual report** |
 | Yearly and when rules change | Review the risk factors, thresholds and rules | Compliance > AML Settings |
 
 ## AML dashboard
@@ -2533,6 +2709,8 @@ Compliance > AML Dashboard shows the counts of the programme in three rows: clie
 ## Client due diligence and risk rating
 
 Compliance > Client Due Diligence lists every client with **Risk rating**, **Score**, **KYC status**, open hits, PEP and **Next KYC refresh**; filter by rating, KYC status and client type, or search. Select a client to open its AML profile.
+
+![Compliance > Client Due Diligence](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-aml-clients.png)
 
 The rating adds, for each risk factor, the score of the client's value: client type (customer type), nationality or country of incorporation, PEP (client or beneficial owner), line of business or product (expected lines and policies), payment mode (expected and used), annual premium, and address (country, region, province, city). A value without a row of its own takes the factor's **Any other value** row. The total is Low up to `aml.risk_low_max_score` (2), High from `aml.risk_high_min_score` (8), Normal between. A PEP is always High (`aml.pep_always_high`) and a confirmed screening match always rates the client High. The client is rated at onboarding, at every policy issue (with the new policy's line, premium and payment mode), at the KYC refresh, after a screening decision and on demand.
 
@@ -2630,6 +2808,8 @@ The file layout is BV-AMLC-TXN 1.0, a pipe-delimited text file: a header record 
 
 Compliance > AML Settings has three tabs.
 
+![Compliance > AML Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-aml-settings.png)
+
 **General**: covered transaction amount and test, payment modes counted as cash, working days to file a CTR and an STR, lowest match score, the Low and High score limits, PEP always High, KYC refresh months per rating and the notice days, beneficial owner threshold, retention years of AML records (at least 5), the events stopped by a hit, the EDD block on policy issue, the AMLC institution code and transaction codes, and the screening provider (provider, mode, endpoint, environment variable of the API key, timeout, attempts). The values delivered follow the AMLA and its rules as known at delivery: the compliance officer confirms them against the AMLC's current issuances. **Save** records every change in the audit trail.
 
 **Risk factors**: the scoring table, grouped by factor. **Add factor value** (for example geography Sulu 3, or a nationality), change a score, switch a row off, or remove it. Premium size is scored by bands (from, below).
@@ -2647,6 +2827,13 @@ AML records (identification, ratings, screenings, alerts, cases, report files) a
 | Override a risk rating | Client Due Diligence > client > **Override rating** |
 | Approve a case for filing; close a case | AML Cases |
 | Record a filing with the AMLC | AMLC Reports > **Record filing** |
+| Resolve, escalate, refer to the IC or reopen a complaint | Insurance Commission > Complaints |
+| Assess a breach, record the NPC and data subject notifications, close the incident | Data Privacy (NPC) > Breach Register |
+| Anonymise a data subject on an erasure request | Master > Data Privacy > Data Subject Requests > **Anonymise** |
+
+## Insurance Commission registers, complaints and the breach register
+
+The officer works the registers of the chapter Compliance from the Compliance menu: **Licence Register** (the firm's licence, the officers, the licensed individuals and the agents and referrers paid commission, with the expiry calendar and the renewal records; a referrer without a licence in force cannot be paid commission, `compliance.referrer_licence_check`), **Fit and Proper** (the declarations and reviews of directors and officers), **Insurer Authority** (the certificates of authority of the insurers the broker places with, checked when business is sent to the market and issued, `compliance.insurer_authority_check`), **Complaints** (RA 11765: acknowledgement and resolution deadlines, letters, escalation, referral to the IC, the regulator report), **IC Annual Statement** and **IC Production Report** (the yearly workbook and the premiums by insurer and line), and **Breach Register** (NPC Circular 16-03: the 72-hour clock, the assessment, the notifications and the annual report). The daily jobs `compliance-reminders`, `complaints-deadlines` and the hourly `privacy-breach-deadlines` send the officer the reminders of each deadline.
 # Distribution, programmes and products
 
 This chapter covers the screens that bring business in and the specialist products placed in bulk: who works each prospect, the dealers, banks and affinity partners that refer business, the brand-new vehicle programmes, fleet schedules, marine open covers, facultative reinsurance placements, the comparison report given to clients, marketing campaigns and the Report Builder.
@@ -2654,7 +2841,7 @@ This chapter covers the screens that bring business in and the specialist produc
 | Screen | Menu | Who uses it |
 |---|---|---|
 | Lead Assignment | Operations > Sales & Marketing > Lead Assignment | Sales managers and the lead assignment team (read / write:lead-assignment); every account executive sees the team view of their own reporting line |
-| Distribution Channels | Master > Insurance Management > Distribution Channels | Sales, Processing and Operations (read:channels to view, write:channels to change) |
+| Distribution Channels | Master > Insurance > Distribution Channels | Sales, Processing and Operations (read:channels to view, write:channels to change) |
 | Dealer Programmes | Operations > Sales & Marketing > Dealer Programmes | Sales and Processing (read / write:motor-programmes) |
 | Comparison Reports | Operations > Sales & Marketing > Comparison Reports | Sales and Processing (quotation permissions) |
 | Campaigns | Operations > Sales & Marketing > Campaigns | Sales and marketing (read / write:campaigns) |
@@ -2664,7 +2851,11 @@ This chapter covers the screens that bring business in and the specialist produc
 | Dealer Production | Reports > Operational Reports > Dealer Production | Everyone with the reports permission |
 | Report Builder | Reports > Report Builder | Everyone with the reports permission; saving needs write:reports; the BI extract tab is for the administrator |
 
+The Sales Activities screen, also under Operations > Sales & Marketing, is described in the Sales & Marketing chapter.
+
 ## Lead Assignment
+
+![Operations > Sales & Marketing > Lead Assignment](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-lead-assignment.png)
 
 Choose Operations > Sales & Marketing > Lead Assignment. The screen has three tabs: **Team View**, **Queue** and **Assignment Rules**. Users without the lead assignment permissions see only the team view.
 
@@ -2697,7 +2888,9 @@ The **Queue** tab lists prospects waiting for an account executive: those no rul
 
 ## Distribution Channels
 
-Choose Master > Insurance Management > Distribution Channels. A channel is a dealer group or dealer branch, a financing bank or bank branch, or an affinity partner (a company whose members or homeowners are referred to the broker).
+![Master > Insurance > Distribution Channels](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-channels.png)
+
+Choose Master > Insurance > Distribution Channels. A channel is a dealer group or dealer branch, a financing bank or bank branch, or an affinity partner (a company whose members or homeowners are referred to the broker).
 
 1. Select **Add channel**.
 2. Choose the **Channel type**. A dealer branch **Belongs to** a dealer group and a bank branch to a financing bank; a group, bank or affinity partner stands alone.
@@ -2711,6 +2904,8 @@ The list shows each channel with its group and the **Prospects**, **Policies** a
 The channel is recorded on prospects (field **Distribution channel**), carried to the quotation made from the prospect and to the policy issued from the quotation (setting **channels.inherit_from_lead**). The report **Dealer Production** (Reports > Operational Reports > Dealer Production) shows per dealer group and channel the prospects, quotations, policies, sum insured, premium and commission for a period, filtered by channel, dealer group or channel type, and exports to Excel and PDF like every report.
 
 ## Dealer Programmes
+
+![Operations > Sales & Marketing > Dealer Programmes](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-dealer-programmes.png)
 
 Choose Operations > Sales & Marketing > Dealer Programmes. A programme holds the terms agreed with a dealer, and optionally its financing bank, for brand-new vehicles.
 
@@ -2739,6 +2934,8 @@ For every financed sale, **Bank endorsement letter** prints the letter to the ba
 
 Choose Operations > Fleet Schedules. A fleet schedule is one motor policy covering many vehicles of a client.
 
+![Operations > Fleet Schedules](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-fleet.png)
+
 1. Select **New fleet schedule**. Choose the **Client** and **Insurer**, the **Period from** and **Period to**, and the rates: **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury**, **Property damage**.
 2. Add the vehicles: **Add vehicle** for one, or **Template** and **Upload vehicles** for many (Fleet Vehicles upload template). For each vehicle enter the plate number or conduction sticker, chassis and engine numbers, make, model, year model, colour, **Vehicle class (CTPL tariff)**, usage, sum insured and mortgagee if any.
 3. Each vehicle is priced on its own: own damage and acts of nature on its sum insured, the excess liability premium, the CTPL of its class and the premium taxes. The totals show under **Vehicles on cover**.
@@ -2747,6 +2944,8 @@ Choose Operations > Fleet Schedules. A fleet schedule is one motor policy coveri
 After issue, **Add vehicle by endorsement** adds a vehicle and **Delete** (on a vehicle row) removes one. Each change is an endorsement whose premium is the vehicle's annual premium pro-rata to the days left (setting **fleet.pro_rata_basis**); completing it bills the additional premium or credits the return premium (setting **fleet.return_premium_on_delete**). **Schedule PDF** prints the schedule of vehicles on cover with each vehicle's premium and CTPL; **Excel** exports it.
 
 ## Marine Open Covers
+
+![Operations > Marine Open Covers](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-marine.png)
 
 Choose Operations > Marine Open Covers. An open cover insures a client's cargo shipments for a period: each shipment is certified or declared and the premium is billed per declaration period.
 
@@ -2774,6 +2973,8 @@ Declarations are due **marine.declaration_due_days** days after the period ends.
 
 ## Facultative Placements
 
+![Reinsurance > Facultative Placements](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-facultative.png)
+
 Choose Reinsurance > Facultative Placements. Here the broker acts as reinsurance broker: an insurer (the cedant) offers part of a risk to the facultative market.
 
 1. Select **New slip**. Choose the **Cedant**, enter the **Original insured**, **Original policy number**, **Class**, **Risk**, **Location**, **Period from** and **Period to**, **Currency**, **Sum insured (100%)**, **Premium (100%)** and the **Share offered**.
@@ -2787,6 +2988,8 @@ Choose Reinsurance > Facultative Placements. Here the broker acts as reinsurance
 
 ## Comparison Reports
 
+![Operations > Sales & Marketing > Comparison Reports](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-comparison.png)
+
 Choose Operations > Sales & Marketing > Comparison Reports. The comparison report is the printed, branded document given to the client comparing the insurers' offers, with the option the broker recommends and why. It never shows commission.
 
 1. Select **New report**. Choose what is **Compared**: a **Request for quotation** (its insurers' offers become the options) or two or more **Quotations** of the same client or prospect (enter their numbers). From a request for quotation the report can also be opened with the address /sales/comparison-reports?brokerSlipId= followed by the slip.
@@ -2798,6 +3001,8 @@ Choose Operations > Sales & Marketing > Comparison Reports. The comparison repor
 **E-mail to the client** queues the report as a PDF attachment to the client's e-mail on file or to the address entered. When the client decides, **Client chose** on the chosen option records the decision and closes the report as **Accepted**.
 
 ## Campaigns
+
+![Operations > Sales & Marketing > Campaigns](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-campaigns.png)
 
 Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force in the consent register (Master > Data Privacy) and who have an e-mail address. Everyone else is left out and recorded with the reason.
 
@@ -2824,6 +3029,8 @@ Each e-mail carries its own opt-out link. Opening it shows an unsubscribe page; 
 
 ## Report Builder
 
+![Reports > Report Builder](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-report-builder.png)
+
 Choose Reports > Report Builder. The Report Builder answers ad hoc questions over curated datasets (Policies, Clients, Bills (premium receivables), Claims and Commissions); each dataset needs the read permission of its module without a new report being programmed. A user who sees only their own book (data scope) sees only their own rows here too.
 
 1. On **Build**, choose the **Dataset**.
@@ -2844,15 +3051,17 @@ The Compliance menu holds the registers and reports the broker keeps for its reg
 
 | Screen | Read | Change |
 |---|---|---|
-| Licence Register, Fit and Proper, Insurer Authority, IC Annual Statement, IC Production Report | System Administrator, Operations, Accounting, Accounting Manager (`read:compliance`) | System Administrator, Operations (`write:compliance`) |
-| Complaints | System Administrator, Operations, Claims, Sales (`read:complaints`) | System Administrator, Operations, Claims (`write:complaints`); escalations go to `approve:complaints` |
-| Breach Register | System Administrator, Operations (`read:privacy`) | System Administrator, Operations (`write:privacy`) |
+| Licence Register, Fit and Proper, Insurer Authority, IC Annual Statement, IC Production Report | System Administrator, Compliance Officer, Operations, Accounting, Accounting Manager (`read:compliance`) | System Administrator, Compliance Officer, Operations (`write:compliance`) |
+| Complaints | System Administrator, Compliance Officer, Operations, Claims, Sales (`read:complaints`) | System Administrator, Compliance Officer, Operations, Claims (`write:complaints`); escalations go to `approve:complaints` |
+| Breach Register | System Administrator, Compliance Officer, Operations (`read:privacy`) | System Administrator, Compliance Officer, Operations (`write:privacy`) |
 
 The settings named below are in Master > Configuration (groups **compliance**, **complaints** and **privacy**).
 
 ## Licence register
 
 Compliance > Insurance Commission > Licence Register keeps the licences of the firm (the broker's licence), of its officers and licensed individuals, and of the agents, sub-agents and referrers paid commission.
+
+![Compliance > Insurance Commission > Licence Register](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-licences.png)
 
 1. Select **Add licence**. Choose the **Holder type**: **The firm**, **Officer**, **Licensed individual** or **Agent / referrer**. For an agent choose the referrer account; for an officer or individual the user (optional) and the position.
 2. Choose the **Licence type** (list in `compliance.licence_types`), enter the **Licence number**, **Issued by** (Insurance Commission by default), the lines authorised, the **Issued** and **Expires** dates, and attach the licence and the official receipt of the fees with **Attach documents**.
@@ -2874,6 +3083,8 @@ The daily job `compliance-reminders` (Master > Schedules) reminds the compliance
 
 Compliance > Insurance Commission > Fit and Proper keeps the record of each director and officer.
 
+![Compliance > Insurance Commission > Fit and Proper](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-fit-proper.png)
+
 1. Select **Add director or officer**. Enter the name, the **Category** (Director, Officer, Compliance officer, Key person), the position and the date appointed.
 2. Answer each declaration **Yes** or **No**. The declarations are the list in `compliance.fit_proper_declarations` (confirm the wording with the compliance officer against the IC rules in force). A **No** needs an explanation.
 3. Enter the date the declaration was signed and attach the clearances, curriculum vitae and board resolution.
@@ -2884,6 +3095,8 @@ The cards count reviews overdue, due soon (within `compliance.fit_proper_reminde
 ## Insurer authority
 
 Business is placed only with insurers whose IC certificate of authority is in force. The certificate number and validity are the fields **IC Certificate of Authority No.** and **Certificate of Authority Valid Until** of the insurer (Master > Insurance > Insurance Company).
+
+![Compliance > Insurance Commission > Insurer Authority](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-insurer-authority.png)
 
 Compliance > Insurance Commission > Insurer Authority lists every active insurer (switch **Include inactive insurers** for all) with its certificate, the validity, the days left and the **State**: **Valid**, **Expiring** (within `compliance.insurer_authority_expiring_days`, 60), **Expired**, or **No certificate** / **No validity date**. **Open insurer** opens the insurer master to update the certificate. **Export to Excel** downloads the report.
 
@@ -2898,6 +3111,8 @@ The job `compliance-reminders` reminds the compliance team of certificates expir
 ## Complaints register
 
 Compliance > Insurance Commission > Complaints is the register of complaints of clients and claimants under RA 11765 (Financial Products and Services Consumer Protection Act) and the IC rules on complaints handling.
+
+![Compliance > Insurance Commission > Complaints](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-complaints.png)
 
 1. Select **Log complaint**. Enter the date received, the **Channel** (list in `complaints.channels`), the complainant, the contact, the **Complainant type**, the policy number and claim number when the complaint concerns them (the policy fills the client and the insurer), the **Category** (list in `complaints.categories`), **Simple** or **Complex**, the amount disputed, the subject and the description, and attach the complainant's letter.
 2. Choose **Assigned to**: the person is notified with the deadlines.
@@ -2914,6 +3129,8 @@ The cards count open complaints, complaints past a deadline and escalated ones; 
 
 ## IC annual statement
 
+![Compliance > Insurance Commission > IC Annual Statement](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-ic-statement.png)
+
 Compliance > Insurance Commission > IC Annual Statement builds the schedules of the broker's annual statement from the ledger and the production records, as a working paper for the accountant. It follows the structure of the IC annual statement of an insurance broker; the name and version of the form set it follows are in `compliance.ic_statement_form` and printed on the cover. The accountant confirms the figures and transcribes them onto the IC form set in force for the year before filing.
 
 1. Choose the **Year** (the calendar year; the previous year is shown beside every figure).
@@ -2927,6 +3144,8 @@ Compliance > Insurance Commission > IC Annual Statement builds the schedules of 
 
 Compliance > Insurance Commission > IC Production Report shows the premiums placed by insurer and line of business in the layout of the Insurance Commission.
 
+![Compliance > Insurance Commission > IC Production Report](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-ic-production.png)
+
 1. Choose the period (**From**, **To**) and **Month**, **Quarter** or **Year**.
 2. The first table shows each insurer with the premiums of each IC line, the total premiums, the commission earned and the number of policies, and the total; the second the same by period.
 3. Select **Download Excel** for the workbook: **Report** (broker, TIN, period, basis), **Premiums by insurer**, **Premiums by period** and **Detail** (each policy and endorsement with its insurer, share, line, premium and commission).
@@ -2934,6 +3153,8 @@ Compliance > Insurance Commission > IC Production Report shows the premiums plac
 Policies count on their issue date (the inception date when not issued), endorsements on their effective date; a co-insured policy is split by the share of each insurer. The IC lines are `compliance.ic_lines_of_business` and the line of each product line is `compliance.ic_line_map` (a line not mapped goes to **Others**).
 
 ## Personal data breach register
+
+![Compliance > Data Privacy (NPC) > Breach Register](/home/user/BDOI-OOTB/docs/package/source/manual-images/k-breaches.png)
 
 Compliance > Data Privacy (NPC) > Breach Register is the log of security incidents and personal data breaches (Data Privacy Act; NPC Circular 16-03 on personal data breach management and the NPC rules that followed it).
 
@@ -2978,6 +3199,11 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Requests for Quotation (Broker Slips) | Present a risk to several insurers (BS-) and record offers (OFR-). | Customer, product, insured, period, response due, risk details, covers, insurers to approach (required); statuses Draft, Submitted, Responses in, Closed, Cancelled. | Processing Team |
 | Quotations | Price cover for the client (QT-). | Server re-pricing; validity 30 days; statuses Draft, Pending Customer, Customer Accepted, Approved, Rejected, Dropped, Expired, Converted to Policy; customer response Accepted, Declined, Revise. | Sales & Marketing |
 | Placement Slips | Firm order to the insurers (PS-). | Participants with shares totalling exactly 100% and one lead; statuses Draft, Sent to insurer, Bound, Declined, Policy issued, Cancelled; **New direct placement**, **Record Issued Policy**. | Processing Team |
+| Lead Assignment | Give each prospect an account executive. | Tabs Team View, Queue, Assignment Rules; methods round robin, fewest open prospects, fixed; `leads.assignment_fallback`, `leads.assignment_sla_hours`. | Distribution, programmes and products |
+| Dealer Programmes | Brand-new vehicle programmes with dealers and financing banks. | Rates, who pays (free first year, subsidy), what the upload creates; Dealer Sales upload (DSB-); bank endorsement letters. | Distribution, programmes and products |
+| Comparison Reports | The branded comparison of insurers' offers given to the client (CMP-). | From a request for quotation or several quotations; recommended option and reasons; never shows commission; **Client report (PDF)**, **E-mail to the client**, **Client chose**. | Distribution, programmes and products |
+| Campaigns | E-mail campaigns to clients and prospects with marketing consent. | Segments, templates with {{optOutLink}}, **Send now** or **Schedule** (`campaign-dispatch` job), results and opt-outs; `campaigns.max_recipients`. | Distribution, programmes and products |
+| Sales Activities | Calls, meetings, e-mails and visits logged on prospects, clients and quotations. | Period, account executive, type and outcome filters; **Activity Report** per account executive; next steps become My Work tasks; types and outcomes in Master > Organization. | Sales & Marketing |
 
 ### Clients, Policy and Claims
 
@@ -2986,6 +3212,10 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Clients | The client record (CL-) with tabs Policy, Claim, Renewal, Endorsement, Data privacy. | Created at the first policy; details changed by Personal Details Change endorsement. | Operations |
 | Policy | Policies (POL-) with payment status; **More actions**: Claim, Endorsement; **Bulk Upload**. | Policy statuses Active, Expired, Renewed, Lapsed, Cancelled; payment statuses Pending, Reviewing, Partial, Completed, Refunded; motor issue needs the KYC fields. | Sales & Marketing, Operations |
 | Claims | Claims (CLM-) and their journey. | Date of loss inside the policy period and not in the future; blocked while premium unpaid; settlement maker-checker; statuses Pending, Processing, Pending Approval, Approved, Settled, Rejected, Closed. | Claims |
+| Fleet Schedules | One motor policy covering many vehicles (FLT-). | Vehicles priced one by one (own damage, acts of nature, excess liability, CTPL by class, taxes); **Issue policy**; add or delete a vehicle by endorsement pro-rata; `fleet.minimum_vehicles`. | Distribution, programmes and products |
+| Marine Open Covers | A client's cargo shipments for a period (MOC-, MIC-, MDC-). | Rate and limit per conveyance, mark-up on invoice, minimum premium per certificate; certificates and declared shipments; monthly or quarterly declarations billed on the open policy. | Distribution, programmes and products |
+| Claim Documents | The checklist of documents of each claim. | Required and optional documents by line and claim type; **Received**, **Waive**, **Add document**, **Remind the claimant**, **Submit to insurer** (refused while a required document is missing). | Claims |
+| Motor Claim Repairs | Repair estimates, adjuster decisions, letters of authority (LOA-) and vehicle release. | Accredited repair shops; participation and parts depreciation from `motor_claims.*`; supplementary estimates and letters. | Claims |
 
 ### Renewals
 
@@ -3000,9 +3230,15 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Lapse Management | Lapsed and grace-period policies, revenue at risk, win-back campaigns; **Create Campaign**. |
 | Performance | Renewal rate, premium retention and cycle time against targets (85%, 90%, 15 days); KPI scorecard. |
 
-### Open Items and Payments
+### My Work, Payments, CTPL Authentication, Cover Notes and Policy Cancellation
 
-**Open Items**: Expiring Policy, Quote Pending, Pending Payments and Renewal Request, each with **See More**. **Payments**: gross premium, collected premium, receivables and earned commission; tabs Paid, Pending, Reviewing; type POLICY, RENEWAL POLICY or ENDORSEMENT.
+| Screen | Purpose | Fields and rules | Procedure |
+|---|---|---|---|
+| My Work | The daily worklist of the user and the team. | Tabs My Items, My Team, My Tasks, Calendar; counts Overdue, Due today, Next 7 days (`myWork.due_soon_days`), Open items, Open tasks; **New task**, **Reassign**; automatic follow-up tasks (`myWork.auto_tasks`). The old Open Items addresses open My Work. | Operations |
+| Payments | Premium of the user's policies. | Gross premium, collected premium, receivables and earned commission; tabs Paid, Pending, Reviewing; type Policy, Renewal Policy or Endorsement. | Operations |
+| CTPL Authentication | Authentication of CTPL certificates of cover with the IC-accredited provider. | COC series per insurer and branch; automatic request at issue (`ctpl.authenticate_on_issue`); **Authenticate now**, **Vehicle details**, **Enter code from the provider portal**, **Register a policy**; LTO feed. | Operations |
+| Cover Notes | Temporary evidence of cover (CVN-) from an accepted quotation or a placement slip. | Cover period `cover_note.validity_days` (30) up to `cover_note.max_validity_days`; statuses Active, Superseded, Expired, Cancelled; **Print**, **E-mail to the client**; job `cover-note-expiry`. | Operations |
+| Policy Cancellation | Cancellation with a computed return premium. | Methods pro-rata, short-period (Short-Period Rates), flat; reasons from Cancellation Reasons; returned taxes `endorsements.cancellation_returned_taxes`; posting rules policy.cancel and endorsement.return_premium. | Operations |
 
 ## Accounts
 
@@ -3014,7 +3250,12 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Credit Control > Premium Warranty Monitor | Unpaid premium past or near the insurer's warranty. | At risk from 7 days before the deadline; extensions up to 90 days, approved by the Accounting Manager. |
 | Credit Control > Client Credit Limits | Credit limit per client against open premium. | Over-limit policies issued with a warning; limits set by the Accounting Manager. |
 | Credit Control > Remittance Ageing | Collected premium not yet remitted, per insurer. | Aged on the insurer's remittance terms from the collection date; **Excel**. |
+| Post-Dated Cheques | Register of cheques received before their date (PDC-). | **Register cheque**, **Deposit** (posts the official receipt), **Cleared**, **Bounced** (receipt cancelled, client e-mailed), **Replace**, **Return**, **Cancel**; tab Deposit due (`pdc.due_window_days`); job `pdc-deposit-due`. |
+| Claims Settlements | Settlements paid through the broker. | **Funds received** (posting rule claim.funds_received), **Pay claimant** (claim.paid_to_claimant, voucher CPV-), **Release form**; receipts and disbursements permissions. |
+| Payables (Supplier Invoices, Supplier Payments, AP Ageing, Suppliers, Supplier 2307) | Accounts payable sub-ledger (APV-, SPV-) and the suppliers' BIR Form 2307. | Input VAT and EWT computed from the supplier's tax codes; approval by the Accounting Manager (`payables.maker_checker`); posting rules ap.invoice and ap.payment; an asset line goes to the fixed asset register. |
+| Fixed Assets (Asset Register, Depreciation Run, Disposals) | Fixed asset register (FA-), straight-line depreciation and disposals (FAD-). | Asset classes with useful life and accounts; one journal per class and period (fa.depreciation); sale with output VAT and sales invoice, or write-off (fa.disposal); gain or loss accounts. |
 | Disbursement | Payment vouchers and cheques (PV-, DT-). | Payee type, criteria, payee, policy, transaction type, currency; maker-checker; statuses Draft, For approval, Approved, Paid, Cancelled. |
+| Bank Payment Files | Payment of approved vouchers by bank upload file (BPB-). | Layout per bank (Master > Finance > Bank File Layouts), channel bulk credit, InstaPay (`bank_payments.instapay_limit`) or PESONet, value date; approval within the Authority Matrix; **Write file**, **Mark uploaded to the bank**, **Import status file**, **Record result**. |
 | Journal Voucher, Correction JV, Reversal JV | Manual journals (JV-), corrections and reversals. | Must balance; approval required (`journal.require_approval`); period status rules. |
 | Open Entry Matching, Open Entry Unmatching | Match open debit and credit entries of an account; write-offs. | Sub account code, pull, match; write-off reason limits. |
 | Accounting Query | Search accounting entries. | Policy, client, entry type, reference type, status, dates, GL code; **Export**. |
@@ -3023,6 +3264,11 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Bank Reconciliation (Workspace, Reconciliations, reports) | Statements (BST-), matching, adjustments, reconciliations (BRC-). | Balanced statement; duplicate file refused; auto-match rules; stale cheques after 180 days; approval by the Accounting Manager. |
 | Insurer Reconciliation > Insurer Statements | Insurer statements of account (ISR-) matched to remittances and debit notes. | Tolerance PHP 1.00; every difference resolved before submission; approval by the Accounting Manager. |
 | Tax (BIR Form 2307, VAT Summary, SAWT, QAP, SLSP Sales, SLSP Purchases) | BIR certificates, working papers and alphalists. | Quarter and payee; ATC per payee type; broker details in `bir.*`. |
+| Tax > Withholding Returns, Annual Alphalist 1604-E, Percentage Tax 2551Q | The BIR forms 0619-E, 1601-EQ, 1604-E and 2551Q laid out as the forms, with their filing records. | Reconciled with the QAP and the ledger; **Print**, **Excel**, **Record filing**, **Amended return**; due dates from `bir.withholding_due_day`; percentage tax rate `bir.percentage_tax_rate`. |
+| Tax > BIR DAT Files | The validation data files of the QAP, SAWT, SLSP and 1604-E alphalist. | BIR Alphalist Data Entry and Validation Module 7.x and RELIEF layouts; warnings for payees without TIN; validate with the BIR module before submitting. |
+| Tax > Sales Invoices | The broker's sales invoices under the EOPT Act (SI-) and payment acknowledgements (PAR-). | For debit notes, overriding commission, policy commission or manual fees; serial range `invoice.serial_from` to `invoice.serial_to`; posting rules sales_invoice.issue and sales_invoice.payment; **Cancel invoice**. |
+| Tax > E-Invoicing (EIS) | Outbox of e-invoices for the BIR Electronic Invoicing System. | `eis.enabled`, `eis.mode` (test or live), credentials by environment variable names; job `eis-outbox`; **Send now**, **Retry**, **Queue earlier invoices**, **Export payloads**, **Uploaded manually**. |
+| Tax > CAS Books and Documents | Loose-leaf books of accounts and the CAS registration documents. | Readiness checks; books printed month by month with running page numbers (`cas.enforce_print_order`); print register, **Reprint**, **Void print**; system description, backup procedure and audit trail extract. |
 | Period End (Period Management, Month-End Close, Year-End Close, Recurring Journals, Financial Statements) | Fiscal calendar and closing (MEC-, YEC-, RJV-). | Period statuses Open, Soft-closed, Closed, Locked; checklist; approval by the Accounting Manager. |
 | Incentive (My Programs, Calculations, Approvals, Statement) | Incentive results and payment (CALC-). | Calculation batches approved by another user. |
 
@@ -3054,7 +3300,8 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Screen | Purpose and main content |
 |---|---|
 | Commission Dashboard | Brokerage income, comsub, net margin, margin %, outstanding payable, WHT withheld; by referrer, status, month, product and insurer; Accounting and Management views. |
-| Agents/Referrer Accounts | Referrers with type, level, policies, net payable, WHT type, bank account; account per referrer with current, future and past cycles; **Mark eligible**, **Approve**, **Generate payout**. |
+| Agents/Referrer Accounts | Referrers with type, level, policies, net payable, WHT type, bank account; account per referrer with current, future and past cycles; **Mark eligible**, **Approve**, **Generate payout**. An agent or sub-agent without a licence in force on the Licence Register cannot be approved or paid (`compliance.referrer_licence_check`). |
+| Insurer Overrides (Agreements, Computations) | Overriding, profit and contingent commission agreements with insurers (basis production, loss ratio or growth; slab or banded tiers) and their computations per period (OVC-): **Compute**, **Submit for approval**, **Approve** (posting rule override_commission.accrual), **Issue invoice**, **Settle** (override_commission.settlement). |
 
 ## Reinsurance
 
@@ -3065,16 +3312,28 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Claims Recovery | Recoverable amounts on claims (RCL-); **Register Recovery**. |
 | Reconciliation | Reinsurer statements (REC-) against our figures; tolerance 1%; **Reconcile Statement**, **Log Exception**. |
 | Analytics | Utilisation, loss ratio trend, retention against 65%, recovery performance, catastrophe exposure. |
+| Facultative Placements | Facultative slips (FAC-) as reinsurance broker: cedant, risk, share offered, reinsurers' lines; **Send to market**, **Bind** (posting rule ri.facultative.bind), cover note, debit and credit notes, premium received and paid, bordereau. |
 
 ![Reinsurance > Treaty Dashboard](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-ri-treaties.png)
+
+## Compliance
+
+| Screen | Purpose and main content |
+|---|---|
+| AML Dashboard, Client Due Diligence, EDD Reviews, KYC Refresh, Screening Hits, Screening Lists, Transaction Alerts, AML Cases, AMLC Reports, AML Settings | The AML/CFT programme (EDD-, AMA-, AMC-, AMR-): risk rating and KYC status per client, EDD reviews, screening against the uploaded lists and the provider, the monitoring rules and alerts, cases and the AMLC report files; decisions reserved to approve:aml (Compliance Officer chapter). |
+| Insurance Commission > Licence Register, Fit and Proper, Insurer Authority | Licences of the firm, officers, individuals and referrers with expiry calendar and renewals; declarations and reviews of directors and officers; the insurers' certificates of authority with their state; reminders by `compliance-reminders`. |
+| Insurance Commission > Complaints | Complaints register (CPT-) under RA 11765 with acknowledgement and resolution deadlines, letters, escalation, referral to the IC and the regulator report; job `complaints-deadlines`. |
+| Insurance Commission > IC Annual Statement, IC Production Report | The yearly statement workbook from the ledger (schedules 1 to 4, account mapping, accountant confirmation) and the premiums by insurer and IC line for a period. |
+| Data Privacy (NPC) > Breach Register | Security incidents and personal data breaches (PDB-): 72-hour clock, assessment, NPC and data subject notifications, closure, annual report; job `privacy-breach-deadlines`. |
 
 ## Reports
 
 | Screen | Content |
 |---|---|
 | All Reports | Every report the role may run, grouped, with a description and a search box. |
-| Operational Reports | Production, Claims, Renewal, Remittance, Broker Commission. |
+| Operational Reports | Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production. |
 | Financial Reports | SOA/Premium Receivable, Collection Report, Payables, Journal, Trial Balance, Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail, Aged Payables to Insurers, Month-End Close Status, Co-insurance Register, Due to Insurers by Co-insurer. |
+| Report Builder | Ad hoc reports over the datasets Policies, Clients, Bills, Claims and Commissions: columns, grouping, filters, sort, Excel export, saved reports shared by role; BI extract runs for the administrator. |
 
 See the chapter Reports, dashboards, schedules and notifications.
 
@@ -3084,12 +3343,16 @@ See the chapter Reports, dashboards, schedules and notifications.
 
 | Screen | Purpose |
 |---|---|
-| System Settings | Branding (app title, logo, favicon), display currency, default language, theme colours. |
+| System Settings | Branding (app title, logo, favicon), display currency, default language, theme colours; link to Theme and Branding. |
+| System Settings > Theme and Branding | Theme presets, layout, font and colours with the WCAG AA contrast check; sign-in page picture and texts; document, report and Excel branding; e-mail layout; application name and images; document signature mapping; brand pack export and import (System Administrator chapter). |
 | Configuration | Every business setting by area; changes audited. |
 | Document Numbering | Number series: prefix, format tokens, digits, counter reset, next number. |
 | Schedules | Scheduled jobs: timetable, status, next and last run; **Run now**, **Run history**, **Edit schedule**. |
 | Audit Trail | Every audited action by record type, record ID, user and dates. |
 | E-mail Outbox | Queued, sent and failed e-mails with their attachments; **Retry**. |
+| Integrations | Connectors (SMS, Viber, CTPL authentication, LTO feed, insurer API, bank files) with mode, credentials by environment variable name, retries and **Test connection**; the outbox and inbox of every message; job `integration-outbox`. |
+| Message Templates | SMS and Viber texts with placeholders, consent needed and connector; **Send a test**; the messages sent. |
+| Insurer Integration | Mapping per insurer (broker code, product codes, request and answer maps, claim statuses); requests for policy issuance, premium data and claim status; claim status file import. |
 | Go-Live Data Load | Configuration and migration workbooks: **Blank template**, **Current data**, **Upload and validate**, errors download, **Load**, reconciliation, history (chapter Go-Live Data Load). |
 | Data Privacy > Data Subject Requests | Requests of data subjects (DSR-) with due dates; **Log request**, **Export personal data**, **Anonymise**, **Close**. |
 | Data Privacy > Consent Register | Consents given, refused and withdrawn by clients and prospects. |
@@ -3100,11 +3363,14 @@ See the chapter Reports, dashboards, schedules and notifications.
 |---|---|
 | Organization > Company | The broker company: code, name, licence number, e-mail, TIN, logo, website, address, phone, fax; letterhead company. |
 | Organization > Branch | Branches and departments. |
-| Insurance > Insurance Company | Insurers: code, name, address, phone, e-mail, TIN; credit terms (premium payment warranty, remittance terms, default billing mode); **Upload**. |
+| Organization > Sales Activity Types, Sales Activity Outcomes | The activity types (channel, default days to the next step) and the outcomes (positive, neutral or negative) of the sales activity log. |
+| Insurance > Insurance Company | Insurers: code, name, address, phone, e-mail, TIN, IC Certificate of Authority No. and its validity; credit terms (premium payment warranty, remittance terms, default billing mode); **Upload**. |
 | Insurance > Line of Business, Product, Cover | Lines, products (with their line) and covers. |
 | Insurance > Signatories | Authorised signatories of quotations and documents. |
 | Insurance > Vehicle | Vehicle brands, models, variants, seating; **Upload**. |
-| Location > Country, Province, City / Municipality | Address lists; **Upload**. |
+| Insurance > Short-Period Rates, Cancellation Reasons, Claim Document Checklist, Repair Shops | The operational masters: the percentage the insurer keeps per period in force; who initiates each cancellation reason and its method; the documents each claim needs by line and type; the accredited repair shops. |
+| Insurance > Distribution Channels | Dealer groups and branches, financing banks and branches, affinity partners, with referrer and comsub, mortgagee clause and letter addressee; prospects, policies and premium per channel. |
+| Location > Country, Province, City / Municipality | The PSGC address lists (regions, provinces, cities and municipalities with ZIP codes; barangays on the address forms); **Upload**. |
 | Employees > Hierarchy, Designation | Staff structure; branch, designation and reporting line are set on the user. |
 | Users and Access > User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews | Users and access controls (System Administrator chapter). |
 
@@ -3126,7 +3392,9 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Account Category, Main Account, Sub Account | The chart of accounts: code, name, statement group, category, normal balance, open-item flag, manual JV allowed, system use, status; **Upload**. |
 | Taxation | Tax codes with rate, BIR ATC, GL account and effective date. |
 | Close Checklist | Month-end checklist items, automatic or manual, blocking or warning. |
+| Asset Classes | Classes of the fixed asset register with useful life and the asset, accumulated depreciation and depreciation expense accounts. |
 | Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats | How statement files are read; bank items and matching rules. |
+| Bank File Layouts | How each bank's payment upload file is written (delimited or fixed width, header, payment and trailer records, file name) and its status file read; the payee bank accounts; starter layouts in test mode until validated with the bank. |
 | Remittance Master | Automated remittance, statement templates, settlement parameters, bulk processing formats, exceptions, agency bill, adjustment and notification templates. |
 
 ![Master > Finance > Premium Taxes & LGU Rates](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-premium-taxes.png)
@@ -3177,8 +3445,15 @@ Numbers follow their series on Master > Document Numbering. The delivered format
 | CWT | BIR Form 2307 |
 | PC, PCR, PCRC | Petty cash transaction, request, receipt |
 | CALC, INC | Incentive calculation, incentive programme |
-| DSR | Data subject request |
-| CES, RCL, REC, BDX, TRT | Cession, recovery, reinsurance reconciliation, bordereau, treaty |
+| DSR, PDB | Data subject request, personal data breach or security incident |
+| CES, RCL, REC, BDX, TRT, FAC | Cession, recovery, reinsurance reconciliation, bordereau, treaty, facultative slip |
+| CVN, LOA, CPV | Cover note, letter of authority, claim payment voucher |
+| PDC, BPB | Post-dated cheque, bank payment batch |
+| APV, SPV, FA, FAD | Supplier invoice voucher, supplier payment, fixed asset, asset disposal |
+| OVC, SI, PAR | Overriding commission computation, sales invoice, payment acknowledgement |
+| EDD, AMA, AMC, AMR | EDD review, AML alert, AML case, AMLC report file |
+| CPT, CMP | Complaint, comparison report |
+| DSB, FLT, MOC, MIC, MDC | Dealer sales batch, fleet schedule, marine open cover, marine certificate, marine declaration |
 
 # Reports, dashboards, schedules and notifications
 
@@ -3227,7 +3502,7 @@ Dashboards show live figures; they change as soon as a transaction is saved. The
 
 ## Schedules
 
-BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy expiry (00:15), quotation expiry (00:30), dormant accounts (01:45), housekeeping (02:45), daily reports (05:00), renewal pipeline (05:30), renewal notices (06:00), receivable ageing (07:00), collection reminders (08:00), the e-mail outbox (every 5 minutes) and the renewal notice queue (every minute). Five finance jobs are delivered switched off: accrual auto-reversal, recurring journals, period auto soft-close, bank reconciliation auto-match and the month-end close reminder; Accounting decides whether to switch them on or run them from the screens. The remittance schedules job (06:15) and the overdue data subject requests job (07:00) are also delivered switched off. The System Administrator sees and runs the jobs on Master > Schedules. The BrokerVerse Schedules and Batch Jobs document describes each job, what it reads and writes, and what to do when it fails.
+BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy expiry (00:15), quotation expiry (00:30), dormant accounts (01:45), housekeeping (02:45), daily reports (05:00), renewal pipeline (05:30), renewal notices (06:00), cover note expiry (06:20), post-dated cheques due (06:25), AML transaction monitoring (06:30), missing claim document reminders (06:35), compliance reminders (06:45), receivable ageing (07:00), KYC refreshes due (Mondays 07:00), collection reminders and complaints deadlines (08:00), the breach register deadlines (every hour), My Work reminders (every 15 minutes), the e-mail outbox (every 5 minutes), the integration outbox (every 2 minutes) and the renewal notice queue (every minute). Jobs delivered switched off, to be switched on by the process owner: accrual auto-reversal, recurring journals, period auto soft-close, bank reconciliation auto-match, the month-end close reminder, remittance schedules, overdue data subject requests, SMS renewal notices and payment reminders, campaign dispatch, lead assignment SLA, the EIS outbox, the screening provider retry and the BI extract. The System Administrator sees and runs the jobs on Master > Schedules. The BrokerVerse Schedules and Batch Jobs document describes each job, what it reads and writes, and what to do when it fails.
 
 ## Notifications and e-mails
 
@@ -3241,10 +3516,12 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Claims | New claim; claim status changes; settlement to approve; settlement approved. |
 | Renewal | Renewal notices sent; renewal terms to approve; renewed; lapsed. |
 | Remittance and commission | Remittance, settlement and debit note approvals; incentive batch approvals. |
-| Finance | Journal voucher and petty cash approvals; month-end reminders; close run to approve. |
+| Finance | Journal voucher and petty cash approvals; month-end reminders; close run to approve; supplier invoices to approve; post-dated cheques due; bounced cheques. |
 | Reinsurance | Treaty awaiting approval; treaty approved. |
+| Compliance | Screening hits and EDD reviews to decide; alerts and cases due; licences, fit and proper reviews and insurer certificates expiring; complaint deadlines; breach notification deadlines; data subject requests overdue. |
+| My Work | Task reminders at the time chosen; one alert for an overdue task. |
 
-**E-mails** are queued in the E-mail Outbox and sent by the E-mail outbox job when sending is switched on. The main e-mails are the quotation approval request and shared quotation to clients, the request for quotation and the placement slip to insurers, the policy issued and endorsement notices to clients, the renewal notices (First, Second and Final Notice), the premium payment reminders, the Preliminary Loss Advice to insurers, the commission debit note and the remittance statements to insurers, scheduled reports to staff and the password reset code. E-mails carry no attachments; documents travel as download links or are printed. SMS, Viber and WhatsApp are not sent by the system: where a screen offers SMS, phone or letter, the action is only recorded. The wording of each e-mail is a template in Master > Configuration; the BrokerVerse Communication Templates and Touchpoints document lists every e-mail and notification with its trigger, recipient and text.
+**E-mails** are queued in the E-mail Outbox and sent by the E-mail outbox job when sending is switched on, in the branded layout of Theme and Branding. The main e-mails are the quotation approval request and shared quotation to clients, the request for quotation and the placement slip to insurers, the policy issued and endorsement notices to clients, the renewal notices (First, Second and Final Notice), the premium payment reminders, the Preliminary Loss Advice and the missing document reminders of claims, the commission debit note and the remittance statements to insurers, the cover note, the comparison report and the bank endorsement letter, campaign e-mails, scheduled reports to staff and the password reset code. Official receipts, premium invoices, cover notes, debit notes, comparison reports and bank letters travel as PDF attachments (up to `email.max_attachment_mb`); other documents as download links. **SMS and Viber** messages (renewal notices, payment reminders, claim updates, CTPL authentication) are sent through the connectors of Master > System > Integrations with the texts of Message Templates, once a connector is live and the jobs are switched on; until then, and for WhatsApp, phone and letter, the action is only recorded. The wording of each e-mail is a template in Master > Configuration; the BrokerVerse Communication Templates and Touchpoints document lists every e-mail and notification with its trigger, recipient and text.
 
 ![Notifications under the bell](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-bell.png)
 
@@ -3287,6 +3564,13 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Commission payout blocked: no bank account | Add the referrer's bank account first. |
 | A discount above the role's limit is refused | The Authority Matrix limits the discount of your role. Ask a role with a higher limit. |
 | E-mails are not received | Sending is switched off or the mail server is not set; the E-mail Outbox says which. Ask the System Administrator. |
+| ... has no licence on the licence register. Record the licence in Compliance > Licence Register before approving or paying commission. | The agent or sub-agent has no licence in force (`compliance.referrer_licence_check` = block). Record the licence, or ask the Compliance Officer. |
+| The insurer's certificate of authority is expired or missing | `compliance.insurer_authority_check`: with warn the step goes ahead with a warning; with block it is refused until the certificate is entered on Master > Insurance > Insurance Company. |
+| Policy issue, refund or claim payment refused: screening match | A screening hit of the client or payee is open, escalated or confirmed (`aml.screening_block_events`). The Compliance Officer decides the hit on Compliance > Screening Hits. |
+| No policy is issued: EDD required | The client is rated High and has no approved EDD review (`aml.block_issue_pending_edd`). Prepare the review on Compliance > EDD Reviews; the Compliance Officer approves it. |
+| Cannot save: ... contrast ... is below WCAG AA 4.5:1 | Theme and Branding refuses a theme whose button, header or table header text does not reach 4.5:1. Change the text or background colour until the badge is green. |
+| Submit to insurer is disabled on a claim | A required document of the checklist is still missing (`claims.require_documents_before_submission`). Mark it received, upload it or waive it with a reason. |
+| The disposal is refused: a month before it is not depreciated | Run the Depreciation Run up to the month before the disposal first (`fixed_assets.disposal_requires_depreciation_to_date`). |
 | Something went wrong on this screen | Reload the screen. If it persists, report the screen, the record number, the time and the request ID to support. |
 
 ## Frequently asked questions
@@ -3320,16 +3604,20 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Billing mode | How the premium is paid: broker billed or direct bill. |
 | Bordereau | The list of policies ceded to a reinsurer in a period. |
 | Bound | All insurers of a placement slip have confirmed their shares. |
+| Brand pack | The branding of one environment in one file (theme, application name, logo, favicon, sign-in picture, print logo), exported and imported on Theme and Branding. |
 | Broker billed | The client pays the premium to the broker, who remits it to the insurer net of commission. |
 | Broker slip | The request for quotation that presents a risk to several insurers. |
 | Brokerage | The commission the insurer pays the broker. |
 | Co-insurance | Several insurers share one risk, each for a percentage, under one lead insurer. |
 | Comsub | The share of the brokerage paid by the broker to an agent or referrer. |
+| COC | Certificate of cover: the CTPL certificate authenticated with the IC-accredited provider before it is released. |
+| Cover note | Temporary evidence of cover given by the broker while the insurer issues the policy. |
 | CTPL | Compulsory Third Party Liability: the motor cover required for LTO registration, priced at the Insurance Commission tariff per vehicle class. |
 | Debit note | The broker's bill to an insurer for commission on direct-bill policies. |
 | Direct bill | The client pays the premium directly to the insurer; the broker bills its commission to the insurer. |
 | DST | Documentary stamp tax on the premium (PHP 0.50 on each PHP 4.00 of premium or fraction, NIRC section 184). |
 | Endorsement | A change to an issued policy: details, cover, period or cancellation, with additional or return premium. |
+| EDD | Enhanced due diligence: the review of a High-risk client (source of wealth and funds, purpose of the relationship) approved by the Compliance Officer. |
 | EWT | Expanded withholding tax: income tax withheld at source on commission and other income payments, creditable against the payee's income tax. |
 | FST | Fire service tax on fire premium (2% in the delivered set-up). |
 | Gross premium | Net premium plus taxes (and CTPL for motor) less discount: what the client pays. |
@@ -3339,9 +3627,12 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | Lead insurer | The insurer that leads a co-insurance and whose terms apply. |
 | LGT | Local government tax on the premium (0.75% in the delivered set-up, or the rate of the city or municipality). |
 | LGU | Local government unit: the city or municipality whose tax rate applies. |
+| LOA | Letter of authority: the broker's letter to the repair shop with the approved repair cost, the insurer's share and the insured's participation. |
 | Maker-checker | The maker enters a transaction; a different user approves it. |
 | Net premium | The premium before taxes. |
 | OR | Official receipt: the BIR-registered receipt issued for money received. |
+| PDC | Post-dated cheque: a client's cheque received before its date, deposited and receipted on that date. |
+| PEP | Politically exposed person: a client, owner or signatory who holds a prominent public position, always rated High. |
 | Placement slip | The firm order to the lead insurer and the co-insurers. |
 | Posting rule | The recipe that turns a business event into journal lines. |
 | Premium payment warranty | The number of days the insurer allows the client to pay the premium. |
@@ -3351,6 +3642,7 @@ BrokerVerse runs its daily work through scheduled jobs, in Manila time: policy e
 | SAWT | Summary Alphalist of Withholding Taxes: the tax withheld from the broker by its payors. |
 | SLSP | Summary List of Sales and Purchases. |
 | SOA | Statement of account: the list of bills of a client with amount, paid and balance; also the insurer's statement to the broker. |
+| STR, CTR | Suspicious transaction report and covered transaction report filed with the AMLC. |
 | Soft-closed | A period that accepts postings only from the Accounting Manager. |
 | Stale cheque | A cheque not cleared within 180 days of issue. |
 | TIN | Taxpayer identification number. |
