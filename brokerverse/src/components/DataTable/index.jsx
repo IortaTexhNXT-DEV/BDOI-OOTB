@@ -47,7 +47,7 @@ export const TableSkeleton = ({ rows = 5 }) => {
   return (
     <div ref={ref} className="bv-table-skeleton" role="status" aria-label="Loading" aria-busy="true">
       {Array.from({ length: rows }, (_, r) => (
-        <div key={r} className="bv-table-skeleton__row" style={{ gridTemplateColumns: template }}>
+        <div key={r} className="bv-table-skeleton__row" data-testid="table-skeleton-row" style={{ gridTemplateColumns: template }}>
           {Array.from({ length: count }, (__, c) => (
             <div key={c} className="bv-table-skeleton__cell">
               <Skeleton height="0.75rem" width={`${WIDTHS[(r * 3 + c) % WIDTHS.length]}%`} />
