@@ -5,7 +5,7 @@
  * `all: true` grants every menu. Each other entry maps a top-level menu name (lower case) to the
  * second-level items the role may open (case-insensitive; a nested group such as "Renewals" or
  * "Petty Cash" grants all of its children; "Group > Item" grants one item of a group or of a Master
- * section such as "Finance"), or to `true` for the whole menu (a top-level entry such as Home).
+ * section such as "Finance"), or to `true` for the whole menu (a top-level entry such as My Work).
  *
  * The server enforces the same personas through permissions on every endpoint; this file only
  * decides what the user sees and which screens the router lets them open.
@@ -17,7 +17,6 @@ const OPERATIONS_ALL = [
   "Policy",
   "Claims",
   "Renewals",
-  "My Work",
   "Payments",
   // CTPL COC authentication (read:policies; authenticate, enter a code, COC series: write:policies)
   "CTPL Authentication",
@@ -56,7 +55,7 @@ export const roleMenuPermissions = {
   sales: {
     dashboard: ["Executive Dashboard", "Sales Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
-    home: true,
+    "my work": true,
     operations: OPERATIONS_ALL,
     commission: ["Commission Dashboard"],
     reports: ["All Reports", "Operational Reports", "Report Builder"],
@@ -79,7 +78,7 @@ export const roleMenuPermissions = {
       "Risk Mapping",
       "Product Analytics",
     ],
-    home: true,
+    "my work": true,
     operations: OPERATIONS_PROCESSING,
     reinsurance: [
       "Treaty Dashboard",
@@ -96,7 +95,7 @@ export const roleMenuPermissions = {
   operations: {
     dashboard: ["Executive Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
-    home: true,
+    "my work": true,
     operations: OPERATIONS_ALL,
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     // data subject requests and the consent register (read:privacy / write:privacy); distribution channels (read:channels)
@@ -108,7 +107,7 @@ export const roleMenuPermissions = {
   // Compliance Officer (AML/CFT): the Compliance menu (read:aml, write:aml, approve:aml), client onboarding and the client,
   // policy and claim records it reviews
   "compliance-officer": {
-    home: true,
+    "my work": true,
     compliance: true,
     operations: ["Clients", "Policy", "Claims"],
     reports: ["All Reports", "Operational Reports"],
@@ -117,8 +116,8 @@ export const roleMenuPermissions = {
   },
   claims: {
     dashboard: ["Claims Dashboard"],
-    home: true,
-    operations: ["Clients", "Policy", "Claims", "My Work", "Fleet Schedules", "Marine Open Covers",
+    "my work": true,
+    operations: ["Clients", "Policy", "Claims", "Fleet Schedules", "Marine Open Covers",
       // claim document checklist and motor claim repairs (write:claims); their masters below
       "Claim Documents", "Motor Claim Repairs"],
     master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
@@ -131,8 +130,8 @@ export const roleMenuPermissions = {
   // inherits Accounting (the server returns both roles), so it needs no entry of its own.
   accounting: {
     dashboard: ["Executive Dashboard"],
-    home: true,
-    operations: ["My Work", "Payments"],
+    "my work": true,
+    operations: ["Payments"],
     accounts: [
       "Receipts",
       "Collections",
@@ -263,7 +262,7 @@ export const filterMenuForRoles = (menuList, roles) => {
     .filter(Boolean);
 };
 
-/** First screen the roles may open after sign-in (Home, the first entry, for every delivered role); an entry marked `landing: false` only when nothing else is open. */
+/** First screen the roles may open after sign-in (My Work, the first entry, for every delivered role); an entry marked `landing: false` only when nothing else is open. */
 export const firstAllowedPath = (menuList, roles) => {
   const walk = (items, skip) => {
     for (const item of items || []) {

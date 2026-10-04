@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";
 import StatCards from "../../components/StatCards";
@@ -22,7 +21,7 @@ import TaskDialog from "./TaskDialog";
 import "./index.scss";
 
 /**
- * My Work: the landing page of every role (Home, /agent/home) and Operations > My Work (/operations/my-work), one
+ * My Work (/my-work): the first screen of every role after sign-in (the former Home and Operations > My Work), one
  * screen. My Items (everything waiting on the user, by category, with due dates and the next action), My Team
  * (managers: the items of the people reporting to them, per person, with reassignment), My Tasks (the work diary)
  * and Calendar (day / week agenda). The role preset (logic.js PRESETS) decides which categories come first, the
@@ -35,7 +34,6 @@ const MyWork = () => {
   const { formatCurrency } = useFormatCurrency();
   const presetCode = useMemo(() => presetFor(getUserRoles()), []);
   const preset = PRESETS[presetCode] || PRESETS.general;
-  const atHome = location.pathname.startsWith("/agent/home");
   const [mine, setMine] = useState(null);
   const [scoped, setScoped] = useState(null);
   const [home, setHome] = useState(null);
@@ -117,7 +115,6 @@ const MyWork = () => {
     calendar: t("myWork.tab.calendar", "Calendar"),
   };
   const tabIcon = { items: "pi pi-inbox", team: "pi pi-users", tasks: "pi pi-check-square", calendar: "pi pi-calendar" };
-  const crumbHome = atHome ? { label: t("sidebar.Home", "Home") } : { label: t("sidebar.Operations", "Operations") };
 
   return (
     <div className="mw-page">
@@ -125,7 +122,6 @@ const MyWork = () => {
         <div>
           <h1 className="page__title">{t("myWork.title", "My Work")}</h1>
           <p className="mw-subtitle">{subtitle}</p>
-          <BreadCrumb model={[{ label: t("myWork.title", "My Work") }]} home={crumbHome} className="mw-crumbs" />
         </div>
         <div className="mw-head__actions">
           <Button icon="pi pi-refresh" text rounded aria-label={t("myWork.refresh", "Refresh")} tooltip={t("myWork.refresh", "Refresh")} tooltipOptions={{ position: "bottom" }} onClick={refresh} />

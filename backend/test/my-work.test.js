@@ -264,7 +264,7 @@ describe('tasks', () => {
     // the open tasks are listed with the other items, and alone with category=tasks
     expect((await items('mw.sales1', 'pageSize=100')).data.filter((i) => i.category === 'tasks').map((i) => i.id)).toEqual([own.id]);
     const only = await items('mw.sales1', 'category=tasks');
-    expect(only.data[0]).toMatchObject({ id: own.id, link: `/operations/my-work?tab=tasks&task=${own.id}`, reassign: 'task', clientName: 'Mw Client 1', title: 'POL-MW-0001' });
+    expect(only.data[0]).toMatchObject({ id: own.id, link: `/my-work?tab=tasks&task=${own.id}`, reassign: 'task', clientName: 'Mw Client 1', title: 'POL-MW-0001' });
   });
 
   it('records a task can be related to follow the permissions', async () => {

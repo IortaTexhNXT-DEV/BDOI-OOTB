@@ -199,7 +199,7 @@ export async function createTask(body, user, { db = pool, recordScope = null, so
   const task = await getTask(rows[0].id, user, { db });
   if (assignee !== user.id) {
     await notify({ userId: assignee, type: 'info', priority: task.priority === 'urgent' ? 'high' : 'normal', title: `New task: ${task.title}`,
-      message: `${user.username} assigned you a task due ${task.dueDate}${task.dueTime ? ` ${task.dueTime}` : ''}`, link: `/operations/my-work?tab=tasks&task=${task.id}`, entity: 'task', entityId: task.id });
+      message: `${user.username} assigned you a task due ${task.dueDate}${task.dueTime ? ` ${task.dueTime}` : ''}`, link: `/my-work?tab=tasks&task=${task.id}`, entity: 'task', entityId: task.id });
   }
   return task;
 }
@@ -242,7 +242,7 @@ export async function updateTask(id, body, user, { db = pool, recordScope = null
   const after = await getTask(id, user, { db }).catch(() => null) || { ...beforeApi, assignedTo: cols.assigned_to };
   if (cols.assigned_to && cols.assigned_to !== user.id) {
     await notify({ userId: cols.assigned_to, type: 'info', title: `Task assigned to you: ${after.title}`, message: `${user.username} assigned you a task due ${after.dueDate}`,
-      link: `/operations/my-work?tab=tasks&task=${before.id}`, entity: 'task', entityId: before.id });
+      link: `/my-work?tab=tasks&task=${before.id}`, entity: 'task', entityId: before.id });
   }
   return { before: beforeApi, after };
 }
@@ -361,7 +361,7 @@ export async function runReminders({ db = pool } = {}) {
     RETURNING id, title, assigned_to, due_date, to_char(due_time, 'HH24:MI') AS due_hm, priority, entity, entity_id`)).rows;
   for (const t of due) {
     await notify({ userId: t.assigned_to, type: 'reminder', priority: ['high', 'urgent'].includes(t.priority) ? 'high' : 'normal', title: `Task due: ${t.title}`,
-      message: `Due ${t.due_date}${t.due_hm ? ` at ${t.due_hm}` : ''}`, link: `/operations/my-work?tab=tasks&task=${t.id}`, entity: 'task', entityId: t.id });
+      message: `Due ${t.due_date}${t.due_hm ? ` at ${t.due_hm}` : ''}`, link: `/my-work?tab=tasks&task=${t.id}`, entity: 'task', entityId: t.id });
   }
   let overdue = [];
   if ((await getSetting('myWork.overdue_task_alert', true)) !== false) {
@@ -370,7 +370,7 @@ export async function runReminders({ db = pool } = {}) {
       RETURNING id, title, assigned_to, due_date`, [tz])).rows;
     for (const t of overdue) {
       await notify({ userId: t.assigned_to, type: 'alert', priority: 'high', title: `Task overdue: ${t.title}`, message: `It was due on ${t.due_date}`,
-        link: `/operations/my-work?tab=tasks&task=${t.id}`, entity: 'task', entityId: t.id });
+        link: `/my-work?tab=tasks&task=${t.id}`, entity: 'task', entityId: t.id });
     }
   }
   return { ...auto, reminders: due.length, overdue: overdue.length };

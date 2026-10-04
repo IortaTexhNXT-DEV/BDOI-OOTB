@@ -8,17 +8,23 @@
  */
 export const menuList = [
   {
-    // the landing page of every role after sign-in: My Work with the role preset (module/MyWork); a top-level entry,
-    // not part of Operations. "/" and the former Open Items addresses lead here.
-    name: "Home",
-    icon: "pi pi-home",
-    path: "/agent/home",
-    // the notifications page and the user's own profile are open to every signed-in role (not part of Home)
+    // the first screen of every role after sign-in: My Work with the role preset (module/MyWork); a top-level entry,
+    // not part of Operations. "/", the former Home and the former Open Items addresses lead here.
+    name: "My Work",
+    icon: "pi pi-inbox",
+    path: "/my-work",
+    // the notifications page and the user's own profile are open to every signed-in role (not part of My Work)
     includes: [
       "/",
+      "/my-work",
       "/agent/home",
+      "/operations/my-work",
       "/agent/openitems",
       "/agent/openitems/upcomingevents",
+      "/agent/openitemslistdata",
+      "/agent/openitems/expiringpolicy",
+      "/agent/openitems/quotepending",
+      "/agent/openitems/renewalrequest",
     ],
     permissions: ["read:home"],
   },
@@ -311,18 +317,6 @@ export const menuList = [
             path: "/renewal/performance",
             includes: ["/renewal/performance"],
           },
-        ],
-      },
-      {
-        // the work management area (formerly Open Items, whose old addresses redirect here)
-        name: "My Work",
-        path: "/operations/my-work",
-        includes: [
-          "/operations/my-work",
-          "/agent/openitemslistdata",
-          "/agent/openitems/expiringpolicy",
-          "/agent/openitems/quotepending",
-          "/agent/openitems/renewalrequest",
         ],
       },
       {

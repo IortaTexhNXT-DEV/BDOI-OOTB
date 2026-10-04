@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes, useLocation } from "react-router-dom";
 
 import ProtectedLayout from "./ProtectedRoute";
 import NotFound from "../components/NotFound";
@@ -408,6 +408,13 @@ import FacultativePlacements from "../module/Distribution/FacultativePlacements"
 import ComparisonReports from "../module/Distribution/ComparisonReports";
 import Campaigns from "../module/Distribution/Campaigns";
 import ReportBuilder from "../module/Distribution/ReportBuilder";
+
+// The former addresses of My Work (Home, Operations > My Work, Open Items) lead to /my-work, keeping the query string
+// that links in notifications carry (?tab=tasks&task=...).
+const ToMyWork = () => {
+  const { search } = useLocation();
+  return <Navigate to={`/my-work${search}`} replace />;
+};
 
 const Maincomponent = () => {
   return (
@@ -1357,8 +1364,8 @@ const Maincomponent = () => {
           />
 
           {/* // Dashboard Routes */}
-          {/* after sign-in: Home, My Work with the role preset */}
-          <Route path="/" element={<Navigate to="/agent/home" replace />} />
+          {/* after sign-in: My Work with the role preset */}
+          <Route path="/" element={<ToMyWork />} />
           <Route path="/executive/dashboard" element={<ExecutiveDashboard />} />
           <Route path="/claims/dashboard" element={<ClaimsDashboard />} />
           <Route path="/sales/dashboard" element={<SalesDashboard />} />
@@ -1368,8 +1375,9 @@ const Maincomponent = () => {
           />
           <Route path="/underwriting/dashboard" element={<Navigate to="/processing/dashboard" replace />} />
 
-          {/* Home (the landing page of every role) and Operations > My Work are one screen */}
-          <Route path="/agent/home" element={<MyWork />} />
+          {/* My Work: the first screen of every role after sign-in */}
+          <Route path="/my-work" element={<MyWork />} />
+          <Route path="/agent/home" element={<ToMyWork />} />
           <Route path="/agent/notification" element={<Notification />} />
           <Route path="/account/profile" element={<MyProfile />} />
           <Route path="/agent/viewprofile" element={<Navigate to="/account/profile" replace />} />
@@ -1707,11 +1715,11 @@ const Maincomponent = () => {
             path="/agent/payments/detail/:id"
             element={<PaymentDetails />}
           />
-          {/* the former Open Items and Upcoming Events pages: Home */}
-          <Route path="/agent/openitems" element={<Navigate to="/agent/home" replace />} />
-          <Route path="/agent/openitems/upcomingevents" element={<Navigate to="/agent/home" replace />} />
-          <Route path="/agent/openitems/expiringpolicy" element={<Navigate to="/operations/my-work" replace />} />
-          <Route path="/agent/openitems/quotepending" element={<Navigate to="/operations/my-work" replace />} />
+          {/* the former Open Items and Upcoming Events pages: My Work */}
+          <Route path="/agent/openitems" element={<ToMyWork />} />
+          <Route path="/agent/openitems/upcomingevents" element={<ToMyWork />} />
+          <Route path="/agent/openitems/expiringpolicy" element={<ToMyWork />} />
+          <Route path="/agent/openitems/quotepending" element={<ToMyWork />} />
 
           {/* //Reports */}
 
@@ -1828,11 +1836,11 @@ const Maincomponent = () => {
             path="/reports/financialreports/duetoinsurers"
             element={<DueToInsurers />}
           />
-          <Route path="/operations/my-work" element={<MyWork />} />
+          <Route path="/operations/my-work" element={<ToMyWork />} />
           {/* Operations > Open Items became My Work: the old addresses lead there */}
-          <Route path="/agent/openitemslistdata" element={<Navigate to="/operations/my-work" replace />} />
+          <Route path="/agent/openitemslistdata" element={<ToMyWork />} />
 
-          <Route path="/agent/openitems/renewalrequest" element={<Navigate to="/operations/my-work" replace />} />
+          <Route path="/agent/openitems/renewalrequest" element={<ToMyWork />} />
           {/* //Reports */}
 
           {/* // Payments */}
@@ -1841,10 +1849,10 @@ const Maincomponent = () => {
             path="/agent/payments/detail/:id"
             element={<PaymentDetails />}
           />
-          {/* the former Open Items and Upcoming Events pages: Home */}
-          <Route path="/agent/openitems" element={<Navigate to="/agent/home" replace />} />
-          <Route path="/agent/openitems/upcomingevents" element={<Navigate to="/agent/home" replace />} />
-          <Route path="/agent/openitems/expiringpolicy" element={<Navigate to="/operations/my-work" replace />} />
+          {/* the former Open Items and Upcoming Events pages: My Work */}
+          <Route path="/agent/openitems" element={<ToMyWork />} />
+          <Route path="/agent/openitems/upcomingevents" element={<ToMyWork />} />
+          <Route path="/agent/openitems/expiringpolicy" element={<ToMyWork />} />
           {/* Renewal */}
           <Route
             path="/agent/renewal/waiting/:id"

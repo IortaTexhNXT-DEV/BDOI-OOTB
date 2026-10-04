@@ -9,14 +9,16 @@ describe("active menu entry", () => {
     expect(matchLength({ includes: ["/"] }, "/agent/policy")).toBe(0);
   });
   it("takes the most specific entry", () => {
-    // "/" is Home (My Work with the role preset), the landing page after sign-in
-    expect(findActiveTrail(menuList, "/")).toEqual(["Home"]);
+    // "/" is My Work (with the role preset), the first screen after sign-in
+    expect(findActiveTrail(menuList, "/")).toEqual(["My Work"]);
+    expect(findActiveTrail(menuList, "/my-work")).toEqual(["My Work"]);
+    expect(findActiveTrail(menuList, "/operations/my-work")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/executive/dashboard")).toEqual(["Dashboard", "Executive Dashboard"]);
     expect(findActiveTrail(menuList, "/agent/policydetailedview/123")).toEqual(["Operations", "Clients"]);
     expect(findActiveTrail(menuList, "/agent/policy")).toEqual(["Operations", "Policy"]);
     expect(findActiveTrail(menuList, "/renewal/queue")).toEqual(["Operations", "Renewals", "Renewal Queue"]);
     expect(findActiveTrail(menuList, "/master/finance/taxation")).toEqual(["Master", "Finance", "Taxation"]);
-    expect(findActiveTrail(menuList, "/agent/home")).toEqual(["Home"]);
+    expect(findActiveTrail(menuList, "/agent/home")).toEqual(["My Work"]);
     expect(findActiveTrail(menuList, "/account/profile")).toEqual([]);
   });
 });

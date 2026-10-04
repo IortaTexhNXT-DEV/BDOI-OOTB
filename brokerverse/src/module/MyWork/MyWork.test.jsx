@@ -36,12 +36,11 @@ const figures = (preset = "sales") => ({
   figures: [{ key: "quotesMonth", label: "Quotes this month", value: 12, format: "count" }, { key: "conversion", label: "Conversion (90 days)", value: 38, format: "percent" }],
 });
 
-const renderAt = (path = "/operations/my-work") => render(
+const renderAt = (path = "/my-work") => render(
   <Provider store={store}>
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="/agent/home" element={<MyWork />} />
-        <Route path="/operations/my-work" element={<MyWork />} />
+        <Route path="/my-work" element={<MyWork />} />
         <Route path="*" element={<div data-testid="elsewhere" />} />
       </Routes>
     </MemoryRouter>
@@ -81,15 +80,13 @@ test("shows the header figures, the categories with counts and the user's items"
   expect(screen.queryByText("My team")).not.toBeInTheDocument();
 });
 
-test("Home: the role subtitle, the role figures next to the My Work figures and the role's primary action", async () => {
+test("My Work: the role subtitle, the role figures next to the My Work figures and the role's primary action", async () => {
   myWorkService.summary.mockResolvedValue(summary());
-  renderAt("/agent/home");
+  renderAt("/my-work");
   expect(await screen.findByText("Sales | 04/10/2026 | Makati", {}, { timeout: 5000 })).toBeInTheDocument();
   expect(screen.getByText("Quotes this month")).toBeInTheDocument();
   expect(screen.getByText("12")).toBeInTheDocument();
   expect(screen.getByText("38%")).toBeInTheDocument();
-  // the breadcrumb says Home here, Operations on the menu address
-  expect(screen.getByText("Home")).toBeInTheDocument();
   // one primary action: a sales user opens a new quote; refresh and New task stay secondary
   fireEvent.click(screen.getByRole("button", { name: /New quote/ }));
   expect(await screen.findByTestId("elsewhere")).toBeInTheDocument();
@@ -99,7 +96,7 @@ test("the accounting manager preset lists the approvals first, looks at everyone
   signInAs("accounting", "accounting-manager");
   fetchFigures.mockResolvedValue({ ...figures("accounting-manager"), branch: null, figures: [{ key: "overdueReceivables", label: "Overdue receivables", value: 125000, format: "amount" }] });
   myWorkService.summary.mockResolvedValue({ ...summary(), scope: "all" });
-  renderAt("/agent/home");
+  renderAt("/my-work");
   const rail = await screen.findByRole("navigation", { name: "Categories" }, { timeout: 5000 });
   // the category entries of the rail (the scope buttons above them are left out)
   const entries = () => within(rail).getAllByRole("button").filter((b) => b.classList.contains("mw-rail__item")).map((b) => b.textContent);
@@ -127,7 +124,7 @@ test("a manager has the My Team tab with the per-person breakdown and the My tea
     categories: [{ code: "quotes", label: "Quotations", icon: "pi pi-file-edit" }],
     members: [{ userId: "usr_2", name: "Paolo Dizon", designation: "Account Executive", total: 5, overdue: 2, dueToday: 1, high: 2, byCategory: { quotes: { count: 5, overdue: 2 } }, depth: 1 }],
   });
-  renderAt("/operations/my-work?tab=team");
+  renderAt("/my-work?tab=team");
   expect(await screen.findByText("Paolo Dizon", {}, { timeout: 5000 })).toBeInTheDocument();
   expect(screen.getByText(/My Team \(2\)/)).toBeInTheDocument();
   await waitFor(() => expect(myWorkService.items).toHaveBeenCalledWith(expect.objectContaining({ scope: "team" })));
@@ -140,7 +137,7 @@ test("a manager has the My Team tab with the per-person breakdown and the My tea
 test("a reminder link opens the task", async () => {
   myWorkService.summary.mockResolvedValue(summary());
   myWorkService.task.mockResolvedValue({ id: "tsk_1", title: "Call the client", dueDate: "2026-10-05", dueTime: "10:30", priority: "high", reminderMinutes: 60, assignedTo: "usr_1", canReassign: true });
-  renderAt("/operations/my-work?tab=tasks&task=tsk_1");
+  renderAt("/my-work?tab=tasks&task=tsk_1");
   expect(await screen.findByText("Edit task", {}, { timeout: 5000 })).toBeInTheDocument();
   expect(screen.getByDisplayValue("Call the client")).toBeInTheDocument();
   expect(myWorkService.task).toHaveBeenCalledWith("tsk_1");
@@ -150,6 +147,6 @@ test("the calendar asks only for the categories of the role preset", async () =>
   signInAs("claims");
   fetchFigures.mockResolvedValue(figures("claims"));
   myWorkService.summary.mockResolvedValue(summary());
-  renderAt("/agent/home?tab=calendar");
+  renderAt("/my-work?tab=calendar");
   await waitFor(() => expect(myWorkService.agenda).toHaveBeenCalledWith(expect.objectContaining({ scope: "me", category: "claims,approvals" })), { timeout: 5000 });
 });

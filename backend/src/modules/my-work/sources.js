@@ -529,7 +529,7 @@ function tasks() {
   return `SELECT ${select({
     category: "'tasks'", kind: "CASE t.source WHEN 'manual' THEN 'Own task' WHEN 'manager' THEN 'Assigned task' ELSE 'Follow-up' END",
     id: 't.id', ref: 'NULL', title: taskRecord(1), client_name: taskRecord(0), due_date: 't.due_date', status: 't.status', priority: 't.priority', next_action: 't.title',
-    owner_id: 't.assigned_to', link: "'/operations/my-work?tab=tasks&task=' || t.id", created_at: 't.created_at', reassign: "'task'",
+    owner_id: 't.assigned_to', link: "'/my-work?tab=tasks&task=' || t.id", created_at: 't.created_at', reassign: "'task'",
   })} FROM work_tasks t WHERE t.status = 'open'`;
 }
 
