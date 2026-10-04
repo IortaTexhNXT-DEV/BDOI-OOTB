@@ -88,6 +88,14 @@ export { bankAutoMatch } from '../modules/bank-reconciliation/jobs.js';
 // Data privacy: remind the privacy team (read:privacy) of overdue data subject requests (daily, disabled by default)
 export { privacyRequestsDue } from '../modules/privacy/jobs.js';
 
+// My Work: follow-up tasks from collection promises, renewal next steps and claim follow-up dates; task reminders and
+// overdue alerts (every 15 minutes)
+export const myWorkReminders = async () => {
+  const { pool } = await import('../db/pool.js');
+  if (!(await pool.query("SELECT to_regclass('work_tasks') IS NOT NULL AS ok")).rows[0].ok) return { skipped: 'my work not migrated' };
+  return (await import('../modules/my-work/tasks.js')).runReminders();
+};
+
 // Housekeeping: purge operational rows past the retention periods in System Settings, Housekeeping tab (daily)
 export { housekeeping } from './housekeeping.js';
 

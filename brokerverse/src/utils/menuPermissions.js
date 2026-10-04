@@ -17,7 +17,7 @@ const OPERATIONS_ALL = [
   "Policy",
   "Claims",
   "Renewals",
-  "Open Items",
+  "My Work",
   "Payments",
 ];
 
@@ -72,7 +72,7 @@ export const roleMenuPermissions = {
     ],
     reports: ["All Reports", "Operational Reports"],
   },
-  // Operations (Client Servicing): client servicing, endorsement requests, renewals, open items, documents
+  // Operations (Client Servicing): client servicing, endorsement requests, renewals, My Work, documents
   operations: {
     dashboard: ["Executive Dashboard"],
     "product configurator": ["Dashboard", "Product Templates"],
@@ -83,7 +83,7 @@ export const roleMenuPermissions = {
   },
   claims: {
     dashboard: ["Claims Dashboard"],
-    operations: ["Home", "Clients", "Policy", "Claims"],
+    operations: ["Home", "Clients", "Policy", "Claims", "My Work"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports"],
   },
@@ -91,7 +91,7 @@ export const roleMenuPermissions = {
   // inherits Accounting (the server returns both roles), so it needs no entry of its own.
   accounting: {
     dashboard: ["Executive Dashboard"],
-    operations: ["Open Items", "Payments"],
+    operations: ["My Work", "Payments"],
     accounts: [
       "Receipts",
       "Collections",

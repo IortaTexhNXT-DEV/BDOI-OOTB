@@ -6,6 +6,7 @@ import { audit } from '../../lib/audit.js';
 import { ok } from '../../lib/respond.js';
 import { pageParams, sendList } from '../accounting/lib/http.js';
 import * as svc from './service.js';
+import { syncAutoTasksQuietly } from '../my-work/tasks.js';
 
 const { router, define } = moduleRouter('Collections', '/collections');
 const read = [requireAuth, requirePermission('read:collections', 'read:receipts')];
@@ -60,6 +61,8 @@ define({
   handler: async (req, res) => {
     const id = await withTransaction((db) => svc.setCommitment(db, req.params.id, req.body.commitmentDate, req.body.reason, req.user));
     await audit(req, { entity: 'collection', entityId: id, action: 'commitment', after: req.body });
+    // the promised date becomes a follow-up task of the collector (Operations > My Work)
+    await syncAutoTasksQuietly(req.log);
     ok(res, await svc.getCollection(pool, id), 'Commitment date saved');
   },
 });
@@ -70,6 +73,7 @@ define({
   handler: async (req, res) => {
     const id = await withTransaction((db) => svc.addAction(db, req.params.id, req.body, req.user));
     await audit(req, { entity: 'collection', entityId: id, action: 'follow-up', after: req.body });
+    if (req.body.commitmentDate) await syncAutoTasksQuietly(req.log);
     ok(res, await svc.getCollection(pool, id), 'Follow-up saved');
   },
 });

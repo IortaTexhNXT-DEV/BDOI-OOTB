@@ -240,7 +240,8 @@
     "Placement Slips": "Placement Slips",
     "City": "City",
     "Transaction Code": "Transaction Code",
-    "Open Entry Unmatching": "Open Entry Unmatching"
+    "Open Entry Unmatching": "Open Entry Unmatching",
+    "My Work": "My Work"
   },
   "header": {
     "notification": "Notification",
@@ -8480,6 +8481,202 @@
       "noComparisons": "No comparisons yet",
       "compared": "Compared",
       "onlyOneSide": "On one side only"
+    }
+  },
+  "myWork": {
+    "loadFailed": "My Work could not be loaded",
+    "calendar": {
+      "day": "Day",
+      "week": "Week",
+      "previous": "Previous",
+      "today": "Today",
+      "next": "Next",
+      "free": "Nothing due",
+      "overdue": "Overdue"
+    },
+    "task": {
+      "new": "New task",
+      "allDay": "All day",
+      "saveFailed": "The task could not be saved",
+      "completed": "Task done",
+      "reopened": "Task reopened",
+      "delete": "Delete task",
+      "deleted": "Task deleted",
+      "empty": "No tasks",
+      "markDone": "Mark done",
+      "title": "Task",
+      "record": "Record",
+      "from": "From",
+      "assignedTo": "Assigned to",
+      "self": "Self",
+      "reminder": "Reminder",
+      "edit": "Edit task",
+      "reopen": "Reopen",
+      "updated": "Task updated",
+      "created": "Task created",
+      "dueDate": "Due date",
+      "dueTime": "Time",
+      "recordType": "Related record",
+      "none": "None",
+      "searchRecord": "Number or name",
+      "notes": "Notes",
+      "notFound": "The task was not found",
+      "confirmDelete": "Delete the task \"{{title}}\"?",
+      "titleRequired": "Enter what is to be done",
+      "dueDateRequired": "Choose the due date",
+      "timeInvalid": "Use HH:MM",
+      "recordRequired": "Choose the record"
+    },
+    "items": {
+      "empty": "Nothing waiting here"
+    },
+    "col": {
+      "due": "Due",
+      "priority": "Priority",
+      "item": "Item",
+      "client": "Client",
+      "nextAction": "Next action",
+      "amount": "Amount",
+      "owner": "Owner",
+      "actions": "Actions",
+      "status": "Status"
+    },
+    "queue": "Queue",
+    "reassign": "Reassign",
+    "open": "Open",
+    "filter": {
+      "anyDue": "Any due date",
+      "anyPriority": "Any priority",
+      "search": "Search number, client or action",
+      "sort": "Sort by",
+      "sortBy": "Sort",
+      "searchTasks": "Search tasks"
+    },
+    "categories": "Categories",
+    "allItems": "All items",
+    "scope": {
+      "me": "Mine",
+      "all": "Everyone",
+      "label": "Whose items"
+    },
+    "taskScope": {
+      "mine": "My tasks",
+      "created": "Given to others",
+      "team": "My team's tasks",
+      "label": "Whose tasks"
+    },
+    "reassignFailed": "The item could not be reassigned",
+    "reassignTo": "Reassign to",
+    "me": "me",
+    "choosePerson": "Choose a person",
+    "allCategories": "All categories",
+    "team": {
+      "empty": "Nobody reports to you",
+      "member": "Team member",
+      "open": "Open",
+      "overdue": "Overdue",
+      "dueToday": "Due today",
+      "byCategory": "By category",
+      "clear": "Nothing open",
+      "showItems": "Show the items",
+      "allItems": "Open items of the team",
+      "everyone": "Whole team",
+      "via": "via {{name}}",
+      "itemsOf": "Open items of {{name}}"
+    },
+    "reminder": {
+      "none": "No reminder",
+      "atTime": "At the due time",
+      "minutes": "{{count}} minutes before",
+      "hours": "{{count}} hour(s) before",
+      "days": "{{count}} day(s) before"
+    },
+    "kpi": {
+      "overdue": "Overdue",
+      "overdueNote": "Past their due date",
+      "today": "Due today",
+      "open": "Open items",
+      "tasks": "Open tasks",
+      "soon": "Next {{count}} days",
+      "high": "{{count}} high priority"
+    },
+    "tab": {
+      "items": "My Items",
+      "team": "My Team",
+      "tasks": "My Tasks",
+      "calendar": "Calendar"
+    },
+    "title": "My Work",
+    "refresh": "Refresh",
+    "due": {
+      "today": "Today",
+      "tomorrow": "Tomorrow",
+      "none": "No due date",
+      "overdueBy": "{{count}} d overdue",
+      "inDays": "In {{count}} d"
+    },
+    "currentOwner": "With {{name}}",
+    "overdueCount": "{{count}} overdue",
+    "reassigned": "Reassigned to {{name}}",
+    "reassignTitle": "Reassign {{ref}}",
+    "category": {
+      "quotes": "Quotations",
+      "rfq": "Requests for quotation",
+      "placements": "Placement slips",
+      "renewals": "Renewals",
+      "receivables": "Premiums due",
+      "collections": "Collection follow-ups",
+      "endorsements": "Endorsements",
+      "claims": "Claims",
+      "approvals": "Approvals",
+      "documents": "Missing documents",
+      "tasks": "Tasks"
+    },
+    "priority": {
+      "urgent": "Urgent",
+      "high": "High",
+      "normal": "Normal",
+      "low": "Low"
+    },
+    "dueFilter": {
+      "overdue": "Overdue",
+      "today": "Due today",
+      "soon": "Next {{count}} days",
+      "later": "Later",
+      "none": "No due date"
+    },
+    "sort": {
+      "due": "Due date",
+      "priority": "Priority",
+      "client": "Client",
+      "amount": "Amount"
+    },
+    "taskStatus": {
+      "open": "Open",
+      "done": "Done",
+      "cancelled": "Cancelled",
+      "all": "All"
+    },
+    "record": {
+      "client": "Client",
+      "policy": "Policy",
+      "quote": "Quotation",
+      "claim": "Claim",
+      "renewal": "Renewal",
+      "endorsement": "Endorsement",
+      "placement": "Placement slip",
+      "broker_slip": "Request for quotation",
+      "lead": "Prospect",
+      "collection": "Collection"
+    },
+    "weekday": {
+      "0": "Sun",
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat"
     }
   }
 }

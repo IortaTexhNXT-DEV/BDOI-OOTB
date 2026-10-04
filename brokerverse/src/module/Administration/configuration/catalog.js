@@ -92,8 +92,8 @@ export const AREAS = [
     id: "notifications",
     title: "Notifications & E-mail",
     icon: "pi pi-envelope",
-    summary: "Which notices are sent, the sender address, and the wording of every e-mail sent to clients and insurers.",
-    groups: ["notification", "email"],
+    summary: "Which notices are sent, the sender address, the wording of every e-mail sent to clients and insurers, and the reminders of My Work.",
+    groups: ["notification", "email", "myWork"],
     links: [{ label: "E-mail outbox", path: "/master/configuration/email-outbox" }],
   },
   {
@@ -142,7 +142,7 @@ export const GROUP_TITLES = {
   commission: "Commission", incentive: "Incentives", accounting: "Accounting", finance: "Finance", tax: "Taxes",
   bir: "BIR forms", period_end: "Month-end close", notification: "Notifications", email: "E-mail templates",
   security: "Security", access: "Approval authority and accounts", limits: "Limits and validity",
-  reports: "Reports", dashboard: "Dashboard", housekeeping: "Data retention", privacy: "Data privacy", uploads: "Uploads", golive: "Go-live",
+  reports: "Reports", dashboard: "Dashboard", myWork: "My Work", housekeeping: "Data retention", privacy: "Data privacy", uploads: "Uploads", golive: "Go-live",
 };
 
 export const groupTitle = (group) =>

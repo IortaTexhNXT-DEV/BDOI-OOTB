@@ -17,8 +17,8 @@ export const KYC_DEFAULT_REQUIRED = {
 };
 export const KYC_DEFAULT_ID_TYPES = ['PhilSys ID', 'UMID', 'Passport', "Driver's License", 'PRC ID', 'SSS ID', 'GSIS ID', 'TIN ID', 'Postal ID', "Voter's ID", 'Senior Citizen ID'];
 
-/** Items and the field names the screens / API use for them (first non-empty wins). */
-const ITEMS = {
+/** Items and the field names the screens / API use for them (first non-empty wins). Also read by My Work (missing documents). */
+export const KYC_ITEMS = {
   idType: { label: 'ID type', keys: ['idType', 'idCardType', 'IdCardType', 'idProofType'] },
   idNumber: { label: 'ID number', keys: ['idNumber', 'idCardNumber', 'IdCardNumber'] },
   idImage: { label: 'ID card image', keys: ['idCardImage', 'idImage', 'idCardImageUrl', 'idCardPhoto', 'IdCardImage'] },
@@ -33,7 +33,7 @@ const filled = (v) => v !== undefined && v !== null && String(v).trim() !== '' &
 
 /** First non-empty value of an item across the sources (later sources override earlier ones). */
 export function kycValue(sources, item) {
-  const def = ITEMS[item];
+  const def = KYC_ITEMS[item];
   if (!def?.keys) return null;
   let found = null;
   for (const s of sources.filter(Boolean)) {
@@ -46,7 +46,7 @@ export async function requiredKycFor(lob) {
   const cfg = (await getSetting('policy.kyc_required_fields', KYC_DEFAULT_REQUIRED)) || KYC_DEFAULT_REQUIRED;
   const key = String(lob || '').toUpperCase();
   const list = cfg[key] ?? cfg['*'] ?? [];
-  return (Array.isArray(list) ? list : []).filter((i) => ITEMS[i]);
+  return (Array.isArray(list) ? list : []).filter((i) => KYC_ITEMS[i]);
 }
 
 /** Labels of the required items that are missing or invalid (empty when complete). */
@@ -54,7 +54,7 @@ export async function missingKyc({ lob, sources }) {
   const required = await requiredKycFor(lob);
   const missing = [];
   for (const item of required) {
-    const def = ITEMS[item];
+    const def = KYC_ITEMS[item];
     const ok = def.anyOf ? def.anyOf.some((i) => kycValue(sources, i)) : kycValue(sources, item);
     if (!ok) missing.push(def.label);
   }

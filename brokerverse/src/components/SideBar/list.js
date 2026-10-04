@@ -265,18 +265,17 @@ export const menuList = [
         ],
       },
       {
-        name: "Open Items",
+        // the work management area (formerly Open Items, whose old addresses redirect here)
+        name: "My Work",
         icon: <SvgAgentItemsIcon color="#9DA4AE" />,
-        path: "/agent/openitemslistdata",
+        path: "/operations/my-work",
         includes: [
-          "/agent/openitemslistdata",
+          "/operations/my-work",
           "/agent/openitemslistdata",
           "/agent/openitems/expiringpolicy",
           "/agent/openitems/quotepending",
-
           "/agent/openitems/renewalrequest",
         ],
-        permissions: ["read:openitems"],
       },
       {
         name: "Payments",

@@ -83,5 +83,12 @@
     "cron": "15 6 * * *",
     "handler": "remittanceSchedules",
     "enabled": false
+  },
+  {
+    "code": "my-work-reminders",
+    "name": "My Work reminders",
+    "description": "Create follow-up tasks from collection promises to pay, renewal next steps and claim follow-up dates, close those whose record is closed, and notify task reminders and newly overdue tasks",
+    "cron": "*/15 * * * *",
+    "handler": "myWorkReminders"
   }
 ]

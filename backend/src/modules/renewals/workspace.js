@@ -6,6 +6,7 @@ import { notFound } from '../../lib/errors.js';
 import { ok, created, paging, pageMeta } from '../../lib/respond.js';
 import { assertVisible, withScope } from '../../lib/scope.js';
 import * as svc from './service.js';
+import { syncAutoTasksQuietly } from '../my-work/tasks.js';
 import * as an from './analytics.js';
 
 /**
@@ -131,7 +132,13 @@ define({
   middleware: [...write, validate(z.object({ type: z.string().min(2).max(60), method: z.string().max(40).optional(), description: z.string().min(1).max(4000), outcome: z.string().max(2000).optional(), nextAction: z.string().max(500).optional(), followUpDate: z.string().optional(), details: z.record(z.any()).optional() }))],
   request: { type: 'Counter Offer', method: 'Email', description: 'Client asked for a 5% discount', outcome: 'Pending processing review', nextAction: 'Submit for approval', followUpDate: '2026-10-05' },
   response: { success: true, data: { id: 1, type: 'Counter Offer', method: 'Email', description: 'Client asked for a 5% discount' } },
-  handler: async (req, res) => { const a = await svc.addActivity(req.params.id, req.user, req.body); await audit(req, { entity: 'renewal', entityId: req.params.id, action: 'activity', after: a }); created(res, a, 'Update added'); },
+  handler: async (req, res) => {
+    const a = await svc.addActivity(req.params.id, req.user, req.body);
+    await audit(req, { entity: 'renewal', entityId: req.params.id, action: 'activity', after: a });
+    // a follow-up date becomes a task of the renewal's owner (Operations > My Work)
+    if (req.body?.followUpDate) await syncAutoTasksQuietly(req.log);
+    created(res, a, 'Update added');
+  },
 });
 define({
   method: 'POST', path: '/:id/win-back', summary: 'Record a win-back offer on a lapsed renewal (optionally linked to a campaign)', screen: 'Operations > Renewals > Lapse Management',

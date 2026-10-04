@@ -52,6 +52,8 @@ export const TRANSACTION_TABLES = [
   'access_review_items', 'access_reviews', 'agent_events',
   // data privacy: consents and data subject requests belong to the clients and leads that go
   'data_subject_requests', 'privacy_consents',
+  // the work diary of Operations > My Work (tasks and follow-ups on the records that go)
+  'work_tasks',
 ];
 
 /**

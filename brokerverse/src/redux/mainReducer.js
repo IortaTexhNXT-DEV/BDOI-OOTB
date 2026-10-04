@@ -48,9 +48,6 @@ import agentQuoteMainReducers from "../agentModule/quoteModule/quoteListing/quot
 import endorsementTabelMainReducers from "../agentModule/quoteModule/clientView/clientViewCard/ClientListingViewEndorsementTable/store/getEndorsementTabelDataReducers";
 import policyTabelMainReducers from "../agentModule/quoteModule/clientView/clientViewCard/ClientListingViewPolicyTable/store/getPolicyTabelDataReducers";
 import renewalTabelMainReducers from "../agentModule/quoteModule/clientView/clientViewCard/ClientListingViewRenewaleTable/store/getRenewalTabelDataReducers";
-import agentExpiringMainReducers from "../agentModule/openItems/expiringPolicy/expiringPolicyCard/store/expiringReducer";
-import agentQuotependingMainReducers from "../agentModule/openItems/quotePending/quotePendingCard/store/quotePendingReducer";
-import agentRenewalrequestMainReducers from "../agentModule/openItems/renewalRequest/renewalRequestCard/store/renewalRequestReducer";
 import claimsMainReducers from "../agentModule/claimModule/store/claimReducers";
 import policyMainReducers from "../agentModule/policyModule/store/policyReducers";
 import quotationMainReducers from "../agentModule/quotationModule/store/quotationReducers";
@@ -110,9 +107,6 @@ const reducers = {
   endorsementTabelMainReducers,
   policyTabelMainReducers,
   renewalTabelMainReducers,
-  agentExpiringMainReducers,
-  agentQuotependingMainReducers,
-  agentRenewalrequestMainReducers,
   designationMainReducers,
   // openitemTabelMainReducers,
   agentCoverageDetailsReducers,

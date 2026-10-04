@@ -108,6 +108,9 @@
       "name": "Masters"
     },
     {
+      "name": "My Work"
+    },
+    {
       "name": "Notifications"
     },
     {
@@ -44720,6 +44723,2236 @@
             }
           }
         }
+      }
+    },
+    "/my-work/agenda": {
+      "get": {
+        "operationId": "getMyWorkAgenda",
+        "summary": "Open items due between from and to (at most 6 weeks) for the calendar; tasks come from GET /my-work/tasks with from / to",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > Calendar\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-04"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-10"
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "me"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "items": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "category": {
+                                "type": "string"
+                              },
+                              "kind": {
+                                "type": "string"
+                              },
+                              "id": {
+                                "type": "string"
+                              },
+                              "ref": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "clientName": {
+                                "type": "string"
+                              },
+                              "dueDate": {
+                                "type": "string"
+                              },
+                              "overdue": {
+                                "type": "boolean"
+                              },
+                              "dueToday": {
+                                "type": "boolean"
+                              },
+                              "priority": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              },
+                              "nextAction": {
+                                "type": "string"
+                              },
+                              "ownerId": {
+                                "type": "string"
+                              },
+                              "ownerName": {
+                                "type": "string"
+                              },
+                              "queue": {
+                                "type": "boolean"
+                              },
+                              "link": {
+                                "type": "string"
+                              },
+                              "amount": {
+                                "type": "number"
+                              },
+                              "createdAt": {
+                                "type": "string"
+                              },
+                              "reassign": {}
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "from": "2026-10-04",
+                    "to": "2026-10-10",
+                    "items": [
+                      {
+                        "category": "quotes",
+                        "kind": "Awaiting customer response",
+                        "id": "qt_1",
+                        "ref": "QT-2026-00012",
+                        "title": "Private Car",
+                        "clientName": "Maria Santos",
+                        "dueDate": "2026-10-08",
+                        "overdue": false,
+                        "dueToday": false,
+                        "priority": "normal",
+                        "status": "sent",
+                        "nextAction": "Follow up the customer's response",
+                        "ownerId": "usr_1",
+                        "ownerName": "Maria Rivera",
+                        "queue": false,
+                        "link": "/agent/quotedetailview/qt_1",
+                        "amount": 18250.5,
+                        "createdAt": "2026-09-28T02:00:00Z",
+                        "reassign": null
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > Calendar"
+      }
+    },
+    "/my-work/assignees": {
+      "get": {
+        "operationId": "getMyWorkAssignees",
+        "summary": "People the signed-in user may assign work to: themselves and their team (administrators: every active user)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > Task / Reassign\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "username": {
+                            "type": "string"
+                          },
+                          "displayName": {
+                            "type": "string"
+                          },
+                          "designation": {
+                            "type": "string"
+                          },
+                          "self": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "usr_1",
+                      "username": "maria.rivera",
+                      "displayName": "Maria Rivera",
+                      "designation": "Account Executive",
+                      "self": true
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > Task / Reassign"
+      }
+    },
+    "/my-work/items": {
+      "get": {
+        "operationId": "getMyWorkItems",
+        "summary": "Open items, paged and sorted on the server (scope me | team | all; category, due overdue | today | soon | later | none, priority, kind, search, assignee; sort due | priority | client | category | amount, order asc | desc)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Items / My Team\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "me"
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "approvals"
+          },
+          {
+            "name": "due",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "overdue"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "due"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "category": {
+                            "type": "string"
+                          },
+                          "kind": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "ref": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "clientName": {
+                            "type": "string"
+                          },
+                          "dueDate": {
+                            "type": "string"
+                          },
+                          "overdue": {
+                            "type": "boolean"
+                          },
+                          "dueToday": {
+                            "type": "boolean"
+                          },
+                          "priority": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "nextAction": {
+                            "type": "string"
+                          },
+                          "ownerId": {
+                            "type": "string"
+                          },
+                          "ownerName": {
+                            "type": "string"
+                          },
+                          "queue": {
+                            "type": "boolean"
+                          },
+                          "link": {
+                            "type": "string"
+                          },
+                          "amount": {
+                            "type": "number"
+                          },
+                          "createdAt": {
+                            "type": "string"
+                          },
+                          "reassign": {}
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "category": "quotes",
+                      "kind": "Awaiting customer response",
+                      "id": "qt_1",
+                      "ref": "QT-2026-00012",
+                      "title": "Private Car",
+                      "clientName": "Maria Santos",
+                      "dueDate": "2026-10-08",
+                      "overdue": false,
+                      "dueToday": false,
+                      "priority": "normal",
+                      "status": "sent",
+                      "nextAction": "Follow up the customer's response",
+                      "ownerId": "usr_1",
+                      "ownerName": "Maria Rivera",
+                      "queue": false,
+                      "link": "/agent/quotedetailview/qt_1",
+                      "amount": 18250.5,
+                      "createdAt": "2026-09-28T02:00:00Z",
+                      "reassign": null
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Items / My Team"
+      }
+    },
+    "/my-work/items/reassign": {
+      "post": {
+        "operationId": "postMyWorkItemsReassign",
+        "summary": "Reassign an open item to yourself or someone in your team where its module supports it: claim handler (write:claims), data subject request (write:privacy), task",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "category": {
+                          "type": "string"
+                        },
+                        "id": {
+                          "type": "string"
+                        },
+                        "ownerId": {
+                          "type": "string"
+                        },
+                        "ownerName": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Reassigned",
+                  "data": {
+                    "category": "claims",
+                    "id": "clm_1",
+                    "ownerId": "usr_3",
+                    "ownerName": "Joy Macaraeg"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Team",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "category": {
+                    "type": "string"
+                  },
+                  "id": {
+                    "type": "string"
+                  },
+                  "assignTo": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "category": "claims",
+                "id": "clm_1",
+                "assignTo": "usr_3"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/my-work/records": {
+      "get": {
+        "operationId": "getMyWorkRecords",
+        "summary": "Records a task can be related to, by number or name (type client | lead | policy | quote | claim | renewal | endorsement | placement | broker_slip | collection)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks > New task\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "policy"
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "POL-2026"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "entity": {
+                            "type": "string"
+                          },
+                          "id": {
+                            "type": "string"
+                          },
+                          "ref": {
+                            "type": "string"
+                          },
+                          "label": {
+                            "type": "string"
+                          },
+                          "link": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "entity": "policy",
+                      "id": "pol_1",
+                      "ref": "POL-2026-00031",
+                      "label": "Maria Santos",
+                      "link": "/agent/policydetail/pol_1"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks > New task"
+      }
+    },
+    "/my-work/summary": {
+      "get": {
+        "operationId": "getMyWorkSummary",
+        "summary": "Header figures (open, overdue, due today, due soon) and the count of each category for scope me | team | all",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "me"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "scope": {
+                          "type": "string"
+                        },
+                        "dueSoonDays": {
+                          "type": "integer"
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "open": {
+                              "type": "integer"
+                            },
+                            "overdue": {
+                              "type": "integer"
+                            },
+                            "dueToday": {
+                              "type": "integer"
+                            },
+                            "dueSoon": {
+                              "type": "integer"
+                            },
+                            "high": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "icon": {
+                                "type": "string"
+                              },
+                              "count": {
+                                "type": "integer"
+                              },
+                              "overdue": {
+                                "type": "integer"
+                              },
+                              "dueToday": {
+                                "type": "integer"
+                              },
+                              "dueSoon": {
+                                "type": "integer"
+                              },
+                              "high": {
+                                "type": "integer"
+                              },
+                              "nextDue": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "team": {
+                          "type": "object",
+                          "properties": {
+                            "size": {
+                              "type": "integer"
+                            },
+                            "isManager": {
+                              "type": "boolean"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-04",
+                    "scope": "me",
+                    "dueSoonDays": 7,
+                    "totals": {
+                      "open": 14,
+                      "overdue": 3,
+                      "dueToday": 2,
+                      "dueSoon": 5,
+                      "high": 4
+                    },
+                    "categories": [
+                      {
+                        "code": "quotes",
+                        "label": "Quotations",
+                        "icon": "pi pi-file-edit",
+                        "count": 4,
+                        "overdue": 1,
+                        "dueToday": 0,
+                        "dueSoon": 2,
+                        "high": 1,
+                        "nextDue": "2026-10-06"
+                      }
+                    ],
+                    "team": {
+                      "size": 2,
+                      "isManager": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work"
+      }
+    },
+    "/my-work/tasks": {
+      "get": {
+        "operationId": "getMyWorkTasks",
+        "summary": "Tasks, paged (scope mine | created | team | all; status open | done | cancelled | all, due overdue | today | soon | later, priority, source, search, assignee, from / to, entity + entityId; sort due | priority | created)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks / Calendar\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "mine"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "open"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 1
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 20
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "title": {
+                            "type": "string"
+                          },
+                          "notes": {
+                            "type": "string"
+                          },
+                          "dueDate": {
+                            "type": "string"
+                          },
+                          "dueTime": {
+                            "type": "string"
+                          },
+                          "priority": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          },
+                          "overdue": {
+                            "type": "boolean"
+                          },
+                          "dueToday": {
+                            "type": "boolean"
+                          },
+                          "assignedTo": {
+                            "type": "string"
+                          },
+                          "assignedToName": {
+                            "type": "string"
+                          },
+                          "createdBy": {
+                            "type": "string"
+                          },
+                          "createdByName": {
+                            "type": "string"
+                          },
+                          "source": {
+                            "type": "string"
+                          },
+                          "sourceLabel": {
+                            "type": "string"
+                          },
+                          "automatic": {
+                            "type": "boolean"
+                          },
+                          "entity": {
+                            "type": "string"
+                          },
+                          "entityId": {
+                            "type": "string"
+                          },
+                          "entityRef": {
+                            "type": "string"
+                          },
+                          "entityLabel": {
+                            "type": "string"
+                          },
+                          "link": {
+                            "type": "string"
+                          },
+                          "remindAt": {
+                            "type": "string"
+                          },
+                          "reminderMinutes": {
+                            "type": "integer"
+                          },
+                          "canEdit": {
+                            "type": "boolean"
+                          },
+                          "canReassign": {
+                            "type": "boolean"
+                          },
+                          "canDelete": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "page": {
+                      "type": "integer"
+                    },
+                    "perPage": {
+                      "type": "integer"
+                    },
+                    "totalPages": {
+                      "type": "integer"
+                    },
+                    "counts": {
+                      "type": "object",
+                      "properties": {
+                        "open": {
+                          "type": "integer"
+                        },
+                        "overdue": {
+                          "type": "integer"
+                        },
+                        "today": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "tsk_1",
+                      "title": "Call Mr. Santos about the fire renewal",
+                      "notes": "Bring the revised schedule",
+                      "dueDate": "2026-10-06",
+                      "dueTime": "10:30",
+                      "priority": "high",
+                      "status": "open",
+                      "overdue": false,
+                      "dueToday": false,
+                      "assignedTo": "usr_1",
+                      "assignedToName": "Maria Rivera",
+                      "createdBy": "usr_9",
+                      "createdByName": "Ana Reyes",
+                      "source": "manager",
+                      "sourceLabel": "Assigned by manager",
+                      "automatic": false,
+                      "entity": "policy",
+                      "entityId": "pol_1",
+                      "entityRef": "POL-2026-00031",
+                      "entityLabel": "Maria Santos",
+                      "link": "/agent/policydetail/pol_1",
+                      "remindAt": "2026-10-06T01:30:00Z",
+                      "reminderMinutes": 60,
+                      "canEdit": true,
+                      "canReassign": true,
+                      "canDelete": true
+                    }
+                  ],
+                  "total": 1,
+                  "page": 1,
+                  "perPage": 20,
+                  "totalPages": 1,
+                  "counts": {
+                    "open": 4,
+                    "overdue": 1,
+                    "today": 2
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks / Calendar"
+      },
+      "post": {
+        "operationId": "postMyWorkTasks",
+        "summary": "Create a task for yourself or, as a manager, for someone reporting to you; reminderMinutes before the due time (null: none; default myWork.default_reminder_minutes)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks > New task\n\nAccess: Any authenticated user",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "dueTime": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "dueToday": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {
+                          "type": "string"
+                        },
+                        "assignedToName": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdByName": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "sourceLabel": {
+                          "type": "string"
+                        },
+                        "automatic": {
+                          "type": "boolean"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "entityRef": {
+                          "type": "string"
+                        },
+                        "entityLabel": {
+                          "type": "string"
+                        },
+                        "link": {
+                          "type": "string"
+                        },
+                        "remindAt": {
+                          "type": "string"
+                        },
+                        "reminderMinutes": {
+                          "type": "integer"
+                        },
+                        "canEdit": {
+                          "type": "boolean"
+                        },
+                        "canReassign": {
+                          "type": "boolean"
+                        },
+                        "canDelete": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Task created",
+                  "data": {
+                    "id": "tsk_1",
+                    "title": "Call Mr. Santos about the fire renewal",
+                    "notes": "Bring the revised schedule",
+                    "dueDate": "2026-10-06",
+                    "dueTime": "10:30",
+                    "priority": "high",
+                    "status": "open",
+                    "overdue": false,
+                    "dueToday": false,
+                    "assignedTo": "usr_1",
+                    "assignedToName": "Maria Rivera",
+                    "createdBy": "usr_9",
+                    "createdByName": "Ana Reyes",
+                    "source": "manager",
+                    "sourceLabel": "Assigned by manager",
+                    "automatic": false,
+                    "entity": "policy",
+                    "entityId": "pol_1",
+                    "entityRef": "POL-2026-00031",
+                    "entityLabel": "Maria Santos",
+                    "link": "/agent/policydetail/pol_1",
+                    "remindAt": "2026-10-06T01:30:00Z",
+                    "reminderMinutes": 60,
+                    "canEdit": true,
+                    "canReassign": true,
+                    "canDelete": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks > New task",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string"
+                  },
+                  "dueDate": {
+                    "type": "string"
+                  },
+                  "dueTime": {
+                    "type": "string"
+                  },
+                  "priority": {
+                    "type": "string"
+                  },
+                  "entity": {
+                    "type": "string"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  },
+                  "reminderMinutes": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "title": "Call Mr. Santos about the fire renewal",
+                "dueDate": "2026-10-06",
+                "dueTime": "10:30",
+                "priority": "high",
+                "entity": "policy",
+                "entityId": "pol_1",
+                "reminderMinutes": 60
+              }
+            }
+          }
+        }
+      }
+    },
+    "/my-work/tasks/{id}": {
+      "get": {
+        "operationId": "getMyWorkTasksId",
+        "summary": "One task (assignee, creator, a manager of the assignee or an administrator)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "dueTime": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "dueToday": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {
+                          "type": "string"
+                        },
+                        "assignedToName": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdByName": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "sourceLabel": {
+                          "type": "string"
+                        },
+                        "automatic": {
+                          "type": "boolean"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "entityRef": {
+                          "type": "string"
+                        },
+                        "entityLabel": {
+                          "type": "string"
+                        },
+                        "link": {
+                          "type": "string"
+                        },
+                        "remindAt": {
+                          "type": "string"
+                        },
+                        "reminderMinutes": {
+                          "type": "integer"
+                        },
+                        "canEdit": {
+                          "type": "boolean"
+                        },
+                        "canReassign": {
+                          "type": "boolean"
+                        },
+                        "canDelete": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "tsk_1",
+                    "title": "Call Mr. Santos about the fire renewal",
+                    "notes": "Bring the revised schedule",
+                    "dueDate": "2026-10-06",
+                    "dueTime": "10:30",
+                    "priority": "high",
+                    "status": "open",
+                    "overdue": false,
+                    "dueToday": false,
+                    "assignedTo": "usr_1",
+                    "assignedToName": "Maria Rivera",
+                    "createdBy": "usr_9",
+                    "createdByName": "Ana Reyes",
+                    "source": "manager",
+                    "sourceLabel": "Assigned by manager",
+                    "automatic": false,
+                    "entity": "policy",
+                    "entityId": "pol_1",
+                    "entityRef": "POL-2026-00031",
+                    "entityLabel": "Maria Santos",
+                    "link": "/agent/policydetail/pol_1",
+                    "remindAt": "2026-10-06T01:30:00Z",
+                    "reminderMinutes": 60,
+                    "canEdit": true,
+                    "canReassign": true,
+                    "canDelete": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks"
+      },
+      "put": {
+        "operationId": "putMyWorkTasksId",
+        "summary": "Change a task: title, notes, due date / time, priority, reminder, related record; reassign (creator or manager)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks > Edit\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "dueTime": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "dueToday": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {
+                          "type": "string"
+                        },
+                        "assignedToName": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdByName": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "sourceLabel": {
+                          "type": "string"
+                        },
+                        "automatic": {
+                          "type": "boolean"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "entityRef": {
+                          "type": "string"
+                        },
+                        "entityLabel": {
+                          "type": "string"
+                        },
+                        "link": {
+                          "type": "string"
+                        },
+                        "remindAt": {
+                          "type": "string"
+                        },
+                        "reminderMinutes": {
+                          "type": "integer"
+                        },
+                        "canEdit": {
+                          "type": "boolean"
+                        },
+                        "canReassign": {
+                          "type": "boolean"
+                        },
+                        "canDelete": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Task updated",
+                  "data": {
+                    "id": "tsk_1",
+                    "title": "Call Mr. Santos about the fire renewal",
+                    "notes": "Bring the revised schedule",
+                    "dueDate": "2026-10-06",
+                    "dueTime": "10:30",
+                    "priority": "high",
+                    "status": "open",
+                    "overdue": false,
+                    "dueToday": false,
+                    "assignedTo": "usr_1",
+                    "assignedToName": "Maria Rivera",
+                    "createdBy": "usr_9",
+                    "createdByName": "Ana Reyes",
+                    "source": "manager",
+                    "sourceLabel": "Assigned by manager",
+                    "automatic": false,
+                    "entity": "policy",
+                    "entityId": "pol_1",
+                    "entityRef": "POL-2026-00031",
+                    "entityLabel": "Maria Santos",
+                    "link": "/agent/policydetail/pol_1",
+                    "remindAt": "2026-10-06T01:30:00Z",
+                    "reminderMinutes": 60,
+                    "canEdit": true,
+                    "canReassign": true,
+                    "canDelete": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks > Edit",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "dueDate": {
+                    "type": "string"
+                  },
+                  "dueTime": {
+                    "type": "string"
+                  },
+                  "reminderMinutes": {
+                    "type": "integer"
+                  }
+                }
+              },
+              "example": {
+                "dueDate": "2026-10-07",
+                "dueTime": "14:00",
+                "reminderMinutes": 30
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "operationId": "deleteMyWorkTasksId",
+        "summary": "Cancel an open task (its creator or a manager; follow-up tasks are completed instead)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "dueTime": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "dueToday": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {
+                          "type": "string"
+                        },
+                        "assignedToName": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdByName": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "sourceLabel": {
+                          "type": "string"
+                        },
+                        "automatic": {
+                          "type": "boolean"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "entityRef": {
+                          "type": "string"
+                        },
+                        "entityLabel": {
+                          "type": "string"
+                        },
+                        "link": {
+                          "type": "string"
+                        },
+                        "remindAt": {
+                          "type": "string"
+                        },
+                        "reminderMinutes": {
+                          "type": "integer"
+                        },
+                        "canEdit": {
+                          "type": "boolean"
+                        },
+                        "canReassign": {
+                          "type": "boolean"
+                        },
+                        "canDelete": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Task cancelled",
+                  "data": {
+                    "id": "tsk_1",
+                    "title": "Call Mr. Santos about the fire renewal",
+                    "notes": "Bring the revised schedule",
+                    "dueDate": "2026-10-06",
+                    "dueTime": "10:30",
+                    "priority": "high",
+                    "status": "cancelled",
+                    "overdue": false,
+                    "dueToday": false,
+                    "assignedTo": "usr_1",
+                    "assignedToName": "Maria Rivera",
+                    "createdBy": "usr_9",
+                    "createdByName": "Ana Reyes",
+                    "source": "manager",
+                    "sourceLabel": "Assigned by manager",
+                    "automatic": false,
+                    "entity": "policy",
+                    "entityId": "pol_1",
+                    "entityRef": "POL-2026-00031",
+                    "entityLabel": "Maria Santos",
+                    "link": "/agent/policydetail/pol_1",
+                    "remindAt": "2026-10-06T01:30:00Z",
+                    "reminderMinutes": 60,
+                    "canEdit": true,
+                    "canReassign": true,
+                    "canDelete": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks"
+      }
+    },
+    "/my-work/tasks/{id}/complete": {
+      "post": {
+        "operationId": "postMyWorkTasksIdComplete",
+        "summary": "Mark a task done (optional note)",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "dueTime": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "dueToday": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {
+                          "type": "string"
+                        },
+                        "assignedToName": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdByName": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "sourceLabel": {
+                          "type": "string"
+                        },
+                        "automatic": {
+                          "type": "boolean"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "entityRef": {
+                          "type": "string"
+                        },
+                        "entityLabel": {
+                          "type": "string"
+                        },
+                        "link": {
+                          "type": "string"
+                        },
+                        "remindAt": {
+                          "type": "string"
+                        },
+                        "reminderMinutes": {
+                          "type": "integer"
+                        },
+                        "canEdit": {
+                          "type": "boolean"
+                        },
+                        "canReassign": {
+                          "type": "boolean"
+                        },
+                        "canDelete": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Task completed",
+                  "data": {
+                    "id": "tsk_1",
+                    "title": "Call Mr. Santos about the fire renewal",
+                    "notes": "Bring the revised schedule",
+                    "dueDate": "2026-10-06",
+                    "dueTime": "10:30",
+                    "priority": "high",
+                    "status": "done",
+                    "overdue": false,
+                    "dueToday": false,
+                    "assignedTo": "usr_1",
+                    "assignedToName": "Maria Rivera",
+                    "createdBy": "usr_9",
+                    "createdByName": "Ana Reyes",
+                    "source": "manager",
+                    "sourceLabel": "Assigned by manager",
+                    "automatic": false,
+                    "entity": "policy",
+                    "entityId": "pol_1",
+                    "entityRef": "POL-2026-00031",
+                    "entityLabel": "Maria Santos",
+                    "link": "/agent/policydetail/pol_1",
+                    "remindAt": "2026-10-06T01:30:00Z",
+                    "reminderMinutes": 60,
+                    "canEdit": true,
+                    "canReassign": true,
+                    "canDelete": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "note": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "note": "Client confirmed by phone"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/my-work/tasks/{id}/reopen": {
+      "post": {
+        "operationId": "postMyWorkTasksIdReopen",
+        "summary": "Reopen a done or cancelled task",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Tasks\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "notes": {
+                          "type": "string"
+                        },
+                        "dueDate": {
+                          "type": "string"
+                        },
+                        "dueTime": {
+                          "type": "string"
+                        },
+                        "priority": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        },
+                        "overdue": {
+                          "type": "boolean"
+                        },
+                        "dueToday": {
+                          "type": "boolean"
+                        },
+                        "assignedTo": {
+                          "type": "string"
+                        },
+                        "assignedToName": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "createdByName": {
+                          "type": "string"
+                        },
+                        "source": {
+                          "type": "string"
+                        },
+                        "sourceLabel": {
+                          "type": "string"
+                        },
+                        "automatic": {
+                          "type": "boolean"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "entityRef": {
+                          "type": "string"
+                        },
+                        "entityLabel": {
+                          "type": "string"
+                        },
+                        "link": {
+                          "type": "string"
+                        },
+                        "remindAt": {
+                          "type": "string"
+                        },
+                        "reminderMinutes": {
+                          "type": "integer"
+                        },
+                        "canEdit": {
+                          "type": "boolean"
+                        },
+                        "canReassign": {
+                          "type": "boolean"
+                        },
+                        "canDelete": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "message": "Task reopened",
+                  "data": {
+                    "id": "tsk_1",
+                    "title": "Call Mr. Santos about the fire renewal",
+                    "notes": "Bring the revised schedule",
+                    "dueDate": "2026-10-06",
+                    "dueTime": "10:30",
+                    "priority": "high",
+                    "status": "open",
+                    "overdue": false,
+                    "dueToday": false,
+                    "assignedTo": "usr_1",
+                    "assignedToName": "Maria Rivera",
+                    "createdBy": "usr_9",
+                    "createdByName": "Ana Reyes",
+                    "source": "manager",
+                    "sourceLabel": "Assigned by manager",
+                    "automatic": false,
+                    "entity": "policy",
+                    "entityId": "pol_1",
+                    "entityRef": "POL-2026-00031",
+                    "entityLabel": "Maria Santos",
+                    "link": "/agent/policydetail/pol_1",
+                    "remindAt": "2026-10-06T01:30:00Z",
+                    "reminderMinutes": 60,
+                    "canEdit": true,
+                    "canReassign": true,
+                    "canDelete": true
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Tasks",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              },
+              "example": {}
+            }
+          }
+        }
+      }
+    },
+    "/my-work/team": {
+      "get": {
+        "operationId": "getMyWorkTeam",
+        "summary": "Open items of each user reporting to the signed-in manager (users.reporting_to, any depth): totals, overdue, due today and per category",
+        "tags": [
+          "My Work"
+        ],
+        "description": "Front-end touchpoint: Operations > My Work > My Team\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "claims"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "asOf": {
+                          "type": "string"
+                        },
+                        "categories": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "members": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "userId": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "designation": {
+                                "type": "string"
+                              },
+                              "total": {
+                                "type": "integer"
+                              },
+                              "overdue": {
+                                "type": "integer"
+                              },
+                              "dueToday": {
+                                "type": "integer"
+                              },
+                              "high": {
+                                "type": "integer"
+                              },
+                              "byCategory": {
+                                "type": "object",
+                                "properties": {
+                                  "claims": {
+                                    "type": "object",
+                                    "properties": {
+                                      "count": {
+                                        "type": "integer"
+                                      },
+                                      "overdue": {
+                                        "type": "integer"
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "managerName": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "asOf": "2026-10-04",
+                    "categories": [
+                      {
+                        "code": "claims",
+                        "label": "Claims"
+                      }
+                    ],
+                    "members": [
+                      {
+                        "userId": "usr_2",
+                        "name": "Carlo Estrada",
+                        "designation": "Claims Officer",
+                        "total": 6,
+                        "overdue": 2,
+                        "dueToday": 1,
+                        "high": 2,
+                        "byCategory": {
+                          "claims": {
+                            "count": 4,
+                            "overdue": 2
+                          }
+                        },
+                        "managerName": "Joy Macaraeg"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > My Work > My Team"
       }
     },
     "/notifications": {

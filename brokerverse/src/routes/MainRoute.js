@@ -164,9 +164,6 @@ import ExpiredPoliciesPage from "../agentModule/policyModule/ExpiredPoliciesPage
 import Quotation from "../agentModule/quotationModule";
 import OpenItems from "../agentModule/openItems/openItems";
 import UpcomingEvents from "../agentModule/openItems/upcomingEvents";
-import ExpiringPolicy from "../agentModule/openItems/expiringPolicy";
-import RenewalRequest from "../agentModule/openItems/renewalRequest";
-import QuotePending from "../agentModule/openItems/quotePending";
 import ClaimRejected from "../agentModule/claimsModule/claimRejected";
 import ClaimDocumentUpload from "../agentModule/claimsModule/claimDocumentUpload";
 import LeadEdit from "../agentModule/leadModule/leadEdit";
@@ -327,7 +324,7 @@ import {
   RiskMappingDetail,
 } from "../module/ProductConfigurator/RiskMapping";
 
-import OpenItemsListData from "../agentModule/openItems/OpenItemsListData";
+import MyWork from "../module/MyWork";
 import { Navigate } from "react-router-dom";
 import EditRequestForm from "../module/PettyCashManagement/Request/EditRequest";
 import ClaimModule from "../agentModule/claimModule";
@@ -1627,14 +1624,8 @@ const Maincomponent = () => {
             path="/agent/openitems/upcomingevents"
             element={<UpcomingEvents />}
           />
-          <Route
-            path="/agent/openitems/expiringpolicy"
-            element={<ExpiringPolicy />}
-          />
-          <Route
-            path="/agent/openitems/quotepending"
-            element={<QuotePending />}
-          />
+          <Route path="/agent/openitems/expiringpolicy" element={<Navigate to="/operations/my-work" replace />} />
+          <Route path="/agent/openitems/quotepending" element={<Navigate to="/operations/my-work" replace />} />
 
           {/* //Reports */}
 
@@ -1717,15 +1708,11 @@ const Maincomponent = () => {
             path="/reports/financialreports/duetoinsurers"
             element={<DueToInsurers />}
           />
-          <Route
-            path="/agent/openitemslistdata"
-            element={<OpenItemsListData />}
-          />
+          <Route path="/operations/my-work" element={<MyWork />} />
+          {/* Operations > Open Items became My Work: the old addresses lead there */}
+          <Route path="/agent/openitemslistdata" element={<Navigate to="/operations/my-work" replace />} />
 
-          <Route
-            path="/agent/openitems/renewalrequest"
-            element={<RenewalRequest />}
-          />
+          <Route path="/agent/openitems/renewalrequest" element={<Navigate to="/operations/my-work" replace />} />
           {/* //Reports */}
 
           {/* // Payments */}
@@ -1740,10 +1727,7 @@ const Maincomponent = () => {
             path="/agent/openitems/upcomingevents"
             element={<UpcomingEvents />}
           />
-          <Route
-            path="/agent/openitems/expiringpolicy"
-            element={<ExpiringPolicy />}
-          />
+          <Route path="/agent/openitems/expiringpolicy" element={<Navigate to="/operations/my-work" replace />} />
           {/* Renewal */}
           <Route
             path="/agent/renewal/waiting/:id"
