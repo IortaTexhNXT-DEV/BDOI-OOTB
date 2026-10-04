@@ -28,13 +28,8 @@ const request = async (method, path, body, { auth = true } = {}) => {
   return json;
 };
 
-/** Fetch a PDF (GET, or POST with a body) and open it in a new tab. */
-const openPdf = async (path, body, { auth = true } = {}) => {
-  const response = await fetch(`${BASE_URL}${path}`, {
-    method: body ? "POST" : "GET",
-    headers: { ...(body ? { "Content-Type": "application/json" } : {}), ...(auth ? authService.getAuthHeader() : {}) },
-    body: body ? JSON.stringify(body) : undefined,
-  });
+/** Open a PDF response in a new tab. */
+const showPdf = async (response) => {
   if (!response.ok) {
     const json = await response.json().catch(() => null);
     throw new Error(json?.message || `Could not open the document (${response.status})`);
@@ -43,6 +38,16 @@ const openPdf = async (path, body, { auth = true } = {}) => {
   window.open(url, "_blank", "noopener,noreferrer");
   setTimeout(() => URL.revokeObjectURL(url), 60000);
 };
+
+/** Fetch a PDF with GET (printed quotation, policy schedule) and open it in a new tab. */
+const getPdf = (path) => fetch(`${BASE_URL}${path}`, { method: "GET", headers: { ...authService.getAuthHeader() } }).then(showPdf);
+
+/** Fetch a PDF built from a request body (comparison) with POST and open it in a new tab. */
+const postPdf = (path, body) => fetch(`${BASE_URL}${path}`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
+  body: JSON.stringify(body || {}),
+}).then(showPdf);
 
 const enc = encodeURIComponent;
 const data = (p) => p.then((r) => r.data);
@@ -74,7 +79,7 @@ const packagesService = {
 
   // comparison
   compare: (body) => data(request("POST", "/packages/compare", body)),
-  printComparison: (body) => openPdf("/packages/compare/pdf", body),
+  printComparison: (body) => postPdf("/packages/compare/pdf", body),
   quotationFromComparison: (body) => data(request("POST", "/packages/compare/quotation", body)),
 
   // package quotations and policies
@@ -85,10 +90,10 @@ const packagesService = {
   updatePackageQuote: (id, body) => data(request("PUT", `/packages/quotes/${enc(id)}`, body)),
   quoteAction: (id, action) => data(request("POST", `/packages/quotes/${enc(id)}/${action}`, {})),
   issuePackageQuote: (id, body = {}) => data(request("POST", `/packages/quotes/${enc(id)}/issue`, body)),
-  printPackageQuote: (id) => openPdf(`/packages/quotes/${enc(id)}/pdf`),
+  printPackageQuote: (id) => getPdf(`/packages/quotes/${enc(id)}/pdf`),
   listPackagePolicies: (params) => request("GET", `/packages/policies${queryString(params)}`),
   getPackagePolicy: (id) => data(request("GET", `/packages/policies/${enc(id)}`)),
-  printSchedule: (id) => openPdf(`/packages/policies/${enc(id)}/schedule`),
+  printSchedule: (id) => getPdf(`/packages/policies/${enc(id)}/schedule`),
   endorseSection: (id, sectionNo, body) => data(request("POST", `/packages/policies/${enc(id)}/sections/${enc(sectionNo)}/endorse`, body)),
   renewPackage: (id, body = {}) => data(request("POST", `/packages/policies/${enc(id)}/renew`, body)),
 

@@ -25,14 +25,13 @@ For each module it gives what the module does, its key features, the Philippine 
 - Money is in Philippine pesos (PHP). The business time zone is Asia/Manila.
 - **Recommended** marks advice from iorta TechNXT that is not built into the product.
 - The figures in this document come from the product (code, configuration and screens) and from the release test of 03 and 04 October 2026. Modules added after that test cycle (the compliance registers, the BIR returns, the operations and accounting extensions, distribution, integrations, branding and the go-live tools) are covered by their own automated tests; the counts in The product at a glance are those of the release test.
-- **(in development)** marks a capability being completed on its development branch in this release.
 
 ## Version history
 
 | Version | Date | Change |
 |---|---|---|
 | 1.0 | 03 October 2026 | Issue for the release test |
-| 1.1 | 04 October 2026 | Added: Compliance Officer role; IC compliance (licence register and commission block, fit and proper, insurer authority, complaints, IC annual statement and production report); NPC breach register, masking by role and field encryption; My Work, the enterprise menu and the Help panel; Philippine reference masters (PSGC); Product Configurator rules in the business flow; audit trail screen; go-live data workbench, environment comparison, transaction reset, data masking and the release pipeline; branding and e-signatures; work in development. Updated the integrations, disbursement, data privacy, administration, feature checklist and points to note |
+| 1.1 | 04 October 2026 | Added: Compliance Officer role; IC compliance (licence register and commission block, fit and proper, insurer authority, complaints, IC annual statement and production report); NPC breach register, masking by role and field encryption; My Work, the enterprise menu and the Help panel; Philippine reference masters (PSGC); Product Configurator rules in the business flow; audit trail screen; go-live data workbench, environment comparison, transaction reset, data masking and the release pipeline; branding and e-signatures; sales activities, quote wizard covers and risk fields from the Product Configurator, BIR Form 2307 for supplier payments, fixed asset disposals. Updated the integrations, disbursement, data privacy, administration, feature checklist and points to note |
 
 ## The product at a glance
 
@@ -124,9 +123,8 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Bulk upload of prospects from a template (up to 1,000 rows per file) with row-level error report.
 - Lead statuses New, Contacted, Qualified, QuoteGenerated, Converted, Lost.
 - Client onboarding before the first policy (**Onboard client**): individual or juridical, government ID, TIN, PSGC address, signatories and beneficial owners (see AML/CFT compliance); otherwise the client code CL- is created at first policy issue; client view with Policy, Claim, Renewal, Endorsement and Data privacy tabs.
-- Sales activity log on prospects (calls, meetings, follow-ups) (in development); follow-up tasks today through My Work.
 - Consent per purpose recorded on the prospect and client screens (see Data privacy).
-- Sales activities: account executives log calls, meetings, e-mails and visits on a prospect, a quotation or a client (activity type and outcome from masters the broker maintains, contact, duration, notes, next step with its date). Each prospect, client and quotation shows its activity timeline (a prospect and a client also show those of their quotations) and the open next step. The next step becomes a follow-up task in the account executive's My Work; a later activity on the same record completes it.
+- Sales activities (Operations > Sales & Marketing > Sales Activities, and the Activities tab of a prospect, a quotation or a client): account executives log calls, meetings, e-mails and visits on a prospect, a quotation or a client (activity type and outcome from the masters Sales Activity Types and Sales Activity Outcomes under Master > Organization, contact, duration, notes, next step with its date). Each prospect, client and quotation shows its activity timeline (a prospect and a client also show those of their quotations) and the open next step. The next step becomes a follow-up task in the account executive's My Work; a later activity on the same record completes it.
 - Activity report by account executive and period: activities by channel, prospects, clients and quotations worked, positive outcomes, next steps and how their follow-ups stand (done, open, overdue); Excel export.
 
 | Aspect | Detail |
@@ -586,7 +584,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Rules applied in the business flow: the governing template of a quotation, broker slip, placement or policy (the template named on the record, else the motor pricing template `motor.pricing_template_code`, else the newest active template of the product or line) supplies its rating factors (multiplicative, discount or additive) and acceptance rules. A rule tests a risk field (vehicle age, use, class, sum insured, driver age, claims, fleet size, members, flood-prone location and others) and accepts, refers, declines or loads; a referred quotation waits for a user of the rule's authority role within the Underwriting referral limit of the Authority Matrix.
 - Market Mapping restricts the insurers approached for a product when `product.market_panel_enforced` is on.
 - Document templates per product (policy schedule, CTPL certificate, quotation slip, member enrolment) with a text layout of merge fields such as {{PolicyNumber}} and generated blocks such as {{#Premium}}, printed on the letterhead.
-- Quote wizard covers and risk fields taken from the Product Configurator (in development).
+- Quote wizard covers and risk fields taken from the Product Configurator: the quote wizard (Operations > Sales & Marketing > Quotations, Start quote) offers the covers of the governing template's Coverage Builder (a mandatory cover always included, an optional cover ticked or unticked, each priced on its "Priced on quotation as" premium) and asks for the risk fields its acceptance rules and rating factors test (driver date of birth or age, claims in the last three years, fair market value, number of members), so every rule is evaluated; `underwriting.require_rule_fields` makes them compulsory on the server too.
 
 ![Product Templates](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-pc-templates.png)
 
@@ -745,10 +743,6 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Theme and Branding (Master > System Settings): theme presets or custom colours with a contrast check, sign-in picture, document and report colours and footer, branded e-mail layout, logo and favicon; changes apply without a rebuild.
 - Brand packs export and import the whole branding between environments; a client brand pack (for example the Toyota Insurance Services pack) is applied only with the client's written permission.
 - E-signatures of company signatories and of users (captured by the user), versioned, with consent recorded and revocation; mapped per document type (quotation slip, policy schedule, endorsement, official receipt, payment voucher, debit note, statement, journal voucher, claim letter); drafts print UNSIGNED DRAFT.
-
-## Work in development
-
-Being completed on its development branch in this release: the sales activity log on prospects, the quote wizard covers and risk fields from the Product Configurator, BIR Form 2307 for supplier payments, and the disposal of fixed assets.
 
 ## Administration, security and configuration
 
@@ -1017,7 +1011,6 @@ These points come from the release test and the user manual. None of them stops 
 - The sign-in session is kept in the browser's local storage; a change to an httpOnly cookie is planned.
 - Field encryption covers TIN, ID numbers and bank account numbers; other personal data relies on encryption of the database storage and backups.
 - The integration adapters (SMS, Viber, CTPL authentication, LTO, insurer API, bank files, EIS, screening provider) are delivered in test mode; each goes live after the partner's contract and certification.
-- The work in development listed in chapter Functional modules completes on its own branch.
 - A front-end library (react-router) carries a moderate security advisory; the upgrade is planned for the next minor release.
 - Several masters have no Upload button yet; their templates are loaded by the System Administrator.
 - The BIR reports give the figures in the BIR column order; the broker validates them with the BIR's tools before filing.

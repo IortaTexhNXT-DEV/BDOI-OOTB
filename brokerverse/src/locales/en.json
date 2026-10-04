@@ -1876,6 +1876,8 @@
   },
   "financeMasters": {
     "add": "Add",
+    "baseCurrency": "Accounting base currency",
+    "baseCurrencyYes": "Base currency",
     "edit": "Edit",
     "view": "View",
     "searchBy": "Search By",
@@ -2339,6 +2341,7 @@
   },
   "generalMasters": {
     "organization": "Organization",
+    "history": "History",
     "insurance": "Insurance",
     "insuranceManagement": "Insurance",
     "location": "Location",
@@ -3251,6 +3254,7 @@
   },
   "claims": {
     "title": "Claims",
+    "loadFailed": "Claims could not be loaded",
     "home": "Home",
     "claimDetails": "Claim Details",
     "back": "Back",
@@ -3342,8 +3346,29 @@
       "rejected": "Rejected"
     }
   },
+  "auditTrail": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "eventCount": "{{count}} events",
+    "eventCount_one": "{{count}} event",
+    "eventCount_other": "{{count}} events",
+    "refresh": "Refresh",
+    "empty": "No changes have been recorded for this record yet.",
+    "showRecent": "Show recent events only",
+    "showAllEvents": "Show all {{count}} events",
+    "showAllEvents_one": "Show all {{count}} events",
+    "showAllEvents_other": "Show all {{count}} events"
+  },
   "claimAuditTrail": {
     "title": "Claim Audit Trail",
+    "heading": "Claim audit trail",
+    "claims": "Claims",
+    "operations": "Operations",
+    "viewClaim": "View claim",
+    "policyNumber": "Policy number",
+    "insured": "Insured",
+    "insurer": "Insurer",
+    "insurerClaimNumber": "Insurer claim number",
     "back": "Back",
     "newestFirst": "Newest First",
     "oldestFirst": "Oldest First",
@@ -3476,6 +3501,8 @@
   },
   "policyDetail": {
     "title": "Policy Details",
+    "history": "History",
+    "historySubtitle": "Every change to this policy: who made it, when and what changed",
     "policyLabel": "Policy",
     "backToPolicies": "Back to Policies",
     "unableToLoad": "Unable to load policy details",
@@ -5211,6 +5238,9 @@
   },
   "policyList": {
     "title": "Policies",
+    "expiresInDays": "Expires in {{count}} days",
+    "expiresInDays_one": "Expires in {{count}} day",
+    "expiresInDays_other": "Expires in {{count}} days",
     "home": "Home",
     "policy": "Policy",
     "motorPolicy": "Motor Policy",
@@ -5992,6 +6022,7 @@
   },
   "systemSettings": {
     "masters": "Master",
+    "baseCurrencyHint": "Accounts are kept in the base currency {{base}} (Master > Finance > Currency); the display currency only changes how amounts are labelled.",
     "title": "System Settings",
     "subtitle": "Configure shared logo, display currency, theme colors, language, favicon, and app title.",
     "branding": "Branding",
@@ -8734,6 +8765,12 @@
     "quotationFailed": "The renewal quotation could not be created"
   },
   "renewalPolicy": {
+    "expiresIn": "Expires in {{count}} days",
+    "expiresIn_one": "Expires in {{count}} day",
+    "expiresIn_other": "Expires in {{count}} days",
+    "expiredAgo": "Expired {{count}} days ago",
+    "expiredAgo_one": "Expired {{count}} day ago",
+    "expiredAgo_other": "Expired {{count}} days ago",
     "expiryFrom": "Expiry from",
     "expiryTo": "Expiry to",
     "state": "Renewal state",

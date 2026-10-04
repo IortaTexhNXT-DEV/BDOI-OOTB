@@ -12,7 +12,8 @@
  *               environment variables named in the settings, then POST to eis.endpoint)
  *   outbox      eis_submissions: one row per invoice and per cancellation, status queued / sending / accepted /
  *               rejected / failed / manual, attempts, next attempt (eis.retry_minutes doubled per attempt, at most
- *               eis.max_attempts), response and EIS reference; the eis-outbox job (or "Send now") processes it
+ *               eis.max_attempts), response and EIS reference; the eis-outbox job (or "Send now") processes it. A row
+ *               left in sending longer than eis.sending_stale_minutes (server stopped during the call) is retried
  *   fallback    exportPayloads(): the queued payloads as a JSON file for a manual upload, then markManual() records the
  *               reference the BIR gave, so invoicing never waits for the connector
  *
@@ -34,6 +35,7 @@ export async function eisConfig() {
     tokenEndpoint: await setting('token_endpoint', ''), clientIdEnv: await setting('client_id_env', 'BIR_EIS_CLIENT_ID'), clientSecretEnv: await setting('client_secret_env', 'BIR_EIS_CLIENT_SECRET'),
     signingKeyEnv: await setting('signing_key_env', 'BIR_EIS_SIGNING_KEY'), accreditationId: await setting('accreditation_id', ''), submitOnIssue: (await setting('submit_on_issue', true)) !== false,
     maxAttempts: Number(await setting('max_attempts', 5)) || 5, retryMinutes: Number(await setting('retry_minutes', 15)) || 15, timeoutMs: Number(await setting('timeout_ms', 20000)) || 20000,
+    sendingStaleMinutes: Number(await setting('sending_stale_minutes', 15)) || 15,
   };
 }
 
@@ -170,15 +172,27 @@ export async function queueBacklog(db, { from, to }, user) {
 }
 
 /**
+ * A submission left in "sending" longer than eis.sending_stale_minutes (the server stopped during the call) counts as a
+ * failed attempt and is due again at once; the attempt was already counted when the row was claimed, so eis.max_attempts
+ * still bounds it. Returns the number of submissions released.
+ */
+export async function releaseStaleSending(cfg, db = pool) {
+  const r = await db.query(`UPDATE eis_submissions SET status = 'failed', last_error = COALESCE(last_error, 'Sending was interrupted (server stopped during the call); queued again'),
+    next_attempt_at = now(), updated_at = now() WHERE status = 'sending' AND updated_at < now() - make_interval(mins => $1)`, [cfg.sendingStaleMinutes]);
+  return r.rowCount;
+}
+
+/**
  * Send what is due: queued submissions and failed ones whose next attempt has come, up to `limit`. Each is sent
  * on its own; a transient error schedules a retry, a rejection is final (fix the invoice: cancel and reissue).
  */
 export async function processOutbox({ limit = 50, ids = null, providers = PROVIDERS } = {}) {
   const cfg = await eisConfig();
   if (!cfg.enabled) return { skipped: 'the EIS connector is switched off (eis.enabled)' };
+  const released = await releaseStaleSending(cfg);
   const due = (await pool.query(`SELECT * FROM eis_submissions WHERE status IN ('queued', 'failed') AND attempts < $1 AND next_attempt_at <= now()
     AND ($3::text[] IS NULL OR id = ANY($3)) ORDER BY created_at LIMIT $2`, [cfg.maxAttempts, limit, ids])).rows;
-  const out = { sent: 0, accepted: 0, rejected: 0, failed: 0 };
+  const out = { sent: 0, accepted: 0, rejected: 0, failed: 0, ...(released ? { released } : {}) };
   for (const s of due) {
     const claimed = (await pool.query('UPDATE eis_submissions SET status = \'sending\', attempts = attempts + 1, updated_at = now() WHERE id = $1 AND status IN (\'queued\', \'failed\') RETURNING *', [s.id])).rows[0];
     if (!claimed) continue;
