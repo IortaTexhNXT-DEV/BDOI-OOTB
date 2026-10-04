@@ -128,15 +128,24 @@ const sawt = `SELECT x.* FROM (
 const ALPHA_DIMS = ['tin', 'registeredName', 'lastName', 'firstName', 'middleName', 'atc', 'natureOfPayment', 'taxRate'];
 const alphaMeasures = { seqNo: 'row_number() OVER (ORDER BY t."registeredName" NULLS LAST, t."lastName", t.atc)', incomePayment: 'sum(t."incomePayment")', taxWithheld: 'sum(t."taxWithheld")' };
 
-// QAP: tax the broker withheld from payees on payment vouchers (agents / referrers, suppliers, others)
-const qap = `SELECT d.voucher_date AS _date, d.payee_name AS payee, COALESCE(cr.tin, ic.tin, cl.tin, '') AS tin,
+// QAP: tax the broker withheld from payees on payment vouchers (agents / referrers, suppliers, others) and on the
+// supplier invoices of accounts payable (EWT of the invoice's tax code on the amount net of VAT, dated with its journal)
+const qap = `SELECT x.* FROM (
+  SELECT d.voucher_date AS _date, d.payee_name AS payee, COALESCE(cr.tin, ic.tin, cl.tin, '') AS tin,
     ${nameParts('d.payee_name', "COALESCE(cr.referrer_type, '') IN ('Agent', 'Sub-agent') OR COALESCE(cl.client_type, '') = 'individual'")},
     COALESCE($3::jsonb ->> cr.referrer_type, $3::jsonb ->> d.payee_type, '') AS atc,
     COALESCE((SELECT COALESCE(tc.nature_of_payment, tc.description) FROM tax_codes tc WHERE tc.atc = COALESCE($3::jsonb ->> cr.referrer_type, $3::jsonb ->> d.payee_type)), d.payee_type) AS "natureOfPayment",
     round(100 * d.wht_amount / NULLIF(COALESCE(NULLIF(d.gross_amount, 0), d.amount + d.wht_amount), 0), 2) AS "taxRate",
     COALESCE(NULLIF(d.gross_amount, 0), d.amount + d.wht_amount) AS "incomePayment", d.wht_amount AS "taxWithheld", d.voucher_number AS reference, d.payee_type AS "payeeType"
   FROM disbursements d LEFT JOIN commission_referrers cr ON cr.id = d.referrer_id LEFT JOIN insurance_companies ic ON ic.id = d.insurance_company_id LEFT JOIN clients cl ON cl.id = d.client_id
-  WHERE d.wht_amount > 0 AND d.status IN ('approved', 'paid') AND d.voucher_date BETWEEN $1::date AND $2::date`;
+  WHERE d.wht_amount > 0 AND d.status IN ('approved', 'paid') AND d.voucher_date BETWEEN $1::date AND $2::date
+  UNION ALL
+  SELECT COALESCE(j.jv_date, i.invoice_date), m.name, COALESCE(m.data->>'tin', ''),
+    ${nameParts('m.name', "COALESCE(tc.payee_kind, '') = 'individual'")},
+    COALESCE(tc.atc, $3::jsonb ->> 'Supplier', ''), COALESCE(tc.nature_of_payment, tc.description, 'Supplier'),
+    round(100 * i.ewt_amount / NULLIF(i.net_amount, 0), 2), i.net_amount, i.ewt_amount, i.voucher_number, 'Supplier'
+  FROM supplier_invoices i JOIN master_records m ON m.id = i.supplier_id LEFT JOIN journal_vouchers j ON j.id = i.journal_id LEFT JOIN tax_codes tc ON tc.code = i.ewt_code
+  WHERE i.ewt_amount > 0 AND i.status IN ('approved', 'partially-paid', 'paid') AND COALESCE(j.jv_date, i.invoice_date) BETWEEN $1::date AND $2::date) x`;
 
 // SLSP – sales: revenue and output VAT per customer (the insurer of the policy for commission, else the client)
 const slspSales = `SELECT to_char(j.jv_date, 'YYYY-MM') AS "taxableMonth", COALESCE(ic.tin, cl.tin, '') AS tin,

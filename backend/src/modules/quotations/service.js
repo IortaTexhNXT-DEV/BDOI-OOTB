@@ -24,7 +24,7 @@ import { nextDocumentNumber } from '../../lib/numbering.js';
 import { participantsFromDoc, writeParticipants, legacyParticipantDetails, leadOf, participantsOf, participantInputs } from '../placement/participants.js';
 import { journeyFor, assertStep, resolveLob } from '../placement/journey.js';
 import { companyName } from '../../lib/letterhead.js';
-import { assertNotDeclined, referralFor, assertReferralCleared, assertMayDecide } from '../product-configurator/underwriting.js';
+import { assertNotDeclined, assertFactsCaptured, referralFor, assertReferralCleared, assertMayDecide } from '../product-configurator/underwriting.js';
 import { assertAuthority } from '../access-control/service.js';
 
 export async function getQuoteRow(id, db = null) {
@@ -88,6 +88,7 @@ export async function createQuote(body, userId, db = null) {
     if (productId && !raw.lob) raw.lob = await resolveLob({ productId, productType: body.productType }, c);
     const { parts, icId, doc } = await quoteParticipants(c, raw, body.participants, null);
     const b = await premiumBreakdown(doc, { insurerId: icId });
+    await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
     const referral = referralFor(b.underwriting);
     if (referral) doc.underwritingReferral = referral;
@@ -118,6 +119,7 @@ export async function updateQuote(id, body, userId) {
   await withTransaction(async (c) => {
     const { parts, icId, doc } = await quoteParticipants(c, merged, body.participants, before.insurance_company_id);
     const b = await premiumBreakdown(doc, { insurerId: icId });
+    await assertFactsCaptured(b.underwriting);
     assertNotDeclined(b.underwriting, 'The quotation');
     const referral = referralFor(b.underwriting, before.doc?.underwritingReferral || null);
     if (referral) doc.underwritingReferral = referral; else delete doc.underwritingReferral;

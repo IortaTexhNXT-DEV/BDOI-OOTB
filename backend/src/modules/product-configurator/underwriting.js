@@ -20,6 +20,11 @@
  *
  * Rating factors (kind 'rating-factors') multiply the net premium by the factor of the band the risk falls in
  * (Multiplicative / Discount), or add factor % of it (Additive), when the record carries the factor's field.
+ *
+ * Quote set-up (quoteSetup): the covers of the governing template's Coverage Builder (mandatory and optional, with the
+ * quotation premium each is priced on: "Priced on quotation as") and the risk fields its active acceptance rules and
+ * rating factors test, so the quote wizard offers those covers and asks for those fields. With
+ * underwriting.require_rule_fields a quotation missing a tested field is refused (assertFactsCaptured).
  */
 import { query } from '../../db/pool.js';
 import { badRequest, forbidden } from '../../lib/errors.js';
@@ -179,6 +184,13 @@ export async function riskFacts(v = {}) {
   const si = num(v.totalSumInsured) || num(v.sumInsured) || num(rd.sumInsured) || num(v.lossAndDamageCoverage);
   if (si > 0) f.sumInsured = round2(si);
   for (const k of ['fairMarketValue', 'driverAge', 'claimsLast3Years', 'ncbYears', 'fleetSize']) if (present(get(k))) f[k] = num(get(k));
+  // the driver's date of birth gives the driver age (full years on the quotation date)
+  const dob = get('driverDateOfBirth', 'driverBirthDate');
+  if (f.driverAge === undefined && present(dob) && /^\d{4}-\d{2}-\d{2}/.test(String(dob))) {
+    const on = String(await today());
+    const b = String(dob).slice(0, 10);
+    f.driverAge = Number(on.slice(0, 4)) - Number(b.slice(0, 4)) - (on.slice(5) < b.slice(5) ? 1 : 0);
+  }
   const members = get('memberCount', 'numberOfMembers', 'numberOfEmployees');
   if (present(members)) f.memberCount = num(members);
   else if (Array.isArray(v.members)) f.memberCount = v.members.length;
@@ -272,7 +284,7 @@ function outcomeOf(rule, facts) {
     insurerId: rule.insurerId || null, insurerName: rule.insurerName || null, authorityRole: rule.authorityRole || null, message: rule.message || rule.ruleName };
   if (met === null) {
     const missing = !c ? null : facts[c.field] === undefined ? c.field : c.valueField;
-    return { ...base, outcome: 'not-evaluated', message: `${RISK_FIELDS[missing]?.label || 'The tested field'} is not on the record` };
+    return { ...base, outcome: 'not-evaluated', missingField: missing, message: `${RISK_FIELDS[missing]?.label || 'The tested field'} is not on the record` };
   }
   if (rule.action === 'Auto-Accept') {
     if (met) return { ...base, outcome: 'accepted' };
@@ -322,6 +334,48 @@ export function adjustNet(net, uw) {
   rated = round2(rated);
   const loadingAmount = round2((rated * uw.loadingPercent) / 100);
   return { net: round2(rated + loadingAmount), ratingAdjustment: round2(rated - net), loadingAmount };
+}
+
+/**
+ * Refuse a quotation whose acceptance rules could not all be evaluated because a risk field they test is missing, when
+ * underwriting.require_rule_fields is on (the quote wizard always asks for those fields).
+ */
+export async function assertFactsCaptured(uw) {
+  if (!uw || (await getSetting('underwriting.require_rule_fields', false)) !== true) return;
+  const missing = [...new Set(uw.results.filter((r) => r.outcome === 'not-evaluated' && r.missingField).map((r) => r.missingField))];
+  if (!missing.length) return;
+  throw badRequest(`The acceptance rules of ${uw.templateCode} need: ${missing.map((m) => RISK_FIELDS[m]?.label || m).join(', ')}`,
+    missing.map((m) => ({ path: m, message: `${RISK_FIELDS[m]?.label || m} is required by the acceptance rules of ${uw.templateCode}` })));
+}
+
+/** Covers of a template (Coverage Builder): [{ code, name, type, quoteField, deductible, description, premiumImpact }]. */
+export async function templateCovers(templateId, db = null) {
+  return (await components(db, templateId, 'coverages')).map((c) => ({ code: c.code, name: c.data?.coverageName || c.name, type: c.data?.type === 'Mandatory' ? 'Mandatory' : 'Optional',
+    quoteField: c.data?.quoteField || null, deductible: c.data?.deductible ?? null, description: c.data?.description || null, premiumImpact: c.data?.premiumImpact || null }));
+}
+
+/**
+ * What the quote wizard needs from the governing template of a line / product: the covers to offer and the risk
+ * fields its active acceptance rules and rating factors test ({ field, label, type, options, usedBy, required }).
+ * null when no template governs.
+ */
+export async function quoteSetup({ templateCode = null, productId = null, lob = null } = {}, db = null) {
+  const t = await governingTemplate({ templateCode, productId, lob }, db);
+  if (!t) return null;
+  const covers = await templateCovers(t.id, db);
+  const used = new Map();
+  const use = (field, by) => { if (field && RISK_FIELDS[field]) used.set(field, [...(used.get(field) || []), by]); };
+  for (const r of (await components(db, t.id, 'underwriting-rules')).map((x) => x.data)) {
+    const c = conditionOf(r);
+    if (!c) continue;
+    use(c.field, `${r.ruleCode} ${r.ruleName || ''}`.trim());
+    if (c.valueField) use(c.valueField, `${r.ruleCode} ${r.ruleName || ''}`.trim());
+  }
+  for (const f of (await components(db, t.id, 'rating-factors')).map((x) => x.data)) use(factorField(f), `${f.factorCode} ${f.factorName || ''}`.trim());
+  const required = (await getSetting('underwriting.require_rule_fields', false)) === true;
+  const riskFields = [...used.entries()].map(([field, usedBy]) => ({ field, label: RISK_FIELDS[field].label, type: RISK_FIELDS[field].type, options: RISK_FIELDS[field].options || null,
+    usedBy: [...new Set(usedBy)], required }));
+  return { templateId: t.id, templateCode: t.template_code, templateName: t.name, lob: t.line_of_business, covers, riskFields, requireRuleFields: required };
 }
 
 /** Refuse a declined risk with the rules' messages. */

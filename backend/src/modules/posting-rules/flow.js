@@ -34,6 +34,7 @@ export const EVENT_FLOW = {
   'ap.invoice': { trigger: 'Accounts > Payables: supplier invoice approved', approval: 'Approval by another user with approve:payables (payables.maker_checker)' },
   'ap.payment': { trigger: 'Accounts > Payables: supplier payment posted', approval: 'None: the invoices paid are approved' },
   'fa.depreciation': { trigger: 'Accounts > Fixed Assets: depreciation run, or the depreciation step of the month-end close', approval: 'Month-end close approval, where configured' },
+  'fa.disposal': { trigger: 'Accounts > Fixed Assets > Disposals: asset sold or written off (reversed when the disposal is cancelled)', approval: 'None: write:fixed-assets' },
   'remittance.settlement': { trigger: 'Accounts > Remittance > Settlement approved (credit / debit notes)', approval: 'Remittance approval queue: levels by amount, not the maker' },
   'remittance.adjustment': { trigger: 'Accounts > Remittance > Adjustments approved', approval: 'Remittance approval queue: levels by amount, not the maker' },
   'remittance.transfer': { trigger: 'Accounts > Remittance > Electronic transfer approved', approval: 'Remittance approval queue: levels by amount, not the maker' },

@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1271 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1287 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -36341,6 +36341,196 @@
           ]
         },
         {
+          "name": "Figures of a disposal before it is posted (disposalType, disposalDate, proceeds): book value, output VAT, gain or loss, depreciation still to post",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fixed-assets/assets/:id/disposal-preview?disposalType=sale&disposalDate=2026-10-04&proceeds=50000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fixed-assets",
+                "assets",
+                ":id",
+                "disposal-preview"
+              ],
+              "query": [
+                {
+                  "key": "disposalType",
+                  "value": "sale"
+                },
+                {
+                  "key": "disposalDate",
+                  "value": "2026-10-04"
+                },
+                {
+                  "key": "proceeds",
+                  "value": "50000"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Figures of a disposal before it is posted (disposalType, disposalDate, proceeds): book value, output VAT, gain or loss, depreciation still to post\n\nFront-end touchpoint: Accounts > Fixed Assets > Asset Register > Dispose\n\nAccess: read:fixed-assets, write:fixed-assets"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fixed-assets/assets/:id/disposal-preview?disposalType=sale&disposalDate=2026-10-04&proceeds=50000",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fixed-assets",
+                    "assets",
+                    ":id",
+                    "disposal-preview"
+                  ],
+                  "query": [
+                    {
+                      "key": "disposalType",
+                      "value": "sale"
+                    },
+                    {
+                      "key": "disposalDate",
+                      "value": "2026-10-04"
+                    },
+                    {
+                      "key": "proceeds",
+                      "value": "50000"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Figures of a disposal before it is posted (disposalType, disposalDate, proceeds): book value, output VAT, gain or loss, depreciation still to post\n\nFront-end touchpoint: Accounts > Fixed Assets > Asset Register > Dispose\n\nAccess: read:fixed-assets, write:fixed-assets"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"assetNumber\": \"FA-2026-00001\",\n    \"cost\": 360000,\n    \"accumulatedDepreciation\": 300000,\n    \"bookValue\": 60000,\n    \"proceeds\": 50000,\n    \"outputVat\": 6000,\n    \"gainLoss\": -10000,\n    \"unpostedPeriods\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sell or write off an asset: posting rule fa.disposal (cost and accumulated depreciation removed, proceeds, output VAT, gain or loss); a sale issues its BIR sales invoice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/fixed-assets/assets/:id/dispose",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fixed-assets",
+                "assets",
+                ":id",
+                "dispose"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Sell or write off an asset: posting rule fa.disposal (cost and accumulated depreciation removed, proceeds, output VAT, gain or loss); a sale issues its BIR sales invoice\n\nFront-end touchpoint: Accounts > Fixed Assets > Asset Register > Dispose\n\nAccess: write:fixed-assets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"disposalType\": \"sale\",\n  \"disposalDate\": \"2026-10-04\",\n  \"proceeds\": 50000,\n  \"buyerName\": \"Juan dela Cruz\",\n  \"buyerTin\": \"123-456-789-00000\",\n  \"buyerAddress\": \"Makati City\",\n  \"bankAccount\": \"BDO-CA-001\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/fixed-assets/assets/:id/dispose",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fixed-assets",
+                    "assets",
+                    ":id",
+                    "dispose"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Sell or write off an asset: posting rule fa.disposal (cost and accumulated depreciation removed, proceeds, output VAT, gain or loss); a sale issues its BIR sales invoice\n\nFront-end touchpoint: Accounts > Fixed Assets > Asset Register > Dispose\n\nAccess: write:fixed-assets",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"disposalType\": \"sale\",\n  \"disposalDate\": \"2026-10-04\",\n  \"proceeds\": 50000,\n  \"buyerName\": \"Juan dela Cruz\",\n  \"buyerTin\": \"123-456-789-00000\",\n  \"buyerAddress\": \"Makati City\",\n  \"bankAccount\": \"BDO-CA-001\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"fad_1\",\n    \"disposalNumber\": \"FAD-2026-00001\",\n    \"assetNumber\": \"FA-2026-00001\",\n    \"assetName\": \"Laptop computers (5)\",\n    \"disposalDate\": \"2026-10-04\",\n    \"disposalType\": \"sale\",\n    \"buyerName\": \"Juan dela Cruz\",\n    \"cost\": 360000,\n    \"accumulatedDepreciation\": 300000,\n    \"bookValue\": 60000,\n    \"proceeds\": 50000,\n    \"vatCode\": \"VAT12-OUT\",\n    \"outputVat\": 6000,\n    \"grossProceeds\": 56000,\n    \"gainLoss\": -10000,\n    \"journalNumber\": \"JV-2026-00610\",\n    \"salesInvoiceNumber\": \"SI-2026-00031\",\n    \"status\": \"posted\"\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Active asset classes (useful life, accounts)",
           "request": {
             "method": "GET",
@@ -36518,6 +36708,302 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"period\": \"2026-10\",\n    \"assets\": 1,\n    \"amount\": 10000,\n    \"journals\": [\n      {\n        \"journalNumber\": \"JV-2026-00510\",\n        \"classCode\": \"COMPUTER\",\n        \"amount\": 10000\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Disposal register (from, to, disposalType, status, classCode, search; format=xlsx or csv) with cost, accumulated depreciation, proceeds, VAT, gain and loss",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fixed-assets/disposals?from=2026-01-01&to=2026-12-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fixed-assets",
+                "disposals"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-01-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-12-31"
+                }
+              ]
+            },
+            "description": "Disposal register (from, to, disposalType, status, classCode, search; format=xlsx or csv) with cost, accumulated depreciation, proceeds, VAT, gain and loss\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fixed-assets/disposals?from=2026-01-01&to=2026-12-31",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fixed-assets",
+                    "disposals"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-01-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-12-31"
+                    }
+                  ]
+                },
+                "description": "Disposal register (from, to, disposalType, status, classCode, search; format=xlsx or csv) with cost, accumulated depreciation, proceeds, VAT, gain and loss\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"summary\": {\n      \"disposals\": 1,\n      \"cost\": 360000,\n      \"accumulatedDepreciation\": 300000,\n      \"bookValue\": 60000,\n      \"proceeds\": 50000,\n      \"outputVat\": 6000,\n      \"gain\": 0,\n      \"loss\": 10000\n    },\n    \"rows\": [\n      {\n        \"id\": \"fad_1\",\n        \"disposalNumber\": \"FAD-2026-00001\",\n        \"assetNumber\": \"FA-2026-00001\",\n        \"assetName\": \"Laptop computers (5)\",\n        \"disposalDate\": \"2026-10-04\",\n        \"disposalType\": \"sale\",\n        \"buyerName\": \"Juan dela Cruz\",\n        \"cost\": 360000,\n        \"accumulatedDepreciation\": 300000,\n        \"bookValue\": 60000,\n        \"proceeds\": 50000,\n        \"vatCode\": \"VAT12-OUT\",\n        \"outputVat\": 6000,\n        \"grossProceeds\": 56000,\n        \"gainLoss\": -10000,\n        \"journalNumber\": \"JV-2026-00610\",\n        \"salesInvoiceNumber\": \"SI-2026-00031\",\n        \"status\": \"posted\"\n      }\n    ]\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One disposal",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fixed-assets/disposals/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fixed-assets",
+                "disposals",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One disposal\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fixed-assets/disposals/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fixed-assets",
+                    "disposals",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One disposal\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"fad_1\",\n    \"disposalNumber\": \"FAD-2026-00001\",\n    \"assetNumber\": \"FA-2026-00001\",\n    \"assetName\": \"Laptop computers (5)\",\n    \"disposalDate\": \"2026-10-04\",\n    \"disposalType\": \"sale\",\n    \"buyerName\": \"Juan dela Cruz\",\n    \"cost\": 360000,\n    \"accumulatedDepreciation\": 300000,\n    \"bookValue\": 60000,\n    \"proceeds\": 50000,\n    \"vatCode\": \"VAT12-OUT\",\n    \"outputVat\": 6000,\n    \"grossProceeds\": 56000,\n    \"gainLoss\": -10000,\n    \"journalNumber\": \"JV-2026-00610\",\n    \"salesInvoiceNumber\": \"SI-2026-00031\",\n    \"status\": \"posted\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel a disposal: journal reversed, its sales invoice cancelled (none paid), the asset restored",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/fixed-assets/disposals/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fixed-assets",
+                "disposals",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel a disposal: journal reversed, its sales invoice cancelled (none paid), the asset restored\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: write:fixed-assets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Sale did not proceed\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/fixed-assets/disposals/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fixed-assets",
+                    "disposals",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel a disposal: journal reversed, its sales invoice cancelled (none paid), the asset restored\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: write:fixed-assets",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Sale did not proceed\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"fad_1\",\n    \"disposalNumber\": \"FAD-2026-00001\",\n    \"assetNumber\": \"FA-2026-00001\",\n    \"assetName\": \"Laptop computers (5)\",\n    \"disposalDate\": \"2026-10-04\",\n    \"disposalType\": \"sale\",\n    \"buyerName\": \"Juan dela Cruz\",\n    \"cost\": 360000,\n    \"accumulatedDepreciation\": 300000,\n    \"bookValue\": 60000,\n    \"proceeds\": 50000,\n    \"vatCode\": \"VAT12-OUT\",\n    \"outputVat\": 6000,\n    \"grossProceeds\": 56000,\n    \"gainLoss\": -10000,\n    \"journalNumber\": \"JV-2026-00610\",\n    \"salesInvoiceNumber\": \"SI-2026-00031\",\n    \"status\": \"cancelled\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Disposal voucher (PDF with the journal)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/fixed-assets/disposals/:id/pdf",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "fixed-assets",
+                "disposals",
+                ":id",
+                "pdf"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Disposal voucher (PDF with the journal)\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/fixed-assets/disposals/:id/pdf",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "fixed-assets",
+                    "disposals",
+                    ":id",
+                    "pdf"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Disposal voucher (PDF with the journal)\n\nFront-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "text",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/octet-stream"
+                }
+              ],
+              "cookie": [],
+              "body": "application/pdf"
             }
           ]
         }
@@ -55634,7 +56120,7 @@
           ]
         },
         {
-          "name": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers",
+          "name": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers (payeeType=Supplier: the suppliers of accounts payable)",
           "request": {
             "method": "GET",
             "header": [],
@@ -55663,7 +56149,7 @@
                 }
               ]
             },
-            "description": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers"
+            "description": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers (payeeType=Supplier: the suppliers of accounts payable)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307; Accounts > Payables > Supplier 2307\n\nAccess: read:period-end, read:journal-vouchers"
           },
           "response": [
             {
@@ -55696,7 +56182,7 @@
                     }
                   ]
                 },
-                "description": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers"
+                "description": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers (payeeType=Supplier: the suppliers of accounts payable)\n\nFront-end touchpoint: Accounts > Tax > BIR Form 2307; Accounts > Payables > Supplier 2307\n\nAccess: read:period-end, read:journal-vouchers"
               },
               "status": "OK",
               "code": 200,
@@ -56023,6 +56509,87 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"certificateNumber\": \"CWT-2026-00001\",\n    \"totalTax\": 264.93\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Issue the BIR Form 2307 of every payee of a quarter without one (payeeType=Supplier: the suppliers of accounts payable)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/period-end/bir/2307/issue-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "period-end",
+                "bir",
+                "2307",
+                "issue-all"
+              ]
+            },
+            "description": "Issue the BIR Form 2307 of every payee of a quarter without one (payeeType=Supplier: the suppliers of accounts payable)\n\nFront-end touchpoint: Accounts > Payables > Supplier 2307\n\nAccess: write:period-end",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3,\n  \"payeeType\": \"Supplier\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/period-end/bir/2307/issue-all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "period-end",
+                    "bir",
+                    "2307",
+                    "issue-all"
+                  ]
+                },
+                "description": "Issue the BIR Form 2307 of every payee of a quarter without one (payeeType=Supplier: the suppliers of accounts payable)\n\nFront-end touchpoint: Accounts > Payables > Supplier 2307\n\nAccess: write:period-end",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"year\": 2026,\n  \"quarter\": 3,\n  \"payeeType\": \"Supplier\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"year\": 2026,\n    \"quarter\": 3,\n    \"payeeType\": \"Supplier\",\n    \"issued\": [\n      {\n        \"payeeName\": \"Makati Office Supplies Inc.\",\n        \"certificateNumber\": \"CWT-2026-00007\",\n        \"totalTax\": 450\n      }\n    ],\n    \"alreadyIssued\": 0\n  }\n}"
             }
           ]
         },
@@ -70882,6 +71449,67 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": 3,\n    \"templateCode\": \"MOT-003-2025\",\n    \"name\": \"Motor Insurance Basic Plan\",\n    \"category\": \"Motor\",\n    \"lineOfBusiness\": \"Motor Vehicle\",\n    \"status\": \"Active\",\n    \"version\": \"v3.2\",\n    \"effectiveDate\": \"2025-01-01\",\n    \"baseRate\": 2.5,\n    \"minPremium\": 10000,\n    \"commissionRate\": 12,\n    \"configuration\": {\n      \"premiumRates\": {\n        \"private_cars\": \"2\"\n      }\n    },\n    \"features\": {},\n    \"insurers\": [],\n    \"tags\": [],\n    \"_count\": {\n      \"coverages\": 7,\n      \"ratingFactors\": 8,\n      \"underwritingRules\": 7\n    },\n    \"coverages\": [],\n    \"ratingFactors\": [],\n    \"underwritingRules\": []\n  },\n  \"id\": 3,\n  \"templateCode\": \"MOT-003-2025\",\n  \"name\": \"Motor Insurance Basic Plan\",\n  \"category\": \"Motor\",\n  \"lineOfBusiness\": \"Motor Vehicle\",\n  \"status\": \"Active\",\n  \"version\": \"v3.2\",\n  \"effectiveDate\": \"2025-01-01\",\n  \"baseRate\": 2.5,\n  \"minPremium\": 10000,\n  \"commissionRate\": 12,\n  \"configuration\": {\n    \"premiumRates\": {\n      \"private_cars\": \"2\"\n    }\n  },\n  \"features\": {},\n  \"insurers\": [],\n  \"tags\": [],\n  \"_count\": {\n    \"coverages\": 7,\n    \"ratingFactors\": 8,\n    \"underwritingRules\": 7\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Covers (Coverage Builder: mandatory, optional, priced on quotation as) and the risk fields the acceptance rules and rating factors test, of the template governing a line / product (lob, productId, templateCode)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/product-configurator/quote-setup?lob=MOTOR",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "product-configurator",
+                "quote-setup"
+              ],
+              "query": [
+                {
+                  "key": "lob",
+                  "value": "MOTOR"
+                }
+              ]
+            },
+            "description": "Covers (Coverage Builder: mandatory, optional, priced on quotation as) and the risk fields the acceptance rules and rating factors test, of the template governing a line / product (lob, productId, templateCode)\n\nFront-end touchpoint: Quotation wizard (risk details, coverage details); Request for Quotation\n\nAccess: read:products, write:products, read:quotations"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/product-configurator/quote-setup?lob=MOTOR",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "product-configurator",
+                    "quote-setup"
+                  ],
+                  "query": [
+                    {
+                      "key": "lob",
+                      "value": "MOTOR"
+                    }
+                  ]
+                },
+                "description": "Covers (Coverage Builder: mandatory, optional, priced on quotation as) and the risk fields the acceptance rules and rating factors test, of the template governing a line / product (lob, productId, templateCode)\n\nFront-end touchpoint: Quotation wizard (risk details, coverage details); Request for Quotation\n\nAccess: read:products, write:products, read:quotations"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"templateCode\": \"MOT-003-2025\",\n    \"templateName\": \"Motor Insurance Basic Plan\",\n    \"covers\": [\n      {\n        \"code\": \"AOG\",\n        \"name\": \"Acts of Nature\",\n        \"type\": \"Optional\",\n        \"quoteField\": \"actsOfNaturePremium\"\n      }\n    ],\n    \"riskFields\": [\n      {\n        \"field\": \"driverAge\",\n        \"label\": \"Driver age\",\n        \"type\": \"number\",\n        \"usedBy\": [\n          \"YOUNG_DRV Young Driver\"\n        ],\n        \"required\": false\n      }\n    ],\n    \"requireRuleFields\": false\n  }\n}"
             }
           ]
         },
@@ -92089,6 +92717,607 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reportId\": \"rpt_1a2b3c4d5e6f7a8b\",\n    \"code\": \"production-register\",\n    \"format\": \"xlsx\",\n    \"rows\": 42,\n    \"emailed\": 1\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Sales Activities",
+      "item": [
+        {
+          "name": "Activities (from, to, accountExecutive, activityType, outcome, channel, entity, search, status logged | cancelled | all); format=xlsx or csv",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities?from=2026-10-01&to=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Activities (from, to, accountExecutive, activityType, outcome, channel, entity, search, status logged | cancelled | all); format=xlsx or csv\n\nFront-end touchpoint: Sales > Sales Activities > Activities\n\nAccess: read:sales-activities, write:sales-activities"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities?from=2026-10-01&to=2026-10-31",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31"
+                    }
+                  ]
+                },
+                "description": "Activities (from, to, accountExecutive, activityType, outcome, channel, entity, search, status logged | cancelled | all); format=xlsx or csv\n\nFront-end touchpoint: Sales > Sales Activities > Activities\n\nAccess: read:sales-activities, write:sales-activities"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"sac_1\",\n      \"entity\": \"lead\",\n      \"entityId\": \"lead_1\",\n      \"recordNumber\": \"LD-2026-00012\",\n      \"partyName\": \"Rico Villanueva\",\n      \"activityType\": \"CALL\",\n      \"activityTypeName\": \"Phone call\",\n      \"channel\": \"call\",\n      \"subject\": \"Introductory call\",\n      \"activityAt\": \"2026-10-02T02:30:00Z\",\n      \"durationMinutes\": 15,\n      \"contactPerson\": \"Rico Villanueva\",\n      \"outcome\": \"INTERESTED\",\n      \"outcomeName\": \"Interested, wants a quotation\",\n      \"nextStep\": \"Send the motor quotation\",\n      \"nextStepDate\": \"2026-10-06\",\n      \"taskId\": \"tsk_1\",\n      \"taskStatus\": \"open\",\n      \"accountExecutive\": \"usr_1\",\n      \"accountExecutiveName\": \"Maria Rivera\",\n      \"status\": \"logged\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Log an activity on a prospect (lead), quotation (quote) or client; a next step with its date creates the follow-up task in My Work",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities"
+              ]
+            },
+            "description": "Log an activity on a prospect (lead), quotation (quote) or client; a next step with its date creates the follow-up task in My Work\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities > Log Activity\n\nAccess: write:sales-activities",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"entity\": \"lead\",\n  \"entityId\": \"lead_1\",\n  \"activityType\": \"CALL\",\n  \"subject\": \"Introductory call\",\n  \"activityAt\": \"2026-10-02T10:30:00+08:00\",\n  \"durationMinutes\": 15,\n  \"outcome\": \"INTERESTED\",\n  \"nextStep\": \"Send the motor quotation\",\n  \"nextStepDate\": \"2026-10-06\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities"
+                  ]
+                },
+                "description": "Log an activity on a prospect (lead), quotation (quote) or client; a next step with its date creates the follow-up task in My Work\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities > Log Activity\n\nAccess: write:sales-activities",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"entity\": \"lead\",\n  \"entityId\": \"lead_1\",\n  \"activityType\": \"CALL\",\n  \"subject\": \"Introductory call\",\n  \"activityAt\": \"2026-10-02T10:30:00+08:00\",\n  \"durationMinutes\": 15,\n  \"outcome\": \"INTERESTED\",\n  \"nextStep\": \"Send the motor quotation\",\n  \"nextStepDate\": \"2026-10-06\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"sac_1\",\n    \"entity\": \"lead\",\n    \"entityId\": \"lead_1\",\n    \"recordNumber\": \"LD-2026-00012\",\n    \"partyName\": \"Rico Villanueva\",\n    \"activityType\": \"CALL\",\n    \"activityTypeName\": \"Phone call\",\n    \"channel\": \"call\",\n    \"subject\": \"Introductory call\",\n    \"activityAt\": \"2026-10-02T02:30:00Z\",\n    \"durationMinutes\": 15,\n    \"contactPerson\": \"Rico Villanueva\",\n    \"outcome\": \"INTERESTED\",\n    \"outcomeName\": \"Interested, wants a quotation\",\n    \"nextStep\": \"Send the motor quotation\",\n    \"nextStepDate\": \"2026-10-06\",\n    \"taskId\": \"tsk_1\",\n    \"taskStatus\": \"open\",\n    \"accountExecutive\": \"usr_1\",\n    \"accountExecutiveName\": \"Maria Rivera\",\n    \"status\": \"logged\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "One activity",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "One activity\n\nFront-end touchpoint: Sales > Sales Activities\n\nAccess: read:sales-activities, write:sales-activities"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "One activity\n\nFront-end touchpoint: Sales > Sales Activities\n\nAccess: read:sales-activities, write:sales-activities"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"sac_1\",\n    \"entity\": \"lead\",\n    \"entityId\": \"lead_1\",\n    \"recordNumber\": \"LD-2026-00012\",\n    \"partyName\": \"Rico Villanueva\",\n    \"activityType\": \"CALL\",\n    \"activityTypeName\": \"Phone call\",\n    \"channel\": \"call\",\n    \"subject\": \"Introductory call\",\n    \"activityAt\": \"2026-10-02T02:30:00Z\",\n    \"durationMinutes\": 15,\n    \"contactPerson\": \"Rico Villanueva\",\n    \"outcome\": \"INTERESTED\",\n    \"outcomeName\": \"Interested, wants a quotation\",\n    \"nextStep\": \"Send the motor quotation\",\n    \"nextStepDate\": \"2026-10-06\",\n    \"taskId\": \"tsk_1\",\n    \"taskStatus\": \"open\",\n    \"accountExecutive\": \"usr_1\",\n    \"accountExecutiveName\": \"Maria Rivera\",\n    \"status\": \"logged\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Change an activity (a changed next step moves its open follow-up task)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Change an activity (a changed next step moves its open follow-up task)\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: write:sales-activities",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outcome\": \"QUOTE_REQUESTED\",\n  \"nextStepDate\": \"2026-10-07\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities/:id",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities",
+                    ":id"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Change an activity (a changed next step moves its open follow-up task)\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: write:sales-activities",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outcome\": \"QUOTE_REQUESTED\",\n  \"nextStepDate\": \"2026-10-07\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"sac_1\",\n    \"entity\": \"lead\",\n    \"entityId\": \"lead_1\",\n    \"recordNumber\": \"LD-2026-00012\",\n    \"partyName\": \"Rico Villanueva\",\n    \"activityType\": \"CALL\",\n    \"activityTypeName\": \"Phone call\",\n    \"channel\": \"call\",\n    \"subject\": \"Introductory call\",\n    \"activityAt\": \"2026-10-02T02:30:00Z\",\n    \"durationMinutes\": 15,\n    \"contactPerson\": \"Rico Villanueva\",\n    \"outcome\": \"INTERESTED\",\n    \"outcomeName\": \"Interested, wants a quotation\",\n    \"nextStep\": \"Send the motor quotation\",\n    \"nextStepDate\": \"2026-10-06\",\n    \"taskId\": \"tsk_1\",\n    \"taskStatus\": \"open\",\n    \"accountExecutive\": \"usr_1\",\n    \"accountExecutiveName\": \"Maria Rivera\",\n    \"status\": \"logged\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Cancel an activity logged in error (its open follow-up task is cancelled)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities/:id/cancel",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities",
+                ":id",
+                "cancel"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Cancel an activity logged in error (its open follow-up task is cancelled)\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: write:sales-activities",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Logged on the wrong prospect\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities/:id/cancel",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities",
+                    ":id",
+                    "cancel"
+                  ],
+                  "variable": [
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Cancel an activity logged in error (its open follow-up task is cancelled)\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: write:sales-activities",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Logged on the wrong prospect\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"sac_1\",\n    \"entity\": \"lead\",\n    \"entityId\": \"lead_1\",\n    \"recordNumber\": \"LD-2026-00012\",\n    \"partyName\": \"Rico Villanueva\",\n    \"activityType\": \"CALL\",\n    \"activityTypeName\": \"Phone call\",\n    \"channel\": \"call\",\n    \"subject\": \"Introductory call\",\n    \"activityAt\": \"2026-10-02T02:30:00Z\",\n    \"durationMinutes\": 15,\n    \"contactPerson\": \"Rico Villanueva\",\n    \"outcome\": \"INTERESTED\",\n    \"outcomeName\": \"Interested, wants a quotation\",\n    \"nextStep\": \"Send the motor quotation\",\n    \"nextStepDate\": \"2026-10-06\",\n    \"taskId\": \"tsk_1\",\n    \"taskStatus\": \"open\",\n    \"accountExecutive\": \"usr_1\",\n    \"accountExecutiveName\": \"Maria Rivera\",\n    \"status\": \"cancelled\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Activity types (channel, default days to the next step) and outcomes for the log form",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities",
+                "options"
+              ]
+            },
+            "description": "Activity types (channel, default days to the next step) and outcomes for the log form\n\nFront-end touchpoint: Sales > Sales Activities; Activities panel\n\nAccess: read:sales-activities, write:sales-activities"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities",
+                    "options"
+                  ]
+                },
+                "description": "Activity types (channel, default days to the next step) and outcomes for the log form\n\nFront-end touchpoint: Sales > Sales Activities; Activities panel\n\nAccess: read:sales-activities, write:sales-activities"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"types\": [\n      {\n        \"code\": \"CALL\",\n        \"name\": \"Phone call\",\n        \"channel\": \"call\",\n        \"followUpDays\": 3\n      }\n    ],\n    \"outcomes\": [\n      {\n        \"code\": \"INTERESTED\",\n        \"name\": \"Interested, wants a quotation\",\n        \"result\": \"positive\"\n      }\n    ],\n    \"channels\": [\n      \"call\",\n      \"meeting\",\n      \"email\",\n      \"visit\",\n      \"other\"\n    ],\n    \"nextStepRequired\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Activity report of a period (from, to; accountExecutive, activityType, channel): per account executive the activities by channel, outcomes, next steps and follow-ups; format=xlsx or csv",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities/report?from=2026-10-01&to=2026-10-31",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities",
+                "report"
+              ],
+              "query": [
+                {
+                  "key": "from",
+                  "value": "2026-10-01"
+                },
+                {
+                  "key": "to",
+                  "value": "2026-10-31"
+                }
+              ]
+            },
+            "description": "Activity report of a period (from, to; accountExecutive, activityType, channel): per account executive the activities by channel, outcomes, next steps and follow-ups; format=xlsx or csv\n\nFront-end touchpoint: Sales > Sales Activities > Activity Report\n\nAccess: read:sales-activities, write:sales-activities"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities/report?from=2026-10-01&to=2026-10-31",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities",
+                    "report"
+                  ],
+                  "query": [
+                    {
+                      "key": "from",
+                      "value": "2026-10-01"
+                    },
+                    {
+                      "key": "to",
+                      "value": "2026-10-31"
+                    }
+                  ]
+                },
+                "description": "Activity report of a period (from, to; accountExecutive, activityType, channel): per account executive the activities by channel, outcomes, next steps and follow-ups; format=xlsx or csv\n\nFront-end touchpoint: Sales > Sales Activities > Activity Report\n\nAccess: read:sales-activities, write:sales-activities"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"from\": \"2026-10-01\",\n    \"to\": \"2026-10-31\",\n    \"totals\": {\n      \"activities\": 12,\n      \"accountExecutives\": 2,\n      \"nextSteps\": 8,\n      \"followUpsDone\": 5,\n      \"followUpsOpen\": 3,\n      \"followUpsOverdue\": 1,\n      \"positive\": 4\n    },\n    \"rows\": [\n      {\n        \"accountExecutive\": \"usr_1\",\n        \"accountExecutiveName\": \"Maria Rivera\",\n        \"total\": 7,\n        \"call\": 4,\n        \"meeting\": 1,\n        \"email\": 1,\n        \"visit\": 1,\n        \"other\": 0,\n        \"prospects\": 3,\n        \"clients\": 2,\n        \"quotations\": 1,\n        \"nextSteps\": 5,\n        \"followUpsDone\": 3,\n        \"followUpsOpen\": 2,\n        \"followUpsOverdue\": 1,\n        \"positive\": 2\n      }\n    ],\n    \"byType\": [\n      {\n        \"activityType\": \"CALL\",\n        \"activityTypeName\": \"Phone call\",\n        \"total\": 6\n      }\n    ],\n    \"byOutcome\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Timeline of a prospect (lead), quotation (quote) or client: its activities newest first, with those of its quotations, and the open next step",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/sales-activities/timeline/:entity/:id?includeCancelled=false",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "sales-activities",
+                "timeline",
+                ":entity",
+                ":id"
+              ],
+              "query": [
+                {
+                  "key": "includeCancelled",
+                  "value": "false"
+                }
+              ],
+              "variable": [
+                {
+                  "key": "entity",
+                  "value": "",
+                  "description": "entity (path parameter)"
+                },
+                {
+                  "key": "id",
+                  "value": "",
+                  "description": "id (path parameter)"
+                }
+              ]
+            },
+            "description": "Timeline of a prospect (lead), quotation (quote) or client: its activities newest first, with those of its quotations, and the open next step\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: read:sales-activities, write:sales-activities"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/sales-activities/timeline/:entity/:id?includeCancelled=false",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "sales-activities",
+                    "timeline",
+                    ":entity",
+                    ":id"
+                  ],
+                  "query": [
+                    {
+                      "key": "includeCancelled",
+                      "value": "false"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "entity",
+                      "value": "",
+                      "description": "entity (path parameter)"
+                    },
+                    {
+                      "key": "id",
+                      "value": "",
+                      "description": "id (path parameter)"
+                    }
+                  ]
+                },
+                "description": "Timeline of a prospect (lead), quotation (quote) or client: its activities newest first, with those of its quotations, and the open next step\n\nFront-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: read:sales-activities, write:sales-activities"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"record\": {\n      \"entity\": \"lead\",\n      \"id\": \"lead_1\",\n      \"number\": \"LD-2026-00012\",\n      \"name\": \"Rico Villanueva\"\n    },\n    \"activities\": [\n      {\n        \"id\": \"sac_1\",\n        \"entity\": \"lead\",\n        \"entityId\": \"lead_1\",\n        \"recordNumber\": \"LD-2026-00012\",\n        \"partyName\": \"Rico Villanueva\",\n        \"activityType\": \"CALL\",\n        \"activityTypeName\": \"Phone call\",\n        \"channel\": \"call\",\n        \"subject\": \"Introductory call\",\n        \"activityAt\": \"2026-10-02T02:30:00Z\",\n        \"durationMinutes\": 15,\n        \"contactPerson\": \"Rico Villanueva\",\n        \"outcome\": \"INTERESTED\",\n        \"outcomeName\": \"Interested, wants a quotation\",\n        \"nextStep\": \"Send the motor quotation\",\n        \"nextStepDate\": \"2026-10-06\",\n        \"taskId\": \"tsk_1\",\n        \"taskStatus\": \"open\",\n        \"accountExecutive\": \"usr_1\",\n        \"accountExecutiveName\": \"Maria Rivera\",\n        \"status\": \"logged\"\n      }\n    ],\n    \"nextStep\": {\n      \"activityId\": \"sac_1\",\n      \"nextStep\": \"Send the motor quotation\",\n      \"dueDate\": \"2026-10-06\",\n      \"taskId\": \"tsk_1\"\n    }\n  }\n}"
             }
           ]
         }

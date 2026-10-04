@@ -6,6 +6,7 @@
  *   claim-document-requirement, repair-shop      Master > Insurance Management / Operations (write:masters or write:claims)
  *   supplier                                     Accounts > Payables > Suppliers (write:masters or write:payables)
  *   asset-class                                  Master > Finance > Asset Classes (write:masters or write:fixed-assets)
+ *   sales-activity-type, sales-activity-outcome  Master > Organization (write:masters only; read with read:sales-activities)
  * Reading needs the read permission of the owning module (or read:masters).
  */
 import { moduleRouter } from '../../lib/registry.js';
@@ -22,6 +23,7 @@ const { router, define } = moduleRouter('Operational Masters', '/ops-masters');
 export const OWNERS = {
   'short-period-rate': { module: 'endorsements', write: false }, 'cancellation-reason': { module: 'endorsements', write: false },
   'claim-document-requirement': { module: 'claims' }, 'repair-shop': { module: 'claims' }, supplier: { module: 'payables' }, 'asset-class': { module: 'fixed-assets' },
+  'sales-activity-type': { module: 'sales-activities', write: false }, 'sales-activity-outcome': { module: 'sales-activities', write: false },
 };
 const SCREEN = 'Master > Insurance Management / Accounts > Payables / Master > Finance (operational masters)';
 

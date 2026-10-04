@@ -8,8 +8,8 @@
  *            alphalist of payees (schedule 3: subject to expanded withholding; schedule 4: income payments exempt)
  *   2551Q    Quarterly Percentage Tax Return (non-VAT broker or agent): gross sales per month at bir.percentage_tax_rate
  *
- * The withholding figures are the payment vouchers with tax withheld (period-end/tax.js#withholdingLines, the same
- * source as BIR Form 2307 and the QAP); each 0619-E / 1601-EQ is reconciled with the QAP report and with the ledger
+ * The withholding figures are the payment vouchers with tax withheld and the approved supplier invoices of accounts
+ * payable with EWT (period-end/tax.js#withholdingLines, the same source as BIR Form 2307 and the QAP); each 0619-E / 1601-EQ is reconciled with the QAP report and with the ledger
  * withholding accounts (bir.withholding_ledger_accounts, else accounting.account.wht_payable). Item numbers follow
  * the January 2018 (ENCS) versions of the forms; the tax adviser confirms them against the current eBIRForms / eFPS
  * version before filing.
@@ -215,14 +215,15 @@ export async function alphalist1604E(db, y) {
   const map = new Map();
   for (const l of lines) {
     const k = `${l.key}|${l.atc}`;
-    const r = map.get(k) || { payeeKey: l.key, name: l.name, tin: l.tin, address: l.address, atc: l.atc, nature: info.get(l.atc)?.nature || '', rate: info.get(l.atc)?.rate ?? null, income: 0, tax: 0 };
+    const r = map.get(k) || { payeeKey: l.key, name: l.name, tin: l.tin, address: l.address, atc: l.atc, nature: info.get(l.atc)?.nature || '', rate: info.get(l.atc)?.rate ?? null, income: 0, tax: 0,
+      individualPayee: l.individual === true };
     r.income = round2(r.income + l.income); r.tax = round2(r.tax + l.tax);
     map.set(k, r);
   }
   const individual = (name, key) => /^(Agent\/Referrer|Agent|Sub-agent|Client):/.test(key) && !/\b(inc|corp|corporation|co|company|ltd|llc|insurance|agency|services)\b\.?/i.test(name);
   const rows = [...map.values()].sort((a, b) => a.name.localeCompare(b.name) || a.atc.localeCompare(b.atc)).map((r, i) => {
     const t = splitTin(r.tin, '0000');
-    const ind = individual(r.name, r.payeeKey);
+    const ind = r.individualPayee || individual(r.name, r.payeeKey);
     const parts = String(r.name).trim().split(/\s+/);
     return { seqNo: i + 1, tin: t.tin, branch: t.branch.slice(-4).padStart(4, '0'), registeredName: ind ? null : r.name, lastName: ind ? parts[parts.length - 1] : null,
       firstName: ind ? parts[0] : null, middleName: ind && parts.length > 2 ? parts.slice(1, -1).join(' ') : null, atc: r.atc, natureOfPayment: r.nature,

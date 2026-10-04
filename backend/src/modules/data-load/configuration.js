@@ -707,6 +707,7 @@ export const CONFIGURATION_ON_SCREEN = [
   ['Application name, logo, colours, display currency, language', 'Master > System Settings'],
   ['Company logo and letterhead images', 'Master > Generals > Organization > Company (upload the logo on the screen)'],
   ['Scheduled jobs', 'Master > Configuration > Schedules'],
+  ['Sales activity types and outcomes (starter lists are installed)', 'Master > Organization > Sales Activity Types / Sales Activity Outcomes'],
   ['Fiscal years and accounting periods (close the periods before the cutover date)', 'Accounts > Period End > Period Management'],
   ['Remittance masters, reinsurance treaties and reinsurers, incentive programs', 'Master > Finance > Remittance Master; Reinsurance; Incentive'],
   ['Referrers / agents and their commission accounts', 'Commission > Agents/Referrer Accounts'],

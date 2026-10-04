@@ -255,6 +255,9 @@
       "name": "Reports"
     },
     {
+      "name": "Sales Activities"
+    },
+    {
       "name": "Schedules"
     },
     {
@@ -53445,6 +53448,301 @@
         }
       }
     },
+    "/fixed-assets/assets/{id}/disposal-preview": {
+      "get": {
+        "operationId": "getFixedAssetsAssetsIdDisposalPreview",
+        "summary": "Figures of a disposal before it is posted (disposalType, disposalDate, proceeds): book value, output VAT, gain or loss, depreciation still to post",
+        "tags": [
+          "Fixed Assets"
+        ],
+        "description": "Front-end touchpoint: Accounts > Fixed Assets > Asset Register > Dispose\n\nAccess: read:fixed-assets, write:fixed-assets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "disposalType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "sale"
+          },
+          {
+            "name": "disposalDate",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-04"
+          },
+          {
+            "name": "proceeds",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "example": 50000
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "assetNumber": {
+                          "type": "string"
+                        },
+                        "cost": {
+                          "type": "integer"
+                        },
+                        "accumulatedDepreciation": {
+                          "type": "integer"
+                        },
+                        "bookValue": {
+                          "type": "integer"
+                        },
+                        "proceeds": {
+                          "type": "integer"
+                        },
+                        "outputVat": {
+                          "type": "integer"
+                        },
+                        "gainLoss": {
+                          "type": "integer"
+                        },
+                        "unpostedPeriods": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "assetNumber": "FA-2026-00001",
+                    "cost": 360000,
+                    "accumulatedDepreciation": 300000,
+                    "bookValue": 60000,
+                    "proceeds": 50000,
+                    "outputVat": 6000,
+                    "gainLoss": -10000,
+                    "unpostedPeriods": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Fixed Assets > Asset Register > Dispose",
+        "x-permissions": [
+          "read:fixed-assets",
+          "write:fixed-assets"
+        ]
+      }
+    },
+    "/fixed-assets/assets/{id}/dispose": {
+      "post": {
+        "operationId": "postFixedAssetsAssetsIdDispose",
+        "summary": "Sell or write off an asset: posting rule fa.disposal (cost and accumulated depreciation removed, proceeds, output VAT, gain or loss); a sale issues its BIR sales invoice",
+        "tags": [
+          "Fixed Assets"
+        ],
+        "description": "Front-end touchpoint: Accounts > Fixed Assets > Asset Register > Dispose\n\nAccess: write:fixed-assets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "disposalNumber": {
+                          "type": "string"
+                        },
+                        "assetNumber": {
+                          "type": "string"
+                        },
+                        "assetName": {
+                          "type": "string"
+                        },
+                        "disposalDate": {
+                          "type": "string"
+                        },
+                        "disposalType": {
+                          "type": "string"
+                        },
+                        "buyerName": {
+                          "type": "string"
+                        },
+                        "cost": {
+                          "type": "integer"
+                        },
+                        "accumulatedDepreciation": {
+                          "type": "integer"
+                        },
+                        "bookValue": {
+                          "type": "integer"
+                        },
+                        "proceeds": {
+                          "type": "integer"
+                        },
+                        "vatCode": {
+                          "type": "string"
+                        },
+                        "outputVat": {
+                          "type": "integer"
+                        },
+                        "grossProceeds": {
+                          "type": "integer"
+                        },
+                        "gainLoss": {
+                          "type": "integer"
+                        },
+                        "journalNumber": {
+                          "type": "string"
+                        },
+                        "salesInvoiceNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "fad_1",
+                    "disposalNumber": "FAD-2026-00001",
+                    "assetNumber": "FA-2026-00001",
+                    "assetName": "Laptop computers (5)",
+                    "disposalDate": "2026-10-04",
+                    "disposalType": "sale",
+                    "buyerName": "Juan dela Cruz",
+                    "cost": 360000,
+                    "accumulatedDepreciation": 300000,
+                    "bookValue": 60000,
+                    "proceeds": 50000,
+                    "vatCode": "VAT12-OUT",
+                    "outputVat": 6000,
+                    "grossProceeds": 56000,
+                    "gainLoss": -10000,
+                    "journalNumber": "JV-2026-00610",
+                    "salesInvoiceNumber": "SI-2026-00031",
+                    "status": "posted"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Fixed Assets > Asset Register > Dispose",
+        "x-permissions": [
+          "write:fixed-assets"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "disposalType": {
+                    "type": "string"
+                  },
+                  "disposalDate": {
+                    "type": "string"
+                  },
+                  "proceeds": {
+                    "type": "integer"
+                  },
+                  "buyerName": {
+                    "type": "string"
+                  },
+                  "buyerTin": {
+                    "type": "string"
+                  },
+                  "buyerAddress": {
+                    "type": "string"
+                  },
+                  "bankAccount": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "disposalType": "sale",
+                "disposalDate": "2026-10-04",
+                "proceeds": 50000,
+                "buyerName": "Juan dela Cruz",
+                "buyerTin": "123-456-789-00000",
+                "buyerAddress": "Makati City",
+                "bankAccount": "BDO-CA-001"
+              }
+            }
+          }
+        }
+      }
+    },
     "/fixed-assets/classes": {
       "get": {
         "operationId": "getFixedAssetsClasses",
@@ -53710,6 +54008,530 @@
         },
         "x-screen": "Accounts > Fixed Assets > Depreciation Run",
         "x-permissions": [
+          "write:fixed-assets"
+        ]
+      }
+    },
+    "/fixed-assets/disposals": {
+      "get": {
+        "operationId": "getFixedAssetsDisposals",
+        "summary": "Disposal register (from, to, disposalType, status, classCode, search; format=xlsx or csv) with cost, accumulated depreciation, proceeds, VAT, gain and loss",
+        "tags": [
+          "Fixed Assets"
+        ],
+        "description": "Front-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-01-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-12-31"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "summary": {
+                          "type": "object",
+                          "properties": {
+                            "disposals": {
+                              "type": "integer"
+                            },
+                            "cost": {
+                              "type": "integer"
+                            },
+                            "accumulatedDepreciation": {
+                              "type": "integer"
+                            },
+                            "bookValue": {
+                              "type": "integer"
+                            },
+                            "proceeds": {
+                              "type": "integer"
+                            },
+                            "outputVat": {
+                              "type": "integer"
+                            },
+                            "gain": {
+                              "type": "integer"
+                            },
+                            "loss": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "disposalNumber": {
+                                "type": "string"
+                              },
+                              "assetNumber": {
+                                "type": "string"
+                              },
+                              "assetName": {
+                                "type": "string"
+                              },
+                              "disposalDate": {
+                                "type": "string"
+                              },
+                              "disposalType": {
+                                "type": "string"
+                              },
+                              "buyerName": {
+                                "type": "string"
+                              },
+                              "cost": {
+                                "type": "integer"
+                              },
+                              "accumulatedDepreciation": {
+                                "type": "integer"
+                              },
+                              "bookValue": {
+                                "type": "integer"
+                              },
+                              "proceeds": {
+                                "type": "integer"
+                              },
+                              "vatCode": {
+                                "type": "string"
+                              },
+                              "outputVat": {
+                                "type": "integer"
+                              },
+                              "grossProceeds": {
+                                "type": "integer"
+                              },
+                              "gainLoss": {
+                                "type": "integer"
+                              },
+                              "journalNumber": {
+                                "type": "string"
+                              },
+                              "salesInvoiceNumber": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "summary": {
+                      "disposals": 1,
+                      "cost": 360000,
+                      "accumulatedDepreciation": 300000,
+                      "bookValue": 60000,
+                      "proceeds": 50000,
+                      "outputVat": 6000,
+                      "gain": 0,
+                      "loss": 10000
+                    },
+                    "rows": [
+                      {
+                        "id": "fad_1",
+                        "disposalNumber": "FAD-2026-00001",
+                        "assetNumber": "FA-2026-00001",
+                        "assetName": "Laptop computers (5)",
+                        "disposalDate": "2026-10-04",
+                        "disposalType": "sale",
+                        "buyerName": "Juan dela Cruz",
+                        "cost": 360000,
+                        "accumulatedDepreciation": 300000,
+                        "bookValue": 60000,
+                        "proceeds": 50000,
+                        "vatCode": "VAT12-OUT",
+                        "outputVat": 6000,
+                        "grossProceeds": 56000,
+                        "gainLoss": -10000,
+                        "journalNumber": "JV-2026-00610",
+                        "salesInvoiceNumber": "SI-2026-00031",
+                        "status": "posted"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Fixed Assets > Disposals",
+        "x-permissions": [
+          "read:fixed-assets",
+          "write:fixed-assets"
+        ]
+      }
+    },
+    "/fixed-assets/disposals/{id}": {
+      "get": {
+        "operationId": "getFixedAssetsDisposalsId",
+        "summary": "One disposal",
+        "tags": [
+          "Fixed Assets"
+        ],
+        "description": "Front-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "disposalNumber": {
+                          "type": "string"
+                        },
+                        "assetNumber": {
+                          "type": "string"
+                        },
+                        "assetName": {
+                          "type": "string"
+                        },
+                        "disposalDate": {
+                          "type": "string"
+                        },
+                        "disposalType": {
+                          "type": "string"
+                        },
+                        "buyerName": {
+                          "type": "string"
+                        },
+                        "cost": {
+                          "type": "integer"
+                        },
+                        "accumulatedDepreciation": {
+                          "type": "integer"
+                        },
+                        "bookValue": {
+                          "type": "integer"
+                        },
+                        "proceeds": {
+                          "type": "integer"
+                        },
+                        "vatCode": {
+                          "type": "string"
+                        },
+                        "outputVat": {
+                          "type": "integer"
+                        },
+                        "grossProceeds": {
+                          "type": "integer"
+                        },
+                        "gainLoss": {
+                          "type": "integer"
+                        },
+                        "journalNumber": {
+                          "type": "string"
+                        },
+                        "salesInvoiceNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "fad_1",
+                    "disposalNumber": "FAD-2026-00001",
+                    "assetNumber": "FA-2026-00001",
+                    "assetName": "Laptop computers (5)",
+                    "disposalDate": "2026-10-04",
+                    "disposalType": "sale",
+                    "buyerName": "Juan dela Cruz",
+                    "cost": 360000,
+                    "accumulatedDepreciation": 300000,
+                    "bookValue": 60000,
+                    "proceeds": 50000,
+                    "vatCode": "VAT12-OUT",
+                    "outputVat": 6000,
+                    "grossProceeds": 56000,
+                    "gainLoss": -10000,
+                    "journalNumber": "JV-2026-00610",
+                    "salesInvoiceNumber": "SI-2026-00031",
+                    "status": "posted"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Fixed Assets > Disposals",
+        "x-permissions": [
+          "read:fixed-assets",
+          "write:fixed-assets"
+        ]
+      }
+    },
+    "/fixed-assets/disposals/{id}/cancel": {
+      "post": {
+        "operationId": "postFixedAssetsDisposalsIdCancel",
+        "summary": "Cancel a disposal: journal reversed, its sales invoice cancelled (none paid), the asset restored",
+        "tags": [
+          "Fixed Assets"
+        ],
+        "description": "Front-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: write:fixed-assets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "disposalNumber": {
+                          "type": "string"
+                        },
+                        "assetNumber": {
+                          "type": "string"
+                        },
+                        "assetName": {
+                          "type": "string"
+                        },
+                        "disposalDate": {
+                          "type": "string"
+                        },
+                        "disposalType": {
+                          "type": "string"
+                        },
+                        "buyerName": {
+                          "type": "string"
+                        },
+                        "cost": {
+                          "type": "integer"
+                        },
+                        "accumulatedDepreciation": {
+                          "type": "integer"
+                        },
+                        "bookValue": {
+                          "type": "integer"
+                        },
+                        "proceeds": {
+                          "type": "integer"
+                        },
+                        "vatCode": {
+                          "type": "string"
+                        },
+                        "outputVat": {
+                          "type": "integer"
+                        },
+                        "grossProceeds": {
+                          "type": "integer"
+                        },
+                        "gainLoss": {
+                          "type": "integer"
+                        },
+                        "journalNumber": {
+                          "type": "string"
+                        },
+                        "salesInvoiceNumber": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "fad_1",
+                    "disposalNumber": "FAD-2026-00001",
+                    "assetNumber": "FA-2026-00001",
+                    "assetName": "Laptop computers (5)",
+                    "disposalDate": "2026-10-04",
+                    "disposalType": "sale",
+                    "buyerName": "Juan dela Cruz",
+                    "cost": 360000,
+                    "accumulatedDepreciation": 300000,
+                    "bookValue": 60000,
+                    "proceeds": 50000,
+                    "vatCode": "VAT12-OUT",
+                    "outputVat": 6000,
+                    "grossProceeds": 56000,
+                    "gainLoss": -10000,
+                    "journalNumber": "JV-2026-00610",
+                    "salesInvoiceNumber": "SI-2026-00031",
+                    "status": "cancelled"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Fixed Assets > Disposals",
+        "x-permissions": [
+          "write:fixed-assets"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Sale did not proceed"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fixed-assets/disposals/{id}/pdf": {
+      "get": {
+        "operationId": "getFixedAssetsDisposalsIdPdf",
+        "summary": "Disposal voucher (PDF with the journal)",
+        "tags": [
+          "Fixed Assets"
+        ],
+        "description": "Front-end touchpoint: Accounts > Fixed Assets > Disposals\n\nAccess: read:fixed-assets, write:fixed-assets",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "application/pdf",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Fixed Assets > Disposals",
+        "x-permissions": [
+          "read:fixed-assets",
           "write:fixed-assets"
         ]
       }
@@ -86642,11 +87464,11 @@
     "/period-end/bir/2307": {
       "get": {
         "operationId": "getPeriodEndBir2307",
-        "summary": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers",
+        "summary": "Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers (payeeType=Supplier: the suppliers of accounts payable)",
         "tags": [
           "Period End"
         ],
-        "description": "Front-end touchpoint: Accounts > Tax > BIR Form 2307\n\nAccess: read:period-end, read:journal-vouchers",
+        "description": "Front-end touchpoint: Accounts > Tax > BIR Form 2307; Accounts > Payables > Supplier 2307\n\nAccess: read:period-end, read:journal-vouchers",
         "parameters": [
           {
             "name": "year",
@@ -86742,7 +87564,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Accounts > Tax > BIR Form 2307",
+        "x-screen": "Accounts > Tax > BIR Form 2307; Accounts > Payables > Supplier 2307",
         "x-permissions": [
           "read:period-end",
           "read:journal-vouchers"
@@ -87100,6 +87922,123 @@
                 "year": 2026,
                 "quarter": 3,
                 "payeeKey": "Agent/Referrer:ref-jdelacruz"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/period-end/bir/2307/issue-all": {
+      "post": {
+        "operationId": "postPeriodEndBir2307IssueAll",
+        "summary": "Issue the BIR Form 2307 of every payee of a quarter without one (payeeType=Supplier: the suppliers of accounts payable)",
+        "tags": [
+          "Period End"
+        ],
+        "description": "Front-end touchpoint: Accounts > Payables > Supplier 2307\n\nAccess: write:period-end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "year": {
+                          "type": "integer"
+                        },
+                        "quarter": {
+                          "type": "integer"
+                        },
+                        "payeeType": {
+                          "type": "string"
+                        },
+                        "issued": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "payeeName": {
+                                "type": "string"
+                              },
+                              "certificateNumber": {
+                                "type": "string"
+                              },
+                              "totalTax": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "alreadyIssued": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "year": 2026,
+                    "quarter": 3,
+                    "payeeType": "Supplier",
+                    "issued": [
+                      {
+                        "payeeName": "Makati Office Supplies Inc.",
+                        "certificateNumber": "CWT-2026-00007",
+                        "totalTax": 450
+                      }
+                    ],
+                    "alreadyIssued": 0
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Accounts > Payables > Supplier 2307",
+        "x-permissions": [
+          "write:period-end"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "year": {
+                    "type": "integer"
+                  },
+                  "quarter": {
+                    "type": "integer"
+                  },
+                  "payeeType": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "year": 2026,
+                "quarter": 3,
+                "payeeType": "Supplier"
               }
             }
           }
@@ -110088,6 +111027,146 @@
           }
         },
         "x-screen": "Quotation wizard (coverage details, order summary); Product Configurator",
+        "x-permissions": [
+          "read:products",
+          "write:products",
+          "read:quotations"
+        ]
+      }
+    },
+    "/product-configurator/quote-setup": {
+      "get": {
+        "operationId": "getProductConfiguratorQuoteSetup",
+        "summary": "Covers (Coverage Builder: mandatory, optional, priced on quotation as) and the risk fields the acceptance rules and rating factors test, of the template governing a line / product (lob, productId, templateCode)",
+        "tags": [
+          "Product Configurator"
+        ],
+        "description": "Front-end touchpoint: Quotation wizard (risk details, coverage details); Request for Quotation\n\nAccess: read:products, write:products, read:quotations",
+        "parameters": [
+          {
+            "name": "lob",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "MOTOR"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "templateCode": {
+                          "type": "string"
+                        },
+                        "templateName": {
+                          "type": "string"
+                        },
+                        "covers": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "quoteField": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "riskFields": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              },
+                              "type": {
+                                "type": "string"
+                              },
+                              "usedBy": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string"
+                                }
+                              },
+                              "required": {
+                                "type": "boolean"
+                              }
+                            }
+                          }
+                        },
+                        "requireRuleFields": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "templateCode": "MOT-003-2025",
+                    "templateName": "Motor Insurance Basic Plan",
+                    "covers": [
+                      {
+                        "code": "AOG",
+                        "name": "Acts of Nature",
+                        "type": "Optional",
+                        "quoteField": "actsOfNaturePremium"
+                      }
+                    ],
+                    "riskFields": [
+                      {
+                        "field": "driverAge",
+                        "label": "Driver age",
+                        "type": "number",
+                        "usedBy": [
+                          "YOUNG_DRV Young Driver"
+                        ],
+                        "required": false
+                      }
+                    ],
+                    "requireRuleFields": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Quotation wizard (risk details, coverage details); Request for Quotation",
         "x-permissions": [
           "read:products",
           "write:products",
@@ -141981,6 +143060,1377 @@
         "x-screen": "Reports > Schedules > Run now",
         "x-permissions": [
           "write:reports"
+        ]
+      }
+    },
+    "/sales-activities": {
+      "get": {
+        "operationId": "getSalesActivities",
+        "summary": "Activities (from, to, accountExecutive, activityType, outcome, channel, entity, search, status logged | cancelled | all); format=xlsx or csv",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Sales > Sales Activities > Activities\n\nAccess: read:sales-activities, write:sales-activities",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-31"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "entity": {
+                            "type": "string"
+                          },
+                          "entityId": {
+                            "type": "string"
+                          },
+                          "recordNumber": {
+                            "type": "string"
+                          },
+                          "partyName": {
+                            "type": "string"
+                          },
+                          "activityType": {
+                            "type": "string"
+                          },
+                          "activityTypeName": {
+                            "type": "string"
+                          },
+                          "channel": {
+                            "type": "string"
+                          },
+                          "subject": {
+                            "type": "string"
+                          },
+                          "activityAt": {
+                            "type": "string"
+                          },
+                          "durationMinutes": {
+                            "type": "integer"
+                          },
+                          "contactPerson": {
+                            "type": "string"
+                          },
+                          "outcome": {
+                            "type": "string"
+                          },
+                          "outcomeName": {
+                            "type": "string"
+                          },
+                          "nextStep": {
+                            "type": "string"
+                          },
+                          "nextStepDate": {
+                            "type": "string"
+                          },
+                          "taskId": {
+                            "type": "string"
+                          },
+                          "taskStatus": {
+                            "type": "string"
+                          },
+                          "accountExecutive": {
+                            "type": "string"
+                          },
+                          "accountExecutiveName": {
+                            "type": "string"
+                          },
+                          "status": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": "sac_1",
+                      "entity": "lead",
+                      "entityId": "lead_1",
+                      "recordNumber": "LD-2026-00012",
+                      "partyName": "Rico Villanueva",
+                      "activityType": "CALL",
+                      "activityTypeName": "Phone call",
+                      "channel": "call",
+                      "subject": "Introductory call",
+                      "activityAt": "2026-10-02T02:30:00Z",
+                      "durationMinutes": 15,
+                      "contactPerson": "Rico Villanueva",
+                      "outcome": "INTERESTED",
+                      "outcomeName": "Interested, wants a quotation",
+                      "nextStep": "Send the motor quotation",
+                      "nextStepDate": "2026-10-06",
+                      "taskId": "tsk_1",
+                      "taskStatus": "open",
+                      "accountExecutive": "usr_1",
+                      "accountExecutiveName": "Maria Rivera",
+                      "status": "logged"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Sales > Sales Activities > Activities",
+        "x-permissions": [
+          "read:sales-activities",
+          "write:sales-activities"
+        ]
+      },
+      "post": {
+        "operationId": "postSalesActivities",
+        "summary": "Log an activity on a prospect (lead), quotation (quote) or client; a next step with its date creates the follow-up task in My Work",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Prospect / Client / Quotation > Activities > Log Activity\n\nAccess: write:sales-activities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "recordNumber": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "activityType": {
+                          "type": "string"
+                        },
+                        "activityTypeName": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "activityAt": {
+                          "type": "string"
+                        },
+                        "durationMinutes": {
+                          "type": "integer"
+                        },
+                        "contactPerson": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "type": "string"
+                        },
+                        "outcomeName": {
+                          "type": "string"
+                        },
+                        "nextStep": {
+                          "type": "string"
+                        },
+                        "nextStepDate": {
+                          "type": "string"
+                        },
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string"
+                        },
+                        "accountExecutive": {
+                          "type": "string"
+                        },
+                        "accountExecutiveName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "sac_1",
+                    "entity": "lead",
+                    "entityId": "lead_1",
+                    "recordNumber": "LD-2026-00012",
+                    "partyName": "Rico Villanueva",
+                    "activityType": "CALL",
+                    "activityTypeName": "Phone call",
+                    "channel": "call",
+                    "subject": "Introductory call",
+                    "activityAt": "2026-10-02T02:30:00Z",
+                    "durationMinutes": 15,
+                    "contactPerson": "Rico Villanueva",
+                    "outcome": "INTERESTED",
+                    "outcomeName": "Interested, wants a quotation",
+                    "nextStep": "Send the motor quotation",
+                    "nextStepDate": "2026-10-06",
+                    "taskId": "tsk_1",
+                    "taskStatus": "open",
+                    "accountExecutive": "usr_1",
+                    "accountExecutiveName": "Maria Rivera",
+                    "status": "logged"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Prospect / Client / Quotation > Activities > Log Activity",
+        "x-permissions": [
+          "write:sales-activities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "type": "string"
+                  },
+                  "entityId": {
+                    "type": "string"
+                  },
+                  "activityType": {
+                    "type": "string"
+                  },
+                  "subject": {
+                    "type": "string"
+                  },
+                  "activityAt": {
+                    "type": "string"
+                  },
+                  "durationMinutes": {
+                    "type": "integer"
+                  },
+                  "outcome": {
+                    "type": "string"
+                  },
+                  "nextStep": {
+                    "type": "string"
+                  },
+                  "nextStepDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "entity": "lead",
+                "entityId": "lead_1",
+                "activityType": "CALL",
+                "subject": "Introductory call",
+                "activityAt": "2026-10-02T10:30:00+08:00",
+                "durationMinutes": 15,
+                "outcome": "INTERESTED",
+                "nextStep": "Send the motor quotation",
+                "nextStepDate": "2026-10-06"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales-activities/{id}": {
+      "get": {
+        "operationId": "getSalesActivitiesId",
+        "summary": "One activity",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Sales > Sales Activities\n\nAccess: read:sales-activities, write:sales-activities",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "recordNumber": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "activityType": {
+                          "type": "string"
+                        },
+                        "activityTypeName": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "activityAt": {
+                          "type": "string"
+                        },
+                        "durationMinutes": {
+                          "type": "integer"
+                        },
+                        "contactPerson": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "type": "string"
+                        },
+                        "outcomeName": {
+                          "type": "string"
+                        },
+                        "nextStep": {
+                          "type": "string"
+                        },
+                        "nextStepDate": {
+                          "type": "string"
+                        },
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string"
+                        },
+                        "accountExecutive": {
+                          "type": "string"
+                        },
+                        "accountExecutiveName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "sac_1",
+                    "entity": "lead",
+                    "entityId": "lead_1",
+                    "recordNumber": "LD-2026-00012",
+                    "partyName": "Rico Villanueva",
+                    "activityType": "CALL",
+                    "activityTypeName": "Phone call",
+                    "channel": "call",
+                    "subject": "Introductory call",
+                    "activityAt": "2026-10-02T02:30:00Z",
+                    "durationMinutes": 15,
+                    "contactPerson": "Rico Villanueva",
+                    "outcome": "INTERESTED",
+                    "outcomeName": "Interested, wants a quotation",
+                    "nextStep": "Send the motor quotation",
+                    "nextStepDate": "2026-10-06",
+                    "taskId": "tsk_1",
+                    "taskStatus": "open",
+                    "accountExecutive": "usr_1",
+                    "accountExecutiveName": "Maria Rivera",
+                    "status": "logged"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Sales > Sales Activities",
+        "x-permissions": [
+          "read:sales-activities",
+          "write:sales-activities"
+        ]
+      },
+      "put": {
+        "operationId": "putSalesActivitiesId",
+        "summary": "Change an activity (a changed next step moves its open follow-up task)",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: write:sales-activities",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "recordNumber": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "activityType": {
+                          "type": "string"
+                        },
+                        "activityTypeName": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "activityAt": {
+                          "type": "string"
+                        },
+                        "durationMinutes": {
+                          "type": "integer"
+                        },
+                        "contactPerson": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "type": "string"
+                        },
+                        "outcomeName": {
+                          "type": "string"
+                        },
+                        "nextStep": {
+                          "type": "string"
+                        },
+                        "nextStepDate": {
+                          "type": "string"
+                        },
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string"
+                        },
+                        "accountExecutive": {
+                          "type": "string"
+                        },
+                        "accountExecutiveName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "sac_1",
+                    "entity": "lead",
+                    "entityId": "lead_1",
+                    "recordNumber": "LD-2026-00012",
+                    "partyName": "Rico Villanueva",
+                    "activityType": "CALL",
+                    "activityTypeName": "Phone call",
+                    "channel": "call",
+                    "subject": "Introductory call",
+                    "activityAt": "2026-10-02T02:30:00Z",
+                    "durationMinutes": 15,
+                    "contactPerson": "Rico Villanueva",
+                    "outcome": "INTERESTED",
+                    "outcomeName": "Interested, wants a quotation",
+                    "nextStep": "Send the motor quotation",
+                    "nextStepDate": "2026-10-06",
+                    "taskId": "tsk_1",
+                    "taskStatus": "open",
+                    "accountExecutive": "usr_1",
+                    "accountExecutiveName": "Maria Rivera",
+                    "status": "logged"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Prospect / Client / Quotation > Activities",
+        "x-permissions": [
+          "write:sales-activities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "outcome": {
+                    "type": "string"
+                  },
+                  "nextStepDate": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "outcome": "QUOTE_REQUESTED",
+                "nextStepDate": "2026-10-07"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales-activities/{id}/cancel": {
+      "post": {
+        "operationId": "postSalesActivitiesIdCancel",
+        "summary": "Cancel an activity logged in error (its open follow-up task is cancelled)",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: write:sales-activities",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "entity": {
+                          "type": "string"
+                        },
+                        "entityId": {
+                          "type": "string"
+                        },
+                        "recordNumber": {
+                          "type": "string"
+                        },
+                        "partyName": {
+                          "type": "string"
+                        },
+                        "activityType": {
+                          "type": "string"
+                        },
+                        "activityTypeName": {
+                          "type": "string"
+                        },
+                        "channel": {
+                          "type": "string"
+                        },
+                        "subject": {
+                          "type": "string"
+                        },
+                        "activityAt": {
+                          "type": "string"
+                        },
+                        "durationMinutes": {
+                          "type": "integer"
+                        },
+                        "contactPerson": {
+                          "type": "string"
+                        },
+                        "outcome": {
+                          "type": "string"
+                        },
+                        "outcomeName": {
+                          "type": "string"
+                        },
+                        "nextStep": {
+                          "type": "string"
+                        },
+                        "nextStepDate": {
+                          "type": "string"
+                        },
+                        "taskId": {
+                          "type": "string"
+                        },
+                        "taskStatus": {
+                          "type": "string"
+                        },
+                        "accountExecutive": {
+                          "type": "string"
+                        },
+                        "accountExecutiveName": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "sac_1",
+                    "entity": "lead",
+                    "entityId": "lead_1",
+                    "recordNumber": "LD-2026-00012",
+                    "partyName": "Rico Villanueva",
+                    "activityType": "CALL",
+                    "activityTypeName": "Phone call",
+                    "channel": "call",
+                    "subject": "Introductory call",
+                    "activityAt": "2026-10-02T02:30:00Z",
+                    "durationMinutes": 15,
+                    "contactPerson": "Rico Villanueva",
+                    "outcome": "INTERESTED",
+                    "outcomeName": "Interested, wants a quotation",
+                    "nextStep": "Send the motor quotation",
+                    "nextStepDate": "2026-10-06",
+                    "taskId": "tsk_1",
+                    "taskStatus": "open",
+                    "accountExecutive": "usr_1",
+                    "accountExecutiveName": "Maria Rivera",
+                    "status": "cancelled"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Prospect / Client / Quotation > Activities",
+        "x-permissions": [
+          "write:sales-activities"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "reason": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "reason": "Logged on the wrong prospect"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/sales-activities/options": {
+      "get": {
+        "operationId": "getSalesActivitiesOptions",
+        "summary": "Activity types (channel, default days to the next step) and outcomes for the log form",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Sales > Sales Activities; Activities panel\n\nAccess: read:sales-activities, write:sales-activities",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "types": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "channel": {
+                                "type": "string"
+                              },
+                              "followUpDays": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "outcomes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "code": {
+                                "type": "string"
+                              },
+                              "name": {
+                                "type": "string"
+                              },
+                              "result": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "channels": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "nextStepRequired": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "types": [
+                      {
+                        "code": "CALL",
+                        "name": "Phone call",
+                        "channel": "call",
+                        "followUpDays": 3
+                      }
+                    ],
+                    "outcomes": [
+                      {
+                        "code": "INTERESTED",
+                        "name": "Interested, wants a quotation",
+                        "result": "positive"
+                      }
+                    ],
+                    "channels": [
+                      "call",
+                      "meeting",
+                      "email",
+                      "visit",
+                      "other"
+                    ],
+                    "nextStepRequired": false
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Sales > Sales Activities; Activities panel",
+        "x-permissions": [
+          "read:sales-activities",
+          "write:sales-activities"
+        ]
+      }
+    },
+    "/sales-activities/report": {
+      "get": {
+        "operationId": "getSalesActivitiesReport",
+        "summary": "Activity report of a period (from, to; accountExecutive, activityType, channel): per account executive the activities by channel, outcomes, next steps and follow-ups; format=xlsx or csv",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Sales > Sales Activities > Activity Report\n\nAccess: read:sales-activities, write:sales-activities",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-01"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-10-31"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "from": {
+                          "type": "string"
+                        },
+                        "to": {
+                          "type": "string"
+                        },
+                        "totals": {
+                          "type": "object",
+                          "properties": {
+                            "activities": {
+                              "type": "integer"
+                            },
+                            "accountExecutives": {
+                              "type": "integer"
+                            },
+                            "nextSteps": {
+                              "type": "integer"
+                            },
+                            "followUpsDone": {
+                              "type": "integer"
+                            },
+                            "followUpsOpen": {
+                              "type": "integer"
+                            },
+                            "followUpsOverdue": {
+                              "type": "integer"
+                            },
+                            "positive": {
+                              "type": "integer"
+                            }
+                          }
+                        },
+                        "rows": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "accountExecutive": {
+                                "type": "string"
+                              },
+                              "accountExecutiveName": {
+                                "type": "string"
+                              },
+                              "total": {
+                                "type": "integer"
+                              },
+                              "call": {
+                                "type": "integer"
+                              },
+                              "meeting": {
+                                "type": "integer"
+                              },
+                              "email": {
+                                "type": "integer"
+                              },
+                              "visit": {
+                                "type": "integer"
+                              },
+                              "other": {
+                                "type": "integer"
+                              },
+                              "prospects": {
+                                "type": "integer"
+                              },
+                              "clients": {
+                                "type": "integer"
+                              },
+                              "quotations": {
+                                "type": "integer"
+                              },
+                              "nextSteps": {
+                                "type": "integer"
+                              },
+                              "followUpsDone": {
+                                "type": "integer"
+                              },
+                              "followUpsOpen": {
+                                "type": "integer"
+                              },
+                              "followUpsOverdue": {
+                                "type": "integer"
+                              },
+                              "positive": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "byType": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "activityType": {
+                                "type": "string"
+                              },
+                              "activityTypeName": {
+                                "type": "string"
+                              },
+                              "total": {
+                                "type": "integer"
+                              }
+                            }
+                          }
+                        },
+                        "byOutcome": {
+                          "type": "array",
+                          "items": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "from": "2026-10-01",
+                    "to": "2026-10-31",
+                    "totals": {
+                      "activities": 12,
+                      "accountExecutives": 2,
+                      "nextSteps": 8,
+                      "followUpsDone": 5,
+                      "followUpsOpen": 3,
+                      "followUpsOverdue": 1,
+                      "positive": 4
+                    },
+                    "rows": [
+                      {
+                        "accountExecutive": "usr_1",
+                        "accountExecutiveName": "Maria Rivera",
+                        "total": 7,
+                        "call": 4,
+                        "meeting": 1,
+                        "email": 1,
+                        "visit": 1,
+                        "other": 0,
+                        "prospects": 3,
+                        "clients": 2,
+                        "quotations": 1,
+                        "nextSteps": 5,
+                        "followUpsDone": 3,
+                        "followUpsOpen": 2,
+                        "followUpsOverdue": 1,
+                        "positive": 2
+                      }
+                    ],
+                    "byType": [
+                      {
+                        "activityType": "CALL",
+                        "activityTypeName": "Phone call",
+                        "total": 6
+                      }
+                    ],
+                    "byOutcome": []
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Sales > Sales Activities > Activity Report",
+        "x-permissions": [
+          "read:sales-activities",
+          "write:sales-activities"
+        ]
+      }
+    },
+    "/sales-activities/timeline/{entity}/{id}": {
+      "get": {
+        "operationId": "getSalesActivitiesTimelineEntityId",
+        "summary": "Timeline of a prospect (lead), quotation (quote) or client: its activities newest first, with those of its quotations, and the open next step",
+        "tags": [
+          "Sales Activities"
+        ],
+        "description": "Front-end touchpoint: Prospect / Client / Quotation > Activities\n\nAccess: read:sales-activities, write:sales-activities",
+        "parameters": [
+          {
+            "name": "entity",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeCancelled",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "false"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "record": {
+                          "type": "object",
+                          "properties": {
+                            "entity": {
+                              "type": "string"
+                            },
+                            "id": {
+                              "type": "string"
+                            },
+                            "number": {
+                              "type": "string"
+                            },
+                            "name": {
+                              "type": "string"
+                            }
+                          }
+                        },
+                        "activities": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string"
+                              },
+                              "entity": {
+                                "type": "string"
+                              },
+                              "entityId": {
+                                "type": "string"
+                              },
+                              "recordNumber": {
+                                "type": "string"
+                              },
+                              "partyName": {
+                                "type": "string"
+                              },
+                              "activityType": {
+                                "type": "string"
+                              },
+                              "activityTypeName": {
+                                "type": "string"
+                              },
+                              "channel": {
+                                "type": "string"
+                              },
+                              "subject": {
+                                "type": "string"
+                              },
+                              "activityAt": {
+                                "type": "string"
+                              },
+                              "durationMinutes": {
+                                "type": "integer"
+                              },
+                              "contactPerson": {
+                                "type": "string"
+                              },
+                              "outcome": {
+                                "type": "string"
+                              },
+                              "outcomeName": {
+                                "type": "string"
+                              },
+                              "nextStep": {
+                                "type": "string"
+                              },
+                              "nextStepDate": {
+                                "type": "string"
+                              },
+                              "taskId": {
+                                "type": "string"
+                              },
+                              "taskStatus": {
+                                "type": "string"
+                              },
+                              "accountExecutive": {
+                                "type": "string"
+                              },
+                              "accountExecutiveName": {
+                                "type": "string"
+                              },
+                              "status": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "nextStep": {
+                          "type": "object",
+                          "properties": {
+                            "activityId": {
+                              "type": "string"
+                            },
+                            "nextStep": {
+                              "type": "string"
+                            },
+                            "dueDate": {
+                              "type": "string"
+                            },
+                            "taskId": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "record": {
+                      "entity": "lead",
+                      "id": "lead_1",
+                      "number": "LD-2026-00012",
+                      "name": "Rico Villanueva"
+                    },
+                    "activities": [
+                      {
+                        "id": "sac_1",
+                        "entity": "lead",
+                        "entityId": "lead_1",
+                        "recordNumber": "LD-2026-00012",
+                        "partyName": "Rico Villanueva",
+                        "activityType": "CALL",
+                        "activityTypeName": "Phone call",
+                        "channel": "call",
+                        "subject": "Introductory call",
+                        "activityAt": "2026-10-02T02:30:00Z",
+                        "durationMinutes": 15,
+                        "contactPerson": "Rico Villanueva",
+                        "outcome": "INTERESTED",
+                        "outcomeName": "Interested, wants a quotation",
+                        "nextStep": "Send the motor quotation",
+                        "nextStepDate": "2026-10-06",
+                        "taskId": "tsk_1",
+                        "taskStatus": "open",
+                        "accountExecutive": "usr_1",
+                        "accountExecutiveName": "Maria Rivera",
+                        "status": "logged"
+                      }
+                    ],
+                    "nextStep": {
+                      "activityId": "sac_1",
+                      "nextStep": "Send the motor quotation",
+                      "dueDate": "2026-10-06",
+                      "taskId": "tsk_1"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Prospect / Client / Quotation > Activities",
+        "x-permissions": [
+          "read:sales-activities",
+          "write:sales-activities"
         ]
       }
     },

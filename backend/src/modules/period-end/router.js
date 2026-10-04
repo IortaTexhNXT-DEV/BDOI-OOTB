@@ -370,9 +370,11 @@ define({
     ok(res, t);
   },
 });
-const q2307 = z.object({ year: z.coerce.number().int(), quarter: z.coerce.number().int().min(1).max(4), direction: z.enum(['issued', 'received']).optional(), payeeKey: z.string().optional() });
+const q2307 = z.object({ year: z.coerce.number().int(), quarter: z.coerce.number().int().min(1).max(4), direction: z.enum(['issued', 'received']).optional(), payeeKey: z.string().optional(),
+  payeeType: z.string().max(40).optional() });
 define({
-  method: 'GET', path: '/bir/2307', summary: 'Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers', screen: 'Accounts > Tax > BIR Form 2307',
+  method: 'GET', path: '/bir/2307', summary: 'Payees (issued) or payors (received) with creditable withholding in a quarter, with their certificate numbers (payeeType=Supplier: the suppliers of accounts payable)',
+  screen: 'Accounts > Tax > BIR Form 2307; Accounts > Payables > Supplier 2307',
   middleware: [...read, validate(q2307, 'query')], query: { year: 2026, quarter: 3, direction: 'issued' },
   response: { success: true, data: { payees: [{ payeeKey: 'Agent/Referrer:ref-jdelacruz', payeeName: 'Juan Dela Cruz', totalIncome: 5298.72, totalTax: 264.93, certificateNumber: null }] } },
   handler: async (req, res) => ok(res, await tax.payees2307(pool, req.query)),
@@ -391,6 +393,17 @@ define({
     const c = await tx((db) => tax.issue2307(db, req.body, req.user));
     if (!c.alreadyIssued) await audit(req, { entity: 'bir_2307', entityId: c.certificateId, action: 'issue', after: { certificateNumber: c.certificateNumber, payeeKey: c.payeeKey, totalTax: c.totalTax } });
     (c.alreadyIssued ? ok : created)(res, c);
+  },
+});
+define({
+  method: 'POST', path: '/bir/2307/issue-all', summary: 'Issue the BIR Form 2307 of every payee of a quarter without one (payeeType=Supplier: the suppliers of accounts payable)',
+  screen: 'Accounts > Payables > Supplier 2307', middleware: [...write, validate(z.object({ year: z.number().int(), quarter: z.number().int().min(1).max(4), payeeType: z.string().max(40).optional() }))],
+  request: { year: 2026, quarter: 3, payeeType: 'Supplier' },
+  response: { success: true, data: { year: 2026, quarter: 3, payeeType: 'Supplier', issued: [{ payeeName: 'Makati Office Supplies Inc.', certificateNumber: 'CWT-2026-00007', totalTax: 450 }], alreadyIssued: 0 } },
+  handler: async (req, res) => {
+    const r = await tx((db) => tax.issueAll2307(db, req.body, req.user));
+    for (const c of r.issued) await audit(req, { entity: 'bir_2307', entityId: c.certificateId, action: 'issue', after: { certificateNumber: c.certificateNumber, payeeKey: c.payeeKey, totalTax: c.totalTax } });
+    ok(res, r, `${r.issued.length} certificate(s) issued`);
   },
 });
 define({

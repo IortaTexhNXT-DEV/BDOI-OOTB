@@ -17,7 +17,8 @@ import { teamIds, assignableUsers } from './team.js';
 
 export const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
 export const STATUSES = ['open', 'done', 'cancelled'];
-export const SOURCE_LABELS = { manual: 'Own task', manager: 'Assigned by manager', collection: 'Collection follow-up', renewal: 'Renewal follow-up', claim: 'Claim follow-up' };
+export const SOURCE_LABELS = { manual: 'Own task', manager: 'Assigned by manager', collection: 'Collection follow-up', renewal: 'Renewal follow-up', claim: 'Claim follow-up',
+  'sales-activity': 'Sales activity next step' };
 const AUTO_SOURCES = ['collection', 'renewal', 'claim'];
 const DEFAULT_TIME = '09:00';
 
@@ -180,18 +181,21 @@ async function assertAssignable(db, user, assigneeId) {
   if (!list.some((u) => u.id === assigneeId)) throw forbidden('Tasks can be assigned only to yourself or to people who report to you');
 }
 
-/** POST /my-work/tasks */
-export async function createTask(body, user, { db = pool, recordScope = null } = {}) {
+/**
+ * POST /my-work/tasks. Other modules create their follow-up tasks here too, with their own source and source key
+ * (a sales activity's next step: source sales-activity, key sales_activity:<id>).
+ */
+export async function createTask(body, user, { db = pool, recordScope = null, source: fixedSource = null, sourceKey = null } = {}) {
   const assignee = body.assignedTo || user.id;
   await assertAssignable(db, user, assignee);
   const rel = await checkRelated(db, user, recordScope, body.entity, body.entityId);
   const tz = await timeZone();
   const minutes = body.reminderMinutes === undefined ? Number(await getSetting('myWork.default_reminder_minutes', 60)) : body.reminderMinutes;
   const at = await remindAt(db, body.dueDate, body.dueTime, minutes, tz);
-  const source = assignee === user.id ? 'manual' : 'manager';
-  const { rows } = await db.query(`INSERT INTO work_tasks(title, notes, due_date, due_time, priority, assigned_to, source, entity, entity_id, remind_at, created_by, updated_by)
-    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$11) RETURNING id`,
-  [body.title, body.notes || null, body.dueDate, body.dueTime || null, body.priority || 'normal', assignee, source, rel.entity, rel.entityId, at, user.id]);
+  const source = fixedSource || (assignee === user.id ? 'manual' : 'manager');
+  const { rows } = await db.query(`INSERT INTO work_tasks(title, notes, due_date, due_time, priority, assigned_to, source, source_key, entity, entity_id, remind_at, created_by, updated_by)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$12) RETURNING id`,
+  [body.title, body.notes || null, body.dueDate, body.dueTime || null, body.priority || 'normal', assignee, source, sourceKey, rel.entity, rel.entityId, at, user.id]);
   const task = await getTask(rows[0].id, user, { db });
   if (assignee !== user.id) {
     await notify({ userId: assignee, type: 'info', priority: task.priority === 'urgent' ? 'high' : 'normal', title: `New task: ${task.title}`,

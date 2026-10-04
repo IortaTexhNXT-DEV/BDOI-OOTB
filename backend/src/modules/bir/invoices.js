@@ -31,7 +31,9 @@ import { iso } from '../period-end/fiscal.js';
 import { birIdentity, formatTin, round2, splitTin } from './common.js';
 import { enqueueInvoice } from './eis.js';
 
-export const SOURCE_TYPES = ['manual', 'debit_note', 'override_commission', 'policy_commission'];
+export const SOURCE_TYPES = ['manual', 'debit_note', 'override_commission', 'policy_commission', 'asset_disposal'];
+/** Sources whose amount the buyer still pays against the invoice (the disposal journal booked the receivable). */
+const COLLECTED_ON_INVOICE = ['manual', 'asset_disposal'];
 export const VAT_CLASSES = ['vatable', 'exempt', 'zero_rated'];
 
 /** Seller block printed on every invoice (snapshot at issue). */
@@ -106,6 +108,17 @@ async function fromSource(db, type, sourceId) {
     return { sourceId: p.id, sourceReference: p.policy_number, buyer: await insurerBuyer(db, p.insurance_company_id), ewtRate: Number(await getSetting('invoice.ewt_rate_insurer', 10)) / 100,
       lines: [{ description: `Brokerage commission, policy ${p.policy_number}`, quantity: 1, unitPrice: commission, vatClass: 'vatable',
         vatAmount: registered ? round2(commission * rate) : 0, policyNumber: p.policy_number, reference: p.policy_number }] };
+  }
+  if (type === 'asset_disposal') {
+    const d = (await db.query(`SELECT d.*, f.asset_number, f.name AS asset_name, f.serial_number FROM fixed_asset_disposals d JOIN fixed_assets f ON f.id = d.asset_id
+      WHERE d.id = $1 OR d.disposal_number = $1`, [String(sourceId)])).rows[0];
+    if (!d) throw notFound('Fixed asset disposal not found');
+    if (d.status !== 'posted' || d.disposal_type !== 'sale') throw conflict(`Disposal ${d.disposal_number} is not a posted sale`);
+    const t = splitTin(d.buyer_tin);
+    return { sourceId: d.id, sourceReference: d.disposal_number, ewtRate: 0, paidAtOnce: !!d.bank_account,
+      buyer: { buyerType: 'other', buyerName: d.buyer_name, buyerTin: t.tin ? formatTin(t.tin) : '', buyerBranchCode: t.tin ? t.branch : '', buyerAddress: d.buyer_address || '' },
+      lines: [{ description: `Sale of fixed asset ${d.asset_number} ${d.asset_name}${d.serial_number ? ` (serial ${d.serial_number})` : ''}`, quantity: 1, unitPrice: Number(d.proceeds),
+        vatClass: Number(d.output_vat) > 0 ? 'vatable' : 'exempt', vatAmount: Number(d.output_vat), reference: d.disposal_number }] };
   }
   throw badRequest(`Unknown invoice source ${type}`);
 }
@@ -197,8 +210,9 @@ export async function issueInvoice(db, b, user) {
     const jv = await postEvent('sales_invoice.issue', { date, transactionCode: number, referenceType: 'sales_invoice', referenceId: inv.id,
       amounts: { receivable: t.total, income: t.sales, vat: t.vat }, accounts: incomeAccount ? { income: incomeAccount } : {}, vars: { invoiceNumber: number, buyer: buyer.buyerName } }, { db, user });
     await db.query('UPDATE sales_invoices SET journal_id = $2 WHERE id = $1', [inv.id, jv.id]);
-  } else {
-    // the revenue of a debit note, a computation or a policy is already booked: the invoice carries nothing to collect here
+  } else if (type !== 'asset_disposal' || src.paidAtOnce) {
+    // the revenue of a debit note, a computation or a policy is already booked: the invoice carries nothing to collect
+    // here; an asset sold for cash was received with the disposal
     await db.query('UPDATE sales_invoices SET balance = 0 WHERE id = $1', [inv.id]);
   }
   await enqueueInvoice(db, inv.id, 'invoice', user);
@@ -243,7 +257,7 @@ export async function recordPayment(db, id, b, user) {
   const inv = (await db.query('SELECT * FROM sales_invoices WHERE id = $1 FOR UPDATE', [id])).rows[0];
   if (!inv) throw notFound('Sales invoice not found');
   if (inv.status !== 'issued') throw conflict(`Invoice ${inv.invoice_number} is ${inv.status}`);
-  if (inv.source_type !== 'manual') {
+  if (!COLLECTED_ON_INVOICE.includes(inv.source_type)) {
     throw conflict(`Invoice ${inv.invoice_number} is for ${inv.source_reference}: record the payment there (direct-bill collection or overriding commission settlement)`);
   }
   const amount = round2(b.amount); const ewt = round2(b.ewtAmount || 0);

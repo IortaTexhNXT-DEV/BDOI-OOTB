@@ -6,7 +6,7 @@ import { canRead, canWrite, sendList } from '../masters/helpers.js';
 import * as svc from './service.js';
 import { many } from '../../db/pool.js';
 import { notFound } from '../../lib/errors.js';
-import { evaluate, marketFor, RISK_FIELDS, OPERATORS, RULE_ACTIONS, RULE_TYPES } from './underwriting.js';
+import { evaluate, marketFor, quoteSetup, RISK_FIELDS, OPERATORS, RULE_ACTIONS, RULE_TYPES } from './underwriting.js';
 import { MERGE_FIELDS, BLOCKS, DEFAULT_LAYOUTS, PRINT_AS, LAYOUT_EXTENSIONS, LAYOUT_MAX, previewSpec } from '../documents/productDocuments.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 
@@ -187,6 +187,17 @@ define({
     ok(res, r);
   },
 });
+define({
+  method: 'GET', path: '/quote-setup', summary: 'Covers (Coverage Builder: mandatory, optional, priced on quotation as) and the risk fields the acceptance rules and rating factors test, of the template governing a line / product (lob, productId, templateCode)',
+  screen: 'Quotation wizard (risk details, coverage details); Request for Quotation', middleware: canRead('products', 'read:quotations'), query: { lob: 'MOTOR' },
+  response: { success: true, data: { templateCode: 'MOT-003-2025', templateName: 'Motor Insurance Basic Plan', covers: [{ code: 'AOG', name: 'Acts of Nature', type: 'Optional', quoteField: 'actsOfNaturePremium' }],
+    riskFields: [{ field: 'driverAge', label: 'Driver age', type: 'number', usedBy: ['YOUNG_DRV Young Driver'], required: false }], requireRuleFields: false } },
+  handler: async (req, res) => {
+    const r = await quoteSetup({ templateCode: req.query.templateCode || null, productId: req.query.productId || null, lob: req.query.lob || null });
+    ok(res, r || { templateCode: null, covers: [], riskFields: [], requireRuleFields: false });
+  },
+});
+
 define({
   method: 'GET', path: '/market', summary: 'Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer',
   screen: 'Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers', middleware: canRead('products', 'read:quotations'), query: { productId: 2 },
