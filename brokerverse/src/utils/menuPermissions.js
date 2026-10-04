@@ -19,6 +19,9 @@ const OPERATIONS_ALL = [
   "Renewals",
   "My Work",
   "Payments",
+  // cover notes and policy cancellation (return premium computed): write:policies / write:endorsements
+  "Cover Notes",
+  "Policy Cancellation",
 ];
 
 // The Processing Team reads prospects (read:leads) and works the market side: requests for quotation (broker slips),
@@ -87,7 +90,10 @@ export const roleMenuPermissions = {
   claims: {
     dashboard: ["Claims Dashboard"],
     home: true,
-    operations: ["Clients", "Policy", "Claims", "My Work"],
+    operations: ["Clients", "Policy", "Claims", "My Work",
+      // claim document checklist and motor claim repairs (write:claims); their masters below
+      "Claim Documents", "Motor Claim Repairs"],
+    master: ["Insurance Management > Claim Document Checklist", "Insurance Management > Repair Shops"],
     reinsurance: ["Claims Recovery"],
     reports: ["All Reports", "Operational Reports"],
   },
@@ -120,13 +126,20 @@ export const roleMenuPermissions = {
       "Insurer Reconciliation",
       // instalment plans, premium warranty, credit limits, remittance ageing (approvals: accounting-manager, approve:credit-control)
       "Credit Control",
+      // post-dated cheques, claims paid through the broker, accounts payable (approval: approve:payables), fixed assets
+      "Post-Dated Cheques",
+      "Claims Settlements",
+      "Payables",
+      "Fixed Assets",
     ],
     // Account Determination and Posting Rules: Accounting reads them; the Accounting Manager proposes changes and approves
     // those of another user on Configuration Approvals (the administrator configures too)
     master: ["Finance > Taxation", "Finance > Close Checklist", "Finance > Bank Statement Formats", "Finance > Bank Transaction Types",
       "Finance > Account Determination", "Finance > Posting Rules", "Finance > Configuration Approvals", "Finance > Accounting Flow", "Finance > Insurer Statement Formats",
       // premium taxes (write:premium-charges) and the payment links collected through the gateways
-      "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways"],
+      "Finance > Premium Taxes & LGU Rates", "Finance > Payment Gateways",
+      // asset classes of the fixed asset register (write:fixed-assets)
+      "Finance > Asset Classes"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts"],
     // reinsurer statement reconciliation is an Accounting task
     reinsurance: ["Reconciliation"],

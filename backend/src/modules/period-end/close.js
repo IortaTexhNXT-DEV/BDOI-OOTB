@@ -17,7 +17,8 @@ import { bounds, checklistItems, runChecks } from './checks.js';
 import { generateDue, reverseDue, undoEntry } from './journals.js';
 import { deferCommission, revalueFx } from './steps.js';
 
-export const STEPS = ['accruals', 'recurring', 'deferral', 'fx', 'checks'];
+// depreciation: the monthly fixed asset depreciation (modules/fixed-assets), idempotent per asset and period
+export const STEPS = ['accruals', 'recurring', 'deferral', 'fx', 'depreciation', 'checks'];
 const ENTRY_STEP = { accruals: 'accrual', deferral: 'deferral', fx: 'fx' };
 const ACTIVE = ['draft', 'in-progress', 'blocked', 'ready', 'pending-approval', 'soft-closed'];
 
@@ -165,6 +166,9 @@ export async function executeRun(db, id, user, { steps = STEPS } = {}) {
         r = await deferCommission(db, p, { user, runId: run.id });
       } else if (step === 'fx') {
         r = await revalueFx(db, p, { user, runId: run.id });
+      } else if (step === 'depreciation') {
+        const { depreciationStep } = await import('../fixed-assets/service.js');
+        r = await depreciationStep(db, p, { user, runId: run.id });
       }
       await db.query('RELEASE SAVEPOINT step');
       state[step] = { ...r, undone, at: new Date().toISOString(), by };

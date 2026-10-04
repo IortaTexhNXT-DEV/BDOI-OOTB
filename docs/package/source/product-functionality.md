@@ -198,6 +198,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Policy statuses Active, Expired, Renewed, Lapsed, Cancelled; payment statuses Pending, Reviewing, Partial, Completed, Refunded.
 - Bulk upload for new business, or for the in-force book at go-live without bills or journals.
 - Policy issued e-mail to the client with the policy schedule attached.
+- Cover notes (CVN-) while the policy is pending: issued from an accepted quotation or a sent / bound placement slip for `cover_note.validity_days` (30), printed on the letterhead and e-mailed; superseded and linked when the policy is issued, expired after the cover period, reminder to the owner before expiry (Operations > Cover Notes).
 
 ![Policy details](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-policy-detail.png)
 
@@ -218,6 +219,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Coverage changes priced again with the configured rates; CTPL stays as issued.
 - Completion with the insurer's endorsement document; the change is applied to the policy and the client.
 - Return premium on premium already remitted is booked as a refund due from each insurer and netted on its next remittance; commission clawed back on the returned part.
+- Cancellation return premium computed from the days left (Operations > Policy Cancellation and every cancellation endorsement): pro-rata when the insurer cancels, the short-period scale (Master > Insurance Management > Short-Period Rates) when the insured cancels, flat from inception; partial cancellation on the part cancelled; premium taxes from the charge engine (`endorsements.cancellation_returned_taxes`) and the commission reversed through posting rule policy.cancel.
 
 | Aspect | Detail |
 |---|---|
@@ -238,6 +240,9 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Claims paid through the broker: funds received from each insurer and payment to the claimant, each posted with its journal.
 - Claim letters on the letterhead: Acknowledgment letter, Claims Discharge Voucher, Claims Data sheet and FIR.
 - Claim Audit Trail and field change history.
+- Claim document checklist by line of business and claim type (Master > Insurance Management > Claim Document Checklist), received / waived status, missing-document reminders to the claimant (manual and daily), submission to the insurer refused while a required document is missing (`claims.require_documents_before_submission`).
+- Motor claim repairs: estimates of accredited repair shops, the adjuster's decision, supplementary estimates, letter of authority (LOA-) with the insured's participation (`motor_claims.participation`) and the vehicle release acknowledgement.
+- Accounts > Claims Settlements: funds received from insurers and payment to the claimant from the Accounting menu, with the claim payment voucher (CPV-) and the release and quitclaim.
 
 ![Claims Dashboard](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claims-dashboard.png)
 
@@ -294,8 +299,9 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Collections list with ageing buckets (current, 1-30, 31-60, 61-90, over 90 days), due date from the insurer's Premium Payment Warranty days, else `collections.default_credit_days` (30).
 - Collection reminders e-mailed 7 days before the due date and every 7 days after (daily job); Send Payment Reminders Now.
 - Collection items with assignments, commitments, escalation and a log of calls, e-mails and visits.
-- Credit Control: Instalment Plans (split a bill into instalments without changing the ledger), Premium Warranty Monitor (reminders, extension requests approved by the Accounting Manager, cancellation requests that create a draft cancellation endorsement), Client Credit Limits, Remittance Ageing.
+- Credit Control: Instalment Plans (split a bill into instalments, or issue a separate invoice per instalment with its own due date and booking journal), Premium Warranty Monitor (reminders, extension requests approved by the Accounting Manager, cancellation requests that create a draft cancellation endorsement), Client Credit Limits, Remittance Ageing.
 - Import open items at go-live from the old system's ageing.
+- Post-dated cheque register (Accounts > Post-Dated Cheques): cheques on hand with their vault location, deposit due list and daily reminder, deposit on the cheque date creating the official receipt, cleared, bounced (receipt cancelled, client e-mailed), replacement and return.
 
 ![Premium Warranty Monitor](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-cc-warranty.png)
 
@@ -306,6 +312,21 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Key reports | Receivables Ageing, SOA / Premium Receivable, Collection Report, Remittance Ageing |
 | Controls | Warranty extensions need approve:credit-control; nothing is cancelled automatically; credit limit exceptions reported to collections users |
 | Integrations | E-mail reminders |
+
+## Accounts payable and fixed assets
+
+**What it does.** Keeps the broker's own payables and assets: supplier invoices, supplier payments and the fixed asset register with its monthly depreciation.
+
+- Suppliers (TIN, VAT registration, EWT tax code, terms, default expense account); supplier invoices (APV-) with input VAT and expanded withholding tax, approved by a second user (approve:payables) and posted (posting rule ap.invoice); supplier payments (SPV-, posting rule ap.payment); AP ageing; AP and payment vouchers.
+- Fixed asset register (FA-): asset classes with useful life and accounts, assets from supplier invoice lines or registered by hand (with the go-live accumulated depreciation), straight-line schedule, monthly depreciation run per asset class (posting rule fa.depreciation), also a step of the month-end close.
+
+| Aspect | Detail |
+|---|---|
+| Philippine specifics | Input VAT at the VAT12-IN code; EWT codes of the BIR (WC158, WC160, WC100 ...) withheld from suppliers |
+| Personas | Accounting records and pays; Accounting Manager approves |
+| Key reports | AP Ageing, Fixed Asset Register (Excel) |
+| Controls | Maker-checker on supplier invoices (`payables.maker_checker`); one invoice number per supplier; an asset is depreciated once per period |
+| Integrations | Upload templates and go-live sheets for suppliers and asset classes |
 
 ## Disbursement and petty cash
 

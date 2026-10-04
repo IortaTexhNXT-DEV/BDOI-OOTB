@@ -8,6 +8,7 @@ import { DataTable } from "primereact/datatable";
 import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
+import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import service from "../../services/creditControlService";
 import { promptText } from "../../utility/dialogs";
@@ -86,6 +87,18 @@ const InstalmentPlans = () => {
     }
   };
 
+  // separate instalment invoices: one bill per instalment in place of the plan's bill
+  const invoicePlan = async (plan) => {
+    try {
+      const r = await service.invoicePlan(plan.id);
+      showSuccess(toast, t("opsAcc.instalments.invoiced", { count: r.invoices.length, bill: r.replacedBill }));
+      await load(data.policyId);
+      loadAgeing();
+    } catch (e) {
+      showError(toast, e);
+    }
+  };
+
   const bill = data?.bills.find((b) => b.id === terms?.receivableId);
   const setLine = (i, patch) => setDraft((d) => d.map((x, k) => (k === i ? { ...x, ...patch } : x)));
   const labels = bucketLabels(ageing?.bucketDays, t);
@@ -132,10 +145,13 @@ const InstalmentPlans = () => {
               <div key={p.id} className="mt-4">
                 <div className="flex align-items-center gap-2 mb-1">
                   <b>{p.billNumber}</b><CcTag status={p.status} /><span className="pe-muted">{t(`creditControl.freq.${p.frequency}`, { defaultValue: p.frequency })} · {p.instalmentCount}</span>
-                  {p.status === "active" && <Button label={t("creditControl.cancelPlan")} text size="small" onClick={() => cancelPlan(p)} />}
+                  {p.invoiced && <Tag className="pe-tag" value={t("opsAcc.instalments.invoicedTag")} severity="info" />}
+                  {p.status === "active" && !p.invoiced && <Button label={t("opsAcc.instalments.issueInvoices")} icon="pi pi-file" text size="small" onClick={() => invoicePlan(p)} tooltip={t("opsAcc.instalments.issueInvoicesHelp")} />}
+                  {p.status === "active" && !p.invoiced && <Button label={t("creditControl.cancelPlan")} text size="small" onClick={() => cancelPlan(p)} />}
                 </div>
                 <DataTable value={p.instalments} dataKey="seq" size="small" stripedRows>
                   <Column field="seq" header="#" />
+                  {p.invoiced && <Column field="billNumber" header={t("creditControl.bill")} />}
                   <Column header={t("creditControl.dueDate")} body={(r) => date(r.dueDate)} />
                   <Column header={t("creditControl.amount")} body={(r) => money(r.amount)} className="bv-num" headerClassName="bv-num" />
                   <Column header={t("creditControl.paid")} body={(r) => money(r.paid)} className="bv-num" headerClassName="bv-num" />

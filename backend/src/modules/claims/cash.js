@@ -10,6 +10,7 @@ import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { postEvent } from '../accounting/lib/posting.js';
 import { allocate, policyParticipants } from '../accounting/lib/coinsurance.js';
 import { isoDate, round2 } from '../accounting/lib/http.js';
+import { nextDocumentNumber } from '../../lib/numbering.js';
 
 async function loadClaim(db, id, lock = false) {
   const c = (await db.query(`SELECT c.*, p.policy_number, p.client_id AS policy_client_id, cl.display_name AS client_name FROM claims c JOIN policies p ON p.id = c.policy_id
@@ -21,7 +22,7 @@ async function loadClaim(db, id, lock = false) {
 const movementRow = (m) => ({
   id: Number(m.id), kind: m.kind, insurerId: m.insurance_company_id, insurer: m.insurer_name || null, amount: Number(m.amount), date: m.movement_date,
   bankAccount: m.bank_account, paymentMode: m.payment_mode, reference: m.reference, payee: m.payee, remarks: m.remarks, journalId: m.journal_id,
-  journalNumber: m.jv_number || null, createdBy: m.created_by_name || m.created_by, createdAt: m.created_at,
+  journalNumber: m.jv_number || null, voucherNumber: m.voucher_number || null, createdBy: m.created_by_name || m.created_by, createdAt: m.created_at,
 });
 
 /** Settlement cash position: what each insurer owes and has paid, what the claimant is owed and has been paid, the movements. */
@@ -90,11 +91,13 @@ export async function recordMovement(id, kind, b, user) {
         amounts: { amount }, vars: { ...vars, claimant: b.payee || pos.claimant || 'claimant' },
       }, { db, user });
     } else throw badRequest(`Unknown movement ${kind}`);
-    await db.query(`INSERT INTO claim_settlement_movements(claim_id, kind, insurance_company_id, amount, movement_date, bank_account, payment_mode, reference, payee, remarks, journal_id, created_by)
-      VALUES ($1,$2,$3,$4,COALESCE($5::date, numbering_business_date()),$6,$7,$8,$9,$10,$11,$12)`,
+    // a payment to the claimant gets its claim payment voucher number (printed with the release form)
+    const voucher = kind === 'paid-to-claimant' ? await nextDocumentNumber('claim_payment_voucher', { db, unique: { table: 'claim_settlement_movements', column: 'voucher_number' } }) : null;
+    const m = (await db.query(`INSERT INTO claim_settlement_movements(claim_id, kind, insurance_company_id, amount, movement_date, bank_account, payment_mode, reference, payee, remarks, journal_id, created_by, voucher_number)
+      VALUES ($1,$2,$3,$4,COALESCE($5::date, numbering_business_date()),$6,$7,$8,$9,$10,$11,$12,$13) RETURNING id`,
     [c.id, kind, insurer?.insurerId ?? null, amount, date, String(b.bankAccount), kind === 'paid-to-claimant' ? b.paymentMode || 'check' : 'bank-transfer', b.reference || null,
-      kind === 'paid-to-claimant' ? b.payee || pos.claimant || null : null, b.remarks || null, jv.id, user?.id ?? null]);
-    return { journalId: jv.id, journalNumber: jv.jv_number, position: await settlementCash(db, c.id) };
+      kind === 'paid-to-claimant' ? b.payee || pos.claimant || null : null, b.remarks || null, jv.id, user?.id ?? null, voucher])).rows[0];
+    return { journalId: jv.id, journalNumber: jv.jv_number, movementId: Number(m.id), voucherNumber: voucher, position: await settlementCash(db, c.id) };
   });
 }
 

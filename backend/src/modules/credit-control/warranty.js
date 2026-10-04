@@ -11,7 +11,7 @@
  */
 import { badRequest, conflict, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
-import { addDays, today } from '../../lib/dates.js';
+import { addDays, isoDate, today } from '../../lib/dates.js';
 import { assertChecker } from '../../lib/makerChecker.js';
 import { round2 } from '../../lib/money.js';
 import { notify } from '../notifications/service.js';
@@ -36,7 +36,7 @@ async function policiesWithPremiumDue(db, policyIds = null) {
       AND EXISTS (SELECT 1 FROM receivables r WHERE r.policy_id = p.id AND r.status IN ('open', 'partial') AND r.balance > 0)
       AND ($2::text[] IS NULL OR p.id = ANY($2))`, [defaultDays, policyIds])).rows;
   if (!rows.length) return [];
-  const bills = (await db.query(`SELECT r.id, r.policy_id, r.amount, r.balance, pl.id AS plan_id FROM receivables r
+  const bills = (await db.query(`SELECT r.id, r.policy_id, r.amount, r.balance, r.due_date, r.parent_receivable_id, pl.id AS plan_id FROM receivables r
     LEFT JOIN premium_instalment_plans pl ON pl.receivable_id = r.id AND pl.status = 'active'
     WHERE r.policy_id = ANY($1) AND r.status IN ('open', 'partial') AND r.balance > 0`, [rows.map((r) => r.id)])).rows;
   const planLines = bills.some((b) => b.plan_id) ? (await db.query('SELECT * FROM premium_instalments WHERE plan_id = ANY($1) ORDER BY plan_id, seq', [bills.filter((b) => b.plan_id).map((b) => b.plan_id)])).rows : [];
@@ -51,6 +51,10 @@ async function policiesWithPremiumDue(db, policyIds = null) {
         onPlan = true;
         const alloc = allocatePaid(planLines.filter((l) => l.plan_id === b.plan_id), round2(Number(b.amount) - Number(b.balance)), asOf);
         dueNow = round2(dueNow + alloc.filter((a) => a.dueDate <= asOf).reduce((s, a) => s + a.outstanding, 0));
+      } else if (b.parent_receivable_id) {
+        // a separate instalment invoice is due on its own due date
+        onPlan = true;
+        if (isoDate(b.due_date) <= asOf) dueNow = round2(dueNow + Number(b.balance));
       } else dueNow = round2(dueNow + Number(b.balance));
     }
     const warrantyDeadline = addDays(p.inception_date, Number(p.warranty_days) || 0);

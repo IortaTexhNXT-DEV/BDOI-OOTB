@@ -278,6 +278,11 @@ export const menuList = [
         includes: ["/agent/payments"],
         permissions: ["read:payments"],
       },
+      // cover notes, cancellation with computed return premium, claim document checklist and motor claim repairs
+      { id: 40, name: "Cover Notes", path: "/operations/cover-notes", includes: ["/operations/cover-notes"], permissions: ["read:policies"] },
+      { id: 41, name: "Policy Cancellation", path: "/operations/policy-cancellation", includes: ["/operations/policy-cancellation"], permissions: ["read:endorsements"] },
+      { id: 42, name: "Claim Documents", path: "/operations/claim-documents", includes: ["/operations/claim-documents"], permissions: ["read:claims"] },
+      { id: 43, name: "Motor Claim Repairs", path: "/operations/motor-claim-repairs", includes: ["/operations/motor-claim-repairs"], permissions: ["read:claims"] },
     ],
   },
   {
@@ -315,6 +320,39 @@ export const menuList = [
           { id: 2, name: "Premium Warranty Monitor", path: "/accounts/credit-control/warranty", includes: ["/accounts/credit-control/warranty"] },
           { id: 3, name: "Client Credit Limits", path: "/accounts/credit-control/limits", includes: ["/accounts/credit-control/limits"] },
           { id: 4, name: "Remittance Ageing", path: "/accounts/credit-control/remittance-ageing", includes: ["/accounts/credit-control/remittance-ageing"] },
+        ],
+      },
+  // post-dated cheques, claims paid through the broker, accounts payable and fixed assets
+  {
+        id: 40,
+        name: "Post-Dated Cheques",
+        path: "/accounts/post-dated-cheques",
+        includes: ["/accounts/post-dated-cheques"],
+        permissions: ["read:receipts"],
+      },
+  {
+        id: 41,
+        name: "Claims Settlements",
+        path: "/accounts/claims-settlements",
+        includes: ["/accounts/claims-settlements"],
+        permissions: ["read:receipts"],
+      },
+  {
+        id: 42,
+        name: "Payables",
+        submenu: [
+          { id: 1, name: "Supplier Invoices", path: "/accounts/payables/invoices", includes: ["/accounts/payables/invoices"] },
+          { id: 2, name: "Supplier Payments", path: "/accounts/payables/payments", includes: ["/accounts/payables/payments"] },
+          { id: 3, name: "AP Ageing", path: "/accounts/payables/ageing", includes: ["/accounts/payables/ageing"] },
+          { id: 4, name: "Suppliers", path: "/accounts/payables/suppliers", includes: ["/accounts/payables/suppliers"] },
+        ],
+      },
+  {
+        id: 43,
+        name: "Fixed Assets",
+        submenu: [
+          { id: 1, name: "Asset Register", path: "/accounts/fixed-assets/register", includes: ["/accounts/fixed-assets/register"] },
+          { id: 2, name: "Depreciation Run", path: "/accounts/fixed-assets/depreciation", includes: ["/accounts/fixed-assets/depreciation"] },
         ],
       },
   {
@@ -987,6 +1025,11 @@ export const menuList = [
               "/master/reinsurance/treaty/view",
             ],
           },
+          // cancellation and claims masters: short-period scale, cancellation reasons, claim document checklist, repair shops
+          { id: 30, name: "Short-Period Rates", path: "/master/insurance/short-period-rates", includes: ["/master/insurance/short-period-rates"] },
+          { id: 31, name: "Cancellation Reasons", path: "/master/insurance/cancellation-reasons", includes: ["/master/insurance/cancellation-reasons"] },
+          { id: 32, name: "Claim Document Checklist", path: "/master/insurance/claim-document-checklist", includes: ["/master/insurance/claim-document-checklist"] },
+          { id: 33, name: "Repair Shops", path: "/master/insurance/repair-shops", includes: ["/master/insurance/repair-shops"] },
         ],
       },
       {
@@ -1275,6 +1318,8 @@ export const menuList = [
             path: "/master/finance/close-checklist",
             includes: ["/master/finance/close-checklist"],
           },
+          // fixed asset classes: useful life and accounts of the depreciation
+          { id: 40, name: "Asset Classes", path: "/master/finance/asset-classes", includes: ["/master/finance/asset-classes"] },
           {
             id: 21,
             name: "Bank Statement Formats",

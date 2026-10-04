@@ -114,3 +114,8 @@ export async function remittanceSchedules() {
   if (!(await tableExists('remittances'))) return { skipped: 'remittances table missing' };
   return (await import('../modules/remittance/items.js')).runDueSchedules();
 }
+
+// operations and accounting: cover note expiry, post-dated cheques due for deposit, missing claim documents
+export { coverNoteExpiry } from '../modules/cover-notes/jobs.js';
+export { pdcDepositDue } from '../modules/pdc/jobs.js';
+export { claimDocumentReminders } from '../modules/claim-documents/jobs.js';

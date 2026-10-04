@@ -38,13 +38,17 @@ const ROLE_PERMS = {
     'privacy:read', 'privacy:write'],
   claims: ['profile', 'clients:read', 'policies:read', 'claims', 'reports', 'notifications', 'masters:read'],
   // Accounting calculates, approves (maker-checker) and pays incentives; program set-up stays with the system administrator.
-  accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read'],
+  accounting: ['profile', 'clients:read', 'policies:read', 'claims:read', 'receipts', 'collections', 'disbursements', 'commission', 'remittance', 'incentive', 'journal-vouchers', 'period-end', 'bank-reconciliation', 'reports', 'notifications', 'masters:read', 'schedules:read',
+    // accounts payable sub-ledger and fixed asset register (permissions of migration 0298)
+    'payables', 'fixed-assets'],
   // Accounting Manager inherits Accounting (ROLE_INHERITS) and adds the period-end approval (maker-checker on the close).
   // and the bank reconciliation approval (approve:bank-reconciliation: approve / reopen a reconciliation; not its preparer),
   // the insurer statement reconciliation approval (approve:insurer-reconciliation, permission added by migration 0172) and
   // the credit control approvals: warranty extensions and client credit limits (approve:credit-control, migration 0173),
   // and posting rule / account determination changes: propose (write) and approve another user's change (migration 0174).
-  'accounting-manager': ['period-end:approve', 'bank-reconciliation:approve', 'insurer-reconciliation:approve', 'credit-control:approve', 'posting-rules:write', 'posting-rules:approve'],
+  'accounting-manager': ['period-end:approve', 'bank-reconciliation:approve', 'insurer-reconciliation:approve', 'credit-control:approve', 'posting-rules:write', 'posting-rules:approve',
+    // supplier invoices approved by a second user (migration 0298)
+    'payables:approve'],
 };
 /** Roles that include other roles: the user also holds the inherited roles' permissions, menus and reports. */
 const ROLE_INHERITS = { 'accounting-manager': ['accounting'] };

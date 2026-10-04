@@ -74,6 +74,12 @@ with the API collection exported by `npm run export:api`). The table is written 
 | Customer Type master upload | No Upload button: Master > Configuration (reference list, API /api/masters/customer-type; no screen of its own) | `POST /api/masters/customer-type/upload` | `Customer_Type_Upload_Template.xlsx` |
 | Payment Mode master upload | No Upload button: Master > Configuration (reference list, API /api/masters/payment-mode; no screen of its own) | `POST /api/masters/payment-mode/upload` | `Payment_Mode_Upload_Template.xlsx` |
 | Holiday master upload | No Upload button: Master > Configuration (reference list, API /api/masters/holiday; no screen of its own) | `POST /api/masters/holiday/upload` | `Holiday_Upload_Template.xlsx` |
+| Supplier master upload | No Upload button: Accounts > Payables > Suppliers | `POST /api/masters/supplier/upload` | `Supplier_Upload_Template.xlsx` |
+| Asset Class master upload | No Upload button: Master > Finance > Asset Classes | `POST /api/masters/asset-class/upload` | `Asset_Class_Upload_Template.xlsx` |
+| Short-Period Rate master upload | No Upload button: Master > Insurance Management > Short-Period Rates | `POST /api/masters/short-period-rate/upload` | `Short_Period_Rate_Upload_Template.xlsx` |
+| Cancellation Reason master upload | No Upload button: Master > Insurance Management > Cancellation Reasons | `POST /api/masters/cancellation-reason/upload` | `Cancellation_Reason_Upload_Template.xlsx` |
+| Claim Document Checklist master upload | No Upload button: Master > Insurance Management > Claim Document Checklist | `POST /api/masters/claim-document-requirement/upload` | `Claim_Document_Checklist_Upload_Template.xlsx` |
+| Repair Shop master upload | No Upload button: Master > Insurance Management > Repair Shops | `POST /api/masters/repair-shop/upload` | `Repair_Shop_Upload_Template.xlsx` |
 | Leads upload | Operations > Sales & Marketing > Prospects > Bulk Upload | `POST /api/leads/bulk-upload` | `Leads_Upload_Template.xlsx` |
 | Quotations upload | Operations > Sales & Marketing > Quotations > Bulk Upload | `POST /api/quotations/bulk-upload` | `Quotations_Upload_Template.xlsx` |
 | Policies upload | Operations > Policy > Bulk Upload | `POST /api/policies/bulk-upload` | `Policies_Upload_Template.xlsx` |

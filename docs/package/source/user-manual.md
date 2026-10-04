@@ -530,6 +530,19 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Account Category, Main Account, Sub Account | The chart of accounts. |
 | Remittance Master | Automated remittance, statement templates, settlement parameters, bulk processing formats, exceptions, agency bill, adjustment and notification templates. |
 
+### Operational masters
+
+| Master | Menu | Maintained by |
+|---|---|---|
+| Short-Period Rates | Master > Insurance Management | System Administrator |
+| Cancellation Reasons | Master > Insurance Management | System Administrator |
+| Claim Document Checklist | Master > Insurance Management | Claims, System Administrator |
+| Repair Shops | Master > Insurance Management | Claims, System Administrator |
+| Asset Classes | Master > Finance | Accounting, System Administrator |
+| Suppliers | Accounts > Payables > Suppliers | Accounting, System Administrator |
+
+Each screen lists the records with **Add**, the edit icon and activate / deactivate. The six masters are also in the go-live configuration workbook and have upload templates.
+
 ### Uploads
 
 ![Upload dialog of a master with Download template](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-upload.png)
@@ -1359,6 +1372,44 @@ After sending, the endorsement waits for the insurer (**Waiting for Update**). T
 | Initiate Cancel, Cancelled | A cancellation in progress or done. |
 | Rejected | Refused by the insurer. |
 
+## Cover notes (binders)
+
+A cover note is temporary evidence of cover that the broker gives the client while the insurer issues the policy. It is issued from a quotation the customer accepted or from a placement slip sent to (or bound by) the insurers, and it stays in force for the cover period (30 days by default, setting `cover_note.validity_days`).
+
+1. Choose Operations > Cover Notes and select **Issue cover note**.
+2. Search the quotation, placement slip or client and select the row. Only quotations whose status is in `cover_note.quote_statuses` (accepted, approved, submitted) and placement slips in `cover_note.placement_statuses` (sent, bound) without a policy or an active cover note are listed.
+3. Check **Cover from** (the inception of the placement, else today), the **Cover period (days)** (empty: the default; at most `cover_note.max_validity_days`), the **Insurer binder reference** and any **Special conditions**.
+4. Select **Issue cover note**. The number is CVN-YYYY-NNNNN (Master > Document Numbering, series cover_note).
+
+On the list, **Print** opens the cover note with the company letterhead, the cover, the risk, the wording of `cover_note.wording` and the signature block; **E-mail to the client** sends the PDF (e-mail template `cover_note`); **Cancel** asks for a reason.
+
+| Cover note status | Meaning |
+|---|---|
+| Active | In force until the end of the cover period. |
+| Superseded | The policy of the quotation or placement slip was issued; the policy number is shown and the cover note ends. |
+| Expired | The cover period ended before the policy was issued. The policy is still linked when it is issued later. |
+| Cancelled | Cancelled by a user (reason kept in the audit trail). |
+
+The daily job **Cover note expiry** (Master > Schedules) reminds the owner of the quotation or placement `cover_note.reminder_days_before` days (7) before the end date, expires cover notes past their end date and links issued policies.
+
+## Cancel a policy: computed return premium
+
+The return premium of a cancellation is computed from the days left, never typed in (setting `endorsements.compute_cancellation_return`).
+
+| Method | When | Return net premium |
+|---|---|---|
+| Pro-rata | The insurer cancels (reason initiated by the insurer, for example non-payment) | Net premium x days left / days of the policy period. |
+| Short-period | The insured cancels (`endorsements.short_period_for_insured`) | Net premium less the percentage the insurer keeps for the days in force, from Master > Insurance Management > Short-Period Rates (a shorter term is scaled to a year). |
+| Flat | Cancelled from inception, or a reason whose method is flat (not taken up, duplicate) | The whole net premium. |
+
+1. Choose Operations > Policy Cancellation and enter the policy number.
+2. Enter the **Cancellation date** and choose the **Reason** (Master > Insurance Management > Cancellation Reasons says who initiates it and the method). **Return premium method** = From the reason, unless you choose another one.
+3. For a cancellation of part of the cover choose **Part of the cover** and enter the percentage or the net premium of the part cancelled; the policy stays in force.
+4. Select **Compute return premium**. The page shows the days in force and left, the premium kept by the insurer, the return net premium, the premium taxes returned (from Master > Finance > Premium Taxes & LGU Rates on the return premium; the taxes returned are set in `endorsements.cancellation_returned_taxes`, documentary stamp tax is not refundable by default), the return premium and the commission taken back.
+5. Select **Create cancellation endorsement**. The endorsement summary opens; send it to the customer and complete it as any cancellation (Processing Team chapter). The server computes the same figures again, so a figure changed on the screen is not used.
+
+When the endorsement is completed the open bills are credited with the return premium (what the client already paid becomes a refund), and the journal (posting rule policy.cancel, or endorsement.return_premium for a partial cancellation) reverses the premium due to the insurer, the premium taxes and the commission at the computed amounts. A cancellation raised from the endorsement screens is computed the same way.
+
 ## Record the client's payment
 
 Operations records payments exactly as described in the Sales & Marketing chapter (Policy > **Proceed to Payment** > **How does the client pay?** > **Record payment**). Accounting verifies the payment and posts the official receipt.
@@ -1555,6 +1606,26 @@ When the settlement is paid through the broker, the insurer pays the broker and 
 
 ![Claim audit trail](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-audit.png)
 
+## Claim document checklist
+
+Each claim has the list of documents it needs, taken from Master > Insurance Management > Claim Document Checklist by line of business and claim type (* for all), each one required or optional.
+
+1. Choose Operations > Claim Documents and select the claim on the left.
+2. For each document: **Received** (or upload a copy with the upload icon; an uploaded claim document with the same name is marked received by itself), **Waive** with a reason when it does not apply, or **Reopen**. **Add document** adds one the checklist does not list.
+3. **Remind the claimant** e-mails the documents still missing (e-mail template `claim_missing_documents`). The daily job **Missing claim documents** sends the same reminder every `claims.document_reminder_days` days (3; 0 switches it off) to claimants of open claims with a required document missing.
+4. **Submit to insurer** records that the claim file went to the insurer (the reference is written to the claim history). While a required document is missing the button is disabled and the server refuses it (`claims.require_documents_before_submission`).
+
+## Motor claim repairs and letters of authority
+
+Operations > Motor Claim Repairs lists the motor claims with the stage of their repair: no estimate yet, awaiting approval, approved, in repair, released. Select a claim to open its repair file.
+
+1. **Record estimate**: the repair shop (Master > Insurance Management > Repair Shops; only active, accredited shops), its estimate number and date, and the parts, labour, paint, other and VAT amounts. The first estimate is the initial one; an estimate recorded after one is approved is supplementary. One estimate at a time waits for the adjuster.
+2. **Record adjuster decision**: approve with the approved amount (at most the estimate) or reject with the reason, the adjuster and adjusting company, and the insurer's approval reference.
+3. **Issue letter of authority**: covers the approved estimates not yet on a letter. The participation of the insured comes from `motor_claims.participation` (PHP 2,000 or 0.5% of the sum insured, whichever is higher) on the original letter only, and the depreciation on parts from `motor_claims.parts_depreciation_percent`; both can be changed. The letter (LOA-YYYY-NNNNN, valid `motor_claims.loa_validity_days`) shows the approved repair cost, the amount payable by the insurer and the amount the insured settles with the shop. **Print** opens it with the letterhead; a supplementary estimate gets a supplementary letter.
+4. **Release vehicle**: who took the vehicle back, the dates, the participation paid to the shop and the odometer. **Print** gives the release acknowledgement the insured signs.
+
+Every step is written to the claim history.
+
 ## Reinsurance recoveries
 
 Reinsurance > Claims Recovery lists the claims with an amount recoverable from reinsurers under the treaties: **Total Claimed**, **Total Recovered**, **Recovery Rate** and **Avg Recovery Time**, and the tabs **Pending Recoveries** and **Recovered Claims**. **Register Recovery** records a recovery against a claim.
@@ -1659,6 +1730,32 @@ Accounts > Collections lists every open premium with **Client Name**, **Policy N
 | Remittance Ageing | Premium collected and not yet remitted, per insurer, aged on the insurer's remittance terms from the collection date. The amount due is net of the commission and its VAT, plus the EWT on the commission. **Excel** downloads it. |
 
 ![Accounts > Credit Control > Premium Warranty Monitor](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-cc-warranty.png)
+
+### Separate instalment invoices
+
+By default an instalment plan splits the follow-up of one bill. To bill each instalment on its own, select **Issue instalment invoices** on the plan (before any payment is applied to the bill; `credit.instalment_invoices_on_save` does it when the plan is saved). The bill is cancelled with the reversal of its booking journal and each instalment becomes a bill with its own invoice number, due date, share of the net premium, taxes and commission, booking journal and collection item. Receipts, collections, the receivable ageing, the instalment ageing and the Premium Warranty Monitor then work on each instalment bill (an instalment counts as premium due only from its due date). An invoiced plan cannot be cancelled.
+
+## Post-dated cheques
+
+Accounts > Post-Dated Cheques is the register of cheques received from clients before their date.
+
+1. **Register cheque**: the bill (or policy) it pays, the drawee bank (Bank master, or typed), cheque number, date and amount, and where it is kept (**Kept in**). The cheques on hand of a bill cannot exceed its balance. Nothing is posted yet.
+2. The **Deposit due** tab lists the cheques dated within `pdc.due_window_days` days (3); the daily job **Post-dated cheques due** tells Accounting.
+3. **Deposit** on or after the cheque date: choose the bank account. The official receipt is created and posted on that bank account (posting rule receipt.apply) and its number is shown.
+4. **Cleared** when the bank confirms. **Bounced** with the bank's reason (and charge): the receipt is cancelled, its journal reversed and the bill is open again; Accounting is notified and the client is e-mailed (template `pdc_bounced`, `pdc.notify_client_on_bounce`).
+5. **Replace** registers the client's new cheque for the same bill, linked to the bounced one. **Return** gives an unused cheque back to the client; **Cancel** voids a registration made in error.
+
+**Export to Excel** downloads the register.
+
+## Claims settlements paid through the broker
+
+Accounts > Claims Settlements lists the claims whose settlement through the broker is booked, with what is still to receive from the insurers and what is payable to the claimant. Select a claim:
+
+- **Funds received**: the insurer, amount, bank account and the insurer's remittance advice. Posting rule claim.funds_received: Dr bank / Cr Claim Settlements Receivable (clearing). Never more than the insurer's share.
+- **Pay claimant**: payee, mode, bank account, cheque or transfer reference. Posting rule claim.paid_to_claimant: Dr Claim Settlements Payable (fiduciary) / Cr bank. The payment gets a claim payment voucher number (CPV-YYYY-NNNNN); the print icon opens the voucher.
+- **Release form**: the release and quitclaim the claimant signs, with the payments made.
+
+Recording funds needs the receipts permission and paying the claimant the disbursements permission (Accounting). The same cash panel stays on the claim screen.
 
 ## Disbursement: payment vouchers and cheques
 
@@ -1886,7 +1983,7 @@ A fiscal year (FY2026) has twelve monthly periods and an adjustment period 13 us
 ### Run the month-end close (preparer)
 
 1. Choose Accounts > Period End > Month-End Close and select **New close run**. Choose the **Period**, add **Remarks** and select **Start**.
-2. The run (MEC-YYYY-NNNNN) executes its steps in order: (a) Accruals, (b) Recurring journals, (c) Commission deferral (Skipped when off), (d) FX revaluation, (e) Checklist.
+2. The run (MEC-YYYY-NNNNN) executes its steps in order: (a) Accruals, (b) Recurring journals, (c) Commission deferral (Skipped when off), (d) FX revaluation, (e) Depreciation of the fixed asset register (posted once per asset and period; Skipped when `fixed_assets.depreciation_in_month_end` is off), (f) Checklist.
 3. Read the checklist. Automatic items show Passed, Warning or Failed with the reason. Fix what failed and re-run the checks.
 4. Sign off each manual item when it is done, for example the bank reconciliations reviewed and signed off.
 5. Submit the close.
@@ -1906,6 +2003,22 @@ Select **New template** and enter **Name**, **Kind** (Recurring or accrual), **F
 ### Year-end close (preparer)
 
 The year-end close needs all twelve periods closed. Choose the fiscal year and select **Start year-end close**; run the pre-checks; post audit adjustments with **Adjustment journal** (dated the year end, posted in period 13, approved by a second user). The Accounting Manager closes the year.
+
+## Accounts payable
+
+Suppliers are kept on Accounts > Payables > Suppliers: TIN, address, VAT registration, the EWT tax code withheld (Master > Finance > Taxation, for example WC158 goods, WC160 services, WC100 rentals), payment terms and the default expense account.
+
+1. Accounts > Payables > Supplier Invoices > **New supplier invoice**: supplier, the supplier's invoice number and date, description, and one line per expense account (or an **Asset class** for an asset bought). Input VAT is computed on the vatable lines of a VAT-registered supplier at the rate of `payables.input_vat_code`; the EWT at the rate of the supplier's EWT tax code on the amount net of VAT. The due date follows the payment terms. The same supplier invoice number cannot be recorded twice.
+2. **Save and submit** sends it for approval; the Accounting Manager (another user) approves it, which posts the journal (posting rule ap.invoice: Dr expense or asset, Dr input VAT / Cr EWT payable, Cr Accounts Payable - Suppliers), or rejects it with a reason. Without `payables.maker_checker` the invoice posts when it is submitted. An asset line is registered in the fixed asset register on approval.
+3. **Print** gives the AP voucher with the journal. **Cancel** an invoice without payments; an approved one is reversed.
+4. Accounts > Payables > Supplier Payments > **New supplier payment**: the supplier, the invoices to pay (all open invoices are ticked), mode, bank account, cheque number. Posting rule ap.payment: Dr Accounts Payable - Suppliers / Cr bank. **Print** gives the payment voucher; **Cancel** reverses the payment and opens the invoices again.
+5. Accounts > Payables > AP Ageing shows the open balances by supplier and by invoice, aged on the due dates (buckets of `limits.receivable_ageing_buckets`); **Export to Excel**.
+
+## Fixed assets and depreciation
+
+Accounts > Fixed Assets > Asset Register lists the assets with their cost, accumulated depreciation and book value. **Register asset** for an asset not bought through a supplier invoice: name, asset class (Master > Finance > Asset Classes gives the useful life and the asset, accumulated depreciation and depreciation expense accounts), dates, cost, salvage value, location, custodian and serial number. For an asset carried at go-live enter the accumulated depreciation at go-live and the first period to depreciate here. Select an asset to see its straight-line schedule: each month's depreciation, accumulated depreciation and book value, and whether the month is posted.
+
+Depreciation is straight-line from the in-service month (`fixed_assets.first_month`); the last month takes the rounding so the asset ends at its salvage value. Accounts > Fixed Assets > Depreciation Run shows what a period's depreciation is and **Post depreciation** posts one journal per asset class dated the end of the period (posting rule fa.depreciation: Dr depreciation expense / Cr accumulated depreciation). An asset is never depreciated twice for a period. The month-end close runs the same step (**(e) Depreciation**, `fixed_assets.depreciation_in_month_end`).
 
 ## Incentives
 
@@ -2035,6 +2148,10 @@ Posting rule versions, their activation and account determination changes wait o
 ![Master > Finance > Commission Rate Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-crm.png)
 
 The matrix holds the brokerage rates the broker earns by insurer, product, line of business and policy type (New business, Renewal or Any), with effective dates. The most specific active rate on the policy date applies: insurer and product, insurer and line of business, insurer, product, line of business; an exact policy type before Any; then the insurer's default rate and the system default (15%). **Add rate**: choose the insurer, product and line of business (at least one), the policy type, the rate, effective from and to, and remarks; save. **Find rate** shows which rate a placement would get and where it comes from. The screen is in the System Administrator's menu; the Accounting Manager agrees the rates.
+
+## Approve supplier invoices
+
+Supplier invoices sent for approval are announced in the notifications (approve:payables). Open Accounts > Payables > Supplier Invoices, filter **For approval**, open the invoice, check the lines, VAT and EWT and select **Approve** (the journal is posted) or **Reject** with a reason. You cannot approve an invoice you prepared or submitted.
 
 ## Approvals summary
 
