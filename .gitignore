@@ -5,3 +5,6 @@ __pycache__/
 # LibreOffice working files
 .~lock.*#
 *.tmp
+
+# files written by backend tests run from the repository root (UPLOAD_DIR defaults to ./uploads)
+/uploads/
