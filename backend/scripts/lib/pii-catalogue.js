@@ -268,6 +268,7 @@ export const CATALOGUE = {
   'audit_log.before_data': 'json',
   'audit_log.after_data': 'json',
   'audit_log.ip': 'ip',
+  'e_signatures.consent_ip': 'ip',
   'notifications.title': 'scrub',
   'notifications.message': 'scrub',
   'documents.file_name': 'fileName',
