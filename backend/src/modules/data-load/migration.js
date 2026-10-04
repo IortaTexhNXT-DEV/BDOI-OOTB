@@ -16,6 +16,7 @@ import { OPEN_ITEM_COLUMNS, OPENING_SOURCE, loadOpenItem } from '../receipts/ope
 import { GO_LIVE_PREFIX, OPENING_BALANCE_COLUMNS, importOpeningBalances, zeroBalanceRow } from '../period-end/opening.js';
 import { seriesShape, sequenceOf } from './numbering.js';
 import { MIGRATION_SOURCE, amountValue, beforeCutover, cell, dateValue, fail, isDate, keyText, numberCell } from './common.js';
+import { regionOf } from '../../lib/address.js';
 
 /** Refuse a legacy number that the numbering series of the same kind would issue again to a new record. */
 async function assertNoSeriesClash(code, number, column) {
@@ -46,22 +47,24 @@ const CLIENT_COLUMNS = [
   { key: 'tin', header: 'TIN', format: 'Tax identification number, e.g. 123-456-789-000' },
   { key: 'birthDate', header: 'Birth Date', type: 'date', format: 'Date YYYY-MM-DD (individual)' },
   { key: 'gender', header: 'Gender' },
-  { key: 'address', header: 'Address', format: 'Street address' },
-  { key: 'city', header: 'City' },
-  { key: 'province', header: 'Province' },
+  { key: 'address', header: 'Address', format: 'House / unit no. and street' },
+  { key: 'barangay', header: 'Barangay' },
+  { key: 'city', header: 'City / Municipality', aliases: ['City'] },
+  { key: 'province', header: 'Province', format: 'Province of the Province master (Metro Manila for NCR)' },
+  { key: 'region', header: 'Region', format: 'Filled from the province when empty' },
   { key: 'country', header: 'Country', format: 'Philippines when empty' },
-  { key: 'postalCode', header: 'Postal Code' },
+  { key: 'postalCode', header: 'ZIP Code', aliases: ['Postal Code'] },
 ];
 
 const clientsSheet = () => ({
   key: 'clients', name: 'Clients', menu: 'Operations > Clients', columns: CLIENT_COLUMNS, keyColumns: ['clientCode'], keyOf: (v) => keyText(v.clientCode),
   sample: { clientCode: 'C-000123', clientType: 'individual', firstName: 'Maria', lastName: 'Santos', email: 'maria.santos@example.ph', phone: '09171234567', tin: '123-456-789-000',
-    birthDate: '1988-04-12', address: '12 Mabini St., San Antonio', city: 'Pasig City', province: 'Metro Manila', country: 'Philippines', postalCode: '1600' },
+    birthDate: '1988-04-12', address: 'Unit 4B, 12 Mabini St.', barangay: 'San Antonio', city: 'Pasig City', province: 'Metro Manila', region: 'National Capital Region (NCR)', country: 'Philippines', postalCode: '1600' },
   async exportRows() {
     const rows = await many('SELECT * FROM clients WHERE source = $1 ORDER BY client_code', [MIGRATION_SOURCE]);
     return rows.map((c) => ({ clientCode: c.client_code, clientType: c.client_type, firstName: cell(c.first_name), lastName: cell(c.last_name), companyName: cell(c.company_name),
-      email: cell(c.email), phone: cell(c.phone), tin: cell(c.tin), birthDate: cell(c.birth_date), gender: cell(c.gender), address: cell(c.address), city: cell(c.city),
-      province: cell(c.state), country: cell(c.country), postalCode: cell(c.postal_code) }));
+      email: cell(c.email), phone: cell(c.phone), tin: cell(c.tin), birthDate: cell(c.birth_date), gender: cell(c.gender), address: cell(c.address), barangay: cell(c.barangay),
+      city: cell(c.city), province: cell(c.state), region: cell(c.region), country: cell(c.country), postalCode: cell(c.postal_code) }));
   },
   check(ctx, v) {
     if (v.birthDate) beforeCutover(ctx, 'birthDate', v.birthDate, 'Birth Date');
@@ -75,18 +78,21 @@ const clientsSheet = () => ({
     const displayName = type === 'corporate' ? v.companyName : `${v.firstName} ${v.lastName}`;
     const before = await one('SELECT id, source FROM clients WHERE client_code = $1', [v.clientCode]);
     if (before && before.source !== MIGRATION_SOURCE) fail('clientCode', `Client code ${v.clientCode} belongs to a client created in BrokerVerse; give the legacy client another code`);
+    const region = v.region || (v.province ? await regionOf({ province: v.province, city: v.city || null }) : null);
     const values = [type, v.firstName || null, v.lastName || null, v.companyName || null, displayName, v.email || null, v.phone || null, v.tin || null, v.birthDate || null,
-      v.gender || null, v.address || null, v.city || null, v.province || null, v.country || 'Philippines', v.postalCode || null, type === 'corporate' ? 'Corporate' : 'Retail'];
+      v.gender || null, v.address || null, v.city || null, v.province || null, v.country || 'Philippines', v.postalCode || null, type === 'corporate' ? 'Corporate' : 'Retail',
+      v.barangay || null, region];
     if (before) {
       await query(`UPDATE clients SET client_type = $2, first_name = $3, last_name = $4, company_name = $5, display_name = $6, email = $7, phone = $8, tin = $9,
-          birth_date = $10, gender = $11, address = $12, city = $13, state = $14, country = $15, postal_code = $16, lead_category = $17, updated_by = $18, updated_at = now()
+          birth_date = $10, gender = $11, address = $12, city = $13, state = $14, country = $15, postal_code = $16, lead_category = $17, barangay = $18, region = $19,
+          updated_by = $20, updated_at = now()
         WHERE id = $1`, [before.id, ...values, ctx.user.id]);
       return 'updated';
     }
     await assertNoSeriesClash('client', v.clientCode, 'clientCode');
     await query(`INSERT INTO clients(client_code, client_type, first_name, last_name, company_name, display_name, email, phone, tin, birth_date, gender, address, city, state,
-        country, postal_code, lead_category, source, created_by, owner_user_id, load_batch_id, extra)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$19,$20,$21)`,
+        country, postal_code, lead_category, barangay, region, source, created_by, owner_user_id, load_batch_id, extra)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$21,$22,$23)`,
     [v.clientCode, ...values, MIGRATION_SOURCE, ctx.user.id, ctx.batchId, JSON.stringify({ loadBatchId: ctx.batchId, migratedAt: ctx.cutover })]);
     return 'created';
   },

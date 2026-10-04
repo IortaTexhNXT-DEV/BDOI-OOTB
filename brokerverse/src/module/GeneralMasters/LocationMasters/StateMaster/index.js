@@ -29,7 +29,7 @@ import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import ImportDialog, { masterTarget } from "../../../../components/ImportDialog";
 
-const UPLOAD_TARGETS = [masterTarget("state", "States")];
+const UPLOAD_TARGETS = [masterTarget("state", "Provinces")];
 
 const State = () => {
   const { t } = useTranslation();
@@ -169,7 +169,7 @@ const State = () => {
             outlined
           />
 
-          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload states" targets={UPLOAD_TARGETS} onDone={reloadList} />
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title={t("generalMasters.uploadProvinces")} targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button
             type="button"
             label={t("generalMasters.add")}
@@ -229,6 +229,14 @@ const State = () => {
               field="StateName"
               body={(rowData) => rowData.StateName}
               header={t("generalMasters.stateName")}
+              sortable
+              headerStyle={headerStyle}
+              className="fieldvalue_container"
+            ></Column>
+            <Column
+              field="Region"
+              body={(rowData) => rowData.Region}
+              header={t("generalMasters.region")}
               sortable
               headerStyle={headerStyle}
               className="fieldvalue_container"

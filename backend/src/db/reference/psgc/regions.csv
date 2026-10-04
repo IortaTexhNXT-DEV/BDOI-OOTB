@@ -1,0 +1,19 @@
+psgc_code,code,name,designation
+1300000000,NCR,National Capital Region (NCR),NCR
+1400000000,CAR,Cordillera Administrative Region (CAR),CAR
+0100000000,I,Region I (Ilocos Region),Ilocos Region
+0200000000,II,Region II (Cagayan Valley),Cagayan Valley
+0300000000,III,Region III (Central Luzon),Central Luzon
+0400000000,IV-A,Region IV-A (CALABARZON),CALABARZON
+1700000000,MIMAROPA,MIMAROPA Region,
+0500000000,V,Region V (Bicol Region),Bicol Region
+0600000000,VI,Region VI (Western Visayas),Western Visayas
+1800000000,NIR,Negros Island Region (NIR),NIR
+0700000000,VII,Region VII (Central Visayas),Central Visayas
+0800000000,VIII,Region VIII (Eastern Visayas),Eastern Visayas
+0900000000,IX,Region IX (Zamboanga Peninsula),Zamboanga Peninsula
+1000000000,X,Region X (Northern Mindanao),Northern Mindanao
+1100000000,XI,Region XI (Davao Region),Davao Region
+1200000000,XII,Region XII (SOCCSKSARGEN),SOCCSKSARGEN
+1600000000,XIII,Region XIII (Caraga),Caraga
+1900000000,BARMM,Bangsamoro Autonomous Region In Muslim Mindanao (BARMM),BARMM

@@ -24,7 +24,7 @@ AREAS = [
 ]
 
 AREA_TABLES = {
-    'Party and client': 'clients insurance_companies banks branches signatories countries states cities districts postal_codes',
+    'Party and client': 'clients insurance_companies banks branches signatories countries regions states cities districts postal_codes',
     'Product and rating': 'products policy_types coverages vehicle_brands vehicle_models vehicle_variants product_templates product_components '
                           'product_risk_mappings product_risk_sections premium_charge_rules lgu_tax_rates insurer_rate_tables package_bundles package_bundle_sections',
     'Sales and quotation': 'leads quotes quote_customer_responses package_quotes package_sections payment_gateways payment_links payment_events agent_events',

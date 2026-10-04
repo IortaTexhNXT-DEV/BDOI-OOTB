@@ -218,7 +218,7 @@ define({
 
 define({
   method: 'GET', path: '/profile', summary: 'Own profile (My Profile): identity and access (read-only), contact, personal details and Philippine address', screen: 'Profile',
-  response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['underwriting'], roleNames: ['Underwriter'], branchCode: 'MNL', branchName: 'Manila Head Office', designation: 'Underwriter', reportingToName: 'Maria Reyes', email: 'juan@example.com', phone: '09171234567', dateOfBirth: '1990-05-14', gender: 'male', addressLine: '12 Rizal St.', barangay: 'San Antonio', city: 'Makati City', province: 'Metro Manila', zipCode: '1203', country: 'Philippines', status: 'active', lastLoginAt: '2026-10-01T01:00:00Z', previousLoginAt: '2026-09-30T01:00:00Z', emailEditable: false } },
+  response: { success: true, data: { userId: 'usr_1', username: 'juan.santos', displayName: 'Juan Santos', roles: ['underwriting'], roleNames: ['Underwriter'], branchCode: 'MNL', branchName: 'Manila Head Office', designation: 'Underwriter', reportingToName: 'Maria Reyes', email: 'juan@example.com', phone: '09171234567', dateOfBirth: '1990-05-14', gender: 'male', addressLine: '12 Rizal St.', barangay: 'San Antonio', city: 'Makati City', province: 'Metro Manila', region: 'National Capital Region (NCR)', zipCode: '1203', country: 'Philippines', status: 'active', lastLoginAt: '2026-10-01T01:00:00Z', previousLoginAt: '2026-09-30T01:00:00Z', emailEditable: false } },
   handler: async (req, res) => {
     const profile = await loadProfile(req.user.id);
     const user = await loadUser('u.id = $1', [req.user.id]);
@@ -230,7 +230,7 @@ define({
   method: 'PUT', path: '/profile',
   summary: 'Update own profile: name, contact number (Philippine format), date of birth, gender and address. The e-mail address only when security.profile_email_editable is on; user ID, roles, branch, designation and reporting line are changed in User Management',
   screen: 'Profile', middleware: [validate(profileSchema)],
-  request: { displayName: 'Juan Santos', phone: '0917 123 4567', dateOfBirth: '1990-05-14', gender: 'male', addressLine: '12 Rizal St.', barangay: 'San Antonio', city: 'Makati City', province: 'Metro Manila', zipCode: '1203', country: 'Philippines' },
+  request: { displayName: 'Juan Santos', phone: '0917 123 4567', dateOfBirth: '1990-05-14', gender: 'male', addressLine: '12 Rizal St.', barangay: 'San Antonio', city: 'Makati City', province: 'Metro Manila', region: 'National Capital Region (NCR)', zipCode: '1203', country: 'Philippines' },
   response: { success: true, message: 'Profile updated' },
   handler: async (req, res) => {
     const b = { ...req.body };

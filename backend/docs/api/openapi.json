@@ -6425,10 +6425,10 @@
         ]
       }
     },
-    "/addresses/cities/{cityId}/districts": {
+    "/addresses/cities/{cityId}/barangays": {
       "get": {
-        "operationId": "getAddressesCitiesCityIdDistricts",
-        "summary": "Districts / barangays of a city (id or name)",
+        "operationId": "getAddressesCitiesCityIdBarangays",
+        "summary": "Barangays of a city / municipality (id, PSGC code or name); empty when the barangay list is not loaded (free text then)",
         "tags": [
           "Addresses"
         ],
@@ -6465,6 +6465,9 @@
                           "name": {
                             "type": "string"
                           },
+                          "psgcCode": {
+                            "type": "string"
+                          },
                           "postalCode": {
                             "type": "string"
                           }
@@ -6478,8 +6481,166 @@
                   "data": [
                     {
                       "id": 1,
-                      "name": "Poblacion",
-                      "postalCode": "1210"
+                      "name": "Bel-Air",
+                      "psgcCode": "1380300002",
+                      "postalCode": "1209"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Create Lead (address fields)"
+      }
+    },
+    "/addresses/cities/{cityId}/districts": {
+      "get": {
+        "operationId": "getAddressesCitiesCityIdDistricts",
+        "summary": "Barangays of a city / municipality (earlier name of /cities/:cityId/barangays)",
+        "tags": [
+          "Addresses"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead (address fields)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "cityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "psgcCode": {
+                            "type": "string"
+                          },
+                          "postalCode": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "name": "Bel-Air",
+                      "psgcCode": "1380300002",
+                      "postalCode": "1209"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Create Lead (address fields)"
+      }
+    },
+    "/addresses/cities/{cityId}/postal-codes": {
+      "get": {
+        "operationId": "getAddressesCitiesCityIdPostalCodes",
+        "summary": "ZIP codes of a city / municipality (id, PSGC code or name): its main ZIP code first, then the PhilPost list",
+        "tags": [
+          "Addresses"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead (address fields)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "cityId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "postalCode": {
+                            "type": "string"
+                          },
+                          "place": {
+                            "type": "string"
+                          },
+                          "main": {
+                            "type": "boolean"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "postalCode": "1200",
+                      "place": "Makati City",
+                      "main": true
+                    },
+                    {
+                      "postalCode": "1209",
+                      "place": "Bel-air",
+                      "main": false
                     }
                   ]
                 }
@@ -6564,7 +6725,108 @@
     "/addresses/countries/{countryId}/provinces": {
       "get": {
         "operationId": "getAddressesCountriesCountryIdProvinces",
-        "summary": "Provinces / states of a country (id, code or name)",
+        "summary": "Provinces of a country (id, code or name); ?region= (id, code, PSGC code or name) keeps those of one region",
+        "tags": [
+          "Addresses"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead (address fields)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "countryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "region",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "example": "NCR"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "psgcCode": {},
+                          "level": {
+                            "type": "string"
+                          },
+                          "regionId": {
+                            "type": "integer"
+                          },
+                          "regionCode": {
+                            "type": "string"
+                          },
+                          "regionName": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 1,
+                      "code": "NCR",
+                      "name": "Metro Manila",
+                      "psgcCode": null,
+                      "level": "Metropolitan area",
+                      "regionId": 1,
+                      "regionCode": "NCR",
+                      "regionName": "National Capital Region (NCR)"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Create Lead (address fields)"
+      }
+    },
+    "/addresses/countries/{countryId}/regions": {
+      "get": {
+        "operationId": "getAddressesCountriesCountryIdRegions",
+        "summary": "Regions of a country (id, code or name), in the PSA order (NCR, CAR, Region I ... BARMM)",
         "tags": [
           "Addresses"
         ],
@@ -6603,6 +6865,12 @@
                           },
                           "name": {
                             "type": "string"
+                          },
+                          "designation": {
+                            "type": "string"
+                          },
+                          "psgcCode": {
+                            "type": "string"
                           }
                         }
                       }
@@ -6615,7 +6883,9 @@
                     {
                       "id": 1,
                       "code": "NCR",
-                      "name": "Metro Manila"
+                      "name": "National Capital Region (NCR)",
+                      "designation": "NCR",
+                      "psgcCode": "1300000000"
                     }
                   ]
                 }
@@ -6638,7 +6908,7 @@
     "/addresses/postal-code": {
       "get": {
         "operationId": "getAddressesPostalCode",
-        "summary": "Postal code lookup: province / city / district for a country + code",
+        "summary": "ZIP / postal code look-up: region, province, city and place for a country + code",
         "tags": [
           "Addresses"
         ],
@@ -6660,7 +6930,7 @@
             "schema": {
               "type": "string"
             },
-            "example": "1226"
+            "example": "1209"
           }
         ],
         "responses": {
@@ -6679,6 +6949,9 @@
                       "items": {
                         "type": "object",
                         "properties": {
+                          "region": {
+                            "type": "string"
+                          },
                           "province": {
                             "type": "string"
                           },
@@ -6700,9 +6973,10 @@
                   "success": true,
                   "data": [
                     {
+                      "region": "National Capital Region (NCR)",
                       "province": "Metro Manila",
-                      "city": "Makati",
-                      "district": "Bel-Air",
+                      "city": "Makati City",
+                      "district": "Bel-air",
                       "postalCode": "1209"
                     }
                   ]
@@ -6726,7 +7000,7 @@
     "/addresses/provinces/{provinceId}/cities": {
       "get": {
         "operationId": "getAddressesProvincesProvinceIdCities",
-        "summary": "Cities of a province (id, code or name)",
+        "summary": "Cities and municipalities of a province (id, code, PSGC code or name), with class, ZIP code and region",
         "tags": [
           "Addresses"
         ],
@@ -6762,6 +7036,30 @@
                           },
                           "name": {
                             "type": "string"
+                          },
+                          "psgcCode": {
+                            "type": "string"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "cityClass": {
+                            "type": "string"
+                          },
+                          "zipCode": {
+                            "type": "string"
+                          },
+                          "provinceId": {
+                            "type": "integer"
+                          },
+                          "regionId": {
+                            "type": "integer"
+                          },
+                          "regionCode": {
+                            "type": "string"
+                          },
+                          "regionName": {
+                            "type": "string"
                           }
                         }
                       }
@@ -6773,7 +7071,109 @@
                   "data": [
                     {
                       "id": 1,
-                      "name": "Makati"
+                      "name": "Makati City",
+                      "psgcCode": "1380300000",
+                      "code": "1380300000",
+                      "cityClass": "Highly Urbanized City",
+                      "zipCode": "1200",
+                      "provinceId": 1,
+                      "regionId": 1,
+                      "regionCode": "NCR",
+                      "regionName": "National Capital Region (NCR)"
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "x-screen": "Operations > Sales & Marketing > Prospects > Create Lead (address fields)"
+      }
+    },
+    "/addresses/regions/{regionId}/provinces": {
+      "get": {
+        "operationId": "getAddressesRegionsRegionIdProvinces",
+        "summary": "Provinces of a region (id, code, PSGC code or name)",
+        "tags": [
+          "Addresses"
+        ],
+        "description": "Front-end touchpoint: Operations > Sales & Marketing > Prospects > Create Lead (address fields)\n\nAccess: Any authenticated user",
+        "parameters": [
+          {
+            "name": "regionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "integer"
+                          },
+                          "code": {
+                            "type": "string"
+                          },
+                          "name": {
+                            "type": "string"
+                          },
+                          "psgcCode": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "string"
+                          },
+                          "regionId": {
+                            "type": "integer"
+                          },
+                          "regionCode": {
+                            "type": "string"
+                          },
+                          "regionName": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": [
+                    {
+                      "id": 2,
+                      "code": "CEB",
+                      "name": "Cebu",
+                      "psgcCode": "0702200000",
+                      "level": "Province",
+                      "regionId": 7,
+                      "regionCode": "VII",
+                      "regionName": "Region VII (Central Visayas)"
                     }
                   ]
                 }
@@ -7996,6 +8396,9 @@
                         "province": {
                           "type": "string"
                         },
+                        "region": {
+                          "type": "string"
+                        },
                         "zipCode": {
                           "type": "string"
                         },
@@ -8042,6 +8445,7 @@
                     "barangay": "San Antonio",
                     "city": "Makati City",
                     "province": "Metro Manila",
+                    "region": "National Capital Region (NCR)",
                     "zipCode": "1203",
                     "country": "Philippines",
                     "status": "active",
@@ -8135,6 +8539,9 @@
                   "province": {
                     "type": "string"
                   },
+                  "region": {
+                    "type": "string"
+                  },
                   "zipCode": {
                     "type": "string"
                   },
@@ -8152,6 +8559,7 @@
                 "barangay": "San Antonio",
                 "city": "Makati City",
                 "province": "Metro Manila",
+                "region": "National Capital Region (NCR)",
                 "zipCode": "1203",
                 "country": "Philippines"
               }

@@ -16,7 +16,7 @@ user with one role.
 | A2 | Lock and unlock | Sign in as a test user with a wrong password 5 times. Unlock the user on the User screen. | The 6th attempt says the user is locked; after unlocking the user signs in. |
 | A3 | Two-step verification | Add the role to `security.require_2fa_roles` in Master > Configuration > Security; sign in as a user of that role. | The user must set up the authenticator app before reaching any screen. |
 | A4 | Letterhead | Master > Generals > Organization > Company: check your company is primary. Print a billing statement. | The PDF shows your company name, address and TIN. |
-| A5 | Master upload | Master > Generals > Location > City Master > Upload > Download template; replace the sample row with a new city; upload. | "1 created, 0 failed"; the city appears in the list and in address drop-downs. |
+| A5 | Master upload | Master > Generals > Location > City / Municipality > Upload > Download template; replace the sample row with a new city of another country (Philippine cities and municipalities are delivered); upload. | "1 created, 0 failed"; the city appears in the list (filter by its province) and in address drop-downs. |
 | A6 | Document numbering | Master > Configuration > Document Numbering: set the next official receipt number. Have Accounting issue a receipt. | The receipt carries the number you set. |
 | A7 | Audit trail | Master > Audit Trail: filter on your user and today. | Your changes of A1 to A6 are listed with before and after values. |
 

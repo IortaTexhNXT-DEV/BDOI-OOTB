@@ -58,6 +58,8 @@ const areDropdownPropsEqual = (prevProps, nextProps) => {
     prevProps.optionLabel === nextProps.optionLabel &&
     prevProps.optionValue === nextProps.optionValue &&
     prevProps.inputId === nextProps.inputId &&
+    prevProps.filter === nextProps.filter &&
+    prevProps.editable === nextProps.editable &&
     prevProps.onChange === nextProps.onChange &&
     areOptionsEqual(prevProps.options, nextProps.options)
   );
@@ -73,6 +75,8 @@ const DropdownFieldComponent = ({
   optionLabel,
   optionValue = "value",
   inputId,
+  filter = false,
+  editable = false,
 }) => {
   const [focused, setFocused] = useState(false);
   const generatedId = useId();
@@ -119,6 +123,8 @@ const DropdownFieldComponent = ({
         optionValue={optionValue}
         placeholder={placeholder}
         inputId={fieldId}
+        filter={filter}
+        editable={editable}
       />
       <label htmlFor={fieldId} className={labelClassName}>
         {label}

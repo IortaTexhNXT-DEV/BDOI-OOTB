@@ -153,7 +153,7 @@ class ClientService {
   }
 
   /**
-   * Create client (with Thailand address fields: roadThanon, soiAlley, mooVillage)
+   * Create client (Philippine address: houseNo, street, barangay, city, province, region, zipCode)
    * @param {Object} clientData - Client data
    * @returns {Promise<Object>} API response with clientId
    */
@@ -190,7 +190,7 @@ class ClientService {
   }
 
   /**
-   * Update client (supports Thailand address fields: roadThanon, soiAlley, mooVillage)
+   * Update client (Philippine address: houseNo, street, barangay, city, province, region, zipCode)
    * @param {String} clientId - Client ID
    * @param {Object} clientData - Updated client data
    * @returns {Promise<Object>} API response

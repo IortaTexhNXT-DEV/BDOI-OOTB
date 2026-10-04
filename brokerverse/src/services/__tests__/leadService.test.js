@@ -30,7 +30,7 @@ describe('LeadService', () => {
       contactNumber: '+1-555-0123',
       houseNo: '123',
       barangay: 'Barangay 1',
-      country: 'Thailand',
+      country: 'Philippines',
       province: 'Metro Manila',
       city: 'Makati',
       zipCode: '1234',

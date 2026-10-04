@@ -4,7 +4,7 @@ INSERT INTO app_settings(key, value, "group", label, type, editable) VALUES
  -- deprecated and unused (migration 0231): the application name is general.system_name, edited in System Settings
  ('general.app_title', '"Brokerverse"', 'system', 'Deprecated, not used: the application name is general.system_name (Master > System Settings)', 'string', false),
  ('general.default_language', '"en"', 'general', 'Default language', 'string', true),
- ('general.languages', $j$[{"code":"en","label":"English"},{"code":"th","label":"Thai"},{"code":"fil","label":"Filipino"}]$j$, 'general', 'Available languages', 'json', true),
+ ('general.languages', $j$[{"code":"en","label":"English"},{"code":"fil","label":"Filipino"}]$j$, 'general', 'Available languages', 'json', true),
  ('branding.default_logo_url', '"/bdoi/iorta-technxt.png"', 'branding', 'Default logo (used when no logo is selected)', 'image', true),
  ('branding.favicon_url', '"/favicon.ico"', 'branding', 'Favicon', 'image', true),
  ('branding.logo_presets', $j$[{"id":"eastwest","label":"EastWest Bank","url":"/temp-logo/eastwestbank.png","builtIn":true},{"id":"chinabank","label":"China Bank","url":"/chinabank.png","builtIn":true},{"id":"iorta","label":"iorta","url":"/iorta.png","builtIn":true},{"id":"iorta-technxt","label":"iorta TechNXT (BrokerVerse)","url":"/bdoi/iorta-technxt.png","builtIn":true}]$j$, 'branding', 'Company logo presets', 'json', true),

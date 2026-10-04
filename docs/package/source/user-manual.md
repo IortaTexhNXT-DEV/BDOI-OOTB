@@ -402,7 +402,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 | Menu | Items |
 |---|---|
 | Master | System Settings, Configuration, Document Numbering, Schedules, Audit Trail, E-mail Outbox, Go-Live Data Load, Data Privacy (Data Subject Requests, Consent Register) |
-| Master > Generals | Organization (Company, Branch); Insurance Management (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle); Location (Country, State, City); Employee Management (Hierarchy, Designation); User Management (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
+| Master > Generals | Organization (Company, Branch); Insurance Management (Insurance Company, Line of Business, Product, Cover, Signatories, Vehicle); Location (Country, Province, City / Municipality); Employee Management (Hierarchy, Designation); User Management (User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews) |
 | Master > Finance | Account Determination, Posting Rules, Configuration Approvals, Accounting Flow, Package Bundles, Insurer Rate Tables, Premium Taxes & LGU Rates, Payment Gateways, Commission Rate Matrix, Transaction Code, Currency, Exchange Rate, Bank, Account Category, Main Account, Sub Account, Taxation, Close Checklist, Bank Statement Formats, Bank Transaction Types, Insurer Statement Formats, Remittance Master, Incentive Programs, Reinsurance Treaty |
 
 ## Daily and periodic tasks
@@ -495,7 +495,7 @@ Confirm at least every quarter that each active user still needs his or her acce
 Every printed document and report PDF (quotation, request for quotation, placement slip, policy schedule, billing statement, official receipt, payment voucher, debit note, claim letters, BIR forms) carries the letterhead of the company marked as letterhead company.
 
 1. Choose Master > Generals > Organization > Company. Select **Add**, or the pencil on the delivered company to edit it into your own.
-2. Enter **Company Code**, **Company Name**, **License Number** (Insurance Commission licence), **Email ID**, **TIN (BIR forms)**, **RDO Code**, **Logo (printed on documents)** (a link, or **Upload**), **Website link**, **Description**, the registered address (letterhead and BIR forms: **Address Line 1** to **3**, **ZIP Code**, **City**, **State**, **Country**), **Phone Number** and **Fax** (+63 numbers).
+2. Enter **Company Code**, **Company Name**, **License Number** (Insurance Commission licence), **Email ID**, **TIN (BIR forms)**, **RDO Code**, **Logo (printed on documents)** (a link, or **Upload**), **Website link**, **Description**, the registered address (letterhead and BIR forms: **Address Line 1** to **3**, **ZIP Code**, **City / Municipality**, **Province**, **Country**), **Phone Number** and **Fax** (+63 numbers).
 3. Tick **Letterhead company - used on documents and reports** for the company whose letterhead the documents use. Only one company holds it.
 4. Select **Save**, then print any statement or report as PDF to check the letterhead.
 
@@ -508,7 +508,7 @@ The application name and logo of the sign-in page and the sidebar come from Mast
 ![Master > Generals > Insurance Management > Insurance Company > Add](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-insurer-add.png)
 
 1. Choose Master > Generals > Insurance Management > Insurance Company and select **Add**.
-2. Enter **Insurance Company Code**, **Insurance Company Name**, **Insurance Company Description**, the address (**Address Line 1** to **3**, **City**, **State**, **Country**), **Phone Number**, **Email ID** and **TIN**.
+2. Enter **Insurance Company Code**, **Insurance Company Name**, **Insurance Company Description**, the address (**Address Line 1** to **3**, **City / Municipality**, **Province**, **Country**), **Phone Number**, **Email ID** and **TIN**.
 3. Under **Credit terms**, enter **Premium payment warranty (days)** (days the client has to pay: the due date of the premium bill), **Remittance terms (days)** (days after collection within which the broker remits to the insurer) and **Default billing mode** (broker billed or direct bill). Leave them empty to use the system defaults (`collections.default_credit_days`, `remittance.default_due_days`, `direct_bill.default_billing_mode`).
 4. Select **Save**.
 
@@ -523,7 +523,7 @@ All masters work alike: a list with search, **Add** (the form opens on its own p
 | Line of Business, Product, Cover | The lines, products and covers offered in the quotation and placement screens. |
 | Signatories | Authorised signatories of quotations and documents. |
 | Vehicle | Vehicle brands, models, variants and seating; **Upload** loads them from a template. |
-| Country, State, City | The address lists (a province is a State). |
+| Country, Province, City / Municipality | The Philippine address lists of the PSGC: 18 regions (shown with their provinces), 82 provinces plus Metro Manila, 1,642 cities and municipalities with class and ZIP code; barangays are picked on the address forms. The City / Municipality list is filtered by province. |
 | Hierarchy, Designation | The staff structure. A staff member's branch, designation and reporting line are kept on the user (Master > Generals > User Management > User). |
 | Transaction Code, Currency, Exchange Rate | Accounting transaction codes, currencies and rates. |
 | Bank | Banks and the broker's bank accounts, each linked to its GL cash account and statement format. |
@@ -2176,7 +2176,7 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Insurance Management > Line of Business, Product, Cover | Lines, products (with their line) and covers. |
 | Insurance Management > Signatories | Authorised signatories of quotations and documents. |
 | Insurance Management > Vehicle | Vehicle brands, models, variants, seating; **Upload**. |
-| Location > Country, State, City | Address lists; **Upload**. |
+| Location > Country, Province, City / Municipality | Address lists; **Upload**. |
 | Employee Management > Hierarchy, Designation | Staff structure; branch, designation and reporting line are set on the user. |
 | User Management > User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews | Users and access controls (System Administrator chapter). |
 

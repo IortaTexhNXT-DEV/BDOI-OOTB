@@ -30,24 +30,3 @@ INSERT INTO app_settings(key, value, "group", label, type) VALUES
  ('email.template.endorsement_customer', $j${"subject":"{{companyName}}: {{action}} {{endorsementNumber}} on policy {{policyNumber}}","html":"<p>Dear {{customerName}},</p><p>We have prepared {{action}} <b>{{endorsementNumber}}</b> on policy {{policyNumber}}. Premium adjustment: {{currency}} {{premiumDelta}}.</p><p>{{companyName}}</p>"}$j$, 'email', 'E-mail: endorsement sent to the customer', 'json')
 ON CONFLICT (key) DO NOTHING;
 
--- ---------- Address lookups ----------
-INSERT INTO states(country_id, code, name)
-SELECT c.id, v.code, v.name FROM (VALUES ('BKK','Bangkok'),('CNX','Chiang Mai'),('PKT','Phuket')) AS v(code, name) JOIN countries c ON c.code = 'TH'
-WHERE NOT EXISTS (SELECT 1 FROM states s WHERE s.name = v.name);
-INSERT INTO cities(state_id, name)
-SELECT s.id, v.city FROM (VALUES ('Bangkok','Pathum Wan'),('Bangkok','Bang Rak'),('Chiang Mai','Mueang Chiang Mai'),('Phuket','Mueang Phuket')) AS v(state, city)
-JOIN states s ON s.name = v.state WHERE NOT EXISTS (SELECT 1 FROM cities c WHERE c.name = v.city);
-INSERT INTO districts(city_id, name, postal_code)
-SELECT ci.id, v.district, v.zip FROM (VALUES
- ('Makati','Poblacion','1210'),('Makati','Bel-Air','1209'),('Makati','San Lorenzo','1223'),('Quezon City','Diliman','1101'),('Quezon City','Cubao','1109'),
- ('Manila','Ermita','1000'),('Manila','Malate','1004'),('Taguig','Fort Bonifacio','1634'),('Pasig','Kapitolyo','1603'),('Bacoor','Molino','4102'),
- ('Santa Rosa','Balibago','4026'),('Cebu City','Lahug','6000'),('Mandaue','Banilad','6014'),('Davao City','Poblacion District','8000'),('San Fernando','Dolores','2000'),
- ('Malolos','Santo Rosario','3000'),('Batangas City','Poblacion','4200'),('Iloilo City','Jaro','5000'),('Bacolod','Mandalagan','6100'),
- ('Pathum Wan','Lumphini','10330'),('Pathum Wan','Pathum Wan','10330'),('Bang Rak','Si Lom','10500'),('Bang Rak','Suriya Wong','10500'),
- ('Mueang Chiang Mai','Si Phum','50200'),('Mueang Chiang Mai','Chang Phueak','50300'),('Mueang Phuket','Talat Yai','83000')) AS v(city, district, zip)
-JOIN cities ci ON ci.name = v.city
-ON CONFLICT (city_id, name) DO NOTHING;
-INSERT INTO postal_codes(country_code, code, province, city, district)
-SELECT co.code, d.postal_code, s.name, ci.name, d.name FROM districts d JOIN cities ci ON ci.id = d.city_id JOIN states s ON s.id = ci.state_id JOIN countries co ON co.id = s.country_id
-WHERE d.postal_code IS NOT NULL
-ON CONFLICT (country_code, code, district) DO NOTHING;

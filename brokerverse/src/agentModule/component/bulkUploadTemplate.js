@@ -10,7 +10,8 @@ export const BULK_UPLOAD_TEMPLATES = {
     fileName: "Leads-Bulk-Upload.csv",
     columns: [
       "First Name", "Last Name", "Preferred Name", "Company Name", "Date of Birth", "Gender", "Email", "Contact Number",
-      "House No", "Barangay", "City", "Province", "Country", "Zip Code", "Lead Category", "TIN", "LOB", "Source",
+      "House / Unit No.", "Street", "Barangay", "City / Municipality", "Province", "Region", "Country", "ZIP Code", "Lead Category", "TIN", "LOB",
+      "Source",
     ],
   },
   quotations: {

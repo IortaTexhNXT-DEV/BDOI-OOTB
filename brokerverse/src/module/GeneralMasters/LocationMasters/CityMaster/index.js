@@ -28,20 +28,24 @@ import MasterStatusToggle from "../../common/MasterStatusToggle";
 import { Toast } from "primereact/toast";
 import { formatDate as formatAppDate } from "../../../../utility/dateFormat";
 import ImportDialog, { masterTarget } from "../../../../components/ImportDialog";
+import useMasterOptions from "../../common/useMasterOptions";
 
-const UPLOAD_TARGETS = [masterTarget("city", "Cities")];
+const UPLOAD_TARGETS = [masterTarget("city", "Cities and municipalities")];
 
 const City = () => {
   const { t } = useTranslation();
   const [showUpload, setShowUpload] = useState(false);
   const dispatch = useDispatch();
   const statusToast = useRef(null);
-  const reloadList = () => dispatch(getCityMiddleware());
+  // 1,642 cities and municipalities: the list is filtered by province (all provinces: the first 500 by name)
+  const [province, setProvince] = useState("");
+  const provinceOptions = useMasterOptions("state");
+  const reloadList = () => dispatch(getCityMiddleware(province ? { State: province } : {}));
   const showStatusError = (error) =>
     statusToast.current?.show({ severity: "error", detail: error.message });
   useEffect(() => {
-    dispatch(getCityMiddleware());
-  }, [dispatch]);
+    dispatch(getCityMiddleware(province ? { State: province } : {}));
+  }, [dispatch, province]);
   const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
   const [visibleview, setVisibleview] = useState(false);
@@ -170,7 +174,7 @@ const City = () => {
             outlined
           />
 
-          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title="Upload cities" targets={UPLOAD_TARGETS} onDone={reloadList} />
+          <ImportDialog visible={showUpload} onHide={() => setShowUpload(false)} title={t("generalMasters.uploadCities")} targets={UPLOAD_TARGETS} onDone={reloadList} />
           <Button
             type="button"
             label={t("generalMasters.add")}
@@ -185,7 +189,21 @@ const City = () => {
         {/* <div className="searchiput_container"> */}
 
         <div className="header_search_container">
-          <div class="col-12 md:col-12 lg:col-12">
+          <div class="col-12 md:col-4 lg:col-3">
+            <Dropdown
+              value={province}
+              options={provinceOptions}
+              optionLabel="label"
+              optionValue="label"
+              onChange={(e) => setProvince(e.value || "")}
+              placeholder={t("generalMasters.allProvinces")}
+              filter
+              showClear
+              className="w-full"
+              aria-label={t("generalMasters.state")}
+            />
+          </div>
+          <div class="col-12 md:col-8 lg:col-9">
             {/* <div class="text-center p-3 border-round-sm bg-primary font-bold"> */}
             <span className="p-input-icon-left" style={{ width: "100%" }}>
               <i className="pi pi-search" />
@@ -234,8 +252,22 @@ const City = () => {
             ></Column>
             <Column
               field="State"
-              body={(rowData) => rowData.State?.toUpperCase()}
+              body={(rowData) => rowData.State}
               header={t("generalMasters.state")}
+              sortable
+              headerStyle={headerStyle}
+              className="fieldvalue_container"
+            ></Column>
+            <Column
+              field="CityClass"
+              header={t("generalMasters.cityClass")}
+              sortable
+              headerStyle={headerStyle}
+              className="fieldvalue_container"
+            ></Column>
+            <Column
+              field="PostalCode"
+              header={t("generalMasters.zipCode")}
               sortable
               headerStyle={headerStyle}
               className="fieldvalue_container"

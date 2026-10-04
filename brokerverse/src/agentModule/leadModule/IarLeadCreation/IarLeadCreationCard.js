@@ -13,7 +13,6 @@ import { InputText } from "primereact/inputtext";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import InputTextField from "../../component/inputText";
-import DropdownField from "../../component/DropdownField";
 import DatepickerField from "../../component/datePicker";
 import CustomToast from "../../../components/Toast";
 import SvgLeftArrow from "../../../assets/agentIcon/SvgLeftArrow";
@@ -21,8 +20,7 @@ import SvgCountPlusIcon from "../../../assets/icons/SvgCountPlusIcon";
 import SvgCountMinusIcon from "../../../assets/icons/SvgCountMinusIcon";
 import leadService from "../../../services/leadService";
 import quotationService from "../../../services/quotationService";
-import addressService from "../../../services/addressService";
-import { isThailand } from "../../../utility/addressHelpers";
+import PhAddressFields from "../../component/PhAddressFields";
 import { getLeadByIdMiddleware } from "../Store/leadMiddleware";
 import CommissionReferralSection, {
   defaultCommissionDetails,
@@ -57,13 +55,12 @@ const personalDetailsInitialValue = {
   ContactNumber: "",
   HouseNo: "",
   Barangay: "",
-  Country: "",
+  Country: "Philippines",
   Province: "",
   City: "",
   ZIPCode: "",
-  RoadThanon: "",
-  SoiAlley: "",
-  MooVillage: "",
+  Street: "",
+  Region: "",
   DateofBirth: "",
   category: "Retail",
   gender: "Male",
@@ -118,9 +115,8 @@ const leadToPersonalFormValues = (lead) => {
     Province: lead.province || "",
     City: lead.city || "",
     ZIPCode: lead.zipCode || "",
-    RoadThanon: lead.roadThanon || "",
-    SoiAlley: lead.soiAlley || "",
-    MooVillage: lead.mooVillage || "",
+    Street: lead.street || lead.roadThanon || "",
+    Region: lead.region || "",
     DateofBirth: lead.DOB
       ? typeof lead.DOB === "string"
         ? new Date(lead.DOB)
@@ -185,11 +181,6 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
-  const [countryList, setCountryList] = useState([]);
-  const [provinceList, setProvinceList] = useState([]);
-  const [cityList, setCityList] = useState([]);
-  const [districtList, setDistrictList] = useState([]);
-  const [postalLookupLoading, setPostalLookupLoading] = useState(false);
 
   useEffect(() => {
     if (existingLeadRefId && !existingLeadFromState) {
@@ -234,9 +225,8 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
           city:
             typeof values.City === "object" ? values.City?.label : values.City,
           zipCode: values.ZIPCode,
-          roadThanon: values.RoadThanon || undefined,
-          soiAlley: values.SoiAlley || undefined,
-          mooVillage: values.MooVillage || undefined,
+          street: values.Street || undefined,
+          region: typeof values.Region === "object" ? values.Region?.label : values.Region || undefined,
           DOB: values.DateofBirth
             ? typeof values.DateofBirth === "string"
               ? values.DateofBirth
@@ -293,150 +283,6 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
       }
     }
   }, [existingLeadRefId, currentLeadDetails, existingLeadFromState]);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCountries();
-      if (!cancelled && res.success && res.data) {
-        setCountryList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  const selectedCountryId = countryList.find(
-    (c) =>
-      (c.name || c.code) === personalFormik.values.Country ||
-      c.id === personalFormik.values.Country
-  )?.id;
-  const selectedProvinceId = provinceList.find(
-    (p) =>
-      (p.name || p.code) === personalFormik.values.Province ||
-      p.id === personalFormik.values.Province
-  )?.id;
-  const selectedCityId = cityList.find(
-    (c) =>
-      (c.name || c.code) === personalFormik.values.City ||
-      c.id === personalFormik.values.City
-  )?.id;
-
-  useEffect(() => {
-    if (!selectedCountryId) {
-      setProvinceList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getProvincesByCountry(selectedCountryId);
-      if (!cancelled && res.success && res.data) {
-        setProvinceList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCountryId]);
-
-  useEffect(() => {
-    if (!selectedProvinceId) {
-      setCityList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getCitiesByProvince(selectedProvinceId);
-      if (!cancelled && res.success && res.data) {
-        setCityList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedProvinceId]);
-
-  useEffect(() => {
-    if (!selectedCityId || !isThailand(personalFormik.values.Country)) {
-      setDistrictList([]);
-      return;
-    }
-    let cancelled = false;
-    (async () => {
-      const res = await addressService.getDistrictsByCity(selectedCityId);
-      if (!cancelled && res.success && res.data) {
-        setDistrictList(Array.isArray(res.data) ? res.data : []);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCityId, personalFormik.values.Country]);
-
-  const handlePostalCodeLookup = useCallback(async () => {
-    const country = personalFormik.values.Country;
-    const zip = personalFormik.values.ZIPCode?.trim();
-    if (!isThailand(country) || !zip) return;
-    setPostalLookupLoading(true);
-    try {
-      const countryCode =
-        (typeof country === "object" && country?.code) ||
-        countryList.find((c) => (c.name || c.code) === country)?.code ||
-        "TH";
-      const res = await addressService.getPostalCodeLookup(
-        countryCode || "TH",
-        zip
-      );
-      if (res.success && res.data && res.data.length > 0) {
-        const first = res.data[0];
-        personalFormik.setFieldValue(
-          "Province",
-          first.province ?? first.Province ?? ""
-        );
-        personalFormik.setFieldValue("City", first.city ?? first.City ?? "");
-        personalFormik.setFieldValue(
-          "Barangay",
-          first.district ?? first.District ?? ""
-        );
-      }
-    } finally {
-      setPostalLookupLoading(false);
-    }
-  }, [personalFormik.values.Country, personalFormik.values.ZIPCode, countryList]);
-
-  const countryOptions = useMemo(
-    () =>
-      countryList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [countryList]
-  );
-  const availableProvinces = useMemo(
-    () =>
-      provinceList.map((p) => ({
-        label: p.name || p.code || String(p.id),
-        value: p.name || p.code || String(p.id),
-      })),
-    [provinceList]
-  );
-  const availableCities = useMemo(
-    () =>
-      cityList.map((c) => ({
-        label: c.name || c.code || String(c.id),
-        value: c.name || c.code || String(c.id),
-      })),
-    [cityList]
-  );
-  const availableDistricts = useMemo(
-    () =>
-      districtList.map((d) => ({
-        label: d.name || d.code || String(d.id),
-        value: d.name || d.code || String(d.id),
-      })),
-    [districtList]
-  );
 
   const policyFormik = useFormik({
     initialValues: {
@@ -994,170 +840,11 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
         </div>
       </div>
 
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={t("fireLead.country")}
-            value={personalFormik.values.Country}
-            options={countryOptions}
-            onChange={(e) => {
-              personalFormik.setFieldValue("Country", e.value);
-              personalFormik.setFieldValue("Province", "");
-              personalFormik.setFieldValue("City", "");
-              personalFormik.setFieldValue("Barangay", "");
-              personalFormik.setFieldValue("ZIPCode", "");
-            }}
-          />
-          {personalFormik.touched.Country &&
-            personalFormik.errors.Country && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                {personalFormik.errors.Country}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <InputTextField
-            label={
-              isThailand(personalFormik.values.Country)
-                ? t("fireLead.postalCode")
-                : t("fireLead.zipCode")
-            }
-            value={personalFormik.values.ZIPCode}
-            onChange={personalFormik.handleChange("ZIPCode")}
-            onBlur={handlePostalCodeLookup}
-          />
-          {postalLookupLoading && (
-            <div style={{ fontSize: 12, color: "#666" }} className="mt-1">
-              {t("fireLead.lookupInProgress")}
-            </div>
-          )}
-          {personalFormik.touched.ZIPCode &&
-            personalFormik.errors.ZIPCode && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                {personalFormik.errors.ZIPCode}
-              </div>
-            )}
-        </div>
-      </div>
-
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={
-              isThailand(personalFormik.values.Country)
-                ? t("fireLead.provinceChangwat")
-                : t("fireLead.province")
-            }
-            value={personalFormik.values.Province}
-            options={availableProvinces}
-            onChange={(e) => {
-              personalFormik.setFieldValue("Province", e.value);
-              personalFormik.setFieldValue("City", "");
-              personalFormik.setFieldValue("Barangay", "");
-            }}
-            disabled={!personalFormik.values.Country}
-          />
-          {personalFormik.touched.Province &&
-            personalFormik.errors.Province && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                {personalFormik.errors.Province}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <DropdownField
-            label={
-              isThailand(personalFormik.values.Country)
-                ? t("fireLead.districtAmphoe")
-                : t("fireLead.city")
-            }
-            value={personalFormik.values.City}
-            options={availableCities}
-            onChange={(e) => {
-              personalFormik.setFieldValue("City", e.value);
-              personalFormik.setFieldValue("Barangay", "");
-            }}
-            disabled={!personalFormik.values.Province}
-          />
-          {personalFormik.touched.City && personalFormik.errors.City && (
-            <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-              {personalFormik.errors.City}
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="grid mt-2">
-        <div className="col-12 md:col-6 lg:col-6">
-          {isThailand(personalFormik.values.Country) &&
-          districtList.length > 0 ? (
-            <DropdownField
-              label={t("fireLead.subDistrictTambon")}
-              value={personalFormik.values.Barangay}
-              options={availableDistricts}
-              onChange={(e) =>
-                personalFormik.setFieldValue("Barangay", e.value)
-              }
-              disabled={!personalFormik.values.City}
-            />
-          ) : (
-            <InputTextField
-              label={
-                isThailand(personalFormik.values.Country)
-                  ? t("fireLead.subDistrictTambon")
-                  : t("fireLead.barangay")
-              }
-              value={personalFormik.values.Barangay}
-              onChange={personalFormik.handleChange("Barangay")}
-            />
-          )}
-          {personalFormik.touched.Barangay &&
-            personalFormik.errors.Barangay && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                {personalFormik.errors.Barangay}
-              </div>
-            )}
-        </div>
-        <div className="col-12 md:col-6 lg:col-6">
-          <InputTextField
-            label={t("fireLead.houseNoStreet")}
-            value={personalFormik.values.HouseNo}
-            onChange={personalFormik.handleChange("HouseNo")}
-          />
-          {personalFormik.touched.HouseNo &&
-            personalFormik.errors.HouseNo && (
-              <div style={{ fontSize: 12, color: "var(--color-danger)" }} className="mt-3">
-                {personalFormik.errors.HouseNo}
-              </div>
-            )}
-        </div>
-      </div>
-
-      {isThailand(personalFormik.values.Country) && (
-        <div className="grid mt-2">
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.roadThanon")}
-              value={personalFormik.values.RoadThanon}
-              onChange={personalFormik.handleChange("RoadThanon")}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.soiAlley")}
-              value={personalFormik.values.SoiAlley}
-              onChange={personalFormik.handleChange("SoiAlley")}
-            />
-          </div>
-          <div className="col-12 md:col-6 lg:col-6">
-            <InputTextField
-              label={t("fireLead.mooVillage")}
-              value={personalFormik.values.MooVillage}
-              onChange={personalFormik.handleChange("MooVillage")}
-            />
-          </div>
-        </div>
-      )}
+      {/* Philippine address: Region -> Province -> City / Municipality -> Barangay, House / Unit No., Street, ZIP code */}
+      <PhAddressFields
+        formik={personalFormik}
+        required={{ houseNo: true, barangay: true, city: true, province: true, zipCode: true, country: true }}
+      />
 
       <div className="save_continue_conatiner">
         <div className="btn_lable_save_container flex justify-content-end mt-2">

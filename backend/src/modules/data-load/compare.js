@@ -90,7 +90,7 @@ export function readSheets(buffer, sheets, { label = 'The workbook' } = {}) {
   const byName = new Map(book.map((s) => [s.name.trim().toLowerCase(), s]));
   const out = {};
   for (const sheet of sheets) {
-    const ws = byName.get(sheet.name.toLowerCase());
+    const ws = [sheet.name, ...(sheet.aliases || [])].map((n) => byName.get(n.toLowerCase())).find(Boolean);
     if (!ws) continue;
     const header = (ws.rows[0] || []).map((h) => normKey(h));
     const lookup = new Map();

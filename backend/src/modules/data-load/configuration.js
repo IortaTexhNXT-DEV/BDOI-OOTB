@@ -31,12 +31,21 @@ const FIELD_TYPE = { number: 'number', integer: 'number', boolean: 'bool', date:
 
 /** Master types of the kit, in load order: [type code, sheet name]. Location, finance and insurance masters. */
 const MASTER_SHEETS = {
-  company: 'Company', country: 'Countries', state: 'States', city: 'Cities', branch: 'Branches', department: 'Departments',
+  company: 'Company', country: 'Countries', region: 'Regions', state: 'Provinces', city: 'Cities and Municipalities', barangay: 'Barangays',
+  branch: 'Branches', department: 'Departments',
   hierarchy: 'Hierarchy', designation: 'Designations', currency: 'Currencies', 'exchange-rate': 'Exchange Rates', bank: 'Banks',
   'bank-account': 'Bank Accounts', signatory: 'Signatories', 'transaction-code': 'Transaction Codes', 'write-off-reason': 'Write-off Reasons',
   'insurance-company': 'Insurers', 'line-of-business': 'Lines of Business', product: 'Products', 'policy-type': 'Policy Types', cover: 'Covers',
   'vehicle-brand': 'Vehicle Brands', 'vehicle-model': 'Vehicle Models', 'vehicle-variant': 'Vehicle Variants', vehicle: 'Vehicles',
 };
+
+/** Earlier names of a sheet, still read from an uploaded workbook (the Province master was called State). */
+const SHEET_ALIASES = { state: ['States'], city: ['Cities'] };
+/**
+ * Records a sheet leaves out of the downloaded workbook: barangays of the PSGC list (with a PSGC code) are loaded in
+ * every environment by scripts/load-barangays.js, so the Barangays sheet carries only the barangays the broker added.
+ */
+const EXPORT_FILTER = { barangay: (r) => !r.BarangayCode };
 
 /** Sheet of one master type (columns from the type definition, like the master upload template). */
 export async function masterSheet(code) {
@@ -53,7 +62,7 @@ export async function masterSheet(code) {
   });
   const keyOf = (v) => keyText(...key.map((k) => v[k]));
   return {
-    key: `master:${code}`, name: MASTER_SHEETS[code], menu: info.menu || `Master > ${t.label}`, columns, keyColumns: key, keyOf,
+    key: `master:${code}`, name: MASTER_SHEETS[code], aliases: SHEET_ALIASES[code] || [], menu: info.menu || `Master > ${t.label}`, columns, keyColumns: key, keyOf,
     sample: info.samples?.[0] || {},
     async exportRows() {
       const { rows } = await masters.listRecords(t, { sortBy: t.code_field || t.label_field }, { limit: 1000000, offset: 0 });
@@ -66,7 +75,7 @@ export async function masterSheet(code) {
         const code = refs.get(c.key)?.get(r[`${c.key}Id`]);
         return cell(code ?? r[c.key]);
       };
-      return rows.map((r) => Object.fromEntries(columns.map((c) => [c.key, valueOf(r, c)])));
+      return rows.filter(EXPORT_FILTER[code] || (() => true)).map((r) => Object.fromEntries(columns.map((c) => [c.key, valueOf(r, c)])));
     },
     async importRow(ctx, v) {
       const body = {};
@@ -412,9 +421,9 @@ const lguSheet = () => ({
   key: 'lgu-rates', name: 'LGU Rates', menu: 'Master > Finance > Premium Taxes & LGU Rates (LGU Tax Rates)',
   columns: [
     { key: 'code', header: 'Code', required: true, format: 'Letters, digits, _ or -, up to 20' },
-    { key: 'name', header: 'Name', required: true, format: 'City or municipality' },
-    { key: 'province', header: 'Province' },
-    { key: 'city', header: 'City', format: 'Name of a city of the City master (optional link)' },
+    { key: 'name', header: 'Name', required: true, format: 'City or municipality (the local government unit levying the tax)' },
+    { key: 'province', header: 'Province', format: 'Province of the Province master (Metro Manila for NCR)' },
+    { key: 'city', header: 'City / Municipality', aliases: ['City'], format: 'Name or PSGC code of a city / municipality of the City / Municipality master (optional link)' },
     { key: 'rate', header: 'Rate', required: true, type: 'number', format: 'Percent, e.g. 0.2 for 0.2%' },
     { key: 'effectiveFrom', header: 'Effective From', type: 'date' },
     { key: 'effectiveTo', header: 'Effective To', type: 'date' },
@@ -422,7 +431,7 @@ const lguSheet = () => ({
     { key: 'remarks', header: 'Remarks' },
   ],
   keyColumns: ['code'], keyOf: (v) => keyText(v.code),
-  sample: { code: 'VAL', name: 'Valenzuela', province: 'Metro Manila', rate: '0.2', effectiveFrom: '2026-01-01', active: 'Yes' },
+  sample: { code: 'VAL', name: 'Valenzuela City', province: 'Metro Manila', city: 'Valenzuela City', rate: '0.2', effectiveFrom: '2026-01-01', active: 'Yes' },
   async exportRows() {
     return (await charges.listLgus()).map((r) => ({ code: r.code, name: r.name, province: cell(r.province), city: cell(r.cityName), rate: String(r.rate),
       effectiveFrom: cell(r.effectiveFrom), effectiveTo: cell(r.effectiveTo), active: yesNo(r.active), remarks: cell(r.remarks) }));
@@ -434,8 +443,11 @@ const lguSheet = () => ({
     if (rate === null || rate > 100) fail('rate', 'Rate must be a percent from 0 to 100');
     let cityId = null;
     if (v.city) {
-      const c = await one('SELECT id FROM cities WHERE lower(name) = lower($1) AND status <> \'deleted\' ORDER BY id LIMIT 1', [v.city]);
-      if (!c) fail('city', `City ${v.city} is not in the City master`);
+      // a PSGC code, or a name (several cities share a name, e.g. San Jose: the one in the row's province first)
+      const c = await one(`SELECT ci.id FROM cities ci JOIN states s ON s.id = ci.state_id
+        WHERE (ci.psgc_code = $1 OR lower(ci.name) = lower($1)) AND ci.status <> 'deleted'
+        ORDER BY (ci.psgc_code = $1) DESC, (lower(s.name) = lower($2)) DESC, (ci.status = 'active') DESC, ci.id LIMIT 1`, [String(v.city).trim(), v.province || '']);
+      if (!c) fail('city', `City / municipality ${v.city} is not in the City / Municipality master`);
       cityId = c.id;
     }
     const active = toBool(v.active);
@@ -578,7 +590,7 @@ export async function configurationSheets() {
   const m = async (code) => masterSheet(code);
   return [
     await m('company'), settingsSheet(),
-    await m('country'), await m('state'), await m('city'),
+    await m('country'), await m('region'), await m('state'), await m('city'), await m('barangay'),
     await m('branch'), await m('department'), await m('hierarchy'), await m('designation'), usersSheet(),
     await m('currency'), await m('exchange-rate'), accountsSheet(),
     await m('bank'), await m('bank-account'), await m('signatory'), await m('transaction-code'), await m('write-off-reason'),

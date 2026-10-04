@@ -1,20 +1,8 @@
-const THAILAND_COUNTRY_CODES = ["TH", "Thailand", "THAILAND"];
-
-export const isThailand = (country) =>
-  !country
-    ? false
-    : typeof country === "string"
-      ? THAILAND_COUNTRY_CODES.some((c) => c === country)
-      : THAILAND_COUNTRY_CODES.some(
-          (c) => c === country?.label || c === country?.name || c === country?.code
-        );
-
 /** Map legacy stored values to address API country names */
 export const normalizeCountryName = (country) => {
   if (!country) return "";
   const value = String(country).trim();
   if (value.toUpperCase() === "PHILIPPINES") return "Philippines";
-  if (value.toUpperCase() === "THAILAND") return "Thailand";
   if (value.toUpperCase() === "INDIA") return "India";
   return value;
 };

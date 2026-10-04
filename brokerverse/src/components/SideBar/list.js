@@ -1062,7 +1062,7 @@ export const menuList = [
               },
               {
                 id: 2,
-                name: "State",
+                name: "Province",
                 path: "/master/generals/location/state",
                 includes: [
                   "/master/generals/location/state",
@@ -1073,7 +1073,7 @@ export const menuList = [
               },
               {
                 id: 3,
-                name: "City",
+                name: "City / Municipality",
                 path: "/master/generals/location/city",
                 includes: [
                   "/master/generals/location/city",

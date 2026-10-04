@@ -1,4 +1,4 @@
-// Thailand Employee Benefits Policy Details Mock Data
+// Employee Benefits Policy Details Mock Data
 
 export const InsurancePolicyTypes = [
   { label: "Group Medical/HMO", value: "GroupMedical" },
@@ -11,9 +11,9 @@ export const InsurancePolicyTypes = [
 
 export const InsurancePolicycontainer = [
   { label: "Maxicare", value: "Maxicare", sumInsured: "₱500,000" },
-  { label: "Medicard Thailand", value: "Medicard Thailand", sumInsured: "₱750,000" },
+  { label: "Medicard Philippines", value: "Medicard Philippines", sumInsured: "₱750,000" },
   { label: "Intellicare", value: "Intellicare", sumInsured: "₱1,000,000" },
-  { label: "AXA Thailand", value: "AXA Thailand", sumInsured: "₱2,000,000" },
+  { label: "AXA Philippines", value: "AXA Philippines", sumInsured: "₱2,000,000" },
 ];
 
 export const pesoTypes = [

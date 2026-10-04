@@ -7,6 +7,7 @@
 import { one, query } from '../../db/pool.js';
 import { z } from '../../lib/validate.js';
 import { getSetting } from '../../lib/settings.js';
+import { regionOf } from '../../lib/address.js';
 
 export const GENDERS = ['male', 'female', 'other', 'undisclosed'];
 
@@ -39,6 +40,7 @@ export const profileSchema = z.object({
   barangay: text(120),
   city: text(120),
   province: text(120),
+  region: text(120),
   zipCode: z.union([z.literal(''), z.null(), z.string().trim().regex(/^[A-Za-z0-9 -]{3,10}$/, 'Enter a valid ZIP / postal code')]).optional(),
   country: text(80),
 }).superRefine((b, ctx) => {
@@ -51,7 +53,7 @@ export const profileSchema = z.object({
 const COLUMNS = {
   displayName: 'display_name', firstName: 'first_name', lastName: 'last_name', email: 'email', phone: 'phone',
   dateOfBirth: 'date_of_birth', gender: 'gender', addressLine: 'address_line', barangay: 'barangay', city: 'city',
-  province: 'province', zipCode: 'zip_code', country: 'country',
+  province: 'province', region: 'region', zipCode: 'zip_code', country: 'country',
 };
 
 export const emailEditable = async () => (await getSetting('security.profile_email_editable', false)) === true;
@@ -68,7 +70,7 @@ export async function loadProfile(userId) {
   const r = await one(`
     SELECT u.id, u.username, u.display_name, u.first_name, u.last_name, u.email, u.phone, u.status, u.last_login_at,
            u.totp_enabled, u.employee_code, u.branch_code, u.department, u.designation, u.reporting_to,
-           u.date_of_birth, u.gender, u.address_line, u.barangay, u.city, u.province, u.zip_code, u.country,
+           u.date_of_birth, u.gender, u.address_line, u.barangay, u.city, u.province, u.region, u.zip_code, u.country,
            b.name AS branch_name, m.display_name AS reporting_to_name, m.username AS reporting_to_username,
            COALESCE((SELECT array_agg(r.name ORDER BY r.name) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS role_names,
            COALESCE((SELECT array_agg(r.code ORDER BY r.name) FROM user_roles ur JOIN roles r ON r.id = ur.role_id WHERE ur.user_id = u.id), '{}') AS role_codes,
@@ -86,13 +88,18 @@ export async function loadProfile(userId) {
     reportingToName: r.reporting_to_name || r.reporting_to_username || null,
     roleCodes: r.role_codes, roleNames: r.role_names,
     dateOfBirth: isoDay(r.date_of_birth), gender: r.gender, addressLine: r.address_line, barangay: r.barangay, city: r.city,
-    province: r.province, zipCode: r.zip_code, country: r.country,
+    province: r.province, region: r.region, zipCode: r.zip_code, country: r.country,
     emailEditable: await emailEditable(),
   };
 }
 
 /** Save the fields present in `body` (an empty value clears an optional field). Returns the changed fields. */
 export async function saveProfile(userId, body, username) {
+  // the region follows from the province / city when the screen sends none (Philippine address format)
+  if (body.province !== undefined && !body.region && (body.province || body.city)) {
+    const region = await regionOf({ province: body.province || null, city: body.city || null });
+    if (region) body = { ...body, region };
+  }
   const sets = [];
   const params = [userId];
   const changed = {};

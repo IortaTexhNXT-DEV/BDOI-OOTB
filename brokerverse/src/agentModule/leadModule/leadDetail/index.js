@@ -222,6 +222,10 @@ const LeadDetail = () => {
               <span className="value">{currentLeadDetails.houseNo || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
+              <span className="label">{t('address.street')}</span>
+              <span className="value">{currentLeadDetails.street || currentLeadDetails.roadThanon || t('policyDetail.nA')}</span>
+            </div>
+            <div className="detail-row">
               <span className="label">{t('leadDetail.barangay')}</span>
               <span className="value">{currentLeadDetails.barangay || t('policyDetail.nA')}</span>
             </div>
@@ -232,6 +236,10 @@ const LeadDetail = () => {
             <div className="detail-row">
               <span className="label">{t('leadDetail.province')}</span>
               <span className="value">{currentLeadDetails.province || t('policyDetail.nA')}</span>
+            </div>
+            <div className="detail-row">
+              <span className="label">{t('address.region')}</span>
+              <span className="value">{currentLeadDetails.region || t('policyDetail.nA')}</span>
             </div>
             <div className="detail-row">
               <span className="label">{t('leadDetail.country')}</span>
