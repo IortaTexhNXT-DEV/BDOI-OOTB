@@ -159,7 +159,7 @@ const AutomatedRemittanceProcessing = () => {
           <p>{t("remittance.youAreAboutToProcess", { count: selectedRemittances.length })}</p>
           <p><strong>{t("remittance.totalAmount")} {formatCurrency(totalAmount)}</strong></p>
           <p>{t("remittance.processingDate")} {formatDate(processingDate)}</p>
-          {overrideCutoff && <p style={{color: 'var(--color-danger)'}}>⚠ {t("remittance.cutoffOverrideEnabled")}</p>}
+          {overrideCutoff && <p style={{color: 'var(--color-danger)'}}><i className="pi pi-exclamation-triangle mr-1" aria-hidden="true" />{t("remittance.cutoffOverrideEnabled")}</p>}
           <p>{t("remittance.doYouWantToContinue")}</p>
         </div>
       ),
@@ -447,7 +447,10 @@ const AutomatedRemittanceProcessing = () => {
           <div className="processing-overlay">
             <Card className="processing-card">
               <h3>Processing Remittances...</h3>
-              <ProgressBar value={processProgress} showValue={true} />
+              <div className="bv-meter">
+                <ProgressBar value={processProgress} showValue={false} />
+                <span className="bv-meter__value">{`${Math.round(processProgress)}%`}</span>
+              </div>
               <p className="processing-message">
                 {processProgress < 30 && 'Initializing...'}
                 {processProgress >= 30 && processProgress < 60 && 'Validating data...'}
@@ -484,7 +487,7 @@ const AutomatedRemittanceProcessing = () => {
             <div className="validation-results">
               <div className="validation-summary">
                 <div className="summary-item">
-                  <i className="pi pi-check-circle" style={{color: 'green'}}></i>
+                  <i className="pi pi-check-circle" style={{color: 'var(--color-success)'}}></i>
                   <span>Valid: {validationResults.validCount}</span>
                 </div>
                 <div className="summary-item">

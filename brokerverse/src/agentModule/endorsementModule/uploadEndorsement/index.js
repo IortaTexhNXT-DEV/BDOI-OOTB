@@ -345,9 +345,9 @@ const UploadEndorsement = () => {
           {documentUrl && (
             <div
               className="text-sm mt-2"
-              style={{ color: "#28a745", fontWeight: 500 }}
+              style={{ color: "var(--color-success)", fontWeight: 500 }}
             >
-              ✓ {t("endorsement.documentUploadedSuccess")}
+              <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("endorsement.documentUploadedSuccess")}
             </div>
           )}
 

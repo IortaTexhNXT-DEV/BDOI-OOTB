@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__negotiation__workspace__master {
@@ -378,15 +379,15 @@
                         }
 
                         &.red {
-                          background: $dark-red;
+                          background: $color-danger;
                         }
 
                         &.purple {
                           background: #8B5CF6;
                         }
 
-                        &.pink {
-                          background: #EC4899;
+                        &.info {
+                          background: $brand-navy;
                         }
 
                         &.cyan {
@@ -548,7 +549,7 @@
                   }
 
                   .competitor-advantages ul li:before {
-                    color: $dark-red;
+                    color: $color-danger;
                   }
                 }
               }
@@ -874,7 +875,7 @@
         font-weight: 600;
 
         &.increase {
-          color: $dark-red;
+          color: $color-danger;
         }
 
         &.decrease {

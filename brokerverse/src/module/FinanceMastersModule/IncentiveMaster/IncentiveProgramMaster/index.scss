@@ -22,19 +22,6 @@
       margin-bottom: 1rem;
 
       .main__btn__action {
-        background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-        border: none;
-        border-radius: 8px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-        transition: all 0.3s ease;
-
-        &:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
         .pr-2 {
           padding-right: 0.5rem;
         }
@@ -170,26 +157,9 @@
   // Dialog Styles
   .p-dialog {
     .p-dialog-header {
-      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-      color: white;
-      border-radius: 12px 12px 0 0;
-      padding: 1.5rem 2rem;
-
       .p-dialog-title {
         font-size: 1.25rem;
         font-weight: 600;
-      }
-
-      .p-dialog-header-icons {
-        .p-dialog-header-icon {
-          color: white;
-          width: 2rem;
-          height: 2rem;
-
-          &:hover {
-            background: rgba(255, 255, 255, 0.1);
-          }
-        }
       }
     }
 
@@ -350,16 +320,6 @@
             }
           }
 
-          &:not(.p-button-text) {
-            background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-            border: none;
-            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-
-            &:hover {
-              transform: translateY(-1px);
-              box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            }
-          }
         }
       }
     }

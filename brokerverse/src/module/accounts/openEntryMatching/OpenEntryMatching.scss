@@ -80,6 +80,12 @@
           background-color: #0072d8;
           border: none;
           color: #ffffff;
+
+          &.p-button-outlined {
+            background-color: transparent;
+            color: #0072d8;
+            border: 1px solid #0072d8;
+          }
           padding: 10px 20px;
           border-radius: 6px;
           font-size: 16px;

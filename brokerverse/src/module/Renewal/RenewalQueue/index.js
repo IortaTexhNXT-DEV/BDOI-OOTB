@@ -341,9 +341,9 @@ const RenewalQueue = () => {
     const percentage = (rowData.renewalAttempts / maxAttempts) * 100;
 
     return (
-      <div className="attempts-cell">
-        <ProgressBar value={progressValue(percentage)} showValue={false} style={{ width: '60px', height: '8px' }} />
-        <span>{rowData.renewalAttempts}/{maxAttempts}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(percentage)} showValue={false} />
+        <span className="bv-meter__value">{`${rowData.renewalAttempts} of ${maxAttempts}`}</span>
       </div>
     );
   };

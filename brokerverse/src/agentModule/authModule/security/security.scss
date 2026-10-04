@@ -50,7 +50,7 @@
 }
 
 .bv-security__alert {
-  border-left: 4px solid var(--red-500, #d92d20);
+  border-left: 3px solid var(--color-danger, #b42318);
   background: var(--red-50, #fef3f2);
   color: var(--red-700, #912018);
   padding: 0.6rem 0.8rem;
@@ -63,7 +63,7 @@
   align-items: flex-start;
   gap: 0.5rem;
   line-height: 1.45;
-  border-left: 4px solid var(--green-500, #12b76a);
+  border-left: 3px solid var(--color-success, #1d7f4e);
   background: var(--green-50, #ecfdf3);
   color: var(--green-800, #05603a);
   padding: 0.6rem 0.8rem;

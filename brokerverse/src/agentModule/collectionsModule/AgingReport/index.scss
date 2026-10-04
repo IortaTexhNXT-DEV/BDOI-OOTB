@@ -56,25 +56,6 @@
         }
       }
 
-      &.current {
-        border-left: 4px solid #4caf50;
-      }
-
-      &.days-1-30 {
-        border-left: 4px solid #ffc107;
-      }
-
-      &.days-31-60 {
-        border-left: 4px solid #ff9800;
-      }
-
-      &.days-61-90 {
-        border-left: 4px solid #f44336;
-      }
-
-      &.over-90 {
-        border-left: 4px solid #9c27b0;
-      }
     }
   }
 

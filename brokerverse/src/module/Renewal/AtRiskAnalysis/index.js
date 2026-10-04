@@ -18,7 +18,6 @@ import { TabView, TabPanel } from "primereact/tabview";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
-import { Knob } from "primereact/knob";
 import renewalsWorkspaceService from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
@@ -261,9 +260,9 @@ const AtRiskAnalysis = () => {
     };
 
     return (
-      <div className="risk-score-cell">
-        <ProgressBar value={progressValue(score)} showValue={false} className={`risk-progress ${getSeverity(score)}`} />
-        <span className={`score-value ${getSeverity(score)}`}>{score}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(score)} showValue={false} />
+        <span className={`bv-meter__value ${getSeverity(score)}`}>{`${score} of 100`}</span>
       </div>
     );
   };
@@ -429,18 +428,13 @@ const AtRiskAnalysis = () => {
         <div className="dashboard-cards">
           <Card className="dashboard-card danger">
             <div className="card-content">
-              <div className="card-visual">
-                <Knob
-                  value={dashboardData.avgRiskScore}
-                  size={80}
-                  readOnly
-                  valueColor="#EF4444"
-                  rangeColor="#FEE2E2"
-                />
-              </div>
               <div className="card-info">
                 <span className="card-value">{dashboardData.avgRiskScore}</span>
                 <span className="card-label">{t("renewal.averageRiskScore")}</span>
+                <div className="bv-meter">
+                  <ProgressBar value={progressValue(dashboardData.avgRiskScore)} showValue={false} />
+                  <span className="bv-meter__value">{`${dashboardData.avgRiskScore ?? 0} of 100`}</span>
+                </div>
               </div>
             </div>
           </Card>
@@ -591,13 +585,10 @@ const AtRiskAnalysis = () => {
                 <div className="risk-factors">
                   <div className="risk-overview">
                     <div className="risk-score-display">
-                      <Knob
-                        value={progressValue(selectedPolicy.riskScore)}
-                        size={120}
-                        readOnly
-                        valueColor="#EF4444"
-                        rangeColor="#FEE2E2"
-                      />
+                      <div className="bv-meter">
+                        <ProgressBar value={progressValue(selectedPolicy.riskScore)} showValue={false} />
+                        <span className="bv-meter__value">{`${selectedPolicy.riskScore} of 100`}</span>
+                      </div>
                       <div className="score-info">
                         <span className="score-label">{t("renewal.riskScore")}: {selectedPolicy.riskScore}</span>
                         <span className="score-category">{t("renewal.riskBand", { band: selectedPolicy.riskCategory })}</span>
@@ -637,7 +628,10 @@ const AtRiskAnalysis = () => {
                           <Badge value={`${factor.score} pts`} severity="warning" />
                         </div>
                         <div className="factor-details">{factor.details}</div>
-                        <ProgressBar value={progressValue((factor.score / 30) * 100)} showValue={false} className="factor-progress" />
+                        <div className="bv-meter">
+                          <ProgressBar value={progressValue((factor.score / 30) * 100)} showValue={false} />
+                          <span className="bv-meter__value">{`${factor.score} of 30`}</span>
+                        </div>
                       </div>
                     ))}
                   </div>

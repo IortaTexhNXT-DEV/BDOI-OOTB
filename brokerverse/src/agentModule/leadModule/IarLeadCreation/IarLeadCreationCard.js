@@ -1306,7 +1306,6 @@ const IarLeadCreationCard = ({ step, onStepChange }) => {
               </div>
               <div
                 className="discount__action__container"
-                style={{ color: "green" }}
               >
                 <div className="discount__action__text">
                   {t("agent.minPercent", "Min 0%")}

@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__remittance__tracking__master {
@@ -146,7 +147,7 @@
           }
 
           &.red {
-            color: $dark-red;
+            color: $color-danger;
           }
         }
 

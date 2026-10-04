@@ -376,6 +376,7 @@ const EditRequestForm = ({ action }) => {
                             <Button
                                 label={t("common.reject")}
                                 className="add__btn"
+                                outlined
                                 onClick={() => setRejectVisible(true)}
                                 disabled={loading}
                             />

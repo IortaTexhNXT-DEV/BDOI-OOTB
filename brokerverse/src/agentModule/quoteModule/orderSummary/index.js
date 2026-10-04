@@ -907,7 +907,6 @@ const OrderSummary = ({ action, flow }) => {
             </div>
             <div
               className="discount__action__container"
-              style={{ color: "green" }}
             >
               <div className="discount__action__text">{t("agent.minPercent")}</div>
               <div className="discount__action__text">{t("agent.maxPercent")}</div>

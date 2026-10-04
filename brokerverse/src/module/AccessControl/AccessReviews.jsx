@@ -110,7 +110,10 @@ const AccessReviews = () => {
             {isOpen ? <Button icon="pi pi-lock" label={k("closeReview", "Close review")} onClick={close} disabled={current.pending > 0} /> : null}
           </>}
         />
-        <ProgressBar value={progress(current)} className="access__progress" showValue={false} />
+        <div className="bv-meter access__progress">
+          <ProgressBar value={progress(current)} showValue={false} />
+          <span className="bv-meter__value">{`${progress(current)}%`}</span>
+        </div>
         <DataTable value={current.items} dataKey="id" size="small" stripedRows paginator rows={20} className="access__table">
           <Column header={k("colUser", "User")} body={(i) => (
             <div className="access__user"><span className="access__user-name">{i.displayName}</span><span className="access__muted">{i.username}</span></div>
@@ -165,7 +168,7 @@ const AccessReviews = () => {
         <Column field="name" header={k("colReview", "Review")} />
         <Column header={k("colDue", "Due")} body={(r) => shortDate(r.dueDate)} />
         <Column header={k("colProgress", "Progress")} style={{ minWidth: "12rem" }} body={(r) => (
-          <div className="access__user"><ProgressBar value={progress(r)} showValue={false} className="access__progress-sm" /><span className="access__muted">{r.users - r.pending} / {r.users}</span></div>
+          <div className="bv-meter"><ProgressBar value={progress(r)} showValue={false} /><span className="bv-meter__value">{`${r.users - r.pending} of ${r.users}`}</span></div>
         )} />
         <Column field="revoked" header={k("colRevoked", "Revoked")} style={{ textAlign: "right" }} />
         <Column header={k("colStatus", "Status")} body={(r) => <Tag value={k(`reviewStatus.${r.status}`, r.status)} severity={r.status === "open" ? "info" : "success"} />} />

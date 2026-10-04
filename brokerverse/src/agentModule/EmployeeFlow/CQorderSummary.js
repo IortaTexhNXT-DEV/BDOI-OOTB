@@ -155,7 +155,6 @@ const CQOrderSummary = ({ action, flow }) => {
             </div>
             <div
               className="discount__action__container"
-              style={{ color: "green" }}
             >
               <div className="discount__action__text">Min 0%</div>
               <div className="discount__action__text">Max 30%</div>

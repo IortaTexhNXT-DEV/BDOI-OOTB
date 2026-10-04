@@ -15,7 +15,7 @@ import { BASE_URL } from "../../../utility/constant";
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
-import { formatPercent } from "../../../utility/numberFormat";
+import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const pad = (n) => String(n).padStart(2, "0");
 const toIsoDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -215,21 +215,21 @@ const ClaimsDashboard = () => {
         data: trend.submitted,
         borderColor: "#0066CC",
         backgroundColor: "rgba(0, 102, 204, 0.1)",
-        tension: 0.4,
+        tension: 0,
       },
       {
         label: t("claimsDashboard.claimsApproved"),
         data: trend.approved,
         borderColor: "#00C851",
         backgroundColor: "rgba(0, 200, 81, 0.1)",
-        tension: 0.4,
+        tension: 0,
       },
       {
         label: t("claimsDashboard.claimsRejected"),
         data: trend.rejected,
         borderColor: "#FF4444",
         backgroundColor: "rgba(255, 68, 68, 0.1)",
-        tension: 0.4,
+        tension: 0,
       },
     ],
   };
@@ -290,19 +290,20 @@ const ClaimsDashboard = () => {
   };
 
   const priorityBodyTemplate = (rowData) => {
-    const getPriorityIcon = (priority) => {
+    const getPrioritySeverity = (priority) => {
       switch (priority?.toLowerCase()) {
         case "high":
-          return "🔴";
+          return "danger";
         case "medium":
-          return "🟡";
+          return "warning";
         case "low":
-          return "🟢";
+          return "success";
         default:
-          return "⚪";
+          return "secondary";
       }
     };
-    return <span>{getPriorityIcon(rowData.priority)}</span>;
+    if (!rowData.priority) return "-";
+    return <Tag value={rowData.priority} severity={getPrioritySeverity(rowData.priority)} />;
   };
 
   const actionBodyTemplate = (rowData) => {
@@ -369,7 +370,6 @@ const ClaimsDashboard = () => {
             <div className="kpi-content">
               <i
                 className="pi pi-folder-open kpi-icon"
-                style={{ color: "#0066CC" }}
               ></i>
               <div className="kpi-details">
                 <span className="kpi-label">{t("claimsDashboard.totalOpenClaims")}</span>
@@ -382,7 +382,6 @@ const ClaimsDashboard = () => {
             <div className="kpi-content">
               <i
                 className="pi pi-exclamation-triangle kpi-icon"
-                style={{ color: "#FF6B6B" }}
               ></i>
               <div className="kpi-details">
                 <span className="kpi-label">{t("claimsDashboard.claimsOverdue")}</span>
@@ -395,7 +394,6 @@ const ClaimsDashboard = () => {
             <div className="kpi-content">
               <i
                 className="pi pi-calendar kpi-icon"
-                style={{ color: "#4ECDC4" }}
               ></i>
               <div className="kpi-details">
                 <span className="kpi-label">{t("claimsDashboard.todaysClaims")}</span>
@@ -408,7 +406,6 @@ const ClaimsDashboard = () => {
             <div className="kpi-content">
               <i
                 className="pi pi-chart-line kpi-icon"
-                style={{ color: "#95E77E" }}
               ></i>
               <div className="kpi-details">
                 <span className="kpi-label">{t("claimsDashboard.highestClaims")}</span>
@@ -426,7 +423,6 @@ const ClaimsDashboard = () => {
             <div className="kpi-content">
               <i
                 className="pi pi-map-marker kpi-icon"
-                style={{ color: "#FFD93D" }}
               ></i>
               <div className="kpi-details">
                 <span className="kpi-label">{t("claimsDashboard.maxClaimsByState")}</span>
@@ -501,7 +497,10 @@ const ClaimsDashboard = () => {
                   <span className="state-name">{state.state}</span>
                   <span className="state-value">{state.value} {t("claimsDashboard.claims")}</span>
                 </div>
-                <ProgressBar value={state.percentage} showValue={false} />
+                <div className="bv-meter">
+                  <ProgressBar value={progressValue(state.percentage)} showValue={false} />
+                  <span className="bv-meter__value">{formatPercent(state.percentage)}</span>
+                </div>
               </div>
             ))}
           </Card>

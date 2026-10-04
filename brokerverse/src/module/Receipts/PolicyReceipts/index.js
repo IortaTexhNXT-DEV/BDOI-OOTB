@@ -832,7 +832,7 @@ const PolicyReceipts = () => {
                         gap: "4px",
                       }}
                     >
-                      <div style={{ fontWeight: "600", color: "#10b981" }}>
+                      <div style={{ fontWeight: "600", color: "var(--color-success)" }}>
                         {t("accounts.receipts.total")} {formatCurrency(totalPaid)}
                       </div>
                       <div style={{ fontSize: "11px", color: "#6b7280" }}>

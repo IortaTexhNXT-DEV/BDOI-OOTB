@@ -9,7 +9,6 @@ import { Chart } from "primereact/chart";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { ProgressBar } from "primereact/progressbar";
-import { Knob } from "primereact/knob";
 import { Tag } from "primereact/tag";
 import { Badge } from "primereact/badge";
 import { Dialog } from "primereact/dialog";
@@ -97,8 +96,8 @@ const RemittanceAnalytics = () => {
         data: monthlyTrend.map((m) => m.count),
         borderColor: '#007bff',
         backgroundColor: 'rgba(0, 123, 255, 0.1)',
-        tension: 0.4,
-        fill: true
+        tension: 0,
+        fill: false
       }
     ]
   };
@@ -196,15 +195,6 @@ const RemittanceAnalytics = () => {
     }
   };
 
-  const getKpiColor = (status) => {
-    switch (status) {
-      case 'success': return '#28a745';
-      case 'warning': return '#ffc107';
-      case 'danger': return '#dc3545';
-      default: return '#6c757d';
-    }
-  };
-
   const formatPercent = (value) => {
     const sign = value >= 0 ? '+' : '';
     return `${sign}${Number(value || 0).toFixed(1)}%`;
@@ -226,14 +216,21 @@ const RemittanceAnalytics = () => {
     return <Tag value={rowData.severity.toUpperCase()} severity={rowData.severity} />;
   };
   const performanceBodyTemplate = (rowData) => {
-    return <ProgressBar value={progressValue(rowData.performanceScore)} displayValueTemplate={(v) => `${v}%`} className="performance-bar" />;
+    const value = progressValue(rowData.performanceScore);
+    return (
+      <div className="bv-meter">
+        <ProgressBar value={value} showValue={false} />
+        <span className="bv-meter__value">{`${roundTo(value, 1) ?? 0}%`}</span>
+      </div>
+    );
   };
 
   const successRateBodyTemplate = (rowData) => {
+    const value = progressValue(rowData.successRate);
     return (
-      <div className="success-rate">
-        <span>{formatPercent(rowData.successRate)}</span>
-        <ProgressBar value={rowData.successRate} className="rate-bar" showValue={false} />
+      <div className="bv-meter">
+        <ProgressBar value={value} showValue={false} />
+        <span className="bv-meter__value">{`${roundTo(value, 1) ?? 0}%`}</span>
       </div>
     );
   };
@@ -363,18 +360,6 @@ const RemittanceAnalytics = () => {
                     <span>{formatPercent(kpi.trend)}</span>
                   </div>
                 </div>
-                <div className="kpi-gauge">
-                  <Knob
-                    value={roundTo(kpi.value, 1) ?? 0}
-                    max={kpi.unit === '%' ? 100 : kpi.target * 1.5}
-                    size={80}
-                    valueColor={getKpiColor(kpi.status)}
-                    rangeColor="#e9ecef"
-                    textColor="#495057"
-                    strokeWidth={8}
-                    readOnly
-                  />
-                </div>
                 <div className="kpi-details">
                   <div className="kpi-value">
                     {kpi.value} {kpi.unit}
@@ -382,6 +367,12 @@ const RemittanceAnalytics = () => {
                   <div className="kpi-target">
                     Target: {kpi.target} {kpi.unit}
                   </div>
+                  {kpi.target > 0 && (
+                    <div className="bv-meter">
+                      <ProgressBar value={progressValue((Number(kpi.value || 0) / kpi.target) * 100)} showValue={false} />
+                      <span className="bv-meter__value">{`${roundTo((Number(kpi.value || 0) / kpi.target) * 100, 1) ?? 0}% of target`}</span>
+                    </div>
+                  )}
                   <div className="kpi-description">
                     {kpi.description}
                   </div>

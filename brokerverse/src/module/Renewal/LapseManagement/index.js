@@ -439,9 +439,9 @@ const LapseManagement = () => {
     const percentage = (attempts / maxAttempts) * 100;
 
     return (
-      <div className="attempts-cell">
-        <ProgressBar value={progressValue(percentage)} showValue={false} style={{ width: '60px', height: '8px' }} />
-        <span>{attempts}/{maxAttempts}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(percentage)} showValue={false} />
+        <span className="bv-meter__value">{`${attempts} of ${maxAttempts}`}</span>
       </div>
     );
   };
@@ -786,12 +786,9 @@ const LapseManagement = () => {
                             </div>
                           </div>
 
-                          <div className="campaign-progress">
-                            <ProgressBar
-                              value={progressValue(campaign.statistics?.conversionRate)}
-                              showValue={false}
-                              style={{ height: '6px' }}
-                            />
+                          <div className="bv-meter">
+                            <ProgressBar value={progressValue(campaign.statistics?.conversionRate)} showValue={false} />
+                            <span className="bv-meter__value">{formatPercent(campaign.statistics?.conversionRate ?? 0)}</span>
                           </div>
                         </div>
                       </Card>

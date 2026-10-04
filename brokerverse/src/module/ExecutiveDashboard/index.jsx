@@ -180,8 +180,8 @@ const ExecutiveDashboard = () => {
         data: dashboard?.monthlyTrend?.premium || [],
         borderColor: "#0066CC",
         backgroundColor: "rgba(0, 102, 204, 0.1)",
-        tension: 0.4,
-        fill: true,
+        tension: 0,
+        fill: false,
       },
     ],
   };
@@ -229,11 +229,10 @@ const ExecutiveDashboard = () => {
 
   const marketShareTemplate = (rowData) => {
     return (
-      <ProgressBar
-        value={progressValue(rowData.marketShare, 1)}
-        showValue={true}
-        style={{ height: "20px" }}
-      />
+<div className="bv-meter">
+        <ProgressBar value={progressValue(rowData.marketShare, 1)} showValue={false} />
+        <span className="bv-meter__value">{formatPercent(rowData.marketShare)}</span>
+      </div>
     );
   };
 
@@ -316,11 +315,10 @@ const ExecutiveDashboard = () => {
               <div className="kpi-value">{kpi.value}</div>
               <div className="kpi-target">
                 <span>{t("executiveDashboard.target")}: {kpi.target}</span>
-                <ProgressBar
-                  value={kpi.achievement}
-                  showValue={false}
-                  style={{ height: "6px" }}
-                />
+<div className="bv-meter">
+                  <ProgressBar value={progressValue(kpi.achievement)} showValue={false} />
+                  <span className="bv-meter__value">{formatPercent(kpi.achievement)}</span>
+                </div>
               </div>
             </Card>
           ))}
@@ -411,7 +409,7 @@ const ExecutiveDashboard = () => {
                     hoverRadius: 6,
                   },
                   line: {
-                    tension: 0.4,
+                    tension: 0,
                   },
                 },
               }}

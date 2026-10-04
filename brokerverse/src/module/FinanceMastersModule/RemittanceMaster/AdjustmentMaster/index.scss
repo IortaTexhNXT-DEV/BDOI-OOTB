@@ -1,3 +1,4 @@
+@import "../../../../theme/bdoi/tokens";
 .adjustment-master {
   padding: 1rem;
 
@@ -54,7 +55,7 @@
       .rule-builder {
         .rule-card {
           background: #f8f9fa;
-          border-left: 4px solid #007bff;
+          border: 1px solid $color-border;
           padding: 1rem;
           margin-bottom: 1rem;
           border-radius: 4px;

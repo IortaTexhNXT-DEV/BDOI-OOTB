@@ -98,7 +98,7 @@ const ClaimsSettlements = () => {
             <div className="flex gap-2 mb-3">
               <Button label={t("opsAcc.claimPay.fundsReceived")} icon="pi pi-download" disabled={!open.canRecord || !firstOwed}
                 onClick={() => setEntry({ kind: "funds", amount: firstOwed?.outstanding, insurerId: firstOwed?.insurerId, bankAccount: open.bankAccounts[0]?.code, date: new Date(), reference: "" })} />
-              <Button label={t("opsAcc.claimPay.payClaimant")} icon="pi pi-upload" disabled={!open.canRecord || open.payableToClaimant <= 0}
+              <Button label={t("opsAcc.claimPay.payClaimant")} icon="pi pi-upload" outlined disabled={!open.canRecord || open.payableToClaimant <= 0}
                 onClick={() => setEntry({ kind: "pay", amount: open.payableToClaimant, bankAccount: open.bankAccounts[0]?.code, date: new Date(), reference: "", paymentMode: "check", payee: open.claimant })} />
               <Button label={t("opsAcc.claimPay.releaseForm")} icon="pi pi-print" outlined onClick={() => service.claimReleaseForm(open.claimId).catch((e) => showError(toast, e))} />
             </div>

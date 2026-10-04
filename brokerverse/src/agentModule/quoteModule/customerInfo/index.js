@@ -596,7 +596,10 @@ const CustomerInfo = ({ action }) => {
                 <img src={imageURL} alt="ID card" className="image__view" />
                 <div className="flex align-items-center gap-2 mt-2">
                   {idUploadProgress !== null ? (
-                    <ProgressBar value={idUploadProgress} style={{ height: "0.75rem", flex: 1 }} />
+                    <div className="bv-meter flex-1">
+                      <ProgressBar value={idUploadProgress} showValue={false} />
+                      <span className="bv-meter__value">{`${Math.round(idUploadProgress)}%`}</span>
+                    </div>
                   ) : (
                     formik.values.IdCardImage && (
                       <span className="text-sm text-green-600">

@@ -219,11 +219,11 @@
         align-items: center;
         padding: 1rem;
         cursor: pointer;
-        background: linear-gradient(135deg, $main-background 0%, $card-background 100%);
+        background: $card-background;
         transition: background 0.2s ease;
 
         &:hover {
-          background: linear-gradient(135deg, #e9ecef 0%, $main-background 100%);
+          background: $main-background;
         }
 
         .client-info {

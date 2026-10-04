@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
+import { Tag } from "primereact/tag";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
@@ -15,6 +16,7 @@ import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { dateBody, downloadCsv, isoDate, loadSettings, showError, showSuccess } from "../shared";
 import SvgDot from "../../../assets/icons/SvgDot";
 import "./index.scss";
+import { progressValue, roundTo } from "../../../utility/numberFormat";
 import { confirmAction, promptText } from "../../../utility/dialogs";
 
 const emptyRecon = { bankTransactions: [], systemTransactions: [], exceptions: [], summary: { total: 0, matched: 0, unmatched: 0, partial: 0, successRate: 0 } };
@@ -189,15 +191,13 @@ const ReconciliationProcess = () => {
   const selectionDifference = selectedBank.reduce((s, b) => s + Number(b.amount || 0), 0) - selectedSystem.reduce((s, r) => s + Number(r.premium || 0), 0);
 
   const statusBodyTemplate = (rowData) => {
-    const statusColors = {
-      matched: "green",
-      unmatched: "orange",
-      partial: "blue"
-    };
+    const severities = { matched: "success", unmatched: "warning", partial: "info" };
     return (
-      <span style={{ color: statusColors[rowData.status] }}>
-        <i className={`pi pi-${rowData.status === 'matched' ? 'check' : rowData.status === 'unmatched' ? 'exclamation-triangle' : 'info-circle'}`}></i>
-      </span>
+      <Tag
+        severity={severities[rowData.status] || "secondary"}
+        icon={`pi pi-${rowData.status === 'matched' ? 'check' : rowData.status === 'unmatched' ? 'exclamation-triangle' : 'info-circle'}`}
+        value={rowData.status}
+      />
     );
   };
 
@@ -225,20 +225,23 @@ const ReconciliationProcess = () => {
           </Card>
           <Card className="status-card">
             <div className="status-label">Matched</div>
-            <div className="status-value" style={{ color: "green" }}>{reconciliationStatus.matched}</div>
+            <div className="status-value">{reconciliationStatus.matched}</div>
           </Card>
           <Card className="status-card">
             <div className="status-label">Unmatched</div>
-            <div className="status-value" style={{ color: "orange" }}>{reconciliationStatus.unmatched}</div>
+            <div className="status-value">{reconciliationStatus.unmatched}</div>
           </Card>
           <Card className="status-card">
             <div className="status-label">Partial Match</div>
-            <div className="status-value" style={{ color: "blue" }}>{reconciliationStatus.partialMatch}</div>
+            <div className="status-value">{reconciliationStatus.partialMatch}</div>
           </Card>
           <Card className="status-card">
             <div className="status-label">Success Rate</div>
-            <div className="status-value" style={{ color: "green" }}>{reconciliationStatus.successRate}%</div>
-            <ProgressBar value={reconciliationStatus.successRate} showValue={false} className="mt-1" />
+            <div className="status-value">{reconciliationStatus.successRate}%</div>
+            <div className="bv-meter">
+              <ProgressBar value={progressValue(reconciliationStatus.successRate)} showValue={false} />
+              <span className="bv-meter__value">{`${roundTo(reconciliationStatus.successRate, 1) ?? 0}%`}</span>
+            </div>
           </Card>
         </div>
       </div>
@@ -251,7 +254,7 @@ const ReconciliationProcess = () => {
                 <h4>Bank Transactions</h4>
                 <div className="panel-actions">
                   <Button icon="pi pi-upload" className="p-button-sm" label="Import" onClick={() => fileInput.current?.click()} />
-                  <Button icon="pi pi-refresh" className="p-button-sm" onClick={loadReconciliation} aria-label="Refresh" tooltip="Refresh" tooltipOptions={{ position: "top" }} />
+                  <Button icon="pi pi-refresh" className="p-button-sm" outlined onClick={loadReconciliation} aria-label="Refresh" tooltip="Refresh" tooltipOptions={{ position: "top" }} />
                 </div>
               </div>
               <DataTable

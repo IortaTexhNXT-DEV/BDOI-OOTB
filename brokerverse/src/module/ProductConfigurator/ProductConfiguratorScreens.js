@@ -882,8 +882,10 @@ export const MarketMapping = () => {
             <span>{formatCurrency(r.ytdPremium ?? 0)}</span>
             {r.targetAchievedPercent != null && (
               <>
-                <ProgressBar value={Math.min(100, r.targetAchievedPercent)} showValue={false} style={{ height: "6px" }} aria-label={t("marketMapping.ofTargetAria", { percent: r.targetAchievedPercent })} />
-                <small className="pc-muted">{t("marketMapping.ofTargetValue", { percent: r.targetAchievedPercent.toLocaleString(numberLocale(), { maximumFractionDigits: 1 }) })}</small>
+                <div className="bv-meter">
+                  <ProgressBar value={Math.min(100, r.targetAchievedPercent)} showValue={false} aria-label={t("marketMapping.ofTargetAria", { percent: r.targetAchievedPercent })} />
+                  <span className="bv-meter__value">{t("marketMapping.ofTargetValue", { percent: r.targetAchievedPercent.toLocaleString(numberLocale(), { maximumFractionDigits: 1 }) })}</span>
+                </div>
               </>
             )}
           </div>
@@ -1113,7 +1115,7 @@ export const ProductAnalytics = () => {
   const top = analytics?.topProducts || [];
   const trend = analytics?.performanceTrend || [];
   const hasData = top.length > 0;
-  const performanceChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productAnalytics.premiumPhpMillions"), data: trend.map((tr) => tr.premium / 1000000), backgroundColor: "rgba(0, 114, 216, 0.15)", borderColor: "#0072d8", tension: 0.3 }] };
+  const performanceChart = { labels: trend.map((tr) => tr.month), datasets: [{ label: t("productAnalytics.premiumPhpMillions"), data: trend.map((tr) => tr.premium / 1000000), backgroundColor: "rgba(0, 114, 216, 0.15)", borderColor: "#0072d8", tension: 0 }] };
   const categories = Object.entries(analytics?.categoryBreakdown || {});
   const categoryChart = { labels: categories.map(([k]) => k), datasets: [{ data: categories.map(([, c]) => c.premium / 1000000), backgroundColor: ["#0072d8", "#004ea8", "#fdb913", "#1d7f4e", "#99c1e7", "#8a5a00"] }] };
 

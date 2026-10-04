@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .container__retention__analytics__master {
@@ -129,23 +130,14 @@
           gap: 16px;
 
           .kpi-visual {
-            .p-knob {
-              margin: 0;
-            }
-
-            .cycle-time-visual,
             .satisfaction-visual {
               display: flex;
               flex-direction: column;
               align-items: center;
               justify-content: center;
-              width: 80px;
-              height: 80px;
-              border-radius: 50%;
-              background: $default-background-grey;
 
               .pi {
-                font-size: 24px;
+                font-size: 18px;
                 margin-bottom: 4px;
               }
 
@@ -168,11 +160,6 @@
               }
             }
 
-            .cycle-time-visual {
-              .pi-clock {
-                color: #F59E0B;
-              }
-            }
           }
 
           .kpi-info {
@@ -202,36 +189,21 @@
                 color: $green;
 
                 &:before {
-                  content: "↗ ";
+                  content: "+";
                 }
               }
 
               &.negative {
-                color: $dark-red;
+                color: $color-danger;
 
                 &:before {
-                  content: "↘ ";
+                  content: "";
                 }
               }
             }
           }
         }
 
-        &.primary {
-          border-left: 4px solid $primary-blue;
-        }
-
-        &.success {
-          border-left: 4px solid $green;
-        }
-
-        &.warning {
-          border-left: 4px solid #F59E0B;
-        }
-
-        &.info {
-          border-left: 4px solid #06B6D4;
-        }
       }
     }
 
@@ -446,8 +418,8 @@
                     }
 
                     &.p-tag-danger {
-                      background: lighten($dark-red, 40%);
-                      color: $dark-red;
+                      background: $color-danger-050;
+                      color: $color-danger;
                     }
                   }
                 }
@@ -480,7 +452,7 @@
                   font-weight: 600;
 
                   &.p-badge-danger {
-                    background: $dark-red;
+                    background: $color-danger;
                   }
 
                   &.p-badge-warning {
@@ -503,7 +475,7 @@
                 background: $light-grey;
 
                 &.danger .p-progressbar-value {
-                  background: $dark-red;
+                  background: $color-danger;
                 }
 
                 &.warning .p-progressbar-value {
@@ -551,7 +523,7 @@
           }
 
           .p-badge {
-            background: $dark-red;
+            background: $color-danger;
             font-size: 11px;
           }
         }
@@ -564,7 +536,8 @@
             padding: 20px;
             margin-bottom: 16px;
             border-radius: 8px;
-            border-left: 4px solid;
+            border: 1px solid $color-border;
+            border-left: 3px solid $color-border;
 
             &:last-child {
               margin-bottom: 0;
@@ -605,29 +578,29 @@
             }
 
             &.high {
-              background: lighten($dark-red, 45%);
-              border-left-color: $dark-red;
+              background: $color-danger-050;
+              border-left-color: $color-danger;
 
               .pi {
-                color: $dark-red;
+                color: $color-danger;
               }
             }
 
             &.medium {
-              background: lighten(#F59E0B, 45%);
-              border-left-color: #F59E0B;
+              background: $color-warning-050;
+              border-left-color: $color-warning;
 
               .pi {
-                color: #F59E0B;
+                color: $color-warning;
               }
             }
 
             &.low {
-              background: lighten($primary-blue, 45%);
-              border-left-color: $primary-blue;
+              background: $brand-blue-050;
+              border-left-color: $brand-blue;
 
               .pi {
-                color: $primary-blue;
+                color: $brand-blue;
               }
             }
           }

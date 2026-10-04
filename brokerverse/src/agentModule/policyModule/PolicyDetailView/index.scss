@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 $mobile-sm: 480px;
 $tablet-sm: 768px;
 $tablet-md: 1024px;
@@ -186,35 +187,23 @@ $tablet-md: 1024px;
   }
 
   .highlight-card {
-    background: linear-gradient(135deg, #ffffff, #f8fafc);
-    border-radius: 16px;
+    background: $color-surface;
+    border: 1px solid $color-border;
+    border-radius: 12px;
     padding: 1.35rem;
-    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.08);
+    box-shadow: $shadow-sm;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
     position: relative;
     overflow: hidden;
 
-    &::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), transparent);
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-
-    &:hover::after {
-      opacity: 1;
-    }
-
     &--success {
-      background: linear-gradient(135deg, #ecfdf5, #ffffff);
+      background: $color-success-050;
     }
 
     &--warning {
-      background: linear-gradient(135deg, #fff7ed, #ffffff);
+      background: $color-warning-050;
     }
 
     .highlight-label {

@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .container__my__programs {
   padding: 0;
   background: #f8f9fa;
@@ -55,31 +56,8 @@
           gap: 1rem;
 
           .card-icon {
-            font-size: 2.5rem;
-            padding: 1rem;
-            border-radius: 50%;
-
-            &.gold {
-              color: #f39c12;
-              background: rgba(243, 156, 18, 0.1);
-            }
-
-            &.green {
-              color: #27ae60;
-              background: rgba(39, 174, 96, 0.1);
-            }
-
-            &.blue {
-              color: #3498db;
-              background: rgba(52, 152, 219, 0.1);
-            }
-          }
-
-          .knob-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.5rem;
+            font-size: 18px;
+            color: $color-text-muted;
           }
 
           .card-info {
@@ -176,37 +154,6 @@
           }
         }
 
-        .achievement-progress {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-
-          .p-progressbar {
-            flex: 1;
-            height: 0.5rem;
-            border-radius: 0.25rem;
-
-            &.progress-success .p-progressbar-value {
-              background: #28a745;
-            }
-
-            &.progress-warning .p-progressbar-value {
-              background: #ffc107;
-            }
-
-            &.progress-danger .p-progressbar-value {
-              background: #dc3545;
-            }
-          }
-
-          .achievement-text {
-            font-weight: 600;
-            color: #495057;
-            min-width: 3rem;
-            text-align: right;
-          }
-        }
-
         .view-details-button {
           width: 2rem;
           height: 2rem;
@@ -269,7 +216,7 @@
           padding: 1rem;
           background: #f8f9fa;
           border-radius: 8px;
-          border-left: 4px solid #0072d8;
+          border: 1px solid $color-border;
 
           .activity-date {
             font-size: 0.75rem;
@@ -311,26 +258,9 @@
   // Dialog Styles
   .p-dialog {
     .p-dialog-header {
-      background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-      color: white;
-      border-radius: 12px 12px 0 0;
-      padding: 1.5rem 2rem;
-
       .p-dialog-title {
         font-size: 1.25rem;
         font-weight: 600;
-      }
-
-      .p-dialog-header-icons {
-        .p-dialog-header-icon {
-          color: white;
-          width: 2rem;
-          height: 2rem;
-
-          &:hover {
-            background: rgba(255, 255, 255, 0.1);
-          }
-        }
       }
     }
 
@@ -418,12 +348,6 @@
                 gap: 2rem;
               }
 
-              .progress-circle {
-                display: flex;
-                align-items: center;
-                justify-content: center;
-              }
-
               .progress-info {
                 text-align: center;
 
@@ -447,8 +371,9 @@
 
           .earning-breakdown {
             .earning-card {
-              background: linear-gradient(135deg, #0072d8 0%, #004ea8 100%);
-              color: white;
+              background: $brand-blue-050;
+              color: $color-heading;
+              border: 1px solid $color-border;
               padding: 2rem;
               border-radius: 12px;
               text-align: center;

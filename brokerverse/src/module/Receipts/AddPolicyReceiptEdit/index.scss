@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .overall__add_policy_edit__container {
   .label_header {
     color: #111927;
@@ -164,35 +165,8 @@
     max-width: 20%;
   }
   .print.p-button {
-    color: #ffffff;
-    background: linear-gradient(135deg, #0072d8, #005fb4);
-    border: none;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 500;
-    transition: all 0.2s ease-in-out;
-    border-radius: 8px;
     margin-right: 12px;
     min-width: 140px;
-    height: 44px;
-    box-shadow: 0 2px 4px rgba(0, 114, 216, 0.2);
-
-    &:hover {
-      background: linear-gradient(135deg, #005fb4, #004ea8);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 114, 216, 0.3);
-    }
-
-    &:active {
-      transform: translateY(0);
-    }
-
-    &:disabled {
-      background: #9ca3af;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
   }
 
   .next_container {
@@ -305,28 +279,9 @@
     margin: 20px 0;
 
     .reset-btn {
-      background: linear-gradient(135deg, #6b7280, #4b5563);
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s ease-in-out;
       display: flex;
       align-items: center;
       gap: 8px;
-
-      &:hover {
-        background: linear-gradient(135deg, #4b5563, #374151);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      }
-
-      &:active {
-        transform: translateY(0);
-      }
     }
   }
 
@@ -368,8 +323,9 @@
 
   // Unsaved changes warning banner
   .unsaved-changes-warning {
-    background-color: #fef3c7;
-    border-left: 4px solid #f59e0b;
+    background-color: $color-warning-050;
+    border: 1px solid $color-border;
+    border-left: 3px solid $color-warning;
     padding: 12px 16px;
     margin-bottom: 16px;
     display: flex;
@@ -379,13 +335,13 @@
     animation: slideDown 0.3s ease-in-out;
 
     i {
-      color: #f59e0b;
+      color: $color-warning;
       font-size: 18px;
       flex-shrink: 0;
     }
 
     span {
-      color: #92400e;
+      color: $color-heading;
       font-weight: 500;
       font-size: 14px;
       line-height: 1.5;

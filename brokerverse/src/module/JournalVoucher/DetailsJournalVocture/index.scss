@@ -331,5 +331,11 @@
         font-size: 18px;
         color: #fff;
         cursor: pointer;
+
+        &.p-button-outlined {
+            background-color: transparent;
+            color: #0072d8;
+            border: 1px solid #0072d8;
+        }
     }
 }

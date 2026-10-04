@@ -1,3 +1,4 @@
+@import "../../../../theme/bdoi/tokens";
 @import "../../../../Color.scss";
 
 .container__statement__template__master {
@@ -130,7 +131,7 @@
 
           &.required::after {
             content: " *";
-            color: $dark-red;
+            color: $color-danger;
           }
         }
 
@@ -311,11 +312,11 @@
         }
 
         &.delete-button {
-          background: $dark-red;
+          background: $color-danger;
           color: white;
 
           &:hover {
-            background: darken($dark-red, 10%);
+            background: $color-danger;
           }
         }
 

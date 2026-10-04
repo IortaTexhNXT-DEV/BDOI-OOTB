@@ -774,9 +774,9 @@ const UploadPolicyCard = ({
         {policyDocumentUrl && (
           <div
             className="text-sm mt-2"
-            style={{ color: "#28a745", fontWeight: 500 }}
+            style={{ color: "var(--color-success)", fontWeight: 500 }}
           >
-            ✓ {t("agent.policyDocumentUploaded")}
+            <i className="pi pi-check-circle mr-1" aria-hidden="true" />{t("agent.policyDocumentUploaded")}
           </div>
         )}
 
@@ -785,7 +785,7 @@ const UploadPolicyCard = ({
             className="text-sm mt-2"
             style={{ color: "var(--color-danger)", fontWeight: 500 }}
           >
-            ⚠ {t("agent.uploadPolicyDocumentRequired")}
+            <i className="pi pi-exclamation-triangle mr-1" aria-hidden="true" />{t("agent.uploadPolicyDocumentRequired")}
           </div>
         )}
 

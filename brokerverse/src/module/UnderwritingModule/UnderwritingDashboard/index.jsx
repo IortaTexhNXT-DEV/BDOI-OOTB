@@ -165,50 +165,27 @@ const UnderwritingDashboard = () => {
   };
 
   const priorityBodyTemplate = (rowData) => {
-    const getPriorityColor = (priority) => {
+    const getPrioritySeverity = (priority) => {
       switch (priority) {
         case "high":
-          return "#FF5252";
+          return "danger";
         case "medium":
-          return "#FFC107";
+          return "warning";
         case "low":
-          return "#4CAF50";
+          return "success";
         default:
-          return "#9E9E9E";
+          return "secondary";
       }
     };
-    return (
-      <Badge
-        value={String(rowData.priority || "-").toUpperCase()}
-        style={{ backgroundColor: getPriorityColor(rowData.priority) }}
-      />
-    );
+    return <Tag value={String(rowData.priority || "-")} severity={getPrioritySeverity(rowData.priority)} />;
   };
 
   const riskScoreBodyTemplate = (rowData) => {
     if (rowData.riskScore === undefined || rowData.riskScore === null) return "-";
-    const getScoreColor = (score) => {
-      if (score >= 80) return "#F44336";
-      if (score >= 60) return "#FF9800";
-      if (score >= 40) return "#FFC107";
-      return "#4CAF50";
-    };
     return (
-      <div className="risk-score-cell">
-        <ProgressBar
-          value={rowData.riskScore}
-          showValue={false}
-          style={{ height: "6px" }}
-          color={getScoreColor(rowData.riskScore)}
-        />
-        <span
-          style={{
-            color: getScoreColor(rowData.riskScore),
-            fontWeight: "bold",
-          }}
-        >
-          {rowData.riskScore}
-        </span>
+      <div className="bv-meter">
+        <ProgressBar value={rowData.riskScore} showValue={false} />
+        <span className="bv-meter__value">{`${rowData.riskScore} of 100`}</span>
       </div>
     );
   };

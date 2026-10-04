@@ -478,6 +478,7 @@ const DetailsJournalVocture = () => {
           <Button
             label={t("common.reject")}
             className="save__add__btn__JV"
+            outlined
             onClick={() => setRejectVisible(true)}
             disabled={actionLoading}
           />

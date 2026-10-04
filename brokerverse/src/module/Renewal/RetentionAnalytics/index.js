@@ -13,7 +13,6 @@ import { Column } from "primereact/column";
 import { TabView, TabPanel } from "primereact/tabview";
 import { Tag } from "primereact/tag";
 import { ProgressBar } from "primereact/progressbar";
-import { Knob } from "primereact/knob";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat } from "../../../utility/dateFormat";
@@ -108,7 +107,7 @@ const RetentionAnalytics = () => {
         {
           label: 'Renewal Rate (%)',
           data: analyticsData.trends?.monthly?.map(item => item.rate) || [],
-          fill: true,
+          fill: false,
           backgroundColor: `${primaryColor}20`,
           borderColor: primaryColor,
           borderWidth: 2,
@@ -292,18 +291,8 @@ const RetentionAnalytics = () => {
 
 
   const agentRankingTemplate = (rowData) => {
-    const getRankIcon = (rank) => {
-      switch (rank) {
-        case 1: return '🥇';
-        case 2: return '🥈';
-        case 3: return '🥉';
-        default: return rank;
-      }
-    };
-
     return (
       <div className="rank-cell">
-        <span className="rank-icon">{getRankIcon(rowData.ranking)}</span>
         <span className="rank-number">#{rowData.ranking}</span>
       </div>
     );
@@ -311,9 +300,9 @@ const RetentionAnalytics = () => {
 
   const renewalRateTemplate = (rowData) => {
     return (
-      <div className="rate-cell">
-        <ProgressBar value={progressValue(rowData.renewalRate)} showValue={false} style={{ width: '80px', height: '8px' }} />
-        <span>{formatPercentage(rowData.renewalRate)}</span>
+      <div className="bv-meter">
+        <ProgressBar value={progressValue(rowData.renewalRate)} showValue={false} />
+        <span className="bv-meter__value">{formatPercentage(rowData.renewalRate)}</span>
       </div>
     );
   };
@@ -416,18 +405,13 @@ const RetentionAnalytics = () => {
         <div className="kpi-cards">
           <Card className="kpi-card primary">
             <div className="kpi-content">
-              <div className="kpi-visual">
-                <Knob
-                  value={progressValue(analyticsData.overall?.renewalRate)}
-                  size={80}
-                  readOnly
-                  valueColor="#3B82F6"
-                  rangeColor="#E5E7EB"
-                />
-              </div>
               <div className="kpi-info">
                 <span className="kpi-label">Overall Renewal Rate</span>
                 <span className="kpi-value">{formatPercentage(analyticsData.overall?.renewalRate)}</span>
+                <div className="bv-meter">
+                  <ProgressBar value={progressValue(analyticsData.overall?.renewalRate)} showValue={false} />
+                  <span className="bv-meter__value">{formatPercentage(analyticsData.overall?.renewalRate)}</span>
+                </div>
                 <span className="kpi-change">{`${analyticsData.overall?.renewed ?? 0} renewed, ${analyticsData.overall?.lapsed ?? 0} lapsed`}</span>
               </div>
             </div>
@@ -435,18 +419,13 @@ const RetentionAnalytics = () => {
 
           <Card className="kpi-card success">
             <div className="kpi-content">
-              <div className="kpi-visual">
-                <Knob
-                  value={progressValue(analyticsData.overall?.premiumRetention)}
-                  size={80}
-                  readOnly
-                  valueColor="#10B981"
-                  rangeColor="#E5E7EB"
-                />
-              </div>
               <div className="kpi-info">
                 <span className="kpi-label">Premium Retention</span>
                 <span className="kpi-value">{formatPercentage(analyticsData.overall?.premiumRetention)}</span>
+                <div className="bv-meter">
+                  <ProgressBar value={progressValue(analyticsData.overall?.premiumRetention)} showValue={false} />
+                  <span className="bv-meter__value">{formatPercentage(analyticsData.overall?.premiumRetention)}</span>
+                </div>
                 <span className="kpi-change">{`${analyticsData.overall?.open ?? 0} still open`}</span>
               </div>
             </div>
@@ -454,12 +433,6 @@ const RetentionAnalytics = () => {
 
           <Card className="kpi-card warning">
             <div className="kpi-content">
-              <div className="kpi-visual">
-                <div className="cycle-time-visual">
-                  <i className="pi pi-clock"></i>
-                  <span className="cycle-days">{analyticsData.overall?.avgCycleTime ?? 0}</span>
-                </div>
-              </div>
               <div className="kpi-info">
                 <span className="kpi-label">Avg Cycle Time</span>
                 <span className="kpi-value">{formatWithUnit(analyticsData.overall?.avgCycleTime ?? 0, "days")}</span>
@@ -538,7 +511,10 @@ const RetentionAnalytics = () => {
                         <div className="product-premium">
                           <span>Avg Premium: {formatCurrency(product.avgPremium)}</span>
                         </div>
-                        <ProgressBar value={progressValue(product.renewalRate)} showValue={false} style={{ height: '6px' }} />
+                        <div className="bv-meter">
+                          <ProgressBar value={progressValue(product.renewalRate)} showValue={false} />
+                          <span className="bv-meter__value">{formatPercentage(product.renewalRate)}</span>
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -634,8 +610,10 @@ const RetentionAnalytics = () => {
                           <span>{ind.label}</span>
                           <strong>{ind.count}</strong>
                         </div>
-                        <ProgressBar value={ind.pct} showValue={false} className="risk-bar" />
-                        <span className="indicator-text">{t("renewal.shareOfOpen", { pct: ind.pct })}</span>
+                        <div className="bv-meter">
+                          <ProgressBar value={progressValue(ind.pct)} showValue={false} />
+                          <span className="bv-meter__value">{t("renewal.shareOfOpen", { pct: ind.pct })}</span>
+                        </div>
                       </div>
                     ))}
                   </div>

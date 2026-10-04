@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .overall__quotecomparision__view__container {
   .header_title {
     color: #111927;
@@ -199,8 +200,8 @@
 
   // Comparison insights card
   .comparison-insights-card {
-    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-    border: 2px solid #3b82f6 !important;
+    background: $brand-blue-050;
+    border: 1px solid $color-border !important;
 
     .comparison-insights-header {
       display: flex;

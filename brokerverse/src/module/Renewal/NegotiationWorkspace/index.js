@@ -402,7 +402,7 @@ const NegotiationWorkspace = () => {
         case 'Counter Offer': return 'orange';
         case 'Competitor Quote': return 'red';
         case 'Revised Offer': return 'purple';
-        case 'Approval Request': return 'pink';
+        case 'Approval Request': return 'info';
         case 'Communication': return 'cyan';
         default: return 'gray';
       }
