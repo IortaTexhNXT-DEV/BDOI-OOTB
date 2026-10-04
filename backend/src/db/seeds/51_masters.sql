@@ -179,6 +179,8 @@ INSERT INTO master_records(type_code, code, name, data, status, created_by) SELE
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$department$s$ AND code = $s$IT$s$);
 INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$department$s$, $s$RI$s$, $s$Reinsurance$s$, $j${"DepartmentCode":"RI","DepartmentName":"Reinsurance","Description":"Reinsurance department","BranchCode":"HO"}$j$, 'active', 'seed'
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$department$s$ AND code = $s$RI$s$);
+INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$department$s$, $s$CMP$s$, $s$Compliance$s$, $j${"DepartmentCode":"CMP","DepartmentName":"Compliance","Description":"Compliance department (AML/CFT, Insurance Commission and data privacy)","BranchCode":"HO"}$j$, 'active', 'seed'
+WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$department$s$ AND code = $s$CMP$s$);
 INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$line-of-business$s$, $s$MOTOR$s$, $s$Motor$s$, $j${"lineofBusinessCode":"MOTOR","LOBName":"Motor","LOBDescription":"Private and commercial motor vehicles, CTPL"}$j$, 'active', 'seed'
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$line-of-business$s$ AND code = $s$MOTOR$s$);
 INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$line-of-business$s$, $s$FIRE$s$, $s$Fire$s$, $j${"lineofBusinessCode":"FIRE","LOBName":"Fire","LOBDescription":"Fire and allied perils for residential and commercial property"}$j$, 'active', 'seed'
@@ -265,6 +267,8 @@ INSERT INTO master_records(type_code, code, name, data, status, created_by) SELE
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$designation$s$ AND code = $s$DSG-AO$s$);
 INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$designation$s$, $s$DSG-AM$s$, $s$Accounting Manager$s$, $j${"designationCode":"DSG-AM","designationName":"Accounting Manager","designationDescription":"Accounting Manager","departmentCode":"FIN","level":2,"reportingtoLevel":3}$j$, 'active', 'seed'
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$designation$s$ AND code = $s$DSG-AM$s$);
+INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$designation$s$, $s$DSG-CPO$s$, $s$Compliance Officer$s$, $j${"designationCode":"DSG-CPO","designationName":"Compliance Officer","designationDescription":"Compliance Officer (AML/CFT, Insurance Commission and data privacy registers)","departmentCode":"CMP","level":3,"reportingtoLevel":4}$j$, 'active', 'seed'
+WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$designation$s$ AND code = $s$DSG-CPO$s$);
 INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$account-category$s$, $s$AC-ASSET$s$, $s$Asset$s$, $j${"categoryCode":"AC-ASSET","categoryName":"Asset","description":"Asset accounts"}$j$, 'active', 'seed'
 WHERE NOT EXISTS (SELECT 1 FROM master_records WHERE type_code = $s$account-category$s$ AND code = $s$AC-ASSET$s$);
 INSERT INTO master_records(type_code, code, name, data, status, created_by) SELECT $s$account-category$s$, $s$AC-LIAB$s$, $s$Liability$s$, $j${"categoryCode":"AC-LIAB","categoryName":"Liability","description":"Liability accounts"}$j$, 'active', 'seed'

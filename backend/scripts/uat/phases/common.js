@@ -5,7 +5,7 @@ import { addDays, dateBetween, minDate } from '../dates.js';
 
 // a 1 x 1 PNG (ID card scans, vehicle photos) and a small PDF (signed forms, policy documents)
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
-const pdf = (title) => Buffer.from(`%PDF-1.4\n% ${title}\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n`);
+export const pdf = (title) => Buffer.from(`%PDF-1.4\n% ${title}\n1 0 obj << /Type /Catalog >> endobj\ntrailer << /Root 1 0 R >>\n%%EOF\n`);
 
 export const tin = (rnd) => `${rnd.digits(3)}-${rnd.digits(3)}-${rnd.digits(3)}-000`;
 export const mobile = (rnd) => `09${rnd.pick(['17', '18', '19', '20', '27', '28', '39', '47', '55', '66', '77', '95', '98'])}${rnd.digits(7)}`;

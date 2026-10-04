@@ -215,12 +215,23 @@ export function payout(program, achieved, target) {
 // ---------------- calculations ----------------
 
 const MONTHS = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
-/** Period from 'YYYY-MM', a date or a label such as 'September 2026' -> { label, from, to }. */
+/**
+ * Period from 'YYYY-MM', a date or a label such as 'September 2026' -> { label, from, to }. A quarter or half-year
+ * key of a result ('2026-Q3', '2026-H1': quarterly and semi-annual programs) gives its months ('July to September 2026').
+ */
 export function parsePeriod(v, fromOverride, toOverride) {
   if (fromOverride && toOverride) return { label: String(v || `${fromOverride} to ${toOverride}`), from: isoDate(fromOverride), to: isoDate(toOverride) };
   let d = null;
   const s = String(v || '').trim();
   const named = s.match(/^([A-Za-z]+)\s+(\d{4})$/);
+  const span = s.match(/^(\d{4})-([QH])([1-4])$/i);
+  if (span && (span[2].toUpperCase() === 'Q' || span[3] <= '2')) {
+    const months = span[2].toUpperCase() === 'Q' ? 3 : 6;
+    const start = new Date(Date.UTC(Number(span[1]), (Number(span[3]) - 1) * months, 1));
+    const end = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + months, 0));
+    const name = (x) => x.toLocaleString('en-US', { month: 'long', timeZone: 'UTC' });
+    return { label: `${name(start)} to ${name(end)} ${span[1]}`, from: start.toISOString().slice(0, 10), to: end.toISOString().slice(0, 10) };
+  }
   if (/^\d{4}-\d{2}$/.test(s)) d = new Date(`${s}-01T00:00:00Z`);
   else if (named) {
     const m = MONTHS.findIndex((x) => x.startsWith(named[1].slice(0, 3).toLowerCase()));

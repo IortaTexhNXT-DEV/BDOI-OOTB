@@ -18,9 +18,9 @@ import { sendQueuedEmails, queueEmail } from '../src/lib/mailer.js';
 import {
   ALLOW_LIST, CATALOGUE, PERSONAL_NAME_RE, RULES, TABLE_ACTIONS, allowReason, catalogueEntry, jsonKeyRule,
 } from '../scripts/lib/pii-catalogue.js';
-import { Masker, isMaskedMobile } from '../scripts/lib/pseudonyms.js';
+import { MOBILE_RE, Masker, isMaskedMobile } from '../scripts/lib/pseudonyms.js';
 import {
-  MaskRefused, databaseIdentity, main, maskData, maskStorage, parseArgs, registerProduction, verifyMasked,
+  MaskRefused, databaseIdentity, main, maskData, maskStorage, parseArgs, planColumns, registerProduction, tableColumns, verifyMasked,
 } from '../scripts/mask-data.js';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -183,6 +183,14 @@ describe('personal data catalogue', () => {
     expect(gaps, 'add to CATALOGUE or ALLOW_LIST of scripts/lib/pii-catalogue.js').toEqual([]);
   });
 
+  it('never sweeps primary or foreign key columns (a name token inside an id such as policies.renewed_from must stay)', async () => {
+    const cols = await tableColumns(pool);
+    expect(cols.get('policies').find((c) => c.name === 'renewed_from')).toMatchObject({ key: true });
+    expect(planColumns('policies', cols.get('policies')).find((p) => p.name === 'renewed_from')).toBeUndefined();
+    const swept = [];
+    for (const [table, columns] of cols) for (const p of planColumns(table, columns)) if (p.fallback === 'sweep' && p.key) swept.push(`${table}.${p.name}`);
+    expect(swept).toEqual([]);
+  });
   it('reads JSON keys by their name', () => {
     expect(jsonKeyRule('firstName')).toBe('firstName');
     expect(jsonKeyRule('LastName')).toBe('lastName');
@@ -206,6 +214,18 @@ describe('personal data catalogue', () => {
 
 describe('pseudonyms', () => {
   const m = new Masker({ salt: SALT, referenceDate: new Date('2026-10-04T00:00:00Z'), fileFolders: ['id-cards'] });
+  it('masks the mobile number an SMS or Viber message was sent to (recipient fields hold e-mail addresses or mobile numbers)', () => {
+    const sms = m.emailList('+639470986080');
+    expect(sms).not.toBe('+639470986080');
+    expect(isMaskedMobile(sms)).toBe(true);
+    expect(m.emailList('juan@mail.ph, 0917 123 4567')).toMatch(/^user[0-9a-f]{12}@example\.test, 0900 \d{3} \d{4}$/);
+    expect(m.emailList(sms)).toBe(sms);
+  });
+  it('leaves a digit run inside an identifier alone (pol_0991234567ab is not a mobile number)', () => {
+    const id = 'pol_0991234567ab';
+    expect(m.scrub(`policy ${id} of 0917 123 4567`)).toMatch(new RegExp(`^policy ${id} of 0900 \\d{3} \\d{4}$`));
+    expect(`${id} renewed_from ${id}`.match(MOBILE_RE)).toBeNull();
+  });
   it('are deterministic, keyed by the salt and recognisable', () => {
     expect(m.email('Juan@Real.ph')).toBe(m.email('juan@real.ph'));
     expect(m.email('juan@real.ph')).toMatch(/^user[0-9a-f]{12}@example\.test$/);

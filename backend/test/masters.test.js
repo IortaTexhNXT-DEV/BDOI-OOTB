@@ -25,6 +25,14 @@ describe('masters catalogue', () => {
     const fin = await ctx.api('get', '/masters?category=remittance');
     expect(fin.body.data).toHaveLength(16);
   });
+  it('delivers a designation in the Designation master for every broker role, the compliance officer included', async () => {
+    const rows = (await ctx.api('get', '/masters/designation?perPage=100')).body.data;
+    const names = rows.map((r) => r.designationName);
+    for (const d of ['System Administrator', 'Account Executive', 'Placement Officer', 'Client Service Officer', 'Claims Officer', 'Accounting Officer', 'Accounting Manager', 'Compliance Officer']) expect(names).toContain(d);
+    expect(rows.find((r) => r.designationName === 'Compliance Officer')).toMatchObject({ designationCode: 'DSG-CPO', departmentCode: 'CMP' });
+    const depts = (await ctx.api('get', '/masters/department?perPage=100')).body.data.map((r) => r.DepartmentCode);
+    expect(depts).toContain('CMP');
+  });
 });
 
 describe('signatories master (order summary Authorized Signature)', () => {
