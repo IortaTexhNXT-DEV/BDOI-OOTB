@@ -43,6 +43,9 @@ export const TemplateCell = ({ row }) => {
     <div className="pc-cell-stack">
       <span>{templateText(row)}</span>
       {productText(row) && <small className="pc-muted">{productText(row)}</small>}
+      {row.templateInUse === false && (
+        <Tag className="pc-not-applied" value={t("productConfigurator.notApplied")} severity="secondary" title={t("productConfigurator.notAppliedHelp")} />
+      )}
     </div>
   );
 };

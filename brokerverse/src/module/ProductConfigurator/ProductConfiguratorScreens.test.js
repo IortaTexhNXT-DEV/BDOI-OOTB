@@ -71,14 +71,15 @@ describe("Acceptance Rules screen", () => {
 
   it("pages only when there is more than one page", async () => {
     productConfiguratorService.listComponents.mockResolvedValue(Array.from({ length: 5 }, (_, i) => rule(i + 1)));
-    const { container, unmount } = renderScreen(<UnderwritingRules />);
+    const { unmount } = renderScreen(<UnderwritingRules />);
     await screen.findByText("R5");
-    expect(container.querySelector(".p-paginator")).toBeNull();
+    expect(screen.queryByRole("button", { name: /next page/i })).not.toBeInTheDocument();
     unmount();
     productConfiguratorService.listComponents.mockResolvedValue(Array.from({ length: 25 }, (_, i) => rule(i + 1)));
-    const second = renderScreen(<UnderwritingRules />);
+    renderScreen(<UnderwritingRules />);
     await screen.findByText("R1");
-    expect(second.container.querySelector(".p-paginator")).not.toBeNull();
+    expect(screen.getByRole("button", { name: /next page/i })).toBeInTheDocument();
+    expect(screen.queryByText("R21")).not.toBeInTheDocument();
   });
 
   it("filters by insurer and status through the API", async () => {

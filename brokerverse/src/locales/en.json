@@ -4153,13 +4153,12 @@
     "error": "Error",
     "failedToLoad": "Failed to load market mappings",
     "failedToSave": "Failed to save mapping",
-    "agreedCommission": "Agreed commission % (reference)",
+    "agreedCommission": "Agreed comm. % (ref.)",
     "commissionNote": "The agreed commission, override and profit share are kept for reference; commission on policies is taken from the Commission Rate Matrix.",
     "editMapping": "Edit market mapping",
     "valid": "Valid",
     "validFrom": "Valid from",
     "validTo": "Valid to",
-    "openEnded": "Open-ended",
     "profitShare": "Profit share %",
     "specialTerms": "Special terms",
     "policies": "policies",
@@ -7380,7 +7379,9 @@
     "error": "Error",
     "fieldRequired": "{{field}} is required",
     "activated": "Activated",
-    "deactivated": "Deactivated"
+    "deactivated": "Deactivated",
+    "notApplied": "Template not in use",
+    "notAppliedHelp": "Another template is in use for this product (Product Templates > In use): this entry is not applied to quotations until its template is the one in use."
   },
   "customerResponse": {
     "waiting": "Waiting for customer approval",

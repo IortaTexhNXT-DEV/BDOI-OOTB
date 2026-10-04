@@ -482,6 +482,7 @@ const QuoteDetailView = ({ action }) => {
               }`}
         </div>
       </div>
+      <UnderwritingReferralPanel quotation={quotationData} onDecided={loadQuotation} />
       <Card className="mt-4">
         <TabView
           activeIndex={activeTab}
@@ -1223,7 +1224,6 @@ const QuoteDetailView = ({ action }) => {
           </TabPanel>
         </TabView>
       </Card>
-      {activeTab === 0 && <UnderwritingReferralPanel quotation={quotationData} onDecided={loadQuotation} />}
       {activeTab === 0 && (
         <div className="button_component">
           <Button

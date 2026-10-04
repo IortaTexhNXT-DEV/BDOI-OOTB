@@ -328,7 +328,7 @@ function componentValues(kind, body, partial) {
   for (const [k, v] of Object.entries(body)) {
     // identity, workflow and the read-only fields the lists add (template / product names, production, layout flag)
     if (['id', 'productId', 'templateId', 'templateCode', 'status', 'createdAt', 'updatedAt', 'createdBy', 'templateName', 'lineOfBusiness', 'templateStatus',
-      'productMasterCode', 'productMasterName', 'hasLayout', 'ytdPremium', 'ytdPolicies', 'targetAchievedPercent', 'authorityRoleName'].includes(k)) continue;
+      'productMasterCode', 'productMasterName', 'templateInUse', 'hasLayout', 'ytdPremium', 'ytdPolicies', 'targetAchievedPercent', 'authorityRoleName'].includes(k)) continue;
     data[k] = v;
   }
   if (!partial) for (const f of def.required) if (data[f] === undefined || data[f] === null || String(data[f]).trim() === '') errors.push({ path: f, message: `${f} is required` });
@@ -403,6 +403,14 @@ export async function listComponents(kind, qs, pg) {
     ${base} WHERE ${where} ORDER BY t.name NULLS FIRST, c.sort_order, c.id LIMIT ${p.add(pg.limit)} OFFSET ${p.add(pg.offset)}`, p.values);
   const out = rows.map((r) => ({ ...componentOut(r), templateName: r.template_name || null, lineOfBusiness: r.line_of_business || null, templateStatus: r.template_status || null,
     productMasterCode: r.product_code || null, productMasterName: r.product_name || null }));
+  // whether the component's template is the one the business flow applies for its product / line
+  const inUse = new Map();
+  for (const tid of [...new Set(rows.map((r) => r.template_id).filter(Boolean))]) {
+    const t = await one('SELECT id, product_id, line_of_business, status FROM product_templates WHERE id = $1', [tid]);
+    const g = t?.status === 'Active' ? await governingTemplate({ productId: t.product_id, lob: t.line_of_business }) : null;
+    inUse.set(tid, Boolean(g && g.id === tid));
+  }
+  for (const [i, r] of rows.entries()) out[i].templateInUse = r.template_id ? inUse.get(r.template_id) : null;
   if (kind === 'market-mappings') await withProduction(out);
   if (kind === 'documents') for (const d of out) { d.hasLayout = Boolean(d.layout); delete d.layout; }
   return { total, rows: out };

@@ -270,13 +270,16 @@ function outcomeOf(rule, facts) {
   const met = test(c, facts);
   const base = { ruleCode: rule.ruleCode, ruleName: rule.ruleName, type: rule.type, action: rule.action, condition: describeCondition(c) || rule.condition || '',
     insurerId: rule.insurerId || null, insurerName: rule.insurerName || null, authorityRole: rule.authorityRole || null, message: rule.message || rule.ruleName };
-  if (met === null) return { ...base, outcome: 'not-evaluated', message: `${RISK_FIELDS[c?.field]?.label || 'The tested field'} is not on the record` };
+  if (met === null) {
+    const missing = !c ? null : facts[c.field] === undefined ? c.field : c.valueField;
+    return { ...base, outcome: 'not-evaluated', message: `${RISK_FIELDS[missing]?.label || 'The tested field'} is not on the record` };
+  }
   if (rule.action === 'Auto-Accept') {
     if (met) return { ...base, outcome: 'accepted' };
     const otherwise = rule.otherwiseAction || 'Refer';
     return { ...base, outcome: otherwise === 'Decline' ? 'declined' : 'referred', message: rule.otherwiseMessage || `${rule.ruleName}: not met (${base.condition})` };
   }
-  if (!met) return { ...base, outcome: 'passed' };
+  if (!met) return { ...base, outcome: 'passed', message: '' };
   if (rule.action === 'Decline') return { ...base, outcome: 'declined' };
   if (rule.action === 'Refer') return { ...base, outcome: 'referred' };
   if (rule.action === 'Apply Loading') return { ...base, outcome: 'loaded', loadingPercent: num(rule.loadingPercent) };

@@ -98,7 +98,7 @@ export function layoutErrors(text, fileName = null) {
     if (text.length > LAYOUT_MAX) errors.push({ path: 'layout', message: `The layout is longer than ${LAYOUT_MAX} characters` });
     const p = placeholders(text);
     if (p.unknown.length) errors.push({ path: 'layout', message: `Unknown merge field(s): ${p.unknown.join(', ')}. Use the merge fields listed in Document Manager > Merge fields` });
-    if (!p.fields.length && !p.blocks.length) errors.push({ path: 'layout', message: 'The layout has no merge field: it would print the same text for every record' });
+    else if (!p.fields.length && !p.blocks.length) errors.push({ path: 'layout', message: 'The layout has no merge field: it would print the same text for every record' });
   }
   return errors;
 }

@@ -198,7 +198,7 @@ describe('acceptance rules on a quotation', () => {
   it('tests a risk against a template from the Acceptance Rules screen', async () => {
     const r = await ctx.api('post', '/product-configurator/underwriting/evaluate').send({ templateCode: 'MOT-003-2025', risk: { modelYear: year - 16, vehicleType: 'private_cars', totalSumInsured: 700000 } });
     expect(r.body.data).toMatchObject({ templateCode: 'MOT-003-2025', decision: 'referred', referredRules: ['VEH_AGE_LIMIT'] });
-    expect(r.body.data.results.find((x) => x.ruleCode === 'SI_VALIDATION').outcome).toBe('not-evaluated');
+    expect(r.body.data.results.find((x) => x.ruleCode === 'SI_VALIDATION')).toMatchObject({ outcome: 'not-evaluated', message: 'Fair market value is not on the record' });
   });
 });
 

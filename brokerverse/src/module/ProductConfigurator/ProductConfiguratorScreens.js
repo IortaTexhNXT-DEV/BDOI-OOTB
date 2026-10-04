@@ -513,7 +513,7 @@ const TestRiskDialog = ({ visible, onHide, templates, insurers, fields }) => {
       {result && (
         <div>
           <p>
-            {t("underwritingRules.decision")}: <StatusTag status={{ accepted: "Accepted", referred: "Pending", declined: "Declined" }[result.decision]} />{" "}
+            {t("underwritingRules.decision")}: <Tag value={t(`underwritingRules.outcomes.${result.decision}`)} severity={{ accepted: "success", referred: "warning", declined: "danger" }[result.decision]} />{" "}
             <span className="pc-muted">{t(`underwritingRules.decisions.${result.decision}`)}</span>
             {result.loadingPercent > 0 && <span> · {t("underwritingRules.outcome.loading", { percent: result.loadingPercent })}</span>}
           </p>
@@ -875,7 +875,6 @@ export const MarketMapping = () => {
         <Column header={t("productConfigurator.templateProduct")} body={templateBody} />
         <Column field="insurerName" header={t("marketMapping.insurer")} sortable />
         <Column field="productCode" header={t("marketMapping.insurerCode")} />
-        <Column header={t("marketMapping.valid")} body={(r) => (r.validFrom || r.validTo ? `${formatDate(r.validFrom)} – ${formatDate(r.validTo)}` : t("marketMapping.openEnded"))} />
         <Column field="commissionRate" header={t("marketMapping.agreedCommission")} body={(r) => (r.commissionRate == null ? "—" : `${r.commissionRate}%`)} />
         <Column field="targetPremium" header={t("marketMapping.target")} body={(r) => (r.targetPremium ? formatCurrency(r.targetPremium) : "—")} />
         <Column header={t("marketMapping.ytdPerformance")} body={(r) => (
