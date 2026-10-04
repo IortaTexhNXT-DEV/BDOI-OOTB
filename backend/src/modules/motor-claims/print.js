@@ -20,7 +20,7 @@ export async function loaPdf(db, claimRef, loaId) {
     sections: [
       { heading: 'Claim', columns: 2, rows: [['Claim no.', file.claimNumber], ['Policy no.', file.policyNumber], ['Insured', file.insuredName || ''], ['Insurer', file.insurerName || ''],
         ['Vehicle', file.vehicle || ''], ['Valid until', formatDate(loa.validUntil, fmt)]].filter(([, v]) => v) },
-      { text: (await getSetting('motor_claims.loa_wording', '')) || '' },
+      { text: (await getSetting('motor_claims.loa_wording')) || '' },
       { heading: 'Approved estimates', table: { columns: [{ key: 'seq', label: 'No.' }, { key: 'kind', label: 'Kind' }, { key: 'ref', label: 'Shop reference' }, { key: 'adjuster', label: 'Approved by adjuster' },
         { key: 'estimate', label: 'Estimate', type: 'amount' }, { key: 'approved', label: 'Approved', type: 'amount' }],
       rows: estimates.map((e) => ({ seq: e.seq, kind: e.kind, ref: e.shopReference || '', adjuster: [e.adjusterName, e.adjusterCompany].filter(Boolean).join(', '), estimate: e.total, approved: e.approvedAmount })) } },

@@ -7,7 +7,7 @@ export async function coverNotePdf(cn) {
   const fmt = await printFormat();
   const d = (v) => (v ? formatDate(v, fmt) : '');
   const money = (v) => `${cn.currency || fmt.currency} ${formatAmount(v, fmt.decimals)}`;
-  const wording = (await getSetting('cover_note.wording', '')) || '';
+  const wording = (await getSetting('cover_note.wording')) || '';
   const company = await companyName();
   const statusNote = cn.status === 'active' ? null : `This cover note is ${cn.status}${cn.policyNumber ? `: policy ${cn.policyNumber} was issued` : ''}.`;
   return renderPdf({
