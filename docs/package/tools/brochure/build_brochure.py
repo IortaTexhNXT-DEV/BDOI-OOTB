@@ -713,7 +713,7 @@ heading(doc, 'A finished product, documented and tested', 15, after=6)
 why = [
     ('Built for Philippine broking', 'CTPL tariff, premium taxes, BIR working papers, IC records and the Data Privacy Act are part of the product, not a project.'),
     ('Tested before you see it', '497 test cases, a 634-test business rule regression on PostgreSQL and a full UAT cycle of 371 business steps from set-up to month-end close.'),
-    ('Documented for your team', 'A 199-page user manual, seven role decks, a reports book, architecture, compliance matrix, data migration, training and support documents.'),
+    ('Documented for your team', 'A 186-page user manual, seven role decks, a reports book, architecture, compliance matrix, data migration, training and support documents.'),
     ('Configuration over code', 'Settings, masters, posting rules and the Product Configurator change the system. Upgrades stay simple because the code is the same for every broker.'),
     ('Accounting that closes', 'Every event posts through a posting rule; maker-checker, period locks, bank reconciliation and month-end checklist give the auditors their trail.'),
     ('Open and portable', 'React, Node.js and PostgreSQL with permissively licensed components; 854 APIs documented in OpenAPI; runs on AWS, Azure or your own servers.'),

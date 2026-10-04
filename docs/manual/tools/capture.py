@@ -12,8 +12,8 @@ Environment:
     API               API base (default http://localhost:8211/api)
     CHROMIUM          Chromium executable (default /opt/pw-browsers/chromium)
     ADMIN_PASSWORD    password of the BrokerVerse administrator (only needed for scenes signed in as BrokerVerse)
-    PERSONA_PASSWORD  password of the role users (bea.admin, maria.sales, jose.uw, ana.cs, carlo.claims,
-                      liza.finance, rosa.acctmgr)
+    PERSONA_PASSWORD  password of the role users (beatriz.lacson, maria.rivera, jose.bernardo, ana.buenaventura, carlo.estrada,
+                      liza.quiambao, teresa.villaroman)
     DATABASE_URL      optional; read-only lookup of the customer approval link for the public approval screen
     STATE_DIR         where sign-in sessions are cached (default /tmp/bv-manual-state); sign-in is rate limited
     TEXT_DIR          optional; the visible text of each captured screen is written here (for writing the manual)
@@ -74,9 +74,9 @@ def login(page, user):
     page.goto(BASE + '/login'); settle(page, 500)
     page.evaluate('() => localStorage.clear()')
     page.goto(BASE + '/login'); settle(page, 800)
-    ins = page.locator('.login__side__screen input')
-    ins.nth(0).fill(user); ins.nth(1).fill(password_for(user))
-    page.get_by_role('button', name=re.compile('login|sign in', re.I)).click()
+    page.fill('#bv-login-user', user)
+    page.fill('#bv-login-password', password_for(user))
+    page.locator('button[type=submit]').click()
     page.wait_for_url(lambda u: '/login' not in u, timeout=30000)
     settle(page, 2000)
 
@@ -108,7 +108,7 @@ _cache = {}
 
 
 def admin_token():
-    state = os.path.join(STATE_DIR, 'bea.admin.json')
+    state = os.path.join(STATE_DIR, 'beatriz.lacson.json')
     if not os.path.exists(state):
         return None
     for origin in json.load(open(state)).get('origins', []):

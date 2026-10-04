@@ -32,9 +32,13 @@ Source format: `#`, `##`, `###` headings (chapters start on a new page); paragra
 
 ## Screenshots
 
-Taken from a system with the sample data (`SEED_SAMPLE_DATA=true`) and one user per role: bea.admin (System
-Administrator), maria.sales, jose.uw (Processing Team), ana.cs (Operations), carlo.claims, liza.finance
-(Accounting) and rosa.acctmgr (Accounting Manager). Before capturing, a few flows were walked through the API so the
+Taken from a system with the sample data (`SEED_SAMPLE_DATA=true`) and one user per role: beatriz.lacson (System
+Administrator), maria.rivera (Sales & Marketing), jose.bernardo (Processing Team), ana.buenaventura (Operations),
+carlo.estrada (Claims), liza.quiambao (Accounting) and teresa.villaroman (Accounting Manager). `capture.py` signs in
+through the current sign-in form (user ID and password fields, **Sign in**) and reads the passwords from
+`ADMIN_PASSWORD` and `PERSONA_PASSWORD` only. Scenes that open a record by its number (for example LD-2026-95015)
+need that record in the data set; the current screenshots of the broker manual are taken separately from
+`docs/package/source/manual-images`. Before capturing, a few flows were walked through the API so the
 screens show real records: offers on BS-2026-90002, Placement Slip PS-2026-00001 confirmed by both insurers and
 issued as the co-insured policy POL-2026-00001, the lead confirmation on PS-2026-90001, month-end close run
 MEC-2026-00001 for 2026-08, a recurring journal, auto-match and reconciliation BRC-2026-00001 on ACC-BDO-001, and

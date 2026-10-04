@@ -167,7 +167,7 @@ The OOTB approach is to configure, not customise. Most broker differences are me
 
 ## How are users trained?
 
-Train-the-trainer for key users, then end-user training per role, using the user manual (199 pages) and the role guides for the seven roles. Training days are included per tier; extra trainer days are PHP 30,000.00.
+Train-the-trainer for key users, then end-user training per role, using the user manual (186 pages) and the role guides for the seven roles. Training days are included per tier; extra trainer days are PHP 30,000.00.
 
 # Support and maintenance
 

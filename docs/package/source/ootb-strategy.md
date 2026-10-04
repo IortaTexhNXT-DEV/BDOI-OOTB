@@ -62,7 +62,7 @@ Five rules follow from that definition:
 | Number series | 61 document number series |
 | Release test | 497 test cases (486 passed, 2 failed, 3 blocked, 6 not run, after the re-test of 03 October 2026); 717 automated business rule tests; a UAT cycle of 371 business steps |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
-| Documentation | User manual of 199 pages, seven role decks, reports book, data dictionary, technical reference |
+| Documentation | User manual of 186 pages, seven role decks, reports book, data dictionary, technical reference |
 
 ## The product boundary
 
