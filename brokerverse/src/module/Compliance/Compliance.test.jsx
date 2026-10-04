@@ -38,13 +38,14 @@ describe("client onboarding checks", () => {
 });
 
 describe("Compliance menu", () => {
-  it("is open to the compliance officer and the administrator, with EDD Reviews for Operations", () => {
+  it("is open to the compliance officer and the administrator; Operations gets EDD Reviews and the IC and NPC registers", () => {
     const items = (roles) => filterMenuForRoles(menuList, roles).find((m) => m.name === "Compliance")?.submenu.map((i) => i.name) || [];
     expect(items(["compliance-officer"])).toEqual(["AML Dashboard", "Client Due Diligence", "EDD Reviews", "KYC Refresh", "Screening Hits", "Screening Lists",
-      "Transaction Alerts", "AML Cases", "AMLC Reports", "AML Settings"]);
-    expect(items(["system-admin"])).toHaveLength(10);
-    expect(items(["operations"])).toEqual(["EDD Reviews"]);
-    expect(items(["sales"])).toEqual([]);
+      "Transaction Alerts", "AML Cases", "AMLC Reports", "AML Settings", "Insurance Commission", "Data Privacy (NPC)"]);
+    // the AML screens plus the Insurance Commission and Data Privacy (NPC) groups of the IC and NPC registers
+    expect(items(["system-admin"])).toHaveLength(12);
+    expect(items(["operations"])).toEqual(["EDD Reviews", "Insurance Commission", "Data Privacy (NPC)"]);
+    expect(items(["sales"])).toEqual(["Insurance Commission"]);
     expect(isPathAllowed("/compliance/aml/clients/cl_1", menuList, ["compliance-officer"])).toBe(true);
     expect(isPathAllowed("/compliance/aml/hits", menuList, ["accounting"])).toBe(false);
   });

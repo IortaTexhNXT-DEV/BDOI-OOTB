@@ -62,7 +62,8 @@ const ROLE_PERMS = {
     'payables:approve'],
   // Compliance Officer (AML/CFT): the Compliance menu with its decisions (approve:aml), client onboarding and KYC, and read
   // access to the policies, claims, receipts and vouchers it reviews
-  'compliance-officer': ['profile', 'aml', 'aml:approve', 'clients', 'leads:read', 'policies:read', 'claims:read', 'receipts:read', 'disbursements:read', 'reports:read', 'notifications'],
+  // the IC registers and reports, the complaints register and the NPC breach register (write:privacy) belong to the same officer
+  'compliance-officer': ['profile', 'aml', 'aml:approve', 'compliance', 'complaints', 'privacy', 'clients', 'leads:read', 'policies:read', 'claims:read', 'receipts:read', 'disbursements:read', 'reports:read', 'notifications'],
 };
 // Distribution, programmes and products (permissions of migrations 0300 to 0308): lead assignment rules and queue,
 // distribution channels, brand-new vehicle programmes, fleet schedules, marine open covers, marketing campaigns.

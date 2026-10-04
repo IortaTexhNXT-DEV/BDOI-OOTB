@@ -904,6 +904,61 @@ export const menuList = [
       { id: 8, name: "AML Cases", path: "/compliance/aml/cases", includes: ["/compliance/aml/cases"] },
       { id: 9, name: "AMLC Reports", path: "/compliance/aml/reports", includes: ["/compliance/aml/reports"] },
       { id: 10, name: "AML Settings", path: "/compliance/aml/settings", includes: ["/compliance/aml/settings"] },
+      // regulatory compliance: Insurance Commission registers and reports, and the NPC breach register
+      {
+        id: 11,
+        name: "Insurance Commission",
+        submenu: [
+          {
+            id: 1,
+            name: "Licence Register",
+            path: "/compliance/licences",
+            includes: ["/compliance/licences"],
+          },
+          {
+            id: 2,
+            name: "Fit and Proper",
+            path: "/compliance/fit-and-proper",
+            includes: ["/compliance/fit-and-proper"],
+          },
+          {
+            id: 3,
+            name: "Insurer Authority",
+            path: "/compliance/insurer-authority",
+            includes: ["/compliance/insurer-authority"],
+          },
+          {
+            id: 4,
+            name: "Complaints",
+            path: "/compliance/complaints",
+            includes: ["/compliance/complaints"],
+          },
+          {
+            id: 5,
+            name: "IC Annual Statement",
+            path: "/compliance/ic-annual-statement",
+            includes: ["/compliance/ic-annual-statement"],
+          },
+          {
+            id: 6,
+            name: "IC Production Report",
+            path: "/compliance/ic-production-report",
+            includes: ["/compliance/ic-production-report"],
+          },
+        ],
+      },
+      {
+        id: 12,
+        name: "Data Privacy (NPC)",
+        submenu: [
+          {
+            id: 1,
+            name: "Breach Register",
+            path: "/compliance/breaches",
+            includes: ["/compliance/breaches"],
+          },
+        ],
+      },
     ],
   },
   {
@@ -1034,67 +1089,6 @@ export const menuList = [
         path: "/reports/builder",
         includes: ["/reports/builder"],
         permissions: ["read:reports"],
-      },
-    ],
-  },
-  {
-    // regulatory compliance: Insurance Commission registers and reports, and the NPC breach register
-    name: "Compliance",
-    icon: "pi pi-verified",
-    submenu: [
-      {
-        id: 1,
-        name: "Insurance Commission",
-        submenu: [
-          {
-            id: 1,
-            name: "Licence Register",
-            path: "/compliance/licences",
-            includes: ["/compliance/licences"],
-          },
-          {
-            id: 2,
-            name: "Fit and Proper",
-            path: "/compliance/fit-and-proper",
-            includes: ["/compliance/fit-and-proper"],
-          },
-          {
-            id: 3,
-            name: "Insurer Authority",
-            path: "/compliance/insurer-authority",
-            includes: ["/compliance/insurer-authority"],
-          },
-          {
-            id: 4,
-            name: "Complaints",
-            path: "/compliance/complaints",
-            includes: ["/compliance/complaints"],
-          },
-          {
-            id: 5,
-            name: "IC Annual Statement",
-            path: "/compliance/ic-annual-statement",
-            includes: ["/compliance/ic-annual-statement"],
-          },
-          {
-            id: 6,
-            name: "IC Production Report",
-            path: "/compliance/ic-production-report",
-            includes: ["/compliance/ic-production-report"],
-          },
-        ],
-      },
-      {
-        id: 2,
-        name: "Data Privacy (NPC)",
-        submenu: [
-          {
-            id: 1,
-            name: "Breach Register",
-            path: "/compliance/breaches",
-            includes: ["/compliance/breaches"],
-          },
-        ],
       },
     ],
   },

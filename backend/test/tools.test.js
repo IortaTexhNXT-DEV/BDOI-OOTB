@@ -14,7 +14,7 @@ let tmp;
 beforeAll(() => { tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'bv-tools-')); });
 afterAll(() => fs.rmSync(tmp, { recursive: true, force: true }));
 
-const unzipText = (file, entry) => execFileSync('unzip', ['-p', file, entry]).toString('utf8');
+const unzipText = (file, entry) => execFileSync('unzip', ['-p', file, entry], { maxBuffer: 64 * 1024 * 1024 }).toString('utf8');
 /** Parse a worksheet into arrays of cell texts (resolving shared strings). */
 function readSheet(file, n) {
   const sst = [...unzipText(file, 'xl/sharedStrings.xml').matchAll(/<si><t[^>]*>([\s\S]*?)<\/t><\/si>/g)].map((m) => m[1]);
@@ -31,7 +31,7 @@ describe('file writers', () => {
       { name: 'Data/1', columns: [{ key: 'a', header: 'Name' }, { key: 'b', header: 'Amount', type: 'money' }, { key: 'c', header: 'Date', type: 'date' }], rows: [{ a: 'Tom & "Jerry" <x>', b: 1234.5, c: '2026-01-31' }, { a: 'Ana\u0001', b: null, c: 'n/a' }] },
       { name: 'Data/1', columns: [{ header: 'X' }], rows: [['y']], autoFilter: false },
     ] }));
-    expect(execFileSync('unzip', ['-t', file]).toString()).toContain('No errors detected');
+    expect(execFileSync('unzip', ['-t', file], { maxBuffer: 64 * 1024 * 1024 }).toString()).toContain('No errors detected');
     const rows = readSheet(file, 1);
     expect(rows[0]).toEqual(['Name', 'Amount', 'Date']);
     expect(rows[1]).toEqual(['Tom &amp; &quot;Jerry&quot; &lt;x&gt;', 1234.5, 46053]);
@@ -117,7 +117,7 @@ describe('API documentation export', () => {
   });
   it('produces a real xlsx: API List, By Screen and Modules sheets, plus a CSV copy', () => {
     const file = path.join(out, 'BrokerVerse_API_Touchpoints.xlsx');
-    expect(execFileSync('unzip', ['-t', file]).toString()).toContain('No errors detected');
+    expect(execFileSync('unzip', ['-t', file], { maxBuffer: 64 * 1024 * 1024 }).toString()).toContain('No errors detected');
     const wb = unzipText(file, 'xl/workbook.xml');
     expect([...wb.matchAll(/<sheet name="([^"]+)"/g)].map((m) => m[1]).slice(0, 3)).toEqual(['API List', 'By Screen', 'Modules']);
     const list = readSheet(file, 1);

@@ -101,8 +101,9 @@ export const roleMenuPermissions = {
     reports: ["All Reports", "Operational Reports", "Report Builder"],
     // data subject requests and the consent register (read:privacy / write:privacy); distribution channels (read:channels)
     master: ["Data Privacy", "Insurance Management > Distribution Channels"],
-    // prepares the EDD reviews of High-risk clients (approval: compliance officer, approve:aml)
-    compliance: ["EDD Reviews"],
+    // prepares the EDD reviews of High-risk clients (approval: compliance officer, approve:aml); the Insurance Commission
+    // registers and complaints (read/write:compliance, read/write:complaints) and the breach register (write:privacy)
+    compliance: ["EDD Reviews", "Insurance Commission", "Data Privacy (NPC)"],
   },
   // Compliance Officer (AML/CFT): the Compliance menu (read:aml, write:aml, approve:aml), client onboarding and the client,
   // policy and claim records it reviews
