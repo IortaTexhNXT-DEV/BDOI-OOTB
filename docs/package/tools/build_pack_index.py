@@ -69,9 +69,9 @@ DOCS = [
     ('04_Onboarding_and_Go_Live', 'BrokerVerse_Privacy_Impact_Assessment_and_Records_of_Processing_Templates', 'docx, pdf', 'PIA and records of processing pre-filled for the broker DPO', [D, M], True, [IMP, GO]),
     # ---------------------------------------------------------------- 05_Delivery
     ('05_Delivery', 'BrokerVerse_Implementation_Approach_and_Plan', 'docx, pdf', 'Method, phases, plans by size, roles, governance and risks', [D, M], True, [PRE, IMP]),
-    ('05_Delivery', 'BrokerVerse_Implementation_Plan', 'xlsx', 'Gantt plans for the three sizes and the RACI matrix', [D], True, [IMP]),
+    ('05_Delivery', 'BrokerVerse_Implementation_Plan', 'xlsx', 'Task-level plans for the four sizes with owners, predecessors, float and critical path; milestones; RACI', [D], True, [IMP]),
     ('05_Delivery', 'BrokerVerse_Fit_Gap_Register', 'xlsx', 'Register of requirements classed Fit, Configure, Procedure or Gap', [D, M], True, [IMP]),
-    ('05_Delivery', 'BrokerVerse_RAID_Log_Template', 'xlsx', 'Risks, assumptions, issues and dependencies with scoring and summary', [D, M], True, [IMP, GO]),
+    ('05_Delivery', 'BrokerVerse_RAID_Log_Template', 'xlsx', 'Risks, assumptions, issues and dependencies, pre-filled for an implementation, with scoring and summary', [D, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Project_Status_Report_Template', 'docx, pdf', 'Weekly or fortnightly status and steering committee report', [D, M], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Training_Plan', 'docx, pdf', 'Training and change management by role', [D], True, [IMP]),
     ('05_Delivery', 'BrokerVerse_User_Manual', 'docx, pdf', 'User manual for the seven roles', [D, P], True, [IMP, GO, SUP]),
@@ -82,6 +82,7 @@ DOCS = [
     ('05_Delivery', 'BrokerVerse_Test_Cases', 'xlsx', 'Release test cases, traceability and defects', [D, V], True, [IMP, GO]),
     ('05_Delivery', 'BrokerVerse_Test_Summary_Report', 'docx, pdf', 'Results of the release test', [D, V, M], True, [PRE, GO]),
     ('05_Delivery', 'BrokerVerse_Philippine_Regulatory_Compliance_Matrix', 'docx, pdf', 'How the product supports IC, BIR, premium tax, CTPL, DPA and AMLA obligations', [S, D, M], True, [PRE, IMP]),
+    ('05_Delivery', 'BrokerVerse_Dependency_Map_and_Critical_Path', 'docx, pdf', 'Client inputs, partner certifications, regulatory registrations and environments the implementation depends on; critical path and lead times by size; what slips when a dependency slips', [D, M], True, [PRE, IMP, GO]),
     # ---------------------------------------------------------------- 06_Support
     ('06_Support', 'BrokerVerse_Production_Support_Approach_and_Standards', 'docx, pdf', 'Support model, severities, change and release management, monitoring', [P, M], True, [CON, GO, SUP]),
     ('06_Support', 'BrokerVerse_Business_Continuity_and_Disaster_Recovery_Plan', 'docx, pdf', 'Backups, recovery objectives, scenarios and DR tests', [P, M], True, [CON, SUP]),

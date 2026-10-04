@@ -1,6 +1,8 @@
 """Builds the project control workbooks of the implementation:
 
-    python3 build_project_templates_xlsx.py ../05_Delivery
+    python3 build_project_templates_xlsx.py ../05_Delivery            both workbooks
+    python3 build_project_templates_xlsx.py ../05_Delivery raid       only the RAID log
+    python3 build_project_templates_xlsx.py ../05_Delivery fitgap     only the fit-gap register
 
   BrokerVerse_Fit_Gap_Register.xlsx   Instructions, Register, Lists
   BrokerVerse_RAID_Log_Template.xlsx  Instructions, Summary, Risks, Assumptions, Issues, Dependencies, Lists
@@ -161,9 +163,12 @@ def raid():
     ws.title = 'Instructions'
     instructions(ws, 'BrokerVerse RAID Log',
                  'One shared log of risks, assumptions, issues and dependencies, kept by the iorta TechNXT project manager '
-                 'and reviewed in every weekly status meeting. Items rated High go to the steering committee. The risks '
-                 'and dependencies pre-filled from the Implementation Approach and Plan are typical of a BrokerVerse '
-                 'implementation: keep, change or close them at mobilisation.',
+                 'and reviewed in every weekly status meeting. Items rated High go to the steering committee. The risks, '
+                 'assumptions and dependencies pre-filled from the Implementation Approach and Plan and the Dependency Map '
+                 'and Critical Path (version 1.1, 04 October 2026) are typical of a BrokerVerse implementation: partner '
+                 'certification, screening list licences, tax adviser confirmations, regulatory registrations, encryption key '
+                 'custody and the data quality of the migration. Keep, change or close them at mobilisation, and replace '
+                 '[owner] with a named person.',
                  [
                      ('ID', 'R-nnn, A-nnn, I-nnn or D-nnn with a running number. Never reuse an ID.'),
                      ('Probability (risks)', '1 Rare (under 10%), 2 Unlikely (10 to 30%), 3 Possible (30 to 50%), 4 Likely (50 to 80%), 5 Almost certain (over 80%).'),
@@ -171,14 +176,15 @@ def raid():
                      ('Score and rating', 'Score = probability x impact. High: 15 to 25. Medium: 8 to 14. Low: 1 to 7. Calculated on the sheet; do not type over the formula.'),
                      ('Issue priority', 'An issue has happened. Priority follows impact: 4 or 5 High, 3 Medium, 1 or 2 Low.'),
                      ('Assumptions', 'Each assumption has a date by which it must be validated; an assumption found false becomes an issue or a risk.'),
-                     ('Dependencies', 'What the project needs from someone outside the team (the broker, an insurer, a bank, the hosting provider), by when, and its state.'),
+                     ('Dependencies', 'What the project needs from someone outside the team (the broker, a regulator, an insurer, a bank, a provider, the hosting provider), by when (W = week from kick-off, for Small / Medium / Large / Enterprise), its float to go-live in working days, what happens if it is late, and its state. A float of 0 means the go-live moves day for day.'),
+                     ('Escalation', 'A dependency on the critical path late by 3 working days, or any dependency late by more than its float, goes to the steering committee.'),
                      ('Status', 'Open, In progress, Closed. Fill the closure date and keep closed items on the sheet.'),
                      ('Summary', 'The Summary sheet counts open items by type and rating for the status report and the steering committee.'),
                  ])
     refs_data = {
         'Status': ['Open', 'In progress', 'Closed'],
         'Score': ['1', '2', '3', '4', '5'],
-        'Category': ['Scope', 'Schedule', 'Data', 'People', 'Technical', 'Integration', 'Compliance', 'Commercial', 'Hosting'],
+        'Category': ['Scope', 'Schedule', 'Data', 'People', 'Technical', 'Integration', 'Partner', 'Compliance', 'Regulatory', 'Security', 'Commercial', 'Hosting'],
         'Priority': ['High', 'Medium', 'Low'],
         'Dependency state': ['On track', 'At risk', 'Late', 'Delivered'],
     }
@@ -191,24 +197,54 @@ def raid():
           'Mitigation', 'Due date', 'Status', 'Raised on', 'Closed on']
     rw = [8, 38, 28, 30, 13, 18, 11, 9, 8, 10, 46, 12, 12, 12, 12]
     pre = [
-        ('Data arrives late or incomplete', 'Extracts from the old system not ready', 'Mock loads slip; go-live moves', 'Data', 4, 4,
-         'Data requests in week 1; templates handed out at kick-off; data readiness tracked weekly; steering committee escalation after one week of delay'),
-        ('Poor data quality in the old system', 'Duplicates, missing fields, old balances', 'Rejected rows; receivables or balances do not reconcile', 'Data', 3, 4,
-         'Two to four mock loads with reconciliation; the broker cleanses at source; rejected-row reports from each upload'),
+        ('Client data for the configuration kit arrives late or incomplete', 'Insurer agreements, rates, products or the chart of accounts not ready', 'Configuration and every later phase slip day for day (critical path)', 'Data', 4, 4,
+         'Data request and blank kits at kick-off; data readiness tracked weekly; escalation after 3 working days of delay'),
+        ('Poor data quality of the migration', 'Duplicates, missing fields, old balances, addresses that do not match the PSGC masters', 'Rows in error; open items or balances do not reconcile; rehearsal fails', 'Data', 4, 4,
+         'Mock loads on fresh extracts; errors workbook after each validation; the broker cleanses at source; reconciliation signed per load'),
+        ('Migrated clients lack identification and KYC details', 'Old system without ID, TIN, birth date or beneficial owners', 'KYC status Incomplete; High-risk clients without EDD cannot be issued or renewed', 'Compliance', 3, 4,
+         'Identify gaps in mock load 1; compliance officer plans the KYC completion and EDD reviews before the first renewals'),
         ('Requests for customisation', 'Old system habits; new wishes', 'Scope and timeline grow', 'Scope', 3, 4,
          'Configure-first principle; fit-gap classes; change request process with steering committee approval'),
         ('Key users unavailable', 'Business as usual takes priority', 'Decisions late; weak UAT and training', 'People', 3, 3,
          'Named key users with committed time; backups named; workshops scheduled at kick-off'),
         ('Opening balances and open items do not agree', 'Cut-off differences', 'Ledger wrong from day one', 'Data', 2, 5,
-         'Premiums Receivable balance equals the open item total; Due to Insurers reconciled to insurer statements; Accounting Manager signs off'),
-        ('Tax rates or ATC not confirmed', 'Tax adviser not engaged in time', 'Wrong VAT or withholding', 'Compliance', 2, 4,
-         'Tax adviser review in the configuration phase; VAT Summary checked in UAT'),
-        ('Official receipt numbering out of line with the Authority to Print', 'Last numbers not supplied', 'Compliance exposure', 'Compliance', 2, 4,
-         'Numbering set from the last number used; checked in UAT'),
-        ('E-mail or payment gateway credentials late', 'Provider onboarding', 'Approval links, receipts by e-mail, password resets and online payments not working', 'Integration', 3, 3,
-         'Requested in mobilisation; the system works without the gateway; sandbox first'),
+         'Reconciliation of every load: premiums receivable control account equals the open items; Due to Insurers reconciled to insurer statements; Accounting Manager signs off'),
+        ('Tax adviser confirmations late', 'Adviser not engaged in time', 'Wrong VAT, withholding, ATC or invoice wording; UAT sign-off held', 'Compliance', 3, 4,
+         'Adviser review booked in the configuration phase; written confirmation is a predecessor of UAT sign-off'),
+        ('BIR ATP or CAS registration not in place', 'New registration started late; serial range not confirmed', 'Sales invoices cannot be issued from BrokerVerse; release to Production held', 'Regulatory', 2, 5,
+         'Confirm existing registration or start on the kick-off day; manual invoices under the old ATP only with the tax adviser\'s written agreement'),
+        ('BIR EIS enrolment not available by go-live', 'BIR enrolment and certification timetable', 'EIS connector stays off', 'Regulatory', 3, 2,
+         'Go live with the connector off; Queue earlier invoices once enrolled; Export payloads for a manual upload'),
+        ('AMLC registration or portal access not ready', 'Registration not started or institution code missing', 'Covered transactions cannot be filed within 5 working days', 'Regulatory', 2, 4,
+         'Confirm at mobilisation; CTR test file before go/no-go; go/no-go criterion'),
+        ('Screening list licences not obtained', 'PEP list provider not contracted; lists not downloaded', 'Clients not screened at onboarding, issue and payout; compliance officer cannot sign the go/no-go', 'Compliance', 3, 4,
+         'UN and AMLC lists loaded first; PEP licence started after the compliance workshop; full rescreen before go-live'),
+        ('IC licence data incomplete', 'Agents\' or officers\' licences not collected', 'Commission payouts to agents refused (licence check block)', 'Compliance', 3, 3,
+         'Collect licences in weeks 1 to 3; licence register filled before the first commission run; warn mode only by decision of the compliance officer'),
+        ('Insurer certificates of authority missing', 'Certificate numbers and validity not entered', 'Warnings at quotation, firm order and issue; block mode not possible', 'Compliance', 3, 2,
+         'Enter certificates from the IC list; keep warn until complete, then switch to block'),
+        ('NPC registration or DPO not confirmed', 'Registration not updated for the new system', 'Personal data processed without the registration updated; go/no-go criterion not met', 'Regulatory', 2, 4,
+         'DPO named in week 1; registration confirmed before go/no-go'),
+        ('Partner certification of bank payment files late', 'Bank specification changes; bank test cycle', 'Payments by cheque and manual transfers at go-live', 'Partner', 3, 3,
+         'Bank contacts in week 1; starter layouts validated early; fallback agreed at go/no-go'),
+        ('CTPL authentication provider not live at go-live', 'Accreditation or COC series not ready', 'Every COC keyed in from the provider portal; extra work in Operations', 'Partner', 3, 4,
+         'Provider contract in week 1 to 2; COC series loaded with the configuration kit; manual code entry rehearsed in UAT'),
+        ('Insurer API certification late', 'Insurer test environments and mapping cycles', 'Policies recorded with Record Issued Policy; claim status by file', 'Partner', 4, 2,
+         'Prioritise the insurers with the largest volume; go live insurer by insurer'),
+        ('SMS or Viber provider not live', 'Sender name registration; contract', 'Renewal notices and reminders by e-mail only', 'Partner', 3, 2,
+         'Contract early; SMS jobs stay off until live; consent rules checked in UAT'),
+        ('Encryption key lost or not escrowed', 'No key custody record; key only on one server', 'Backups unreadable; TIN, ID and bank numbers lost', 'Security', 1, 5,
+         'Key custody record before Production is provisioned; escrow copy under dual control kept with the backups; rotation procedure'),
+        ('Personal data exposed in a non-production copy', 'Pre-Prod or a training copy opened to people without production access', 'Breach of the Data Privacy Act; NPC notification', 'Security', 2, 5,
+         'mask:data before anyone signs in; DPO approves each refresh; Pre-Prod removed after hypercare'),
+        ('Release pipeline cannot reach a server', 'Network rule or deploy key (SSH from the GitHub runners)', 'Deployments skipped or failing; release to Production late', 'Hosting', 3, 3,
+         'GitHub Environments and reachability tested with the first deployment; self-hosted runner or SSM as alternative'),
+        ('Client marks used without permission', 'Client brand pack applied before permission is on file', 'Trademark exposure', 'Compliance', 2, 3,
+         'Client brand pack applied only with written permission on the engagement file'),
         ('Users not ready at go-live', 'Training too early or skipped', 'Errors and slow work', 'People', 2, 3,
-         'Role-based training, assessment, floor walkers in the first week'),
+         'Role-based training, assessment before production access, floor walkers in the first week'),
+        ('Book larger than one import file', 'More than 20,000 rows of a sheet', 'Longer loads; cutover window too short', 'Data', 2, 3,
+         'Split into several files; time the loads in the rehearsal'),
         ('First month-end close outside hypercare', 'Go-live late in the month', 'Close issues found late', 'Schedule', 2, 3,
          'Hypercare extends to the first close'),
     ]
@@ -234,9 +270,16 @@ def raid():
     ah = ['ID', 'Assumption', 'Basis', 'Effect if false', 'Owner', 'Validate by', 'Validated', 'Status', 'Remarks']
     aw = [8, 44, 30, 34, 18, 13, 11, 12, 30]
     arows = [
-        ('A-001', 'The size of the implementation (Small, Medium or Large) agreed at mobilisation stays valid once the data volumes are known.', 'Implementation Approach and Plan, sizing', 'Plan and price re-baselined', '[PM]', None, '', 'Open', ''),
-        ('A-002', 'The broker provides its SMTP mailbox before the integrations phase.', 'Dependencies on the broker', 'E-mails stay queued in the outbox', '[IT head]', None, '', 'Open', ''),
-        ('A-003', 'The delivered chart of accounts is used with the accountant\'s mapping, not replaced.', 'Configure-first principle', 'Posting rules and account determination redone', '[Accounting Manager]', None, '', 'Open', ''),
+        ('A-001', 'The size of the implementation (Small, Medium, Large or Enterprise) agreed at mobilisation stays valid once the data volumes are known.', 'Implementation Approach and Plan, sizes', 'Plan and price re-baselined', '[PM]', None, '', 'Open', ''),
+        ('A-002', 'The broker already holds, or obtains within the lead times of the Dependency Map, its BIR ATP or CAS registration, AMLC registration and NPC registration.', 'Dependency Map, regulatory registrations', 'Go-live moves; becomes a dependency late', '[Broker PM]', None, '', 'Open', ''),
+        ('A-003', 'The delivered chart of accounts is used with the accountant\'s mapping, not replaced.', 'Configure-first principle', 'Posting rules, account determination and IC account mapping redone', '[Accounting Manager]', None, '', 'Open', ''),
+        ('A-004', 'The delivered tax codes, ATC and rates apply, subject to the tax adviser\'s confirmation.', 'Delivered tax set-up', 'Tax set-up and UAT tax scenarios redone', '[Accounting Manager]', None, '', 'Open', ''),
+        ('A-005', 'The delivered AML values (thresholds, working days, match score, refresh months) apply, subject to the compliance officer\'s confirmation against the AMLC\'s current issuances.', 'AML Settings as delivered', 'AML settings and monitoring rules changed before UAT', '[Compliance officer]', None, '', 'Open', ''),
+        ('A-006', 'The broker contracts its partners (banks for payment files, SMS provider, CTPL authentication provider, insurers for APIs, payment gateway) in weeks 1 to 2.', 'Integration workshop', 'Features go live after go-live with their fallback', '[IT head]', None, '', 'Open', ''),
+        ('A-007', 'The broker provides its SMTP mailbox before the integrations phase.', 'Dependencies on the broker', 'E-mails stay queued in the outbox; go-live held', '[IT head]', None, '', 'Open', ''),
+        ('A-008', 'One legal entity and one fiscal year are migrated, at a single cutover date.', 'Statement of Work', 'Migration scope and plan re-baselined', '[PM]', None, '', 'Open', ''),
+        ('A-009', 'Users work with the delivered roles, including Compliance Officer (AML/CFT); view:pii is granted only to the roles that need it.', 'Delivered roles', 'Role design and training redone', '[System Administrator]', None, '', 'Open', ''),
+        ('A-010', 'The broker\'s own brand (or a delivered preset) is used; a client brand pack is used only with written permission.', 'Branding workshop', 'Branding delayed until permission', '[Sponsor]', None, '', 'Open', ''),
     ]
     table(asn, ah, aw, arows)
     boxes(asn, 2, ROWS + 1, len(ah))
@@ -247,7 +290,11 @@ def raid():
     iss = wb.create_sheet('Issues')
     ih = ['ID', 'Issue', 'Effect', 'Category', 'Owner', 'Impact', 'Priority', 'Action', 'Due date', 'Status', 'Raised on', 'Closed on', 'From risk']
     iw = [8, 40, 32, 13, 18, 8, 10, 44, 12, 12, 12, 12, 10]
-    table(iss, ih, iw, [('I-001', '[Example: bank statement export of one bank does not match the delivered formats]', '[Bank reconciliation not testable in SIT]', 'Integration', '[owner]', 3, None, '[Add an insurer or bank statement format in Master > Finance]', None, 'Open', None, None, '')])
+    table(iss, ih, iw, [
+        ('I-001', '[Example: bank statement export of one bank does not match the delivered formats]', '[Bank reconciliation not testable in SIT]', 'Integration', '[owner]', 3, None, '[Adjust the columns in Master > Finance > Bank Statement Formats]', None, 'Open', None, None, ''),
+        ('I-002', '[Example: mock load 1 rejected 8% of client rows: city and barangay names do not match the PSGC masters]', '[Clients and policies not loaded; reconciliation fails]', 'Data', '[owner]', 4, None, '[Map addresses to PSGC codes in the extract; correct with the errors workbook; validate again]', None, 'Open', None, None, 'R-002'),
+        ('I-003', '[Example: PEP list licence not signed; only UN and AMLC lists loaded]', '[Screening incomplete for go/no-go]', 'Compliance', '[owner]', 4, None, '[Escalate to the sponsor; agree interim internal list; sign licence before go/no-go]', None, 'Open', None, None, 'R-011'),
+    ])
     boxes(iss, 2, ROWS + 1, len(ih))
     for r in range(2, ROWS + 2):
         iss.cell(row=r, column=7, value=f'=IF(F{r}="","",IF(F{r}>=4,"High",IF(F{r}=3,"Medium","Low")))')
@@ -257,21 +304,39 @@ def raid():
 
     # dependencies
     dep = wb.create_sheet('Dependencies')
-    dh = ['ID', 'Dependency', 'Provided by', 'Needed for', 'Needed by', 'Owner', 'State', 'Remarks']
-    dw = [8, 50, 22, 30, 14, 18, 12, 30]
+    dh = ['ID', 'Dependency', 'Provided by', 'Needed for', 'Needed by (S / M / L / E)', 'Owner', 'State', 'Remarks',
+          'Float to go-live, days (S / M / L / E)', 'If late']
+    dw = [8, 46, 20, 26, 18, 18, 12, 24, 16, 40]
     dpre = [
-        ('Named project manager, key users and Accounting Manager', 'Broker', 'Mobilisation', 'Week 1'),
-        ('Insurer list and agreements, commission and referrer rates, product list', 'Broker', 'Configuration', 'End of discovery'),
-        ('Chart of accounts and the accountant\'s mapping decisions', 'Broker', 'Ledger configuration', 'Start of configuration'),
-        ('BIR Authority to Print or registered series; last numbers used', 'Broker', 'Document numbering', 'Configuration'),
-        ('SMTP mailbox and credentials; payment gateway merchant account', 'Broker', 'Integrations', 'Integrations phase'),
-        ('One recent statement export per bank account', 'Broker', 'Bank reconciliation formats', 'Integrations phase'),
-        ('In-force policy, open receivable and trial balance extracts in the templates', 'Broker', 'Mock loads and cutover', 'Each mock load'),
-        ('User list with roles and e-mail addresses', 'Broker', 'Training and go-live', 'Two weeks before training'),
-        ('UAT testers and sign-off authority', 'Broker', 'UAT', 'UAT phase'),
-        ('Production environment provisioned and backups tested', 'Hosting provider', 'Go-live', 'Before mock load 2'),
+        ('Named PM, key users, Accounting Manager, System Administrator, compliance officer and DPO', 'Broker', 'Workshops, decisions', 'W1 / W1 / W1 / W1', '10 / 14 / 24 / 30', 'Workshops and decisions late'),
+        ('Hosting option, environment set and data location decision', 'Broker', 'Environments', 'W1 / W1 / W1 / W1', '4 / 8 / 12 / 17', 'Environments and the configuration load late'),
+        ('Insurer list and agreements, commission and referrer rates, product list', 'Broker', 'Configuration kit', 'W1 / W2 / W3 / W4', '0 / 0 / 0 / 0', 'Go-live moves day for day (critical path)'),
+        ('Chart of accounts and the accountant\'s mapping decisions', 'Broker', 'Configuration kit', 'W1 / W2 / W3 / W4', '0 / 0 / 0 / 0', 'Go-live moves day for day (critical path)'),
+        ('User list with roles, branches and reporting lines', 'Broker', 'Configuration kit; My Team; approvals', 'W1 / W2 / W3 / W3', '0 / 1 / 2 / 3', 'Go-live moves; approvals misrouted'),
+        ('SMTP mailbox and credentials', 'Broker', 'E-mail test', 'W1 / W2 / W2 / W2', '23 / 36 / 60 / 90', 'E-mails stay queued; go-live held at the end'),
+        ('Bank accounts, one statement export per account, payee bank accounts', 'Broker', 'Statement formats; bank payment files', 'W2 / W2 / W3 / W3', '19 / 30 / 51 / 77', 'Bank imports and payment files late'),
+        ('Encryption key custody record (PII_ENCRYPTION_KEY, DATA_ENCRYPTION_KEY), signed by the broker IT head and iorta TechNXT', 'Broker and iorta TechNXT', 'Production provisioning', 'W1 / W2 / W2 / W2', '5 / 9 / 14 / 20', 'Production not provisioned'),
+        ('GitHub Environments with reviewers and secrets; server reachable from the pipeline', 'iorta TechNXT (repository owner)', 'First deployment', 'W1 / W2 / W2 / W2', '4 / 8 / 13 / 19', 'Configuration load late'),
+        ('Production environment provisioned, backups and restore test', 'Hosting provider', 'Release to Production', 'W2 / W3 / W4 / W5', '13 / 23 / 42 / 67', 'Release to Production and rehearsal late'),
+        ('BIR ATP or CAS registration; invoice serial range; last numbers used', 'Broker (BIR)', 'Numbering; release to Production', 'W4 / W5 / W6 / W6', '2 / 12 / 31 / 58', 'Go-live moves; invoices not issued from BrokerVerse'),
+        ('BIR EIS enrolment and credentials (when covered)', 'Broker (BIR)', 'EIS connector live', 'Go-live week', 'Feature only', 'Connector off; earlier invoices queued later'),
+        ('AMLC registration, portal access, institution code', 'Broker (AMLC)', 'AMLC report file; go/no-go', 'W3 / W4 / W4 / W4', '12 / 22 / 46 / 76', 'Go-live held; CTR filing not possible'),
+        ('IC licence data of the firm, officers and agents; insurer certificates of authority', 'Broker', 'Compliance set-up', 'W2 / W2 / W3 / W3', '10 / 14 / 31 / 48', 'Commission payouts blocked; authority warnings'),
+        ('NPC registration of the DPO and data processing systems', 'Broker (NPC)', 'Go/no-go', 'W4 / W5 / W6 / W6', '8 / 18 / 38 / 68', 'Go-live held'),
+        ('Screening lists (UN, AMLC) and the PEP list licence', 'Broker; list provider', 'Screening; go/no-go', 'W3 / W4 / W4 / W5', '15 / 26 / 47 / 76', 'Go-live held; clients not screened'),
+        ('Tax adviser written confirmation of tax codes, ATC, rates, invoice and receipt wording', 'Broker (tax adviser)', 'UAT sign-off', 'W4 / W6 / W9 / W12', '8 / 14 / 23 / 42', 'UAT sign-off held'),
+        ('Partner contracts and credentials: SMS provider, CTPL authentication provider, payment gateway, insurer API access', 'Broker', 'Partner certifications', 'W2 / W3 / W4 / W6', 'Feature only', 'Features go live later with their fallback'),
+        ('COC number series from each insurer', 'Insurers', 'CTPL authentication', 'W2 / W2 / W3 / W3', 'Feature only', 'COC numbers entered by hand'),
+        ('Bank acceptance of each payment file layout (test file)', 'Banks', 'Bank payment files live', 'W5 / W7 / W10 / W13', 'Feature only', 'Cheques and manual transfers'),
+        ('CTPL authentication provider: accreditation and live test', 'CTPL authentication provider', 'Authentication at issue; LTO feed', 'W4 / W6 / W9 / W11', 'Feature only', 'Enter code from the provider portal'),
+        ('Insurer API test cycles', 'Insurers', 'Insurer API connectors', 'W5 / W8 / W11 / W13', 'Feature only', 'Record Issued Policy; claim status file'),
+        ('Written permission to use client marks (client brand pack only)', 'Broker; mark owner', 'Client brand pack', 'W1 / W2 / W2 / W2', 'Feature only', 'Broker theme or delivered preset'),
+        ('Migration extracts of clients, in-force policies, open items, open claims and trial balance, cleansed', 'Broker', 'Each mock load and cutover', 'W2 / W3 / W5 / W6', '10 / 20 / 31 / 47', 'Mock loads and rehearsal late'),
+        ('User list for training, training rooms and devices', 'Broker', 'End-user training', 'W2 / W2 / W2 / W2', '17 / 28 / 52 / 75', 'Training late; production access held'),
+        ('UAT testers and sign-off authority', 'Broker', 'UAT', 'W1 / W1 / W2 / W2', '18 / 31 / 53 / 72', 'UAT late'),
+        ('Freeze of the old system and final extract at cutover', 'Broker', 'Cutover', 'Cutover week', '0 / 0 / 0 / 0', 'Go-live moves'),
     ]
-    table(dep, dh, dw, [(f'D-{i:03d}', d[0], d[1], d[2], d[3], '[owner]', 'On track', '') for i, d in enumerate(dpre, 1)])
+    table(dep, dh, dw, [(f'D-{i:03d}', d[0], d[1], d[2], d[3], '[owner]', 'On track', '', d[4], d[5]) for i, d in enumerate(dpre, 1)])
     boxes(dep, 2, ROWS + 1, len(dh))
 
     refs = listsheet(wb, refs_data)
@@ -319,6 +384,9 @@ def raid():
 
 
 if __name__ == '__main__':
-    fit_gap()
-    raid()
+    which = sys.argv[2] if len(sys.argv) > 2 else 'both'
+    if which in ('both', 'fitgap'):
+        fit_gap()
+    if which in ('both', 'raid'):
+        raid()
     print('written to', OUT)

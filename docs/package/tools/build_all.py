@@ -76,6 +76,7 @@ DOCUMENTS = [
     ('schedules-and-batch-jobs.md', DELIVERY, 'BrokerVerse_Schedules_and_Batch_Jobs', None),
     ('test-summary.md', DELIVERY, 'BrokerVerse_Test_Summary_Report', None),
     ('ph-regulatory-compliance-matrix.md', DELIVERY, 'BrokerVerse_Philippine_Regulatory_Compliance_Matrix', None),
+    ('dependency-map.md', DELIVERY, 'BrokerVerse_Dependency_Map_and_Critical_Path', None),
     # 06 Support
     ('production-support.md', SUPPORT, 'BrokerVerse_Production_Support_Approach_and_Standards', None),
     ('business-continuity-and-disaster-recovery.md', SUPPORT, 'BrokerVerse_Business_Continuity_and_Disaster_Recovery_Plan', None),
