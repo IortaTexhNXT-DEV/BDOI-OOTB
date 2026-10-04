@@ -263,7 +263,7 @@ Most screens open on a list. The lists work the same way everywhere:
 - **Tabs and cards**: many lists have status cards or tabs at the top (for example **Motor**, **Fire and Allied Perils**, **Industrial All Risks** on Prospects). Select a card or tab to narrow the list.
 - **Sorting**: select a column heading to sort by it; select it again to reverse the order.
 - **Paging**: lists are paged by the server, 20, 50 or 100 rows per page (**Rows per page**). Use the arrows at the bottom right (first, previous, next, last page). The text next to the arrows shows the rows on screen and the total, for example 1 - 20 of 82. Search and filters apply to the whole list, not only to the page on screen.
-- **Row actions**: at the end of the row. The arrow or eye opens the record, the pencil edits it, the three dots (**More Actions**) open the other actions. An action that does not apply to the row is greyed out.
+- **Row actions**: at the end of the row. The arrow or eye opens the record, the pencil edits it, the three dots (**More actions**) open the other actions. An action that does not apply to the row is greyed out.
 - **Export**: lists that can be exported have **Export**, **Export CSV**, **Excel** or **Generate Report**. The file downloads to your computer.
 
 ![Operations > Policy with the filters opened](/home/user/BDOI-OOTB/docs/package/source/manual-images/gs-filters.png)
@@ -358,8 +358,8 @@ Every piece of business passes through the same cycle. Each step is done on its 
 | 9 | Receipt and collection | Operations or Sales record the payment; Accounting posts the receipt | Policy: **Proceed to Payment**; Accounts > Receipts; Accounts > Collections |
 | 10 | Remittance to insurer | Accounting, maker and checker | Accounts > Remittance; Accounts > Disbursement |
 | 11 | Commission | Accounting, maker and checker | Commission > Agents/Referrer Accounts; Accounts > Disbursement |
-| 12 | Endorsements | Operations raise; Processing Team complete | Operations > Policy: **More Actions** > **Endorsement** |
-| 13 | Claims | Claims, maker and checker | Operations > Policy: **More Actions** > **Claim**; Operations > Claims |
+| 12 | Endorsements | Operations raise; Processing Team complete | Operations > Policy: **More actions** > **Endorsement** |
+| 13 | Claims | Claims, maker and checker | Operations > Policy: **More actions** > **Claim**; Operations > Claims |
 | 14 | Renewals | Operations, Sales & Marketing; Processing Team approve terms | Operations > Renewals |
 | 15 | Bank and insurer reconciliation | Accounting; Accounting Manager approves | Accounts > Bank Reconciliation; Accounts > Insurer Reconciliation |
 | 16 | Month-end close | Accounting; Accounting Manager approves | Accounts > Period End > Month-End Close |
@@ -429,8 +429,9 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reinsurance, Reports, M
 1. Choose Master > Generals > User Management > User and select **Add**.
 2. Enter **Username** (the user ID used to sign in), **E-mail** and **Display Name**. All three are required. The e-mail is where Forgot password? sends its code.
 3. Leave **Password** empty: the system then generates a temporary password ("Leave empty for a temporary password").
-4. Under **Roles**, tick the role or roles. A person normally holds one role. The Accounting Manager role includes Accounting. When `access.sod_enforced` is on, a combination listed on Segregation of Duties with the action Block is refused.
-5. Select **Save**. The temporary password is shown once. Hand it to the user privately.
+4. Choose the **Branch**, the **Designation** and **Reporting to** (the user's manager), if your organisation uses them.
+5. Under **Roles**, tick the role or roles. A person normally holds one role. The Accounting Manager role includes Accounting. When `access.sod_enforced` is on, a combination listed on Segregation of Duties with the action Block is refused.
+6. Select **Save**. The temporary password is shown once. Hand it to the user privately.
 
 A duplicate username is refused. At the first sign-in the user must choose a new password (Getting started).
 
@@ -479,7 +480,7 @@ A delegation lets another user approve for an approver who is away.
 
 ### Segregation of Duties
 
-Each rule names two roles that one person should not hold together, what happens when they are assigned (**Block**), the reason and the status. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager). **New rule** adds a rule; **Switch off** disables one.
+Each rule names two roles that one person should not hold together, what happens when they are assigned (**When assigned**: **Block** refuses the combination, **Warn** allows it with a warning), the reason and the status. The delivered rules are SOD-CLM-ACCT (Claims and Accounting: the claims handler should not also release claim payments), SOD-PROC-ACCT (Processing Team and Accounting: the person who places and issues business should not also release premium to insurers) and SOD-PROC-MGR (Processing Team and Accounting Manager: the person who places business should not approve its payments), all three Block; and SOD-SALES-ACCT (Sales & Marketing and Accounting) and SOD-SALES-CLM (Sales & Marketing and Claims), both Warn. **New rule** adds a rule; **Switch off** disables one.
 
 ![Master > Generals > User Management > Segregation of Duties](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-sod.png)
 
@@ -494,7 +495,7 @@ Confirm at least every quarter that each active user still needs his or her acce
 Every printed document and report PDF (quotation, request for quotation, placement slip, policy schedule, billing statement, official receipt, payment voucher, debit note, claim letters, BIR forms) carries the letterhead of the company marked as letterhead company.
 
 1. Choose Master > Generals > Organization > Company. Select **Add**, or the pencil on the delivered company to edit it into your own.
-2. Enter **Company Code**, **Company Name**, **License Number** (Insurance Commission licence), **Email ID**, **TIN**, **Logo (printed on documents)** (a link, or **Upload**), **Website link**, **Description**, **Address Line 1** to **3**, **ZIP Code**, **City**, **State**, **Country**, **Phone Number** and **Fax** (+63 numbers).
+2. Enter **Company Code**, **Company Name**, **License Number** (Insurance Commission licence), **Email ID**, **TIN (BIR forms)**, **RDO Code**, **Logo (printed on documents)** (a link, or **Upload**), **Website link**, **Description**, the registered address (letterhead and BIR forms: **Address Line 1** to **3**, **ZIP Code**, **City**, **State**, **Country**), **Phone Number** and **Fax** (+63 numbers).
 3. Tick **Letterhead company - used on documents and reports** for the company whose letterhead the documents use. Only one company holds it.
 4. Select **Save**, then print any statement or report as PDF to check the letterhead.
 
@@ -567,7 +568,7 @@ The group **Go-live** (area Company & Branding) holds the cutover date `golive.c
 
 > Change tax rates, GL accounts and maker-checker switches only with the agreement of the Accounting Manager. Settings that control postings are protected: the system refuses a change that must go through Configuration Approvals.
 
-**System Settings** (Master > System Settings) holds the branding and localisation: **App Title**, **Logo Preset**, **Upload Logo**, **Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. **Save** applies them to every user, including the sign-in page.
+**System Settings** (Master > System Settings) holds the branding, localisation and theme: **Application name** (shown on the sign-in page, the sidebar and the browser tab), **Application logo (screen)** with **Upload Logo** or **Add Company Logo**, **Favicon** with **Upload Favicon**, **Display Currency**, **Default Language**, **Primary Color** and **Secondary Color**. Printed documents use the logo of the letterhead company in Master > Generals > Organization > Company. **Save** applies them to every user, including the sign-in page.
 
 ![Master > System Settings](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-system-settings.png)
 
@@ -802,7 +803,7 @@ The system gives the prospect its number (LD-YYYY-NNNNN) with status New and, fo
 
 ![Prospect Details](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-detail.png)
 
-Select **View** on a prospect card. **Prospect Details** shows **Personal Information**, **Contact Information**, **Address Information** and **System Information** (created, last updated, number of quotes). Select **Create Quote** to start a quotation, **Edit** to correct the prospect (the form shows the same fields; select **Update** to save), **Delete** to remove a prospect entered by mistake, or **Back**. Keep prospects that have quotations.
+Select the eye (**View**) on a prospect row. **Prospect Details** shows **Personal Information**, **Contact Information**, **Address Information** and **System Information** (created, last updated, number of quotes). Select **Create Quote** to start a quotation, **Edit** to correct the prospect (the form shows the same fields; select **Update** to save), **Delete** to remove a prospect entered by mistake, or **Back**. Keep prospects that have quotations.
 
 | Prospect status | Set when |
 |---|---|
@@ -882,7 +883,7 @@ When you select **Completed Quote**, the system prices the quotation again on th
 
 ![Operations > Sales & Marketing > Quotations](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-quotations.png)
 
-Choose Operations > Sales & Marketing > Quotations. The cards count **Total Quotations**, **Converted to Policy**, **Rejected**, **Pending Customer**, **Approved Quotations**, **Active Quotations** and **Pending Review**, with the **Average Premium**. The list shows **Quote ID**, **Prospect Name**, **Policy Type**, **Gross premium**, **Date** and **Status**; **View Details** opens a quotation. **Create Quote** starts a quotation and **Bulk Upload** loads quotations from a template.
+Choose Operations > Sales & Marketing > Quotations. The cards count **Total Quotations**, **Active Quotations**, **Pending Review**, **Approved Quotations** (with the approval rate) and **Converted to Policy**, with the **Average Premium**. The list shows **Quote ID**, **Prospect Name**, **Policy Type**, **Gross premium**, **Date** and **Status**; **View Details** opens a quotation. **Create Quote** starts a quotation and **Bulk Upload** loads quotations from a template.
 
 | Status | Meaning | Next step |
 |---|---|---|
@@ -950,11 +951,11 @@ The payment waits for verification, the policy payment status becomes Reviewing 
 
 ![Operations > Policy](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-policy-list.png)
 
-Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **Client Name**, **Gross Premium**, **Policy Issued**, **Policy Expiry**, **Product Description** and **Payment** status. The field selector next to the search box chooses what you search by. **Show Filters** offers **Payment Status**, **Product Type**, **Insurance Company**, **Client Name**, issue and expiry date ranges and minimum and maximum premium.
+Choose Operations > Policy. The list shows **Policy Number**, **Client Id**, **Client Name**, **Gross Premium**, **Policy Issued**, **Policy Expiry**, **Product Description** and **Payment** status. The search box finds a policy by number or client. **Show Filters** offers **Payment Status**, **Product Type**, **Insurance Company**, **Client Name**, issue and expiry date ranges and minimum and maximum premium.
 
-The arrow on a row (**View Policy**) opens the policy; **More Actions** opens **Claim**, **Endorsement** and **Reminder**. These are greyed out while the premium payment is Pending or Reviewing, and **Endorsement** is not offered for expired, lapsed, cancelled or renewed policies.
+The eye on a row (**View policy**) opens the policy; the three dots (**More actions**) open **Claim** and **Endorsement**. Both are greyed out while the premium payment is Pending or Reviewing, and **Endorsement** is not offered for expired, lapsed, cancelled or renewed policies.
 
-![More Actions on a policy row](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-policy-rowmenu.png)
+![More actions on a policy row](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-policy-rowmenu.png)
 
 ![Policy Details](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-policy-detail.png)
 
@@ -1041,7 +1042,7 @@ Choose Dashboard > Processing Dashboard. The **PROCESSING WORKBENCH** shows, for
 
 ![Operations > Sales & Marketing > Request for Quotation (Broker Slip)](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-rfq-list.png)
 
-Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The cards count the requests by status (**SUBMITTED**, **RESPONSES IN**, **DRAFT**, **CLOSED**); select a card to filter. Each row shows **Slip No.**, **Insured**, **Product**, **Sum insured**, **Offers / approached** (with the number declined), **Best offer (gross)**, **Response due**, **Age**, **Status** and the **Quotation Slip** made from it. Select a row to open it.
+Choose Operations > Sales & Marketing > Request for Quotation (Broker Slip). The cards count the requests by status (**Submitted**, **Responses in**, **Draft**, **Closed**); select a card to filter. Each row shows **Slip No.**, **Insured**, **Product**, **Sum insured**, **Offers / approached** (with the number declined), **Best offer (gross)**, **Response due**, **Age**, **Status** and the **Quotation Slip** made from it. Select a row to open it.
 
 | Status | Meaning |
 |---|---|
@@ -1105,7 +1106,7 @@ A Quotation Slip prepared from a request is a quotation (QT-YYYY-NNNNN) with the
 
 ![Operations > Sales & Marketing > Placement Slips](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-ps-list.png)
 
-Choose Operations > Sales & Marketing > Placement Slips. The cards count **DRAFT**, **SENT TO INSURER**, **BOUND** and **POLICY ISSUED**; the filters choose a status and a source. Each row shows **Placement No.**, **Insured**, **Product**, **Lead insurer**, **Gross premium**, **Period**, **Confirmed** (insurers confirmed / participants), **Source** (From quotation slip, From broker slip, Direct placement or Recorded policy), **Status** and the **Policy** issued.
+Choose Operations > Sales & Marketing > Placement Slips. The cards count **Draft**, **Sent to insurer**, **Bound** and **Policy issued**; the filters choose a status and a source. Each row shows **Placement No.**, **Insured**, **Product**, **Lead insurer**, **Gross premium**, **Period**, **Confirmed** (insurers confirmed / participants), **Source** (From quotation slip, From broker slip, Direct placement or Recorded policy), **Status** and the **Policy** issued.
 
 | Status | Meaning |
 |---|---|
@@ -1171,7 +1172,7 @@ A line whose journey does not allow a direct policy entry refuses it; place thos
 
 ![Policy POL-2026-00052: a co-insured fire policy](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-policy-fire.png)
 
-A co-insured policy lists its participants with role, share, sum insured, premium, taxes, gross premium, commission and policy or certificate number. Amounts are split by share; the rounding remainder goes to the lead. The same split is used for the bill journal, the remittance to each insurer, claim recoveries and the reports. **Premium Accounting Entries** (Documents & Billing on the policy) lists every journal line of the policy with **Code**, **Entry Type**, **Description**, **Document Date**, **Due Date**, **Main Account**, **Dr/Cr** and **Amount**; **Filter by Entry Type** narrows the list.
+**Policy Details** of a co-insured policy shows **CO-INSURANCE DETAILS**: each insurer with **Insurer share (%)**, **Premium allocation (LC)** and **Status**, and the total. The placement slip of the policy shows each participant with role, share, sum insured, premium, taxes, gross premium, commission and policy or certificate number. Amounts are split by share; the rounding remainder goes to the lead. The same split is used for the bill journal, the remittance to each insurer, claim recoveries and the reports. **Premium Accounting Entries** (Documents & Billing on the policy) lists every journal line of the policy with **Code**, **Entry Type**, **Description**, **Document Date**, **Due Date**, **Main Account**, **Dr/Cr** and **Amount**; **Filter by Entry Type** narrows the list.
 
 ![Premium Accounting Entries of a co-insured policy](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-accounting-entries.png)
 
@@ -1253,7 +1254,7 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 |---|---|---|
 | Daily | Work expiring policies, pending payments, pending quotations and renewal requests | Open Items |
 | Daily | Answer client requests: policy details, documents, changes | Clients, Policy |
-| Daily | Raise endorsement requests | Policy > **More Actions** > **Endorsement** |
+| Daily | Raise endorsement requests | Policy > **More actions** > **Endorsement** |
 | Daily | Record client payments | Policy > **Proceed to Payment** |
 | Daily | Work the renewal queue and record contacts | Renewals > Renewal Queue, Negotiations |
 | Weekly | Batch renewal notices; at-risk and lapsed policies | Renewal Batch, At-Risk Policies, Lapse Management |
@@ -1272,8 +1273,8 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 A client is a person or company that holds or has held a policy. BrokerVerse creates the client, with its client code CL-YYYY-NNNNN, when the first policy is issued.
 
 1. Choose Operations > Clients.
-2. Use the tabs or the search box to find the client. The list shows the name and client code, type, number of policies and latest policy status.
-3. Select the arrow at the end of the row to open the client.
+2. Use the tabs (**All**, **Individual**, **Corporate**) or the search box to find the client. The list shows **Client ID**, **Assured Name**, **Category**, **E-mail**, **Mobile**, **Client Since**, **Policies** and the latest policy status.
+3. Select the eye (**View**) at the end of the row to open the client; the pencil (**Edit**) edits it.
 
 ![The client view](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-client-view.png)
 
@@ -1292,7 +1293,7 @@ To correct the name, address or contact details of a client with an issued polic
 An endorsement changes an issued policy: the client's details, the vehicle, the cover, the period, or cancels the policy. BrokerVerse records it with its number END-YYYY-NNNNN, sends it to the insurer and bills additional premium or credits return premium. A change of cover is priced again with the configured rates.
 
 1. Choose Operations > Policy (or open the client and the **Policy** tab) and find the policy.
-2. On the row, select **More Actions**, then **Endorsement**. The action is greyed out while the premium is Pending or Reviewing, and is not offered for expired, lapsed, cancelled or renewed policies.
+2. On the row, select **More actions**, then **Endorsement**. The action is greyed out while the premium is Pending or Reviewing, and is not offered for expired, lapsed, cancelled or renewed policies.
 3. Tick one or more endorsement types and select **Proceed**.
 4. Enter the changes on the **Endorsement Request** page.
 5. Select **Save & Next**, check the summary and send it to the insurance company.
@@ -1336,7 +1337,7 @@ Operations records payments exactly as described in the Sales & Marketing chapte
 
 ![Operations > Payments](/home/user/BDOI-OOTB/docs/package/source/manual-images/o-payments.png)
 
-Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivables** and **Earned Commission**, and the bills in the tabs **Paid**, **Pending** and **Reviewing**. The **Type** column says whether the bill is for a POLICY, a RENEWAL POLICY or an ENDORSEMENT. Receipts are posted by Accounting; this screen shows the result.
+Operations > Payments shows **Gross Premium**, **Collected Premium**, **Receivables** and **Earned Commission**, and the bills in the tabs **Paid**, **Pending** and **Reviewing**. The **Type** column says whether the bill is for a **Policy**, a **Renewal Policy** or an **Endorsement**. Receipts are posted by Accounting; this screen shows the result.
 
 ## Renewals
 
@@ -1426,7 +1427,7 @@ The Claims role lands on the Claims Dashboard.
 
 | When | Task | Screen |
 |---|---|---|
-| Daily | Register new losses | Policy > **More Actions** > **Claim** |
+| Daily | Register new losses | Policy > **More actions** > **Claim** |
 | Daily | Follow open claims with the insurer and adjuster | Operations > Claims |
 | Daily | Approve settlements entered by another Claims user | Notification; claim in Pending Approval |
 | Daily | Watch overdue claims | Claims Dashboard |
@@ -1441,7 +1442,7 @@ The dashboard shows **Total Open Claims**, **Claims Overdue** (past the handling
 
 ![Operations > Claims](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claims-list.png)
 
-Choose Operations > Claims. Each row shows **Claim Number**, **Client Name**, **Policy Number**, **Policy Issued**, **Product Description** and **Status**. The icons under **Actions** open the claim details, the next step for the claim's status and the claim audit trail.
+Choose Operations > Claims. Each row shows **Claim Number**, **Client Name**, **Policy Number**, **Reported**, **Product** and **Status**; search by claim number, policy number or client and filter by status. The icons under **Actions** open the claim details, the next step for the claim's status and the claim audit trail.
 
 | Status | Meaning |
 |---|---|
@@ -1457,7 +1458,7 @@ Every claim screen shows the claim journey at the top: **Notification**, **Insur
 
 ## Register a claim
 
-1. Choose Operations > Policy, find the policy and select **More Actions**, then **Claim**. You can also select **Claim** on the policy details page. The action is greyed out while the premium payment is Pending or Reviewing.
+1. Choose Operations > Policy, find the policy and select **More actions**, then **Claim**. You can also select **Claim** on the policy details page. The action is greyed out while the premium payment is Pending or Reviewing.
 2. Check **Insurance Company Name**, **Policy Number**, **Policy Holder Name** and the address, which fill in from the policy.
 3. Under **Incident Details**, enter the fields below.
 4. Enter the driver (motor) and **Third Party Details (If Applicable)**.
@@ -2055,7 +2056,7 @@ The user's own book: prospects, clients, policies sold, commission chart, upcomi
 | Screen | Purpose | Fields and rules | Procedure |
 |---|---|---|---|
 | Clients | The client record (CL-) with tabs Policy, Claim, Renewal, Endorsement, Data privacy. | Created at the first policy; details changed by Personal Details Change endorsement. | Operations |
-| Policy | Policies (POL-) with payment status; **More Actions**: Claim, Endorsement, Reminder; **Bulk Upload**. | Policy statuses Active, Expired, Renewed, Lapsed, Cancelled; payment statuses Pending, Reviewing, Partial, Completed, Refunded; motor issue needs the KYC fields. | Sales & Marketing, Operations |
+| Policy | Policies (POL-) with payment status; **More actions**: Claim, Endorsement; **Bulk Upload**. | Policy statuses Active, Expired, Renewed, Lapsed, Cancelled; payment statuses Pending, Reviewing, Partial, Completed, Refunded; motor issue needs the KYC fields. | Sales & Marketing, Operations |
 | Claims | Claims (CLM-) and their journey. | Date of loss inside the policy period and not in the future; blocked while premium unpaid; settlement maker-checker; statuses Pending, Processing, Pending Approval, Approved, Settled, Rejected, Closed. | Claims |
 
 ### Renewals
