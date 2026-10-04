@@ -93,7 +93,7 @@ DOCS = [
     ('07_Technical', 'BrokerVerse_Data_Dictionary', 'docx, pdf, xlsx', 'Tables, columns, relationships, personal data and retention', [D, V, P], True, [IMP, SUP]),
     # ---------------------------------------------------------------- 08_Management
     ('08_Management', 'BrokerVerse_Go_No_Go_and_Management_Register', 'docx, pdf', 'Release recommendation, go-live conditions, risks, plans and decisions needed', [M, D, V, P, S], False, [GO]),
-    ('08_Management', 'iNXT_BrokerVerse_OOTB_Strategy_and_Playbook', 'docx, pdf', 'How iorta TechNXT sells, delivers, supports and evolves the OOTB product', [M, S, D, V, P], False, [PRE, CON, IMP, GO, SUP]),
+    ('08_Management', 'iNXT_BrokerVerse_OOTB_Strategy_and_Playbook_INTERNAL', 'docx, pdf', 'How iorta TechNXT sells, delivers, supports and evolves the OOTB product', [M, S, D, V, P], False, [PRE, CON, IMP, GO, SUP]),
     ('08_Management', 'BrokerVerse_OOTB_Documentation_Pack_Index', 'docx, pdf', 'This index', [S, D, V, P, M], True, [PRE, CON, IMP, GO, SUP]),
 ]
 
@@ -185,7 +185,7 @@ def body(for_readme):
           '- Audiences: Sales (account managers and presales), Delivery (implementation project managers and consultants), Development (product engineering), Support (L2 and L3 application support), Management (iorta TechNXT management, and the broker\'s management for client-facing files).',
           '- Lifecycle stages: Pre-sales, Contracting, Implementation, Go-live, Support.', '',
           'The files are kept in `docs/package`, one folder per purpose in the order of the customer lifecycle, and each file is kept once. `source/` holds the text sources and `tools/` the builders.', '',
-          '| Folder | What it holds | Documents |', '|---|---|---|']
+          '| Folder | What it holds | Count |', '|---|---|---|']
     for folder, title, what in FOLDERS:
         n = sum(1 for d in DOCS if d[0] == folder)
         L.append(f'| `{folder}/` | {what} | {n} |')

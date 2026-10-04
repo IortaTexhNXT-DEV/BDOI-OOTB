@@ -86,14 +86,16 @@ DOCUMENTS = [
     ('data-dictionary.md', TECHNICAL, 'BrokerVerse_Data_Dictionary', None),
     # 08 Management
     ('go-live-readiness-and-management-register.md', MANAGEMENT, 'BrokerVerse_Go_No_Go_and_Management_Register', None),
-    ('ootb-strategy.md', MANAGEMENT, 'iNXT_BrokerVerse_OOTB_Strategy_and_Playbook', None),
+    ('ootb-strategy.md', MANAGEMENT, 'iNXT_BrokerVerse_OOTB_Strategy_and_Playbook_INTERNAL', None),
     ('documentation-pack-index.md', MANAGEMENT, 'BrokerVerse_OOTB_Documentation_Pack_Index', None),
 ]
 
-# Sales material built without a text source (python-pptx, a browser), run with --sales.
-# The two-page brochure (brochure/build_brochure.py) is not rebuilt here: it needs the cropped pictures of
-# brochure/img, which are not in the repository; without them the layout runs over. Its .docx and .pdf are kept as built.
+# Sales material built without a text source (python-docx, python-pptx, a browser), run with --sales.
+# The two-page brochure takes its cropped screen pictures from brochure/img.
 SALES_BUILDS = [
+    ['python3', 'brochure/build_brochure.py', os.path.join(PKG, SALES, 'iNXT_BrokerVerse_Brochure.docx')],
+    ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', os.path.join(PKG, SALES),
+     os.path.join(PKG, SALES, 'iNXT_BrokerVerse_Brochure.docx')],
     ['python3', 'onepager/build_onepager.py'],
     ['python3', 'build_sales_deck.py'],
     ['soffice', '--headless', '--convert-to', 'pdf', '--outdir', os.path.join(PKG, SALES),
