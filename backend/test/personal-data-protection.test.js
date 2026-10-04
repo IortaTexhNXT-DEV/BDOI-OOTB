@@ -41,6 +41,19 @@ beforeAll(async () => {
 });
 afterAll(async () => { await pool.end(); });
 
+describe('database sessions carry the keys', () => {
+  it('keeps the options of the database URL (time zone on Railway) and adds the session keys', async () => {
+    const { poolConfig } = await import('../src/db/pool.js');
+    const c = poolConfig('postgres://u:p@db.internal:5432/bv?options=-c%20TimeZone%3DAsia%2FManila&sslmode=disable', '-c brokerverse.pii_kid=abc');
+    expect(c.options).toBe('-c TimeZone=Asia/Manila -c brokerverse.pii_kid=abc');
+    expect(c.connectionString).toBe('postgres://u:p@db.internal:5432/bv?sslmode=disable');
+    expect(poolConfig('postgres://u:p@h/bv', '-c x=1').options).toBe('-c x=1');
+    // the live pool: the keys are in every session, so the trigger can encrypt
+    const r = await one("SELECT current_setting('brokerverse.pii_kid', true) AS kid");
+    expect(r.kid).toBeTruthy();
+  });
+});
+
 describe('field-level encryption (14.13)', () => {
   it('stores TIN and government ID numbers encrypted with a blind index; the API answers them in clear', async () => {
     const row = await one('SELECT tin, tin_bidx, id_number, extra FROM clients WHERE id = $1', [clientId]);

@@ -11,7 +11,19 @@ pg.types.setTypeParser(1082, (v) => v);
 
 // Every session starts with the keys of the personal identifier encryption (lib/pii.js, migration 0277) as session
 // settings in the start-up packet: the database encrypts TIN, government ID and bank account numbers on write with them.
-export const pool = new Pool({ connectionString: config.databaseUrl, max: 10, options: sessionOptions() });
+// A DATABASE_URL may carry its own `options` (Railway: ?options=-c%20TimeZone%3DAsia%2FManila); the driver lets the URL
+// override the pool's options, so both are merged here and the URL is passed without its options parameter.
+export function poolConfig(url = config.databaseUrl, keys = sessionOptions(), max = 10) {
+  let connectionString = url;
+  let own = '';
+  try {
+    const u = new URL(url);
+    own = u.searchParams.get('options') || '';
+    if (own) { u.searchParams.delete('options'); connectionString = u.toString(); }
+  } catch { /* not a URL: passed through as is */ }
+  return { connectionString, max, options: [own, keys].filter(Boolean).join(' ') };
+}
+export const pool = new Pool(poolConfig());
 
 /**
  * Ambient transaction (runInTransaction): while one is active in the current async context, query / one / many and
