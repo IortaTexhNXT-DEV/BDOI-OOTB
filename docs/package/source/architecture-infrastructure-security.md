@@ -1,12 +1,12 @@
 ---
 title: Architecture, Infrastructure, Security and Data Privacy
 subtitle: BrokerVerse OOTB
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: New modules (AML/CFT, BIR, operations and accounting, distribution, My Work, go-live workbench), integration framework and its connectors, encryption of personal identifiers at rest and masking by role, runtime theming and e-signatures, release pipeline, IC and NPC compliance registers
+change: Version 1.1.1: release figures aligned (packages B and G merged on 04 October 2026; backend suite of 104 test files). Version 1.1: new modules (AML/CFT, BIR, operations and accounting, distribution, My Work, go-live workbench), integration framework and its connectors, encryption of personal identifiers at rest and masking by role, runtime theming and e-signatures, release pipeline, IC and NPC compliance registers
 acronyms: OOTB=Out of the box; IC=Insurance Commission; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (Republic Act 10173); IRR=Implementing Rules and Regulations; DPO=Data Protection Officer; PIC=Personal information controller; PIP=Personal information processor; SPA=Single-page application; API=Application programming interface; RDS=Amazon Relational Database Service; EFS=Amazon Elastic File System; WAF=Web application firewall; CDN=Content delivery network; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; TOTP=Time-based one-time password; JWT=JSON Web Token; SoD=Segregation of duties; BIR=Bureau of Internal Revenue; DR=Disaster recovery; DEV=Development environment; SIT=System integration test; PRE-PROD=Pre-production environment; PROD=Production environment; UAT=User acceptance testing; AML=Anti-money laundering; CFT=Countering the financing of terrorism; AMLC=Anti-Money Laundering Council; EIS=Electronic Invoicing System; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; PII=Personally identifiable information; OIDC=OpenID Connect; CAB=Change advisory board
 ---
 
@@ -18,7 +18,7 @@ This document describes how BrokerVerse OOTB is built, how it can be hosted for 
 
 ## Sources and conventions
 
-The facts in this document come from the source code and configuration of branch `brokerverse-platform` on 04 October 2026 (backend in `backend/`, front end in `brokerverse/`), the two packages being merged into it (package B: Insurance Commission and data privacy compliance, with encryption and masking of personal data; package G: sales activities, quote covers and risk fields, supplier BIR Form 2307 and fixed asset disposal), the deployment package in `deploy/` (including `deploy/RELEASE_PIPELINE.md`), the GitHub workflows in `.github/workflows/`, `docker-compose.yml`, the onboarding guides in `docs/onboarding/` and the eleven Solution Architecture documents in `docs/architecture/` (version 1.2, 04 October 2026). Where a statement depends on package B or G it says so.
+The facts in this document come from the source code and configuration of branch `brokerverse-platform` on 04 October 2026 (backend in `backend/`, front end in `brokerverse/`), including the two packages merged into it that day (package B: Insurance Commission and data privacy compliance, with encryption and masking of personal data; package G: sales activities, quote covers and risk fields, supplier BIR Form 2307 and fixed asset disposal), the deployment package in `deploy/` (including `deploy/RELEASE_PIPELINE.md`), the GitHub workflows in `.github/workflows/`, `docker-compose.yml`, the onboarding guides in `docs/onboarding/` and the eleven Solution Architecture documents in `docs/architecture/` (version 1.2, 04 October 2026). Where a statement depends on package B or G it says so.
 
 - Statements without a label describe what the system does today.
 - **Recommended** marks a design choice, a size, a threshold or a procedure that iorta TechNXT advises but that is not built into the code or the deployment package. It must be confirmed by the broker and the hosting team.
@@ -613,7 +613,7 @@ Master > System Configuration > Audit Trail filters by record type, record, user
 
 | Practice | Current state |
 |---|---|
-| Code review | Pull requests run `ci.yml` (lint, the backend suite of 97 test files against PostgreSQL 16, front-end lint, tests and build, dependency audit); branch protection requires one approving review and the four checks; the Technical Reference gives the reviewer's checklist |
+| Code review | Pull requests run `ci.yml` (lint, the backend suite of 104 test files against PostgreSQL 16, front-end lint, tests and build, dependency audit); branch protection requires one approving review and the four checks; the Technical Reference gives the reviewer's checklist |
 | Tests | Backend integration tests with vitest and supertest on a real database; front-end tests with Jest |
 | Lint rules | `no-console` outside scripts, `no-unused-vars` and `eqeqeq` as errors |
 | Secure defaults | Production start-up checks; sample data off in production; routes authenticated unless declared public |

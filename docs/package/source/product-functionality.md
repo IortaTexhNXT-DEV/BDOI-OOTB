@@ -1,10 +1,10 @@
 ---
 title: Product Functionality
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
-change: Version 1.1: compliance (IC, NPC, AML), BIR returns, operations and accounting, distribution, integrations, branding and e-signatures, go-live and environment tools, My Work, Philippine masters
+change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (Test Summary Report 1.3). Version 1.1: compliance (IC, NPC, AML), BIR returns, operations and accounting, distribution, integrations, branding and e-signatures, go-live and environment tools, My Work, Philippine masters
 reviewed:
 approved:
 acronyms: OOTB=Out of the box; AMLC=Anti-Money Laundering Council; PSGC=Philippine Standard Geographic Code; EDD=Enhanced due diligence; PEP=Politically exposed person; COC=Certificate of cover; EIS=Electronic Invoicing System; CAS=Computerized accounting system; PDC=Post-dated cheque; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); CTPL=Compulsory Third Party Liability; APPA=Auto Passenger Personal Accident; LTO=Land Transportation Office; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial All Risks; KYC=Know your customer; RFQ=Request for quotation; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DSR=Data subject request; SoD=Segregation of duties; TOTP=Time-based one-time password; UAT=User acceptance test; SIT=System integration test; API=Application programming interface; RPO=Recovery point objective; RTO=Recovery time objective
@@ -24,7 +24,7 @@ For each module it gives what the module does, its key features, the Philippine 
 - Settings are named by their key in Master > Configuration, for example `claims.sla_days`. The value given is the delivered value; the broker can change it.
 - Money is in Philippine pesos (PHP). The business time zone is Asia/Manila.
 - **Recommended** marks advice from iorta TechNXT that is not built into the product.
-- The figures in this document come from the product (code, configuration and screens) and from the release test of 03 and 04 October 2026. Modules added after that test cycle (the compliance registers, the BIR returns, the operations and accounting extensions, distribution, integrations, branding and the go-live tools) are covered by their own automated tests; the counts in The product at a glance are those of the release test.
+- The figures in this document come from the product (code, configuration and screens), from the release test of 03 and 04 October 2026 and from the release verification of 04 October 2026 on the merged release (Test Summary Report 1.3); the counts in The product at a glance are those of the release verification.
 
 ## Version history
 
@@ -32,6 +32,7 @@ For each module it gives what the module does, its key features, the Philippine 
 |---|---|---|
 | 1.0 | 03 October 2026 | Issue for the release test |
 | 1.1 | 04 October 2026 | Added: Compliance Officer role; IC compliance (licence register and commission block, fit and proper, insurer authority, complaints, IC annual statement and production report); NPC breach register, masking by role and field encryption; My Work, the enterprise menu and the Help panel; Philippine reference masters (PSGC); Product Configurator rules in the business flow; audit trail screen; go-live data workbench, environment comparison, transaction reset, data masking and the release pipeline; branding and e-signatures; sales activities, quote wizard covers and risk fields from the Product Configurator, BIR Form 2307 for supplier payments, fixed asset disposals. Updated the integrations, disbursement, data privacy, administration, feature checklist and points to note |
+| 1.1.1 | 04 October 2026 | Release figures aligned with the release verification on the merged release (Test Summary Report 1.3): product at a glance (API routes, jobs, number series, release test, user manual), upload templates, performance observations |
 
 ## The product at a glance
 
@@ -41,12 +42,12 @@ For each module it gives what the module does, its key features, the Philippine 
 | Personas | 8 roles: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager, Compliance Officer (AML/CFT); IC compliance, complaints and privacy permissions given to the roles the broker chooses |
 | Screens | 173 menu screens checked per role in the release test |
 | Reports | 39 catalogue reports in Excel, CSV and PDF, plus dashboards and document outputs |
-| APIs | 868 registered API routes, documented in OpenAPI, a Postman collection and an Excel touchpoint list |
-| Scheduled jobs | 18 jobs in Asia/Manila time; the remittance schedules job and the overdue data subject request reminder are delivered switched off |
-| Number series | 61 document number series, counters only move forward |
-| Release test | 497 test cases (486 passed, 2 failed, 3 blocked, 6 not run, after the re-test of 03 October 2026); 717 automated business rule tests; a full UAT cycle of 371 business steps |
+| APIs | 1,356 registered API routes, documented in OpenAPI, a Postman collection and an Excel touchpoint list |
+| Scheduled jobs | 35 jobs in Asia/Manila time; 14 are delivered switched off (among them the remittance schedules job and the overdue data subject request reminder) |
+| Number series | 85 document number series, counters only move forward |
+| Release test | 629 test cases (617 passed, 1 failed, 3 blocked, 8 not run; Test Summary Report 1.3 of 04 October 2026); 1,113 automated backend tests in 104 files and 175 front-end tests in 33 suites, all passed on the merged release; a full UAT cycle of 433 business steps in 12 phases (2,168 API calls) and a go-live rehearsal of 52 checks on the final code |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
-| User documentation | User manual of 186 pages for the seven roles, seven role decks |
+| User documentation | User manual version 1.2 of 279 pages for the eight roles, seven role decks |
 
 # The end-to-end process
 
@@ -749,7 +750,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 **What it does.** Sets up the broker's organisation, reference data, users and rules, and keeps the record of who did what.
 
 - Masters: Company (letterhead, TIN, IC licence number), Branch, Insurance Company (credit and remittance terms, billing mode, placement and claims e-mails, IC certificate of authority), Line of Business, Product, Cover, Signatories, Vehicle, locations, designations and hierarchy, finance masters. Staff details (branch, designation, reporting to) are on the user record.
-- Uploads for masters and go-live data from about 40 templates (10 MB per file, 20,000 rows).
+- Uploads for masters and go-live data from 74 templates (10 MB per file, 20,000 rows).
 - Users and Access: User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews.
 - Master > Configuration: business parameters by business area, applied at once and audited; Master > Document Numbering with 61 series; Master > Schedules with run now and history; Master > System Settings with Theme and Branding.
 - Audit Trail of every create, update, approval, report run and sign-in, with before and after values.
@@ -839,7 +840,7 @@ Prices of optional services and day rates for change requests are in the commerc
 
 | Area | Capability |
 |---|---|
-| Observed in the release test | 2,116 API calls with database writes in 24 seconds, about 11 ms per call, on a single server; every screen loaded within 2.6 seconds |
+| Observed in the release verification | 2,168 API calls with database writes in 29 seconds, about 13 ms per call, on a single server started with the production settings; every screen loaded within 2.6 seconds |
 | Reference sizing | 200 named users, 80 concurrent and 50,000 policies a year on two API instances of 1 vCPU and 2 GB and a database of 2 vCPU and 8 GB |
 | Limits | Reports up to 50,000 rows per file; imports up to 20,000 rows per file |
 | Recommended | A load test with the broker's concurrent users and month-end volumes on the production-sized server before go-live |

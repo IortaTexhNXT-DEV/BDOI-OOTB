@@ -1,12 +1,12 @@
 ---
 title: OOTB Strategy and Playbook
 subtitle: iNXT BrokerVerse
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-change: Product at a glance, boundary, standard integrations, modules, optional services and roadmap updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, the integration framework, dealer programmes, branding, My Work and the Report Builder; new decisions on pricing of the new modules
+change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (product at a glance). Version 1.1: product at a glance, boundary, standard integrations, modules, optional services and roadmap updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, the integration framework, dealer programmes, branding, My Work and the Report Builder; new decisions on pricing of the new modules
 open_item: Owner decisions listed in the last chapter
 acronyms: AM=Account manager; AMLC=Anti-Money Laundering Council; CTPL=Compulsory third party liability; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; LTO=Land Transportation Office; AMC=Annual Maintenance Contract; AML=Anti-money laundering; API=Application programming interface; ARR=Annual recurring revenue; BIR=Bureau of Internal Revenue; CAB=Change advisory board; CEO=Chief executive officer; CR=Change request; DPA=Data Processing Agreement; Dev=Development environment; DPO=Data protection officer; DSO=Days sales outstanding; eFPS=Electronic Filing and Payment System; IC=Insurance Commission; KPI=Key performance indicator; L1/L2/L3=Support levels 1, 2 and 3; LOB=Line of business; LoA=Letter of Award; MSA=Master Services Agreement; NDA=Non-disclosure agreement; NPC=National Privacy Commission; OOTB=Out of the box; PHP=Philippine peso; PM=Project manager; RACI=Responsible, Accountable, Consulted, Informed; RCA=Root-cause analysis; SaaS=Software as a service; SH=Sales head; Pre-Prod=Pre-production environment; SIT=System integration test; SLA=Service level agreement; SMS=Short message service; SOW=Statement of work; UAT=User acceptance testing; USD=United States dollar; VAT=Value-added tax
 ---
@@ -57,10 +57,10 @@ Five rules follow from that definition:
 | Roles | 8: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager, Compliance Officer (AML/CFT) |
 | Philippine masters | Regions, provinces, cities and municipalities, barangays (PSGC 2Q 2026), ZIP codes, banks, ID types, salutations, holidays, the IC list of insurers |
 | Reports | Catalogue reports in Excel, CSV and PDF on the broker's letterhead, dashboards, the Report Builder over curated datasets, a nightly BI extract |
-| APIs | 1,291 documented API operations (OpenAPI file of the current build) |
-| Scheduled jobs | 32 jobs in Asia/Manila time, 35 with the IC and NPC compliance package |
+| APIs | 1,356 documented API operations (OpenAPI file of the current build) |
+| Scheduled jobs | 35 jobs in Asia/Manila time, 14 delivered switched off |
 | Connectors | SMS (Semaphore-style, Globe Labs-style, generic), Viber business messages, CTPL authentication and COC series, LTO feed, insurer API with a mapping per insurer, bank payment files (starter layouts for BDO, BPI, Metrobank, Landbank, UnionBank and a generic CSV), BIR EIS, AML screening provider; all delivered in test mode or switched off |
-| Release test | Release 1.0: 497 test cases (486 passed, 2 failed, 3 blocked, 6 not run, after the re-test of 03 October 2026); 717 automated business rule tests; a UAT cycle of 371 business steps. The Test Strategy, Test Plan and Test Summary Report give the figures of the current build |
+| Release test | Release 1.1 (release verification of 04 October 2026 on the merged release): 629 test cases (617 passed, 1 failed, 3 blocked, 8 not run); 1,113 automated backend tests and 175 front-end tests; a UAT cycle of 433 business steps and a go-live rehearsal of 52 checks. The Test Strategy, Test Plan and Test Summary Report give the detail |
 | Technology | React 18 web application, Node.js 22 API, PostgreSQL 16 database |
 | Documentation | User manual with a Help panel per screen (F1), role decks, reports book, data dictionary, technical reference, BRD, process flows, test strategy and plan, traceability matrix, dependency map, schedules and support runbooks |
 | In progress | Sales activity log, quote wizard covers and risk fields from the Product Configurator, supplier BIR Form 2307 and fixed asset disposal, being completed for the next release |

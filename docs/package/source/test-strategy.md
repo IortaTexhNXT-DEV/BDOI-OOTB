@@ -1,12 +1,12 @@
 ---
 title: Test Strategy
 subtitle: BrokerVerse OOTB product releases and broker implementations
-version: 1.0
+version: 1.0.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
-change: Initial issue: test levels, test types, environments by broker size, test data and masking, entry and exit criteria, defect management, CI gates, roles, tools and risks
+change: Version 1.0.1: release figures aligned (UAT scenario of 433 steps, go-live rehearsal of 52 checks). Version 1.0: initial issue: test levels, test types, environments by broker size, test data and masking, entry and exit criteria, defect management, CI gates, roles, tools and risks
 open_item: Load test on a production-sized server and external penetration test not yet run; both are go-live conditions of the first broker
 open_item_owner: iorta TechNXT QA lead
 acronyms: OOTB=Out of the box; QA=Quality assurance; CI=Continuous integration; API=Application programming interface; SIT=System integration test; UAT=User acceptance test; Pre-Prod=Pre-production environment; Dev=Development environment; RTM=Requirements traceability matrix; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; AMLC=Anti-Money Laundering Council; AML=Anti-money laundering; CFT=Countering the financing of terrorism; DPA=Data Privacy Act of 2012; PII=Personally identifiable information; WCAG=Web Content Accessibility Guidelines; CAB=Change advisory board; PSGC=Philippine Standard Geographic Code; CTPL=Compulsory third party liability; COC=Certificate of cover; EOPT=Ease of Paying Taxes Act; CAS=Computerized accounting system; EIS=Electronic Invoicing System; DAT=BIR validation data file
@@ -65,9 +65,9 @@ The Test Plan applies this strategy to one broker implementation (scope per modu
 |---|---|---|---|---|
 | Unit and component (front end) | Screen logic: menu permissions, help routes, number and date formats, form checks, rule editors, theme engine and contrast | jest through craco: `brokerverse/src/**/*.test.js`, `*.test.jsx` | Developers | Every pull request and push (CI) |
 | API and integration (backend) | Every business rule through the HTTP API against a real PostgreSQL 16 database: postings, approvals, permissions, regulatory rules, scheduled jobs, files produced | vitest with supertest: `backend/test/*.test.js`; each file builds the schema from the migrations and seeds it (`test/helpers.js`) | Developers | Every pull request and push (CI); before each release tag |
-| System integration (end to end) | The full broking cycle of a Philippine broker across roles, with one user per role, from set-up to month-end close and reports | `backend/scripts/uat-scenario.js` (about 371 steps, run log `docs/e2e/UAT_SCENARIO_RUN.md`); life-cycle plan `docs/e2e/E2E_TEST_PLAN.md`; screen check of every menu per role | iorta TechNXT QA | SIT cycles; each release candidate |
+| System integration (end to end) | The full broking cycle of a Philippine broker across roles, with one user per role, from set-up to month-end close and reports | `backend/scripts/uat-scenario.js` (433 steps in 12 phases on the merged release, run log `docs/e2e/UAT_SCENARIO_RUN.md`); life-cycle plan `docs/e2e/E2E_TEST_PLAN.md`; screen check of every menu per role | iorta TechNXT QA | SIT cycles; each release candidate |
 | User acceptance | The configured system works for the broker's people with the broker's data | `docs/onboarding/UAT_SCRIPTS.md` per role, plus broker scenarios agreed in discovery | Broker key users, supported by iorta TechNXT | UAT cycles 1 and 2 |
-| Go-live rehearsal | Configuration promotion, smoke test, transaction reset, migration with reconciliation, new and migrated business side by side, go-live lock | `npm run rehearsal:golive` (`backend/scripts/golive-rehearsal.js`, 51 checks, run log `docs/e2e/GOLIVE_REHEARSAL_RUN.md`) | iorta TechNXT migration lead and DevOps | In Pre-Prod before go-live; before each major release |
+| Go-live rehearsal | Configuration promotion, smoke test, transaction reset, migration with reconciliation, new and migrated business side by side, go-live lock | `npm run rehearsal:golive` (`backend/scripts/golive-rehearsal.js`, 52 checks, run log `docs/e2e/GOLIVE_REHEARSAL_RUN.md`) | iorta TechNXT migration lead and DevOps | In Pre-Prod before go-live; before each major release |
 | Environment comparison | Configuration and masters of two environments are mirrored apart from environment-specific values | Master > Go-Live Data Load > Compare environments, or `npm run compare:environments` (exit code 0 mirrored, 1 differences, 2 could not run) | DevOps, System Administrator | After each promotion: Dev or SIT to UAT, UAT to Production, Pre-Prod against Production |
 | Masking verification | A restored copy holds no unmasked e-mail address, mobile number or TIN | `npm run mask:data -- --verify-only` (exit code 4 when personal data is left) after `--execute` | DevOps, Data Protection Officer | Every copy of production data used outside Production |
 | Cutover verification | Production after the final load: counts and totals reconciled, trial balance and receivables control account agreed, lock on | Go-Live Data Load reconciliation workbook; smoke test of the deployment checklist | Migration lead, Accounting Manager | Cutover weekend |

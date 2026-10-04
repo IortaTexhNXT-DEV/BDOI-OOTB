@@ -1,12 +1,12 @@
 ---
 title: Competitive Battlecard
 subtitle: INTERNAL: not for clients
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT Corp.
 reviewed: To be completed
 approved: To be completed
-change: Position, proof points and limits updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, integrations, dealer programmes, branding, My Work and the Report Builder
+change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (proof points). Version 1.1: position, proof points and limits updated for AML/CFT, the IC and NPC registers, BIR forms and EOPT, integrations, dealer programmes, branding, My Work and the Report Builder
 open_item: Win and loss evidence, client references and any named competitor positioning to be verified before use
 acronyms: AE=Account executive; AML=Anti-money laundering; AMLC=Anti-Money Laundering Council; EIS=Electronic Invoicing System; EOPT=Ease of Paying Taxes Act; KYC=Know your customer; AMC=Annual Maintenance Contract; BIR=Bureau of Internal Revenue; CR=Change request; CTPL=Compulsory Third Party Liability; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EWT=Expanded withholding tax; IC=Insurance Commission; LOB=Line of business; OOTB=Out of the box; OR=Official receipt; PHP=Philippine peso; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; SoD=Segregation of duties; TCO=Total cost of ownership; UAT=User acceptance test
 ---
@@ -228,7 +228,7 @@ An in-house development team, a local software house, or a low-code platform, bu
 
 | Point | Show | Reference |
 |---|---|---|
-| Already built and tested | 497 test cases, 634 automated business-rule tests, 371-step end-to-end cycle | Test Summary Report |
+| Already built and tested | 629 test cases, 1,113 automated backend tests and 175 front-end tests, 433-step end-to-end cycle and 52-check go-live rehearsal on the final code | Test Summary Report |
 | Configure, not code | Master > Configuration by business area; Product Configurator; Document Numbering | Demo Script 0:51 Controls and data privacy; Implementation Approach |
 | Security controls already in place | Two-step verification, lockout, maker-checker, audit trail, OWASP mapping | Architecture, Infrastructure, Security and Privacy; Security Due Diligence Questionnaire |
 | Continuity | Mainstream technology (React, Node.js, PostgreSQL); optional source code escrow with the perpetual licence; broker can host | FAQ; Escrow Agreement |

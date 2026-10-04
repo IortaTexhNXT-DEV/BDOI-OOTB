@@ -1,11 +1,12 @@
 ---
 title: Security and Outsourcing Due Diligence
 subtitle: Pre-filled vendor questionnaire for BrokerVerse OOTB
-version: 1.0
-date: 03 October 2026
+version: 1.0.1
+date: 04 October 2026
 prepared: iorta TechNXT
 reviewed:
 approved:
+change: Version 1.0.1: release figures aligned with the release verification of 04 October 2026 (SDL-02 automated tests and UAT cycle, AUD-04 test cases). Version 1.0: initial issue
 open_item: Answers marked [to confirm] need a signed-off answer from iorta TechNXT management before the questionnaire is released to a broker
 acronyms: OOTB=Out of the box; IC=Insurance Commission; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); IRR=Implementing Rules and Regulations; DPO=Data Protection Officer; PIC=Personal information controller; PIP=Personal information processor; ISMS=Information security management system; ISO=International Organization for Standardization; SOC=System and Organization Controls; MFA=Multi-factor authentication; TOTP=Time-based one-time password; TLS=Transport Layer Security; KMS=Key management service; WAF=Web application firewall; RTO=Recovery time objective; RPO=Recovery point objective; PITR=Point-in-time recovery; SDLC=Secure development lifecycle; CI=Continuous integration; OWASP=Open Worldwide Application Security Project; SoD=Segregation of duties; CAB=Change advisory board; DR=Disaster recovery; PCI DSS=Payment Card Industry Data Security Standard; DEV=Development environment; SIT=System integration test; PRE-PROD=Pre-production environment; PROD=Production environment
 ---
@@ -178,7 +179,7 @@ This document is not legal advice. The broker's compliance officer and DPO decid
 | Ref | Question | Response | Answer | Evidence |
 |---|---|---|---|---|
 | SDL-01 | Is there a defined SDLC with code review | Partial | Pull requests run CI (lint, backend tests against PostgreSQL 16, front-end tests). Branch protection with required reviews is recommended and not yet enforced | AIS, Secure development lifecycle |
-| SDL-02 | What automated tests exist | Yes | 634 backend business-rule tests (03 October 2026), 43 front-end tests, a 371-step end-to-end UAT cycle with one user per role | TSR, Approach |
+| SDL-02 | What automated tests exist | Yes | 1,113 backend tests in 104 files and 175 front-end tests in 33 suites (04 October 2026, merged release), a 433-step end-to-end UAT cycle with one user per role and a 52-check go-live rehearsal | TSR, Approach |
 | SDL-03 | Do deployments run the tests | Partial | Gap: the deploy workflow does not run lint and tests on push; tests run on pull requests only. Remedy: restore test jobs as a dependency of deployment | AIS, CI/CD |
 | SDL-04 | Are coding standards documented | Yes | Naming, route registry, zod validation, error envelope, parameterised SQL, audit, settings, logging, lint rules (`no-console`, `eqeqeq`) | TR, Coding standards |
 | SDL-05 | Are secrets kept out of source code | Yes | No secret in the repository; `.env.example` files carry placeholders that production refuses | TR, Encryption and secrets |
@@ -227,7 +228,7 @@ This document is not legal advice. The broker's compliance officer and DPO decid
 | AUD-01 | Does the broker have a right to audit | Yes | Once a year on 30 days' notice, by the broker or an approved independent auditor under confidentiality; extra audits after a breach or when the NPC requires | DPA, Audits |
 | AUD-02 | What evidence is provided without an on-site audit | Yes | Policies, the penetration test summary, sub-processor certifications, monthly service reports, restore test records | DPA, Audits; PSS |
 | AUD-03 | Can regulators audit the provider | Partial | NPC: under the DPA audit clause. IC: disclosure to the IC is allowed; a direct examination right for the IC: [to confirm in the MSA] | MSA; DPA |
-| AUD-04 | Are the product's controls documented for the broker's auditors | Yes | AIS compliance checklist; PRCM; TSR with 497 test cases and traceability to automated tests | AIS; PRCM; TSR |
+| AUD-04 | Are the product's controls documented for the broker's auditors | Yes | AIS compliance checklist; PRCM; TSR with 629 test cases and traceability to automated tests | AIS; PRCM; TSR |
 
 # Open items before release to a broker
 

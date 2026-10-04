@@ -1,12 +1,12 @@
 ---
 title: FAQ and Objection Handling
 subtitle: iNXT BrokerVerse OOTB
-version: 1.1
+version: 1.1.1
 date: 04 October 2026
 prepared: iorta TechNXT
 reviewed: To be completed
 approved: To be completed
-change: Answers updated for AML/CFT, the IC and NPC compliance registers, BIR forms and EOPT invoices, integrations, dealer programmes, branding, My Work and the Report Builder; known limits revised
+change: Version 1.1.1: release figures aligned with the release verification of 04 October 2026 (test cases, automated tests, UAT cycle, go-live rehearsal). Version 1.1: answers updated for AML/CFT, the IC and NPC compliance registers, BIR forms and EOPT invoices, integrations, dealer programmes, branding, My Work and the Report Builder; known limits revised
 acronyms: AMC=Annual Maintenance Contract; AMLA=Anti-Money Laundering Act; AMLC=Anti-Money Laundering Council; CTR=Covered transaction report; STR=Suspicious transaction report; EDD=Enhanced due diligence; PEP=Politically exposed person; EIS=Electronic Invoicing System; CTPL=Compulsory third party liability; COC=Certificate of cover; LTO=Land Transportation Office; SMS=Short message service; API=Application programming interface; BIR=Bureau of Internal Revenue; CAS=Computerized Accounting System; CR=Change request; DPA=Data Privacy Act of 2012; DPO=Data protection officer; EOPT=Ease of Paying Taxes Act; EWT=Expanded withholding tax; IC=Insurance Commission; NPC=National Privacy Commission; OOTB=Out of the box; SoD=Segregation of duties; Dev=Development environment; Pre-Prod=Pre-production environment; SIT=System integration test; UAT=User acceptance test; VAT=Value-added tax
 ---
 
@@ -164,7 +164,7 @@ Every hosting option includes daily backups with point-in-time restore, and prod
 
 ## Has it been tested?
 
-Yes. For this release, 497 test cases were prepared and, after the re-test of 03 October 2026, 486 passed; the remaining 11 are 2 open Medium items, 3 cases that need a mail server and 6 not yet run, each tracked in the test workbook. The backend business-rule regression has 717 tests. An end-to-end UAT cycle of 371 business steps ran on a fresh database with one user per role, from set-up to month-end close. An external penetration test was not part of this cycle and is recommended before go-live.
+Yes. For this release, 629 test cases were prepared and, in the release verification of 04 October 2026, 617 passed; the remaining 12 are 1 open Medium item, 3 cases that need a mail server and 8 not yet run, each tracked in the test workbook. The backend regression has 1,113 automated tests and the front end 175, all passed on the merged release. An end-to-end UAT cycle of 433 business steps ran on a fresh database of the final code with one user per role, from set-up and customer due diligence to month-end close, and a go-live rehearsal of 52 checks passed between two environments. An external penetration test was not part of this cycle and is recommended before go-live.
 
 # Implementation
 
@@ -319,7 +319,7 @@ The onboarding fee percentage for subscription is an input that can be reduced a
 
 ## "Who are your other clients?"
 
-**Response:** [to confirm: the client references iorta TechNXT may name, and the reference call arrangement]. Until confirmed, offer the test evidence (497 test cases for this release), the documentation package and a proof-of-concept on the prospect's own examples during the workshop.
+**Response:** [to confirm: the client references iorta TechNXT may name, and the reference call arrangement]. Until confirmed, offer the test evidence (629 test cases for this release), the documentation package and a proof-of-concept on the prospect's own examples during the workshop.
 
 ## "What happens if iorta TechNXT is no longer there?"
 
