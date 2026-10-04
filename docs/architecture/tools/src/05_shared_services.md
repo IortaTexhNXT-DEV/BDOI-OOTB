@@ -34,7 +34,15 @@ This document describes the shared service components of BrokerVerse OOTB: the b
 | Validation, errors and responses | `lib/validate.js`, `lib/errors.js`, `lib/respond.js` | zod validation, error envelope, success envelope and paging |
 | Request context and logging | `lib/requestContext.js`, `lib/logger.js` | The signed-in user deep inside a request; pino logger with redaction |
 | Health | `lib/health.js`, `modules/system` | Readiness, liveness, version |
-| Database access | `db/pool.js`, `db/migrate.js` | Pool, `query`, `one`, `many`, `withTransaction`; migrations under an advisory lock |
+| Database access | `db/pool.js`, `db/migrate.js` | Pool, `query`, `one`, `many`, `withTransaction`, `runInTransaction`; migrations under an advisory lock |
+| Setting owners | `lib/settingOwners.js` | Keys changed only on their own screen (branding, company identity, premium taxes) |
+| Audit events | `lib/auditEvents.js`, `modules/audit` | The audit trail read back as business events with labels, old and new values, source |
+| Currency and addresses | `lib/currency.js`, `lib/address.js` | Base currency and dated exchange rates; Philippine address format with the region derived from the city or province |
+| Branding | `modules/branding/service.js`, front end `theme/runtime` | Theme, logo, sign-in picture, document and e-mail branding, brand packs; runtime CSS custom properties |
+| E-signatures | `modules/e-signatures` | Signature images with consent, versions, revocation; mapping of signatures to document slots |
+| Integration framework | `modules/integrations/framework` | Connectors in test or live mode, outbox with retries and backoff, inbox with signature check, adapters and fake provider |
+| Personal data protection (package B) | `lib/pii.js`, `lib/piiPolicy.js` | Field encryption of TIN, ID and bank account numbers with blind indexes; masking by role (`view:pii`); key rotation (`npm run pii:rotate`) |
+| Environment and go-live controls | `lib/environment.js`, `lib/goLiveLock.js` | Environment marker read by the masking tool; go-live lock read by the transaction reset |
 
 ## Configuration (src/config.js)
 
@@ -140,8 +148,8 @@ The storage functions keep an S3-like key space, so they can later be replaced b
 | Single execution | `runJob()` takes `pg_try_advisory_lock(hashtext('brokerverse.scheduled_job'), hashtext(code))` on a dedicated connection; if another instance holds it the run is skipped. A scheduled run is also skipped when a scheduled run of the same job already started in the same minute (clock skew between instances) |
 | Recording | Each executed run inserts `job_runs` (triggered by `schedule` or the user name) and updates `scheduled_jobs.last_run_at` and `last_status`; the handler output (JSON) or error is stored; a failure is also logged at error level with the job code and run id |
 | Manual run | Master > Schedules > Run now (`POST /api/schedules/{code}/run`); listing needs `read:schedules` |
-| Handlers | `renewalNotices`, `policyExpiry`, `quoteExpiry`, `receivableAgeing`, `dailyReports`, `emailOutbox`, `processRenewalQueue`, `renewalPipeline`, `collectionReminders`, `housekeeping`, `monthEndReminder`, `recurringJournals`, `accrualReversal`, `periodAutoSoftClose`, `bankAutoMatch`, `scheduledReport` |
-| Housekeeping | `jobs/housekeeping.js` deletes, in batches of 5,000 rows, job runs, sent and failed e-mails, sign-in history, expired or revoked refresh tokens, used or expired reset codes, read notifications and completed queue items older than the days in System Settings > Housekeeping (`housekeeping.*`; 0 keeps forever). The audit trail is kept unless `housekeeping.audit_log_days` is set, and never below seven years (document 10). |
+| Handlers | 32 seeded jobs (35 with package B) in `jobs/handlers.js` and the modules' own `jobs.js`, re-exported by the handlers file: renewals, expiries, ageing and reminders, e-mail and integration outboxes, My Work reminders, cover note expiry, PDC deposit due, claim document reminders, AML monitoring and KYC refresh, period-end jobs, bank matching, EIS outbox, lead assignment SLA, campaigns, BI extract, SMS notices and, with package B, licence, complaint and breach deadline reminders; plus `scheduledReport` for report schedules. The Technical Reference lists each job with its module and default state |
+| Housekeeping | `jobs/housekeeping.js` deletes, in batches of 5,000 rows, job runs, sent and failed e-mails, sign-in history, expired or revoked refresh tokens, used or expired reset codes, read notifications and completed queue items older than the days in System Settings > Housekeeping (`housekeeping.*`; 0 keeps forever). The audit trail is kept unless `housekeeping.audit_log_days` is set, and never below seven years (document 10). The operational tables of the integration framework, the EIS outbox and the go-live workbench are not yet purged (Gap, document 10). |
 
 ## Rate limiting and upload limits
 

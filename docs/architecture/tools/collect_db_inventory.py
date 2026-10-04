@@ -40,6 +40,7 @@ def main():
     snap['migrations'] = [{'name': a, 'appliedAt': b} for a, b in q('SELECT name, applied_at FROM schema_migrations ORDER BY name')]
     snap['settingsByGroup'] = {g: int(n) for g, n in q('SELECT "group", count(*) FROM app_settings GROUP BY 1 ORDER BY 1')}
     snap['numberSequences'] = [{'name': a, 'period': b, 'value': int(c)} for a, b, c in q('SELECT name, period, value FROM sequences ORDER BY 1, 2')]
+    snap['numberSeries'] = [dict(zip(['code', 'prefix', 'module', 'reset'], r)) for r in q("SELECT code, prefix, coalesce(module, ''), reset_rule FROM document_numbering WHERE active ORDER BY code")]
     snap['scheduledJobs'] = [dict(zip(['code', 'cron', 'handler', 'enabled'], r)) for r in q('SELECT code, cron, handler, enabled FROM scheduled_jobs ORDER BY id')]
     snap['indexCount'] = int(q("SELECT count(*) FROM pg_indexes WHERE schemaname = 'public'")[0][0])
     snap['uniqueIndexCount'] = int(q("SELECT count(*) FROM pg_indexes WHERE schemaname = 'public' AND indexdef LIKE 'CREATE UNIQUE%'")[0][0])

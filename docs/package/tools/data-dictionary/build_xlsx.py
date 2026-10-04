@@ -7,11 +7,13 @@ import gen
 import tables_meta as tm
 import pii
 
-OUT = '/home/user/BDOI-OOTB/docs/package/07_Technical/BrokerVerse_Data_Dictionary.xlsx'
+from ddpaths import WORKBOOK as OUT, psql, db_label, migration_files, MIGRATIONS, EXTRA_MIGRATIONS
+
+VERSION, DATE = '1.1', '04 October 2026'   # document version and date of this issue
 # Database read by dump_db.py / vals.py (DD_DB, default the loaded test database "golive"). DD_REFERENCE_ONLY=1 when it
 # was built with the migrations and the reference seed data only (SEED_SAMPLE_DATA=false): row counts are then those
 # of the reference data.
-DD_DB = os.environ.get('DD_DB', 'golive')
+DD_DB = db_label()
 REFERENCE_ONLY = os.environ.get('DD_REFERENCE_ONLY') == '1'
 DB_WORDS = 'reference data only' if REFERENCE_ONLY else 'loaded test database'
 D = gen.D
@@ -26,10 +28,7 @@ for _c in ('name', 'applied_at'):
 
 
 def q(sql):
-    out = subprocess.run(['su', 'postgres', '-c', f'psql -d {DD_DB} -AtF "\x1f" -c "{sql}"'], capture_output=True, text=True)
-    if out.returncode:
-        raise Exception(out.stderr)
-    return [l.split('\x1f') for l in out.stdout.split('\n') if l]
+    return psql(sql)
 
 
 TTYPE = {t: ty for t, ty in D['tables']}
@@ -161,8 +160,8 @@ for t in tables_sorted:
 
 # views: creating migration
 for v in VIEWS:
-    for f in sorted(__import__('os').listdir('/home/user/BDOI-OOTB/backend/src/db/migrations')):
-        txt = open('/home/user/BDOI-OOTB/backend/src/db/migrations/' + f).read().lower()
+    for f, full in migration_files():
+        txt = open(full).read().lower()
         if re.search(r'create (or replace )?view (public\.)?' + v + r'\b', txt):
             for row in table_rows:
                 if row[0] == v:
@@ -259,6 +258,8 @@ summary = [
     ['Database', f'PostgreSQL, schema public (database "{DD_DB}" built with the migrations and the reference seed data, no sample data)'
                  if REFERENCE_ONLY else f'PostgreSQL, schema public (loaded test database "{DD_DB}")'],
     ['Migrations applied', f"{len(q('select name from schema_migrations'))} (0001_core.sql to {q('select max(name) from schema_migrations')[0][0]})"],
+    *([['  of which from branches being merged', ', '.join(f for f, full in migration_files() if not full.startswith(MIGRATIONS))]]
+      if EXTRA_MIGRATIONS else []),
     ['Tables', len(base_tables)],
     ['Views', len(VIEWS)],
     ['Columns in tables', n_cols_tables],
@@ -301,7 +302,7 @@ ws = wb.active
 ws.title = 'Summary'
 ws.append(['BrokerVerse OOTB: Data Dictionary', ''])
 ws['A1'].font = Font(bold=True, size=14, color='0F4761', name='Segoe UI')
-ws.append(['iorta TechNXT, version 1.0, 03 October 2026', ''])
+ws.append([f'iorta TechNXT, version {VERSION}, {DATE}', ''])
 ws['A2'].font = Font(italic=True, size=9, name='Segoe UI')
 ws.append(['', ''])
 ws.append(['Item', 'Value'])

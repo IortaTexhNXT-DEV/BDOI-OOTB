@@ -45,8 +45,7 @@
 <text text-anchor="start" x="355" y="-40.5" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
 <text text-anchor="start" x="391" y="-40.5" font-family="Nunito" font-size="10.00">commission_id</text>
 <text text-anchor="start" x="355" y="-23.5" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
-<text text-anchor="start" x="391" y="-24.5" font-family="Nunito" font-size="10.00">journal_id</text>
-<text text-anchor="start" x="436" y="-24.5" font-family="Nunito" font-size="10.00" fill="#c0392b">*</text>
+<text text-anchor="start" x="391" y="-23.5" font-family="Nunito" font-size="10.00">journal_id</text>
 <text text-anchor="start" x="355" y="-6.5" font-family="Nunito" font-size="10.00" fill="#0065b3">FK</text>
 <text text-anchor="start" x="391" y="-6.5" font-family="Nunito" font-size="10.00">policy_id</text>
 <polygon fill="none" stroke="#0065b3" points="351,0 351,-87 477,-87 477,0 351,0"/>

@@ -45,6 +45,7 @@ Every job run takes a PostgreSQL session advisory lock keyed on the job code (`p
 | Reruns | A month-end close run executed again first reverses its own earlier journals; the go-live opening balance load for the same date replaces the earlier load. |
 | Client retries | The front end retries a request once after refreshing an expired access token. Other failed requests are not retried automatically; the user repeats the action. POST requests carry no idempotency keys, so a save that timed out but succeeded can be repeated by the user; the uniqueness rules above prevent the most harmful duplicates. |
 | E-mail | Queued in the database and sent by the outbox job with up to 5 attempts; an SMTP outage delays e-mail but does not fail a business transaction. |
+| Integration outbox | Messages to third parties are queued in the business transaction and sent by the `integration-outbox` job with exponential backoff; a provider outage never fails a business operation; rows stuck in `processing` longer than `integrations.stuck_minutes` are queued again; each business event carries an idempotency key. |
 | Renewal notice queue | `job_queue` items are retried by the `renewal-queue` job; stale items are picked up again. |
 | Database failover | During an RDS Multi-AZ failover (typically 60 to 120 s) open connections fail; requests in that window return 500 or 503 and the pool reconnects afterwards. Readiness answers 503 while the database is unreachable, but the liveness probe keeps the containers running. |
 

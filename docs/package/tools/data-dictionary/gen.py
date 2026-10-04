@@ -56,6 +56,10 @@ def rule(t, c, dtype, default):
         return f"User who {w} the {e}", 'by'
     if c.endswith('_date') and dtype == 'date':
         return f"Date of the {words(c[:-5])}", 'date'
+    if c.endswith('_due_on') and dtype == 'date':
+        return f"Date by which the {words(c[:-7])} is due", 'date'
+    if c.endswith('_on') and dtype == 'date':
+        return f"Date the {e} was {words(c[:-3])}", 'date'
     if c.startswith('is_') or c.startswith('has_'):
         return f"Yes when the {e} is {words(c[3:] if c.startswith('is_') else c)}", 'bool'
     if c.endswith('_count'):

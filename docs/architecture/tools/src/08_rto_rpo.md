@@ -62,9 +62,9 @@ Summary proposal for the business: **Tier 1 RPO <= 15 minutes (5 minutes achieva
 | RDS Multi-AZ, backups 35 days, PITR | To be provisioned (`deploy/README.md`: daily snapshots with at least 30 days' retention, one restore test before go-live) |
 | Cross-region snapshot and EFS copies | To be provisioned |
 | EFS for `UPLOAD_DIR` with AWS Backup | To be provisioned (`deploy/README.md`: back up the upload volume) |
-| Secrets in Secrets Manager with escrow of `DATA_ENCRYPTION_KEY` | To be provisioned (`deploy/README.md`: keep the key with the backups) |
+| Secrets in Secrets Manager with escrow of `DATA_ENCRYPTION_KEY` and `PII_ENCRYPTION_KEY` (package B) | To be provisioned (`deploy/README.md`: keep the key with the backups) |
 | Infrastructure as code (CloudFormation / Terraform / CDK) | Not in the repository; recommended to meet the regional RTO |
-| Backend image registry and release pipeline | CI builds the image (`.github/workflows/ci.yml`) but does not push it; registry (for example ECR) and image retention to be set up |
+| Backend image registry and release pipeline | The release pipeline promotes one artefact per commit (`backend-<sha>`, kept 90 days), takes a pre-deploy backup and rolls back automatically (`deploy/RELEASE_PIPELINE.md`); a container registry is needed only for container platforms |
 | Restore runbook and restore tests | Document 09; first test before go-live (`deploy/README.md`) |
 | Monitoring and alerting to detect incidents quickly | Document 11; to be provisioned |
 
