@@ -27,7 +27,6 @@
 
     &:hover {
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-      transform: translateY(-2px);
     }
 
     .p-card-title {
@@ -82,38 +81,37 @@
         border-radius: 12px;
         font-size: 12px;
         font-weight: 500;
-        text-transform: uppercase;
         display: inline-block;
         width: fit-content;
 
         &.status-pending {
-          background-color: #e3f2fd;
-          color: #1976d2;
+          background-color: $brand-blue-050;
+          color: $brand-navy;
         }
 
         &.status-current {
-          background-color: #e8f5e9;
-          color: #388e3c;
+          background-color: $color-success-050;
+          color: $color-success;
         }
 
         &.status-overdue {
-          background-color: #ffebee;
-          color: var(--color-danger);
+          background-color: $color-danger-050;
+          color: $color-danger;
         }
 
         &.status-partiallypaid {
-          background-color: #fff3e0;
-          color: #f57c00;
+          background-color: $color-warning-050;
+          color: $color-warning;
         }
 
         &.status-committed {
-          background-color: #f3e5f5;
-          color: #7b1fa2;
+          background-color: $color-surface-muted;
+          color: $color-text;
         }
 
         &.status-escalated {
-          background-color: #ffccbc;
-          color: #bf360c;
+          background-color: $color-danger-050;
+          color: $color-danger;
         }
       }
 
@@ -126,13 +124,13 @@
         width: fit-content;
 
         &.level-1 {
-          background-color: #fff9c4;
-          color: #f57f17;
+          background-color: $color-warning-050;
+          color: $color-warning;
         }
 
         &.level-2 {
-          background-color: #ffe0b2;
-          color: #ef6c00;
+          background-color: $color-warning-050;
+          color: $color-warning;
         }
 
         &.level-3 {
@@ -162,7 +160,6 @@
         font-weight: 500;
         color: #7f8c8d;
         font-size: 12px;
-        text-transform: uppercase;
         letter-spacing: 0.5px;
       }
 
@@ -177,11 +174,11 @@
       }
 
       &.total {
-        background-color: #e3f2fd;
-        border: 2px solid #1976d2;
+        background-color: $brand-blue-050;
+        border: 2px solid $brand-blue;
 
         span {
-          color: #1976d2;
+          color: $brand-blue;
           font-size: 16px;
         }
       }
@@ -310,7 +307,6 @@
       border-bottom: 1px solid $color-border;
       color: #2c3e50;
       font-size: 13px;
-      text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
@@ -320,7 +316,6 @@
 
       &:hover {
         background-color: rgba(0, 122, 217, 0.05);
-        transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       }
     }
@@ -415,7 +410,6 @@
     &:hover {
       color: #007ad9;
       background-color: rgba(0, 122, 217, 0.08);
-      transform: translateY(-1px);
       box-shadow: 0 2px 8px rgba(0, 122, 217, 0.2);
     }
 
@@ -456,7 +450,6 @@
       font-size: 13px;
       font-weight: 600;
       letter-spacing: 0.04em;
-      text-transform: uppercase;
     }
   }
 
@@ -465,12 +458,11 @@
     align-items: center;
     padding: 4px 10px;
     border-radius: 999px;
-    background: #dcfce7;
-    color: #166534;
+    background: $color-success-050;
+    color: $color-success;
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.03em;
-    text-transform: uppercase;
     white-space: nowrap;
   }
 
@@ -496,7 +488,6 @@
       font-size: 11px;
       font-weight: 600;
       letter-spacing: 0.04em;
-      text-transform: uppercase;
       padding-top: 8px;
       padding-bottom: 8px;
     }
@@ -577,13 +568,13 @@
   }
 
   .role-pill--lead {
-    background: #dcfce7;
-    color: #166534;
+    background: $color-success-050;
+    color: $color-success;
   }
 
   .role-pill--co {
-    background: #e5f5ff;
-    color: #3730a3;
+    background: $brand-blue-050;
+    color: $brand-navy;
   }
 
   .status-text {

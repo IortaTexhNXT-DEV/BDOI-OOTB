@@ -251,6 +251,7 @@ const AddRequestTable = () => {
             <Button
               label={t("pettyCash.save")}
               className="add__btn"
+              outlined
               onClick={() => {
                 handleapprove("save");
               }}
@@ -313,6 +314,7 @@ const AddRequestTable = () => {
             <Button
               label={t("pettyCash.save")}
               className="add__btn"
+              outlined
               onClick={() => {
                 formik.handleSubmit();
               }}

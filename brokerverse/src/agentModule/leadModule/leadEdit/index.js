@@ -43,13 +43,13 @@ const LeadEdit = ({ flow, action }) => {
                 width: '65px',
                 height: '65px',
                 borderRadius: '50%',
-                backgroundColor: '#FDB6B2',
+                backgroundColor: 'var(--bv-primary-050)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '24px',
                 fontWeight: 'bold',
-                color: '#D4635D'
+                color: 'var(--bv-secondary)'
               }}
             >
               {currentLeadDetails.firstName.charAt(0).toUpperCase()}

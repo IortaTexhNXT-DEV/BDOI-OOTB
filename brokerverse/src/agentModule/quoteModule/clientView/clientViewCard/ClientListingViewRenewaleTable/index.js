@@ -19,6 +19,7 @@ import { notifyWarn } from "../../../../../utility/dialogs";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import { useFormatCurrency } from "../../../../../hooks/useFormatCurrency";
 import logger from "../../../../../utility/logger";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const Index = ({ clientId, action }) => {
   const { t } = useTranslation();
@@ -503,7 +504,7 @@ const Index = ({ clientId, action }) => {
       return <Skeleton width="8rem" />;
     }
 
-    return <div className="category__text">{description.toUpperCase()}</div>;
+    return <div className="category__text">{description}</div>;
   };
 
   const renderType = (rowData) => {
@@ -512,7 +513,7 @@ const Index = ({ clientId, action }) => {
       return <Skeleton width="6rem" />;
     }
 
-    return <div className="category__text">{type.toUpperCase()}</div>;
+    return <div className="category__text">{statusLabel(type)}</div>;
   };
 
   const formatDate = (value) => {

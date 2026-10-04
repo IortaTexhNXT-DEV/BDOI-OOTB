@@ -238,11 +238,11 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                backgroundColor: '#0072d8',
+                                backgroundColor: 'var(--bv-primary)',
                                 gap: '8px',
                                 padding: '10px',
                                 color: '#fff',
-                                border: '1px solid #0072d8',
+                                border: '1px solid var(--bv-primary)',
                                 borderRadius: '6px',
                                 fontFamily: "Nunito, Arial, sans-serif",
                                 fontSize: '16px',
@@ -257,11 +257,11 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             style={{
                                 display: 'flex',
                                 alignItems: 'center',
-                                backgroundColor: '#0072d8',
+                                backgroundColor: 'var(--bv-primary)',
                                 gap: '8px',
                                 padding: '10px',
                                 color: '#fff',
-                                border: '1px solid #0072d8',
+                                border: '1px solid var(--bv-primary)',
                                 borderRadius: '6px',
                                 fontFamily: "Nunito, Arial, sans-serif",
                                 fontSize: '16px',
@@ -454,7 +454,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 type="submit"
                                 label="Submit"
                                 style={{
-                                    backgroundColor: '#0072d8',
+                                    backgroundColor: 'var(--bv-primary)',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '6px',
@@ -495,7 +495,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                             <div
                                 onClick={() => fileInputRef.current.click()}
                                 style={{
-                                    border: '2px dashed #0072d8',
+                                    border: '2px dashed var(--bv-primary)',
                                     padding: '20px',
                                     borderRadius: '10px',
                                     textAlign: 'center',
@@ -520,7 +520,7 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
                                 label="Upload"
                                 icon={<SvgUploadArrowIcon />}
                                 style={{
-                                    backgroundColor: '#0072d8',
+                                    backgroundColor: 'var(--bv-primary)',
                                     color: '#fff',
                                     border: 'none',
                                     borderRadius: '6px',

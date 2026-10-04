@@ -208,7 +208,6 @@ $tablet-md: 1024px;
 
     .highlight-label {
       font-size: 0.85rem;
-      text-transform: uppercase;
       letter-spacing: 0.08rem;
       color: #64748b;
       font-weight: 600;
@@ -329,7 +328,6 @@ $tablet-md: 1024px;
       font-size: 0.8rem;
       font-weight: 600;
       color: #64748b;
-      text-transform: uppercase;
       letter-spacing: 0.08rem;
     }
 
@@ -416,7 +414,8 @@ $tablet-md: 1024px;
         font-size: 0.875rem;
 
         .pi {
-          font-size: 2rem;
+          font-size: 1.25rem;
+          color: var(--color-text-muted);
         }
       }
 
@@ -800,7 +799,6 @@ $tablet-md: 1024px;
       h3 {
         font-size: 1.15rem;
         letter-spacing: 0.02em;
-        text-transform: uppercase;
         color: #e11d48;
       }
     }
@@ -817,12 +815,10 @@ $tablet-md: 1024px;
       width: fit-content;
       padding: 0.3rem 0.75rem;
       border-radius: 999px;
-      background: #e11d48;
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
+      background: $brand-blue-050;
+      color: $brand-navy;
+      font-size: 12px;
+      font-weight: 600;
     }
 
     .co-insurance-policy-pill {
@@ -835,7 +831,6 @@ $tablet-md: 1024px;
       font-size: 0.75rem;
       font-weight: 700;
       letter-spacing: 0.03em;
-      text-transform: uppercase;
       white-space: nowrap;
     }
 
@@ -860,7 +855,6 @@ $tablet-md: 1024px;
         font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.04em;
-        text-transform: uppercase;
         border: none;
         border-bottom: 1px solid #e2e8f0;
       }

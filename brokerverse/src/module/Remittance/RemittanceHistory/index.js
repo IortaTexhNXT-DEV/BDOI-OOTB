@@ -22,10 +22,10 @@ import "./index.scss";
 import { numberLocale } from "../../../utility/currencyConverter";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 const ACTION_STYLE = {
-  create: { icon: "pi pi-plus", color: "#4CAF50" },
-  approve: { icon: "pi pi-verified", color: "#4CAF50" },
+  create: { icon: "pi pi-plus", color: "var(--color-success)" },
+  approve: { icon: "pi pi-verified", color: "var(--color-success)" },
   reject: { icon: "pi pi-times", color: "var(--color-danger)" },
-  submit: { icon: "pi pi-send", color: "#2196F3" },
+  submit: { icon: "pi pi-send", color: "var(--bv-primary)" },
 };
 const HISTORY_COLUMNS = [
   { field: "referenceNo", header: "Reference No" },

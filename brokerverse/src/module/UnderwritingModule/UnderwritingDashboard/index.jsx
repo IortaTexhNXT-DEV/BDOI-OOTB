@@ -444,11 +444,11 @@ const UnderwritingDashboard = () => {
                 <div className="task-info">
                   <i
                     className={isOverdue(task) ? "pi pi-exclamation-triangle task-icon" : "pi pi-clock task-icon"}
-                    style={isOverdue(task) ? { color: "#FF9800" } : undefined}
+                    style={isOverdue(task) ? { color: "var(--color-warning)" } : undefined}
                   ></i>
                   <div>
                     <span className="task-title">{`${task.proposedInsured || "-"} (${task.productType || "-"})`}</span>
-                    <span className="task-meta">{`${task.caseId} • ${formatAppDate(task.requirementDue)}`}</span>
+                    <span className="task-meta">{`${task.caseId} · ${formatAppDate(task.requirementDue)}`}</span>
                   </div>
                 </div>
                 <Button icon="pi pi-eye" rounded text severity="info" size="small" onClick={() => openCase(task)} aria-label="View" tooltip="View" tooltipOptions={{ position: "top" }} />

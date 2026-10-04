@@ -146,9 +146,6 @@
           cursor: pointer;
           transition: transform 0.2s;
 
-          &:hover {
-            transform: translateY(-2px);
-          }
         }
 
         &.summary-stats {
@@ -392,24 +389,6 @@
     .p-tabview-panels {
       background: transparent;
       padding: 1.5rem 0;
-    }
-  }
-
-  .p-badge {
-    &.p-badge-danger {
-      background: #dc3545;
-    }
-  }
-
-  .p-tag {
-    &.p-tag-info {
-      background: #007bff;
-    }
-    &.p-tag-warning {
-      background: #ffc107;
-    }
-    &.p-tag-danger {
-      background: #dc3545;
     }
   }
 

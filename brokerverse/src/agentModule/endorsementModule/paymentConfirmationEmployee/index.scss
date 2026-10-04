@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .overall__endorsement__payment__confirmation {
   .p-card {
     background: #ffffff;
@@ -125,13 +126,11 @@
     gap: 8px;
     padding: 6px 14px;
     border-radius: 999px;
-    background: #047857;
-    color: #fff;
+    background: $color-success-050;
+    color: $color-success;
     font-family: "Nunito", Arial, sans-serif;
     font-size: 13px;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
   }
   .refund__message {
     color: #064e3b;

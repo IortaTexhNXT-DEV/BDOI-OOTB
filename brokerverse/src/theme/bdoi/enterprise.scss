@@ -1326,3 +1326,27 @@ small.p-error {
     background: inherit;
   }
 }
+
+// ---------------------------------------------------------------- outlined actions on screens with their own button classes
+// An action bar has one filled (primary) button; the others are outlined. Many older screens colour their header and
+// footer buttons through their own class names (add__btn, upload__btn, bulk_button_container...), which filled an
+// outlined button as well. Inside the content area an outlined button without a severity is drawn the same way on
+// every screen: white surface, the brand colour for the border and the text, a light brand tint on hover. Icon-only
+// buttons keep the row-action rules above.
+#{$shell} .p-button.p-button-outlined:not(.p-button-icon-only):not(.p-button-secondary):not(.p-button-success):not(.p-button-info):not(.p-button-warning):not(.p-button-help):not(.p-button-danger):not(.p-button-contrast) {
+  background: $color-surface;
+  border: 1px solid $brand-blue;
+  color: $brand-blue;
+  box-shadow: none;
+
+  .p-button-label,
+  .addtext {
+    color: inherit;
+  }
+
+  &:enabled:hover {
+    background: $brand-blue-050;
+    border-color: $brand-blue;
+    color: $brand-blue-600;
+  }
+}

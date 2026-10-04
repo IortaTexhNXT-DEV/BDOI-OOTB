@@ -156,7 +156,7 @@
 
             .satisfaction-visual {
               .pi-star-fill {
-                color: #F59E0B;
+                color: $color-warning;
               }
             }
 
@@ -171,7 +171,6 @@
             .kpi-label {
               font-size: 14px;
               color: $grey;
-              text-transform: uppercase;
               font-weight: 600;
             }
 
@@ -413,8 +412,8 @@
                     }
 
                     &.p-tag-warning {
-                      background: lighten(#F59E0B, 40%);
-                      color: darken(#F59E0B, 20%);
+                      background: $color-warning-050;
+                      color: $color-warning;
                     }
 
                     &.p-tag-danger {
@@ -456,7 +455,7 @@
                   }
 
                   &.p-badge-warning {
-                    background: #F59E0B;
+                    background: $color-warning;
                   }
 
                   &.p-badge-info {
@@ -479,7 +478,7 @@
                 }
 
                 &.warning .p-progressbar-value {
-                  background: #F59E0B;
+                  background: $color-warning;
                 }
 
                 &.info .p-progressbar-value {

@@ -16,6 +16,7 @@ import { Skeleton } from "primereact/skeleton";
 import { setPolicyHolderData } from "../../../../claimsModule/claimDetails/store/claimDetailsReducers";
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import { notifyError } from "../../../../../utility/dialogs";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const STATUS_CLASS_MAP = {
   processing: "company__status__type__green",
@@ -305,7 +306,7 @@ const LeadListingAllTable = ({ clientId }) => {
     const status = normalized?.status || "processing";
     const className = STATUS_CLASS_MAP[status] || STATUS_CLASS_MAP.processing;
 
-    return <div className={className}>{status.toUpperCase()}</div>;
+    return <div className={className}>{statusLabel(status)}</div>;
   };
 
   const renderViewEditButton = (rowData) => {

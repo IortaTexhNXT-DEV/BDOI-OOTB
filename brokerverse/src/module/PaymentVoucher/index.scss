@@ -1,3 +1,4 @@
+@import "../../theme/bdoi/tokens";
 @import "../../styles/responsive.scss";
 
 .overall__paymentvoucher__container {
@@ -108,8 +109,10 @@
     display: flex;
     align-items: center;
   }
+  // secondary header actions (bulk print, bulk upload, bulk disburse): outlined; Create stays the one filled button
   .bulk_button_container {
-    background-color: #0072d8;
+    background-color: $color-surface;
+    border: 1px solid $brand-blue;
     border-radius: 6px;
     // width: 100px !important;
     height: 38px;
@@ -119,7 +122,15 @@
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    color: #fff;
+    color: $brand-blue;
+
+    .addtext {
+      color: $brand-blue;
+    }
+
+    &:hover {
+      background-color: $brand-blue-050;
+    }
   }
   .filterbutton_container {
     display: flex;

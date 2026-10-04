@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 .remittance-history {
   padding: 1rem;
 
@@ -42,7 +43,7 @@
             }
 
             &.blue {
-              background: #2196f3;
+              background: $brand-blue;
             }
 
             &.green {
@@ -360,27 +361,6 @@
     .p-tabview-panels {
       background: transparent;
       padding: 1.5rem 0;
-    }
-  }
-
-  .p-badge {
-    &.p-badge-info {
-      background: #2196f3;
-    }
-  }
-
-  .p-tag {
-    &.p-tag-danger {
-      background: #f44336;
-    }
-    &.p-tag-warning {
-      background: #ff9800;
-    }
-    &.p-tag-info {
-      background: #2196f3;
-    }
-    &.p-tag-success {
-      background: #4caf50;
     }
   }
 

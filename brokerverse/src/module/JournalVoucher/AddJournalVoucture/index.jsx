@@ -466,7 +466,7 @@ const AddJournalVocture = () => {
       {buttonshow === 0 && (
         <div className="col-12 btn__view__Add__JV mt-2">
           {Math.abs(totalForeignAmount - totalLocalAmount) > 0.01 && (
-            <div className="mb-2" style={{ fontSize: 12, color: "#b42318" }}>
+            <div className="mb-2" style={{ fontSize: 12, color: "var(--color-danger)" }}>
               Debits and credits must be equal before the voucher can be submitted.
             </div>
           )}

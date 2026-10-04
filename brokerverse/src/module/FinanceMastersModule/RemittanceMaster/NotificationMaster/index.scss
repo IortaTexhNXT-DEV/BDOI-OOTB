@@ -138,21 +138,6 @@
     }
   }
 
-  .p-tag {
-    &.p-tag-danger {
-      background: #f44336;
-    }
-    &.p-tag-warning {
-      background: #ff9800;
-    }
-    &.p-tag-info {
-      background: #2196f3;
-    }
-    &.p-tag-success {
-      background: #4caf50;
-    }
-  }
-
   @media (max-width: 768px) {
     .config-grid {
       grid-template-columns: 1fr !important;

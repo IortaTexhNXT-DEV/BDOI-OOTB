@@ -46,7 +46,7 @@ const SchedulingDashboard = () => {
     try {
       const data = await remittanceService.listSchedules();
       setScheduledJobs(data.scheduledJobs || []);
-      setUpcomingEvents((data.upcomingEvents || []).map((e) => ({ ...e, icon: "pi pi-calendar", color: "#673AB7" })));
+      setUpcomingEvents((data.upcomingEvents || []).map((e) => ({ ...e, icon: "pi pi-calendar", color: "var(--bv-primary)" })));
       setJob(data.job || null);
       setTimeZone(data.timeZone || "");
     } catch (e) {

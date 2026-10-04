@@ -20,6 +20,7 @@ import {
 } from "../../store/branchMiddleware";
 import SvgIconeye from "../../../../../../assets/icons/SvgIconeye";
 import SvgEditicons from "../../../../../../assets/icons/SvgEditicons";
+import { statusLabel } from "../../../../../../utils/statusSeverity";
 
 const DepartMentList = ({ action, branchCode }) => {
   const { departmentList, depatmentView, getDepartmentPatch } =
@@ -206,7 +207,7 @@ const DepartMentList = ({ action, branchCode }) => {
           ></Column>
           <Column
             field="status"
-            body={(rowData) => rowData.status?.toUpperCase()}
+            body={(rowData) => statusLabel(rowData.status)}
             header="Status"
             headerStyle={headerStyle}
           ></Column>

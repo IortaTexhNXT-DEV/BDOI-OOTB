@@ -286,7 +286,7 @@ const CQOrderSummary = ({ action, flow }) => {
                     }}>Apex Assurance</div>
                     <div style={{
                       width: '10%', fontSize: 14,
-                      color: '#0072d8'
+                      color: 'var(--bv-primary)'
                     }}>20</div>
                     <div style={{
                       width: '20%', fontSize: 16, textAlign: 'end'
@@ -303,7 +303,7 @@ const CQOrderSummary = ({ action, flow }) => {
                       width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
                     }}>Liberty Shield Insurance</div>
                     <div style={{
-                      width: '10%', fontSize: 14, color: '#0072d8'
+                      width: '10%', fontSize: 14, color: 'var(--bv-primary)'
 
                     }}>30</div>
                     <div style={{
@@ -321,7 +321,7 @@ const CQOrderSummary = ({ action, flow }) => {
                       width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
                     }}>Sentinel Underwriters</div>
                     <div style={{
-                      width: '10%', fontSize: 14, color: '#0072d8'
+                      width: '10%', fontSize: 14, color: 'var(--bv-primary)'
 
                     }}>10</div>
                     <div style={{
@@ -346,7 +346,7 @@ const CQOrderSummary = ({ action, flow }) => {
                       width: '50%', textAlign: 'left', fontSize: 14, color: '#6c737f'
                     }}>Total</div>
                     <div style={{
-                      width: '10%', fontSize: 14, color: '#0072d8'
+                      width: '10%', fontSize: 14, color: 'var(--bv-primary)'
 
                     }}>60</div>
                     <div style={{

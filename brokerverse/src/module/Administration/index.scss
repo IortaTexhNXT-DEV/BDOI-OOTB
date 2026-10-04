@@ -168,7 +168,6 @@
   .dn__stat-label {
     font-size: 0.8rem;
     color: var(--text-color-secondary, #5f6b7a);
-    text-transform: uppercase;
     letter-spacing: 0.04em;
   }
 }
@@ -201,7 +200,6 @@
 
   .p-datatable-thead > tr > th {
     font-size: 0.8rem;
-    text-transform: uppercase;
     letter-spacing: 0.03em;
     color: var(--text-color-secondary, #5f6b7a);
     background: var(--surface-50, #f8fafc);

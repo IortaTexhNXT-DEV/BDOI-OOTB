@@ -378,8 +378,8 @@
       gap: 1rem;
 
       i {
-        font-size: 3rem;
-        color: #adb5bd;
+        font-size: 1.25rem;
+        color: var(--color-text-muted);
       }
 
       p {
@@ -664,7 +664,8 @@
 
       .empty-message {
         i {
-          font-size: 2.5rem;
+          font-size: 1.25rem;
+          color: var(--color-text-muted);
         }
 
         p {

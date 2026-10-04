@@ -70,7 +70,7 @@ const PolicyApprovalCard = ({ state }) => {
       <Card className="pt-5">
         <div className="policy__approval__card__title">{t("agent.waitingForPolicy")}</div>
         <div className="policy__approval__card__image__containe mt-4">
-          <StatusIllustration variant="waiting" size="8rem" />
+          <StatusIllustration variant="waiting" />
         </div>
         <div className="policy__approval__card__sub__text__container mt-3">
           <div className="policy__approval__card__sub__text">

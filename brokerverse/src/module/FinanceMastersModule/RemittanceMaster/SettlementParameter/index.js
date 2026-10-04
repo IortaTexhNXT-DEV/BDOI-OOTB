@@ -120,7 +120,7 @@ const SettlementParameterMaster = () => {
               onClick={handleClose}
               text aria-label="Back" tooltip="Back" tooltipOptions={{ position: "top" }} />
             <h1 className="page__title">Settlement Parameter Master</h1>
-            <span className="mode-badge">{mode?.toUpperCase() || "ADD"}</span>
+            <span className="mode-badge">{mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : "Add"}</span>
           </div>
           <BreadCrumb model={items} home={home} />
         </div>

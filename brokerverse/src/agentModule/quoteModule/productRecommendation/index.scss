@@ -1,3 +1,4 @@
+@import "../../../theme/bdoi/tokens";
 @import "../../../Color.scss";
 
 .coverage__container {
@@ -116,8 +117,8 @@
       background-color: #e8f4f8 !important;
       font-weight: 600 !important;
       font-size: 16px !important;
-      color: #1976d2 !important;
-      border: 2px solid #1976d2 !important;
+      color: $brand-blue !important;
+      border: 2px solid $brand-blue !important;
     }
   }
 
@@ -265,7 +266,6 @@
       font-family: "Nunito", Arial, sans-serif;
       padding: 2px 8px;
       border-radius: 6px;
-      text-transform: uppercase;
       letter-spacing: 0.2em;
     }
   }
@@ -318,7 +318,6 @@
       font-weight: 900;
       font-family: "Nunito", Arial, sans-serif;
       color: #94a3b8;
-      text-transform: uppercase;
       letter-spacing: 0.2em;
       text-align: center;
       line-height: 1.2;
@@ -352,15 +351,14 @@
     font-weight: 900;
     font-family: "Nunito", Arial, sans-serif;
     color: #0072d8;
-    text-transform: uppercase;
     letter-spacing: 0.5em;
     flex-shrink: 0;
   }
 
   .product__recommendation__alternatives__divider {
-    height: 2px;
+    height: 0;
     flex: 1;
-    background: linear-gradient(to right, rgba(0, 114, 216, 0.2), transparent);
+    border-top: 1px solid $color-border;
   }
 
   .product__recommendation__alternatives__trigger {
@@ -387,7 +385,6 @@
       font-size: 12px;
       font-weight: 900;
       font-family: "Nunito", Arial, sans-serif;
-      text-transform: uppercase;
       letter-spacing: 0.4em;
       color: #94a3b8;
       transition: color 0.2s;
@@ -485,7 +482,6 @@
       font-size: 9px;
       font-weight: 900;
       font-family: "Nunito", Arial, sans-serif;
-      text-transform: uppercase;
       letter-spacing: 0.2em;
       white-space: nowrap;
       box-shadow: 0 10px 15px -3px rgba(0, 114, 216, 0.3);
@@ -513,7 +509,6 @@
     font-size: 10px;
     font-weight: 900;
     font-family: "Nunito", Arial, sans-serif;
-    text-transform: uppercase;
     letter-spacing: 0.2em;
     color: #0072d8;
   }
@@ -604,7 +599,6 @@
       font-weight: 900;
       font-family: "Nunito", Arial, sans-serif;
       color: #0072d8;
-      text-transform: uppercase;
       letter-spacing: 0.2em;
       margin-bottom: 4px;
     }
@@ -680,7 +674,6 @@
         font-weight: 900;
         font-family: "Nunito", Arial, sans-serif;
         color: #94a3b8;
-        text-transform: uppercase;
         letter-spacing: 0.2em;
       }
 
@@ -696,7 +689,6 @@
       font-weight: 900;
       font-family: "Nunito", Arial, sans-serif;
       color: #1e293b;
-      text-transform: uppercase;
       letter-spacing: 0.05em;
     }
   }
@@ -711,7 +703,6 @@
       font-weight: 900;
       font-family: "Nunito", Arial, sans-serif;
       color: #94a3b8;
-      text-transform: uppercase;
       letter-spacing: 0.2em;
       margin-bottom: 4px;
     }
@@ -747,7 +738,6 @@
     font-weight: 900;
     font-size: 11px;
     font-family: "Nunito", Arial, sans-serif;
-    text-transform: uppercase;
     letter-spacing: 0.4em;
     transition: all 0.2s;
     cursor: pointer;
@@ -789,7 +779,6 @@
     color: #94a3b8;
     font-weight: 700;
     font-family: "Nunito", Arial, sans-serif;
-    text-transform: uppercase;
     font-size: 11px;
     letter-spacing: 0.3em;
     background: #f8fafc;

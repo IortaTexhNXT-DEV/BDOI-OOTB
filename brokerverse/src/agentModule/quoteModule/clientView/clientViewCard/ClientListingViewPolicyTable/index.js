@@ -22,6 +22,7 @@ import {
 import { formatDate as formatConfiguredDate } from "../../../../../utility/dateFormat";
 import { notifyWarn } from "../../../../../utility/dialogs";
 import { useFormatCurrency } from "../../../../../hooks/useFormatCurrency";
+import { statusLabel } from "../../../../../utils/statusSeverity";
 
 const normalizePolicyRecord = (policy) => {
   if (!policy) {
@@ -365,7 +366,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
     const normalized = normalizePolicyRecord(rowData);
     const productType =
       normalized?.quotation?.productType || "MOTOR COMPREHENSIVE";
-    return <div className="category__text">{productType.toUpperCase()}</div>;
+    return <div className="category__text">{productType}</div>;
   };
 
   const renderPolicyNumber = (rowData) => {
@@ -410,7 +411,7 @@ const LeadListingAllTable = ({ action, clientId }) => {
             : "company__status__type__red"
         }
       >
-        {paymentStatus.toUpperCase()}
+        {statusLabel(paymentStatus)}
       </div>
     );
   };

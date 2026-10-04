@@ -287,11 +287,10 @@ function PolicyReceipts() {
           onClick={handlePrintAll}
           disabled={!currentReceiptId || printLoading || loading}
           loading={printLoading}
+          outlined
           style={{
             minWidth: "150px",
             padding: "10px 20px",
-            backgroundColor: "#28a745",
-            borderColor: "#28a745",
           }}
         />
         <Button
@@ -308,8 +307,6 @@ function PolicyReceipts() {
           style={{
             minWidth: "160px",
             padding: "10px 20px",
-            backgroundColor: "#198754",
-            borderColor: "#198754",
           }}
         />
       </div>

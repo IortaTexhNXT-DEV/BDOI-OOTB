@@ -987,7 +987,7 @@ const CoverageDetailedView = () => {
                     href={additionalPolicyData.policyDocument}
                     target="_blank"
                     rel="noopener noreferrer"
-                    style={{ color: "#007bff", textDecoration: "underline" }}
+                    style={{ color: "var(--bv-primary)", textDecoration: "underline" }}
                   >
                     {t("coverageDetailsReview.viewDocument")}
                   </a>

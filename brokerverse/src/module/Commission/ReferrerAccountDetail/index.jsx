@@ -156,7 +156,7 @@ const ReferrerAccountDetail = () => {
       onRowClick={clickable ? (e) => openLineDrawer(e.data) : undefined}
     >
       <Column field="policyNo" header="POLICY" />
-      <Column field="productInsurer" header="PRODUCT • INSURER" />
+      <Column field="productInsurer" header="Product / insurer" />
       <Column field="cycle" header="CYCLE" />
       <Column field="comsub" header="COMSUB" body={comsubBody} />
       <Column field="wht" header="WHT" body={(r) => formatAmount(r.wht)} />
@@ -220,8 +220,8 @@ const ReferrerAccountDetail = () => {
         </div>
         <h1>{referrer.name}</h1>
         <p className="meta">
-          WHT: {referrer.whtType || "—"} • Bank:{" "}
-          {referrer.bankAccount || "Not on file"} •{" "}
+          WHT: {referrer.whtType || "—"} · Bank:{" "}
+          {referrer.bankAccount || "Not on file"} ·{" "}
           {referrer.policiesCount} policies on the book
         </p>
         <label className="wht-toggle">
@@ -278,7 +278,7 @@ const ReferrerAccountDetail = () => {
           <div className="actions">
             <Button
               label={`Approve ${actions.approveCount}`}
-              className="p-button-sm approve-btn"
+              className="p-button-sm p-button-outlined approve-btn"
               disabled={!actions.approveCount || actionLoading || Boolean(payoutBlocked)}
               tooltip={payoutBlocked || undefined}
               tooltipOptions={{ showOnDisabled: true }}

@@ -240,7 +240,7 @@ const CustomerInfoFire = ({ action }) => {
         <div className="customer__info__main__title">{t("agent.leads")}</div>
         <Card className="mt-4">
           <div style={{ textAlign: "center", padding: "2rem" }}>
-            <i className="pi pi-times-circle" style={{ fontSize: "2rem", color: "var(--color-danger)" }}></i>
+            <i className="pi pi-times-circle" style={{ fontSize: "1.25rem", color: "var(--color-danger)" }}></i>
             <p style={{ marginTop: "1rem", color: "var(--color-danger)" }}>{quotationLoadError}</p>
             <Button label={t("agent.returnToQuoteListing")} onClick={() => navigate("/agent/quotelisting")} className="mt-3" />
           </div>

@@ -42,7 +42,6 @@
         transition: transform 0.2s ease, box-shadow 0.2s ease;
 
         &:hover {
-          transform: translateY(-2px);
           box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
         }
 
@@ -56,7 +55,8 @@
           gap: 1rem;
 
           .card-icon {
-            font-size: 2.5rem;
+            font-size: 1.25rem;
+            color: var(--color-text-muted);
             padding: 1rem;
             border-radius: 50%;
 
@@ -169,7 +169,6 @@
             &:hover:not(:disabled) {
               background: #218838;
               border-color: #1e7e34;
-              transform: translateY(-1px);
               box-shadow: 0 4px 12px rgba(40, 167, 69, 0.4);
             }
 
@@ -225,11 +224,11 @@
         }
 
         .view-details-button {
-          background: #e3f2fd;
-          color: #1976d2;
+          background: $brand-blue-050;
+          color: $brand-blue;
 
           &:hover {
-            background: #bbdefb;
+            background: var(--bv-primary-100);
           }
         }
 
@@ -508,25 +507,6 @@
     font-weight: 500;
     font-size: 0.75rem;
 
-    &.p-tag-success {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    &.p-tag-info {
-      background: #d1ecf1;
-      color: #0c5460;
-    }
-
-    &.p-tag-warning {
-      background: #fff3cd;
-      color: #856404;
-    }
-
-    &.p-tag-danger {
-      background: #f8d7da;
-      color: #721c24;
-    }
   }
 
   // Responsive Design

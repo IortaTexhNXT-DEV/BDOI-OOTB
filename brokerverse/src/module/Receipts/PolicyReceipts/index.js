@@ -575,12 +575,12 @@ const PolicyReceipts = () => {
   const headerActions = (
     <>
       <div className="filter_bulk_button_container">
-        <Button type="button" className="bulk_button_container" onClick={handleModal}>
+        <Button type="button" className="bulk_button_container" outlined onClick={handleModal}>
           <span className="addtext">{t("accounts.receipts.bulkPrint")}</span>
         </Button>
       </div>
       <div className="filter_bulk_button_container">
-        <Button type="button" className="bulk_button_container" onClick={handleBulkUploadModal}>
+        <Button type="button" className="bulk_button_container" outlined onClick={handleBulkUploadModal}>
           <span className="addtext">{t("accounts.receipts.bulkUpload")}</span>
         </Button>
       </div>
@@ -599,8 +599,8 @@ const PolicyReceipts = () => {
       {policyId && (
         <div
           style={{
-            backgroundColor: "#e3f2fd",
-            border: "1px solid #1976d2",
+            backgroundColor: "var(--color-surface-muted)",
+            borderLeft: "3px solid var(--bv-primary)",
             borderRadius: "8px",
             padding: "12px 16px",
             marginBottom: "16px",
@@ -609,7 +609,7 @@ const PolicyReceipts = () => {
             gap: "8px",
           }}
         >
-          <span style={{ color: "#1976d2", fontWeight: "500" }}>
+          <span style={{ color: "var(--color-text)", fontWeight: "500" }}>
             {t("accounts.receipts.filteredByPolicyId")} {policyId}
           </span>
           <button
@@ -617,7 +617,7 @@ const PolicyReceipts = () => {
             style={{
               background: "none",
               border: "none",
-              color: "#1976d2",
+              color: "var(--bv-primary)",
               cursor: "pointer",
               textDecoration: "underline",
               fontSize: "14px",

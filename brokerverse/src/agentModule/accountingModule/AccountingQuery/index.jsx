@@ -609,7 +609,7 @@ const AccountingQuery = () => {
           <div className="empty-message">
             <i
               className="pi pi-search"
-              style={{ fontSize: "3rem", color: "#6c757d" }}
+              style={{ fontSize: "1.25rem", color: "var(--color-text-muted)" }}
             ></i>
             <p>
               {t("accounting.noEntriesHint")}
