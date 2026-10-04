@@ -76,6 +76,8 @@ DOCUMENTS = [
     ('schedules-and-batch-jobs.md', DELIVERY, 'BrokerVerse_Schedules_and_Batch_Jobs', None),
     ('test-summary.md', DELIVERY, 'BrokerVerse_Test_Summary_Report', None),
     ('ph-regulatory-compliance-matrix.md', DELIVERY, 'BrokerVerse_Philippine_Regulatory_Compliance_Matrix', None),
+    ('brd.md', DELIVERY, 'BrokerVerse_Business_Requirements_Document', 'brd_pfd_widths.py'),
+    ('process-flows.md', DELIVERY, 'BrokerVerse_Process_Flow_Document', 'brd_pfd_widths.py'),
     # 06 Support
     ('production-support.md', SUPPORT, 'BrokerVerse_Production_Support_Approach_and_Standards', None),
     ('business-continuity-and-disaster-recovery.md', SUPPORT, 'BrokerVerse_Business_Continuity_and_Disaster_Recovery_Plan', None),

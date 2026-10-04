@@ -2,7 +2,7 @@
 
     python3 build_project_templates_xlsx.py ../05_Delivery
 
-  BrokerVerse_Fit_Gap_Register.xlsx   Instructions, Register, Lists
+  BrokerVerse_Fit_Gap_Register.xlsx   Instructions, Register, Product Gaps Closed, Lists
   BrokerVerse_RAID_Log_Template.xlsx  Instructions, Summary, Risks, Assumptions, Issues, Dependencies, Lists
 
 The classes and fields follow the Implementation Approach and Plan (fit-gap classes Fit, Configure, Procedure, Gap;
@@ -84,6 +84,66 @@ def instructions(ws, title, intro, rows):
     ws.auto_filter.ref = None
 
 
+# Product gaps of the PH process fit assessment (catalogue IDs of build_fit_assessment_xlsx.py) and the module that
+# closes each one in the release of 04 October 2026; 'In development' when the work is on its development branch.
+CLOSED = [
+    ('1.01', 'Client onboarding, KYC and AML', 'Individual client record with Philippine address, mobile and TIN', 'Client created only at first policy; location masters not the full PSGC list', 'Closed', 'Operations > Clients > Onboard client; PSGC masters (Master > Location)', 'BR-01-001, BR-15-011'),
+    ('1.02', 'Client onboarding, KYC and AML', 'Corporate client with authorised signatories', 'No signatory or board resolution record', 'Closed', 'Onboard client > Add signatory (aml)', 'BR-01-002'),
+    ('1.04', 'Client onboarding, KYC and AML', 'Risk-based CDD rating and EDD', 'No risk rating, EDD or KYC refresh', 'Closed', 'Compliance > Client Due Diligence, EDD Reviews, KYC Refresh (aml)', 'BR-01-005, BR-01-006, BR-01-011'),
+    ('1.05', 'Client onboarding, KYC and AML', 'Beneficial ownership of juridical clients', 'No beneficial owner capture', 'Closed', 'Onboard client > Add beneficial owner (aml)', 'BR-01-004'),
+    ('1.06', 'Client onboarding, KYC and AML', 'Sanctions, PEP and negative list screening', 'No screening', 'Closed', 'Compliance > Screening Lists, Screening Hits; provider adapter (aml)', 'BR-01-007, BR-01-008'),
+    ('1.07', 'Client onboarding, KYC and AML', 'Covered and suspicious transaction monitoring and AMLC reporting', 'No rules, alerts or AMLC file', 'Closed', 'Compliance > Transaction Alerts, AML Cases, AMLC Reports (aml)', 'BR-01-009, BR-01-010'),
+    ('2.04', 'Prospecting and sales pipeline', 'Sales activities on prospects', 'No activity log', 'In development', 'Sales activity log (in development); My Work tasks today', 'BR-02-010'),
+    ('2.05', 'Prospecting and sales pipeline', 'Lead assignment and team view', 'No assignment rules, queue or team view', 'Closed', 'Operations > Sales & Marketing > Lead Assignment (leads)', 'BR-02-004, BR-02-005'),
+    ('2.07', 'Prospecting and sales pipeline', 'Dealer, bank and affinity channels', 'No channel master or dealer report', 'Closed', 'Master > Insurance > Distribution Channels; Dealer Production report (channels)', 'BR-02-006'),
+    ('2.08', 'Prospecting and sales pipeline', 'Marketing campaigns to consenting clients', 'No campaign module', 'Closed', 'Operations > Sales & Marketing > Campaigns (campaigns)', 'BR-02-007'),
+    ('3.03', 'Quotation and insurer comparison', 'Client comparison and recommendation report', 'In development at assessment', 'Closed', 'Operations > Sales & Marketing > Comparison Reports (comparison-reports)', 'BR-03-008'),
+    ('3.10', 'Quotation and insurer comparison', 'Electronic signature on documents', 'In development at assessment', 'Closed', 'E-signatures mapped to documents (e-signatures); client acceptance by approval link', 'BR-15-010, BR-03-006'),
+    ('3.11', 'Quotation and insurer comparison', 'Product Configurator rules drive the quotation', 'Only the motor tariff fed quotations', 'Closed', 'Governing template, acceptance rules, rating factors, market mapping, document templates (product-configurator); quote wizard covers and risk fields in development', 'BR-03-004, BR-03-009, BR-03-010'),
+    ('4.07', 'RFQ, placement and reinsurance', 'Cover note while the policy is pending', 'No cover note', 'Closed', 'Operations > Cover Notes (cover-notes)', 'BR-04-007'),
+    ('4.08', 'RFQ, placement and reinsurance', 'Placement only with IC-authorised insurers', 'No certificate of authority check', 'Closed', 'Compliance > Insurance Commission > Insurer Authority; check at RFQ, firm order and issue (ic-compliance)', 'BR-04-008'),
+    ('4.10', 'RFQ, placement and reinsurance', 'Facultative reinsurance placement', 'No facultative slip workflow', 'Closed', 'Reinsurance > Facultative Placements (reinsurance)', 'BR-04-010'),
+    ('5.07', 'Policy issuance and motor', 'CTPL COC authentication and LTO', 'No provider or LTO integration', 'Closed', 'Operations > CTPL Authentication; connectors CTPL_AUTH, LTO_FEED (integrations)', 'BR-05-005'),
+    ('5.08', 'Policy issuance and motor', 'Brand-new vehicle programme with dealers and banks', 'No programme, dealer upload or bank letter', 'Closed', 'Operations > Sales & Marketing > Dealer Programmes (motor-programmes)', 'BR-05-008'),
+    ('5.09', 'Policy issuance and motor', 'Fleet schedules', 'No per-vehicle fleet policy', 'Closed', 'Operations > Fleet Schedules (fleet)', 'BR-05-009'),
+    ('5.12', 'Policy issuance and motor', 'Marine open cover', 'No open cover or declarations', 'Closed', 'Operations > Marine Open Covers (marine)', 'BR-05-010'),
+    ('6.04', 'Endorsements and cancellations', 'Computed return premium on cancellation', 'Return premium typed by the user', 'Closed', 'Operations > Policy Cancellation (cancellations)', 'BR-06-004, BR-06-005'),
+    ('6.05', 'Endorsements and cancellations', 'Short-period rate scale', 'No short-period table', 'Closed', 'Master > Insurance > Short-Period Rates (cancellations)', 'BR-06-004'),
+    ('7.07', 'Renewals and retention', 'Renewal notices by SMS or messaging app', 'No SMS or Viber gateway', 'Closed', 'Message Templates; SMS and Viber connectors (integrations)', 'BR-07-002'),
+    ('8.09', 'Billing, collection and receipts', 'Separate instalment invoices', 'No invoice per instalment', 'Closed', 'Accounts > Credit Control > Instalment Plans > Issue instalment invoices (credit-control)', 'BR-08-007'),
+    ('8.12', 'Billing, collection and receipts', 'Post-dated cheque register', 'PDCs not tracked', 'Closed', 'Accounts > Post-Dated Cheques (pdc)', 'BR-08-008'),
+    ('9.05', 'Remittance and direct bill', 'Bank payment files', 'No bank upload file', 'Closed', 'Accounts > Bank Payment Files; Master > Finance > Bank File Layouts (integrations)', 'BR-09-004'),
+    ('9.09', 'Remittance and direct bill', 'Insurer system integration by API', 'No insurer API connector', 'Closed', 'Master > System > Insurer Integration (integrations)', 'BR-09-008'),
+    ('10.09', 'Commission and incentives', 'Licence check before paying commission', 'Commission payable without a licence', 'Closed', 'Compliance > Insurance Commission > Licence Register; referrer licence check (ic-compliance)', 'BR-10-005'),
+    ('10.10', 'Commission and incentives', 'Overriding, profit and contingent commission', 'Booked by journal voucher', 'Closed', 'Commission > Insurer Overrides (insurer-overrides)', 'BR-10-007'),
+    ('11.03', 'Claims assistance', 'Claim document checklist and reminders', 'No checklist or reminders', 'Closed', 'Operations > Claim Documents; Master > Insurance > Claim Document Checklist (claim-documents)', 'BR-11-003'),
+    ('11.06', 'Claims assistance', 'Claims paid through the broker from the Accounting menu', 'Panel only on the claim screens', 'Closed', 'Accounts > Claims Settlements (claim-payments)', 'BR-11-007'),
+    ('11.08', 'Claims assistance', 'Motor repair estimates and letters of authority', 'No estimate or LOA workflow', 'Closed', 'Operations > Motor Claim Repairs; Master > Insurance > Repair Shops (motor-claims)', 'BR-11-006'),
+    ('12.10', 'Accounting and period end', 'Supplier invoices, input VAT and fixed assets', 'No AP sub-ledger or asset register', 'Closed', 'Accounts > Payables; Accounts > Fixed Assets (payables, fixed-assets); asset disposal and supplier 2307 in development', 'BR-12-006, BR-12-007'),
+    ('13.04', 'Taxes and BIR', 'Percentage tax 2551Q', 'No working paper', 'Closed', 'Accounts > Tax > Percentage Tax 2551Q (bir)', 'BR-13-003'),
+    ('13.07', 'Taxes and BIR', '0619-E and 1601-EQ returns', 'Not laid out as the BIR forms', 'Closed', 'Accounts > Tax > Withholding Returns (bir)', 'BR-13-005'),
+    ('13.08', 'Taxes and BIR', 'Annual information return 1604-E', 'No 1604-E alphalist', 'Closed', 'Accounts > Tax > Annual Alphalist 1604-E (bir)', 'BR-13-006'),
+    ('13.10', 'Taxes and BIR', 'Invoices under the EOPT Act', 'Registered invoice not fixed in the product', 'Closed', 'Accounts > Tax > Sales Invoices (bir)', 'BR-13-008'),
+    ('13.11', 'Taxes and BIR', 'CAS registration support', 'No books print set or CAS pack', 'Closed', 'Accounts > Tax > CAS Books and Documents (bir)', 'BR-13-009'),
+    ('13.12', 'Taxes and BIR', 'Electronic invoicing (EIS)', 'No EIS connector', 'Closed', 'Accounts > Tax > E-Invoicing (EIS) (bir); live after BIR certification', 'BR-13-010'),
+    ('13.13', 'Taxes and BIR', 'BIR DAT files', 'No DAT file', 'Closed', 'Accounts > Tax > BIR DAT Files (bir)', 'BR-13-007'),
+    ('14.02', 'IC and Data Privacy compliance', 'Licence renewal tracking', 'No licence calendar', 'Closed', 'Compliance > Insurance Commission > Licence Register (ic-compliance)', 'BR-14-001'),
+    ('14.03', 'IC and Data Privacy compliance', 'Fit and proper records', 'Kept outside the system', 'Closed', 'Compliance > Insurance Commission > Fit and Proper (ic-compliance)', 'BR-14-002'),
+    ('14.04', 'IC and Data Privacy compliance', 'IC annual statement in the IC format', 'No IC-format report', 'Closed', 'Compliance > Insurance Commission > IC Annual Statement (ic-compliance)', 'BR-14-003'),
+    ('14.05', 'IC and Data Privacy compliance', 'IC production report', 'IC layout not produced', 'Closed', 'Compliance > Insurance Commission > IC Production Report (ic-compliance)', 'BR-14-004'),
+    ('14.08', 'IC and Data Privacy compliance', 'Complaints handling (RA 11765)', 'No complaints register', 'Closed', 'Compliance > Insurance Commission > Complaints (ic-compliance)', 'BR-14-005'),
+    ('14.11', 'IC and Data Privacy compliance', 'Breach register and 72-hour tracker', 'No breach register', 'Closed', 'Compliance > Data Privacy (NPC) > Breach Register (privacy)', 'BR-14-009'),
+    ('14.12', 'IC and Data Privacy compliance', 'Masking of personal data by role', 'Identifiers shown in full', 'Closed', 'view:pii permission, privacy.masking_enabled; mask:data tool for copies', 'BR-14-010, BR-14-012'),
+    ('14.13', 'IC and Data Privacy compliance', 'Encryption of personal identifiers', 'No field-level encryption', 'Closed', 'Field encryption of TIN, ID and bank numbers (PII_ENCRYPTION_KEY)', 'BR-14-011'),
+    ('15.03', 'Reporting, administration and go-live', 'Ad hoc reporting and BI extract', 'No report designer or extract', 'Closed', 'Reports > Report Builder; BI extract (report-builder)', 'BR-15-003'),
+    ('15.07', 'Reporting, administration and go-live', 'Audit trail screen', 'Reworked screen in development', 'Closed', 'Master > System > Audit Trail (audit)', 'BR-15-007'),
+    ('15.08', 'Reporting, administration and go-live', 'Menu by role and task', 'Menu redesign in development', 'Closed', 'Enterprise side menu with Master sections; Help panel (F1)', 'BR-15-008'),
+    ('15.09', 'Reporting, administration and go-live', 'My Work inbox', 'In development at assessment', 'Closed', 'Operations > My Work (my-work)', 'BR-02-009'),
+    ('15.11', 'Reporting, administration and go-live', 'Branding, letterhead and e-signature', 'In development at assessment', 'Closed', 'Master > System Settings > Theme and Branding; e-signatures (branding, e-signatures)', 'BR-15-010'),
+    ('15.12', 'Reporting, administration and go-live', 'Philippine reference masters', 'In development at assessment', 'Closed', 'PSGC geography, banks, ID types, salutations, holidays, IC insurer list (migration 0250, seeds 12 and 69)', 'BR-15-011'),
+]
+
+
 # ------------------------------------------------------------------ fit-gap register
 def fit_gap():
     wb = Workbook()
@@ -108,6 +168,7 @@ def fit_gap():
                      ('Decision date', 'The date the class and solution were agreed (workshop or steering committee).'),
                      ('Decided by', 'The process owner, or the steering committee for a Gap.'),
                      ('Summary', 'The counts at the top of the Register sheet update themselves; report them in the weekly status report.'),
+                     ('Product Gaps Closed', 'The gaps of the product found in the PH process fit assessment (IDs of the PH Fit and ASEAN Rollout Assessment catalogue), with the module that now closes each one, or In development. Use it in discovery: a requirement on this sheet is Fit or Configure, not Gap. The BR column points to the Business Requirements Document.'),
                  ])
     reg = wb.create_sheet('Register')
     reg['A1'] = 'Lines by classification:'
@@ -123,8 +184,8 @@ def fit_gap():
          'Delivered: direct bill debit notes add VAT at the tax code direct_bill.commission_vat_code (VAT12-OUT).', '', '', 'Must have', '[Accounting Manager]', 'Decided', '', '[name]', 'Example: delete'),
         ('FG-BIL-002', 'Billing and collection', 'Example. Official receipts e-mailed to the client with the PDF when recorded.', 'Configure',
          'Switch on receipts.email_on_record (Master > Configuration > Billing, Collections & Credit > Receipts); SMTP mailbox set.', '', '1 hour', 'Should have', '[System Administrator]', 'Decided', '', '[name]', 'Example: delete'),
-        ('FG-REG-003', 'Regulatory reporting', 'Example. Quarterly report to the Insurance Commission in its prescribed format.', 'Gap',
-         'Figures from the financial statements and production reports; a report in the IC format needs a change request.', 'CR-[number]', '[days]', 'Could have', '[Compliance officer]', 'Under analysis', '', 'Steering committee', 'Example: delete'),
+        ('FG-REG-003', 'Regulatory reporting', 'Example. BIR returns filed from the system straight into eFPS.', 'Gap',
+         'BrokerVerse prepares the returns, DAT files and filing records; direct filing to eFPS or eBIRForms needs a change request.', 'CR-[number]', '[days]', 'Could have', '[Accounting Manager]', 'Under analysis', '', 'Steering committee', 'Example: delete'),
         ('FG-REM-004', 'Remittance', 'Example. Remittances above PHP 1,000,000.00 approved by the Accounting Manager.', 'Configure',
          'Authority Matrix, transaction type Remittance approval: Accounting PHP 1,000,000.00, Accounting Manager without limit (delivered default).', '', '0.5 hour', 'Must have', '[Accounting Manager]', 'Decided', '', '[name]', 'Example: delete'),
         ('FG-POL-005', 'Policy and servicing', 'Example. Brokers send the policy schedule by courier only.', 'Procedure',
@@ -150,6 +211,18 @@ def fit_gap():
         validate(reg, refs[name], col, 4, ROWS + 3)
     reg.conditional_formatting.add(f'D4:D{ROWS + 3}', CellIsRule(operator='equal', formula=['"Gap"'], fill=PatternFill('solid', fgColor='FCE4D6')))
     reg.freeze_panes = 'B4'
+    pg = wb.create_sheet('Product Gaps Closed', 2)
+    pg['A1'] = 'Product gaps closed in the release of 04 October 2026'
+    pg['A1'].font = TITLE_FONT
+    pg['A2'] = (f'{sum(r[4] == "Closed" for r in CLOSED)} of {len(CLOSED)} gaps of the PH process fit assessment are closed; '
+                f'in development: {sum(r[4] != "Closed" for r in CLOSED)}. Module names in brackets are the backend modules.')
+    pg['A2'].font = BODY_FONT
+    table(pg, ['Fit ID', 'Area', 'Requirement', 'Gap as assessed', 'Status', 'Closed by (screen and module)', 'BR reference'],
+          [8, 24, 36, 32, 13, 52, 20], CLOSED, start=4)
+    pg.auto_filter.ref = f'A4:G{4 + len(CLOSED)}'
+    pg.conditional_formatting.add(f'E5:E{4 + len(CLOSED)}', CellIsRule(operator='equal', formula=['"Closed"'], fill=PatternFill('solid', fgColor='DCEFE3')))
+    pg.conditional_formatting.add(f'E5:E{4 + len(CLOSED)}', CellIsRule(operator='equal', formula=['"In development"'], fill=PatternFill('solid', fgColor='FFF2CC')))
+    pg.freeze_panes = 'A5'
     wb.active = 1
     wb.save(os.path.join(OUT, 'BrokerVerse_Fit_Gap_Register.xlsx'))
 

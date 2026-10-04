@@ -1,12 +1,13 @@
 ---
 title: Product Functionality
 subtitle: iNXT BrokerVerse OOTB
-version: 1.0
-date: 03 October 2026
+version: 1.1
+date: 04 October 2026
 prepared: iorta TechNXT
+change: Version 1.1: compliance (IC, NPC, AML), BIR returns, operations and accounting, distribution, integrations, branding and e-signatures, go-live and environment tools, My Work, Philippine masters
 reviewed:
 approved:
-acronyms: OOTB=Out of the box; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); CTPL=Compulsory Third Party Liability; APPA=Auto Passenger Personal Accident; LTO=Land Transportation Office; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial All Risks; KYC=Know your customer; RFQ=Request for quotation; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DSR=Data subject request; SoD=Segregation of duties; TOTP=Time-based one-time password; UAT=User acceptance test; SIT=System integration test; API=Application programming interface; RPO=Recovery point objective; RTO=Recovery time objective
+acronyms: OOTB=Out of the box; AMLC=Anti-Money Laundering Council; PSGC=Philippine Standard Geographic Code; EDD=Enhanced due diligence; PEP=Politically exposed person; COC=Certificate of cover; EIS=Electronic Invoicing System; CAS=Computerized accounting system; PDC=Post-dated cheque; IC=Insurance Commission; BIR=Bureau of Internal Revenue; NPC=National Privacy Commission; DPA=Data Privacy Act of 2012 (RA 10173); CTPL=Compulsory Third Party Liability; APPA=Auto Passenger Personal Accident; LTO=Land Transportation Office; DST=Documentary stamp tax; LGT=Local government tax; FST=Fire service tax; VAT=Value-added tax; EWT=Expanded withholding tax; CWT=Creditable withholding tax; ATC=Alphanumeric tax code; SAWT=Summary Alphalist of Withholding Taxes; QAP=Quarterly Alphalist of Payees; SLSP=Summary List of Sales and Purchases; IAR=Industrial All Risks; KYC=Know your customer; RFQ=Request for quotation; OR=Official receipt; PV=Payment voucher; JV=Journal voucher; GL=General ledger; DSR=Data subject request; SoD=Segregation of duties; TOTP=Time-based one-time password; UAT=User acceptance test; SIT=System integration test; API=Application programming interface; RPO=Recovery point objective; RTO=Recovery time objective
 ---
 
 # Introduction
@@ -23,14 +24,22 @@ For each module it gives what the module does, its key features, the Philippine 
 - Settings are named by their key in Master > Configuration, for example `claims.sla_days`. The value given is the delivered value; the broker can change it.
 - Money is in Philippine pesos (PHP). The business time zone is Asia/Manila.
 - **Recommended** marks advice from iorta TechNXT that is not built into the product.
-- The figures in this document come from the product (code, configuration and screens) and from the release test of 03 and 04 October 2026. The data privacy registers, the e-mailing of receipts and invoices with PDF attachments, and approval notifications for every maker-checker flow were added after that test cycle.
+- The figures in this document come from the product (code, configuration and screens) and from the release test of 03 and 04 October 2026. Modules added after that test cycle (the compliance registers, the BIR returns, the operations and accounting extensions, distribution, integrations, branding and the go-live tools) are covered by their own automated tests; the counts in The product at a glance are those of the release test.
+- **(in development)** marks a capability being completed on its development branch in this release.
+
+## Version history
+
+| Version | Date | Change |
+|---|---|---|
+| 1.0 | 03 October 2026 | Issue for the release test |
+| 1.1 | 04 October 2026 | Added: Compliance Officer role; IC compliance (licence register and commission block, fit and proper, insurer authority, complaints, IC annual statement and production report); NPC breach register, masking by role and field encryption; My Work, the enterprise menu and the Help panel; Philippine reference masters (PSGC); Product Configurator rules in the business flow; audit trail screen; go-live data workbench, environment comparison, transaction reset, data masking and the release pipeline; branding and e-signatures; work in development. Updated the integrations, disbursement, data privacy, administration, feature checklist and points to note |
 
 ## The product at a glance
 
 | Item | BrokerVerse OOTB |
 |---|---|
 | Scope | Full broking cycle and broker accounting: prospects to renewals, billing to month-end close, BIR working papers |
-| Personas | 7 roles: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager |
+| Personas | 8 roles: System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager, Compliance Officer (AML/CFT); IC compliance, complaints and privacy permissions given to the roles the broker chooses |
 | Screens | 173 menu screens checked per role in the release test |
 | Reports | 39 catalogue reports in Excel, CSV and PDF, plus dashboards and document outputs |
 | APIs | 868 registered API routes, documented in OpenAPI, a Postman collection and an Excel touchpoint list |
@@ -114,7 +123,8 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Prospects for Motor, Fire and Allied Perils, Industrial All Risks and Employee Benefit, retail or corporate; corporate prospects require company name and TIN.
 - Bulk upload of prospects from a template (up to 1,000 rows per file) with row-level error report.
 - Lead statuses New, Contacted, Qualified, QuoteGenerated, Converted, Lost.
-- Client code CL- created at first policy issue; client view with Policy, Claim, Renewal and Endorsement tabs.
+- Client onboarding before the first policy (**Onboard client**): individual or juridical, government ID, TIN, PSGC address, signatories and beneficial owners (see AML/CFT compliance); otherwise the client code CL- is created at first policy issue; client view with Policy, Claim, Renewal, Endorsement and Data privacy tabs.
+- Sales activity log on prospects (calls, meetings, follow-ups) (in development); follow-up tasks today through My Work.
 - Consent per purpose recorded on the prospect and client screens (see Data privacy).
 
 | Aspect | Detail |
@@ -342,14 +352,14 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Personas | Accounting, Accounting Manager |
 | Key reports | Payables / Disbursement Register |
 | Controls | Voucher and cheque approval by a different user (`finance.maker_checker_enabled`); petty cash requests maker-checker; approval limits by Authority Matrix |
-| Integrations | Cheque printing; no bank payment file |
+| Integrations | Cheque printing; bank payment files (bulk credit, InstaPay, PESONet) through Accounts > Bank Payment Files |
 
 ## Remittance to insurers and direct bill
 
 **What it does.** Remits collected premium, net of commission, to each insurer by its share; for direct-bill policies, bills the broker's commission to the insurer.
 
 - Automated Processing creates draft remittances per insurer from collected, unremitted premium; due date from the insurer's Remittance Terms, else `remittance.default_due_days` (30).
-- Approval Workflow: each approver acts within the Remittance approval and Remittance settlement limits of the Authority Matrix (delivered: Accounting up to PHP 1,000,000, Accounting Manager without limit); cover during absence through User Management > Delegations.
+- Approval Workflow: each approver acts within the Remittance approval and Remittance settlement limits of the Authority Matrix (delivered: Accounting up to PHP 1,000,000, Accounting Manager without limit); cover during absence through Users and Access > Delegations.
 - Settlement: premium less commission less tax plus or minus adjustments gives the net settlement; the insurer payment voucher is raised in Disbursement.
 - Tracking, Statements, Reconciliation of bank transactions (tolerance PHP 0.50), Bulk Processing, Scheduling (due schedules run by the `remittance-schedules` job once switched on in Master > Schedules), Electronic Transfer records (InstaPay, PESONet, RTGS, wire), Exception Management, Adjustments, Notifications, History, Analytics.
 - Direct Bill Processing: commission debit notes (DN-) with 12% output VAT, 10% EWT and net cash expected; due 30 days later; collection with tax withheld; change of billing mode with a reason.
@@ -382,7 +392,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Philippine specifics | Withholding on comsub by payee type (`commission.wht_rate_by_type`: Agent 5%, Sub-agent 5%, External 10%); ATC per payee type |
 | Personas | Accounting pays; Sales & Marketing views its commission |
 | Key reports | Broker Commission Statement, Commission Dashboard |
-| Controls | Payable only after full collection (`commission.require_full_payment`) and with a bank account on file; approval of lines and payout by a second user |
+| Controls | Payable only after full collection (`commission.require_full_payment`) and with a bank account on file; approval of lines and payout by a second user; no approval or payout to an agent or sub-agent without an IC licence in force (`compliance.referrer_licence_check`, block as delivered) |
 | Integrations | Payout through Disbursement |
 
 ## Incentives
@@ -568,6 +578,10 @@ Every business event posts a balanced journal through its posting rule. On a co-
 
 - Product Templates with versions and statuses (Draft, Active, Inactive, Retired); motor template MOT-003-2025 with the CTPL and Auto Passenger PA tariff per vehicle class.
 - Coverage Builder, Rating Engine with Test Calculator, Acceptance Rules, Document Manager, Market Mapping, Risk Mapping, Product Analytics.
+- Rules applied in the business flow: the governing template of a quotation, broker slip, placement or policy (the template named on the record, else the motor pricing template `motor.pricing_template_code`, else the newest active template of the product or line) supplies its rating factors (multiplicative, discount or additive) and acceptance rules. A rule tests a risk field (vehicle age, use, class, sum insured, driver age, claims, fleet size, members, flood-prone location and others) and accepts, refers, declines or loads; a referred quotation waits for a user of the rule's authority role within the Underwriting referral limit of the Authority Matrix.
+- Market Mapping restricts the insurers approached for a product when `product.market_panel_enforced` is on.
+- Document templates per product (policy schedule, CTPL certificate, quotation slip, member enrolment) with a text layout of merge fields such as {{PolicyNumber}} and generated blocks such as {{#Premium}}, printed on the letterhead.
+- Quote wizard covers and risk fields taken from the Product Configurator (in development).
 
 ![Product Templates](/home/user/BDOI-OOTB/docs/package/source/manual-images/p-pc-templates.png)
 
@@ -575,7 +589,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 |---|---|
 | Philippine specifics | Delivered CTPL tariff per vehicle class, for example private cars PHP 610.40 (1 year) and PHP 1,660.40 (3 years), confirmed on 29 September 2026; Philippine lines of business and products |
 | Personas | Processing Team maintains; Sales & Marketing and Operations view |
-| Controls | Only active templates are used by the quotation screens |
+| Controls | Only active templates are used by the quotation screens; referrals approved within the authority limit; unknown merge fields refused when a layout is saved |
 
 ## Reports
 
@@ -646,13 +660,17 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Personal data export of a client or prospect, as JSON or Excel, noted on the request it answers.
 - Anonymisation of a client or prospect with a dry run first: personal fields are overwritten in the party, its prospects, policies, quotations, claims and slips, while amounts, numbers and dates stay for the books.
 - Overdue request reminder job (delivered switched off) notifies the data privacy team.
+- Breach Register (Compliance > Data Privacy (NPC)): incidents (PDB-), assessment against the NPC criteria, the 72-hour clock (`privacy.breach_notify_hours`) with hourly reminders, NPC and data subject notifications, closure and the annual security incident report.
+- Masking of personal identifiers by role: users without **View full personal identifiers** (`view:pii`) see TIN, ID numbers, mobile, e-mail, bank account and birth date partially masked on screens and in every Excel, CSV and PDF listing; unmasking on request is audited (`privacy.masking_enabled`, `privacy.pii_reveal_mode`).
+- Field encryption at rest of TIN, government ID numbers and bank account numbers with the environment key (`PII_ENCRYPTION_KEY`), exact-value search kept.
+- Masking tool for production copies used outside production (`npm run mask:data`): consistent pseudonyms, verification, refusal on production, evidence for the DPO.
 
 | Aspect | Detail |
 |---|---|
 | Philippine specifics | Data Privacy Act of 2012 and NPC rules; retention of insurance and tax records |
 | Personas | System Administrator and Operations hold the privacy permissions (`read:privacy`, `write:privacy`); the broker's DPO works the registers |
 | Controls | Anonymisation refused while policies are in force, bills or claims are open, commission is unpaid, endorsements are open, or within `privacy.retention_years` (10 years) after the last policy expiry; every action in the audit trail |
-| Integrations | Excel export |
+| Integrations | Excel export; masking tool for test and training copies |
 
 ## AML/CFT compliance
 
@@ -672,14 +690,69 @@ Every business event posts a balanced journal through its posting rule. On a co-
 | Controls | Policy issue and payouts stopped by an undecided or confirmed match; maker-checker on EDD approval; every decision with a reason in the audit trail; AML records kept `aml.record_retention_years` (5) years |
 | Integrations | List files (XML, CSV, XLSX); commercial screening provider API by configuration; report files filed by the broker in the AMLC portal |
 
+## Insurance Commission compliance and complaints
+
+**What it does.** Keeps the registers and reports the broker owes the Insurance Commission and handles complaints under RA 11765.
+
+- Licence Register: licences of the firm, officers, licensed individuals, agents, sub-agents and referrers with renewal status, documents, expiry calendar and reminders at 90, 60, 30, 15 and 7 days; commission held for an agent without a licence in force.
+- Fit and Proper: declarations, documents, review outcome and next review of directors and officers.
+- Insurer Authority: each insurer's IC certificate of authority and validity, checked when a request for quotation or firm order is sent and when a policy is issued (`compliance.insurer_authority_check` warn or block).
+- Complaints: intake by channel and category, acknowledgement and resolution deadlines (2, 7 or 45 days), automatic escalation, acknowledgement and resolution letters, referral to the IC, ageing and the regulator report.
+- IC Annual Statement: workbook of the annual statement from the ledger and production with checks, a configurable account mapping and the accountant confirmation sheet; IC Production Report by insurer and IC line.
+
+| Aspect | Detail |
+|---|---|
+| Philippine specifics | Insurance Code, IC rules on licensing, fit and proper and complaints handling; RA 11765 |
+| Personas | Users with `read:compliance` and `write:compliance` (System Administrator, Operations; Accounting reads); complaints handlers (`write:complaints`) and complaints officers (`approve:complaints`) |
+| Controls | Daily `compliance-reminders` and `complaints-deadlines` jobs; every step in the audit trail |
+| Integrations | Excel exports for the regulator |
+
+## My Work, menu and help
+
+**What it does.** Gives each user one worklist and a menu organised by task, with help on every screen.
+
+- My Work (Operations > My Work): My Items by category (quotations, requests for quotation, placements, renewals, premiums due, collection follow-ups, endorsements, claims, approvals, missing documents, tasks), My Team by reporting line with reassignment, My Tasks with reminders, Calendar; overdue and due-today counts.
+- Side menu in business order with Master in sections (Organization, Insurance, Location, Employees, Users and Access, Finance, System, Data Privacy, Go-Live and Data), menu search and skeleton loading of lists.
+- Help panel (**F1**): the manual section of the screen, the user manual PDF, the support desk's contacts, raise a support ticket, About BrokerVerse.
+
+## Philippine reference masters
+
+**What it does.** Delivers the reference data a Philippine broker needs.
+
+- Geography of the PSGC (2Q 2026): regions, provinces (the field is Province), cities and municipalities with their class and ZIP code, barangays on the address forms.
+- Philippine banks, government ID types, salutations, national holidays (used for working-day deadlines) and the list of insurers licensed by the IC.
+
+## Go-live data workbench and environments
+
+**What it does.** Loads the broker's go-live data, proves that environments hold the same configuration, and keeps test and personal data where they belong.
+
+- Go-Live Data Load: configuration workbook and migration workbook (clients, in-force policies, open receivables, open claims, GL opening balances); blank template or current data; upload and validate as a trial run; errors workbook; load in one transaction; reconciliation of the migration; history; go-live lock (`golive.locked`).
+- Compare environments: a configuration export against this environment, or two exports against each other; result Mirrored or Differences found, field by field, with environment-specific fields listed apart; comparison workbook; `npm run compare:environments` for the release pipeline.
+- Transaction reset (`npm run reset:transactions`): removes test transactions before go-live, keeps masters, settings and users, refused after the go-live lock.
+- Data masking of production copies (`npm run mask:data`, with `--remark-copy` and `--register-production`).
+- Release pipeline: one build promoted through Dev, SIT, UAT, Pre-Prod and Production with approvals, backup, forward-only migrations, smoke test and automatic rollback.
+- Audit Trail screen (Master > System > Audit Trail): every audited action by record type, record ID, user and dates.
+
+## Branding and e-signatures
+
+**What it does.** Presents the broker's brand on screens, documents, reports and e-mails, and signs documents with captured signatures.
+
+- Theme and Branding (Master > System Settings): theme presets or custom colours with a contrast check, sign-in picture, document and report colours and footer, branded e-mail layout, logo and favicon; changes apply without a rebuild.
+- Brand packs export and import the whole branding between environments; a client brand pack (for example the Toyota Insurance Services pack) is applied only with the client's written permission.
+- E-signatures of company signatories and of users (captured by the user), versioned, with consent recorded and revocation; mapped per document type (quotation slip, policy schedule, endorsement, official receipt, payment voucher, debit note, statement, journal voucher, claim letter); drafts print UNSIGNED DRAFT.
+
+## Work in development
+
+Being completed on its development branch in this release: the sales activity log on prospects, the quote wizard covers and risk fields from the Product Configurator, BIR Form 2307 for supplier payments, and the disposal of fixed assets.
+
 ## Administration, security and configuration
 
 **What it does.** Sets up the broker's organisation, reference data, users and rules, and keeps the record of who did what.
 
-- Masters: Company (letterhead, TIN, IC licence number), Branch, Insurance Company (credit and remittance terms, billing mode, placement and claims e-mails), Line of Business, Product, Cover, Signatories, Vehicle, locations, designations and hierarchy, finance masters. Staff details (branch, designation, reporting to) are on the user record.
+- Masters: Company (letterhead, TIN, IC licence number), Branch, Insurance Company (credit and remittance terms, billing mode, placement and claims e-mails, IC certificate of authority), Line of Business, Product, Cover, Signatories, Vehicle, locations, designations and hierarchy, finance masters. Staff details (branch, designation, reporting to) are on the user record.
 - Uploads for masters and go-live data from about 40 templates (10 MB per file, 20,000 rows).
-- User Management: User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews.
-- Master > Configuration: business parameters by business area, applied at once and audited; Master > Document Numbering with 61 series; Master > Schedules with run now and history; Master > System Settings for title, logo and theme.
+- Users and Access: User, Role, User Access Matrix, Role Permissions, Authority Matrix, Delegations, Segregation of Duties, Access Reviews.
+- Master > Configuration: business parameters by business area, applied at once and audited; Master > Document Numbering with 61 series; Master > Schedules with run now and history; Master > System Settings with Theme and Branding.
 - Audit Trail of every create, update, approval, report run and sign-in, with before and after values.
 
 ![Authority Matrix](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-authority.png)
@@ -688,7 +761,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 |---|---|
 | Personas | System Administrator |
 | Controls | Only a System Administrator grants that role; nobody changes their own role; new authority limits approved by another administrator; SoD rules checked at role assignment; dormant accounts deactivated after 90 days |
-| Integrations | User provisioning from a template |
+| Integrations | User provisioning from a template or the configuration workbook |
 
 # OOTB scope and optional extras
 
@@ -700,7 +773,7 @@ The OOTB edition is the product as delivered, fitted to the broker by configurat
 |---|---|
 | All modules in chapter 5 | Delivered screens, workflows, reports and printed documents |
 | Configuration and master data | Company, users, insurers, products and tariff, commission, taxes, chart of accounts, posting rules, number series, approvals, schedules, e-mail texts |
-| Standard integrations | SMTP e-mail, bank statement files, insurer statement files, PayMongo and Dragonpay payment links |
+| Standard integrations | SMTP e-mail, bank statement files, insurer statement files, PayMongo and Dragonpay payment links; adapters with test mode for SMS and Viber, CTPL authentication and the LTO feed, insurer APIs, bank payment files, the BIR EIS and a screening provider (certification with each partner during onboarding) |
 | Go-live data | Masters, in-force policies and clients, open receivables, GL opening balances through the delivered templates |
 | Implementation | Discovery, configuration, mock loads, SIT, UAT support, training per role, cutover, hypercare to the first month-end close |
 | Documentation | User manual, role decks, reports book, architecture and security, compliance matrix, data migration, training and support documents |
@@ -736,7 +809,7 @@ Prices of optional services and day rates for change requests are in the commerc
 | Authentication | Named users only; bcrypt passwords; minimum 8 characters with four character classes, history of 5, expiry 90 days; lockout after 5 failures; sign-in rate limits |
 | Two-step verification | TOTP built in, compulsory per role (`security.require_2fa_roles`); secrets encrypted with AES-256-GCM |
 | Sessions | Access token 30 minutes, refresh token rotated on use with reuse detection; idle sign-out after 30 minutes; sessions ended on password or role change |
-| Authorisation | Seven roles, deny by default; permission checked by the server on every route; record scope for scoped roles |
+| Authorisation | Eight roles, deny by default; permission checked by the server on every route; record scope for scoped roles; masking of personal identifiers without `view:pii` |
 | Controls | Maker-checker, Authority Matrix, Delegations, Segregation of Duties, Access Reviews |
 | Application security | Parameterised SQL, request validation, security headers, upload type check by file content, signed document links valid 30 minutes, CSV formula-injection guard; mapped to the OWASP Top 10 (2021) |
 | Production start-up checks | The API refuses to start with weak or missing secrets, `CORS_ORIGINS=*` or localhost addresses |
@@ -749,6 +822,9 @@ Prices of optional services and day rates for change requests are in the commerc
 | Minimisation | KYC fields required for motor only by default (`policy.kyc_required_fields`) |
 | Retention | Housekeeping deletes operational logs after their retention days; business records and the audit trail are kept; anonymisation after `privacy.retention_years` |
 | Payment cards | Card details are entered on the gateway's page only |
+| Encryption | TIN, ID numbers and bank account numbers encrypted at rest (`PII_ENCRYPTION_KEY`); two-step secrets encrypted |
+| Test data | Production copies masked before use outside production; verification and DPO evidence |
+| Breaches | Breach register with the 72-hour NPC deadline |
 
 ## Availability and recovery
 
@@ -892,11 +968,11 @@ The table lists capabilities a Philippine non-life broker typically compares. Th
 | 53 | Consent register per purpose | Yes |  | | |
 | 54 | Data subject request register with due dates | Yes |  | | |
 | 55 | Personal data export and anonymisation with retention rules | Yes |  | | |
-| 56 | Field-level encryption of personal identifiers | No | Storage encryption recommended | | |
-| 57 | Insurer system integration by API | No | Files and e-mail | | |
-| 58 | Bank payment file generation | No | Transfers recorded | | |
-| 59 | SMS notifications | No | E-mail and in-app | | |
-| 60 | IC-format regulatory reports | Partial | Figures from reports | | |
+| 56 | Field-level encryption of personal identifiers | Yes | TIN, ID and bank account numbers | | |
+| 57 | Insurer system integration by API | Configurable | Mapping per insurer; test mode until the insurer certifies | | |
+| 58 | Bank payment file generation | Configurable | Starter layouts validated with each bank | | |
+| 59 | SMS notifications | Configurable | SMS gateway contract; optional Viber | | |
+| 60 | IC-format regulatory reports | Yes | Annual statement workbook and production report; accountant confirms | | |
 | 61 | AML transaction monitoring and sanctions screening | Yes | Lists loaded by the broker; provider optional | | |
 | 62 | Filipino user interface | No | English | | |
 | 63 | Hosting on AWS, Azure, a Philippine partner or on-premise | Yes | | | |
@@ -910,15 +986,30 @@ The table lists capabilities a Philippine non-life broker typically compares. Th
 | 71 | Client comparison and recommendation report | Yes |  | | |
 | 72 | E-mail marketing campaigns to consenting clients with opt-out | Yes | Sent through the e-mail outbox | | |
 | 73 | Ad hoc report builder with saved, shared reports and BI extract | Yes | CSV extract to file storage | | |
+| 74 | Licence register with commission block for unlicensed agents | Yes |  | | |
+| 75 | Complaints register with deadlines and regulator report (RA 11765) | Yes |  | | |
+| 76 | Personal data breach register with the 72-hour clock | Yes |  | | |
+| 77 | Masking of personal data on screens and exports by role | Yes |  | | |
+| 78 | CTPL COC authentication and LTO feed | Configurable | Provider contract | | |
+| 79 | Cover notes, computed cancellation (pro-rata, short-period) | Yes |  | | |
+| 80 | Post-dated cheque register and instalment invoices | Yes |  | | |
+| 81 | Claim document checklist and motor repair letters of authority | Yes |  | | |
+| 82 | Accounts payable and fixed assets with depreciation | Yes | Disposal in development | | |
+| 83 | BIR 0619-E, 1601-EQ, 1604-E, 2551Q, DAT files, EOPT invoices, CAS books | Yes | Filing by the broker | | |
+| 84 | Go-live data workbench with reconciliation and environment comparison | Yes |  | | |
+| 85 | Theme, branded documents and e-signatures | Yes |  | | |
+| 86 | Philippine PSGC geography and reference masters | Yes |  | | |
+| 87 | One worklist per user (My Work) | Yes |  | | |
 
 # Points to note in this release
 
 These points come from the release test and the user manual. None of them stops the end-to-end cycle.
 
-- The sign-in session is kept in the browser's local storage; a change to an httpOnly cookie is planned. Two-step enrolment shows a setup key and a link, not a QR code.
-- Client personal data relies on encryption of the database storage and backups; only two-step secrets are encrypted inside the application.
+- The sign-in session is kept in the browser's local storage; a change to an httpOnly cookie is planned.
+- Field encryption covers TIN, ID numbers and bank account numbers; other personal data relies on encryption of the database storage and backups.
+- The integration adapters (SMS, Viber, CTPL authentication, LTO, insurer API, bank files, EIS, screening provider) are delivered in test mode; each goes live after the partner's contract and certification.
+- The work in development listed in chapter Functional modules completes on its own branch.
 - A front-end library (react-router) carries a moderate security advisory; the upgrade is planned for the next minor release.
 - Several masters have no Upload button yet; their templates are loaded by the System Administrator.
-- The Settlement cash panel of a claim paid through the broker is on the claim screens, so the System Administrator records the funds on Accounting's instruction until the Accounting menu is extended.
 - The BIR reports give the figures in the BIR column order; the broker validates them with the BIR's tools before filing.
 - No load test has been run yet; a load test on the production-sized environment is recommended before go-live.
