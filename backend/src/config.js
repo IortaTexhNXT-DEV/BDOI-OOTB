@@ -48,8 +48,37 @@ export function buildConfig(source = process.env) {
     /** Spreadsheet import caps: uncompressed bytes per workbook part and data rows per file. */
     importMaxInflatedBytes: num('IMPORT_MAX_INFLATED_MB', 50) * MB,
     importMaxRows: num('IMPORT_MAX_ROWS', 20000),
+    /**
+     * Proxies in front of the API whose X-Forwarded-For is believed (Express "trust proxy"): a hop count, or addresses
+     * and subnets separated by commas. 1 for one reverse proxy (nginx, Railway); Azure counts every hop between Front
+     * Door and the API (deploy/AZURE.md). The client address feeds the sign-in rate limits and the sign-in history.
+     */
+    trustProxy: trustProxySetting(env('TRUST_PROXY', '1')),
+    /**
+     * Sign-in with Microsoft Entra ID (OpenID Connect, authorization code flow with PKCE). Off unless the tenant, the
+     * application (client) ID, its secret and the redirect address are all set (deploy/AZURE.md, Entra ID).
+     */
+    entra: Object.freeze({
+      tenantId: env('ENTRA_TENANT_ID', ''),
+      clientId: env('ENTRA_CLIENT_ID', ''),
+      clientSecret: env('ENTRA_CLIENT_SECRET', ''),
+      redirectUri: env('ENTRA_REDIRECT_URI', ''),
+      authority: env('ENTRA_AUTHORITY', 'https://login.microsoftonline.com').replace(/\/+$/, ''),
+    }),
   });
 }
+
+/** TRUST_PROXY as Express takes it: a number of hops, true / false, or a list of addresses and subnets. */
+function trustProxySetting(value) {
+  const v = String(value).trim();
+  if (/^\d+$/.test(v)) return Number(v);
+  if (/^(true|false)$/i.test(v)) return v.toLowerCase() === 'true';
+  return v.split(',').map((s) => s.trim()).filter(Boolean);
+}
+
+const ENTRA_VARIABLES = ['ENTRA_TENANT_ID', 'ENTRA_CLIENT_ID', 'ENTRA_CLIENT_SECRET', 'ENTRA_REDIRECT_URI'];
+/** Is sign-in with Microsoft Entra ID configured (every ENTRA_* variable set)? */
+export const entraConfigured = (cfg = config) => !!(cfg.entra.tenantId && cfg.entra.clientId && cfg.entra.clientSecret && cfg.entra.redirectUri);
 
 export const config = buildConfig();
 
@@ -79,6 +108,10 @@ export function productionConfigProblems(cfg = config, source = process.env) {
   if (!source.CORS_ORIGINS || cfg.corsOrigins.includes('*') || !cfg.corsOrigins.length) problems.push('CORS_ORIGINS must list the web application origin(s); "*" is not allowed');
   if (!source.PUBLIC_BASE_URL) problems.push('PUBLIC_BASE_URL is not set');
   else if (isLocalUrl(cfg.publicBaseUrl)) problems.push('PUBLIC_BASE_URL must be the public address of the API, not localhost');
+  const entraSet = ENTRA_VARIABLES.filter((name) => source[name]);
+  if (entraSet.length && entraSet.length < ENTRA_VARIABLES.length) {
+    problems.push(`Entra ID sign-in is partly configured: set ${ENTRA_VARIABLES.filter((name) => !source[name]).join(', ')} or none of the ENTRA_* variables`);
+  } else if (entraSet.length && !/^https:\/\//i.test(cfg.entra.redirectUri)) problems.push('ENTRA_REDIRECT_URI must be an https:// address');
   return problems;
 }
 

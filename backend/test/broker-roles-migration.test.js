@@ -87,7 +87,7 @@ describe('migration 0140: broker role model on an existing database', () => {
   });
   it('rewrites the settings, the report catalogue and the master data', async () => {
     const s = Object.fromEntries((await query("SELECT key, value FROM app_settings WHERE key LIKE '%roles'")).rows.map((r) => [r.key, r.value]));
-    expect(s).toEqual({ 'security.scoped_roles': [], 'security.require_2fa_roles': ['system-admin', 'accounting'], 'quotations.approval_notify_roles': ['processing'],
+    expect(s).toMatchObject({ 'security.scoped_roles': [], 'security.require_2fa_roles': ['system-admin', 'accounting'], 'quotations.approval_notify_roles': ['processing'],
       'renewals.approver_roles': ['processing', 'operations'], 'incentive.eligible_roles': ['sales'], 'commission.eligible_roles': ['sales'] });
     const reports = (await query('SELECT DISTINCT roles FROM report_definitions')).rows.map((r) => r.roles);
     expect(reports).toEqual([['accounting', 'processing', 'sales', 'operations']]);

@@ -215,6 +215,18 @@ describe('production start-up check', () => {
     expect(problems({ NODE_ENV: 'development' })).toEqual([]);
     expect(problems({})).toEqual([]);
   });
+  it('refuses a partly configured Entra ID sign-in and a redirect address without https', () => {
+    const entra = { ENTRA_TENANT_ID: 'tenant', ENTRA_CLIENT_ID: 'client', ENTRA_CLIENT_SECRET: 'secret', ENTRA_REDIRECT_URI: 'https://app.example.ph/login' };
+    expect(problems({ ...good, ...entra })).toEqual([]);
+    expect(problems({ ...good, ...entra, ENTRA_CLIENT_SECRET: '' }).join()).toMatch(/partly configured: set ENTRA_CLIENT_SECRET/);
+    expect(problems({ ...good, ...entra, ENTRA_REDIRECT_URI: 'http://app.example.ph/login' }).join()).toMatch(/https/);
+  });
+  it('reads TRUST_PROXY as a hop count, a flag or a list of addresses', () => {
+    expect(buildConfig({}).trustProxy).toBe(1);
+    expect(buildConfig({ TRUST_PROXY: '4' }).trustProxy).toBe(4);
+    expect(buildConfig({ TRUST_PROXY: 'false' }).trustProxy).toBe(false);
+    expect(buildConfig({ TRUST_PROXY: 'loopback, 10.20.0.0/16' }).trustProxy).toEqual(['loopback', '10.20.0.0/16']);
+  });
   it('defaults: 30-minute access tokens; development keeps its fallbacks', () => {
     expect(buildConfig({}).accessTtl).toBe(1800);
     expect(buildConfig({ JWT_ACCESS_TTL_SECONDS: '900' }).accessTtl).toBe(900);
@@ -425,7 +437,7 @@ describe('upload and request limits', () => {
 // ------------------------------------------------------------------------------------------------ 10. registry
 describe('route registry', () => {
   const PUBLIC = new Set([
-    'GET /version', 'POST /auth/login', 'POST /auth/login/2fa', 'POST /auth/refresh', 'POST /auth/logout', 'GET /auth/password-policy',
+    'GET /version', 'POST /auth/login', 'GET /auth/options', 'POST /auth/sso/start', 'POST /auth/sso/callback', 'POST /auth/login/2fa', 'POST /auth/refresh', 'POST /auth/logout', 'GET /auth/password-policy',
     'POST /auth/forgot-password', 'POST /auth/reset-password', 'POST /quotations/approve-by-customer', 'GET /quotations/approve-by-customer',
     'GET /reports/generated/:id/download', 'GET /settings/public', 'GET /system-settings/', 'GET /branding/', 'GET /branding/assets/:name', 'GET /s3/object/*', 'GET /upload/file/*',
     // client checkout by the payment link's random token, and the gateways' signed webhooks / postbacks

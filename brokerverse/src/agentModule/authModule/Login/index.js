@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import EnvironmentBadge from "../../../components/EnvironmentBadge";
 import "../Login/index.scss";
 import "../security/security.scss";
@@ -31,6 +31,9 @@ const initialValue = {
  * - enrol2fa: the role requires two-factor authentication and the user has none yet (forced enrolment);
  * - changePassword: new user, password reset by an administrator, or password older than the maximum age;
  * - forgot: request a reset code by e-mail and choose a new password.
+ * "Sign in with Microsoft" (Entra ID, when the environment has it) leaves for the Microsoft sign-in page, which sends
+ * the browser back here with ?code=&state=; the API then answers like the password sign-in. When the password
+ * sign-in is switched off the form stays behind a link, for the administrators who keep it.
  * Only a complete session is stored; the intermediate tokens stay in this screen's memory.
  */
 const Login = () => {
@@ -45,6 +48,9 @@ const Login = () => {
   const [notice, setNotice] = useState(() =>
     new URLSearchParams(window.location.search).get("session") === "ended" ? "sessionEnded" : ""
   );
+  const [signInOptions, setSignInOptions] = useState({ passwordSignIn: true, sso: { enabled: false } });
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [microsoftBusy, setMicrosoftBusy] = useState(false);
   const { t } = useTranslation();
   const languageOptions = useLanguageOptions();
   const currentLanguage =
@@ -71,6 +77,50 @@ const Login = () => {
       state.systemSettingsReducer?.secondaryColor ||
       DEFAULT_SYSTEM_SETTINGS.secondaryColor
   );
+
+  useEffect(() => {
+    let active = true;
+    authService
+      .signInOptions()
+      .then((options) => active && setSignInOptions((current) => ({ ...current, ...options })))
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // back from the Microsoft sign-in page: finish the sign-in once and take the code out of the address bar
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    const state = params.get("state");
+    const failure = params.get("error");
+    if (!(code && state) && !failure) return;
+    window.history.replaceState(null, "", window.location.pathname);
+    if (failure) {
+      setErrorMessage(t("login.microsoftCancelled"));
+      return;
+    }
+    setMicrosoftBusy(true);
+    authService
+      .completeMicrosoftSignIn(code, state)
+      .then(handleResult)
+      .catch((error) => setErrorMessage(error.message || t("login.microsoftFailed")))
+      .finally(() => setMicrosoftBusy(false));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const signInWithMicrosoft = async () => {
+    setErrorMessage("");
+    setNotice("");
+    setMicrosoftBusy(true);
+    try {
+      await authService.startMicrosoftSignIn();
+    } catch (error) {
+      setErrorMessage(error.message || t("login.microsoftFailed"));
+      setMicrosoftBusy(false);
+    }
+  };
 
   const validate = (values) => {
     const errors = {};
@@ -149,7 +199,7 @@ const Login = () => {
       </small>
     ) : null;
 
-  const signInForm = (
+  const passwordForm = (
     <form
       className="bv-security__form"
       onSubmit={(e) => {
@@ -222,9 +272,62 @@ const Login = () => {
         </div>
       )}
       <div className="bv-security__actions">
-        <Button type="submit" label={isLoading ? t("login.loggingIn") : t("login.login")} disabled={isLoading} loading={isLoading} />
+        <Button type="submit" label={isLoading ? t("login.loggingIn") : t("login.login")} disabled={isLoading || microsoftBusy} loading={isLoading} />
       </div>
     </form>
+  );
+
+  const ssoEnabled = !!signInOptions.sso?.enabled;
+  const passwordVisible = !ssoEnabled || signInOptions.passwordSignIn !== false || showPasswordForm;
+  const microsoftButton = ssoEnabled && (
+    <Button
+      type="button"
+      className="p-button-outlined bv-auth__sso"
+      onClick={signInWithMicrosoft}
+      disabled={isLoading || microsoftBusy}
+      loading={microsoftBusy}
+      label={microsoftBusy ? t("login.microsoftSigningIn") : t("login.signInWithMicrosoft")}
+      icon={
+        <svg className="bv-auth__sso-logo" viewBox="0 0 21 21" aria-hidden="true">
+          <rect x="1" y="1" width="9" height="9" fill="#f25022" />
+          <rect x="11" y="1" width="9" height="9" fill="#7fba00" />
+          <rect x="1" y="11" width="9" height="9" fill="#00a4ef" />
+          <rect x="11" y="11" width="9" height="9" fill="#ffb900" />
+        </svg>
+      }
+    />
+  );
+
+  const signInForm = (
+    <>
+      {passwordVisible ? (
+        passwordForm
+      ) : (
+        <>
+          {notice && (
+            <div className="bv-security__success" role="status">
+              {t(`security.notice.${notice}`)}
+            </div>
+          )}
+          {errorMessage && (
+            <div className="bv-security__alert" role="alert">
+              {errorMessage}
+            </div>
+          )}
+        </>
+      )}
+      {microsoftButton && (
+        <div className="bv-auth__sso-block">
+          {passwordVisible && <div className="bv-auth__divider">{t("login.or")}</div>}
+          {microsoftButton}
+          {!passwordVisible && (
+            <button type="button" className="bv-auth__link bv-auth__sso-local" onClick={() => setShowPasswordForm(true)}>
+              {t("login.useLocalAccount")}
+            </button>
+          )}
+        </div>
+      )}
+    </>
   );
 
   let stepBody = null;
@@ -264,7 +367,8 @@ const Login = () => {
   }
 
   const title = step === "signin" ? login.headline || t("login.title", { name: systemName }) : headings[step][0];
-  const subtitle = step === "signin" ? t("login.subtitle") : headings[step][1];
+  const subtitle =
+    step === "signin" ? (passwordVisible ? t("login.subtitle") : t("login.subtitleMicrosoft")) : headings[step][1];
   const tagline = step === "signin" ? login.tagline : "";
 
   return (

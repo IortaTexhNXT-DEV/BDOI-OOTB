@@ -8332,6 +8332,65 @@
         }
       }
     },
+    "/auth/options": {
+      "get": {
+        "operationId": "getAuthOptions",
+        "summary": "Sign-in methods offered by the sign-in page: user ID and password (security.password_sign_in_enabled) and \"Sign in with Microsoft\" (Entra ID, when the ENTRA_* variables are set)",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Sign-in\n\nAccess: Public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "passwordSignIn": {
+                          "type": "boolean"
+                        },
+                        "sso": {
+                          "type": "object",
+                          "properties": {
+                            "enabled": {
+                              "type": "boolean"
+                            },
+                            "provider": {
+                              "type": "string"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "passwordSignIn": true,
+                    "sso": {
+                      "enabled": true,
+                      "provider": "entra-id"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "x-screen": "Sign-in",
+        "security": []
+      }
+    },
     "/auth/password-policy": {
       "get": {
         "operationId": "getAuthPasswordPolicy",
@@ -8790,6 +8849,202 @@
                 "username": "juan.santos",
                 "code": "123456",
                 "newPassword": "<new password>"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/sso/callback": {
+      "post": {
+        "operationId": "postAuthSsoCallback",
+        "summary": "Finish \"Sign in with Microsoft\": the code and state Microsoft returned to the sign-in page and the transaction token from /auth/sso/start. The ID token is verified (tenant keys, issuer, audience, nonce) and matched to an active user by e-mail or user principal name; answers the normal token payload (rate limited, logged in the sign-in history)",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Sign-in > Sign in with Microsoft\n\nAccess: Public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "accessToken": {
+                      "type": "string"
+                    },
+                    "refreshToken": {
+                      "type": "string"
+                    },
+                    "expiresIn": {
+                      "type": "integer"
+                    },
+                    "issuedAt": {
+                      "type": "string"
+                    },
+                    "mustChangePassword": {
+                      "type": "boolean"
+                    },
+                    "user": {
+                      "type": "object",
+                      "properties": {
+                        "userId": {
+                          "type": "string"
+                        },
+                        "username": {
+                          "type": "string"
+                        },
+                        "displayName": {
+                          "type": "string"
+                        },
+                        "roles": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "permissions": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "mustChangePassword": {
+                          "type": "boolean"
+                        },
+                        "twoFactorEnabled": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "accessToken": "<jwt>",
+                  "refreshToken": "<jwt>",
+                  "expiresIn": 1800,
+                  "issuedAt": "2026-01-01T00:00:00Z",
+                  "mustChangePassword": false,
+                  "user": {
+                    "userId": "usr_1",
+                    "username": "BrokerVerse",
+                    "displayName": "BrokerVerse Administrator",
+                    "roles": [
+                      "system-admin"
+                    ],
+                    "permissions": [
+                      "read:leads"
+                    ],
+                    "mustChangePassword": false,
+                    "twoFactorEnabled": false
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "x-screen": "Sign-in > Sign in with Microsoft",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "state": {
+                    "type": "string"
+                  },
+                  "transaction": {
+                    "type": "string"
+                  },
+                  "deviceId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "code": "<authorization code>",
+                "state": "<state>",
+                "transaction": "<jwt from /auth/sso/start>",
+                "deviceId": "device-1"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/sso/start": {
+      "post": {
+        "operationId": "postAuthSsoStart",
+        "summary": "Start \"Sign in with Microsoft\" (Entra ID, authorization code flow with PKCE): the address of the Microsoft sign-in page and a transaction token, kept by the browser and sent back to /auth/sso/callback with the code (valid 10 minutes)",
+        "tags": [
+          "Auth"
+        ],
+        "description": "Front-end touchpoint: Sign-in > Sign in with Microsoft\n\nAccess: Public",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "authorizationUrl": {
+                          "type": "string"
+                        },
+                        "transaction": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "authorizationUrl": "https://login.microsoftonline.com/<tenant>/oauth2/v2.0/authorize?client_id=...&code_challenge=...",
+                    "transaction": "<jwt>"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        },
+        "x-screen": "Sign-in > Sign in with Microsoft",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "deviceId": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "deviceId": "device-1"
               }
             }
           }

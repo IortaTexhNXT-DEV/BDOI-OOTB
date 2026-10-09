@@ -273,6 +273,11 @@ environment-neutral there too (runtime variables, no rebuild for an address chan
 Railway, push the CI images to a registry and point each Railway environment's service at the image tag, then set
 `BACKEND_TARGET=none` and `FRONTEND_TARGET=none` and let `deploy.yml` run the smoke test only.
 
+**Microsoft Azure (TISPH).** `azure-deploy.yml` builds the two images once on a push to `TISPH-DEV`, pushes them
+to the shared Azure Container Registry and promotes the same digests from `azure-dev` to `azure-sit`, `azure-uat` and
+`azure-prod` with approvals; migrations run as a Container Apps job before each switch. The infrastructure is
+Terraform under `deploy/azure`. See [AZURE.md](AZURE.md).
+
 ## 14. Checking locally
 
 ```

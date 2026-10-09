@@ -20,6 +20,10 @@ await migrate({ log: (m) => logger.info(m) });
 await seed({ log: (m) => logger.info(m) });
 const app = await createApp();
 const server = app.listen(config.port, () => logger.info(`BrokerVerse API listening on :${config.port}`));
+// Idle keep-alive connections stay open longer than the proxy in front keeps its own (load balancers and the Container
+// Apps ingress reuse them), so the proxy never sends a request on a connection the API is closing (an occasional 502).
+server.keepAliveTimeout = (Number(process.env.HTTP_KEEP_ALIVE_SECONDS) > 0 ? Number(process.env.HTTP_KEEP_ALIVE_SECONDS) : 65) * 1000;
+server.headersTimeout = server.keepAliveTimeout + 5000;
 await startScheduler(logger);
 watchSchedules(logger); // other instances' schedule / time-zone edits are picked up within SCHEDULER_RELOAD_SECONDS
 setReady(true);

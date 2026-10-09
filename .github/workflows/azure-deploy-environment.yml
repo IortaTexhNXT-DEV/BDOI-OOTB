@@ -1,0 +1,229 @@
+name: Azure deploy (one environment)
+
+# Deploys one pair of images (API and web, by digest) to one Azure environment. Called by azure-deploy.yml; see
+# deploy/AZURE.md, section 9. Steps: migrations and reference seed as a Container Apps job with the new API image,
+# then the API, then the web app (each new revision takes traffic only once it is ready), then deploy/smoke-test.sh.
+# A failed smoke test puts the previous images back (the database keeps the forward-only migrations).
+#
+# Per GitHub Environment (azure-dev, azure-sit, azure-uat, azure-prod), from the Terraform output github_variables:
+#   variables  DEPLOY_ENABLED=true, AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID, AZURE_RESOURCE_GROUP,
+#              API_APP_NAME, WEB_APP_NAME, MIGRATE_JOB_NAME, APP_URL, ENVIRONMENT_NAME (DEV, SIT, UAT; empty in prod)
+#   protection required reviewers on azure-sit, azure-uat and azure-prod; deployment branch TISPH-DEV
+# Repository variable ACR_NAME (the shared registry). No Azure secret is stored: the job signs in with OpenID Connect.
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        description: azure-dev, azure-sit, azure-uat or azure-prod
+        type: string
+        required: true
+      sha:
+        description: Commit the images were built from (their tag)
+        type: string
+        required: true
+      api_image:
+        description: "API image by digest (<registry>/brokerverse-api@sha256:...); empty: the image tagged with sha"
+        type: string
+        required: false
+        default: ""
+      web_image:
+        description: Web image by digest; empty, the image tagged with sha
+        type: string
+        required: false
+        default: ""
+      mode:
+        description: deploy (migrations, then the images) or rollback (the images only)
+        type: string
+        required: false
+        default: deploy
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: ${{ inputs.mode == 'rollback' && 'Roll back' || 'Deploy' }} ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment:
+      name: ${{ inputs.environment }}
+      url: ${{ vars.APP_URL }}
+    concurrency:
+      group: azure-${{ inputs.environment }}
+      cancel-in-progress: false
+    env:
+      TARGET_ENV: ${{ inputs.environment }}
+      SHA: ${{ inputs.sha }}
+      MODE: ${{ inputs.mode }}
+      ACR_NAME: ${{ vars.ACR_NAME }}
+      RG: ${{ vars.AZURE_RESOURCE_GROUP }}
+      API_APP: ${{ vars.API_APP_NAME }}
+      WEB_APP: ${{ vars.WEB_APP_NAME }}
+      MIGRATE_JOB: ${{ vars.MIGRATE_JOB_NAME }}
+    steps:
+      - name: Check the environment is configured
+        id: cfg
+        env:
+          DEPLOY_ENABLED: ${{ vars.DEPLOY_ENABLED }}
+          AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID }}
+          AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID }}
+          AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+          APP_URL: ${{ vars.APP_URL }}
+        run: |
+          set -euo pipefail
+          case "$TARGET_ENV" in azure-dev|azure-sit|azure-uat|azure-prod) ;; *) echo "::error::unknown environment '$TARGET_ENV'"; exit 1 ;; esac
+          case "$MODE" in deploy|rollback) ;; *) echo "::error::mode must be deploy or rollback"; exit 1 ;; esac
+          [[ "$SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full 40-character commit SHA (got '$SHA')"; exit 1; }
+          if [ "$DEPLOY_ENABLED" != true ]; then
+            echo "::notice title=Deployment to $TARGET_ENV skipped::variable DEPLOY_ENABLED of the '$TARGET_ENV' environment is not 'true' (deploy/AZURE.md, section 9)."
+            echo "Deployment to **$TARGET_ENV** skipped: DEPLOY_ENABLED is not 'true'." >> "$GITHUB_STEP_SUMMARY"
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          missing=()
+          for v in AZURE_CLIENT_ID AZURE_TENANT_ID AZURE_SUBSCRIPTION_ID ACR_NAME RG API_APP WEB_APP MIGRATE_JOB APP_URL; do
+            [ -n "${!v}" ] || missing+=("$v")
+          done
+          if [ "${#missing[@]}" -gt 0 ]; then
+            echo "::error::the '$TARGET_ENV' environment is missing variables: ${missing[*]} (Terraform output github_variables, repository variable ACR_NAME)"
+            exit 1
+          fi
+          echo "enabled=true" >> "$GITHUB_OUTPUT"
+
+      # SIT, UAT and production receive only a build whose CI run passed (lint, tests, front-end build)
+      - name: Check CI passed for this commit
+        if: steps.cfg.outputs.enabled == 'true' && inputs.environment != 'azure-dev'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          n="$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/ci.yml/runs?head_sha=$SHA&status=success&per_page=1" --jq '.total_count')"
+          [ "${n:-0}" -gt 0 ] || { echo "::error::no successful CI run for $SHA; $TARGET_ENV receives only tested builds."; exit 1; }
+
+      - name: Check out the deployment scripts
+        if: steps.cfg.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: deploy
+
+      - name: Sign in to Azure (OpenID Connect)
+        if: steps.cfg.outputs.enabled == 'true'
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Resolve the images and record what runs now
+        id: images
+        if: steps.cfg.outputs.enabled == 'true'
+        env:
+          API_IMAGE: ${{ inputs.api_image }}
+          WEB_IMAGE: ${{ inputs.web_image }}
+        run: |
+          set -euo pipefail
+          az extension add --name containerapp --upgrade --only-show-errors --yes
+          server="$(az acr show --name "$ACR_NAME" --query loginServer -o tsv)"
+          # by digest: a tag can be moved, a digest cannot, so every environment runs exactly what dev ran
+          digest_of() {
+            local d
+            d="$(az acr repository show --name "$ACR_NAME" --image "$1:$SHA" --query digest -o tsv 2>/dev/null)" \
+              || { echo "::error::image $1:$SHA is not in $ACR_NAME; it is built by the dev deployment of that commit." >&2; return 1; }
+            echo "$server/$1@$d"
+          }
+          [ -n "$API_IMAGE" ] || API_IMAGE="$(digest_of brokerverse-api)"
+          [ -n "$WEB_IMAGE" ] || WEB_IMAGE="$(digest_of brokerverse-web)"
+          for i in "$API_IMAGE" "$WEB_IMAGE"; do
+            [[ "$i" == "$server/"*@sha256:* ]] || { echo "::error::image '$i' is not a digest in $server"; exit 1; }
+          done
+          prev_api="$(az containerapp show -n "$API_APP" -g "$RG" --query 'properties.template.containers[0].image' -o tsv)"
+          prev_web="$(az containerapp show -n "$WEB_APP" -g "$RG" --query 'properties.template.containers[0].image' -o tsv)"
+          {
+            echo "api=$API_IMAGE"
+            echo "web=$WEB_IMAGE"
+            echo "prev_api=$prev_api"
+            echo "prev_web=$prev_web"
+          } >> "$GITHUB_OUTPUT"
+          echo "API $prev_api -> $API_IMAGE"
+          echo "web $prev_web -> $WEB_IMAGE"
+
+      - name: Run migrations and reference seed (Container Apps job)
+        id: migrate
+        if: steps.cfg.outputs.enabled == 'true' && inputs.mode == 'deploy'
+        env:
+          API_IMAGE: ${{ steps.images.outputs.api }}
+        run: |
+          set -euo pipefail
+          az containerapp job update -n "$MIGRATE_JOB" -g "$RG" --image "$API_IMAGE" --only-show-errors -o none
+          execution="$(az containerapp job start -n "$MIGRATE_JOB" -g "$RG" --query name -o tsv)"
+          echo "Started $execution"
+          for _ in $(seq 1 180); do
+            status="$(az containerapp job execution show -n "$MIGRATE_JOB" -g "$RG" --job-execution-name "$execution" --query properties.status -o tsv)"
+            case "$status" in
+              Succeeded) echo "Migrations applied ($execution)"; exit 0 ;;
+              Failed|Stopped|Degraded)
+                echo "::error::migration job $execution ended $status. Logs: Log Analytics, ContainerAppConsoleLogs_CL where ContainerJobName_s == '$MIGRATE_JOB'. The API was not changed."
+                exit 1 ;;
+            esac
+            sleep 10
+          done
+          echo "::error::migration job $execution still running after 30 minutes"
+          exit 1
+
+      - name: Deploy the API
+        id: api
+        if: steps.cfg.outputs.enabled == 'true'
+        env:
+          IMAGE: ${{ steps.images.outputs.api }}
+        run: |
+          set -euo pipefail
+          bash deploy/azure/wait-for-revision.sh "$RG" "$API_APP" "$IMAGE"
+
+      - name: Deploy the web app
+        id: web
+        if: steps.cfg.outputs.enabled == 'true'
+        env:
+          IMAGE: ${{ steps.images.outputs.web }}
+        run: |
+          set -euo pipefail
+          bash deploy/azure/wait-for-revision.sh "$RG" "$WEB_APP" "$IMAGE"
+
+      - name: Smoke test
+        id: smoke
+        if: steps.cfg.outputs.enabled == 'true'
+        env:
+          APP_URL: ${{ vars.APP_URL }}
+          ENVIRONMENT_NAME: ${{ vars.ENVIRONMENT_NAME }}
+          EXPECTED_SHA: ${{ inputs.sha }}
+        run: bash deploy/smoke-test.sh
+
+      - name: Automatic rollback (deployment or smoke test failed)
+        if: failure() && inputs.mode == 'deploy' && steps.cfg.outputs.enabled == 'true' && (steps.api.outcome == 'failure' || steps.web.outcome == 'failure' || steps.smoke.outcome == 'failure')
+        env:
+          PREV_API: ${{ steps.images.outputs.prev_api }}
+          PREV_WEB: ${{ steps.images.outputs.prev_web }}
+        run: |
+          set -uo pipefail
+          status=0
+          echo "Putting back $PREV_API and $PREV_WEB (the database keeps the forward-only migrations)"
+          bash deploy/azure/wait-for-revision.sh "$RG" "$API_APP" "$PREV_API" || status=1
+          bash deploy/azure/wait-for-revision.sh "$RG" "$WEB_APP" "$PREV_WEB" || status=1
+          echo "::warning::$TARGET_ENV was rolled back to the previous images"
+          exit $status
+
+      - name: Summary
+        if: always() && steps.cfg.outputs.enabled == 'true'
+        run: |
+          {
+            echo "### ${MODE} of \`${SHA:0:12}\` to **${TARGET_ENV}**"
+            echo "| Step | Result |"
+            echo "|---|---|"
+            echo "| Migrations | ${{ steps.migrate.outcome || 'skipped' }} |"
+            echo "| API | ${{ steps.api.outcome }} \`${{ steps.images.outputs.api }}\` |"
+            echo "| Web | ${{ steps.web.outcome }} \`${{ steps.images.outputs.web }}\` |"
+            echo "| Smoke test | ${{ steps.smoke.outcome }} |"
+            echo "| Previous API | \`${{ steps.images.outputs.prev_api }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

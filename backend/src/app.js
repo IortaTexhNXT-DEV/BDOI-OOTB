@@ -58,7 +58,7 @@ export function requestId(req, res, next) {
 export async function createApp() {
   const app = express();
   app.disable('x-powered-by');
-  app.set('trust proxy', 1);
+  app.set('trust proxy', config.trustProxy);
   app.use(requestId);
   app.use(requestContext);
   app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));

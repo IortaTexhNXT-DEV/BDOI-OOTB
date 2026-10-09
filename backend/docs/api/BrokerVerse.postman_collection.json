@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1208 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -5826,6 +5826,61 @@
           ]
         },
         {
+          "name": "Sign-in methods offered by the sign-in page: user ID and password (security.password_sign_in_enabled) and \"Sign in with Microsoft\" (Entra ID, when the ENTRA_* variables are set)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/options",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "options"
+              ]
+            },
+            "description": "Sign-in methods offered by the sign-in page: user ID and password (security.password_sign_in_enabled) and \"Sign in with Microsoft\" (Entra ID, when the ENTRA_* variables are set)\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/options",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "options"
+                  ]
+                },
+                "description": "Sign-in methods offered by the sign-in page: user ID and password (security.password_sign_in_enabled) and \"Sign in with Microsoft\" (Entra ID, when the ENTRA_* variables are set)\n\nFront-end touchpoint: Sign-in\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"passwordSignIn\": true,\n    \"sso\": {\n      \"enabled\": true,\n      \"provider\": \"entra-id\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
           "name": "Password rules from settings (for the change / reset password forms)",
           "request": {
             "method": "GET",
@@ -6169,6 +6224,176 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true\n}"
+            }
+          ]
+        },
+        {
+          "name": "Finish \"Sign in with Microsoft\": the code and state Microsoft returned to the sign-in page and the transaction token from /auth/sso/start. The ID token is verified (tenant keys, issuer, audience, nonce) and matched to an active user by e-mail or user principal name; answers the normal token payload (rate limited, logged in the sign-in history)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/sso/callback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "sso",
+                "callback"
+              ]
+            },
+            "description": "Finish \"Sign in with Microsoft\": the code and state Microsoft returned to the sign-in page and the transaction token from /auth/sso/start. The ID token is verified (tenant keys, issuer, audience, nonce) and matched to an active user by e-mail or user principal name; answers the normal token payload (rate limited, logged in the sign-in history)\n\nFront-end touchpoint: Sign-in > Sign in with Microsoft\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"<authorization code>\",\n  \"state\": \"<state>\",\n  \"transaction\": \"<jwt from /auth/sso/start>\",\n  \"deviceId\": \"device-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/sso/callback",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "sso",
+                    "callback"
+                  ]
+                },
+                "description": "Finish \"Sign in with Microsoft\": the code and state Microsoft returned to the sign-in page and the transaction token from /auth/sso/start. The ID token is verified (tenant keys, issuer, audience, nonce) and matched to an active user by e-mail or user principal name; answers the normal token payload (rate limited, logged in the sign-in history)\n\nFront-end touchpoint: Sign-in > Sign in with Microsoft\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"code\": \"<authorization code>\",\n  \"state\": \"<state>\",\n  \"transaction\": \"<jwt from /auth/sso/start>\",\n  \"deviceId\": \"device-1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"accessToken\": \"<jwt>\",\n  \"refreshToken\": \"<jwt>\",\n  \"expiresIn\": 1800,\n  \"issuedAt\": \"2026-01-01T00:00:00Z\",\n  \"mustChangePassword\": false,\n  \"user\": {\n    \"userId\": \"usr_1\",\n    \"username\": \"BrokerVerse\",\n    \"displayName\": \"BrokerVerse Administrator\",\n    \"roles\": [\n      \"system-admin\"\n    ],\n    \"permissions\": [\n      \"read:leads\"\n    ],\n    \"mustChangePassword\": false,\n    \"twoFactorEnabled\": false\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Start \"Sign in with Microsoft\" (Entra ID, authorization code flow with PKCE): the address of the Microsoft sign-in page and a transaction token, kept by the browser and sent back to /auth/sso/callback with the code (valid 10 minutes)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/auth/sso/start",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "auth",
+                "sso",
+                "start"
+              ]
+            },
+            "description": "Start \"Sign in with Microsoft\" (Entra ID, authorization code flow with PKCE): the address of the Microsoft sign-in page and a transaction token, kept by the browser and sent back to /auth/sso/callback with the code (valid 10 minutes)\n\nFront-end touchpoint: Sign-in > Sign in with Microsoft\n\nAccess: Public",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"deviceId\": \"device-1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/auth/sso/start",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "auth",
+                    "sso",
+                    "start"
+                  ]
+                },
+                "description": "Start \"Sign in with Microsoft\" (Entra ID, authorization code flow with PKCE): the address of the Microsoft sign-in page and a transaction token, kept by the browser and sent back to /auth/sso/callback with the code (valid 10 minutes)\n\nFront-end touchpoint: Sign-in > Sign in with Microsoft\n\nAccess: Public",
+                "auth": {
+                  "type": "noauth"
+                },
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"deviceId\": \"device-1\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"authorizationUrl\": \"https://login.microsoftonline.com/<tenant>/oauth2/v2.0/authorize?client_id=...&code_challenge=...\",\n    \"transaction\": \"<jwt>\"\n  }\n}"
             }
           ]
         }
