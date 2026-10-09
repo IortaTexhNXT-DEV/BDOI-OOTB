@@ -171,6 +171,21 @@ describe('coverage change endorsements (premium delta)', () => {
     expect(p.odp).toBe(net.toFixed(2));
   });
 
+  it('earns the brokerage rate the policy was sold at on an additional premium', async () => {
+    await q(`UPDATE policies SET details = details || '{"commissionDetails":{"brokeragePct":18}}'::jsonb WHERE id = 'pol_sls_02'`);
+    const before = Number((await q("SELECT premium_total FROM policies WHERE id = 'pol_sls_02'"))[0].premium_total);
+    const net = r2(1200000 * 0.0175);
+    const e = await cs('post', '/endorsements/create-endorsement').send({ policyId: 'pol_sls_02', endorsementTypeIds: [3], coverageChanges: screen(1200000), premiumDelta: r2((await grossOf(net)) - before) });
+    expect(e.status).toBe(201);
+    const netDelta = Math.abs(Number(e.body.premiumChange.delta.netPremium));
+    const c = await complete(e.body.endorsementId);
+    const [bill] = await q('SELECT commission_amount FROM receivables WHERE id = $1', [c.body.receivableId]);
+    expect(Number(bill.commission_amount)).toBeCloseTo(r2(netDelta * 0.18), 2);
+    // the additional premium is open: the policy is no longer fully paid
+    const [p] = await q("SELECT payment_status FROM policies WHERE id = 'pol_sls_02'");
+    expect(p.payment_status).toBe('Partial');
+  });
+
   it('prices the screen payload of a motor policy with BI / PD / APPA (own damage 1,200,000 -> 1,400,000 at 2%)', async () => {
     // same figures as the policy the screen was tested on: net 28,005 (OD 24,000 + BI 2,000 + PD 2,000 + APPA 5)
     const doc = { lossAndDamageCoverage: '1200000', lossAndDamageCoverageRate: '2', lossAndDamageCoveragePremium: '24000.00', bodilyInjury: '2,00,000',

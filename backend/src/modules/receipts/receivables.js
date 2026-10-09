@@ -41,11 +41,15 @@ export async function findClient(db, ref) {
   return (await db.query('SELECT * FROM clients WHERE id = $1 OR client_code = $1 LIMIT 1', [String(ref)])).rows[0] || null;
 }
 
-/** Brokerage commission on a premium amount: the given amount, the policy's own commission for its full premium, else rate x net premium. */
+/** Brokerage commission on a premium amount: the given amount, the policy's own commission for its full premium or its sold rate on an endorsement, else rate x net premium. */
 export async function commissionFor(policy, amount, breakdown, source) {
   if (breakdown.commissionAmount !== undefined && breakdown.commissionAmount !== null) return round2(breakdown.commissionAmount);
   const base = breakdown.netPremium > 0 ? breakdown.netPremium : amount;
   if (source === 'policy' && Number(policy.commission_amount) > 0 && Math.abs(Number(policy.premium_total) - amount) < 0.01) return round2(policy.commission_amount);
+  // a premium change of an issued policy earns the brokerage rate the policy was sold at (its commission code), not the
+  // insurer's default rate
+  const sold = num(policy.details?.commissionDetails?.brokeragePct) || num(policy.doc?.commissionDetails?.brokeragePct);
+  if (source === 'endorsement' && sold > 0) return round2(Math.min(base * (sold / 100), amount));
   const rate = (await resolveCommissionRate({ insurerId: policy.insurance_company_id, productId: policy.product_id, lob: policy.lob || policy.product_line,
     policyType: source === 'renewal' || policy.renewed_from ? 'renewal' : 'new', date: policy.inception_date })).rate;
   return round2(Math.min(base * rate, amount));
@@ -163,6 +167,8 @@ export async function createReceivable(db, { policy, amount, breakdown = {}, sou
   await db.query('UPDATE receivables SET booking_jv_id = $2 WHERE id = $1', [r.id, jv.id]);
   if (basis === 'gross') await bookGrossCommission(db, { policy, rcv: r, commission: computed.commission, netPremium: breakdown.netPremium, date: bookedOn, user });
   await db.query('INSERT INTO collection_items(receivable_id, policy_id, client_id) VALUES ($1,$2,$3) ON CONFLICT (receivable_id) DO NOTHING', [r.id, policy.id, policy.client_id]);
+  // an additional premium leaves a paid policy with something to pay again
+  if (source === 'endorsement') await syncPolicyPaymentStatus(db, policy.id, user?.id ?? null);
   await autoEmailBill(db, r);
   return { ...r, booking_jv_id: jv.id };
 }
