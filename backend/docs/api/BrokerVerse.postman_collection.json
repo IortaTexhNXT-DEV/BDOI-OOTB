@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1207 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -41820,21 +41820,27 @@
       "name": "Lead assignment",
       "item": [
         {
-          "name": "Active users who can receive prospects (name, branch, open prospects)",
+          "name": "Active users who can receive prospects (name, branch, open prospects); with leadIds (comma separated) the assignees of the rules matching those prospects are marked suggested",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/lead-assignment/assignees",
+              "raw": "{{baseUrl}}/lead-assignment/assignees?leadIds=ld_1,ld_2",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "lead-assignment",
                 "assignees"
+              ],
+              "query": [
+                {
+                  "key": "leadIds",
+                  "value": "ld_1,ld_2"
+                }
               ]
             },
-            "description": "Active users who can receive prospects (name, branch, open prospects)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
+            "description": "Active users who can receive prospects (name, branch, open prospects); with leadIds (comma separated) the assignees of the rules matching those prospects are marked suggested\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
           },
           "response": [
             {
@@ -41843,16 +41849,22 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/lead-assignment/assignees",
+                  "raw": "{{baseUrl}}/lead-assignment/assignees?leadIds=ld_1,ld_2",
                   "host": [
                     "{{baseUrl}}"
                   ],
                   "path": [
                     "lead-assignment",
                     "assignees"
+                  ],
+                  "query": [
+                    {
+                      "key": "leadIds",
+                      "value": "ld_1,ld_2"
+                    }
                   ]
                 },
-                "description": "Active users who can receive prospects (name, branch, open prospects)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
+                "description": "Active users who can receive prospects (name, branch, open prospects); with leadIds (comma separated) the assignees of the rules matching those prospects are marked suggested\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment\n\nAccess: read:leads, read:lead-assignment"
               },
               "status": "OK",
               "code": 200,
@@ -41864,7 +41876,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Juan Dela Cruz\",\n      \"username\": \"agent.jdelacruz\",\n      \"branchCode\": \"HO\",\n      \"open\": 4\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": \"usr_1\",\n      \"name\": \"Juan Dela Cruz\",\n      \"username\": \"agent.jdelacruz\",\n      \"branchCode\": \"HO\",\n      \"designation\": \"Account Executive\",\n      \"open\": 4,\n      \"suggested\": true,\n      \"rules\": [\n        \"Metro Manila motor\"\n      ]\n    }\n  ]\n}"
             }
           ]
         },
@@ -41934,12 +41946,12 @@
           ]
         },
         {
-          "name": "Reassignment queue: prospects no rule could assign, whose assignee is inactive or that were not worked in time",
+          "name": "Reassignment queue: prospects no rule could assign, whose assignee is inactive, not worked in time or sent by hand (filters search, lob (NONE: product not yet tagged), branchCode, reasonCode)",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes",
+              "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes&lob=MOTOR&reasonCode=REA-LEAVE",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -41951,10 +41963,18 @@
                 {
                   "key": "search",
                   "value": "reyes"
+                },
+                {
+                  "key": "lob",
+                  "value": "MOTOR"
+                },
+                {
+                  "key": "reasonCode",
+                  "value": "REA-LEAVE"
                 }
               ]
             },
-            "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive or that were not worked in time\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
+            "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive, not worked in time or sent by hand (filters search, lob (NONE: product not yet tagged), branchCode, reasonCode)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
           },
           "response": [
             {
@@ -41963,7 +41983,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes",
+                  "raw": "{{baseUrl}}/lead-assignment/queue?search=reyes&lob=MOTOR&reasonCode=REA-LEAVE",
                   "host": [
                     "{{baseUrl}}"
                   ],
@@ -41975,10 +41995,18 @@
                     {
                       "key": "search",
                       "value": "reyes"
+                    },
+                    {
+                      "key": "lob",
+                      "value": "MOTOR"
+                    },
+                    {
+                      "key": "reasonCode",
+                      "value": "REA-LEAVE"
                     }
                   ]
                 },
-                "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive or that were not worked in time\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
+                "description": "Reassignment queue: prospects no rule could assign, whose assignee is inactive, not worked in time or sent by hand (filters search, lob (NONE: product not yet tagged), branchCode, reasonCode)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue\n\nAccess: read:lead-assignment, write:lead-assignment"
               },
               "status": "OK",
               "code": 200,
@@ -41995,7 +42023,7 @@
           ]
         },
         {
-          "name": "Send prospects to the reassignment queue with a reason",
+          "name": "Send prospects to the reassignment queue with a reason code of the Reason Codes master (reassignment) and / or a note",
           "request": {
             "method": "POST",
             "header": [
@@ -42014,10 +42042,10 @@
                 "queue"
               ]
             },
-            "description": "Send prospects to the reassignment queue with a reason\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
+            "description": "Send prospects to the reassignment queue with a reason code of the Reason Codes master (reassignment) and / or a note\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reason\": \"Account executive on leave\"\n}",
+              "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reasonCode\": \"REA-LEAVE\",\n  \"reason\": \"Back on 20 October\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -42046,10 +42074,10 @@
                     "queue"
                   ]
                 },
-                "description": "Send prospects to the reassignment queue with a reason\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
+                "description": "Send prospects to the reassignment queue with a reason code of the Reason Codes master (reassignment) and / or a note\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Send to Queue\n\nAccess: write:lead-assignment",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reason\": \"Account executive on leave\"\n}",
+                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ],\n  \"reasonCode\": \"REA-LEAVE\",\n  \"reason\": \"Back on 20 October\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -42067,12 +42095,91 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"queued\": 1\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"queued\": 1,\n    \"reasonCode\": \"REA-LEAVE\",\n    \"reason\": \"Account executive on leave: Back on 20 October\"\n  }\n}"
             }
           ]
         },
         {
-          "name": "Reassign one or many prospects to an account executive (from the queue or in bulk)",
+          "name": "Take prospects waiting in the reassignment queue: they are assigned to the signed-in user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lead-assignment/queue/take",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead-assignment",
+                "queue",
+                "take"
+              ]
+            },
+            "description": "Take prospects waiting in the reassignment queue: they are assigned to the signed-in user\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Take\n\nAccess: write:lead-assignment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/lead-assignment/queue/take",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead-assignment",
+                    "queue",
+                    "take"
+                  ]
+                },
+                "description": "Take prospects waiting in the reassignment queue: they are assigned to the signed-in user\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Take\n\nAccess: write:lead-assignment",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\"\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reassigned\": 1,\n    \"toUserId\": \"usr_1\",\n    \"toName\": \"Ana Garcia\"\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reassign one or many prospects to an account executive (from the queue or in bulk) with a reason code of the Reason Codes master (reassignment) and / or a note (required while leads.reassignment_reason_required)",
           "request": {
             "method": "POST",
             "header": [
@@ -42091,10 +42198,10 @@
                 "reassign"
               ]
             },
-            "description": "Reassign one or many prospects to an account executive (from the queue or in bulk)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
+            "description": "Reassign one or many prospects to an account executive (from the queue or in bulk) with a reason code of the Reason Codes master (reassignment) and / or a note (required while leads.reassignment_reason_required)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reason\": \"Territory change\"\n}",
+              "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"REA-TERRITORY\",\n  \"reason\": \"Moved to the Cebu branch\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -42123,10 +42230,10 @@
                     "reassign"
                   ]
                 },
-                "description": "Reassign one or many prospects to an account executive (from the queue or in bulk)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
+                "description": "Reassign one or many prospects to an account executive (from the queue or in bulk) with a reason code of the Reason Codes master (reassignment) and / or a note (required while leads.reassignment_reason_required)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassign\n\nAccess: write:lead-assignment",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reason\": \"Territory change\"\n}",
+                  "raw": "{\n  \"leadIds\": [\n    \"ld_1\",\n    \"ld_2\"\n  ],\n  \"toUserId\": \"usr_2\",\n  \"reasonCode\": \"REA-TERRITORY\",\n  \"reason\": \"Moved to the Cebu branch\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -42144,7 +42251,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reassigned\": 2,\n    \"toUserId\": \"usr_2\",\n    \"toName\": \"Maria Santos\"\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"reassigned\": 2,\n    \"toUserId\": \"usr_2\",\n    \"toName\": \"Maria Santos\",\n    \"reasonCode\": \"REA-TERRITORY\",\n    \"reason\": \"Territory or branch change: Moved to the Cebu branch\"\n  }\n}"
             }
           ]
         },
@@ -42287,7 +42394,7 @@
           ]
         },
         {
-          "name": "Change an assignment rule",
+          "name": "Change an assignment rule (status active / inactive activates or deactivates it)",
           "request": {
             "method": "PUT",
             "header": [
@@ -42314,7 +42421,7 @@
                 }
               ]
             },
-            "description": "Change an assignment rule\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
+            "description": "Change an assignment rule (status active / inactive activates or deactivates it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
             "body": {
               "mode": "raw",
               "raw": "{\n  \"priority\": 20,\n  \"status\": \"inactive\"\n}",
@@ -42354,7 +42461,7 @@
                     }
                   ]
                 },
-                "description": "Change an assignment rule\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
+                "description": "Change an assignment rule (status active / inactive activates or deactivates it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Edit\n\nAccess: write:lead-assignment",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"priority\": 20,\n  \"status\": \"inactive\"\n}",
@@ -42441,6 +42548,164 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"message\": \"Assignment rule removed\",\n  \"data\": {\n    \"removed\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Order the assignment rules: priorities 10, 20, 30 ... in the order of the ids given",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lead-assignment/rules/order",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead-assignment",
+                "rules",
+                "order"
+              ]
+            },
+            "description": "Order the assignment rules: priorities 10, 20, 30 ... in the order of the ids given\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Move up / down\n\nAccess: write:lead-assignment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    3,\n    1,\n    2\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/lead-assignment/rules/order",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead-assignment",
+                    "rules",
+                    "order"
+                  ]
+                },
+                "description": "Order the assignment rules: priorities 10, 20, 30 ... in the order of the ids given\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Rules > Move up / down\n\nAccess: write:lead-assignment",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ids\": [\n    3,\n    1,\n    2\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"name\": \"Metro Manila motor\",\n      \"priority\": 10,\n      \"method\": \"round_robin\",\n      \"conditions\": {\n        \"lob\": \"MOTOR\",\n        \"province\": \"Metro Manila\"\n      },\n      \"assignees\": [\n        \"usr_1\",\n        \"usr_2\"\n      ],\n      \"assigneeNames\": [\n        \"Juan Dela Cruz\",\n        \"Maria Santos\"\n      ],\n      \"status\": \"active\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Run the reassignment queue through the active rules (dryRun: preview only)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/lead-assignment/rules/run",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "lead-assignment",
+                "rules",
+                "run"
+              ]
+            },
+            "description": "Run the reassignment queue through the active rules (dryRun: preview only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Assign by rules\n\nAccess: write:lead-assignment",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dryRun\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/lead-assignment/rules/run",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "lead-assignment",
+                    "rules",
+                    "run"
+                  ]
+                },
+                "description": "Run the reassignment queue through the active rules (dryRun: preview only)\n\nFront-end touchpoint: Operations > Sales & Marketing > Lead Assignment > Reassignment Queue > Assign by rules\n\nAccess: write:lead-assignment",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"dryRun\": true\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"dryRun\": true,\n    \"assigned\": [\n      {\n        \"leadNumber\": \"LD-2026-00012\",\n        \"name\": \"Jose Reyes\",\n        \"ruleName\": \"Metro Manila motor\",\n        \"toName\": \"Juan Dela Cruz\"\n      }\n    ],\n    \"unmatched\": 2\n  }\n}"
             }
           ]
         },
@@ -43186,6 +43451,99 @@
               ],
               "cookie": [],
               "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Processed 3 rows: 3 created, 0 failed\",\n    \"total\": 3,\n    \"created\": 3,\n    \"failed\": 0,\n    \"errors\": []\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/leads/duplicates?firstName=Juan&lastName=Dela Cruz&DOB=1990-05-01&emailId=juan@example.com&contactNumber=09171234567",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "leads",
+                "duplicates"
+              ],
+              "query": [
+                {
+                  "key": "firstName",
+                  "value": "Juan"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Dela Cruz"
+                },
+                {
+                  "key": "DOB",
+                  "value": "1990-05-01"
+                },
+                {
+                  "key": "emailId",
+                  "value": "juan@example.com"
+                },
+                {
+                  "key": "contactNumber",
+                  "value": "09171234567"
+                }
+              ]
+            },
+            "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
+          },
+          "response": [
+            {
+              "name": "Example response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/leads/duplicates?firstName=Juan&lastName=Dela Cruz&DOB=1990-05-01&emailId=juan@example.com&contactNumber=09171234567",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "leads",
+                    "duplicates"
+                  ],
+                  "query": [
+                    {
+                      "key": "firstName",
+                      "value": "Juan"
+                    },
+                    {
+                      "key": "lastName",
+                      "value": "Dela Cruz"
+                    },
+                    {
+                      "key": "DOB",
+                      "value": "1990-05-01"
+                    },
+                    {
+                      "key": "emailId",
+                      "value": "juan@example.com"
+                    },
+                    {
+                      "key": "contactNumber",
+                      "value": "09171234567"
+                    }
+                  ]
+                },
+                "description": "Possible duplicates of a new prospect: clients and open prospects with the same e-mail, mobile number, or name and date of birth (clientId: the open prospects of that client); off with leads.duplicate_check\n\nFront-end touchpoint: Operations > Sales & Marketing > Prospects > Create Prospect\n\nAccess: read:leads"
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json; charset=utf-8"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"kind\": \"client\",\n      \"id\": \"cli_1\",\n      \"number\": \"CL-2026-00004\",\n      \"name\": \"Juan Dela Cruz\",\n      \"ownerName\": \"Ana Garcia\",\n      \"matchedOn\": [\n        \"email\",\n        \"name\",\n        \"birthDate\"\n      ]\n    }\n  ]\n}"
             }
           ]
         },
