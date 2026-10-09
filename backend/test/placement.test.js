@@ -7,7 +7,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withProducts } from './helpers.js';
 import { pool, withTransaction } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { splitParticipants } from '../src/modules/placement/participants.js';
@@ -68,6 +68,7 @@ const sumOf = (rows, k) => Math.round(rows.reduce((s, r) => s + Number(r[k]), 0)
 
 beforeAll(async () => {
   ctx = await setup();
+  await withProducts();
   sales = await persona('p.sales', ['sales']);
   uw = await persona('p.uw', ['processing']);
   ic = Object.fromEntries((await q('SELECT code, id FROM insurance_companies')).map((r) => [r.code, r.id]));

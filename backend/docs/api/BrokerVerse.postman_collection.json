@@ -3,7 +3,7 @@
     "_postman_id": "fa829ef9-0398-5bff-aee5-9e0cd99a72a5",
     "name": "BrokerVerse Platform API",
     "version": "1.0.0",
-    "description": "BrokerVerse Platform API (1211 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
+    "description": "BrokerVerse Platform API (1208 requests). Select the \"BrokerVerse\" environment, fill username and password, run \"Login\" first: its test script stores the access token in {{token}}, which every request sends as a bearer token.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -50544,241 +50544,6 @@
           ]
         },
         {
-          "name": "Instant comparison of a package product across insurers (rate tables in force): premium, taxes, total, deductible, benefits; commission for staff (clientView=true hides it)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/packages/compare",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "packages",
-                "compare"
-              ]
-            },
-            "description": "Instant comparison of a package product across insurers (rate tables in force): premium, taxes, total, deductible, benefits; commission for staff (clientView=true hides it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers\n\nAccess: read:quotations",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/packages/compare",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "packages",
-                    "compare"
-                  ]
-                },
-                "description": "Instant comparison of a package product across insurers (rate tables in force): premium, taxes, total, deductible, benefits; commission for staff (clientView=true hides it)\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers\n\nAccess: read:quotations",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"product\": {\n      \"id\": 11,\n      \"code\": \"HOME\",\n      \"name\": \"Householder Insurance\",\n      \"line\": \"fire\",\n      \"lob\": \"FIRE\",\n      \"taxRegime\": \"vat\"\n    },\n    \"sumInsured\": 1000000,\n    \"date\": \"2026-09-30\",\n    \"lgu\": {\n      \"code\": \"MKT\",\n      \"name\": \"Makati\",\n      \"rate\": 0.2\n    },\n    \"currency\": \"PHP\",\n    \"cheapestId\": 2,\n    \"columns\": [\n      {\n        \"insuranceCompanyId\": 2,\n        \"insurerName\": \"Malayan Insurance Co., Inc.\",\n        \"rateTableId\": 1,\n        \"rateBasis\": \"percent\",\n        \"rate\": 0.25,\n        \"premium\": 2500,\n        \"vat\": 300,\n        \"premiumTax\": 0,\n        \"dst\": 312.5,\n        \"fst\": 50,\n        \"lgt\": 5,\n        \"otherCharges\": 0,\n        \"taxes\": 667.5,\n        \"totalCharges\": 667.5,\n        \"total\": 3167.5,\n        \"deductible\": \"PHP 2,500 each and every loss\",\n        \"keyBenefits\": [\n          \"Fire and lightning\"\n        ],\n        \"commissionRate\": 0.2,\n        \"commissionAmount\": 500\n      }\n    ]\n  }\n}"
-            }
-          ]
-        },
-        {
-          "name": "Printable comparison for the client on the company letterhead (commission never printed); selected limits the insurers shown",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/packages/compare/pdf",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "packages",
-                "compare",
-                "pdf"
-              ]
-            },
-            "description": "Printable comparison for the client on the company letterhead (commission never printed); selected limits the insurers shown\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Print\n\nAccess: read:quotations",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"preparedFor\": \"Maria Santos\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/packages/compare/pdf",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "packages",
-                    "compare",
-                    "pdf"
-                  ]
-                },
-                "description": "Printable comparison for the client on the company letterhead (commission never printed); selected limits the insurers shown\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Print\n\nAccess: read:quotations",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"preparedFor\": \"Maria Santos\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "text",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/octet-stream"
-                }
-              ],
-              "cookie": [],
-              "body": "(application/pdf)"
-            }
-          ]
-        },
-        {
-          "name": "Proceed with one insurer of the comparison: a quotation for the prospect or client priced from its rate table with the tax and charge engine",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/packages/compare/quotation",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "packages",
-                "compare",
-                "quotation"
-              ]
-            },
-            "description": "Proceed with one insurer of the comparison: a quotation for the prospect or client priced from its rate table with the tax and charge engine\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Proceed\n\nAccess: write:quotations",
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"insuranceCompanyId\": 2,\n  \"leadRefId\": \"ld_0123456789abcdef\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            }
-          },
-          "response": [
-            {
-              "name": "Example response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "{{baseUrl}}/packages/compare/quotation",
-                  "host": [
-                    "{{baseUrl}}"
-                  ],
-                  "path": [
-                    "packages",
-                    "compare",
-                    "quotation"
-                  ]
-                },
-                "description": "Proceed with one insurer of the comparison: a quotation for the prospect or client priced from its rate table with the tax and charge engine\n\nFront-end touchpoint: Operations > Sales & Marketing > Compare Insurers > Proceed\n\nAccess: write:quotations",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"productId\": 11,\n  \"sumInsured\": 1000000,\n  \"lguCode\": \"MKT\",\n  \"insuranceCompanyId\": 2,\n  \"leadRefId\": \"ld_0123456789abcdef\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json; charset=utf-8"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"quotationId\": \"qt_0123456789abcdef\",\n    \"quotationNumber\": \"QT-2026-00042\",\n    \"premiumTotal\": 3167.5\n  }\n}"
-            }
-          ]
-        },
-        {
           "name": "Package policies (status, clientId, search; paging)",
           "request": {
             "method": "GET",
@@ -68035,7 +67800,7 @@
                 }
               ]
             },
-            "description": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer\n\nFront-end touchpoint: Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers\n\nAccess: read:products, write:products, read:quotations"
+            "description": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer\n\nFront-end touchpoint: Request for Quotation > Insurers to approach\n\nAccess: read:products, write:products, read:quotations"
           },
           "response": [
             {
@@ -68059,7 +67824,7 @@
                     }
                   ]
                 },
-                "description": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer\n\nFront-end touchpoint: Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers\n\nAccess: read:products, write:products, read:quotations"
+                "description": "Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer\n\nFront-end touchpoint: Request for Quotation > Insurers to approach\n\nAccess: read:products, write:products, read:quotations"
               },
               "status": "OK",
               "code": 200,

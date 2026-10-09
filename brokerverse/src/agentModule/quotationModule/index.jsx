@@ -12,6 +12,7 @@ import SvgHome from "../../assets/agentIcon/SvgHome";
 import BulkUploadModal from "./BulkUploadModal";
 import { useNavigate } from "react-router-dom";
 import QuoteStatsCards from "../quoteModule/quoteListing/QuoteStatsCards";
+import { RFQ_PATH, entryOf, rfqState, useSalesProducts } from "../../module/Sales/salesProducts";
 
 const ClientListingCard = () => {
   const { t } = useTranslation();
@@ -28,89 +29,37 @@ const ClientListingCard = () => {
     setRefreshKey((prev) => prev + 1);
   };
 
-  const handleCreateQuote = () => {
-    // Navigate to lead listing to select a lead for quote creation
-    navigate("/agent/leadlisting");
+  // one choice per active product of the Product master: motor and fire quotes start from a prospect, IAR and employee
+  // benefits from their own forms, any other product from a Request for Quotation to the insurers
+  const products = useSalesProducts();
+  const icons = { motor: <SvgMotor />, fire: <SvgFire />, iar: <SvgHome /> };
+  const start = (p) => {
+    const entry = entryOf(p);
+    if (entry === "motor" || entry === "fire") navigate("/agent/leadlisting");
+    else if (entry === "iar") navigate("/agent/createlead/iar");
+    else if (entry === "eb") navigate("/agent/createlead/employee-benefit");
+    else navigate(RFQ_PATH, { state: rfqState(p) });
   };
 
-  const handleCreateIarQuote = () => {
-    navigate("/agent/createlead/iar");
-  };
-
-  const dropdownOptions = [
-    {
-      label: (
+  const dropdownOptions = (products || []).map((p) => ({
+    value: p.id,
+    label: (
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div>{icons[entryOf(p)] || <i className="pi pi-send" />}</div>
         <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => handleCreateQuote()}
+          style={{
+            fontFamily: "Nunito, Arial, sans-serif",
+            fontWeight: 400,
+            fontSize: "16px",
+            color: "#111927",
+            width: "100%",
+          }}
         >
-          <div>
-            <SvgMotor />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("quotationPage.motorQuote")}
-          </div>
+          {p.name}
         </div>
-      ),
-      value: "Motor",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => handleCreateQuote()}
-        >
-          <div>
-            <SvgFire />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("quotationPage.fireAndAlliedPerils")}
-          </div>
-        </div>
-      ),
-      value: "FireAndAlliedPerils",
-    },
-    {
-      label: (
-        <div
-          style={{ display: "flex", alignItems: "center", gap: "10px" }}
-          onClick={() => handleCreateIarQuote()}
-        >
-          <div>
-            <SvgHome />
-          </div>
-          <div
-            style={{
-              fontFamily: "Nunito, Arial, sans-serif",
-              fontWeight: 400,
-              fontSize: "16px",
-              color: "#111927",
-              width: "100%",
-            }}
-          >
-            {t("quotationPage.industrialAllRisks", "Industrial All Risks")}
-          </div>
-        </div>
-      ),
-      value: "IndustrialAllRisks",
-    },
-  ];
+      </div>
+    ),
+  }));
 
   return (
     <div className="claim__table__container__quotation mt-4">
@@ -154,12 +103,8 @@ const ClientListingCard = () => {
                 borderRadius: "8px",
               }}
               onChange={(e) => {
-                setSelectedOption(e.value);
-                if (e.value === "IndustrialAllRisks") {
-                  handleCreateIarQuote();
-                } else if (e.value === "Motor" || e.value === "FireAndAlliedPerils") {
-                  handleCreateQuote();
-                }
+                const product = (products || []).find((p) => p.id === e.value);
+                if (product) start(product);
                 setSelectedOption(null);
               }}
             />

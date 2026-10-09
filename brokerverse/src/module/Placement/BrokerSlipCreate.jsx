@@ -29,16 +29,20 @@ const termEnd = (start) => {
   return d;
 };
 
-/** The picked lead of a prefilled request (from the Fire / IAR quote cards or Quick Quote). */
-const prefilledCustomer = (prefill) =>
-  prefill?.leadRefId
-    ? { kind: "lead", selected: { id: prefill.leadRefId, label: `${prefill.leadName || prefill.leadRefId} (${prefill.leadRefId})`, name: prefill.leadName || "" } }
-    : { kind: "lead" };
+/** The customer of a prefilled request (Fire / IAR quote cards, Quick Quote, the product choosers): a lead, a client or a new prospect. */
+const prefilledCustomer = (prefill) => {
+  if (prefill?.leadRefId) return { kind: "lead", selected: { id: prefill.leadRefId, label: `${prefill.leadName || prefill.leadRefId} (${prefill.leadRefId})`, name: prefill.leadName || "" } };
+  if (prefill?.clientId) {
+    return { kind: "client", selected: { id: prefill.clientId, label: `${prefill.clientName || prefill.clientId} (${prefill.clientCode || prefill.clientId})`, name: prefill.clientName || "" } };
+  }
+  return { kind: prefill?.newProspect ? "new" : "lead" };
+};
 
 /**
  * New Request for Quotation (broker slip): the risk presented to the market, several insurers asked for terms. Mostly
  * for non-package products; the customer is an existing prospect or client, or a new prospect entered here.
- * location.state.prefill: { leadRefId, leadName, productId, productType, riskDetails, requestedCovers }.
+ * location.state.prefill: { leadRefId, leadName | clientId, clientName, clientCode | newProspect, productId, productType, riskDetails,
+ * requestedCovers }.
  */
 const BrokerSlipCreate = () => {
   const { t } = useTranslation();
@@ -49,7 +53,7 @@ const BrokerSlipCreate = () => {
   const [customer, setCustomer] = useState(() => prefilledCustomer(prefill));
   const [productId, setProductId] = useState(prefill?.productId || null);
   const [showPackage, setShowPackage] = useState(false);
-  const [insuredName, setInsuredName] = useState(prefill?.leadName || "");
+  const [insuredName, setInsuredName] = useState(prefill?.leadName || prefill?.clientName || "");
   const [riskDetails, setRiskDetails] = useState(prefill?.riskDetails || {});
   const [vehicle, setVehicle] = useState({ vehicleBrand: "", vehicleModel: "", modelYear: "", plateNumber: "", fmv: null });
   const [covers, setCovers] = useState(() => (prefill?.requestedCovers?.length ? prefill.requestedCovers.map((c) => ({ ...blankCover(), ...c })) : [blankCover()]));

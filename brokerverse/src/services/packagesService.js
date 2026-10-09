@@ -42,13 +42,6 @@ const showPdf = async (response) => {
 /** Fetch a PDF with GET (printed quotation, policy schedule) and open it in a new tab. */
 const getPdf = (path) => fetch(`${BASE_URL}${path}`, { method: "GET", headers: { ...authService.getAuthHeader() } }).then(showPdf);
 
-/** Fetch a PDF built from a request body (comparison) with POST and open it in a new tab. */
-const postPdf = (path, body) => fetch(`${BASE_URL}${path}`, {
-  method: "POST",
-  headers: { "Content-Type": "application/json", ...authService.getAuthHeader() },
-  body: JSON.stringify(body || {}),
-}).then(showPdf);
-
 const enc = encodeURIComponent;
 const data = (p) => p.then((r) => r.data);
 
@@ -76,11 +69,6 @@ const packagesService = {
   createBundle: (body) => data(request("POST", "/packages/bundles", body)),
   updateBundle: (id, body) => data(request("PUT", `/packages/bundles/${enc(id)}`, body)),
   deleteBundle: (id) => data(request("DELETE", `/packages/bundles/${enc(id)}`)),
-
-  // comparison
-  compare: (body) => data(request("POST", "/packages/compare", body)),
-  printComparison: (body) => postPdf("/packages/compare/pdf", body),
-  quotationFromComparison: (body) => data(request("POST", "/packages/compare/quotation", body)),
 
   // package quotations and policies
   previewPackage: (body) => data(request("POST", "/packages/quotes/preview", body)),

@@ -92,3 +92,25 @@ export async function placeAndBook(api, body, { policyNumber = null, checker = n
   }
   return (checker || api)('post', `/placements/${p.id}/book`).send({});
 }
+
+/**
+ * Switch products outside the TISPH catalogue (migration 0341) back on, with their policy types, lines of business,
+ * Product Configurator templates and risk mappings, insurer rate tables and the package bundles made of active
+ * products only: for suites that test the lines TISPH does not sell yet (fire, IAR, employee benefits, marine cargo).
+ * Without codes, every inactive product.
+ */
+export async function withProducts(codes = null) {
+  const { query } = await import('../src/db/pool.js');
+  if (!codes) codes = (await query("SELECT code FROM products WHERE status = 'inactive'")).rows.map((r) => r.code);
+  await query("UPDATE products SET status = 'active' WHERE code = ANY($1)", [codes]);
+  await query(`UPDATE policy_types t SET status = 'active' FROM products p
+    WHERE p.id = t.product_id AND p.code = ANY($1) AND t.code NOT IN ('ODTH', 'PA-GRP')`, [codes]);
+  await query(`UPDATE master_records SET status = 'active' WHERE type_code = 'line-of-business'
+    AND code IN (SELECT upper(line) FROM products WHERE code = ANY($1))`, [codes]);
+  await query(`UPDATE product_templates t SET status = 'Active' FROM products p
+    WHERE p.id = t.product_id AND p.code = ANY($1) AND t.status = 'Inactive'`, [codes]);
+  await query("UPDATE product_risk_mappings SET status = 'Active' WHERE upper(lob_code) = ANY($1)", [codes]);
+  await query('UPDATE insurer_rate_tables r SET active = true FROM products p WHERE p.id = r.product_id AND p.code = ANY($1)', [codes]);
+  await query(`UPDATE package_bundles b SET status = 'active' WHERE NOT EXISTS (SELECT 1 FROM package_bundle_sections s
+    JOIN products p ON p.id = s.product_id WHERE s.bundle_id = b.id AND p.status <> 'active')`);
+}

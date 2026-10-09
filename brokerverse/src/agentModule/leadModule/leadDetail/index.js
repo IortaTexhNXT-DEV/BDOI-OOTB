@@ -13,6 +13,7 @@ import { isFireLob, isIarLob } from '../../endorsementModule/constants/endorseme
 import { formatDate as formatConfiguredDate } from '../../../utility/dateFormat';
 import PartyPrivacyPanel from '../../../module/DataPrivacy/PartyPrivacyPanel';
 import ActivityPanel from '../../../components/SalesActivities/ActivityPanel';
+import { RFQ_PATH, rfqState } from '../../../module/Sales/salesProducts';
 import './index.scss';
 
 const LeadDetail = () => {
@@ -78,7 +79,10 @@ const LeadDetail = () => {
     navigate('/agent/leadlisting');
   };
 
-  /** Same entry point as straight after creating the lead: the quote wizard for the lead's line of business. */
+  /**
+   * Same entry point as straight after creating the lead: the quote screen of the lead's line of business (the motor
+   * quote wizard, the Fire or IAR form), else a Request for Quotation to the insurers.
+   */
   const handleCreateQuote = () => {
     const id = currentLeadDetails.leadId || leadId;
     const lob = currentLeadDetails.lob;
@@ -88,6 +92,11 @@ const LeadDetail = () => {
     }
     if (lob && isFireLob(lob)) {
       navigate('/agent/createlead/fire-allied-perils', { state: { leadId: id, isEdit: true } });
+      return;
+    }
+    if (lob && String(lob).toUpperCase() !== 'MOTOR') {
+      const product = currentLeadDetails.productType ? { name: currentLeadDetails.productType } : null;
+      navigate(RFQ_PATH, { state: rfqState(product, { lead: { ...currentLeadDetails, leadId: id } }) });
       return;
     }
     navigate(`/agent/createquote/policydetails/createquote/${id}`, { state: { lead: currentLeadDetails } });

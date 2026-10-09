@@ -211,15 +211,15 @@ describe('users are the staff register', () => {
 
 describe('product templates use master codes', () => {
   it('stores the Line of Business master code and checks the product', async () => {
-    const lob = await ctx.api('post', '/product-configurator/products').send({ templateCode: 'CS-FIRE-1', name: 'Fire test', category: 'Fire', lineOfBusiness: 'Fire', effectiveDate: '2026-01-01', status: 'Draft' });
+    const lob = await ctx.api('post', '/product-configurator/products').send({ templateCode: 'CS-PA-1', name: 'PA test', category: 'Accident', lineOfBusiness: 'Personal Accident', effectiveDate: '2026-01-01', status: 'Draft' });
     expect(lob.status, JSON.stringify(lob.body)).toBe(201);
-    expect(lob.body.data.lineOfBusiness).toBe('FIRE');
+    expect(lob.body.data.lineOfBusiness).toBe('ACCIDENT');
     const product = await one("SELECT id FROM products WHERE code = 'MOTOR'");
     const fromProduct = await ctx.api('post', '/product-configurator/products').send({ templateCode: 'CS-MOT-1', name: 'Motor test', category: 'Motor', productId: product.id, effectiveDate: '2026-01-01', status: 'Draft' });
     expect(fromProduct.status, JSON.stringify(fromProduct.body)).toBe(400); // lineOfBusiness is required on create
     const both = await ctx.api('post', '/product-configurator/products').send({ templateCode: 'CS-MOT-1', name: 'Motor test', category: 'Motor', productId: product.id, lineOfBusiness: 'MOTOR', effectiveDate: '2026-01-01', status: 'Draft' });
     expect(both.body.data).toMatchObject({ lineOfBusiness: 'MOTOR', productId: product.id });
-    const mismatch = await ctx.api('post', '/product-configurator/products').send({ templateCode: 'CS-MOT-2', name: 'x', category: 'Motor', productId: product.id, lineOfBusiness: 'FIRE', effectiveDate: '2026-01-01', status: 'Draft' });
+    const mismatch = await ctx.api('post', '/product-configurator/products').send({ templateCode: 'CS-MOT-2', name: 'x', category: 'Motor', productId: product.id, lineOfBusiness: 'ACCIDENT', effectiveDate: '2026-01-01', status: 'Draft' });
     expect(mismatch.status).toBe(400);
     const unknown = await ctx.api('post', '/product-configurator/products').send({ templateCode: 'CS-X', name: 'x', category: 'Motor', lineOfBusiness: 'Motor Vehicle', effectiveDate: '2026-01-01', status: 'Draft' });
     expect(unknown.status).toBe(400);

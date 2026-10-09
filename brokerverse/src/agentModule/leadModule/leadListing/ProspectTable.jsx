@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -19,12 +19,14 @@ import useMasterOptions from "../../../module/GeneralMasters/common/useMasterOpt
 import { useListState, useServerList } from "../../../hooks/useServerList";
 import { statusLabel, statusSeverity } from "../../../utils/statusSeverity";
 import logger from "../../../utility/logger";
+import { useSalesProducts } from "../../../module/Sales/salesProducts";
 
-const LOBS = [
-  { lob: "MOTOR", labelKey: "dashboard.Motor", fallback: "Motor" },
-  { lob: "FIRE", labelKey: "dashboard.Fire and Allied Perils", fallback: "Fire and Allied Perils" },
-  { lob: "IAR", labelKey: "dashboard.Industrial All Risks", fallback: "Industrial All Risks" },
-];
+/** Names of the lines that are not Line of Business master codes (IAR is a fire line) or read before the master loads. */
+const LOB_LABELS = {
+  MOTOR: { labelKey: "dashboard.Motor", fallback: "Motor" },
+  FIRE: { labelKey: "dashboard.Fire and Allied Perils", fallback: "Fire and Allied Perils" },
+  IAR: { labelKey: "dashboard.Industrial All Risks", fallback: "Industrial All Risks" },
+};
 
 const LEAD_STATUS_KEYS = {
   New: "new", Contacted: "contacted", Qualified: "qualified", QuoteGenerated: "quoteGenerated", Converted: "converted", Lost: "lost",
@@ -35,7 +37,8 @@ const LEAD_STATUS_KEYS = {
 const INITIAL = { tab: 0, search: "", leadCategory: "", country: "", province: "", city: "", showFilters: false };
 
 /**
- * Sales > Prospects list: one table per product line (Motor, Fire, IAR), paged, searched and filtered by the server.
+ * Sales > Prospects list: one table per line of business of the active products (Product master), Motor first, paged,
+ * searched and filtered by the server.
  * The search, filters, tab and page are kept while the user opens a prospect and comes back.
  */
 const ProspectTable = () => {
@@ -44,7 +47,15 @@ const ProspectTable = () => {
   const dispatch = useDispatch();
   const toast = useRef(null);
   const [state, patch] = useListState("prospects", INITIAL);
-  const lob = LOBS[state.tab]?.lob || "MOTOR";
+  const products = useSalesProducts();
+  const lobMaster = useMasterOptions("line-of-business");
+  const lobs = useMemo(() => {
+    const lines = [...new Set((products || []).map((p) => p.lob).filter(Boolean))];
+    return lines.length ? ["MOTOR", ...lines.filter((l) => l !== "MOTOR").sort()] : ["MOTOR"];
+  }, [products]);
+  const lob = lobs[state.tab] || "MOTOR";
+  const lobName = (code) => lobMaster.find((o) => o.code === code)?.label
+    || t(LOB_LABELS[code]?.labelKey || "", { defaultValue: LOB_LABELS[code]?.fallback || code || "-" });
 
   const fetchPage = useCallback(async ({ page, pageSize }) => {
     const res = await leadService.getAllLeads({
@@ -112,7 +123,7 @@ const ProspectTable = () => {
       <Button icon="pi pi-trash" text rounded size="small" severity="danger" aria-label={t("leads.delete")} tooltip={t("leads.delete")} tooltipOptions={{ position: "top" }} onClick={(e) => { e.stopPropagation(); removeLead(r); }} />
     </div>
   );
-  const lobLabel = (r) => r.productType || t(LOBS.find((l) => l.lob === r.lob)?.labelKey || "", { defaultValue: LOBS.find((l) => l.lob === r.lob)?.fallback || r.lob || "-" });
+  const lobLabel = (r) => r.productType || lobName(r.lob);
 
   const table = (
     <DataTable {...list.tableProps} scrollable dataKey="leadId" size="small" stripedRows className="prospect-table" emptyMessage={list.error ? t("listCommon.loadFailed", { message: list.error }) : t("leads.noLeadsFound")}
@@ -136,7 +147,7 @@ const ProspectTable = () => {
       <ConfirmDialog />
       <div className="prospect-list-card">
         <TabView className="bv-tabbar" activeIndex={state.tab} onTabChange={(e) => patch({ tab: e.index })}>
-          {LOBS.map((l) => <TabPanel key={l.lob} header={t(l.labelKey, { defaultValue: l.fallback })} />)}
+          {lobs.map((l) => <TabPanel key={l} header={lobName(l)} />)}
         </TabView>
         <div className="prospect-toolbar">
           <span className="p-input-icon-left prospect-search">

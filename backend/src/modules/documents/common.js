@@ -32,7 +32,7 @@ export function lobOf(...values) {
     if (!v) continue;
     const u = String(v).toUpperCase();
     // line codes of the placement journey (products master lines) are kept as they are
-    if (['MARINE', 'CASUALTY', 'ENGINEERING', 'ACCIDENT'].includes(u)) return u;
+    if (['MARINE', 'CASUALTY', 'ENGINEERING', 'ACCIDENT', 'LIFE'].includes(u)) return u;
     if (u === 'IAR' || u.includes('INDUSTRIAL ALL RISK') || u.includes('INDUSTRIAL_ALL_RISK')) return 'IAR';
     if (u.includes('FIRE')) return 'FIRE';
     if (u.includes('EMPLOYEE') || u === 'EB') return 'EB';
@@ -42,7 +42,8 @@ export function lobOf(...values) {
     if (u.includes('LIABILITY') || u.includes('BOND') || u.includes('MONEY') || u.includes('BURGLARY')) return 'CASUALTY';
     if (u.includes('HOUSEHOLD')) return 'FIRE';
     if (u.includes('ALL RISK') || u.includes('MACHINERY') || u === 'CAR' || u === 'EAR') return 'ENGINEERING';
-    if (u.includes('CARGO') || u.includes('HULL')) return 'MARINE';
+    if (u.includes('CARGO') || u.includes('HULL') || u.includes('PARCEL') || u.includes('COURIER')) return 'MARINE';
+    if (u.includes('CREDIT LIFE') || u.includes('GROUP LIFE') || u.startsWith('CL-')) return 'LIFE';
     if (u.includes('MOTOR') || u.includes('CTPL') || u.includes('COMPREHENSIVE')) return 'MOTOR';
   }
   return 'MOTOR';

@@ -302,7 +302,6 @@ import ConsentRegister from "../module/DataPrivacy/ConsentRegister";
 // client onboarding before the first policy (customer due diligence)
 import ClientOnboarding from "../agentModule/quoteModule/clientOnboarding";
 import GoLiveDataLoad from "../module/GoLiveDataLoad";
-import CompareInsurers from "../module/PackagedProducts/CompareInsurers";
 import BundleProducts from "../module/PackagedProducts/BundleProducts";
 import InsurerRateTables from "../module/PackagedProducts/InsurerRateTables";
 import LguTaxRates from "../module/PackagedProducts/LguTaxRates";
@@ -1143,7 +1142,6 @@ const Maincomponent = () => {
           <Route path="/agent/client-onboarding" element={<ClientOnboarding />} />
           <Route path="/agent/client-onboarding/:id" element={<ClientOnboarding />} />
           <Route path="/master/go-live-data-load" element={<GoLiveDataLoad />} />
-          <Route path="/sales/compare-insurers" element={<CompareInsurers />} />
           <Route path="/master/finance/package-bundles" element={<BundleProducts />} />
           <Route path="/master/finance/insurer-rate-tables" element={<InsurerRateTables />} />
           <Route path="/master/finance/premium-taxes" element={<LguTaxRates />} />

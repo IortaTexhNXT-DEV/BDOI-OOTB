@@ -3988,11 +3988,8 @@
     "failedToLoadQuotation": "โหลดรายละเอียดใบเสนอราคาไม่สำเร็จ",
     "errorLoadingQuotation": "เกิดข้อผิดพลาดขณะโหลดรายละเอียดใบเสนอราคา",
     "unexpectedErrorConverting": "เกิดข้อผิดพลาดขณะแปลงเป็นกรมธรรม์",
-    "motor": "มอเตอร์",
     "fireAndAlliedPerils": "อัคคีภัยและภัย allied",
-    "employeeBenefit": "สวัสดิการพนักงาน",
     "travel": "เดินทาง",
-    "property": "ทรัพย์สิน",
     "afterSameDay": "วันเดียวกัน",
     "afterOneDay": "1 วัน",
     "afterDays": "{{count}} วัน",
@@ -4003,8 +4000,6 @@
   "quotationPage": {
     "title": "ใบเสนอราคา",
     "home": "หน้าแรก",
-    "motorQuote": "ใบเสนอราคามอเตอร์",
-    "fireAndAlliedPerils": "อัคคีภัยและภัย allied",
     "createQuote": "สร้างใบเสนอราคา",
     "bulkUpload": "อัปโหลดหลายรายการ"
   },

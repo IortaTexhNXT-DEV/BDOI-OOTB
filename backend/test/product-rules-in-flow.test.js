@@ -2,11 +2,11 @@
  * Product Configurator configuration takes effect in the business flow: acceptance rules (auto-accept / refer /
  * decline / loading) on quotations, broker slips and placements, rating factors in the premium, insurer-specific
  * rules, the referral approved by the rule's authority role, the market mapping filtering insurers on a Request for
- * Quotation and in Compare Insurers, and an uploaded document layout used for the printed policy schedule.
+ * Quotation, and an uploaded document layout used for the printed policy schedule.
  */
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withProducts } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 import { clearSettingsCache } from '../src/lib/settings.js';
 import { parseCondition, bandOf, test as testCondition, adjustNet } from '../src/modules/product-configurator/underwriting.js';
@@ -38,6 +38,7 @@ const ruleId = async (code) => (await q("SELECT c.id FROM product_components c J
 
 beforeAll(async () => {
   ctx = await setup();
+  await withProducts();
   sales = await persona('r.sales', ['sales']);
   proc = await persona('r.proc', ['processing']);
   ic = Object.fromEntries((await q('SELECT code, id FROM insurance_companies')).map((r) => [r.code, r.id]));

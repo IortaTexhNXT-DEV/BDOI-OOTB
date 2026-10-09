@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
-import { setup, loginAs } from './helpers.js';
+import { setup, loginAs, withProducts } from './helpers.js';
 import { pool } from '../src/db/pool.js';
 
 let ctx;
@@ -11,6 +11,7 @@ const setSettings = (settings) => ctx.api('put', '/settings').send({ settings })
 
 beforeAll(async () => {
   ctx = await setup();
+  await withProducts();
   await ctx.api('post', '/users').send({ username: 'pc.sales', password: 'Welcome@123', displayName: 'pc.sales', email: 'pc.sales@example.ph', roles: ['sales'] });
   const token = await loginAs(ctx.app, 'pc.sales', 'Welcome@123');
   sales = (m, p) => request(ctx.app)[m](`/api${p}`).set('Authorization', `Bearer ${token}`);

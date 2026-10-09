@@ -350,7 +350,7 @@ Every piece of business passes through the same cycle. Each step is done on its 
 | # | Step | Persona | Screen |
 |---|---|---|---|
 | 1 | Prospect | Sales & Marketing, Operations | Operations > Sales & Marketing > Prospects |
-| 2 | Quick quote | Sales & Marketing, Operations | Operations > Sales & Marketing > Quick Quote, Compare Insurers |
+| 2 | Quick quote | Sales & Marketing, Operations | Operations > Sales & Marketing > Quick Quote |
 | 2 | Request for quotation | Processing Team (Sales and Operations can start one) | Operations > Sales & Marketing > Request for Quotation (Broker Slip) |
 | 3 | Insurer offers and comparison | Processing Team | Request for Quotation: tabs Market responses, Compare offers |
 | 4 | Quotation | Sales & Marketing, Operations; Processing Team for quotation slips from a request | Operations > Sales & Marketing > Quotations |
@@ -949,7 +949,7 @@ The account executive (role Sales & Marketing (Account Executive)) finds and rec
 | Menu | Items |
 |---|---|
 | Dashboard | Executive Dashboard, Sales Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips, Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
+| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Request for Quotation (Broker Slip), Quotations, Placement Slips, Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
 | Commission | Commission Dashboard |
 | Reports | All Reports; Operational Reports (Production, Claims, Renewal, Remittance, Broker Commission, Dealer Production); Report Builder |
 | Master | Insurance > Distribution Channels |
@@ -1034,7 +1034,7 @@ The system checks every row and reports the rows it could not load with the reas
 
 ![Bulk upload prospects](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-prospect-bulk.png)
 
-## Quick Quote and Compare Insurers
+## Quick Quote
 
 ![Operations > Sales & Marketing > Quick Quote](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-quick-quote.png)
 
@@ -1044,10 +1044,6 @@ Quick Quote lists the package products: standard tariff and wording, quoted on t
 - **Request quotation**: the product has no quote wizard yet. The button opens a Request for Quotation so the Processing Team gets the terms from the insurers.
 
 **Request for Quotation (non-package)** at the top opens a new request for a risk that is not a package product.
-
-**Compare Insurers** shows the premiums of several insurers side by side for a package product, from their rate tables (Master > Finance > Insurer Rate Tables). Choose the **Product**, the **Sum insured**, the **Location of the risk** (the city or municipality decides the local government tax) and the **Inception date**, then select **Compare**. An insurer without a rate for the product is not listed.
-
-![Operations > Sales & Marketing > Compare Insurers](/home/user/BDOI-OOTB/docs/package/source/manual-images/s-compare-insurers.png)
 
 ## Create a motor quotation
 
@@ -1497,7 +1493,7 @@ Operations (role Operations (Client Servicing)) looks after the clients once the
 | Menu | Items |
 |---|---|
 | Dashboard | Executive Dashboard |
-| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Compare Insurers, Request for Quotation (Broker Slip), Quotations, Placement Slips, Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
+| Operations | Home; Sales & Marketing (Prospects, Quick Quote, Request for Quotation (Broker Slip), Quotations, Placement Slips, Lead Assignment, Dealer Programmes, Comparison Reports, Campaigns, Sales Activities); Clients; Policy; Fleet Schedules; Marine Open Covers; Claims; Renewals (Renewal Policy, Renewal Batch, Renewal Queue, Retention Analytics, At-Risk Policies, Negotiations, Lapse Management, Performance); My Work; Payments; CTPL Authentication; Cover Notes; Policy Cancellation |
 | Reports | All Reports; Operational Reports; Report Builder |
 | Master | Insurance > Distribution Channels; Data Privacy (Data Subject Requests, Consent Register) |
 | Product Configurator | Dashboard, Product Templates |
@@ -2877,7 +2873,6 @@ The landing page of every role after sign-in: My Work with the role preset (cate
 |---|---|---|---|
 | Prospects | Record and follow prospects (LD-). | Category, names, date of birth (age 18 to 100), gender, e-mail, Philippine mobile number, address with 4-digit ZIP code; statuses New, Contacted, Qualified, QuoteGenerated, Converted, Lost; **Bulk Upload** (.xlsx or .csv, up to 10 MB). | Sales & Marketing |
 | Quick Quote | Quote package products on the spot. | **Start quote** for products with a wizard; **Request quotation** for the others. | Sales & Marketing |
-| Compare Insurers | Compare insurers' premiums for a package product. | Product, sum insured, location of the risk, inception date; rates from Insurer Rate Tables. | Sales & Marketing |
 | Requests for Quotation (Broker Slips) | Present a risk to several insurers (BS-) and record offers (OFR-). | Customer, product, insured, period, response due, risk details, covers, insurers to approach (required); statuses Draft, Submitted, Responses in, Closed, Cancelled. | Processing Team |
 | Quotations | Price cover for the client (QT-). | Server re-pricing; validity 30 days; statuses Draft, Pending Customer, Customer Accepted, Approved, Rejected, Dropped, Expired, Converted to Policy; customer response Accepted, Declined, Revise. | Sales & Marketing |
 | Placement Slips | Firm order to the insurers (PS-). | Participants with shares totalling exactly 100% and one lead; statuses Placement raised, Sent to insurer, Acknowledged, e-Policy received, Checked against slip, Insurer issued (Booked), Declined, Cancelled; **New direct placement**, **Record e-Policy**. | Processing Team |
@@ -3042,7 +3037,7 @@ See the chapter Reports, dashboards, schedules and notifications.
 | Configuration Approvals | Pending posting configuration changes for a second user. |
 | Accounting Flow | What each event posts, from the rules in force. |
 | Package Bundles | Packages sold under one master policy (sections with their own insurer): code, bundle, customer segment, sections, bundle discount, default sum insured; **Add bundle**. |
-| Insurer Rate Tables | Each insurer's rates for package products: product, insurer, rate basis, rate, minimum premium, deductible, key benefits, commission, effective dates; used by Compare Insurers and Quick Quote; **Add rate**. |
+| Insurer Rate Tables | Each insurer's rates for package products: product, insurer, rate basis, rate, minimum premium, deductible, key benefits, commission, effective dates; used by Package Bundles; **Add rate**. |
 | Premium Taxes & LGU Rates | VAT or premium tax, DST, FST and the local government tax per city or municipality (code, city, province, rate, effective dates); tabs Local government tax, Tax and charge rules, Calculator; **Add city / municipality**. |
 | Payment Gateways | Online payment of premium (GCash, Maya, GrabPay, cards, online banking) through a payment link: gateway, mode (sandbox or live), methods, fee, link validity (72 hours), issue the policy when paid, bank account credited; payment log. Merchant keys are set on the server, never on the screen. |
 | Commission Rate Matrix | Brokerage rates by insurer, product, line and policy type; **Add rate**, **Find rate**. |

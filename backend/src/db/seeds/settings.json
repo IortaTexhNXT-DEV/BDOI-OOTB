@@ -338,7 +338,7 @@
     "key": "product.market_panel_enforced",
     "value": true,
     "group": "premium",
-    "label": "Insurers approached on a Request for Quotation and compared in Compare Insurers must be on the product's insurer market (Product Configurator > Market Mapping); a product whose templates name no insurer is open to every insurer",
+    "label": "Insurers approached on a Request for Quotation must be on the product's insurer market (Product Configurator > Market Mapping); a product whose templates name no insurer is open to every insurer",
     "type": "boolean"
   },
   {

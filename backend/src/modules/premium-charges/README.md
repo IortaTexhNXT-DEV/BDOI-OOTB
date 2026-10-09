@@ -1,7 +1,7 @@
 # Premium taxes and charges
 
 The Philippine taxes and charges added to an insurance premium, kept as configuration, and the one calculator every
-premium is taxed with: Quick Quote > Compare Insurers, Package Bundles, quotations (and so endorsements and placement
+premium is taxed with: Package Bundles, quotations (and so endorsements and placement
 slips), insurer offers on broker slips, the renewal queue quote, the renewal quotation, the product configurator
 illustration and payment links. Routes are under `/premium-charges` (Master > Packaged Products > LGU Tax Rates, with the Taxes & Charges
 tab). Anyone who quotes, issues or collects can read them (`read:quotations`, `read:policies`, `read:masters`,

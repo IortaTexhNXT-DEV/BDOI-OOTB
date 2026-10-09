@@ -20,8 +20,7 @@ import { allocate } from '../accounting/lib/coinsurance.js';
 import { chargesFor, lguFor, rulesInForce } from '../premium-charges/service.js';
 import { sumCharges } from '../premium-charges/calculator.js';
 import { getBundle } from './bundles.js';
-import { premiumOnRate, rateTableFor } from './rateTables.js';
-import { commissionRateFor } from './compare.js';
+import { commissionRateFor, premiumOnRate, rateTableFor } from './rateTables.js';
 
 const run = (db) => db || { query };
 const AMOUNT_KEYS = ['sumInsured', 'basePremium', 'discountAmount', 'netPremium', 'vat', 'premiumTax', 'dst', 'fst', 'lgt', 'otherCharges', 'totalCharges', 'totalAmount', 'commissionAmount'];

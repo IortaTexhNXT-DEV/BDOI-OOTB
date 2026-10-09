@@ -200,7 +200,7 @@ define({
 
 define({
   method: 'GET', path: '/market', summary: 'Insurer market of a product (insurer panel of its templates in force plus active market mappings); restricted=false when no template names an insurer',
-  screen: 'Request for Quotation > Insurers to approach; Quick Quote > Compare Insurers', middleware: canRead('products', 'read:quotations'), query: { productId: 2 },
+  screen: 'Request for Quotation > Insurers to approach', middleware: canRead('products', 'read:quotations'), query: { productId: 2 },
   response: { success: true, data: { restricted: true, insurerIds: [2], insurers: [{ id: 2, name: 'Malayan Insurance Co., Inc.' }], templateCodes: ['MOT-003-2025'] } },
   handler: async (req, res) => ok(res, await marketFor({ productId: req.query.productId || null, lob: req.query.lob || null })),
 });
