@@ -312,7 +312,7 @@ const ReconciliationProcess = () => {
                 <Button
                   label="Match Selected"
                   icon="pi pi-link"
-                  className="p-button-success w-full"
+                  className="w-full"
                   onClick={handleMatchSelected}
                   disabled={selectedBank.length === 0 || selectedSystem.length === 0}
                 />
@@ -356,7 +356,7 @@ const ReconciliationProcess = () => {
           <div className="exceptions-section">
             <div className="toolbar mb-3">
               <Button label="Export Exceptions" icon="pi pi-download" className="p-button-sm" onClick={handleExportExceptions} />
-              <Button label="Resolve All" icon="pi pi-check" className="p-button-sm p-button-success" onClick={handleResolveAll} disabled={!exceptions.length} />
+              <Button label="Resolve All" icon="pi pi-check" className="p-button-sm" onClick={handleResolveAll} disabled={!exceptions.length} />
             </div>
             <DataTable value={exceptions} stripedRows>
               <Column field="type" header="Exception Type" />

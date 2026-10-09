@@ -93,7 +93,7 @@ const ConfigurationApprovals = () => {
           )} />
           <Column body={(r) => (r.status === "pending" ? (
             <div className="flex gap-1">
-              <Button icon="pi pi-check" className="p-button-text p-button-success p-button-sm" tooltip={t("postingRules.approve")} onClick={() => act(r, "approve")} aria-label={t("postingRules.approve")} />
+              <Button icon="pi pi-check" className="p-button-text p-button-sm" tooltip={t("postingRules.approve")} onClick={() => act(r, "approve")} aria-label={t("postingRules.approve")} />
               <Button icon="pi pi-times" className="p-button-text p-button-danger p-button-sm" tooltip={t("postingRules.reject")} onClick={() => act(r, "reject")} aria-label={t("postingRules.reject")} />
               <Button icon="pi pi-undo" className="p-button-text p-button-sm" tooltip={t("postingRules.withdraw")} onClick={() => act(r, "withdraw")} aria-label={t("postingRules.withdraw")} />
             </div>

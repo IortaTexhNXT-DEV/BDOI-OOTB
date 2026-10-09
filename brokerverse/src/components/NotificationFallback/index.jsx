@@ -12,7 +12,7 @@ const NotificationFallback = ({ onRetry, error }) => {
         <div className="fallback-warning">
           <i
             className="pi pi-exclamation-triangle"
-            style={{ color: "#f39c12", marginRight: "8px" }}
+            style={{ color: "var(--color-warning)", marginRight: "8px" }}
           ></i>
           <span>{t("notificationPage.unableToLoad")}</span>
           <Button

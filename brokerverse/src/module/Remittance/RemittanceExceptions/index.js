@@ -155,7 +155,7 @@ const RemittanceExceptions = () => {
     return (
       <div className="action-buttons">
         <Button icon="pi pi-play" className="p-button-rounded p-button-text" tooltip={t("remittance.start")} disabled={rowData.status !== 'Open'} onClick={() => startException(rowData)} aria-label={t("remittance.start")} />
-        <Button icon="pi pi-check" className="p-button-rounded p-button-success p-button-text" tooltip={t("remittance.resolve")} disabled={!['In Progress', 'Escalated'].includes(rowData.status)} onClick={() => resolveException(rowData)} aria-label={t("remittance.resolve")} />
+        <Button icon="pi pi-check" className="p-button-rounded p-button-text" tooltip={t("remittance.resolve")} disabled={!['In Progress', 'Escalated'].includes(rowData.status)} onClick={() => resolveException(rowData)} aria-label={t("remittance.resolve")} />
         <Button icon="pi pi-arrow-up" className="p-button-rounded p-button-warning p-button-text" tooltip={t("remittance.escalate")} disabled={['Resolved', 'Escalated'].includes(rowData.status)} onClick={() => escalateException(rowData)} aria-label={t("remittance.escalate")} />
       </div>
     );
@@ -324,7 +324,7 @@ const RemittanceExceptions = () => {
                 <div className="action-buttons mt-3">
                   <Button label={t("remittance.saveProgress")} className="p-button-secondary mr-2"
                     disabled={selectedException.status !== 'Open'} onClick={() => startException(selectedException)} />
-                  <Button label={t("remittance.resolveException")} className="p-button-success mr-2"
+                  <Button label={t("remittance.resolveException")} className="mr-2"
                     disabled={selectedException.status === 'Resolved' || !resolutionData.resolutionType || !resolutionData.resolutionNotes}
                     onClick={() => resolveException(selectedException, resolutionText())} />
                   <Button label={t("remittance.escalate")} className="p-button-warning"

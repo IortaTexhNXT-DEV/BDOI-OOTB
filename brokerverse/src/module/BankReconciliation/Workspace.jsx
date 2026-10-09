@@ -143,7 +143,7 @@ const Workspace = () => {
           onClick={() => { setForm({ line: l }); setDialog("adjust"); }} aria-label={t("bankReconciliation.createAdjustment")} />
       )}
       {l.adjustmentJournalStatus === "for-approval" && !l.matchId && hasPermission("write:journal-vouchers") && (
-        <Button icon="pi pi-check-circle" text rounded size="small" severity="success" tooltip={t("bankReconciliation.approveAdjustment")} tooltipOptions={{ position: "left" }}
+        <Button icon="pi pi-check-circle" text rounded size="small" tooltip={t("bankReconciliation.approveAdjustment")} tooltipOptions={{ position: "left" }}
           onClick={() => act("approveAdj", () => bankReconciliationService.approveAdjustment(l.id), t("bankReconciliation.adjustmentPosted"))} aria-label={t("bankReconciliation.approveAdjustment")} />
       )}
       {!l.matchId && (
@@ -184,10 +184,10 @@ const Workspace = () => {
           </div>
           <div className="flex gap-2 flex-wrap ml-auto">
             <Button icon="pi pi-upload" label={t("bankReconciliation.importStatement")} disabled={!linked} onClick={() => setDialog("import")} />
-            <Button icon="pi pi-bolt" severity="help" label={t("bankReconciliation.autoMatch")} disabled={!linked} loading={busy === "auto"}
+            <Button icon="pi pi-bolt" label={t("bankReconciliation.autoMatch")} disabled={!linked} loading={busy === "auto"}
               onClick={() => act("auto", () => bankReconciliationService.autoMatch(account), (r) => t("bankReconciliation.autoMatched", { count: r.matched }))} />
             <Button icon="pi pi-clock" outlined label={t("bankReconciliation.staleCheques")} disabled={!linked} onClick={() => setDialog("stale")} />
-            <Button icon="pi pi-file-check" severity="success" label={rec ? `${t("bankReconciliation.reconciliation")} ${rec.recNumber}` : t("bankReconciliation.startReconciliation")}
+            <Button icon="pi pi-file-check" label={rec ? `${t("bankReconciliation.reconciliation")} ${rec.recNumber}` : t("bankReconciliation.startReconciliation")}
               disabled={!linked} loading={busy === "rec"} onClick={openRec} />
           </div>
         </div>
@@ -278,7 +278,7 @@ const Workspace = () => {
           </div>
           <div className="flex gap-2">
             <Button label={t("bankReconciliation.clear")} text style={{ color: "#fff" }} onClick={() => { setBankSel([]); setBookSel([]); }} />
-            <Button icon="pi pi-link" label={t("bankReconciliation.matchSelected")} severity="success" loading={busy === "match"} onClick={matchSelected}
+            <Button icon="pi pi-link" label={t("bankReconciliation.matchSelected")} loading={busy === "match"} onClick={matchSelected}
               disabled={bankSel.length + bookSel.length < 2} />
           </div>
         </div>
@@ -303,7 +303,7 @@ const Workspace = () => {
               onClick={() => act("flag", () => bankReconciliationService.flagLine(form.line.id, "bank-error", form.remarks), t("bankReconciliation.flagged"))} />}
             {dialog === "unmatch" && <Button label={t("bankReconciliation.unmatch")} icon="pi pi-link" severity="warning" loading={busy === "unmatch"}
               onClick={() => act("unmatch", () => bankReconciliationService.unmatch(form.matchId, form.reason), t("bankReconciliation.unmatched"))} />}
-            {dialog === "match" && <Button label={t("bankReconciliation.matchSelected")} icon="pi pi-link" severity="success" loading={busy === "match"}
+            {dialog === "match" && <Button label={t("bankReconciliation.matchSelected")} icon="pi pi-link" loading={busy === "match"}
               disabled={form.treatment === "adjustment" && !form.typeCode} onClick={confirmMatchWithDifference} />}
           </div>
         )}>

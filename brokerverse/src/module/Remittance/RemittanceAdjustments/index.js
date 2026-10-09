@@ -151,7 +151,7 @@ const RemittanceAdjustments = () => {
           <>
             <Button
               icon="pi pi-check"
-              className="p-button-rounded p-button-success p-button-text"
+              className="p-button-rounded p-button-text"
               tooltip="Approve"
               onClick={() => approveRows([rowData])} aria-label="Approve"
             />
@@ -368,7 +368,7 @@ const RemittanceAdjustments = () => {
 
             {selectedRows.length > 0 && (
               <div className="bulk-actions mt-3">
-                <Button label="Bulk Approve" icon="pi pi-check" className="p-button-success mr-2"
+                <Button label="Bulk Approve" icon="pi pi-check" className="mr-2"
                   onClick={() => approveRows(selectedRows.filter((r) => r.status === 'Pending Approval'))} />
                 <Button label="Bulk Reject" icon="pi pi-times" className="p-button-danger mr-2"
                   onClick={() => rejectRows(selectedRows.filter((r) => r.status === 'Pending Approval'))} />

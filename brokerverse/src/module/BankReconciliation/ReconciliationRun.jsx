@@ -110,8 +110,8 @@ const ReconciliationRun = () => {
         <Button icon="pi pi-arrow-left" text label={t("bankReconciliation.back")} onClick={() => navigate("/accounts/bank-reconciliation/reconciliations")} />
         <Button icon="pi pi-th-large" outlined label={t("bankReconciliation.workspace")} onClick={() => navigate(`/accounts/bank-reconciliation?account=${encodeURIComponent(rec.bankAccount)}&period=${rec.period}`)} />
         {rec.status === "draft" && <Button icon="pi pi-refresh" outlined label={t("bankReconciliation.refresh")} loading={busy === "refresh"} onClick={() => act("refresh", load)} />}
-        {rec.status === "draft" && <Button icon="pi pi-send" severity="success" label={t("bankReconciliation.prepare")} disabled={!agree} onClick={() => setDialog("prepare")} />}
-        {canApprove && rec.status === "prepared" && <Button icon="pi pi-check" severity="success" label={t("bankReconciliation.approve")} onClick={() => setDialog("approve")} />}
+        {rec.status === "draft" && <Button icon="pi pi-send" label={t("bankReconciliation.prepare")} disabled={!agree} onClick={() => setDialog("prepare")} />}
+        {canApprove && rec.status === "prepared" && <Button icon="pi pi-check" label={t("bankReconciliation.approve")} onClick={() => setDialog("approve")} />}
         {canApprove && ["prepared", "approved"].includes(rec.status) && <Button icon="pi pi-undo" severity="warning" outlined label={t("bankReconciliation.reopen")} onClick={() => setDialog("reopen")} />}
         <Button icon="pi pi-print" outlined label={t("bankReconciliation.printPdf")} loading={busy === "pdf"} onClick={print} />
         {rec.status === "draft" && <Button icon="pi pi-ban" text severity="secondary" label={t("bankReconciliation.cancelRun")} onClick={() => setDialog("cancel")} />}

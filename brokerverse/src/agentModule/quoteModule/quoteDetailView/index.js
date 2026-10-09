@@ -1234,7 +1234,6 @@ const QuoteDetailView = ({ action }) => {
         <div className="button_component">
           <Button
             label={t("quoteDetailView.share")}
-            severity="help"
             text
             className="download_button"
             onClick={() => setModalVisible(true)}
@@ -1244,7 +1243,7 @@ const QuoteDetailView = ({ action }) => {
             <Button
               onClick={handleclick}
               label={t("quoteDetailView.proceedToPolicy")}
-              className="policy_button p-button-success"
+              className="policy_button"
             >
               <SvgRightarrow />
             </Button>
@@ -1301,7 +1300,6 @@ const QuoteDetailView = ({ action }) => {
                     label={t("quoteDetailView.sendForCustomerApproval")}
                     icon="pi pi-send"
                     onClick={handleSendForApproval}
-                    className="p-button-success"
                   />
                 )}
 

@@ -300,7 +300,7 @@ const PolicyPaymentCapture = ({ policyId, receivableId = null, onSummary, onPayL
             )}
 
             <div className="button_component">
-              <Button label={t("common.cancel", "Cancel")} severity="help" text className="download_button" onClick={onCancel} disabled={saving} />
+              <Button label={t("common.cancel", "Cancel")} text className="download_button" onClick={onCancel} disabled={saving} />
               <Button
                 label={option === "pay-later" ? "Confirm pay later" : summary.canConfirm ? "Record payment and issue receipt" : "Record payment"}
                 className="policy_button"

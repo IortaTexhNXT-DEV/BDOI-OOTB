@@ -3,6 +3,116 @@
 // stock colours of the component library.
 @import "./tokens";
 
+// ---------------------------------------------------------------- button colours
+// A button is an action in the theme's colours. "info" and "help" carry no meaning on a button, so they draw as the
+// primary button; success, warning and danger keep their meaning in the shared status tokens (the stock theme drew
+// them in bright green, orange and red).
+
+@mixin bv-button-colour($bg, $hover, $text) {
+  &:not(.p-button-outlined):not(.p-button-text):not(.p-button-link) {
+    background: $bg;
+    border-color: $bg;
+    color: $text;
+
+    &:not(:disabled):hover {
+      background: $hover;
+      border-color: $hover;
+      color: $text;
+    }
+  }
+
+  &.p-button-outlined,
+  &.p-button-text {
+    color: $bg;
+
+    &:not(:disabled):hover {
+      color: $hover;
+    }
+  }
+
+  &.p-button-outlined {
+    border-color: $bg;
+  }
+}
+
+.p-button.p-button-info,
+.p-button.p-button-help,
+.p-splitbutton.p-button-info > .p-button,
+.p-splitbutton.p-button-help > .p-button {
+  @include bv-button-colour(var(--bv-button-bg, #0072d8), var(--bv-button-hover-bg, #005fb4), var(--bv-button-text, #ffffff));
+}
+
+.p-button.p-button-success,
+.p-splitbutton.p-button-success > .p-button {
+  @include bv-button-colour($color-success, #166640, #ffffff);
+}
+
+.p-button.p-button-warning,
+.p-splitbutton.p-button-warning > .p-button {
+  @include bv-button-colour($color-warning, #6e4800, #ffffff);
+}
+
+.p-button.p-button-danger,
+.p-splitbutton.p-button-danger > .p-button {
+  @include bv-button-colour($color-danger, #912018, #ffffff);
+}
+
+// ---------------------------------------------------------------- icons
+// Icons of assets/ drawn in the default brand blues follow the theme like the stylesheets do (inside a button they
+// take the button's text colour, enterprise.scss).
+
+svg {
+  [fill="#0072d8" i] {
+    fill: $brand-blue;
+  }
+
+  [stroke="#0072d8" i] {
+    stroke: $brand-blue;
+  }
+
+  [fill="#004ea8" i] {
+    fill: $brand-navy;
+  }
+
+  [stroke="#004ea8" i] {
+    stroke: $brand-navy;
+  }
+}
+
+// ---------------------------------------------------------------- badges
+// Count badges (alerts, notifications) in the same tokens as the status tags.
+
+.p-badge {
+  background: $brand-blue;
+  color: var(--bv-primary-text, #ffffff);
+
+  &.p-badge-success {
+    background: $color-success;
+    color: #ffffff;
+  }
+
+  &.p-badge-info {
+    background: $brand-blue;
+    color: var(--bv-primary-text, #ffffff);
+  }
+
+  &.p-badge-warning {
+    background: $color-warning;
+    color: #ffffff;
+  }
+
+  &.p-badge-danger {
+    background: $color-danger;
+    color: #ffffff;
+  }
+
+  &.p-badge-secondary,
+  &.p-badge-contrast {
+    background: #f1f2f4;
+    color: $color-text;
+  }
+}
+
 // ---------------------------------------------------------------- dialog and side panel overlay
 // One overlay colour behind every dialog and side panel. The stock overlay fades in to black and the side panel rule
 // switched it to another colour once the panel was in place, so the backdrop flashed when a form opened and closed;

@@ -375,7 +375,7 @@ const QuoteListingCard = () => {
         {canConvert && (
           <Button
             label={t("quoteListing.convert")}
-            className="p-button-success p-button-sm"
+            className="p-button-sm"
             onClick={() => handleConvertToPolicy(rowData)}
             tooltip={t("quoteListing.convertToPolicy")}
             tooltipOptions={{ position: "top" }}

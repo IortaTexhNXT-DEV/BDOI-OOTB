@@ -260,7 +260,7 @@ const CollectionsList = () => {
         <Button
           label={t("collectionsList.sendPaymentRemindersNow")}
           icon="pi pi-send"
-          className="p-button-info p-button-rounded"
+          className="p-button-rounded"
           onClick={handleSendDueDateReminders}
           loading={sendingReminders}
           tooltipOptions={{ position: "top" }}

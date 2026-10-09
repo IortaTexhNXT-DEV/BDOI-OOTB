@@ -155,7 +155,7 @@ const RemittanceApproval = () => {
         />
         <Button
           icon="pi pi-check"
-          className="p-button-rounded p-button-success p-button-text"
+          className="p-button-rounded p-button-text"
           tooltip={t("remittance.approve")}
           onClick={() => approveRows([rowData])} aria-label={t("remittance.approve")}
         />
@@ -308,7 +308,7 @@ const RemittanceApproval = () => {
 
             {selectedRows.length > 0 && (
               <div className="bulk-actions mt-3">
-                <Button label={t("remittance.bulkApprove")} icon="pi pi-check" className="p-button-success mr-2" onClick={() => approveRows(selectedRows)} />
+                <Button label={t("remittance.bulkApprove")} icon="pi pi-check" className="mr-2" onClick={() => approveRows(selectedRows)} />
                 <Button label={t("remittance.bulkReject")} icon="pi pi-times" className="p-button-danger mr-2" onClick={() => rejectRows(selectedRows)} />
                 <Button label={t("remittance.delegate")} icon="pi pi-forward" className="p-button-secondary" onClick={openDelegation} />
               </div>

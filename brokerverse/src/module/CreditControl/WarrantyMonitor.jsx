@@ -107,7 +107,7 @@ const WarrantyMonitor = () => {
             <Column field="requestedBy" header={t("creditControl.requestedBy")} />
             <Column body={(r) => (
               <div className="flex gap-1">
-                <Button icon="pi pi-check" text size="small" severity="success" tooltip={t("creditControl.approve")} onClick={() => decide(r, "approve")} aria-label={t("creditControl.approve")} />
+                <Button icon="pi pi-check" text size="small" tooltip={t("creditControl.approve")} onClick={() => decide(r, "approve")} aria-label={t("creditControl.approve")} />
                 <Button icon="pi pi-times" text size="small" severity="danger" tooltip={t("creditControl.reject")} onClick={() => decide(r, "reject")} aria-label={t("creditControl.reject")} />
               </div>
             )} />

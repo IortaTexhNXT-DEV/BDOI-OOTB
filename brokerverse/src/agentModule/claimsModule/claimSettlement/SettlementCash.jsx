@@ -81,7 +81,7 @@ const SettlementCash = ({ claimId }) => {
         <div className="claim__title">{t("followUps.settlementCash", "Settlement cash")}</div>
         <div className="flex gap-2">
           {canReceive && <Button icon="pi pi-download" label={t("followUps.recordFundsReceived", "Record funds received")} onClick={() => open("funds-received")} />}
-          {canPay && <Button icon="pi pi-upload" severity="success" label={t("followUps.payClaimant", "Pay claimant")} onClick={() => open("paid-to-claimant")} />}
+          {canPay && <Button icon="pi pi-upload" label={t("followUps.payClaimant", "Pay claimant")} onClick={() => open("paid-to-claimant")} />}
         </div>
       </div>
       {!pos.canRecord && <small className="block mt-2">{t("followUps.settlementNotBooked", "Cash can be recorded once the settlement through the broker is booked.")}</small>}

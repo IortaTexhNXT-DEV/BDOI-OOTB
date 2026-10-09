@@ -472,7 +472,7 @@ const LapseManagement = () => {
         ) : (
           <Button
             icon="pi pi-replay"
-            className="p-button-text p-button-success"
+            className="p-button-text"
             onClick={() => handleReinstate(rowData)}
             tooltip={t("renewal.reinstated")}
             disabled={!rowData.reinstatementEligible} aria-label={t("renewal.reinstated")}

@@ -239,7 +239,7 @@ const PaymentConfirmation = () => {
                 />
               )}
               <div className="button_component">
-                <Button label={t("common.cancel", "Cancel")} severity="help" text className="download_button" onClick={handleBack} disabled={issuing} />
+                <Button label={t("common.cancel", "Cancel")} text className="download_button" onClick={handleBack} disabled={issuing} />
                 <Button label="Issue policy" className="policy_button" onClick={handleIssuePolicy} loading={issuing} disabled={issuing || !quotationId} />
               </div>
             </>

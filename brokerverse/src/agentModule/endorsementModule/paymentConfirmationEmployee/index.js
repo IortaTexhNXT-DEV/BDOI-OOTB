@@ -357,7 +357,6 @@ const PaymentConfirmationEmployeeBenefit = () => {
         <div className="button_component">
           <Button
             label={t("endorsement.paymentConfirmation.cancel")}
-            severity="help"
             text
             className="download_button"
             onClick={handleBack}

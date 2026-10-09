@@ -180,7 +180,6 @@ const CQquoteDetails = ({ action }) => {
       <div className="button_component">
         <Button
           label="Share"
-          severity="help"
           text
           className="download_button"
           onClick={() => setModalVisible(true)}
