@@ -81216,7 +81216,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"rm_1\",\n    \"remittanceNo\": \"REM-2026-00001\",\n    \"remittanceDate\": \"2026-09-15\",\n    \"insurerCode\": \"MALAYAN\",\n    \"insurerName\": \"Malayan Insurance Co., Inc.\",\n    \"policyCount\": 3,\n    \"grossAmount\": 45000,\n    \"commission\": 6750,\n    \"tax\": 0,\n    \"netAmount\": 38250,\n    \"status\": \"Pending Approval\",\n    \"statusCode\": \"for-approval\",\n    \"insurerDetails\": {\n      \"code\": \"MALAYAN\",\n      \"name\": \"Malayan Insurance Co., Inc.\"\n    },\n    \"policies\": [\n      {\n        \"policyNo\": \"POL-2026-00001\",\n        \"premium\": 15000,\n        \"commission\": 2250\n      }\n    ],\n    \"activityLog\": [\n      {\n        \"action\": \"submit\",\n        \"by\": \"r.finance\",\n        \"at\": \"2026-10-10T01:03:00.000Z\",\n        \"notes\": null,\n        \"id\": \"812\",\n        \"day\": \"2026-10-10\",\n        \"date\": \"10/10/2026\",\n        \"time\": \"09:03\",\n        \"atText\": \"10/10/2026 09:03\",\n        \"actionCode\": \"submit\",\n        \"actionLabel\": \"Remittance submitted\",\n        \"user\": {\n          \"username\": \"r.finance\",\n          \"displayName\": \"Rosa Finance\",\n          \"roles\": [\n            \"Finance Officer\"\n          ],\n          \"role\": \"Finance Officer\"\n        },\n        \"fromStatus\": \"Draft\",\n        \"toStatus\": \"Pending Approval\",\n        \"remarks\": null,\n        \"changes\": [\n          {\n            \"field\": \"batchId\",\n            \"label\": \"Batch ID\",\n            \"before\": null,\n            \"after\": \"BLK-2026-00001\"\n          }\n        ],\n        \"source\": {\n          \"channel\": \"screen\",\n          \"label\": \"Screen\",\n          \"name\": \"Accounts > Remittance > Tracking\"\n        }\n      }\n    ]\n  }\n}"
             }
           ]
         },
@@ -87782,7 +87782,7 @@
           ]
         },
         {
-          "name": "Run history of a job",
+          "name": "Run history of a job (who started a run: triggeredBy, triggeredByName)",
           "request": {
             "method": "GET",
             "header": [],
@@ -87804,7 +87804,7 @@
                 }
               ]
             },
-            "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
+            "description": "Run history of a job (who started a run: triggeredBy, triggeredByName)\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
           },
           "response": [
             {
@@ -87830,7 +87830,7 @@
                     }
                   ]
                 },
-                "description": "Run history of a job\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
+                "description": "Run history of a job (who started a run: triggeredBy, triggeredByName)\n\nFront-end touchpoint: Master > Schedules > History\n\nAccess: read:schedules"
               },
               "status": "OK",
               "code": 200,
@@ -87842,7 +87842,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"status\": \"success\",\n      \"startedAt\": \"2026-01-01T06:00:00Z\",\n      \"output\": {\n        \"notifications\": 3\n      }\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"status\": \"success\",\n      \"startedAt\": \"2026-01-01T06:00:00Z\",\n      \"output\": {\n        \"notifications\": 3\n      },\n      \"triggeredBy\": \"r.finance\",\n      \"triggeredByName\": \"Rosa Finance\"\n    }\n  ]\n}"
             }
           ]
         }

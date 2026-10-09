@@ -123,7 +123,7 @@ export const fromWarrantyActions = (rows = [], { actionLabels = {} } = {}) =>
 /** followUpActions of GET /collections/:id (calls, e-mails, notes, payment commitments). */
 export const fromCollectionActions = (rows = []) =>
   rows.map((r, i) => toEntry({
-    id: r.id, at: r.actionDate, actionCode: r.actionType, user: userOf(null, r.actionBy), remarks: r.notes,
+    id: r.id, at: r.actionDate, actionCode: r.actionType, user: userOf(r.actionByName, r.actionBy, r.actionByRoles), remarks: r.notes,
     changes: [
       r.callOutcome ? { field: "callOutcome", label: field("outcome"), before: null, after: humanize(r.callOutcome) } : null,
       r.commitmentDate ? { field: "commitmentDate", label: field("commitmentDate"), before: null, after: formatDate(r.commitmentDate) } : null,
@@ -133,7 +133,8 @@ export const fromCollectionActions = (rows = []) =>
 /** GET /schedules/:code/runs (Master > Schedules > Run history). */
 export const fromJobRuns = (rows = []) =>
   rows.map((r, i) => toEntry({
-    id: r.id, at: r.startedAt, actionCode: "run", user: userOf(r.triggeredBy === "schedule" ? null : r.triggeredBy), toStatus: statusLabel(r.status), remarks: r.error,
+    id: r.id, at: r.startedAt, actionCode: "run", user: r.triggeredBy === "schedule" ? userOf() : userOf(r.triggeredByName, r.triggeredBy),
+    toStatus: statusLabel(r.status), remarks: r.error,
     source: r.triggeredBy === "schedule" ? { channel: "job", label: i18n.t("activityLog.sources.job") } : null,
   }, i));
 
