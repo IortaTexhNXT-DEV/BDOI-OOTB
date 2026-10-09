@@ -10,9 +10,9 @@ import { Toast } from "primereact/toast";
 import auditService from "../../services/auditService";
 import { useListState, useServerList } from "../../hooks/useServerList";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
-import { AuditChanges, SourceText, UserText } from "../../components/AuditTrail";
+import { AuditChanges, SourceText, UserText } from "../../components/AuditTimeline";
 import { PageHeader, SectionCard } from "../../components/RecordPage";
-import "../../components/AuditTrail/auditTrail.scss";
+import "../../components/AuditTimeline/auditTrail.scss";
 import "./index.scss";
 
 const NO_FILTERS = { from: "", to: "", username: "", entity: "", entityRef: "", action: "" };

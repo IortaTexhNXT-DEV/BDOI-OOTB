@@ -1,4 +1,3 @@
-export { default as AuditTimeline } from "./AuditTimeline";
-export { default as AuditChanges } from "./AuditChanges";
-export { EventMeta, SourceText, UserText, eventTone } from "./AuditEventParts";
-export { default } from "./AuditTimeline";
+// The audit timeline lives in components/AuditTimeline; this path is kept for the screens that still import it.
+export * from "../AuditTimeline";
+export { default } from "../AuditTimeline";

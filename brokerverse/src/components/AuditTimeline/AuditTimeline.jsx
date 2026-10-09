@@ -29,7 +29,15 @@ const searchText = (e) => [e.title, e.note, e.user?.displayName, e.source?.name,
  * (what happened, when, who with their role, from which screen / API / job) with the fields it changed beneath it
  * (old value -> new value). A filter bar narrows it by text, person and kind of event; Export downloads the whole
  * history (Excel or CSV, one row per changed field). Dates and times come from the server in the configured format and
- * time zone.
+ * time zone. Used by the full-page audit trails (claim, quotation, client) and the client's Activity tab.
+ *
+ * Props:
+ *   entity     record type as the audit trail names it: policy, quotation, claim, client, endorsement, receipt,
+ *              master:<type> ... (required)
+ *   recordId   id or number of the record; nothing loads until it is set
+ *   emptyText  text shown when the record has no history (default: auditTrail.empty)
+ *   limit      show this many events first, the rest behind "Show all" (default: every event)
+ * Data: GET /audit/records/:entity/:id (auditService.getRecordHistory); Export: the same with ?export=excel|csv.
  */
 const AuditTimeline = ({ entity, recordId, emptyText, limit }) => {
   const { t } = useTranslation();

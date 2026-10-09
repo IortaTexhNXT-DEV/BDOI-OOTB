@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useParams, useNavigate } from "react-router-dom";
 import { Button } from "primereact/button";
 import claimsService from "../../../services/claimsService";
-import { AuditTimeline } from "../../../components/AuditTrail";
+import { AuditTimeline } from "../../../components/AuditTimeline";
 import { KeyFacts, PageHeader, SectionCard, StatusChip } from "../../../components/RecordPage";
 import { claimFacts } from "../../claimsModule/shared/ClaimJourneyLayout";
 import logger from "../../../utility/logger";

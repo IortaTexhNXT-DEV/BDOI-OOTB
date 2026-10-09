@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
 import { TabPanel, TabView } from "primereact/tabview";
 import ActivityPanel from "../../../../components/SalesActivities/ActivityPanel";
-import { AuditTimeline } from "../../../../components/AuditTrail";
+import { AuditTimeline } from "../../../../components/AuditTimeline";
 import { SectionCard } from "../../../../components/RecordPage";
 import { ClaimTab, DocumentTab, EndorsementTab, PolicyTab, QuotationTab, ReceiptTab, RenewalTab } from "./ClientRecordTables";
 
