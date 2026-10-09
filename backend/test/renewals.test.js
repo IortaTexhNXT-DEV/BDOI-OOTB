@@ -188,6 +188,37 @@ describe('renewals', () => {
     expect((await ctx.api('get', '/renewals/campaigns')).body.data.map((x) => x.id)).toContain(c.body.data.id);
     expect((await ctx.api('post', '/renewals/campaigns').send({ campaignName: 'Bad', startDate: '2026-12-31', endDate: '2026-01-01' })).status).toBe(400);
   });
+  it('scores the at-risk register from the record, offers the actions as tasks and escalates to the unit head', async () => {
+    await query(`INSERT INTO policies(id, policy_number, client_id, product_id, insurance_company_id, owner_user_id, status, inception_date, expiry_date, sum_insured, premium_total)
+      SELECT 'pol_r9', 'POL-R-0009', 'cl_r1', (SELECT id FROM products WHERE code = 'MOTOR'), (SELECT id FROM insurance_companies WHERE code = 'MAPFRE'),
+             (SELECT id FROM users WHERE username = 'u.maker'), 'active', current_date - 355, current_date + 10, 500000, 20000`);
+    await query(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, estimate_amount) VALUES
+      ('CLM-R-91','pol_r9','cl_r1','settled',current_date - 90, 5000), ('CLM-R-92','pol_r9','cl_r1','registered',current_date - 20, 8000)`);
+    const rn9 = (await ctx.api('post', '/renewals/policies/POL-R-0009')).body.data;
+    const row = (await ctx.api('get', '/renewals/at-risk')).body.data.find((a) => a.id === rn9.id);
+    const byCode = Object.fromEntries(row.scoreBreakdown.map((f) => [f.code, f]));
+    expect(byCode.claims).toMatchObject({ value: '2 claims in the current term', weight: 25, points: 25 });
+    expect(byCode.firstRenewal.points).toBe(15);
+    expect(byCode.dueSoon).toMatchObject({ value: 'Expires in 10 days', points: 10 });
+    expect(byCode.unpaid).toMatchObject({ value: null, points: 0 });
+    expect(row.riskScore).toBe(row.scoreBreakdown.reduce((s, f) => s + f.points, 0));
+    expect(JSON.stringify(row)).not.toMatch(/Statistically/);
+    expect(row.recommendedActions).toEqual(expect.arrayContaining(['Prepare an alternative quote', 'Call the client', 'Escalate to the unit head']));
+    expect(row.nextAction).toBeNull();
+    const task = await as('u.maker', 'post', '/my-work/tasks').send({ title: 'Prepare an alternative quote', dueDate: '2030-01-10', priority: 'high', entity: 'renewal', entityId: rn9.id });
+    expect(task.status).toBe(201);
+    const after = (await ctx.api('get', '/renewals/at-risk')).body.data.find((a) => a.id === rn9.id);
+    expect(after.nextAction).toMatchObject({ kind: 'task', title: 'Prepare an alternative quote', dueDate: '2030-01-10' });
+    const esc = await as('u.maker', 'post', `/renewals/${rn9.id}/escalate`).send({ note: 'Client is comparing quotes' });
+    expect(esc.status).toBe(200);
+    expect(esc.body.data.escalatedTo.map((u) => u.name)).toContain('u.checker');
+    const checker = await one("SELECT id FROM users WHERE username = 'u.checker'");
+    expect((await one("SELECT count(*)::int AS n FROM notifications WHERE user_id = $1 AND entity = 'renewal' AND entity_id = $2", [checker.id, rn9.id])).n).toBe(1);
+    const r9 = (await ctx.api('get', `/renewals/${rn9.id}`)).body.data;
+    expect(r9.activities.some((a) => a.type === 'Escalation' && a.description === 'Client is comparing quotes')).toBe(true);
+    expect(r9.contactAttempts).toBe(0);
+    expect((await as('f.finance', 'post', `/renewals/${rn9.id}/escalate`).send({})).status).toBe(403);
+  });
   it('enforces permissions per persona', async () => {
     expect((await as('f.finance', 'get', '/policy-renewals')).status).toBe(403);
     expect((await as('f.finance', 'post', '/policy-renewals/create-batches').send({ policies: ['POL-R-0004'] })).status).toBe(403);

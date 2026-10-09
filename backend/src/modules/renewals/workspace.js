@@ -60,8 +60,13 @@ define({
   },
 });
 define({
-  method: 'GET', path: '/at-risk', summary: 'At-risk renewals: risk score, factors, recommended actions', screen: 'Operations > Renewals > At-Risk Policies', middleware: read,
-  response: { success: true, data: [{ policyNumber: 'POL-2025-00012', riskScore: 65, riskCategory: 'High', riskFactors: [{ factor: 'Claims History', score: 25, details: '1 claim(s) on the expiring term' }], recommendedActions: ['Review claims experience with the insurer'], actionPlan: { priority: 'Urgent', assignedTo: 'Ana Reyes', deadline: '2026-10-30' } }] },
+  method: 'GET', path: '/at-risk', summary: 'At-risk register: open renewals of Medium risk or above, highest score first, with the score breakdown (factor, finding, weight, points), recommended actions (renewals.risk_actions), next open task or step and last contact',
+  screen: 'Operations > Renewals > At-Risk Policies', middleware: read,
+  response: { success: true, data: [{ id: 'rnw_1', renewalNumber: 'RN-2026-00001', policyNumber: 'POL-2025-00012', insuredName: 'Maria Santos', riskScore: 60, riskCategory: 'High',
+    riskFactors: [{ code: 'claims', factor: 'Claims History', score: 25, details: '2 claims in the current term' }],
+    scoreBreakdown: [{ code: 'claims', factor: 'Claims History', value: '2 claims in the current term', weight: 25, points: 25 }, { code: 'unpaid', factor: 'Unpaid Premium', value: null, weight: 20, points: 0 }],
+    recommendedActions: ['Review the claims record with the insurer', 'Prepare an alternative quote'], nextAction: { kind: 'task', taskId: 'tsk_1', title: 'Call the client', dueDate: '2026-10-12', assignee: 'Ana Reyes' },
+    lastContactDate: null, assignedAgent: 'Ana Reyes', assignedAgentId: 'usr_1' }] },
   handler: async (_req, res) => ok(res, await an.atRisk()),
 });
 define({
@@ -140,6 +145,13 @@ define({
     if (req.body?.followUpDate) await syncAutoTasksQuietly(req.log);
     created(res, a, 'Update added');
   },
+});
+define({
+  method: 'POST', path: '/:id/escalate', summary: 'Escalate an at-risk renewal to the unit head (manager of the renewal owner, else renewals.approver_roles): recorded on the timeline and notified',
+  screen: 'Operations > Renewals > At-Risk Policies > Escalate', middleware: [...write, validate(z.object({ note: z.string().max(2000).optional() }))],
+  request: { note: 'Client is comparing quotes from two other brokers' },
+  response: { success: true, data: { activity: { id: 12, type: 'Escalation', description: 'Client is comparing quotes from two other brokers' }, escalatedTo: [{ id: 'usr_1', name: 'Carlo Mendoza' }] } },
+  handler: command('escalate', (req) => svc.escalate(req.params.id, req.user, req.body), 'Escalated'),
 });
 define({
   method: 'POST', path: '/:id/win-back', summary: 'Record a win-back offer on a lapsed renewal (optionally linked to a campaign)', screen: 'Operations > Renewals > Lapse Management',

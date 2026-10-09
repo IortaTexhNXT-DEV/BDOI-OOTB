@@ -2,7 +2,7 @@
 import { many, one } from '../../db/pool.js';
 import { getSetting } from '../../lib/settings.js';
 import { round2, today, daysBetween } from '../claims/util.js';
-import { BASE, OPEN, activityApi, listRenewals, readContext, riskOf, toApi } from './service.js';
+import { BASE, OPEN, RISK_FACTORS, activityApi, listRenewals, readContext, riskOf, toApi } from './service.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
 import { businessDate } from '../../lib/dates.js';
 
@@ -20,25 +20,47 @@ export async function renewalQueue(q, pg) {
   };
 }
 
-/** Open renewals whose retention risk is Medium or above, with factors and recommended actions. */
+/**
+ * Risk register of the Renewals > At-Risk Policies screen: open renewals whose retention risk is Medium or above, highest
+ * score first, with the score breakdown (every factor with its finding, weight and points), the recommended actions of
+ * the factors found (renewals.risk_actions), the next open My Work task on the renewal (or the next step recorded on its
+ * timeline) and the last contact.
+ */
 export async function atRisk() {
   const ctx = await readContext();
   const actions = (await getSetting('renewals.risk_actions', {})) || {};
   const rows = await many(`${BASE} WHERE r.status = ANY($1) ORDER BY p.expiry_date`, [OPEN]);
-  const todayStr = ctx.todayStr;
-  return rows.map((r) => toApi(r, ctx)).map((a) => {
-    const raw = rows.find((x) => x.id === a.id);
-    const days = daysBetween(todayStr, a.expiryDate);
-    const { factors } = riskOf(raw, ctx, days, a.premiumVariancePct);
-    return { ...a, factors };
-  }).filter((a) => a.retentionRisk !== 'Low').map((a) => ({
-    id: a.id, renewalId: a.id, policyNumber: a.policyNumber, insuredName: a.insuredName, product: a.product, expiryDate: a.expiryDate, daysToExpiry: a.daysToExpiry,
-    currentPremium: a.currentPremium, renewalPremium: a.renewalPremium, riskScore: a.riskScore, riskCategory: a.retentionRisk, riskFactors: a.factors,
-    recommendedActions: [...new Set(a.factors.flatMap((f) => actions[f.factor] || []))],
-    actionPlan: { priority: a.retentionRisk === 'Critical' ? 'Critical' : a.retentionRisk === 'High' ? 'Urgent' : 'Normal', assignedTo: a.assignedAgent, deadline: a.expiryDate },
-    expired: a.daysToExpiry < 0, inGracePeriod: a.inGracePeriod, pastGracePeriod: a.pastGracePeriod,
-    premiumChangePct: a.premiumVariancePct, premiumChangeReview: a.premiumChangeReview, salesPerson: a.salesPerson,
-  })).sort((x, y) => y.riskScore - x.riskScore);
+  const ids = rows.map((r) => r.id);
+  const [tasks, steps] = ids.length ? await Promise.all([
+    many(`SELECT DISTINCT ON (t.entity_id) t.entity_id, t.id, t.title, t.due_date, u.display_name AS assignee FROM work_tasks t
+      LEFT JOIN users u ON u.id = t.assigned_to WHERE t.entity = 'renewal' AND t.entity_id = ANY($1) AND t.status = 'open' ORDER BY t.entity_id, t.due_date, t.id`, [ids]),
+    many(`SELECT DISTINCT ON (renewal_id) renewal_id, next_action, follow_up_date FROM renewal_activities
+      WHERE renewal_id = ANY($1) AND next_action IS NOT NULL ORDER BY renewal_id, at DESC, id DESC`, [ids]),
+  ]) : [[], []];
+  const taskOf = new Map(tasks.map((t) => [t.entity_id, t]));
+  const stepOf = new Map(steps.map((s) => [s.renewal_id, s]));
+  return rows.map((raw) => {
+    const a = toApi(raw, ctx);
+    const { factors, breakdown } = riskOf(raw, ctx, daysBetween(ctx.todayStr, a.expiryDate), a.premiumVariancePct);
+    return { a, raw, factors, breakdown };
+  }).filter(({ a }) => a.retentionRisk !== 'Low').map(({ a, raw, factors, breakdown }) => {
+    const task = taskOf.get(a.id);
+    const step = stepOf.get(a.id);
+    const keyOf = (f) => (actions[f.factor] ? f.factor : RISK_FACTORS.find((x) => x.code === f.code)?.factor);
+    return {
+      id: a.id, renewalId: a.id, renewalNumber: a.renewalNumber, policyId: a.policyId, policyNumber: a.policyNumber, clientId: a.clientId, insuredName: a.insuredName,
+      product: a.product, insurer: a.insurer, expiryDate: a.expiryDate, daysToExpiry: a.daysToExpiry, status: a.status, statusCode: a.statusCode,
+      currentPremium: a.currentPremium, renewalPremium: a.renewalPremium, riskScore: a.riskScore, riskCategory: a.retentionRisk, riskFactors: factors, scoreBreakdown: breakdown,
+      recommendedActions: [...new Set(factors.flatMap((f) => actions[keyOf(f)] || []))],
+      nextAction: task ? { kind: 'task', taskId: task.id, title: task.title, dueDate: task.due_date, assignee: task.assignee }
+        : step ? { kind: 'step', title: step.next_action, dueDate: step.follow_up_date } : null,
+      lastContactDate: a.lastContactDate, contactAttempts: a.contactAttempts, noticeStage: a.noticeStage,
+      assignedAgent: a.assignedAgent, assignedAgentId: raw.owner_user_id || raw.policy_owner || null,
+      actionPlan: { priority: a.retentionRisk === 'Critical' ? 'Critical' : a.retentionRisk === 'High' ? 'Urgent' : 'Normal', assignedTo: a.assignedAgent, deadline: a.expiryDate },
+      expired: a.daysToExpiry < 0, inGracePeriod: a.inGracePeriod, pastGracePeriod: a.pastGracePeriod,
+      premiumChangePct: a.premiumVariancePct, premiumChangeReview: a.premiumChangeReview, salesPerson: a.salesPerson,
+    };
+  }).sort((x, y) => y.riskScore - x.riskScore);
 }
 /**
  * Negotiation timeline of renewals, newest first: notes and contacts recorded on the renewal, notices sent, re-rated
