@@ -174,8 +174,8 @@ export async function tagProduct(id, { lob, productId }, userId) {
     const p = await productOfLine(c, { lob, product: productId });
     await c.query('UPDATE leads SET lob = $2, product_id = $3, product_interest = $4, updated_by = $5, updated_at = now() WHERE id = $1',
       [before.id, p.lob, p.id, p.name, userId]);
-    const assignment = await assignTaggedLead(c, before.id, userId);
-    return { before, after: await getLead(before.id, c), assignment };
+    await assignTaggedLead(c, before.id, userId);
+    return { before, after: await getLead(before.id, c) };
   });
 }
 
