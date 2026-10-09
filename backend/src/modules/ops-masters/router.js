@@ -6,6 +6,7 @@
  *   claim-document-requirement, repair-shop      Master > Insurance Management / Operations (write:masters or write:claims)
  *   supplier                                     Accounts > Payables > Suppliers (write:masters or write:payables)
  *   asset-class                                  Master > Finance > Asset Classes (write:masters or write:fixed-assets)
+ *   cost-centre                                  Master > Finance > Cost Centres (write:masters or write:journal-vouchers)
  *   sales-activity-type, sales-activity-outcome  Master > Organization (write:masters only; read with read:sales-activities)
  *   lead-source                                  Master > Insurance Management (write:masters only; read with read:leads)
  *   reason-code                                  Master > Insurance Management (write:masters only; read with the read
@@ -27,6 +28,7 @@ const { router, define } = moduleRouter('Operational Masters', '/ops-masters');
 export const OWNERS = {
   'short-period-rate': { module: 'endorsements', write: false }, 'cancellation-reason': { module: 'endorsements', write: false },
   'claim-document-requirement': { module: 'claims' }, 'repair-shop': { module: 'claims' }, supplier: { module: 'payables' }, 'asset-class': { module: 'fixed-assets' },
+  'cost-centre': { module: 'journal-vouchers' },
   'sales-activity-type': { module: 'sales-activities', write: false }, 'sales-activity-outcome': { module: 'sales-activities', write: false },
   'lead-source': { module: 'leads', write: false }, 'reason-code': { module: ['quotations', 'claims', 'renewals'], write: false },
 };

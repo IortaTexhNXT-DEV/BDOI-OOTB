@@ -149,7 +149,7 @@ export const roleMenuPermissions = {
       "Finance > Bank File Layouts",
       // asset classes of the fixed asset register (write:fixed-assets)
       "Finance > Asset Classes",
-      // cost centres of the journal lines (write:masters)
+      // cost centres of the journal lines (write:journal-vouchers)
       "Finance > Cost Centres"],
     commission: ["Commission Dashboard", "Agents/Referrer Accounts",
       // overriding, profit and contingent commission from insurers (read:commission / write:commission)
