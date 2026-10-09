@@ -1,0 +1,173 @@
+name: Azure deploy
+
+# TISPH on Microsoft Azure (deploy/AZURE.md). A push to TISPH-DEV builds the API and web images once, pushes them to
+# the shared Azure Container Registry and deploys them to DEV. The same digests then wait for approval to go to SIT,
+# then UAT, then production (required reviewers on the GitHub environments azure-sit, azure-uat, azure-prod).
+# Nothing is rebuilt along the way, and SIT, UAT and production only accept a commit whose CI run passed.
+#
+# Actions > Azure deploy > Run workflow deploys (or rolls back to) the images of an earlier commit in one
+# environment: mode rollback skips the migrations.
+#
+# Azure access is OpenID Connect only (a federated credential per GitHub environment, created by Terraform); no
+# Azure secret is stored in GitHub. The EC2 and Railway pipelines (ci.yml, deploy.yml, rollback.yml) are unchanged.
+
+on:
+  push:
+    branches:
+      - TISPH-DEV
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        type: choice
+        options: [azure-dev, azure-sit, azure-uat, azure-prod]
+        required: true
+      sha:
+        description: Commit whose images to deploy (full SHA; empty = the commit chosen in "Use workflow from")
+        type: string
+        required: false
+        default: ""
+      mode:
+        description: deploy (migrations, then the images) or rollback (the images only)
+        type: choice
+        options: [deploy, rollback]
+        default: deploy
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+
+jobs:
+  build:
+    name: Build and push images
+    # nothing happens on Azure until the registry is set up (repository variable ACR_NAME)
+    if: github.event_name == 'push' && vars.ACR_NAME != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    # the dev identity is the one allowed to push to the registry
+    environment: azure-dev
+    outputs:
+      api_image: ${{ steps.refs.outputs.api }}
+      web_image: ${{ steps.refs.outputs.web }}
+    env:
+      ACR_NAME: ${{ vars.ACR_NAME }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sign in to Azure (OpenID Connect)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Sign in to the registry
+        id: acr
+        run: |
+          set -euo pipefail
+          az acr login --name "$ACR_NAME"
+          echo "server=$(az acr show --name "$ACR_NAME" --query loginServer -o tsv)" >> "$GITHUB_OUTPUT"
+          echo "time=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: API image
+        id: api
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.acr.outputs.server }}/brokerverse-api:${{ github.sha }}
+            ${{ steps.acr.outputs.server }}/brokerverse-api:tisph-dev
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            GIT_REF=${{ github.ref_name }}
+            BUILD_TIME=${{ steps.acr.outputs.time }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+
+      - name: Web image
+        id: web
+        uses: docker/build-push-action@v6
+        with:
+          context: brokerverse
+          file: brokerverse/Dockerfile
+          push: true
+          provenance: false
+          tags: |
+            ${{ steps.acr.outputs.server }}/brokerverse-web:${{ github.sha }}
+            ${{ steps.acr.outputs.server }}/brokerverse-web:tisph-dev
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+
+      - name: Image references
+        id: refs
+        run: |
+          echo "api=${{ steps.acr.outputs.server }}/brokerverse-api@${{ steps.api.outputs.digest }}" >> "$GITHUB_OUTPUT"
+          echo "web=${{ steps.acr.outputs.server }}/brokerverse-web@${{ steps.web.outputs.digest }}" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Images of \`${GITHUB_SHA:0:12}\`"
+            echo "- API \`${{ steps.acr.outputs.server }}/brokerverse-api@${{ steps.api.outputs.digest }}\`"
+            echo "- Web \`${{ steps.acr.outputs.server }}/brokerverse-web@${{ steps.web.outputs.digest }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  dev:
+    name: DEV
+    needs: build
+    uses: ./.github/workflows/azure-deploy-environment.yml
+    with:
+      environment: azure-dev
+      sha: ${{ github.sha }}
+      api_image: ${{ needs.build.outputs.api_image }}
+      web_image: ${{ needs.build.outputs.web_image }}
+    secrets: inherit
+
+  sit:
+    name: SIT
+    needs: [build, dev]
+    uses: ./.github/workflows/azure-deploy-environment.yml
+    with:
+      environment: azure-sit
+      sha: ${{ github.sha }}
+      api_image: ${{ needs.build.outputs.api_image }}
+      web_image: ${{ needs.build.outputs.web_image }}
+    secrets: inherit
+
+  uat:
+    name: UAT
+    needs: [build, sit]
+    uses: ./.github/workflows/azure-deploy-environment.yml
+    with:
+      environment: azure-uat
+      sha: ${{ github.sha }}
+      api_image: ${{ needs.build.outputs.api_image }}
+      web_image: ${{ needs.build.outputs.web_image }}
+    secrets: inherit
+
+  prod:
+    name: Production
+    needs: [build, uat]
+    uses: ./.github/workflows/azure-deploy-environment.yml
+    with:
+      environment: azure-prod
+      sha: ${{ github.sha }}
+      api_image: ${{ needs.build.outputs.api_image }}
+      web_image: ${{ needs.build.outputs.web_image }}
+    secrets: inherit
+
+  manual:
+    name: ${{ inputs.mode == 'rollback' && 'Roll back' || 'Deploy' }} ${{ inputs.environment }}
+    if: github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/azure-deploy-environment.yml
+    with:
+      environment: ${{ inputs.environment }}
+      sha: ${{ inputs.sha || github.sha }}
+      mode: ${{ inputs.mode }}
+    secrets: inherit
