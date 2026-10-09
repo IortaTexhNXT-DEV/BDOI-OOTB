@@ -11,13 +11,17 @@ import "./index.scss";
 const label = (item) => (item && typeof item === "object" ? item.label : item);
 const hasLabel = (item) => label(item) !== undefined && label(item) !== null && label(item) !== "";
 
-/** Breadcrumb items: the first one is the home item, the others follow it with a dot between them. */
+/**
+ * Breadcrumb items: the first one is the home item, the others follow it with a dot between them. The breadcrumb
+ * always draws a dot after its home item, so a breadcrumb of one item hides it.
+ */
 const Crumbs = ({ items, navigate }) => {
   const model = items.map((item) => {
     const to = typeof item === "object" ? item.to : null;
     return to && navigate ? { label: item.label, command: () => navigate(to), className: "bv-crumb-link" } : { label: label(item) };
   });
-  return <BreadCrumb home={model[0]} model={model.slice(1)} separatorIcon={<SvgDot color="currentColor" />} className="bv-page-header__crumbs" />;
+  const classes = `bv-page-header__crumbs${model.length === 1 ? " bv-page-header__crumbs--single" : ""}`;
+  return <BreadCrumb home={model[0]} model={model.slice(1)} separatorIcon={<SvgDot color="currentColor" />} className={classes} />;
 };
 
 /** Breadcrumb with items that open another screen (needs the router). */

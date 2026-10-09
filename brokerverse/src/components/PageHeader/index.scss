@@ -53,6 +53,10 @@
     background: transparent;
   }
 
+  .bv-page-header__crumbs--single .p-menuitem-separator {
+    display: none;
+  }
+
   .bv-page-header__actions {
     display: flex;
     flex-wrap: wrap;

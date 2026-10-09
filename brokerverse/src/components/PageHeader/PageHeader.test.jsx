@@ -16,6 +16,12 @@ describe("PageHeader", () => {
     expect(within(screen.getByRole("banner")).getByRole("button", { name: "New fiscal year" })).toBeInTheDocument();
   });
 
+  it("draws no dot after a breadcrumb of one item", () => {
+    render(<PageHeader title="Accounts" home="Accounts" />);
+    expect(crumbs()).toEqual(["Accounts"]);
+    expect(screen.getByRole("navigation")).toHaveClass("bv-page-header__crumbs--single");
+  });
+
   it("puts the help behind an info icon instead of a paragraph", () => {
     render(<PageHeader title="BIR DAT Files" subtitle="Validation files of the alphalists." />);
     const icon = screen.getByRole("button", { name: "About this page" });
