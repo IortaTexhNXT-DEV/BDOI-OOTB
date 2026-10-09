@@ -6,6 +6,8 @@ import { created, ok, paging } from '../../lib/respond.js';
 import { withTransaction } from '../../db/pool.js';
 import { sendTable } from '../documents/tabular.js';
 import * as ctpl from './ctpl.js';
+import { printFormat } from '../../lib/pdf/index.js';
+import { formatDateTime } from '../../lib/pdf/format.js';
 
 /**
  * Operations > CTPL Authentication: COC series per insurer and branch, the authentication of each CTPL cover (request
@@ -36,7 +38,13 @@ define({
   handler: async (req, res) => {
     const q = { unauthenticated: 'true', ...req.query };
     const { rows } = await ctpl.listAuthentications(q, { limit: 10000, offset: 0 });
-    await sendTable(res, { header: ctpl.REPORT_COLUMNS.map((c) => c.label), rows: rows.map((r) => ctpl.REPORT_COLUMNS.map((c) => (c.key === 'overdue' ? (r.overdue ? 'Yes' : 'No') : r[c.key] ?? ''))),
+    const fmt = await printFormat();
+    const cell = (r, key) => {
+      if (key === 'overdue') return r.overdue ? 'Yes' : 'No';
+      if (key === 'createdAt') return r.createdAt ? formatDateTime(r.createdAt, fmt) : '';
+      return r[key] ?? '';
+    };
+    await sendTable(res, { header: ctpl.REPORT_COLUMNS.map((c) => c.label), rows: rows.map((r) => ctpl.REPORT_COLUMNS.map((c) => cell(r, c.key))),
       fileBase: 'unauthenticated-ctpl', format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Unauthenticated CTPL' });
   },
 });

@@ -252,6 +252,9 @@ describe('CTPL authentication', () => {
     const xl = await ctx.as('sales')('get', '/ctpl/authentications/report?format=csv');
     expect(xl.status).toBe(200);
     expect(xl.text).toContain(p.policy_number);
+    // registered time in the business date format, not an ISO timestamp
+    expect(xl.text).toMatch(/\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}/);
+    expect(xl.text).not.toMatch(/\d{4}-\d{2}-\d{2}T/);
     const man = await ctx.as('sales')('post', `/ctpl/authentications/${a.id}/manual`).send({ authCode: 'PORTAL-77AB', providerReference: 'PRT-1' });
     expect(man.body.data).toMatchObject({ status: 'authenticated', method: 'manual', authCode: 'PORTAL-77AB' });
     expect((await ctx.as('sales')('post', `/ctpl/authentications/${a.id}/manual`).send({ authCode: 'AGAIN-1' })).status).toBe(409);
