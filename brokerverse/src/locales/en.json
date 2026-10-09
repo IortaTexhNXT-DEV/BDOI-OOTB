@@ -2718,7 +2718,8 @@
       "Commercial": "Commercial",
       "PUV": "Public utility vehicle (PUV)",
       "TNVS": "TNVS (ride-hailing)"
-    }
+    },
+    "fireServiceTax": "Fire Service Tax"
   },
   "commission": {
     "addCommissions": "Add Commissions",
@@ -5047,7 +5048,8 @@
     "quoteSentToSuccess": "Quote sent to {{sentTo}} successfully!",
     "errorSendingQuoteForApproval": "Error sending quote for approval",
     "notIncluded": "Not included",
-    "pageTitle": "Quotation Slip"
+    "pageTitle": "Quotation Slip",
+    "fst": "FST"
   },
   "policyList": {
     "title": "Policies",

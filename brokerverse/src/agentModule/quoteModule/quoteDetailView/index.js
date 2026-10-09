@@ -145,6 +145,9 @@ const QuoteDetailView = ({ action }) => {
     iarPremiumDetails?.sections ||
     (Array.isArray(iarSections) ? iarSections : []);
   const fireSumInsured = firePremiumDetails?.sumInsured || {};
+  // a fire quotation priced outside the fire wizard (a renewal, an imported policy) has no premium schedule: its
+  // premium and sum insured are the quotation's own figures
+  const hasFireSchedule = Object.keys(firePremiumDetails).length > 0;
   const fireCoverBreakup = firePremiumDetails?.coverBreakup || [];
 
   // Calculate premium breakdown from coverage details
@@ -169,7 +172,7 @@ const QuoteDetailView = ({ action }) => {
     }
 
     // Fire LOB: Use firePremiumDetails
-    if (isFireLOB && firePremiumDetails) {
+    if (isFireLOB && hasFireSchedule) {
       const total = firePremiumDetails.totalPremium ?? 0;
       return {
         netPremium: firePremiumDetails.totalCoverPremium ?? total,
@@ -189,6 +192,7 @@ const QuoteDetailView = ({ action }) => {
         documentaryStampTax: quotationData.documentaryStampTax || "0.00",
         valueAddedTax: quotationData.valueAddedTax || "0.00",
         localGovernmentTax: quotationData.localGovernmentTax || "0.00",
+        fireServiceTax: quotationData.fireServiceTax || 0,
         accountPremiumOthers: quotationData.accountPremiumOthers || "0.00",
         discount: quotationData.discount || "0.00",
         grossPremium: quotationData.grossPremium,
@@ -203,6 +207,7 @@ const QuoteDetailView = ({ action }) => {
     settingsTaxRates,
     isFireLOB,
     isIarLOB,
+    hasFireSchedule,
     firePremiumDetails,
     iarPremiumDetails,
   ]);
@@ -861,42 +866,53 @@ const QuoteDetailView = ({ action }) => {
                 </div>
                 <div className="sub_title">
                   <label className="policy_text">{t("quoteDetailView.sumInsured")}</label>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.building")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.Building ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.plantAndMachinery")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.otherContents")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.grossProfit")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.wages")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.Wages ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
-                  <div className="quote_details">
-                    <label className="insurance_text">{t("quoteDetailView.lossOfRent")}</label>
-                    <label className="alpha_text">
-                      {(fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale())}
-                    </label>
-                  </div>
+                  {Object.keys(fireSumInsured).length === 0 ? (
+                    <div className="quote_details">
+                      <label className="insurance_text">{t("quoteDetailView.totalSumInsured")}</label>
+                      <label className="alpha_text">
+                        {Number(quotationData?.totalSumInsured || 0).toLocaleString(numberLocale())}
+                      </label>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="quote_details">
+                        <label className="insurance_text">{t("quoteDetailView.building")}</label>
+                        <label className="alpha_text">
+                          {(fireSumInsured.Building ?? 0).toLocaleString(numberLocale())}
+                        </label>
+                      </div>
+                      <div className="quote_details">
+                        <label className="insurance_text">{t("quoteDetailView.plantAndMachinery")}</label>
+                        <label className="alpha_text">
+                          {(fireSumInsured.PlantAndMachinery ?? 0).toLocaleString(numberLocale())}
+                        </label>
+                      </div>
+                      <div className="quote_details">
+                        <label className="insurance_text">{t("quoteDetailView.otherContents")}</label>
+                        <label className="alpha_text">
+                          {(fireSumInsured.OtherContents ?? 0).toLocaleString(numberLocale())}
+                        </label>
+                      </div>
+                      <div className="quote_details">
+                        <label className="insurance_text">{t("quoteDetailView.grossProfit")}</label>
+                        <label className="alpha_text">
+                          {(fireSumInsured.GrossProfit ?? 0).toLocaleString(numberLocale())}
+                        </label>
+                      </div>
+                      <div className="quote_details">
+                        <label className="insurance_text">{t("quoteDetailView.wages")}</label>
+                        <label className="alpha_text">
+                          {(fireSumInsured.Wages ?? 0).toLocaleString(numberLocale())}
+                        </label>
+                      </div>
+                      <div className="quote_details">
+                        <label className="insurance_text">{t("quoteDetailView.lossOfRent")}</label>
+                        <label className="alpha_text">
+                          {(fireSumInsured.LossOfRent ?? 0).toLocaleString(numberLocale())}
+                        </label>
+                      </div>
+                    </>
+                  )}
                 </div>
                 {fireCoverBreakup.length > 0 && (
                   <div className="sub_title">
@@ -1129,7 +1145,7 @@ const QuoteDetailView = ({ action }) => {
                   </div>
                 </>
               )}
-              {isFireLOB && (
+              {isFireLOB && hasFireSchedule && (
                 <>
                   <div className="quote_details">
                     <label className="insurance_text">{t("quoteDetailView.totalCoverPremium")}</label>
@@ -1161,7 +1177,7 @@ const QuoteDetailView = ({ action }) => {
                   </div>
                 </>
               )}
-              {!isFireLOB && !isIarLOB && (
+              {!(isFireLOB && hasFireSchedule) && !isIarLOB && (
                 <>
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.netPremium")}</label>
@@ -1196,6 +1212,16 @@ const QuoteDetailView = ({ action }) => {
                   {formatCurrency(calculatedPremiums?.localGovernmentTax)}
                 </label>
               </div>
+              {Number(calculatedPremiums?.fireServiceTax) > 0 && (
+                <div className="quote_details">
+                  <label className="insurance_text">
+                    {t("quoteDetailView.fst")} ({taxRatePercent("fireServiceTax")}%)
+                  </label>
+                  <label className="alpha_text">
+                    {formatCurrency(calculatedPremiums?.fireServiceTax)}
+                  </label>
+                </div>
+              )}
               <div className="quote_details">
                 <label className="insurance_text">{t("quoteDetailView.others")}</label>
                 <label className="alpha_text">

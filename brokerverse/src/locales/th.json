@@ -2237,7 +2237,8 @@
     "completedQuote": "ใบเสนอราคาเสร็จสิ้น",
     "claimRequestRejected": "คำขอเคลมนี้ถูกปฏิเสธแล้ว",
     "claimRejectedViewInfo": "คุณยังสามารถดูข้อมูลทั้งหมดเพื่ออ้างอิงได้",
-    "detail": "รายละเอียด"
+    "detail": "รายละเอียด",
+    "fireServiceTax": "ภาษีบริการดับเพลิง"
   },
   "commission": {
     "addCommissions": "เพิ่มคอมมิชชั่น",
@@ -4171,7 +4172,8 @@
     "waitingForCustomerApproval": "รอการอนุมัติจากลูกค้า",
     "quoteSentToSuccess": "ส่งใบเสนอราคาให้ {{sentTo}} เรียบร้อยแล้ว!",
     "errorSendingQuoteForApproval": "เกิดข้อผิดพลาดในการส่งใบเสนอราคาเพื่ออนุมัติ",
-    "pageTitle": "ใบเสนอราคา"
+    "pageTitle": "ใบเสนอราคา",
+    "fst": "ภาษีบริการดับเพลิง"
   },
   "policyList": {
     "title": "กรมธรรม์",
