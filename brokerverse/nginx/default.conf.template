@@ -7,6 +7,9 @@ server {
   client_max_body_size 25m;
   server_tokens off;
 
+  # Azure: only requests through the environment's Front Door (FRONT_DOOR_ID); empty elsewhere
+  include /etc/nginx/brokerverse/origin.conf;
+
   # same-origin API (API_UPSTREAM), empty when the API is on another origin
   include /etc/nginx/brokerverse/api-proxy.conf;
 
