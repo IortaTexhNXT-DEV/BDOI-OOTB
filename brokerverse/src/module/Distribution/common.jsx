@@ -48,8 +48,7 @@ export const Field = ({ label, children, full = false, help, required = false, e
   </div>
 );
 
-/** Field messages of an API validation error ({ path: message }), for the fields of a form. */
-export const fieldErrors = (e) => Object.fromEntries((e?.errors || []).filter((x) => x.path).map((x) => [String(x.path).split(".")[0], x.message]));
+export { apiFieldErrors as fieldErrors } from "../../hooks/useFieldErrors";
 
 /** Number of a numeric cell, right aligned. */
 export const num = (v, digits = 2) => (v === null || v === undefined || v === "" ? "" : Number(v).toLocaleString("en-PH", { minimumFractionDigits: digits, maximumFractionDigits: digits }));

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "primereact/button";
+import { Calendar } from "primereact/calendar";
 import { Checkbox } from "primereact/checkbox";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -9,9 +10,10 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
+import { MultiSelect } from "primereact/multiselect";
 import { Toast } from "primereact/toast";
 import service from "../../services/opsAccountingService";
-import { Field, OpsTag, PageHeader, blank, showError, showSuccess, useFieldErrors } from "./common";
+import { Field, OpsTag, PageHeader, blank, isoOf, showError, showSuccess, toDate, useFieldErrors } from "./common";
 
 const HIDDEN = ["audit-user", "audit-date"];
 const EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -58,6 +60,8 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
     if (blank(v) || (Array.isArray(v) && !v.length)) return f.required && !f.numbering && f.type !== "boolean" ? t("opsAcc.required") : null;
     if (f.type === "email" && !EMAIL.test(String(v).trim())) return t("opsAcc.invalidEmail");
     if (f.maxLength && String(v).length > f.maxLength) return t("opsAcc.tooLong", { max: f.maxLength });
+    const from = f.notBefore ? edit.values[f.notBefore] : null;
+    if (f.type === "date" && from && String(v).slice(0, 10) < String(from).slice(0, 10)) return t("opsAcc.notBefore", { other: fields.find((x) => x.name === f.notBefore)?.label || f.notBefore });
     return null;
   };
   const save = async () => {
@@ -87,6 +91,8 @@ const MasterRecordsPage = ({ type, title, group, section, intro, columns }) => {
     const v = edit.values[f.name];
     if (f.type === "boolean") return <Checkbox inputId={`f-${f.name}`} checked={v === true || v === "true"} onChange={(e) => set(f.name, e.checked)} />;
     if (f.type === "select" && Array.isArray(f.options)) return <Dropdown value={v ?? null} options={f.options} onChange={(e) => set(f.name, e.value)} className="w-full" showClear />;
+    if (f.type === "multiselect" && Array.isArray(f.options)) return <MultiSelect value={Array.isArray(v) ? v : []} options={f.options} onChange={(e) => set(f.name, e.value)} className="w-full" display="chip" />;
+    if (f.type === "date") return <Calendar value={toDate(v)} onChange={(e) => set(f.name, isoOf(e.value))} dateFormat="yy-mm-dd" showIcon showButtonBar className="w-full" />;
     if (f.type === "number" || f.type === "integer") {
       return <InputNumber value={v === null || v === undefined || v === "" ? null : Number(v)} onValueChange={(e) => set(f.name, e.value)} className="w-full"
         mode="decimal" maxFractionDigits={f.type === "integer" ? 0 : 4} useGrouping={false} />;
