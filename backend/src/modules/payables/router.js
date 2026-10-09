@@ -143,7 +143,7 @@ define({
     const r = await svc.apAgeing(pool, req.query);
     if (['xlsx', 'csv'].includes(req.query.format)) {
       const header = ['Supplier', 'AP Voucher', 'Supplier Invoice', 'Invoice Date', 'Due Date', 'Days Past Due', 'Balance', 'Bucket'];
-      sendTable(res, { header, rows: r.rows.map((x) => [x.supplierName, x.voucherNumber, x.supplierInvoiceNo, x.invoiceDate, x.dueDate, x.daysPastDue, x.balance, x.bucket]),
+      await sendTable(res, { header, rows: r.rows.map((x) => [x.supplierName, x.voucherNumber, x.supplierInvoiceNo, x.invoiceDate, x.dueDate, x.daysPastDue, x.balance, x.bucket]),
         fileBase: `ap-ageing-${r.asOf}`, format: req.query.format, sheetName: 'AP ageing' });
       return;
     }

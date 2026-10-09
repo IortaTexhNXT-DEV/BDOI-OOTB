@@ -129,7 +129,7 @@ define({
   response: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
   handler: async (req, res) => {
     const { batch, rows } = await batches.reportRows(req.params.id);
-    sendSheet(res, { fileName: `renewal-batch-${batch.batchId}`, format: req.query.format === 'csv' ? 'csv' : 'excel', sheets: [{ name: batch.batchId, columns: batches.REPORT_COLUMNS, rows }] });
+    await sendSheet(res, { fileName: `renewal-batch-${batch.batchId}`, format: req.query.format === 'csv' ? 'csv' : 'excel', sheets: [{ name: batch.batchId, columns: batches.REPORT_COLUMNS, rows }] });
   },
 });
 

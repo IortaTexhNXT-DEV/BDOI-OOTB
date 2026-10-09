@@ -13,7 +13,7 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { badRequest } from '../../lib/errors.js';
-import { sendPdf } from '../../lib/pdf/index.js';
+import { printFormat, sendPdf } from '../../lib/pdf/index.js';
 import { writeXlsx } from '../../lib/xlsx.js';
 import { renderReportPdf } from '../../lib/pdf/index.js';
 import * as ret from './returns.js';
@@ -67,7 +67,7 @@ define({
   middleware: [...read, validate(formParam, 'params'), validate(periodQ, 'query')], query: { year: 2026, quarter: 3 },
   handler: async (req, res) => {
     const r = await ret.computeReturn(pool, req.params.form, req.query);
-    sendFile(res, returnXlsx(r), `BIR-${r.form}-${r.period.key}.xlsx`, XLSX);
+    sendFile(res, returnXlsx(r, await printFormat()), `BIR-${r.form}-${r.period.key}.xlsx`, XLSX);
   },
 });
 const filingSchema = periodQ.extend({

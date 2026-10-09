@@ -36,7 +36,7 @@ define({
   handler: async (req, res) => {
     const q = { unauthenticated: 'true', ...req.query };
     const { rows } = await ctpl.listAuthentications(q, { limit: 10000, offset: 0 });
-    sendTable(res, { header: ctpl.REPORT_COLUMNS.map((c) => c.label), rows: rows.map((r) => ctpl.REPORT_COLUMNS.map((c) => (c.key === 'overdue' ? (r.overdue ? 'Yes' : 'No') : r[c.key] ?? ''))),
+    await sendTable(res, { header: ctpl.REPORT_COLUMNS.map((c) => c.label), rows: rows.map((r) => ctpl.REPORT_COLUMNS.map((c) => (c.key === 'overdue' ? (r.overdue ? 'Yes' : 'No') : r[c.key] ?? ''))),
       fileBase: 'unauthenticated-ctpl', format: req.query.format === 'csv' ? 'csv' : 'xlsx', sheetName: 'Unauthenticated CTPL' });
   },
 });

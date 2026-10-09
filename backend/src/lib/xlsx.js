@@ -6,6 +6,7 @@
  */
 import { createZip } from './zip.js';
 import { protectExportRows } from './piiPolicy.js';
+import { DEFAULT_FORMAT } from './pdf/format.js';
 
 const MAX_CELL = 32767;
 // Style indexes in styles.xml cellXfs
@@ -36,6 +37,12 @@ export const xmlEscape = (v) => String(v).replace(INVALID_XML, '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})/;
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const DECIMAL = /^-?\d+\.\d{1,4}$/;
+
+/** Excel number format of a date pattern of general.date_format ("DD/MM/YYYY" -> "dd/mm/yyyy", "DD MMM YYYY" -> "dd mmm yyyy"). */
+export const excelDateFormat = (pattern = DEFAULT_FORMAT.dateFormat) => String(pattern || DEFAULT_FORMAT.dateFormat)
+  .replace(/YYYY|YY|MMMM|MMM|MM|M|DD|D/g, (t) => t.toLowerCase());
 function excelDate(v) {
   const s = v instanceof Date ? v.toISOString() : String(v);
   const m = DATE_RE.exec(s);
@@ -75,17 +82,20 @@ function cellXml(ref, value, type, sst, rowStyle = null) {
     return `<c r="${ref}" s="${rowStyle}" t="s"><v>${sst.idx(text.slice(0, MAX_CELL))}</v></c>`;
   }
   if (value === null || value === undefined || value === '') return '';
-  // 'auto': a JavaScript number stays a number, anything else is text
-  if (type === 'auto' && typeof value === 'number' && Number.isFinite(value)) return `<c r="${ref}"><v>${value}</v></c>`;
-  const numeric = ['money', 'integer', 'number', 'percent'].includes(type);
-  if (numeric && Number.isFinite(Number(value))) return `<c r="${ref}" s="${STYLE[type]}"><v>${Number(value)}</v></c>`;
-  if (type === 'date') {
+  // 'auto': a whole number stays a number, a decimal (a number, or text such as a database amount "12525.00") is an amount
+  // with thousands separators, a yyyy-mm-dd date is a date cell, anything else is text
+  if (type === 'auto' && typeof value === 'number' && Number.isFinite(value)) return Number.isInteger(value) ? `<c r="${ref}"><v>${value}</v></c>` : `<c r="${ref}" s="${STYLE.money}"><v>${value}</v></c>`;
+  const autoText = type === 'auto' && typeof value === 'string';
+  const kind = autoText && ISO_DATE.test(value) ? 'date' : autoText && DECIMAL.test(value) ? 'money' : type;
+  const numeric = ['money', 'integer', 'number', 'percent'].includes(kind);
+  if (numeric && Number.isFinite(Number(value))) return `<c r="${ref}" s="${STYLE[kind]}"><v>${Number(value)}</v></c>`;
+  if (kind === 'date') {
     const d = excelDate(value);
     if (d !== null) return `<c r="${ref}" s="${STYLE.date}"><v>${d}</v></c>`;
   }
   let text = typeof value === 'object' ? JSON.stringify(value, null, 2) : String(value);
   if (text.length > MAX_CELL) text = `${text.slice(0, MAX_CELL - 3)}...`;
-  const style = type === 'wrap' || typeof value === 'object' ? STYLE.wrap : STYLE.text;
+  const style = kind === 'wrap' || typeof value === 'object' ? STYLE.wrap : STYLE.text;
   return `<c r="${ref}" s="${style}" t="s"><v>${sst.idx(text)}</v></c>`;
 }
 
@@ -143,9 +153,9 @@ function drawingXml(logo) {
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><xdr:oneCellAnchor><xdr:from><xdr:col>0</xdr:col><xdr:colOff>38100</xdr:colOff><xdr:row>0</xdr:row><xdr:rowOff>38100</xdr:rowOff></xdr:from><xdr:ext cx="${cx}" cy="${cy}"/><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="2" name="Logo" descr="Company logo"/><xdr:cNvPicPr><a:picLocks noChangeAspect="1"/></xdr:cNvPicPr></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:oneCellAnchor></xdr:wsDr>`;
 }
 
-const stylesXml = ({ headerBg = '#1f4e78', headerText = '#ffffff', titleColor = '#0b2a4a' } = {}) => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+const stylesXml = ({ headerBg = '#1f4e78', headerText = '#ffffff', titleColor = '#0b2a4a' } = {}, dateFormat = DEFAULT_FORMAT.dateFormat) => `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-<numFmts count="1"><numFmt numFmtId="164" formatCode="yyyy-mm-dd"/></numFmts>
+<numFmts count="1"><numFmt numFmtId="164" formatCode="${xmlEscape(excelDateFormat(dateFormat))}"/></numFmts>
 <fonts count="9"><font><sz val="11"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/></font><font><i/><sz val="11"/><color rgb="FF595959"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FF0B2A4A"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FF9C0006"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="FF006100"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="11"/><color rgb="${argb(headerText, 'FFFFFF')}"/><name val="Calibri"/><family val="2"/></font><font><b/><sz val="14"/><color rgb="${argb(titleColor, '0B2A4A')}"/><name val="Calibri"/><family val="2"/></font><font><sz val="9"/><color rgb="FF5F6B76"/><name val="Calibri"/><family val="2"/></font></fonts>
 <fills count="9"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="${argb(headerBg, '1F4E78')}"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF9C2A00"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FF0B2A4A"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFF4CC"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFC6EFCE"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFEB9C"/><bgColor indexed="64"/></patternFill></fill><fill><patternFill patternType="solid"><fgColor rgb="FFFFC7CE"/><bgColor indexed="64"/></patternFill></fill></fills>
 <borders count="2"><border><left/><right/><top/><bottom/><diagonal/></border><border><left style="thin"><color rgb="FFBFBFBF"/></left><right style="thin"><color rgb="FFBFBFBF"/></right><top style="thin"><color rgb="FFBFBFBF"/></top><bottom style="thin"><color rgb="FFBFBFBF"/></bottom><diagonal/></border></borders>
@@ -184,10 +194,11 @@ const stylesXml = ({ headerBg = '#1f4e78', headerText = '#ffffff', titleColor = 
  * title) and logo (true: the brand logo above the banner).
  * Branding (`brand`, modules/branding documentBranding().excel plus the logo): { headerBg, headerText, titleColor,
  * logoImage: { buffer, type: 'png' | 'jpeg', width, height } }.
- * @param {{sheets: {name: string, columns: {key?: string, header?: string, label?: string, width?: number, type?: string, required?: boolean}[], rows: (Array|Object)[], freeze?: boolean, autoFilter?: boolean, banner?: string[], logo?: boolean}[], creator?: string, title?: string, brand?: object}} wb
+ * Date cells are shown in dateFormat (the general.date_format pattern, e.g. DD/MM/YYYY).
+ * @param {{sheets: {name: string, columns: {key?: string, header?: string, label?: string, width?: number, type?: string, required?: boolean}[], rows: (Array|Object)[], freeze?: boolean, autoFilter?: boolean, banner?: string[], logo?: boolean}[], creator?: string, title?: string, brand?: object, dateFormat?: string}} wb
  * @returns {Buffer}
  */
-export function writeXlsx({ sheets, creator = 'BrokerVerse', title = '', brand = null }) {
+export function writeXlsx({ sheets, creator = 'BrokerVerse', title = '', brand = null, dateFormat = DEFAULT_FORMAT.dateFormat }) {
   const sst = new SharedStrings();
   const used = new Set();
   const img = brand?.logoImage && brand.logoImage.width && brand.logoImage.height ? brand.logoImage : null;
@@ -215,7 +226,7 @@ export function writeXlsx({ sheets, creator = 'BrokerVerse', title = '', brand =
     { name: 'docProps/app.xml', data: '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>BrokerVerse</Application></Properties>' },
     { name: 'xl/workbook.xml', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><bookViews><workbookView/></bookViews><sheets>${named.map((s, i) => `<sheet name="${xmlEscape(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets>${definedNames ? `<definedNames>${definedNames}</definedNames>` : ''}</workbook>` },
     { name: 'xl/_rels/workbook.xml.rels', data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${named.map((_, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${named.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rId${named.length + 2}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/sharedStrings" Target="sharedStrings.xml"/></Relationships>` },
-    { name: 'xl/styles.xml', data: stylesXml(brand || {}) },
+    { name: 'xl/styles.xml', data: stylesXml(brand || {}, dateFormat) },
     ...sheetFiles,
     ...drawingParts,
   ];

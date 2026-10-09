@@ -190,7 +190,7 @@ define({
   handler: async (req, res) => {
     const r = await remittanceAgeing(pool, req.query);
     if (['xlsx', 'csv'].includes(req.query.format)) {
-      sendTable(res, { header: AGEING_HEADER, rows: ageingRows(r), fileBase: `remittance-ageing-${r.asOf}`, format: req.query.format, sheetName: 'Remittance ageing' });
+      await sendTable(res, { header: AGEING_HEADER, rows: ageingRows(r), fileBase: `remittance-ageing-${r.asOf}`, format: req.query.format, sheetName: 'Remittance ageing' });
       return;
     }
     ok(res, r);

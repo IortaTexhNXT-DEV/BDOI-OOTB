@@ -12,6 +12,7 @@ import { pool, withTransaction } from '../../db/pool.js';
 import { audit } from '../../lib/audit.js';
 import { ok, created } from '../../lib/respond.js';
 import { sendTable } from '../documents/tabular.js';
+import { printFormat } from '../../lib/pdf/index.js';
 import { formatMoney } from '../../lib/money.js';
 import { notifyApprovers, notifyDecision } from '../notifications/approvals.js';
 import * as svc from './service.js';
@@ -37,7 +38,7 @@ define({
   response: { success: true, data: { roles: [{ code: 'sales', name: 'Sales & Marketing' }], dormantDays: 90, rows: [{ username: 'maria.rivera', roles: ['sales'], status: 'active', dormant: false, sodConflicts: [] }] } },
   handler: async (req, res) => {
     const m = await svc.userMatrix(pool, { status: req.query.status || null });
-    if (req.query.format) return sendTable(res, { header: svc.USER_MATRIX_HEADER, rows: svc.userMatrixRows(m), fileBase: 'user-access-matrix', format: format(req.query), sheetName: 'Users' });
+    if (req.query.format) return sendTable(res, { header: svc.USER_MATRIX_HEADER, rows: svc.userMatrixRows(m, await printFormat()), fileBase: 'user-access-matrix', format: format(req.query), sheetName: 'Users' });
     return ok(res, m);
   },
 });
@@ -215,7 +216,7 @@ define({
   response: { success: true, data: { id: 1, items: [{ username: 'maria.rivera', roles: ['sales'], decision: 'pending' }] } },
   handler: async (req, res) => {
     const r = await svc.getReview(pool, req.params.id);
-    if (req.query.format) return sendTable(res, { header: svc.REVIEW_HEADER, rows: svc.reviewRows(r), fileBase: `access-review-${r.id}`, format: format(req.query), sheetName: 'Review' });
+    if (req.query.format) return sendTable(res, { header: svc.REVIEW_HEADER, rows: svc.reviewRows(r, await printFormat()), fileBase: `access-review-${r.id}`, format: format(req.query), sheetName: 'Review' });
     return ok(res, r);
   },
 });
