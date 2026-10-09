@@ -8,6 +8,8 @@
  *   - "no limit" when a matching row has max_amount NULL.
  * When no row applies at all, access.authority_without_limit decides (allow, the default, or refuse).
  */
+import { adminEquivalentRoles } from '../../lib/auth.js';
+import { businessName } from './catalogue.js';
 import { badRequest, conflict, forbidden, notFound } from '../../lib/errors.js';
 import { getSetting } from '../../lib/settings.js';
 import { today } from '../../lib/dates.js';
@@ -206,24 +208,51 @@ export async function revokeDelegation(db, id, user) {
 }
 
 // ---------------------------------------------------------------- segregation of duties
+//
+// Two kinds of rule. Roles held together (kind roles): two roles one person may not hold. Access combined (kind access):
+// two sets of permissions a role or a person should not combine (issuing receipts and issuing policies); a set of
+// permissions breaks it when it holds a code of each set. The administrator role and the roles that include it hold
+// every permission and are left out of the access rules (the role rules control who holds them).
+
+const sodOut = (r) => ({ ...r, accessANames: r.accessA.map((c) => businessName(c)), accessBNames: r.accessB.map((c) => businessName(c)) });
 
 export async function listSodRules(db) {
-  const { rows } = await db.query(`SELECT s.id, s.code, s.name, s.role_a AS "roleA", a.name AS "roleAName", s.role_b AS "roleB", b.name AS "roleBName", s.action, s.reason, s.active
-    FROM sod_rules s JOIN roles a ON a.code = s.role_a JOIN roles b ON b.code = s.role_b ORDER BY s.code`);
-  return rows;
+  const { rows } = await db.query(`SELECT s.id, s.code, s.name, s.kind, s.role_a AS "roleA", a.name AS "roleAName", s.role_b AS "roleB", b.name AS "roleBName",
+      s.access_a AS "accessA", s.access_b AS "accessB", s.action, s.reason, s.active
+    FROM sod_rules s LEFT JOIN roles a ON a.code = s.role_a LEFT JOIN roles b ON b.code = s.role_b ORDER BY s.code`);
+  return rows.map(sodOut);
 }
 
-export async function saveSodRule(db, b, id = null) {
+/** The two sides of a rule: two different known roles, or two sets of known permissions that do not overlap. */
+async function sodSides(db, b, kind) {
+  if (kind === 'access') {
+    const a = [...new Set(b.accessA || [])];
+    const c = [...new Set(b.accessB || [])];
+    if (!a.length || !c.length) throw badRequest('Choose the access on both sides of the rule');
+    if (a.some((x) => c.includes(x))) throw badRequest('The same access cannot be on both sides of the rule');
+    const known = (await db.query('SELECT code FROM permissions WHERE code = ANY($1)', [[...a, ...c]])).rows.map((r) => r.code);
+    const unknown = [...a, ...c].filter((x) => !known.includes(x));
+    if (unknown.length) throw badRequest(`Unknown permission: ${unknown.join(', ')}`);
+    return { roleA: null, roleB: null, accessA: a, accessB: c };
+  }
+  if (!b.roleA || !b.roleB) throw badRequest('Pick the two roles');
   if (b.roleA === b.roleB) throw badRequest('Pick two different roles');
   const known = (await db.query('SELECT code FROM roles WHERE code = ANY($1)', [[b.roleA, b.roleB]])).rows;
   if (known.length !== 2) throw badRequest('Unknown role');
+  return { roleA: b.roleA, roleB: b.roleB, accessA: [], accessB: [] };
+}
+
+export async function saveSodRule(db, b, id = null) {
+  const existing = id ? (await db.query('SELECT kind FROM sod_rules WHERE id = $1', [id])).rows[0] : null;
+  if (id && !existing) throw notFound('Rule not found');
+  const kind = b.kind || existing?.kind || 'roles';
+  const x = await sodSides(db, b, kind);
   if (id) {
-    const { rows } = await db.query(`UPDATE sod_rules SET name = $2, role_a = $3, role_b = $4, action = $5, reason = $6, active = $7 WHERE id = $1 RETURNING id`,
-      [id, b.name, b.roleA, b.roleB, b.action, b.reason || null, b.active !== false]);
-    if (!rows[0]) throw notFound('Rule not found');
+    await db.query(`UPDATE sod_rules SET name = $2, kind = $3, role_a = $4, role_b = $5, access_a = $6, access_b = $7, action = $8, reason = $9, active = $10 WHERE id = $1`,
+      [id, b.name, kind, x.roleA, x.roleB, x.accessA, x.accessB, b.action, b.reason || null, b.active !== false]);
   } else {
-    await db.query(`INSERT INTO sod_rules(code, name, role_a, role_b, action, reason, active) VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [b.code, b.name, b.roleA, b.roleB, b.action, b.reason || null, b.active !== false]);
+    await db.query(`INSERT INTO sod_rules(code, name, kind, role_a, role_b, access_a, access_b, action, reason, active) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)`,
+      [b.code, b.name, kind, x.roleA, x.roleB, x.accessA, x.accessB, b.action, b.reason || null, b.active !== false]);
   }
   return (await listSodRules(db)).find((r) => (id ? r.id === Number(id) : r.code === b.code));
 }
@@ -235,14 +264,27 @@ export async function deleteSodRule(db, id) {
   return { id: Number(id), active: false };
 }
 
-/** Rules broken by a set of role codes (inherited roles count). */
+/** Does a set of permission codes break an access rule (a code of each side)? */
+export const breaksAccessRule = (rule, codes) => rule.accessA.some((c) => codes.has(c)) && rule.accessB.some((c) => codes.has(c));
+
+/** Rules broken by a set of role codes (inherited roles count; access rules on the permissions of the active roles). */
 export async function sodConflicts(db, roleCodes) {
   if (!(await db.query("SELECT to_regclass('sod_rules') IS NOT NULL AS ok")).rows[0].ok) return [];
   const { rows: expanded } = await db.query(`WITH RECURSIVE r(code) AS (SELECT unnest($1::text[]) UNION SELECT unnest(x.inherits) FROM roles x JOIN r ON r.code = x.code)
     SELECT DISTINCT code FROM r`, [roleCodes || []]);
   const have = new Set(expanded.map((r) => r.code));
-  return (await listSodRules(db)).filter((s) => s.active && have.has(s.roleA) && have.has(s.roleB));
+  const rules = (await listSodRules(db)).filter((s) => s.active);
+  const byRoles = rules.filter((s) => s.kind !== 'access' && have.has(s.roleA) && have.has(s.roleB));
+  const access = rules.filter((s) => s.kind === 'access');
+  if (!access.length) return byRoles;
+  const full = await adminEquivalentRoles(db);
+  const { rows } = await db.query(`SELECT DISTINCT p.code FROM roles r JOIN role_permissions rp ON rp.role_id = r.id JOIN permissions p ON p.id = rp.permission_id
+    WHERE r.code = ANY($1) AND r.status = 'active'`, [[...have].filter((c) => !full.includes(c))]);
+  const codes = new Set(rows.map((r) => r.code));
+  return [...byRoles, ...access.filter((s) => breaksAccessRule(s, codes))];
 }
+
+const sodBetween = (s) => (s.kind === 'access' ? `${s.accessANames.join(', ')} with ${s.accessBNames.join(', ')} (${s.name})` : `${s.roleAName} and ${s.roleBName} (${s.name})`);
 
 /** Throws when a blocking rule is broken; returns the warnings otherwise. */
 export async function assertSod(db, roleCodes) {
@@ -250,9 +292,9 @@ export async function assertSod(db, roleCodes) {
   const found = await sodConflicts(db, roleCodes);
   const blocking = found.filter((s) => s.action === 'block');
   if (blocking.length) {
-    throw conflict(`Segregation of duties: ${blocking.map((s) => `${s.roleAName} and ${s.roleBName} (${s.name})`).join('; ')} may not be held by the same person`);
+    throw conflict(`Segregation of duties: ${blocking.map(sodBetween).join('; ')} may not be held by the same person`);
   }
-  return found.map((s) => `${s.roleAName} with ${s.roleBName}: ${s.reason || s.name}`);
+  return found.map((s) => (s.kind === 'access' ? `${s.name}: ${s.reason || sodBetween(s)}` : `${s.roleAName} with ${s.roleBName}: ${s.reason || s.name}`));
 }
 
 // ---------------------------------------------------------------- matrices
@@ -267,18 +309,30 @@ const USER_MATRIX_SQL = `SELECT u.id, u.username, u.display_name AS "displayName
   FROM users u LEFT JOIN users rt ON rt.id = u.reporting_to
   WHERE ($1::text IS NULL OR u.status = $1) ORDER BY u.display_name`;
 
+/** The permissions of every user through their active roles, full-access roles left out (only when an access rule is active). */
+async function userAccessCodes(db, rules) {
+  if (!rules.some((s) => s.kind === 'access')) return new Map();
+  const { rows } = await db.query(`SELECT u.id, array_agg(DISTINCT p.code) AS codes FROM users u CROSS JOIN LATERAL user_effective_roles(u.id) er
+    JOIN role_permissions rp ON rp.role_id = er.role_id JOIN permissions p ON p.id = rp.permission_id
+    WHERE NOT (er.code = ANY($1)) GROUP BY u.id`, [await adminEquivalentRoles(db)]);
+  return new Map(rows.map((r) => [r.id, new Set(r.codes)]));
+}
+
 /** Every user with roles, branch, status and sign-in facts, plus their segregation-of-duties conflicts. */
 export async function userMatrix(db, { status = null } = {}) {
   const { rows } = await db.query(USER_MATRIX_SQL, [status]);
   const dormantDays = Number(await getSetting('access.dormant_days', 90)) || 0;
   const rules = (await listSodRules(db)).filter((s) => s.active);
   const roles = (await db.query("SELECT code, name FROM roles ORDER BY id")).rows;
+  const access = await userAccessCodes(db, rules);
   return {
     roles,
     dormantDays,
     rows: rows.map((u) => {
       const have = new Set(u.effectiveRoles);
-      return { ...u, sodConflicts: rules.filter((s) => have.has(s.roleA) && have.has(s.roleB)).map((s) => ({ name: s.name, action: s.action })),
+      const codes = access.get(u.id) || new Set();
+      const broken = rules.filter((s) => (s.kind === 'access' ? breaksAccessRule(s, codes) : have.has(s.roleA) && have.has(s.roleB)));
+      return { ...u, sodConflicts: broken.map((s) => ({ name: s.name, action: s.action, kind: s.kind })),
         dormant: dormantDays > 0 && u.status === 'active' && Number(u.daysSinceLogin) >= dormantDays };
     }),
   };

@@ -80,7 +80,9 @@ describe('segregation of duties', () => {
     expect(warned.status).toBe(201);
     expect(warned.body.message).toMatch(/Segregation of duties/);
     const check = await ctx.api('post', '/access-control/sod-check').send({ roles: ['claims', 'accounting'] });
-    expect(check.body.data.map((r) => r.action)).toEqual(['block']);
+    expect(check.body.data.filter((r) => r.kind === 'roles').map((r) => r.action)).toEqual(['block']);
+    // and the access the two roles combine: registering claims with preparing payments (seed 91_role_access.sql)
+    expect(check.body.data.filter((r) => r.kind === 'access').map((r) => [r.code, r.action])).toEqual([['SOD-ACC-CLAIM-PAY', 'warn']]);
   });
 });
 
@@ -89,7 +91,8 @@ describe('matrices', () => {
     const m = await ctx.api('get', '/access-control/user-matrix');
     const row = m.body.data.rows.find((u) => u.username === 'ac.sod2');
     expect(row.roles).toEqual(['accounting', 'sales']);
-    expect(row.sodConflicts.map((c) => c.action)).toEqual(['warn']);
+    expect(row.sodConflicts.filter((c) => c.kind === 'roles').map((c) => c.action)).toEqual(['warn']);
+    expect(row.sodConflicts.filter((c) => c.kind === 'access').map((c) => c.name).sort()).toEqual(['Placing and paying insurers', 'Receipting and selling']);
     const file = await ctx.api('get', '/access-control/user-matrix?format=xlsx');
     expect(file.status).toBe(200);
     expect(file.headers['content-type']).toMatch(/spreadsheetml/);

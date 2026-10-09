@@ -150,11 +150,15 @@ define({
 });
 
 // ---------- segregation of duties ----------
-const SOD = z.object({ code: z.string().min(2).max(40).optional(), name: z.string().min(2).max(120), roleA: z.string(), roleB: z.string(), action: z.enum(['block', 'warn']),
-  reason: z.string().max(500).optional(), active: z.boolean().optional() });
+const SOD = z.object({ code: z.string().min(2).max(40).optional(), name: z.string().min(2).max(120), kind: z.enum(['roles', 'access']).optional(),
+  roleA: z.string().nullable().optional(), roleB: z.string().nullable().optional(), accessA: z.array(z.string()).max(100).optional(), accessB: z.array(z.string()).max(100).optional(),
+  action: z.enum(['block', 'warn']), reason: z.string().max(500).optional(), active: z.boolean().optional() });
 define({
-  method: 'GET', path: '/sod-rules', summary: 'Segregation-of-duties rules: pairs of roles one person may not hold together', screen: `${S} > Segregation of Duties`, middleware: read,
-  response: { success: true, data: [{ id: 1, code: 'SOD-PROC-ACCT', roleA: 'processing', roleB: 'accounting', action: 'block' }] },
+  method: 'GET', path: '/sod-rules', summary: 'Segregation-of-duties rules: pairs of roles one person may not hold together, and access a role or a person should not combine',
+  screen: `${S} > Segregation of Duties`, middleware: read,
+  response: { success: true, data: [{ id: 1, code: 'SOD-PROC-ACCT', kind: 'roles', roleA: 'processing', roleB: 'accounting', accessA: [], accessB: [], action: 'block' },
+    { id: 7, code: 'SOD-ACC-CLAIM-PAY', kind: 'access', roleA: null, roleB: null, accessA: ['write:claims'], accessB: ['write:disbursements'],
+      accessANames: ['Operations › Claims › Create and edit'], accessBNames: ['Accounts › Disbursements and petty cash › Create and edit'], action: 'warn' }] },
   handler: async (_req, res) => ok(res, await svc.listSodRules(pool)),
 });
 define({

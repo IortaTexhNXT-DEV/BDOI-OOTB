@@ -79,6 +79,7 @@ A sample row that the purge script must remove needs a key listed in `scripts/pu
 | `83_tisph_lists.sql` | reference | the 14 lead sources of Pre-BSM M07 and the 32 reason codes of M24 that have no master of their own (decline, repudiation, lapse, refund, adjustment, non-materialise) |
 | `84_lead_reassignment_reasons.sql` | reference | the context reassignment on the Reason Code master and its reasons (account executive left or on leave, territory or branch change, workload balancing, customer request, not worked in time, needs a specialist, other): the reason of a prospect reassigned or sent to the reassignment queue |
 | `88_accounting_reasons.sql` | reference | the contexts of the accounting decisions on the Reason Code master (period close, period reopening, year-end reversal, void of a printed CAS book, change of a CAS document, incentive batch rejection) and their reasons, each with an Other that needs a note |
+| `91_role_access.sql` | reference | the segregation-of-duties access rules (receipting and selling, placing and paying insurers, claims and payment, administration and transactions; all warn) |
 
 The TISPH files replace a reference value only while it is still the reference value and nobody has changed it, so
 they apply to a new database and, at the next start, to a database already in use, without undoing administrator changes.
