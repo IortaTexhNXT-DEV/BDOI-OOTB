@@ -12,6 +12,7 @@ each item. The runtime details (every environment variable, seed data, health ch
 | `backend.env.example` | the backend environment with placeholders; copy the names into the secret store |
 | `frontend.env.example` | the front end's runtime settings (`/env-config.js`): one build serves every environment |
 | `RAILWAY.md` | the same deployment on Railway (database, API and web services from this repository) |
+| `AZURE.md` | TISPH on Microsoft Azure: Terraform per environment (`azure/`), promotion DEV -> SIT -> UAT -> PROD, backups and disaster recovery, sign-in with Microsoft Entra ID |
 | `RELEASE_PIPELINE.md` | CI and deployment workflows: environments per broker size, promotion and approvals, GitHub settings, migrations, rollback, hotfix |
 | `ec2/` | the EC2 host: `release.sh` (releases installed by the pipeline), `deploy.sh` (older git-checkout route), nginx and PM2 files |
 

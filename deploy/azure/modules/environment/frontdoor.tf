@@ -56,6 +56,27 @@ locals {
   custom_domain_ids = [for d in azurerm_cdn_frontdoor_custom_domain.web : d.id]
 }
 
+# HSTS on every answer: browsers keep to https for a year once they have seen the site
+resource "azurerm_cdn_frontdoor_rule_set" "security" {
+  name                     = "security"
+  cdn_frontdoor_profile_id = azurerm_cdn_frontdoor_profile.env.id
+}
+
+resource "azurerm_cdn_frontdoor_rule" "hsts" {
+  name                      = "hsts"
+  cdn_frontdoor_rule_set_id = azurerm_cdn_frontdoor_rule_set.security.id
+  order                     = 1
+  behavior_on_match         = "Continue"
+
+  actions {
+    response_header_action {
+      header_action = "Overwrite"
+      header_name   = "Strict-Transport-Security"
+      value         = "max-age=31536000"
+    }
+  }
+}
+
 resource "azurerm_cdn_frontdoor_route" "app" {
   name                            = "app"
   cdn_frontdoor_endpoint_id       = azurerm_cdn_frontdoor_endpoint.web.id
@@ -67,6 +88,7 @@ resource "azurerm_cdn_frontdoor_route" "app" {
   https_redirect_enabled          = true
   forwarding_protocol             = "HttpsOnly"
   link_to_default_domain          = true
+  cdn_frontdoor_rule_set_ids      = [azurerm_cdn_frontdoor_rule_set.security.id]
 }
 
 resource "azurerm_cdn_frontdoor_route" "static" {
@@ -80,6 +102,7 @@ resource "azurerm_cdn_frontdoor_route" "static" {
   https_redirect_enabled          = true
   forwarding_protocol             = "HttpsOnly"
   link_to_default_domain          = true
+  cdn_frontdoor_rule_set_ids      = [azurerm_cdn_frontdoor_rule_set.security.id]
 
   cache {
     query_string_caching_behavior = "IgnoreQueryString"

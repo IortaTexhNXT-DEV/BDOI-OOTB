@@ -99,6 +99,7 @@ With `NODE_ENV=production` (the Docker image sets it) the API refuses to start, 
 | `PII_ENCRYPTION_KEY` | set, at least 32 characters, different from `JWT_SECRET` and `DATA_ENCRYPTION_KEY` (encrypts TIN, government ID and bank account numbers at rest and keys their blind indexes) |
 | `CORS_ORIGINS` | set to the web application origin(s), comma separated; `*` is refused |
 | `PUBLIC_BASE_URL` | set to the public address of the API (file links are built from it); `localhost` / `127.0.0.1` are refused |
+| `ENTRA_*` | either none or all four of `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET`, `ENTRA_REDIRECT_URI` (an `https://` address) |
 
 Keep `DATA_ENCRYPTION_KEY` with the database backups: without the same key, users with two-factor authentication
 cannot sign in (an administrator can turn their two-factor off under User Management and they enrol again).
@@ -134,11 +135,16 @@ Deployment variables (all optional; defaults shown):
 | `IMPORT_MAX_MB` | 10 | Size of one spreadsheet / CSV import or statement file. |
 | `IMPORT_MAX_INFLATED_MB` / `IMPORT_MAX_ROWS` | 50 / 20000 | Decompressed size of a workbook part and data rows per import. |
 | `JSON_BODY_LIMIT` | 2mb | Largest JSON request body. |
+| `TRUST_PROXY` | 1 | Proxies in front of the API whose `X-Forwarded-For` is believed: a hop count, `true` / `false`, or addresses and subnets separated by commas. The client address feeds the sign-in rate limits and the sign-in history. 1 for one reverse proxy (nginx, Railway); 4 on Azure (Front Door, the web app's ingress, nginx, the API's ingress). |
+| `ENTRA_TENANT_ID`, `ENTRA_CLIENT_ID`, `ENTRA_CLIENT_SECRET`, `ENTRA_REDIRECT_URI` | empty | Sign-in with Microsoft Entra ID (OpenID Connect, authorization code with PKCE). All four set: the sign-in page shows "Sign in with Microsoft". The redirect address is the web address followed by `/login`. App registration: [AZURE.md](AZURE.md), section 14. |
+| `ENTRA_AUTHORITY` | https://login.microsoftonline.com | Microsoft sign-in host (another national cloud only). |
 
 Configuration (Master > Configuration, group Security / Uploads): `security.api_rate_limit` (requests per signed-in
 user or per address, default 600 a minute), `security.login_rate_limit`, `security.reset_code_max_attempts`,
 `security.require_2fa_roles`, the password policy keys, and `uploads.allowed_types` (file types users may upload,
-checked against the file content).
+checked against the file content). With Entra ID configured: `security.password_sign_in_enabled` (off: staff sign in
+only with Microsoft), `security.password_sign_in_roles` (roles that keep the password form, default System
+Administrator) and `security.sso_register_users` (an unknown Microsoft account is registered as an inactive user).
 
 Documents are served only to a signed-in caller or through short-lived signed links (`?exp=&sig=`) that the API adds
 to every file URL it returns; records keep the unsigned URL. Files are sent with `nosniff` and a sandbox
@@ -157,6 +163,7 @@ when the pipeline publishes the build (`brokerverse/scripts/env-config.sh`), and
 | `ENVIRONMENT_NAME` | empty | `DEV`, `SIT`, `UAT`, `PREPROD`, `TRAINING`: a small coloured label next to the logo and the browser tab title. Empty or `PRODUCTION`: none |
 | `ENVIRONMENT_COLOR` | per name | label colour, `#rrggbb` |
 | `ANALYTICS_ENABLED` | `false` | allow analytics |
+| `FRONT_DOOR_ID` | empty | Azure: the Front Door profile ID; requests without that `X-Azure-FDID` header are refused with 403 |
 
 The web server sends `Cache-Control: no-store` for `env-config.js`, `no-cache` for `index.html` and one year
 `immutable` for the hashed files under `static/`, plus a Content-Security-Policy (`script-src 'self'`, `connect-src`
