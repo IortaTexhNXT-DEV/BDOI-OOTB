@@ -23,6 +23,16 @@ const request = async (path, options = {}) => {
   }
   return body.data;
 };
+/** GET a file with the session token: { blob, fileName }. */
+const file = async (path) => {
+  const response = await fetch(`${BASE_URL}${path}`, { headers: { ...authService.getAuthHeader() } });
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    throw new Error(body.message || `Could not create the file (${response.status})`);
+  }
+  const name = /filename="?([^";]+)"?/i.exec(response.headers.get("Content-Disposition") || "");
+  return { blob: await response.blob(), fileName: name ? name[1] : "download" };
+};
 const post = (path, payload = {}) => request(path, { method: "POST", body: JSON.stringify(payload) });
 const put = (path, payload = {}) => request(path, { method: "PUT", body: JSON.stringify(payload) });
 const del = (path) => request(path, { method: "DELETE" });
@@ -72,7 +82,10 @@ const periodEndService = {
   createAdjustment: (body) => post("/period-end/adjustments", body),
 
   // statements and journals
+  statementPeriods: () => request("/period-end/statements/periods"),
   statement: (type, params) => request(`/period-end/statements/${type}${qs(params)}`),
+  /** Statement file (format xlsx or pdf): { blob, fileName }. */
+  statementFile: (type, params, format) => file(`/period-end/statements/${type}/export${qs({ ...params, format })}`),
   journalLines: (jvNumber) => request(`/accounting/entries/search${qs({ transactionCode: jvNumber, pageSize: 200 })}`),
   accounts: () => request("/accounting/accounts?status=active"),
 

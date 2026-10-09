@@ -5201,6 +5201,119 @@
       "ltoDocument": "แนบเอกสาร LTO หรือใบเสร็จรับเงิน"
     }
   },
+  "financialStatements": {
+    "title": "งบการเงิน",
+    "help": "งบการเงินจากรายการบัญชีที่ผ่านรายการแล้ว ตามงวดบัญชีหรือช่วงวันที่ เลือกบัญชีเพื่อดูรายการเคลื่อนไหว",
+    "statement": {
+      "income-statement": "งบกำไรขาดทุน",
+      "balance-sheet": "งบแสดงฐานะการเงิน",
+      "trial-balance": "งบทดลอง"
+    },
+    "fiscalYear": "ปีบัญชี",
+    "period": "งวด",
+    "view": "มุมมอง",
+    "views": {
+      "month": "รายเดือน",
+      "quarter": "รายไตรมาส",
+      "ytd": "ตั้งแต่ต้นปี",
+      "custom": "กำหนดช่วงเอง",
+      "periodEnd": "ณ สิ้นงวด",
+      "customDate": "กำหนดวันที่เอง"
+    },
+    "from": "ตั้งแต่",
+    "to": "ถึง",
+    "asOf": "ณ วันที่",
+    "label": {
+      "quarter": "ไตรมาส {{quarter}}, {{fiscalYear}}",
+      "ytd": "ตั้งแต่ต้นปี, {{fiscalYear}}",
+      "asOf": "ณ วันที่ {{date}}"
+    },
+    "amountsIn": "จำนวนเงินเป็น {{currency}}",
+    "refresh": "รีเฟรช",
+    "export": "ส่งออก",
+    "excel": "ไฟล์ Excel",
+    "pdf": "ไฟล์ PDF",
+    "print": "พิมพ์",
+    "account": "บัญชี",
+    "measure": {
+      "currentPeriod": "งวดนี้",
+      "yearToDate": "ตั้งแต่ต้นปี",
+      "priorPeriod": "งวดเดียวกันปีก่อน",
+      "priorYearToDate": "ตั้งแต่ต้นปีก่อน",
+      "balance": "ณ วันที่",
+      "priorYearEnd": "สิ้นปีก่อน"
+    },
+    "tb": {
+      "opening": "ยอดยกมา",
+      "movement": "ระหว่างงวด",
+      "closing": "ยอดยกไป",
+      "debit": "เดบิต",
+      "credit": "เครดิต"
+    },
+    "section": {
+      "income": "รายได้",
+      "expense": "ค่าใช้จ่าย",
+      "asset": "สินทรัพย์",
+      "liability": "หนี้สิน",
+      "equity": "ส่วนของผู้ถือหุ้น"
+    },
+    "total": "รวม{{label}}",
+    "result": {
+      "netIncome": "กำไร (ขาดทุน) สุทธิ",
+      "liabilitiesAndEquity": "รวมหนี้สินและส่วนของผู้ถือหุ้น",
+      "total": "รวม"
+    },
+    "earnings": {
+      "CYE": "กำไรปีปัจจุบัน",
+      "PYE": "กำไรสะสมปีก่อนที่ยังไม่ปิดบัญชี"
+    },
+    "noLines": "ไม่มีรายการในงวดนี้",
+    "cards": {
+      "totalIncome": "รายได้รวม",
+      "totalExpense": "ค่าใช้จ่ายรวม",
+      "netIncome": "กำไรสุทธิ",
+      "netLoss": "ขาดทุนสุทธิ",
+      "netIncomeYtd": "กำไรสุทธิตั้งแต่ต้นปี",
+      "netLossYtd": "ขาดทุนสุทธิตั้งแต่ต้นปี",
+      "totalAssets": "สินทรัพย์รวม",
+      "totalLiabilities": "หนี้สินรวม",
+      "totalEquity": "ส่วนของผู้ถือหุ้นรวม",
+      "withEarnings": "รวมกำไรปีปัจจุบัน",
+      "balanceCheck": "ตรวจสอบความสมดุล",
+      "totalDebit": "เดบิตรวม",
+      "totalCredit": "เครดิตรวม",
+      "difference": "ผลต่าง",
+      "closingAt": "ยอดคงเหลือ ณ {{date}}"
+    },
+    "status": {
+      "balanced": "สมดุล",
+      "outOfBalance": "ไม่สมดุล"
+    },
+    "errors": {
+      "required": "กรุณาระบุวันที่",
+      "range": "วันที่สิ้นสุดอยู่ก่อนวันที่เริ่มต้น"
+    },
+    "ledger": {
+      "title": "บัญชีแยกประเภท",
+      "account": "บัญชี",
+      "period": "งวด",
+      "opening": "ยอดยกมา",
+      "debits": "เดบิต",
+      "credits": "เครดิต",
+      "closing": "ยอดยกไป",
+      "date": "วันที่",
+      "journal": "สมุดรายวัน",
+      "description": "รายละเอียด",
+      "source": "ที่มา",
+      "debit": "เดบิต",
+      "credit": "เครดิต",
+      "balance": "ยอดคงเหลือ",
+      "close": "ปิด",
+      "dr": "Dr",
+      "cr": "Cr",
+      "none": "ไม่มีรายการในงวดนี้"
+    }
+  },
   "salesMarketing": {
     "newProspect": "New prospect",
     "requestQuotes": "Request quotes from insurers",

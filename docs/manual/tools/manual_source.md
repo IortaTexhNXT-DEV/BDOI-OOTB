@@ -1395,7 +1395,7 @@ Accounts > Period End holds the fiscal calendar and the closing work of Accounti
 | Month-End Close | Run the month-end steps and checklist for a period and send the close for approval. |
 | Year-End Close | Close income and expense to retained earnings and carry the balances into the next year. |
 | Recurring Journals | Keep templates for journals that repeat every month, and accruals that reverse on day 1 of the next period. |
-| Financial Statements | Income statement, balance sheet and trial balance for any dates. |
+| Financial Statements | Income statement, balance sheet and trial balance of a fiscal period or any dates, with the general ledger of each account. |
 
 The close checklist items are maintained on Master > Finance > Close Checklist.
 
@@ -1509,13 +1509,23 @@ Reverse the close (Accounting Manager, with a reason) reverses the closing entri
 
 ![Accounts > Period End > Financial Statements: income statement](pe-statements)
 
-Financial Statements offers three tabs for the From date and To date you choose:
+Financial Statements has three tabs: Income Statement, Balance Sheet and Trial Balance. Choose the **Fiscal year**, the **Period** and the **View**; the screen opens on the period of today.
 
-- Income Statement: current period, year to date, prior year period and prior year to date, grouped into revenue, cost of services and operating expenses, with net income.
-- Balance Sheet: balances at the To date against the prior year end.
-- Trial Balance: opening, movement and closing balance per account.
+| View | Covers |
+|---|---|
+| Month | The period. |
+| Quarter | From the first day of the fiscal quarter to the end of the period. |
+| Year to date | From the first day of the fiscal year to the end of the period. |
+| Custom range | The From and To dates you enter. |
+| Period end, Custom date (Balance Sheet) | The balances as of the end of the period, or as of the date you enter. |
 
-Export downloads the statement. The same statements are reports under Reports > Financial Reports (Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail), where you can also produce them as PDF on the company letterhead.
+The cards above the statement follow the tab: total income, total expenses, net income (or net loss) and the year to date for the income statement; total assets, total liabilities, total equity and the balance check for the balance sheet; total debits, total credits and the difference of the closing balances for the trial balance.
+
+- Income Statement: this period, year to date, same period last year and last year to date, grouped into revenue, cost of services and operating expenses, with net income (loss). An expense credited in the period, such as a commission clawback or the reversal of an earlier month's entry, shows in parentheses.
+- Balance Sheet: balances as of the date against the previous year end. Income and expense not yet closed show under equity as current year earnings (and earnings of prior years not yet closed). The opening balances loaded at go-live are included.
+- Trial Balance: opening, movement and closing debit and credit per account.
+
+Select an account to open its general ledger for the period: opening balance, each posting with its journal, running balance and closing balance. **Export** saves the statement as an Excel workbook or a PDF document with the company name, the period and who printed it and when; **Print** prints the same PDF. The same statements are reports under Reports > Financial Reports (Income Statement, Balance Sheet, Trial Balance Movement, General Ledger Detail).
 
 # Tax
 

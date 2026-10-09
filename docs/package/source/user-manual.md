@@ -2369,7 +2369,7 @@ Choose Accounts > Tax > CAS Books and Documents.
 | Month-End Close | Run the month-end steps and checklist of a period and submit the close for approval. |
 | Year-End Close | Close income and expense to retained earnings and carry the balances into the next year. |
 | Recurring Journals | Keep templates for journals that repeat and accruals that reverse on day 1 of the next period. |
-| Financial Statements | Income statement, balance sheet and trial balance for any dates; **Export**. |
+| Financial Statements | Income statement, balance sheet and trial balance of a fiscal period (month, quarter, year to date) or any dates; general ledger of each account; **Export** (Excel, PDF), **Print**. |
 
 ![Accounts > Period End > Period Management](/home/user/BDOI-OOTB/docs/package/source/manual-images/a-pe-periods.png)
 

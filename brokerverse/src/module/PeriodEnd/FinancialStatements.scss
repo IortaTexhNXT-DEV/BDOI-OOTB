@@ -1,0 +1,267 @@
+@import "../../theme/bdoi/tokens";
+
+// Accounts > Period End > Financial Statements
+.fs-page {
+  .fs-tabs {
+    margin-top: 16px;
+  }
+
+  .fs-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 12px 16px;
+    margin-top: 0;
+  }
+
+  .fs-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 9rem;
+
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: $color-text-muted;
+    }
+
+    .p-dropdown,
+    .p-calendar {
+      width: 100%;
+    }
+
+    &--period {
+      width: 13rem;
+    }
+
+    &--view {
+      width: 11rem;
+    }
+
+    &--date {
+      width: 11rem;
+    }
+  }
+
+  .fs-refresh {
+    align-self: flex-end;
+    margin-left: auto;
+  }
+
+  // amounts need room: one card per row on a phone
+  .fs-cards {
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    margin: 16px 0 0;
+  }
+
+  .fs-card-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 16px;
+    margin-bottom: 12px;
+  }
+
+  .fs-card-title {
+    margin: 0;
+    font-family: $font-heading;
+    font-size: 18px;
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  .fs-card-period {
+    font-size: 13px;
+    color: $color-text-muted;
+  }
+
+  .fs-scroll {
+    overflow-x: auto;
+  }
+}
+
+.fs-period-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+.fs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  color: $color-text;
+
+  th,
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid $color-border;
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  thead th {
+    font-size: 13px;
+  }
+
+  .fs-account-col {
+    min-width: 16rem;
+  }
+
+  .fs-colgroup {
+    text-align: center;
+  }
+
+  // the trial balance has six amount columns
+  &--wide {
+    font-size: 13px;
+
+    th,
+    td {
+      padding: 8px 10px;
+    }
+  }
+
+  // amount columns take the width of their figures (a heading may wrap); the account column the rest
+  .num {
+    width: 1%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  td.num {
+    white-space: nowrap;
+  }
+
+  .fs-col-label,
+  .fs-col-dates {
+    display: block;
+  }
+
+  // a long column label wraps rather than narrowing the account column
+  .fs-col-label {
+    max-width: 8.5rem;
+    margin-left: auto;
+  }
+
+  .fs-col-dates {
+    font-size: 12px;
+    font-weight: 400;
+    white-space: nowrap;
+    opacity: 0.85;
+  }
+
+  .fs-section th {
+    padding-top: 14px;
+    font-family: $font-heading;
+    font-weight: 700;
+    color: $brand-navy;
+    background: $color-surface-muted;
+  }
+
+  .fs-group th {
+    font-weight: 700;
+    color: $color-heading;
+  }
+
+  .fs-line .fs-account-col {
+    padding-left: 28px;
+  }
+
+  .fs-subtotal td {
+    font-weight: 600;
+    color: $color-heading;
+    border-top: 1px solid $color-border-strong;
+  }
+
+  .fs-total td {
+    font-weight: 700;
+    color: $color-heading;
+    border-top: 1px solid $color-border-strong;
+  }
+
+  .fs-result td {
+    font-weight: 800;
+    color: $color-heading;
+    border-top: 2px solid $color-heading;
+    border-bottom: 3px double $color-heading;
+  }
+
+  .fs-empty td {
+    padding: 24px 12px;
+    text-align: center;
+    color: $color-text-muted;
+  }
+
+  .fs-account {
+    display: inline-flex;
+    gap: 12px;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: $brand-blue;
+    text-align: left;
+    cursor: pointer;
+
+    &:hover span:last-child {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: none;
+      box-shadow: $focus-ring;
+      border-radius: 2px;
+    }
+  }
+
+  .fs-code {
+    flex: 0 0 7rem;
+    color: $color-text-muted;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fs-account-text {
+    font-style: italic;
+  }
+}
+
+.fs-ledger {
+  .fs-facts {
+    display: grid;
+    grid-template-columns: minmax(14rem, 2fr) repeat(5, minmax(7.5rem, 1fr));
+    gap: 12px 20px;
+    margin: 0 0 16px;
+
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    }
+
+    div {
+      min-width: 0;
+    }
+
+    @media (max-width: 900px) {
+      .fs-fact--wide {
+        grid-column: 1 / -1;
+      }
+    }
+
+    dt {
+      font-size: 12px;
+      font-weight: 600;
+      color: $color-text-muted;
+    }
+
+    dd {
+      margin: 2px 0 0;
+      color: $color-heading;
+      font-variant-numeric: tabular-nums;
+      overflow-wrap: anywhere;
+    }
+  }
+}
