@@ -1,8 +1,9 @@
 @import "../../../theme/bdoi/fields";
 
-// Drop-down with its label above (theme/bdoi/_fields.scss); the focus class of the component changes nothing.
-.dropdown__container,
-.dropdown__container__changed {
+// Drop-down with its label above (theme/bdoi/_fields.scss); the focus class of the component changes nothing. Screens
+// also use "dropdown__container" as a class of their own drop-downs: only the field of this component is restyled.
+.dropdown__container:has(> .dropdown__field),
+.dropdown__container__changed:has(> .dropdown__field) {
   @include bv-field-stack;
 
   .dropdown__field.p-dropdown {
