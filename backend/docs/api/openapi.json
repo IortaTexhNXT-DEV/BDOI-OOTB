@@ -143772,11 +143772,11 @@
     "/roles": {
       "get": {
         "operationId": "getRoles",
-        "summary": "List roles with their permissions and user counts",
+        "summary": "List roles with their permissions, user counts, department on the user form and last change (who and when)",
         "tags": [
           "User Management"
         ],
-        "description": "Front-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user",
+        "description": "Front-end touchpoint: Master > User Management > Role; User > Add / Edit\n\nAccess: Any authenticated user",
         "parameters": [],
         "responses": {
           "200": {
@@ -143811,6 +143811,24 @@
                           },
                           "users": {
                             "type": "integer"
+                          },
+                          "department": {
+                            "type": "string"
+                          },
+                          "summary": {
+                            "type": "string"
+                          },
+                          "groupOrder": {
+                            "type": "integer"
+                          },
+                          "platform": {
+                            "type": "boolean"
+                          },
+                          "modifiedBy": {
+                            "type": "string"
+                          },
+                          "modifiedAt": {
+                            "type": "string"
                           }
                         }
                       }
@@ -143821,13 +143839,19 @@
                   "success": true,
                   "data": [
                     {
-                      "id": 1,
-                      "code": "sales",
-                      "name": "Sales & Marketing (Account Executive)",
+                      "id": 9,
+                      "code": "tis-sales-associate",
+                      "name": "TIS Sales Associate",
                       "permissions": [
                         "read:leads"
                       ],
-                      "users": 3
+                      "users": 3,
+                      "department": "Sales",
+                      "summary": "Leads, clients, quotations, placements, policies, endorsements and renewals; no approvals",
+                      "groupOrder": 0,
+                      "platform": false,
+                      "modifiedBy": "BrokerVerse Administrator",
+                      "modifiedAt": "2026-10-09T08:00:00.000Z"
                     }
                   ]
                 }
@@ -143841,7 +143865,7 @@
             "$ref": "#/components/responses/Forbidden"
           }
         },
-        "x-screen": "Master > User Management > Role"
+        "x-screen": "Master > User Management > Role; User > Add / Edit"
       },
       "post": {
         "operationId": "postRoles",

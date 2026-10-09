@@ -9,6 +9,7 @@ import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { useNavigate } from "react-router-dom";
 import { InputText } from "primereact/inputtext";
+import { Checkbox } from "primereact/checkbox";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getSearchRoleMiddleware,
@@ -33,6 +34,9 @@ const RoleMaster = () => {
     }
   );
   const [search, setSearch] = useState("");
+  // the roles of the base platform (setting access.platform_roles) are listed only when asked for
+  const [showPlatform, setShowPlatform] = useState(false);
+  const rows = (search ? roleSearchList : roleTableList)?.filter((role) => showPlatform || !role.platform);
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const statusToast = useRef(null);
@@ -151,6 +155,10 @@ const RoleMaster = () => {
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
+              <div className="flex align-items-center gap-2 mt-3">
+                <Checkbox inputId="role-platform" checked={showPlatform} onChange={(e) => setShowPlatform(e.checked)} />
+                <label htmlFor="role-platform">{t("generalMasters.includePlatformRoles", "Include the base platform roles")}</label>
+              </div>
             </div>
           </div>
           <div className="col-12 ">
@@ -162,7 +170,7 @@ const RoleMaster = () => {
           >
             <div className="card">
               <DataTable
-                value={search ? roleSearchList : roleTableList}
+                value={rows}
                 style={{ overflowY: "auto", maxWidth: "100%" }}
                 responsive={true}
                 className="table__view__hierarchy"
@@ -191,13 +199,19 @@ const RoleMaster = () => {
                   className="fieldvalue_container"
                   body={(rowData) => rowData.roleName}
                 ></Column>
+                <Column
+                  field="department"
+                  header={t("generalMasters.department", "Department")}
+                  headerStyle={headerStyle}
+                  className="fieldvalue_container"
+                ></Column>
 
                 <Column
                   field="modifiedBy"
                   header="Modified By"
                   headerStyle={headerStyle}
                   className="fieldvalue_container"
-                  body={(rowData) => rowData.modifiedBy}
+                  body={(rowData) => rowData.modifiedBy || t("generalMasters.systemSetup", "System set-up")}
                 ></Column>
                 <Column
                   field="modifiedOn"

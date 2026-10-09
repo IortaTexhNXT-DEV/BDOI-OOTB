@@ -89061,7 +89061,7 @@
       "name": "User Management",
       "item": [
         {
-          "name": "List roles with their permissions and user counts",
+          "name": "List roles with their permissions, user counts, department on the user form and last change (who and when)",
           "request": {
             "method": "GET",
             "header": [],
@@ -89074,7 +89074,7 @@
                 "roles"
               ]
             },
-            "description": "List roles with their permissions and user counts\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user"
+            "description": "List roles with their permissions, user counts, department on the user form and last change (who and when)\n\nFront-end touchpoint: Master > User Management > Role; User > Add / Edit\n\nAccess: Any authenticated user"
           },
           "response": [
             {
@@ -89091,7 +89091,7 @@
                     "roles"
                   ]
                 },
-                "description": "List roles with their permissions and user counts\n\nFront-end touchpoint: Master > User Management > Role\n\nAccess: Any authenticated user"
+                "description": "List roles with their permissions, user counts, department on the user form and last change (who and when)\n\nFront-end touchpoint: Master > User Management > Role; User > Add / Edit\n\nAccess: Any authenticated user"
               },
               "status": "OK",
               "code": 200,
@@ -89103,7 +89103,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 1,\n      \"code\": \"sales\",\n      \"name\": \"Sales & Marketing (Account Executive)\",\n      \"permissions\": [\n        \"read:leads\"\n      ],\n      \"users\": 3\n    }\n  ]\n}"
+              "body": "{\n  \"success\": true,\n  \"data\": [\n    {\n      \"id\": 9,\n      \"code\": \"tis-sales-associate\",\n      \"name\": \"TIS Sales Associate\",\n      \"permissions\": [\n        \"read:leads\"\n      ],\n      \"users\": 3,\n      \"department\": \"Sales\",\n      \"summary\": \"Leads, clients, quotations, placements, policies, endorsements and renewals; no approvals\",\n      \"groupOrder\": 0,\n      \"platform\": false,\n      \"modifiedBy\": \"BrokerVerse Administrator\",\n      \"modifiedAt\": \"2026-10-09T08:00:00.000Z\"\n    }\n  ]\n}"
             }
           ]
         },

@@ -2337,8 +2337,7 @@
     "displayName": "Display Name",
     "password": "Password",
     "roles": "Roles",
-    "standardRoles": "Standard roles",
-    "roleGroup": "{{group}} roles",
+    "otherRoles": "Other roles",
     "searchRoles": "Search roles",
     "rolesSelected": "{{count}} selected",
     "noRolesMatch": "No role matches the search",
@@ -2435,7 +2434,10 @@
     "replaceLogo": "Replace logo",
     "uploadLogo": "Upload logo",
     "removeLogo": "Remove",
-    "policyTypeMaster": "Policy Type"
+    "policyTypeMaster": "Policy Type",
+    "department": "Department",
+    "systemSetup": "System set-up",
+    "includePlatformRoles": "Include the base platform roles"
   },
   "agent": {
     "createQuote": "Create Quote",

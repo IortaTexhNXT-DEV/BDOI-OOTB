@@ -24006,17 +24006,23 @@
     ""updatedAt"": ""2026-09-28T00:00:00.000Z""
   }
 }"
-1198,User Management,GET,/api/roles,List roles with their permissions and user counts,Master > User Management > Role,Bearer JWT,Any authenticated user,,"{
+1198,User Management,GET,/api/roles,"List roles with their permissions, user counts, department on the user form and last change (who and when)",Master > User Management > Role; User > Add / Edit,Bearer JWT,Any authenticated user,,"{
   ""success"": true,
   ""data"": [
     {
-      ""id"": 1,
-      ""code"": ""sales"",
-      ""name"": ""Sales & Marketing (Account Executive)"",
+      ""id"": 9,
+      ""code"": ""tis-sales-associate"",
+      ""name"": ""TIS Sales Associate"",
       ""permissions"": [
         ""read:leads""
       ],
-      ""users"": 3
+      ""users"": 3,
+      ""department"": ""Sales"",
+      ""summary"": ""Leads, clients, quotations, placements, policies, endorsements and renewals; no approvals"",
+      ""groupOrder"": 0,
+      ""platform"": false,
+      ""modifiedBy"": ""BrokerVerse Administrator"",
+      ""modifiedAt"": ""2026-10-09T08:00:00.000Z""
     }
   ]
 }"

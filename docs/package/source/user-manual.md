@@ -459,7 +459,7 @@ Every menu: Dashboard, Operations, Accounts, Commission, Reports, Master and Pro
 2. Enter **Username** (the user ID used to sign in), **E-mail** and **Display Name**. All three are required. The e-mail is where Forgot password? sends its code.
 3. Leave **Password** empty: the system then generates a temporary password ("Leave empty for a temporary password").
 4. Choose the **Branch**, the **Designation** and **Reporting to** (the user's manager), if your organisation uses them.
-5. Under **Roles**, tick the role or roles. A person normally holds one role. The Accounting Manager role includes Accounting. When `access.sod_enforced` is on, a combination listed on Segregation of Duties with the action Block is refused.
+5. Under **Roles**, tick the role or roles. The roles are grouped by department (Sales, Operations, Cash Control, Finance and Accounting, IT, Management), each with a one-line description; a role in no department is under **Other roles**. A person normally holds one role. The roles of the base platform (System Administrator, Sales & Marketing, Processing Team, Operations, Claims, Accounting, Accounting Manager) are not offered for a new assignment; a user who still holds one sees it under **Other roles**, where it can be unticked. The departments, the descriptions and the platform roles are the settings `access.role_groups` and `access.platform_roles` (Master > Configuration). When `access.sod_enforced` is on, a combination listed on Segregation of Duties with the action Block is refused.
 6. Select **Save**. The temporary password is shown once. Hand it to the user privately.
 
 A duplicate username is refused. At the first sign-in the user must choose a new password (Getting started).
@@ -481,7 +481,7 @@ The eye opens the user, the pencil edits the display name, e-mail and roles (a r
 
 ### Roles and role permissions
 
-**Role** lists the seven broker roles and the TISPH roles (see TISPH roles under Roles and menus). **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end, approve:quotations), which roles hold it. A role that builds on another (the Accounting Manager on Accounting, SUPERID on the System Administrator) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
+**Role** lists the TISPH roles by department, with who changed each role last and when (**System set-up** for a role that has not been changed since it was set up); tick **Include the base platform roles** to list the seven broker roles of the base platform as well (see TISPH roles under Roles and menus). **Role Permissions** shows, for each permission (for example read:receipts, write:bank-reconciliation, approve:period-end, approve:quotations), which roles hold it. A role that builds on another (the Accounting Manager on Accounting, SUPERID on the System Administrator) also has that role's permissions. **Edit roles** changes the permissions of a role; do this only with the process owner, because the menus and the server checks follow the permissions.
 
 ![Master > Users and Access > Role Permissions](/home/user/BDOI-OOTB/docs/package/source/manual-images/ad-role-permissions.png)
 

@@ -70,7 +70,7 @@ const AddUser = ({ action }) => {
       };
     }
   );
-  // Role options come from GET /roles (active roles; the value is the role code)
+  // Role options come from GET /roles (active roles; the value is the role code), with their department on this form
   const [roleOptions, setRoleOptions] = useState([]);
   useEffect(() => {
     userService
@@ -80,7 +80,8 @@ const AddUser = ({ action }) => {
           roles
             .filter((role) => role.status !== "inactive")
             .filter((role) => canGrantPrivileged() || !PRIVILEGED_ROLES.includes(role.code))
-            .map((role) => ({ label: role.name, value: role.code }))
+            .map((role) => ({ label: role.name, value: role.code, description: role.summary || role.description || undefined,
+              department: role.department || undefined, groupOrder: role.groupOrder ?? undefined, platform: !!role.platform }))
         )
       )
       .catch((error) => toastRef.current?.showToast({ severity: "error", detail: error.message }));

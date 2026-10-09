@@ -7,6 +7,15 @@
 --                                       taxpayers offices are not listed.
 --   cost-centre responsiblePerson       Master > Finance > Cost Centres: the responsible person is picked from the active
 --                                       users (the department already comes from the department master).
+--   access.role_groups                  Master > User Management > User: the roles offered, by department (Sales,
+--                                       Operations, Cash Control, Finance and Accounting, IT, Management), each with a
+--                                       one-line summary; a role in no department is offered under Other roles. The
+--                                       Role list shows the department of each role.
+--   access.platform_roles               the roles of the base platform (System Administrator, Sales & Marketing,
+--                                       Processing Team, Operations, Claims, Accounting, Accounting Manager): not offered
+--                                       for a new assignment (a user who holds one keeps it under Other roles until it is
+--                                       taken off) and left out of the Role list unless asked for. The roles themselves
+--                                       stay as they are.
 -- Idempotent.
 
 INSERT INTO app_settings(key, value, "group", label, type) VALUES
@@ -143,3 +152,30 @@ UPDATE master_types t SET fields = (
     FROM jsonb_array_elements(t.fields) WITH ORDINALITY AS x(f, ord)),
   updated_at = now()
 WHERE t.code = 'cost-centre' AND t.fields @> '[{"name":"responsiblePerson"}]' AND NOT t.fields @> '[{"name":"responsiblePerson","optionsFrom":"user"}]';
+
+INSERT INTO app_settings(key, value, "group", label, type) VALUES
+ ('access.role_groups', $j$[
+  {"name": "Sales", "roles": [
+    {"code": "tis-sales-associate", "summary": "Leads, clients, quotations, placements, policies, endorsements and renewals; no approvals"},
+    {"code": "tis-sales-officer", "summary": "As the Sales Associate, plus lead allocation, campaigns and approving the work of others"},
+    {"code": "tis-sales-unit-head", "summary": "As the Sales Officer, plus telesales incentives and supplier invoice approval"}]},
+  {"name": "Operations", "roles": [
+    {"code": "tis-ops-associate", "summary": "Placements, policies, endorsements, renewals and claims; no approvals"},
+    {"code": "tis-ops-officer", "summary": "As the Operations Associate, plus reading journal vouchers and fixed assets"},
+    {"code": "tis-ops-unit-head", "summary": "As the Operations Officer, plus approving quotations, placements, renewals and claims"}]},
+  {"name": "Cash Control", "roles": [
+    {"code": "tis-ccd-pdu", "summary": "Post-dated cheques: encoding, acknowledgement, deposit and cancellation"},
+    {"code": "tis-ccd-pdc", "summary": "Post-dated cheques and auto-debit arrangements"},
+    {"code": "tis-ccd-bp", "summary": "Official and acknowledgement receipts, bills payment and QRPh; no reversals"},
+    {"code": "tis-ccd-recon", "summary": "Payment reconciliation, reversals and adjustments, bank and insurer statements"}]},
+  {"name": "Finance and Accounting", "roles": [
+    {"code": "tis-finance", "summary": "Disbursements, journal vouchers, payables, fixed assets, commission, remittance and period end"}]},
+  {"name": "IT", "roles": [
+    {"code": "tis-it-admin", "summary": "Users, roles, settings, reference masters and interfaces; no business transactions"},
+    {"code": "tis-superid", "summary": "User acceptance testing only: includes the System Administrator"}]},
+  {"name": "Management", "roles": [
+    {"code": "tis-general-manager", "summary": "Front office with every approval; reads accounting and the audit trail"}]}
+ ]$j$, 'access', 'Roles offered on the user form by department, each with a one-line summary (a role in no department is offered under Other roles)', 'json'),
+ ('access.platform_roles', '["system-admin", "sales", "processing", "operations", "claims", "accounting", "accounting-manager"]', 'access',
+  'Roles of the base platform: not offered for a new assignment on the user form and left out of the Role list unless asked for', 'json')
+ON CONFLICT (key) DO NOTHING;
