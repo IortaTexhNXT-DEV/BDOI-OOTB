@@ -1,130 +1,52 @@
-import { Card } from "primereact/card";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import PropTypes from "prop-types";
 import { useTranslation } from "react-i18next";
-import { TabView, TabPanel } from "primereact/tabview";
-import ClientListingViewPolicyTable from "./ClientListingViewPolicyTable";
-import ClientListingViewClaimTable from "./ClientListingViewClaimTable";
-import ClientListingViewRenewalTable from "./ClientListingViewRenewaleTable";
-import ClientListingViewEndorsementTable from "./ClientListingViewEndorsementTable";
+import { TabPanel, TabView } from "primereact/tabview";
+import ActivityPanel from "../../../../components/SalesActivities/ActivityPanel";
+import { AuditTimeline } from "../../../../components/AuditTrail";
+import { SectionCard } from "../../../../components/RecordPage";
+import { ClaimTab, DocumentTab, EndorsementTab, PolicyTab, QuotationTab, ReceiptTab, RenewalTab } from "./ClientRecordTables";
 
-import "../../clientView/index.scss";
-import SvgLeftArrow from "../../../../assets/agentIcon/SvgLeftArrow";
-import { useNavigate } from "react-router-dom";
-import clientService from "../../../../services/clientService";
-import logger from "../../../../utility/logger";
+const TABS = ["policies", "quotations", "claims", "renewals", "endorsements", "receipts", "documents", "activity", "history"];
 
-const ClientListingCard = ({ action, clientId, onClient }) => {
+/** Tabs of the client view, each with its record count; a tab's table is loaded when the tab is first opened. */
+const ClientTabs = ({ clientId, leadId, counts, onOnboarding }) => {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-  const [clientName, setClientName] = useState(t("clientView.clientDetails"));
-  const [isLoadingClient, setIsLoadingClient] = useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchClientDetails = async () => {
-      if (!clientId) {
-        setClientName(t("clientView.clientDetails"));
-        return;
-      }
-
-      // Check if clientId is a valid format (not empty string, not just whitespace)
-      if (typeof clientId === "string" && clientId.trim() === "") {
-        setClientName(t("clientView.clientDetails"));
-        return;
-      }
-
-      setIsLoadingClient(true);
-
-      try {
-        const response = await clientService.getClientById(clientId);
-
-        if (!isMounted) {
-          return;
-        }
-
-        if (response.success && response.data) {
-          const payload = response.data?.data || response.data;
-          onClient?.(payload?.client || payload);
-
-          const firstName =
-            payload?.firstName || payload?.client?.firstName || null;
-          const lastName =
-            payload?.lastName || payload?.client?.lastName || null;
-
-          const fullName = [firstName, lastName]
-            .filter(Boolean)
-            .join(" ")
-            .trim();
-
-          const fallbackName =
-            payload?.preferredName ||
-            payload?.name ||
-            payload?.clientName ||
-            payload?.insuredName ||
-            payload?.companyName ||
-            null;
-
-          setClientName(fullName || fallbackName || t("clientView.clientDetails"));
-        } else {
-          setClientName(t("clientView.clientDetails"));
-        }
-      } catch (error) {
-        if (isMounted) {
-          logger.error("Failed to load client details:", error);
-          logger.error("Error details:", {
-            message: error.message,
-            name: error.name,
-            stack: error.stack,
-          });
-          setClientName(t("clientView.clientDetails"));
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoadingClient(false);
-        }
-      }
-    };
-
-    fetchClientDetails();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [clientId]);
-
-  const handleClientNavigation = () => {
-    navigate("/agent/clientlisting");
+  const [active, setActive] = useState(0);
+  const [opened, setOpened] = useState([0]);
+  const header = (key) => (counts && counts[key] !== undefined ? `${t(`client360.tabs.${key}`)} (${counts[key]})` : t(`client360.tabs.${key}`));
+  const body = (key) => {
+    switch (key) {
+      case "policies": return <PolicyTab clientId={clientId} />;
+      case "quotations": return <QuotationTab clientId={clientId} leadId={leadId} />;
+      case "claims": return <ClaimTab clientId={clientId} />;
+      case "renewals": return <RenewalTab clientId={clientId} />;
+      case "endorsements": return <EndorsementTab clientId={clientId} />;
+      case "receipts": return <ReceiptTab clientId={clientId} />;
+      case "documents": return <DocumentTab clientId={clientId} onOnboarding={onOnboarding} />;
+      case "activity": return <ActivityPanel entity="client" recordId={String(clientId)} />;
+      default: return <AuditTimeline entity="client" recordId={clientId} />;
+    }
   };
   return (
-    <div className="client__listing__card__container mt-4">
-      <Card style={{ borderRadius: "20px" }}>
-        <div
-          onClick={handleClientNavigation}
-          className="cursor-pointer arrow__outer"
-        >
-          <SvgLeftArrow />
-          <div className="carson__style">
-            {isLoadingClient ? t("clientView.loading") : clientName}
-          </div>
-        </div>
-        <TabView>
-          <TabPanel header={t("clientView.tabPolicy")} className="policy__header">
-            <ClientListingViewPolicyTable action={action} clientId={clientId} />
+    <SectionCard className="client360-tabs">
+      <TabView activeIndex={active} scrollable onTabChange={(e) => { setActive(e.index); setOpened((o) => (o.includes(e.index) ? o : [...o, e.index])); }}>
+        {TABS.map((key, i) => (
+          <TabPanel key={key} header={header(key)}>
+            {opened.includes(i) ? body(key) : null}
           </TabPanel>
-          <TabPanel header={t("clientView.tabClaim")} className="policy__header">
-            <ClientListingViewClaimTable clientId={clientId} />
-          </TabPanel>
-          <TabPanel header={t("clientView.tabRenewal")} className="policy__header">
-            <ClientListingViewRenewalTable clientId={clientId} />
-          </TabPanel>
-          <TabPanel header={t("clientView.tabEndorsement")} className="policy__header">
-            <ClientListingViewEndorsementTable clientId={clientId} />
-          </TabPanel>
-        </TabView>
-      </Card>
-    </div>
+        ))}
+      </TabView>
+    </SectionCard>
   );
 };
 
-export default ClientListingCard;
+ClientTabs.propTypes = {
+  clientId: PropTypes.string.isRequired,
+  leadId: PropTypes.string,
+  counts: PropTypes.object,
+  onOnboarding: PropTypes.func.isRequired,
+};
+ClientTabs.defaultProps = { leadId: null, counts: null };
+
+export default ClientTabs;

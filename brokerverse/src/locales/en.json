@@ -5313,6 +5313,124 @@
     "noEndorsementsFound": "No endorsements found",
     "reminder": "Reminder"
   },
+  "client360": {
+    "back": "All clients",
+    "type": {
+      "individual": "Individual",
+      "corporate": "Corporate"
+    },
+    "figures": {
+      "activePolicies": "Active policies",
+      "ofPolicies": "{{count}} policies in all",
+      "premium": "Premium in force",
+      "premiumNote": "gross, active policies",
+      "openClaims": "Open claims",
+      "ofClaims": "{{count}} claims in all",
+      "renewalsDue": "Renewals due",
+      "nextExpiry": "next expiry {{date}}",
+      "noneDue": "none open",
+      "outstanding": "Outstanding balance",
+      "overdue": "{{count}} bills overdue",
+      "overdue_one": "{{count}} bill overdue",
+      "overdue_other": "{{count}} bills overdue",
+      "noOverdue": "nothing overdue"
+    },
+    "tabs": {
+      "policies": "Policies",
+      "quotations": "Quotations",
+      "claims": "Claims",
+      "renewals": "Renewals",
+      "endorsements": "Endorsements",
+      "receipts": "Receipts",
+      "documents": "Documents",
+      "activity": "Activity",
+      "history": "History"
+    },
+    "search": {
+      "policies": "Policy number, product or insurer",
+      "quotations": "Quotation number, product or insurer",
+      "claims": "Claim or policy number",
+      "renewals": "Policy or renewal number",
+      "endorsements": "Endorsement or policy number",
+      "receipts": "Receipt or policy number",
+      "documents": "Document or file name"
+    },
+    "empty": {
+      "policies": "No policies for this client",
+      "quotations": "No quotations for this client",
+      "claims": "No claims for this client",
+      "renewals": "No renewals for this client",
+      "endorsements": "No endorsements for this client",
+      "receipts": "No receipts for this client",
+      "documents": "No KYC documents",
+      "documentsText": "Identification and other due diligence documents are uploaded on the onboarding screen."
+    },
+    "col": {
+      "policy": "Policy",
+      "productInsurer": "Product / insurer",
+      "period": "Period of cover",
+      "premium": "Gross premium",
+      "status": "Status",
+      "payment": "Payment",
+      "actions": "Actions",
+      "quotation": "Quotation",
+      "created": "Created",
+      "claim": "Claim / policy",
+      "loss": "Date / cause of loss",
+      "reported": "Reported",
+      "estimate": "Estimate",
+      "expiry": "Expiry",
+      "currentPremium": "Current premium",
+      "renewalPremium": "Renewal premium",
+      "endorsement": "Endorsement / policy",
+      "type": "Type",
+      "effective": "Effective",
+      "premiumChange": "Premium change",
+      "receipt": "Receipt",
+      "date": "Date",
+      "mode": "Payment mode",
+      "amount": "Amount",
+      "document": "Document",
+      "relatesTo": "Relates to",
+      "uploaded": "Uploaded"
+    },
+    "action": {
+      "viewPolicy": "View policy",
+      "reportClaim": "Report a claim",
+      "renew": "Renew",
+      "endorse": "Endorse",
+      "viewQuotation": "View quotation",
+      "openPolicy": "Open policy",
+      "viewClaim": "View claim",
+      "continueClaim": "Continue claim",
+      "claimHistory": "Claim history",
+      "continueRenewal": "Continue renewal",
+      "viewEndorsement": "View endorsement",
+      "openDocument": "Open document"
+    },
+    "endorseHeader": "Endorse {{policy}}",
+    "endorseHint": "Choose what the endorsement changes.",
+    "endorsementNoPolicy": "This endorsement has no policy reference.",
+    "downloadFailed": "The document could not be opened",
+    "endorsementType": {
+      "personal-details": "Personal details",
+      "motor-details": "Vehicle details",
+      "coverage": "Cover",
+      "cancellation": "Cancellation"
+    },
+    "paymentMode": {
+      "cash": "Cash",
+      "cheque": "Cheque",
+      "bank-transfer": "Bank transfer",
+      "card": "Card",
+      "online": "Online"
+    },
+    "related": {
+      "client": "Client",
+      "signatory": "Signatory",
+      "beneficial-owner": "Beneficial owner"
+    }
+  },
   "collections": {
     "title": "Collections",
     "list": "Collections List"

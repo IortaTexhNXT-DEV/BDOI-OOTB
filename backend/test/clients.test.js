@@ -81,6 +81,23 @@ describe('clients', () => {
     expect(b.body.clientId).toBe(a.body.clientId);
     expect((await sales('get', `/leads/${lead.body.leadId}`)).body.status).toBe('Converted');
   });
+  it('serves the figures of the client view from its policies, claims, renewals and bills', async () => {
+    const c = (await sales('post', '/clients').send({ firstName: 'Summary', lastName: 'Client', emailId: 'summary@example.ph' })).body.data;
+    await query(`INSERT INTO policies(id, policy_number, client_id, status, inception_date, expiry_date, premium_total) VALUES
+      ('pol_cs1', 'POL-CS-1', $1, 'active', current_date - 30, current_date + 335, 12000), ('pol_cs2', 'POL-CS-2', $1, 'active', current_date - 400, current_date - 35, 8000)`, [c.id]);
+    await query(`INSERT INTO claims(claim_number, policy_id, client_id, status, loss_date, estimate_amount) VALUES
+      ('CLM-CS-1', 'pol_cs1', $1, 'in-review', current_date - 5, 5000), ('CLM-CS-2', 'pol_cs1', $1, 'settled', current_date - 50, 2000)`, [c.id]);
+    await query(`INSERT INTO renewals(renewal_number, policy_id, client_id, status, due_date, premium_old) VALUES ('RN-CS-1', 'pol_cs2', $1, 'quoted', current_date - 35, 8000)`, [c.id]);
+    await query(`INSERT INTO receivables(bill_number, policy_id, client_id, amount, balance, due_date, status) VALUES
+      ('BL-CS-1', 'pol_cs1', $1, 12000, 4500, current_date - 1, 'partial'), ('BL-CS-2', 'pol_cs2', $1, 8000, 0, current_date - 300, 'paid')`, [c.id]);
+    const r = await sales('get', `/clients/${c.clientCode}/summary`);
+    expect(r.status).toBe(200);
+    expect(r.body.data).toMatchObject({ clientId: c.id, activePolicies: 1, activePremium: 12000, openClaims: 1, openRenewals: 1, outstanding: 4500, overdueBills: 1 });
+    expect(r.body.data.counts).toMatchObject({ policies: 2, claims: 2, renewals: 1, quotations: 0 });
+    expect((await sales('get', '/clients/CL-NOPE/summary')).status).toBe(404);
+    const noClients = await persona('c.nosummary', ['tis-ccd-pdu']);
+    expect((await noClients('get', `/clients/${c.id}/summary`)).status).toBe(403);
+  });
   it('serves customer codes and enforces permissions', async () => {
     const codes = await finance('get', '/customers/codes');
     expect(codes.body.data.length).toBeGreaterThanOrEqual(10);

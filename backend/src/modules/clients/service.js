@@ -3,7 +3,7 @@ import { notFound, badRequest } from '../../lib/errors.js';
 import { SCOPE, scopeSql } from '../../lib/scope.js';
 import { assertBirthDate } from '../../lib/birthDate.js';
 import { nextDocumentNumber } from '../../lib/numbering.js';
-import { isoDate } from '../../lib/dates.js';
+import { isoDate, today } from '../../lib/dates.js';
 import { fillRegion } from '../../lib/address.js';
 import { refreshKycStatus, saveOwner, saveSignatory } from './kyc.js';
 
@@ -55,6 +55,41 @@ export async function getClient(id) {
   const r = await one(`SELECT c.*, ${POLICIES_JSON} FROM clients c WHERE c.id = $1 OR c.client_code = $1`, [id]);
   if (!r) throw notFound('Client not found');
   return r;
+}
+
+/** Claim statuses of a claim still being worked (not settled, closed or rejected). */
+const OPEN_CLAIMS = ['registered', 'in-review', 'pending-approval', 'approved'];
+
+/**
+ * Figures of the client view (Operations > Clients > client): policies in force and their premium, open claims, open
+ * renewals (not yet renewed or lapsed), the unpaid balance of the client's bills, and the number of records under each tab
+ * (quotations of the client or of the prospect it was converted from).
+ */
+export async function clientSummary(id) {
+  const c = await one('SELECT id, client_code, lead_id FROM clients WHERE id = $1 OR client_code = $1', [id]);
+  if (!c) throw notFound('Client not found');
+  const r = await one(`SELECT
+      (SELECT count(*) FROM policies p WHERE p.client_id = $1 AND p.status = 'active' AND (p.expiry_date IS NULL OR p.expiry_date >= $2::date))::int AS active_policies,
+      (SELECT COALESCE(sum(p.premium_total), 0) FROM policies p WHERE p.client_id = $1 AND p.status = 'active' AND (p.expiry_date IS NULL OR p.expiry_date >= $2::date))::numeric AS active_premium,
+      (SELECT count(*) FROM policies p WHERE p.client_id = $1)::int AS policies,
+      (SELECT count(*) FROM claims cl WHERE cl.client_id = $1 AND cl.status = ANY($3))::int AS open_claims,
+      (SELECT count(*) FROM claims cl WHERE cl.client_id = $1)::int AS claims,
+      (SELECT count(*) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1 AND rn.status <> ALL('{renewed,lapsed}'))::int AS open_renewals,
+      (SELECT min(p.expiry_date) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1 AND rn.status <> ALL('{renewed,lapsed}')) AS next_expiry,
+      (SELECT count(*) FROM renewals rn JOIN policies p ON p.id = rn.policy_id WHERE COALESCE(rn.client_id, p.client_id) = $1)::int AS renewals,
+      (SELECT COALESCE(sum(rv.balance), 0) FROM receivables rv WHERE rv.client_id = $1 AND rv.balance > 0 AND rv.status NOT IN ('paid', 'written-off'))::numeric AS outstanding,
+      (SELECT count(*) FROM receivables rv WHERE rv.client_id = $1 AND rv.balance > 0 AND rv.status NOT IN ('paid', 'written-off') AND rv.due_date < $2::date)::int AS overdue_bills,
+      (SELECT count(*) FROM quotes q WHERE (q.client_id = $1 OR q.lead_id = $4) AND q.deleted_at IS NULL)::int AS quotations,
+      (SELECT count(*) FROM endorsements e WHERE e.client_id = $1)::int AS endorsements,
+      (SELECT count(*) FROM receipts rc WHERE rc.client_id = $1)::int AS receipts,
+      (SELECT count(*) FROM client_kyc_documents d WHERE d.client_id = $1)::int AS documents`,
+  [c.id, await today(), OPEN_CLAIMS, c.lead_id]);
+  return {
+    clientId: c.id, clientCode: c.client_code,
+    activePolicies: r.active_policies, activePremium: Number(r.active_premium), openClaims: r.open_claims, openRenewals: r.open_renewals,
+    nextExpiry: r.next_expiry ? isoDate(r.next_expiry) : null, outstanding: Number(r.outstanding), overdueBills: r.overdue_bills,
+    counts: { policies: r.policies, quotations: r.quotations, claims: r.claims, renewals: r.renewals, endorsements: r.endorsements, receipts: r.receipts, documents: r.documents },
+  };
 }
 
 export async function listClients(q, pg) {

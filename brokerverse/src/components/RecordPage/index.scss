@@ -12,6 +12,7 @@
   margin-bottom: 16px;
 
   &__main {
+    flex: 1 1 24rem;
     min-width: 0;
   }
 
@@ -50,6 +51,7 @@
 
   &__actions {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
