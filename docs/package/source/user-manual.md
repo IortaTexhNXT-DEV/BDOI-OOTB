@@ -2713,7 +2713,7 @@ Choose Operations > Fleet Schedules. A fleet schedule is one motor policy coveri
 
 ![Operations > Fleet Schedules](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-fleet.png)
 
-1. Select **New fleet schedule**. Choose the **Client** and **Insurer**, the **Period from** and **Period to**, and the rates: **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury**, **Property damage**.
+1. Select **New fleet schedule**. Choose the **Client** and **Insurer** (the insurer can be chosen later, before issue), the **Period from** (today) and **Period to** (one year after the start, recalculated when the start changes, unless you change it), and the rates: **Own damage rate %**, **Acts of nature rate %**, **Excess bodily injury**, **Property damage**.
 2. Add the vehicles: **Add vehicle** for one, or **Template** and **Upload vehicles** for many (Fleet Vehicles upload template). For each vehicle enter the plate number or conduction sticker, chassis and engine numbers, make, model, year model, colour, **Vehicle class (CTPL tariff)**, usage, sum insured and mortgagee if any.
 3. Each vehicle is priced on its own: own damage and acts of nature on its sum insured, the excess liability premium, the CTPL of its class and the premium taxes. The totals show under **Vehicles on cover**.
 4. Select **Issue policy**. The policy is issued for the totals of the schedule and billed with its booking journal and commission, like any policy. At least **fleet.minimum_vehicles** vehicles are needed.
@@ -2766,20 +2766,26 @@ Choose Operations > Sales & Marketing > Comparison Reports. The comparison repor
 
 ![Operations > Sales & Marketing > Campaigns](/home/user/BDOI-OOTB/docs/package/source/manual-images/d-campaigns.png)
 
-Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force in the consent register and who have an e-mail address. Everyone else is left out and recorded with the reason.
+Choose Operations > Sales & Marketing > Campaigns. Campaigns e-mail offers only to clients and prospects whose marketing consent is in force and who have an e-mail address. Everyone else is left out and recorded with the reason.
+
+### Marketing consents
+
+**Marketing consents** lists the clients and prospects with their consent: **Agreed**, **Refused**, **Withdrawn** (by an opt-out link) or **Not recorded**. Find a person by name, code or e-mail, then select **Agreed to receive offers** or **Refused offers**, choose **How the person told us** (signed form, e-mail, phone call, in person, website) and enter the **Evidence**. The new record replaces the one in force; a campaign reaches only the people marked Agreed.
 
 ### Segments
 
 1. Open **Segments** and select **New segment**.
-2. Choose **Who** (clients, prospects or both) and narrow the audience by **Line of business**, **Province**, **City / municipality**, **Distribution channel**, **Client type**, **Prospect status** and **Policy expiring within (days)**.
+2. Choose **Who** (clients, prospects or both) and narrow the audience by **Line of business**, **Product** (clients insured for the product, prospects interested in it), **Province**, **City / municipality**, **Distribution channel**, **Client type**, **Prospect status** and **Policy expiring within (days)**.
 3. Select **Who is reached**. The preview shows how many match, how many are reachable and how many are **Left out because** of a missing or withdrawn consent or a missing e-mail.
 4. Select **Save**.
 
 ### Templates
 
-1. Open **Templates** and select **New template**. Enter the **Code**, **Name**, **Subject** and the **Message (HTML)**.
-2. Use the placeholders {{firstName}}, {{fullName}}, {{companyName}} and {{optOutLink}}. A template without an opt-out link gets the unsubscribe paragraph of **campaigns.opt_out_text** added at the end.
-3. **Preview** shows the template filled in for a sample recipient.
+1. Open **Templates** and select **New template**. Enter the **Code**, **Name** and **Subject** ({{firstName}} in the subject is replaced by the recipient's first name).
+2. Write the **Message**. The toolbar sets bold, italic, underline, bulleted and numbered lists and links; **HTML source** shows the HTML. **Insert** places the recipient's **First name**, **Full name**, our **Company name** or the **Opt-out link** where the cursor is. A message without an opt-out link gets the unsubscribe paragraph of **campaigns.opt_out_text** added at the end; the screen warns about it.
+3. **Preview** shows the e-mail as the recipient receives it, in the e-mail layout of the theme (Master > System Configuration > E-mail Layout), for a sample recipient, before or after the template is saved.
+
+The templates delivered are the Motor renewal reminder, Motor insurance for new Toyota owners, the Personal Accident offer and Credit Life information.
 
 ### Send a campaign and read the results
 

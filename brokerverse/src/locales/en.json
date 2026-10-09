@@ -10066,8 +10066,7 @@
       "noneExcluded": "Nobody is left out",
       "leftOut": "Left out because",
       "people": "People",
-      "body": "Message (HTML)",
-      "placeholders": "Placeholders: {{firstName}}, {{fullName}}, {{companyName}}, {{optOutLink}}. Without an opt-out link an unsubscribe paragraph is added.",
+      "placeholders": "The buttons insert the recipient's first name, full name, our company name and the opt-out link where the cursor is.",
       "window": "Quoted and insured count the quotations and policies of recipients within {{days}} days of sending.",
       "recipient": "Recipient",
       "email": "E-mail",
@@ -10086,6 +10085,42 @@
         "both": "Clients and prospects",
         "client": "Clients",
         "lead": "Prospects"
+      },
+      "segmentRequired": "Choose the segment",
+      "templateRequired": "Choose the template",
+      "subjectRequired": "Enter the subject of the e-mail",
+      "bodyRequired": "Write the message",
+      "channelRequired": "Choose how the person told us",
+      "ph": {
+        "firstName": "First name",
+        "fullName": "Full name",
+        "companyName": "Company name",
+        "optOutLink": "Opt-out link"
+      },
+      "consents": "Marketing consents",
+      "consentsHelp": "A campaign reaches only the clients and prospects whose agreement to receive offers is recorded here. Record what the person told us and how (the signed form, a call, an e-mail).",
+      "consentSearch": "Name, code or e-mail",
+      "consent": "Consent",
+      "consentHow": "How",
+      "recordedAt": "Recorded",
+      "agreed": "Agreed to receive offers",
+      "refused": "Refused offers",
+      "product": "Product",
+      "productHelp": "Clients insured for the product, prospects interested in it",
+      "recordConsents": "Record the consents people gave on the Marketing consents tab.",
+      "subjectHelp": "{{firstName}} in the subject is replaced by the recipient's first name",
+      "message": "Message",
+      "noOptOut": "The message has no opt-out link: the unsubscribe paragraph is added at the end of every e-mail. Use Opt-out link to place it yourself.",
+      "previewHelp": "Shown for a sample recipient, Maria Santos; the opt-out link of each e-mail is personal to its recipient.",
+      "consentChannel": "How the person told us",
+      "evidence": "Evidence",
+      "evidenceHelp": "The signed form, the call or the e-mail",
+      "channels": {
+        "Form": "Signed form",
+        "E-mail": "E-mail",
+        "Phone": "Phone call",
+        "In person": "In person",
+        "Website": "Website"
       }
     },
     "home": {
@@ -10567,7 +10602,11 @@
       "done": "Done",
       "running": "Running",
       "pending": "Pending",
-      "paid": "Paid"
+      "paid": "Paid",
+      "granted": "Agreed",
+      "refused": "Refused",
+      "withdrawn": "Withdrawn",
+      "not-recorded": "Not recorded"
     }
   },
   "signature": {
@@ -10744,5 +10783,19 @@
     "intro": "BIR Form 2307 for the expanded withholding tax withheld from suppliers on their invoices, one certificate per supplier and quarter. The same figures are in the QAP, the 0619-E and 1601-EQ and the 1604-E alphalist.",
     "issueAll": "Issue all certificates",
     "issuedAll": "{{count}} certificate(s) issued"
+  },
+  "editor": {
+    "linkUrl": "Address of the link (https://...)",
+    "link": "Link",
+    "toolbar": "Formatting",
+    "formatted": "Formatted text",
+    "source": "HTML source",
+    "insert": "Insert",
+    "bold": "Bold",
+    "italic": "Italic",
+    "underline": "Underline",
+    "bullets": "Bulleted list",
+    "numbers": "Numbered list",
+    "clear": "Clear formatting"
   }
 }
