@@ -1041,7 +1041,6 @@ const CoverageDetailedView = () => {
       <div className="button__component">
         <Button
           label={t("coverageDetailsReview.back")}
-          severity="help"
           text
           className="download__button"
           onClick={handleBackNavigation}
@@ -1049,7 +1048,7 @@ const CoverageDetailedView = () => {
         />
         <Button
           label={t("coverageDetailsReview.sendToInsuranceCompany")}
-          className="policy_button p-button-success"
+          className="policy_button"
           onClick={handleSendToInsuranceCompany}
           disabled={loading || !quotData || isProcessing}
           loading={isProcessing}

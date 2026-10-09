@@ -5,11 +5,12 @@
  */
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 const json = async (response, fallback) => {
   const body = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const err = new Error(body.message || `${fallback} (${response.status})`);
+    const err = new Error(apiErrorMessage(body, response.status, fallback));
     err.errors = body.errors || [];
     err.status = response.status;
     throw err;
@@ -21,7 +22,7 @@ const send = (method, body) => ({ method, headers: headers({ "Content-Type": "ap
 const blob = async (response, fallback) => {
   if (!response.ok) {
     const body = await response.json().catch(() => ({}));
-    const err = new Error(body.message || `${fallback} (${response.status})`);
+    const err = new Error(apiErrorMessage(body, response.status, fallback));
     err.errors = body.errors || [];
     throw err;
   }

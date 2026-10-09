@@ -138,7 +138,7 @@ const Workspace = () => {
         <IrTag status={st.status} />
         {draft && <Button icon="pi pi-bolt" label={t("insurerRec.autoMatch")} outlined onClick={() => run(() => service.autoMatch(st.id), (r) => t("insurerRec.autoMatched", r))} />}
         {draft && <Button icon="pi pi-send" label={t("insurerRec.submit")} onClick={() => run(() => service.submit(st.id), t("insurerRec.submitted"))} />}
-        {st.status === "submitted" && <Button icon="pi pi-check" label={t("insurerRec.approve")} severity="success" onClick={() => decide("approve")} />}
+        {st.status === "submitted" && <Button icon="pi pi-check" label={t("insurerRec.approve")} onClick={() => decide("approve")} />}
         {st.status === "submitted" && <Button icon="pi pi-times" label={t("insurerRec.reject")} severity="danger" outlined onClick={() => decide("reject")} />}
         {draft && <Button icon="pi pi-ban" label={t("insurerRec.cancelStatement")} text onClick={cancel} />}
         <Button icon="pi pi-file-excel" label="Excel" outlined onClick={() => download("xlsx")} />

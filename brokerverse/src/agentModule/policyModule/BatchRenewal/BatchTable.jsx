@@ -903,7 +903,6 @@ export default function BatchTable() {
                   label={t("batchRenewal.createBatch")}
                   icon="pi pi-plus"
                   onClick={generateBatchRenewal}
-                  className="p-button-success"
                 />
               </div>
             </>
@@ -1096,7 +1095,7 @@ export default function BatchTable() {
                     label="Generate Report"
                     icon="pi pi-file-excel"
                     onClick={generateReport}
-                    className="p-button-outlined p-button-success"
+                    className="p-button-outlined"
                     tooltip="Download batch report as Excel"
                   />
                   <Tag
@@ -1278,8 +1277,7 @@ export default function BatchTable() {
                     label="Send Renewal Notices"
                     icon="pi pi-envelope"
                     onClick={sendRenewalNotice}
-                    className="p-button-success"
-                    disabled={
+                                        disabled={
                       sendingNotices ||
                       selectedBatch.policies.filter(
                         (p) => p.isSelected && p.noticeStatus === "NotSent"

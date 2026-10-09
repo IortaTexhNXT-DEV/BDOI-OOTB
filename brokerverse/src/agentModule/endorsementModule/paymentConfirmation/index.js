@@ -233,7 +233,7 @@ const PaymentConfirmation = () => {
               )}
             />
             <div className="button_component">
-              <Button label={t("endorsement.paymentConfirmation.cancel")} severity="help" text className="download_button" onClick={handleBack} disabled={isProcessing} />
+              <Button label={t("endorsement.paymentConfirmation.cancel")} text className="download_button" onClick={handleBack} disabled={isProcessing} />
               <Button
                 label={isProcessing ? t("endorsement.paymentConfirmation.processing") : t("endorsement.paymentConfirmation.confirmRefund")}
                 className="policy__button"

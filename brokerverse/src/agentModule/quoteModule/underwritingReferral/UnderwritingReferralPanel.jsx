@@ -88,7 +88,7 @@ const UnderwritingReferralPanel = ({ quotation, onDecided }) => {
           </div>
           {referral.status === "pending" && mayDecide(referral) && (
             <div className="uw-referral__actions">
-              <Button label={t("underwritingReferral.approve")} icon="pi pi-check" className="p-button-success" onClick={() => setDecision("approve")} />
+              <Button label={t("underwritingReferral.approve")} icon="pi pi-check" onClick={() => setDecision("approve")} />
               <Button label={t("underwritingReferral.decline")} icon="pi pi-times" className="p-button-outlined p-button-danger" onClick={() => setDecision("decline")} />
             </div>
           )}

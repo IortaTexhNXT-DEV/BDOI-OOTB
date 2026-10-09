@@ -350,3 +350,5 @@ h6 {
 
 // Enterprise consistency layer (tables, page structure, forms, dialogs); see enterprise.scss.
 @import "./enterprise";
+// One look for the patterns shared by every screen, older screens included; see consistency.scss.
+@import "./consistency";

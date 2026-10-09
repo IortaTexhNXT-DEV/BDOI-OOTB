@@ -704,8 +704,7 @@ function PolicyReceipts() {
           label={t("accounts.addReceiptEdit.addInvoice")}
           icon="pi pi-plus"
           onClick={handleAddNewPayment}
-          className="p-button-success"
-          style={{ height: "40px", fontSize: "14px" }}
+                    style={{ height: "40px", fontSize: "14px" }}
         />
       </div>
       <Card>

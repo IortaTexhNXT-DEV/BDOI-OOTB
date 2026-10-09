@@ -578,8 +578,7 @@ const StatementGeneration = () => {
                 label="Generate"
                 icon="pi pi-check"
                 iconPos="right"
-                className="p-button-success"
-                onClick={handleGenerate}
+                                onClick={handleGenerate}
               />
             )}
             <Button

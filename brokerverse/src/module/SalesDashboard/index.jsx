@@ -14,6 +14,7 @@ import { useFormatCurrency } from "../../hooks/useFormatCurrency";
 import { calendarDateFormat, toDate, toIsoDate } from "../../utility/dateFormat";
 import { formatPercent } from "../../utility/numberFormat";
 import { numberLocale } from "../../utility/currencyConverter";
+import { useChartTheme } from "../../theme/chartTheme";
 import "./index.scss";
 
 /** "PendingCustomer" / "QuoteGenerated" as sentence-case text. */
@@ -21,10 +22,6 @@ export const stageLabel = (stage) => {
   const words = String(stage || "").replace(/([a-z])([A-Z])/g, "$1 $2").replace(/_/g, " ").trim().toLowerCase();
   return words ? words.charAt(0).toUpperCase() + words.slice(1) : "-";
 };
-
-const NAVY = "#004ea8";
-const BLUE = "#0072d8";
-const LIGHT = "#99c1e7";
 
 /**
  * Sales Dashboard: prospects, quotations, conversion and premium over a period, the open pipeline by stage and the
@@ -34,6 +31,7 @@ const SalesDashboard = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { formatCurrency } = useFormatCurrency();
+  const chart = useChartTheme();
   const toast = useRef(null);
   const [period, setPeriod] = useState("month");
   const [range, setRange] = useState(null);
@@ -77,25 +75,26 @@ const SalesDashboard = () => {
   ];
 
   const trend = data?.monthlyTrend || {};
+  const [barColor, prospectColor, quoteColor] = chart.series(3);
   const trendData = {
     labels: trend.labels || [],
     datasets: [
-      { type: "bar", label: t("salesDashboard.premium"), data: trend.premium || [], backgroundColor: BLUE, yAxisID: "y" },
-      { type: "line", label: t("salesDashboard.prospects"), data: trend.leads || [], borderColor: NAVY, backgroundColor: NAVY, tension: 0, yAxisID: "y1" },
-      { type: "line", label: t("salesDashboard.quotations"), data: trend.quotes || [], borderColor: LIGHT, backgroundColor: LIGHT, tension: 0, yAxisID: "y1" },
+      { type: "bar", label: t("salesDashboard.premium"), data: trend.premium || [], backgroundColor: barColor, yAxisID: "y" },
+      { type: "line", label: t("salesDashboard.prospects"), data: trend.leads || [], borderColor: prospectColor, backgroundColor: prospectColor, tension: 0, yAxisID: "y1" },
+      { type: "line", label: t("salesDashboard.quotations"), data: trend.quotes || [], borderColor: quoteColor, backgroundColor: quoteColor, tension: 0, yAxisID: "y1" },
     ],
   };
-  const trendOptions = {
+  const trendOptions = chart.options({
     maintainAspectRatio: false,
     plugins: { legend: { position: "bottom" } },
     scales: {
       y: { beginAtZero: true, ticks: { callback: (v) => money(v) } },
       y1: { beginAtZero: true, position: "right", grid: { drawOnChartArea: false }, ticks: { precision: 0 } },
     },
-  };
+  });
   const product = data?.premiumByProduct || {};
-  const productData = { labels: product.labels || [], datasets: [{ label: t("salesDashboard.premium"), data: product.data || [], backgroundColor: BLUE }] };
-  const productOptions = { indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { callback: (v) => money(v) } } } };
+  const productData = { labels: product.labels || [], datasets: [{ label: t("salesDashboard.premium"), data: product.data || [], backgroundColor: chart.primary }] };
+  const productOptions = chart.options({ indexAxis: "y", maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { beginAtZero: true, ticks: { callback: (v) => money(v) } } } });
 
   const periodText = data?.period ? `${toDate(data.period.from)?.toLocaleDateString(numberLocale())} - ${toDate(data.period.to)?.toLocaleDateString(numberLocale())}` : "";
 

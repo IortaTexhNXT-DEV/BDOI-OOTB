@@ -32,6 +32,7 @@ import SvgDropdown from "../../../assets/icons/SvgDropdown";
 import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { Toast } from "primereact/toast";
+import { Tag } from "primereact/tag";
 import clientService from "../../../services/clientService";
 import BulkUploadModal from "../BulkUploadModal";
 import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
@@ -872,26 +873,7 @@ const PolicyReceipts = () => {
                       : status === "Draft"
                       ? t("accounts.receipts.statusDraft")
                       : status;
-                  const statusColor =
-                    status === "Converted"
-                      ? "#10b981"
-                      : status === "Draft"
-                      ? "#f59e0b"
-                      : "#6b7280";
-                  return (
-                    <span
-                      style={{
-                        backgroundColor: statusColor + "20",
-                        color: statusColor,
-                        padding: "4px 8px",
-                        borderRadius: "4px",
-                        fontSize: "12px",
-                        fontWeight: "500",
-                      }}
-                    >
-                      {statusLabel}
-                    </span>
-                  );
+                  return <Tag value={statusLabel} severity={status === "Converted" ? "success" : status === "Draft" ? "warning" : "secondary"} />;
                 }}
               ></Column>
               <Column

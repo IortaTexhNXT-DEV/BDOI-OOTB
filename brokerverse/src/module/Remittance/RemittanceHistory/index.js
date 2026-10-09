@@ -115,7 +115,7 @@ const RemittanceHistory = () => {
     status: a.actionType,
     date: a.changeDate,
     icon: (ACTION_STYLE[a.actionType] || {}).icon || "pi pi-pencil",
-    color: (ACTION_STYLE[a.actionType] || {}).color || "#FF9800",
+    color: (ACTION_STYLE[a.actionType] || {}).color || "var(--color-warning)",
     description: [a.previousValue && a.newValue ? `${a.previousValue} → ${a.newValue}` : a.newValue, a.changedBy ? `by ${a.changedBy}` : null, a.reason].filter(Boolean).join(" ")
   }));
   const timelineEvents = toTimeline(lineageRecord ? auditFor(lineageRecord.referenceNo) : []);

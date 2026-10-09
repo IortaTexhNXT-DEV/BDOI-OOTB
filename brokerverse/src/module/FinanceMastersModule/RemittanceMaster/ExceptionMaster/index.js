@@ -180,7 +180,7 @@ const ExceptionMaster = () => {
             <Button
               label="Save"
               icon="pi pi-save"
-              className="p-button-sm p-button-success"
+              className="p-button-sm"
               onClick={handleSave}
               disabled={mode === "view"}
               loading={isLoading}

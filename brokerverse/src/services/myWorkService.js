@@ -1,4 +1,5 @@
 import { deleteRequest, getRequest, postRequest, putRequest } from "../utility/commonServices";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Operations > My Work API (/my-work): open items waiting on the user, their team or everyone; the per-member team
@@ -9,10 +10,9 @@ const clean = (params = {}) => Object.fromEntries(Object.entries(params).filter(
 
 /** The server's message (with the field messages of a validation error), for toasts. */
 export const errorMessage = (error, fallback) => {
-  const body = error?.response?.data || {};
-  const detail = Array.isArray(body.errors) ? body.errors.map((e) => e.message).filter(Boolean).join("; ") : "";
-  if (body.message && detail && body.message !== "Validation failed") return body.message;
-  return detail || body.message || error?.message || fallback;
+  const body = error?.response?.data;
+  if (body?.message || body?.errors) return apiErrorMessage(body, error.response.status, fallback);
+  return error?.message || fallback;
 };
 
 const data = (promise) => promise.then((r) => r.data.data);

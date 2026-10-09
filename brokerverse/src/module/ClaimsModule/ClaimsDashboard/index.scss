@@ -3,7 +3,6 @@
 
 .claims-dashboard {
   padding: 1.5rem;
-  background: #f8f9fa;
   min-height: 100vh;
 
   @include tablet-sm {
@@ -14,20 +13,9 @@
     padding: 0.75rem;
   }
 
+  // the page header of every screen: the title on the page and the actions at its right
   .dashboard-header {
-    background: white;
-    padding: 1.5rem;
-    border-radius: 8px;
     margin-bottom: 1.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-
-    @include tablet-sm {
-      padding: 1rem;
-    }
-
-    @include mobile-sm {
-      padding: 0.75rem;
-    }
 
     .header-content {
       display: flex;
@@ -42,17 +30,9 @@
 
       h2 {
         margin: 0;
-        color: #2c3e50;
-        font-size: 1.75rem;
-
-        @include tablet-sm {
-          font-size: 1.5rem;
-          text-align: center;
-        }
-
-        @include mobile-sm {
-          font-size: 1.25rem;
-        }
+        color: $color-heading;
+        font-size: 24px;
+        line-height: 32px;
       }
 
       .header-actions {
@@ -214,7 +194,7 @@
 
           .kpi-percentage {
             font-size: 0.875rem;
-            color: #28a745;
+            color: $color-text-muted;
             font-weight: 500;
 
             @include mobile-sm {

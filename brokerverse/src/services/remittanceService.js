@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 const toQuery = (params = {}) => {
   const entries = Object.entries(params).filter(([, v]) => v !== undefined && v !== null && v !== "");
@@ -7,12 +8,6 @@ const toQuery = (params = {}) => {
   const search = new URLSearchParams();
   entries.forEach(([k, v]) => search.append(k, Array.isArray(v) ? v.join(",") : v));
   return `?${search.toString()}`;
-};
-
-const errorMessage = (body, status) => {
-  const details = (body?.errors || []).map((e) => e.message).filter(Boolean).join(", ");
-  const message = body?.message || body?.error?.message || body?.error || `Request failed (${status})`;
-  return details ? `${message}: ${details}` : message;
 };
 
 /** Calls the API and returns the full JSON envelope ({ success, data, total, ... }); throws the server message on error. */
@@ -25,7 +20,7 @@ export const apiRequest = async (method, path, { body, params, form } = {}) => {
     body: form || (body === undefined ? undefined : JSON.stringify(body)),
   });
   const json = await response.json().catch(() => null);
-  if (!response.ok || json?.success === false) throw new Error(errorMessage(json, response.status));
+  if (!response.ok || json?.success === false) throw new Error(apiErrorMessage(json, response.status));
   return json;
 };
 
@@ -78,7 +73,7 @@ export const remittanceService = {
     const response = await fetch(`${BASE_URL}${R}/direct-bill/${id(dnId)}/pdf`, { headers: { ...authService.getAuthHeader() } });
     if (!response.ok) {
       const json = await response.json().catch(() => null);
-      throw new Error(errorMessage(json, response.status));
+      throw new Error(apiErrorMessage(json, response.status));
     }
     const url = URL.createObjectURL(await response.blob());
     window.open(url, "_blank", "noopener,noreferrer");

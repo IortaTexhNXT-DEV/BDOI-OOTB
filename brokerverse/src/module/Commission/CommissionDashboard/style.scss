@@ -1,10 +1,12 @@
+@import "../../../theme/bdoi/tokens";
+
 .commission-dashboard-page {
   padding: 1.5rem 2rem 2.5rem;
-  background: #f7f8fa;
+  background: $color-bg;
   min-height: 100%;
 
   .loading-msg {
-    color: #718096;
+    color: $color-text-muted;
   }
 
   .page-header {
@@ -27,28 +29,28 @@
       margin: 0 0 0.35rem;
       font-size: 1.75rem;
       font-weight: 700;
-      color: #1a202c;
+      color: $color-heading;
     }
 
     p {
       margin: 0;
-      color: #718096;
+      color: $color-text-muted;
       font-size: 0.9rem;
       line-height: 1.5;
     }
 
     .readonly-note {
-      color: #d69e2e;
+      color: $color-warning;
       font-weight: 600;
     }
 
     .view-mode-toggle {
       display: flex;
       flex-shrink: 0;
-      border: 1px solid #e2e8f0;
+      border: 1px solid $color-border;
       border-radius: 9999px;
       overflow: hidden;
-      background: #edf2f7;
+      background: $color-surface-muted;
 
       button {
         border: none;
@@ -56,13 +58,13 @@
         padding: 0.4rem 1rem;
         font-size: 0.85rem;
         font-weight: 500;
-        color: #718096;
+        color: $color-text-muted;
         cursor: pointer;
         white-space: nowrap;
 
         &.active {
-          background: #3b82f6;
-          color: #fff;
+          background: $brand-blue;
+          color: var(--bv-primary-text, #ffffff);
           font-weight: 600;
         }
       }
@@ -86,51 +88,23 @@
 
   .kpi-card {
     background: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid $color-border;
     border-radius: 10px;
     padding: 0.85rem 1rem;
-    border-left-width: 4px;
+    border-left: 4px solid $brand-blue;
     display: flex;
     flex-direction: column;
     gap: 0.35rem;
 
     .label {
       font-size: 0.78rem;
-      color: #718096;
+      color: $color-text-muted;
     }
 
     .value {
       font-size: 1.15rem;
       font-weight: 700;
-
-      &.green {
-        color: #16a34a;
-      }
-      &.red {
-        color: #e53e3e;
-      }
-      &.blue {
-        color: #2563eb;
-      }
-      &.navy {
-        color: #1e3a5f;
-      }
-    }
-
-    &.accent-green {
-      border-left-color: #22c55e;
-    }
-    &.accent-red {
-      border-left-color: #ef4444;
-    }
-    &.accent-blue {
-      border-left-color: #3b82f6;
-    }
-    &.accent-navy {
-      border-left-color: #1e3a5f;
-    }
-    &.accent-purple {
-      border-left-color: #0072d8;
+      color: $color-heading;
     }
   }
 
@@ -147,7 +121,7 @@
 
   .panel {
     background: #fff;
-    border: 1px solid #e2e8f0;
+    border: 1px solid $color-border;
     border-radius: 12px;
     padding: 1rem 1.15rem;
 
@@ -156,7 +130,7 @@
       font-size: 0.72rem;
       letter-spacing: 0.04em;
       font-weight: 700;
-      color: #718096;
+      color: $color-text-muted;
     }
   }
 
@@ -173,7 +147,7 @@
 
     .toggle {
       display: flex;
-      border: 1px solid #cbd5e0;
+      border: 1px solid $color-border-strong;
       border-radius: 9999px;
       overflow: hidden;
 
@@ -182,14 +156,14 @@
         background: transparent;
         padding: 0.25rem 0.7rem;
         font-size: 0.75rem;
-        color: #718096;
+        color: $color-text-muted;
         cursor: pointer;
 
         &.active {
-          background: #eff6ff;
-          color: #2563eb;
+          background: $brand-blue-050;
+          color: $brand-blue;
           font-weight: 600;
-          box-shadow: inset 0 0 0 1px #3b82f6;
+          box-shadow: inset 0 0 0 1px $brand-blue;
         }
       }
     }
@@ -213,20 +187,20 @@
 
     .hbar-label {
       font-size: 0.8rem;
-      color: #4a5568;
+      color: $color-text;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
 
       &.bold {
         font-weight: 700;
-        color: #1a202c;
+        color: $color-heading;
       }
     }
 
     .hbar-track {
       height: 10px;
-      background: #edf2f7;
+      background: $color-surface-muted;
       border-radius: 9999px;
       overflow: hidden;
     }
@@ -234,20 +208,14 @@
     .hbar-fill {
       height: 100%;
       border-radius: 9999px;
-
-      &.purple {
-        background: #7c3aed;
-      }
-      &.blue {
-        background: #3b82f6;
-      }
+      background: $brand-blue;
     }
 
     .hbar-value {
       text-align: right;
       font-size: 0.8rem;
       font-weight: 600;
-      color: #2d3748;
+      color: $color-text;
     }
 
     &.funnel .hbar-row {
@@ -268,7 +236,7 @@
 
     .status-label {
       font-weight: 700;
-      color: #1a202c;
+      color: $color-heading;
       font-size: 0.9rem;
     }
 
@@ -282,14 +250,14 @@
       width: 18px;
       height: 8px;
       border-radius: 2px;
-      background: #1e3a5f;
+      background: $brand-navy;
     }
 
     .status-count {
       font-weight: 700;
       min-width: 1.5rem;
       text-align: right;
-      color: #1a202c;
+      color: $color-heading;
     }
   }
 
@@ -301,13 +269,13 @@
     font-weight: 600;
 
     &.accrued {
-      background: #edf2f7;
-      color: #4a5568;
+      background: $color-surface-muted;
+      color: $color-text;
     }
 
     &.paid {
-      background: #c6f6d5;
-      color: #22543d;
+      background: $color-success-050;
+      color: $color-success;
     }
 
     &.funnel-label {
@@ -318,11 +286,11 @@
   .clawback-note {
     margin: 1rem 0 0;
     font-size: 0.78rem;
-    color: #718096;
+    color: $color-text-muted;
     line-height: 1.45;
 
     .claw-lines {
-      color: #e53e3e;
+      color: $color-danger;
     }
   }
 
@@ -379,7 +347,7 @@
         justify-content: center;
         font-size: 0.8rem;
         font-weight: 600;
-        color: #4a5568;
+        color: $color-text;
         pointer-events: none;
       }
     }
@@ -398,7 +366,7 @@
         align-items: center;
         padding: 0.35rem 0;
         font-size: 0.82rem;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid $color-border;
 
         &:last-child {
           border-bottom: none;
@@ -412,11 +380,11 @@
       }
 
       .name {
-        color: #4a5568;
+        color: $color-text;
       }
 
       .amt {
-        color: #1a202c;
+        color: $color-heading;
         font-weight: 600;
         white-space: nowrap;
       }
@@ -427,7 +395,7 @@
     .funnel-note {
       margin: 0.85rem 0 0;
       font-size: 0.78rem;
-      color: #718096;
+      color: $color-text-muted;
     }
   }
 }

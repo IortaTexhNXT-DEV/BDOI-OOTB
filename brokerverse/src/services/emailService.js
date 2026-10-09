@@ -1,5 +1,6 @@
 import authService from "./authService";
 import { BASE_URL } from "../utility/constant";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * E-mails of the quote Share dialog (/email/*). Every method resolves to
@@ -23,7 +24,7 @@ async function postUrl(url, body, fallbackError, timeoutMs = 15000) {
     });
     const json = await response.json().catch(() => ({}));
     // a validation failure names the field: show its message ("The client has no e-mail address; enter one")
-    if (!response.ok) throw new Error((Array.isArray(json.errors) && json.errors[0]?.message) || json.message || fallbackError);
+    if (!response.ok) throw new Error(apiErrorMessage(json, response.status, fallbackError));
     return { success: true, data: json };
   } catch (error) {
     return {

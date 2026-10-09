@@ -13,12 +13,14 @@ import productConfiguratorService from "../../../services/productConfiguratorSer
 import { numberLocale } from "../../../utility/currencyConverter";
 import { formatPercent } from "../../../utility/numberFormat";
 import { ConfiguratorPage, FilterBar, RowActions, StatusTag, pagingFor, productText } from "../shared/ConfiguratorPage";
+import { useChartTheme } from "../../../theme/chartTheme";
 import "./style.scss";
 
 /** Product Configurator > Dashboard: templates, what is configured and in force, and the production of the products. */
 const ProductDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
+  const chart = useChartTheme();
   const [templates, setTemplates] = useState([]);
   const [summary, setSummary] = useState(null);
   const [analytics, setAnalytics] = useState(null);
@@ -69,11 +71,11 @@ const ProductDashboard = () => {
   const performanceChart = {
     labels: trend.map((tr) => tr.month),
     datasets: [
-      { label: t("productConfiguratorDashboard.premiumMillions"), data: trend.map((tr) => tr.premium / 1000000), borderColor: "#0072d8", fill: false, yAxisID: "y1" },
-      { label: t("productConfiguratorDashboard.lossRatioPercent"), data: trend.map((tr) => tr.lossRatio), borderColor: "#fdb913", fill: false, yAxisID: "y2" },
+      { label: t("productConfiguratorDashboard.premiumMillions"), data: trend.map((tr) => tr.premium / 1000000), borderColor: chart.primary, backgroundColor: chart.primary, fill: false, yAxisID: "y1" },
+      { label: t("productConfiguratorDashboard.lossRatioPercent"), data: trend.map((tr) => tr.lossRatio), borderColor: chart.accent, backgroundColor: chart.accent, fill: false, yAxisID: "y2" },
     ],
   };
-  const chartOptions = {
+  const chartOptions = chart.options({
     responsive: true,
     interaction: { mode: "index", intersect: false },
     plugins: { legend: { position: "top" } },
@@ -81,7 +83,7 @@ const ProductDashboard = () => {
       y1: { type: "linear", position: "left", title: { display: true, text: t("productConfiguratorDashboard.premiumPhpMillions") } },
       y2: { type: "linear", position: "right", title: { display: true, text: t("productConfiguratorDashboard.lossRatioPercent") }, grid: { drawOnChartArea: false } },
     },
-  };
+  });
   const links = [
     ["templates", "pi pi-list", "/product-configurator/templates"], ["coverages", "pi pi-shield", "/product-configurator/coverages"], ["rating", "pi pi-calculator", "/product-configurator/rating"],
     ["underwriting", "pi pi-check-circle", "/product-configurator/underwriting"], ["documents", "pi pi-file", "/product-configurator/documents"],
@@ -129,7 +131,8 @@ const ProductDashboard = () => {
                 <div className="col-12 lg:col-8"><h3 className="mt-0">{t("productConfiguratorDashboard.premiumLossRatioTrend")}</h3><Chart type="line" data={performanceChart} options={chartOptions} /></div>
                 <div className="col-12 lg:col-4">
                   <h3 className="mt-0">{t("productConfiguratorDashboard.categoryDistribution")}</h3>
-                  <Chart type="doughnut" data={{ labels: categories.map(([k]) => k), datasets: [{ data: categories.map(([, c]) => c.percentage), backgroundColor: ["#0072d8", "#004ea8", "#fdb913", "#1d7f4e", "#99c1e7", "#8a5a00"] }] }} />
+                  <Chart type="doughnut" data={{ labels: categories.map(([k]) => k), datasets: [{ data: categories.map(([, c]) => c.percentage), backgroundColor: chart.series(categories.length), borderColor: chart.surface }] }}
+                    options={chart.options({})} />
                 </div>
               </div>
               <h3>{t("productConfiguratorDashboard.topPerformingProducts")}</h3>

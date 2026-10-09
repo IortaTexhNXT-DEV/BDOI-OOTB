@@ -13,6 +13,7 @@ import claimSettlementCashService from "../../../services/claimSettlementCashSer
 import { useFormatCurrency } from "../../../hooks/useFormatCurrency";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import { hasPermission } from "../../../utils/canOpen";
+import DateField from "../../../components/DateField";
 
 const PAYMENT_MODES = [
   { label: "Cheque", value: "check" },
@@ -81,7 +82,7 @@ const SettlementCash = ({ claimId }) => {
         <div className="claim__title">{t("followUps.settlementCash", "Settlement cash")}</div>
         <div className="flex gap-2">
           {canReceive && <Button icon="pi pi-download" label={t("followUps.recordFundsReceived", "Record funds received")} onClick={() => open("funds-received")} />}
-          {canPay && <Button icon="pi pi-upload" severity="success" label={t("followUps.payClaimant", "Pay claimant")} onClick={() => open("paid-to-claimant")} />}
+          {canPay && <Button icon="pi pi-upload" label={t("followUps.payClaimant", "Pay claimant")} onClick={() => open("paid-to-claimant")} />}
         </div>
       </div>
       {!pos.canRecord && <small className="block mt-2">{t("followUps.settlementNotBooked", "Cash can be recorded once the settlement through the broker is booked.")}</small>}
@@ -120,7 +121,7 @@ const SettlementCash = ({ claimId }) => {
             {dialog.kind === "paid-to-claimant" && field(t("followUps.payee", "Payee"), <InputText className="w-full" value={dialog.payee} onChange={(e) => setDialog({ ...dialog, payee: e.target.value })} />)}
             {field(dialog.kind === "funds-received" ? t("followUps.adviceReference", "Remittance advice / reference") : t("followUps.voucherReference", "Voucher / cheque number"),
               <InputText className="w-full" value={dialog.reference} onChange={(e) => setDialog({ ...dialog, reference: e.target.value })} />)}
-            {field(t("followUps.date", "Date"), <InputText className="w-full" type="date" value={dialog.date} onChange={(e) => setDialog({ ...dialog, date: e.target.value })} />)}
+            {field(t("followUps.date", "Date"), <DateField value={dialog.date} onChange={(e) => setDialog({ ...dialog, date: e.target.value })} />)}
           </div>
         )}
       </Dialog>

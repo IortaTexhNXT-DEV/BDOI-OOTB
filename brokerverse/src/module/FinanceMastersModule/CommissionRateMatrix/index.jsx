@@ -15,6 +15,7 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import numberingService from "../../../services/numberingService";
 import { formatDate } from "../../../utility/dateFormat";
+import DateField from "../../../components/DateField";
 import "../../Administration/index.scss";
 
 const POLICY_TYPES = ["any", "new", "renewal"];
@@ -250,7 +251,7 @@ const CommissionRateMatrix = () => {
           </div>
           <div className="admin__field">
             <label htmlFor="cr-t-date">{k("date")}</label>
-            <InputText id="cr-t-date" type="date" value={test.date} onChange={(e) => setTest((x) => ({ ...x, date: e.target.value }))} />
+            <DateField id="cr-t-date" value={test.date} onChange={(e) => setTest((x) => ({ ...x, date: e.target.value }))} />
           </div>
           <Button label={k("testRun")} icon="pi pi-search" onClick={runTest} className="cr__test-run" />
           </div>
@@ -306,12 +307,12 @@ const CommissionRateMatrix = () => {
               </div>
               <div className="admin__field">
                 <label htmlFor="cr-from">{k("effectiveFrom")}</label>
-                <InputText id="cr-from" type="date" value={edit.effectiveFrom} onChange={(e) => set("effectiveFrom", e.target.value)} className={errors.effectiveFrom ? "p-invalid" : undefined} />
+                <DateField id="cr-from" value={edit.effectiveFrom} onChange={(e) => set("effectiveFrom", e.target.value)} className={errors.effectiveFrom ? "p-invalid" : undefined} />
                 {errors.effectiveFrom ? <small className="dn__error">{errors.effectiveFrom}</small> : null}
               </div>
               <div className="admin__field">
                 <label htmlFor="cr-to">{k("effectiveTo")}</label>
-                <InputText id="cr-to" type="date" value={edit.effectiveTo} placeholder={k("openEnded")} onChange={(e) => set("effectiveTo", e.target.value)} className={errors.effectiveTo ? "p-invalid" : undefined} />
+                <DateField id="cr-to" value={edit.effectiveTo} placeholder={k("openEnded")} onChange={(e) => set("effectiveTo", e.target.value)} className={errors.effectiveTo ? "p-invalid" : undefined} />
                 {errors.effectiveTo ? <small className="dn__error">{errors.effectiveTo}</small> : null}
               </div>
             </div>

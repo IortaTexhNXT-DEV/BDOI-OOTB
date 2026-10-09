@@ -86,10 +86,10 @@ const MonthEndCloseRun = () => {
         {canExecute && run.executionCount > 0 && (
           <Button icon="pi pi-refresh" outlined label={t("periodEnd.recheck")} loading={busy === "recheck"} onClick={() => act("recheck", () => periodEndService.recheckRun(run.id))} />
         )}
-        {canSubmit && <Button icon="pi pi-send" severity="success" label={t("periodEnd.submitClose")} onClick={() => { setTarget(run.status === "soft-closed" ? "closed" : "closed"); setDialog({ kind: "submit" }); }} />}
+        {canSubmit && <Button icon="pi pi-send" label={t("periodEnd.submitClose")} onClick={() => { setTarget(run.status === "soft-closed" ? "closed" : "closed"); setDialog({ kind: "submit" }); }} />}
         {canApprove && run.status === "pending-approval" && (
           <>
-            <Button icon="pi pi-check" severity="success" label={t("periodEnd.approveClose")} onClick={() => setDialog({ kind: "approve" })} />
+            <Button icon="pi pi-check" label={t("periodEnd.approveClose")} onClick={() => setDialog({ kind: "approve" })} />
             <Button icon="pi pi-times" severity="danger" outlined label={t("periodEnd.reject")} onClick={() => setDialog({ kind: "reject" })} />
           </>
         )}

@@ -2,8 +2,8 @@ import React, { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
 import importService from "../../services/importService";
+import DateField from "../DateField";
 import "./index.scss";
 
 /**
@@ -71,7 +71,7 @@ const ImportDialog = ({ visible, onHide, title, targets, note, goLiveDate = fals
       {goLiveDate && (
         <div className="import-dialog__field">
           <label htmlFor="import-go-live">Go-live date (first day of live transactions)</label>
-          <InputText id="import-go-live" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <DateField id="import-go-live" value={date} onChange={(e) => setDate(e.target.value)} />
         </div>
       )}
       <div className="import-dialog__field">

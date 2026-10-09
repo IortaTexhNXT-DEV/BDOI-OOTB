@@ -17,6 +17,7 @@ import SvgDeleteIcon from "../../assets/icons/SvgDeleteIcon";
 import SvgEdit from "../../assets/icons/SvgEdits";
 import { useNavigate } from "react-router-dom"; 
 import SvgLeftArrow from "../../assets/agentIcon/SvgLeftArrow";
+import DateField from "../../components/DateField";
 
 const CQEmployeeBulkUpload = ({ action, flow, }) => {
     const { t } = useTranslation();
@@ -367,19 +368,10 @@ const CQEmployeeBulkUpload = ({ action, flow, }) => {
 
                         <div className="field">
                             <label>Date of Birth*</label>
-                            <input
-                                type="date"
+                            <DateField
                                 name="DateofBirth"
                                 value={formik.values.DateofBirth}
                                 onChange={formik.handleChange}
-                                className="w-full"
-                                style={{
-                                    padding: '10px',
-                                    borderRadius: '6px',
-                                    border: '1px solid #ccc',
-                                    fontSize: '16px',
-                                    width: '100%',
-                                }}
                             />
                             {formik.errors.DateofBirth && (
                                 <div style={{ fontSize: 12, color: 'var(--color-danger)' }}>{formik.errors.DateofBirth}</div>

@@ -14,6 +14,7 @@ import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import SvgDot from "../../../assets/icons/SvgDot";
 import postingRulesService from "../../../services/postingRulesService";
+import DateField from "../../../components/DateField";
 import "./index.scss";
 
 const money = (n) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -265,7 +266,7 @@ const PostingRules = () => {
                   <div className="grid">
                     <div className="col-12 md:col-3">
                       <label>{t("postingRules.effectiveFrom")}</label>
-                      <InputText type="date" value={edit.effectiveFrom} onChange={(e) => setEdit({ ...edit, effectiveFrom: e.target.value })} className="w-full" />
+                      <DateField value={edit.effectiveFrom} onChange={(e) => setEdit({ ...edit, effectiveFrom: e.target.value })} />
                     </div>
                     <div className="col-12 md:col-3">
                       <label>{t("postingRules.branch")}</label>

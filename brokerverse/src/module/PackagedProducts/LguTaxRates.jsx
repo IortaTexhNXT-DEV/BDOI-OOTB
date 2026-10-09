@@ -16,6 +16,7 @@ import { confirmAction, notifyError, notifySuccess } from "../../utility/dialogs
 import { formatDate } from "../../utility/dateFormat";
 import { PageHeader } from "../Placement/shared";
 import { ChargesBreakdown, PRODUCT_LINES, RULE_KINDS, RULE_METHODS, TAX_REGIMES, todayIso, usePackageOptions, lguOptions } from "./common";
+import DateField from "../../components/DateField";
 import "../Placement/index.scss";
 import "../Administration/index.scss";
 import "./index.scss";
@@ -160,8 +161,8 @@ const LguTaxRates = () => {
             <div className="admin__field"><label htmlFor="lgu-name">{k("lguName")}</label><InputText id="lgu-name" value={lgu.name} onChange={(e) => setLgu({ ...lgu, name: e.target.value })} /></div>
             <div className="admin__field"><label htmlFor="lgu-province">{k("province")}</label><InputText id="lgu-province" value={lgu.province || ""} onChange={(e) => setLgu({ ...lgu, province: e.target.value })} /></div>
             <div className="admin__field"><label htmlFor="lgu-rate">{k("rate")}</label><InputNumber inputId="lgu-rate" value={lgu.rate} suffix="%" maxFractionDigits={4} min={0} max={100} onValueChange={(e) => setLgu({ ...lgu, rate: e.value })} /></div>
-            <div className="admin__field"><label htmlFor="lgu-from">{k("effectiveFrom")}</label><InputText id="lgu-from" type="date" value={lgu.effectiveFrom || ""} onChange={(e) => setLgu({ ...lgu, effectiveFrom: e.target.value })} /></div>
-            <div className="admin__field"><label htmlFor="lgu-to">{k("effectiveTo")}</label><InputText id="lgu-to" type="date" value={lgu.effectiveTo || ""} onChange={(e) => setLgu({ ...lgu, effectiveTo: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="lgu-from">{k("effectiveFrom")}</label><DateField id="lgu-from" value={lgu.effectiveFrom || ""} onChange={(e) => setLgu({ ...lgu, effectiveFrom: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="lgu-to">{k("effectiveTo")}</label><DateField id="lgu-to" value={lgu.effectiveTo || ""} onChange={(e) => setLgu({ ...lgu, effectiveTo: e.target.value })} /></div>
             <div className="admin__field"><label htmlFor="lgu-active">{t("packagedProducts.active")}</label><InputSwitch inputId="lgu-active" checked={Boolean(lgu.active)} onChange={(e) => setLgu({ ...lgu, active: e.value })} /></div>
           </div>
         )}
@@ -191,8 +192,8 @@ const LguTaxRates = () => {
             <div className="admin__field"><label htmlFor="rule-regimes">{k("regimes")}</label><MultiSelect inputId="rule-regimes" value={rule.regimes} options={opt(TAX_REGIMES, "packagedProducts.regimes")} placeholder={k("allRegimes")} onChange={(e) => setRule({ ...rule, regimes: e.value })} /></div>
             <div className="admin__field"><label htmlFor="rule-min">{k("minimumAmount")}</label><InputNumber inputId="rule-min" value={rule.minimumAmount} minFractionDigits={2} maxFractionDigits={2} min={0} onValueChange={(e) => setRule({ ...rule, minimumAmount: e.value })} /></div>
             <div className="admin__field"><label htmlFor="rule-sort">{k("sortOrder")}</label><InputNumber inputId="rule-sort" value={rule.sortOrder} min={0} onValueChange={(e) => setRule({ ...rule, sortOrder: e.value })} /></div>
-            <div className="admin__field"><label htmlFor="rule-from">{k("effectiveFrom")}</label><InputText id="rule-from" type="date" value={rule.effectiveFrom || ""} onChange={(e) => setRule({ ...rule, effectiveFrom: e.target.value })} /></div>
-            <div className="admin__field"><label htmlFor="rule-to">{k("effectiveTo")}</label><InputText id="rule-to" type="date" value={rule.effectiveTo || ""} onChange={(e) => setRule({ ...rule, effectiveTo: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="rule-from">{k("effectiveFrom")}</label><DateField id="rule-from" value={rule.effectiveFrom || ""} onChange={(e) => setRule({ ...rule, effectiveFrom: e.target.value })} /></div>
+            <div className="admin__field"><label htmlFor="rule-to">{k("effectiveTo")}</label><DateField id="rule-to" value={rule.effectiveTo || ""} onChange={(e) => setRule({ ...rule, effectiveTo: e.target.value })} /></div>
             <div className="admin__field"><label htmlFor="rule-active">{t("packagedProducts.active")}</label><InputSwitch inputId="rule-active" checked={Boolean(rule.active)} onChange={(e) => setRule({ ...rule, active: e.value })} /></div>
           </div>
         )}

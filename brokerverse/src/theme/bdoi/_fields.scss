@@ -1,0 +1,45 @@
+// The field of every form: the label above the control (13px, semi-bold), a 40px control with the theme's field
+// border and radius, help and error text under it. The older field components of agentModule/component (which
+// floated their label inside a 64px box) use these mixins, so their screens look like the newer forms.
+@import "./tokens";
+
+@mixin bv-field-stack {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+@mixin bv-field-label {
+  position: static;
+  order: -1;
+  margin: 0;
+  font-family: $font-body;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: $color-text;
+  pointer-events: auto;
+  transition: none;
+}
+
+@mixin bv-field-control {
+  width: 100%;
+  min-height: $control-height - 4px;
+  height: auto;
+  padding: 8px 12px;
+  font-family: $font-body;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 20px;
+  color: $color-heading;
+  border: 1px solid $brand-field-blue;
+  border-radius: $radius-sm;
+  background: $color-surface;
+
+  &:enabled:focus {
+    outline: 0 none;
+    border-color: $brand-blue;
+    box-shadow: $focus-ring;
+  }
+}

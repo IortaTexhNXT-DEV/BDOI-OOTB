@@ -14,6 +14,8 @@ import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
+import { Tag } from "primereact/tag";
+import { statusSeverity } from "../../../utils/statusSeverity";
 import { useSelector } from "react-redux";
 import CustomToast from "../../../components/Toast";
 import disbursementService from "../../../services/disbursementService";
@@ -229,33 +231,7 @@ function Bankdetailselection() {
 
   const home = { label: t("paymentVoucher.accounts") };
 
-  const statusBodyTemplate = (rowData) => {
-    let backgroundColor = "#E2F6EF"; // Default green for Approved
-    let color = "#29CE00"; // Default green text
-
-    if (rowData.status === "Pending") {
-      backgroundColor = "#FFE5B4";
-      color = "#FFA800";
-    } else if (rowData.status === "Approved") {
-      backgroundColor = "#E2F6EF";
-      color = "#29CE00";
-    } else if (rowData.status === "Printed") {
-      backgroundColor = "#E2F6EF";
-      color = "#29CE00";
-    }
-
-    return (
-      <div
-        style={{
-          backgroundColor: backgroundColor,
-          color: color,
-        }}
-        className="statuslable_container"
-      >
-        {rowData.status}
-      </div>
-    );
-  };
+  const statusBodyTemplate = (rowData) => <Tag value={rowData.status} severity={statusSeverity(rowData.status)} />;
   useEffect(() => {
     if (actionToast != null) {
       toastRef.current.showToast();

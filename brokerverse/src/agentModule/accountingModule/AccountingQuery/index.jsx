@@ -427,7 +427,6 @@ const AccountingQuery = () => {
                 onClick={handleExport}
                 loading={exportLoading}
                 disabled={exportLoading}
-                severity="success"
                 className="export-button"
               />
               <Button
