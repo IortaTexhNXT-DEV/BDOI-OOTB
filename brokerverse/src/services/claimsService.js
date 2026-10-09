@@ -1,19 +1,13 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Message of an API error body: the message plus the reason given for each field or acceptance problem
  * ("Validation failed: Reported date ... cannot be before the date of loss").
  */
-export const apiErrorText = (body, fallback) => {
-  const reasons = [body?.errors, body?.details]
-    .filter(Array.isArray)
-    .flat()
-    .map((d) => (typeof d === "string" ? d : d?.message))
-    .filter(Boolean);
-  const message = body?.message || fallback;
-  return reasons.length ? `${message}: ${reasons.join("; ")}` : message;
-};
+export const apiErrorText = (body, fallback) =>
+  apiErrorMessage({ ...body, errors: [body?.errors, body?.details].filter(Array.isArray).flat() }, undefined, fallback);
 const readError = (response) => response.json().catch(() => ({}));
 
 class ClaimsService {

@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Placement journey API: Broker Slips (/broker-slips), Placement Slips (/placements: raised, sent to the insurer,
@@ -20,8 +21,7 @@ const request = async (method, path, body) => {
   });
   const json = await response.json().catch(() => ({}));
   if (!response.ok || json.success === false) {
-    const detail = Array.isArray(json.errors) ? json.errors.map((e) => e.message).filter(Boolean).join(", ") : "";
-    const error = new Error(json.message && detail && json.message === "Validation failed" ? detail : json.message || detail || `Request failed (${response.status})`);
+    const error = new Error(apiErrorMessage(json, response.status));
     error.status = response.status;
     error.errors = json.errors;
     throw error;

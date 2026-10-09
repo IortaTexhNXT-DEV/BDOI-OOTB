@@ -12,12 +12,12 @@ describe("apiErrorMessage", () => {
     expect(apiErrorMessage(json, 400)).toBe("Password must be at least 8 characters, contain a digit");
   });
 
-  it("keeps field messages that add information", () => {
+  it("shows the field messages without the generic headline", () => {
     const json = { message: "Validation failed", errors: [{ message: "Required" }, { message: "E-mail is not valid" }] };
-    expect(apiErrorMessage(json, 400)).toBe("Validation failed: Required, E-mail is not valid");
+    expect(apiErrorMessage(json, 400)).toBe("• Required\n• E-mail is not valid");
   });
 
-  it("falls back to the status", () => {
-    expect(apiErrorMessage({}, 500)).toBe("Request failed (500)");
+  it("falls back to a sentence for the status", () => {
+    expect(apiErrorMessage({}, 500)).toBe("The system could not complete the request. Please try again.");
   });
 });

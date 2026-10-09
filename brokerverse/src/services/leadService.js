@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Lead Service
@@ -192,8 +193,7 @@ class LeadService {
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) {
-        const detail = Array.isArray(data.errors) ? data.errors.map((e) => e.message).filter(Boolean).join(", ") : "";
-        throw new Error(detail || data.message || "Failed to tag the product");
+        throw new Error(apiErrorMessage(data, response.status));
       }
       return { success: true, data };
     } catch (error) {

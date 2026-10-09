@@ -113,6 +113,15 @@ svg {
   }
 }
 
+// ---------------------------------------------------------------- messages
+// An error lists its field messages one per line (utility/apiError.js).
+
+.p-toast .p-toast-message .p-toast-detail,
+.p-message .p-message-detail,
+.p-inline-message .p-inline-message-text {
+  white-space: pre-line;
+}
+
 // ---------------------------------------------------------------- dialog and side panel overlay
 // One overlay colour behind every dialog and side panel. The stock overlay fades in to black and the side panel rule
 // switched it to another colour once the panel was in place, so the backdrop flashed when a form opened and closed;

@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 const handleResponse = async (response) => {
   if (!response.ok) {
@@ -259,8 +260,7 @@ const call = async (method, path, body) => {
   });
   const json = await response.json().catch(() => ({}));
   if (!response.ok || json.success === false) {
-    const detail = json.errors?.map((e) => e.message).join(", ");
-    throw new Error(detail || json.message || `Request failed (${response.status})`);
+    throw new Error(apiErrorMessage(json, response.status));
   }
   return json.data;
 };

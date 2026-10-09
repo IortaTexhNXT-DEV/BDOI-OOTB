@@ -1,6 +1,7 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 import { toIsoDate } from "../utility/dateFormat";
+import { apiErrorMessage } from "../utility/apiError";
 
 /** Operations > Renewals workspace: /renewals/* (queue, quotes, notices, approvals, lapse, win-back, analytics). */
 const QUEUE_PAGE_SIZE = 500;
@@ -24,8 +25,7 @@ const request = async (method, path, body) => {
   });
   const json = await response.json().catch(() => ({}));
   if (!response.ok || json.success === false) {
-    const detail = json.errors?.map((e) => e.message).join(", ");
-    throw new Error(detail || json.message || `Request failed (${response.status})`);
+    throw new Error(apiErrorMessage(json, response.status));
   }
   return json;
 };

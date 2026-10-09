@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Distribution, programmes and products API: lead assignment (/lead-assignment), distribution channels (/channels),
@@ -13,8 +14,7 @@ const qs = (params = {}) => {
 const handle = async (response) => {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.success === false) {
-    const detail = Array.isArray(body.errors) && body.errors.length ? ` (${body.errors.slice(0, 3).map((e) => (e.path ? `${e.path}: ${e.message}` : e.message)).join("; ")})` : "";
-    throw new Error(`${body.message || `Request failed (${response.status})`}${detail}`);
+    throw new Error(apiErrorMessage(body, response.status));
   }
   return body;
 };

@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Integration framework API: connectors, outbox and inbox (/integrations), message templates and messages
@@ -14,8 +15,7 @@ const qs = (params = {}) => {
 const handleBody = async (response) => {
   const body = await response.json().catch(() => ({}));
   if (!response.ok || body.success === false) {
-    const detail = Array.isArray(body.errors) && body.errors.length ? ` (${body.errors.slice(0, 4).map((e) => `${e.path}: ${e.message}`).join("; ")})` : "";
-    throw new Error(`${body.message || `Request failed (${response.status})`}${detail}`);
+    throw new Error(apiErrorMessage(body, response.status));
   }
   return body;
 };

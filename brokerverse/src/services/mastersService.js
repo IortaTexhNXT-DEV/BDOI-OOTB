@@ -1,3 +1,4 @@
+import { apiErrorMessage } from "../utility/apiError";
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
 
@@ -14,20 +15,8 @@ const headers = () => ({
   ...authService.getAuthHeader(),
 });
 
-/** "Validation failed: Code is required, ..." from an API error body. */
-export const apiErrorMessage = (json = {}, status) => {
-  const message = json.message || `Request failed (${status})`;
-  // A field message the summary already states (e.g. "Password must contain a digit") is not repeated after it
-  const lower = message.toLowerCase();
-  const details = (Array.isArray(json.errors) ? json.errors.map((e) => String(e.message || e)) : [])
-    .filter((d) => {
-      const text = d.toLowerCase();
-      const tail = text.split(" ").slice(2).join(" ");
-      return !lower.includes(text) && !(tail.length > 8 && lower.includes(tail));
-    })
-    .join(", ");
-  return details ? `${message}: ${details}` : message;
-};
+/** The user's text of an API error body (utility/apiError), kept here for the services that import it from masters. */
+export { apiErrorMessage };
 
 const queryString = (params = {}) => {
   const query = new URLSearchParams();

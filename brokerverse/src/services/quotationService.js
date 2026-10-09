@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 class QuotationService {
   constructor() {
@@ -906,8 +907,7 @@ class QuotationService {
     });
     const body = await response.json().catch(() => ({}));
     if (!response.ok || body.success === false) {
-      const detail = Array.isArray(body.errors) ? body.errors.map((e) => e.message).filter(Boolean).join(", ") : "";
-      throw new Error((body.message === "Validation failed" && detail) || body.message || detail || `Request failed (${response.status})`);
+      throw new Error(apiErrorMessage(body, response.status));
     }
     return body;
   }

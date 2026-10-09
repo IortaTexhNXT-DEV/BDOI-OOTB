@@ -1,5 +1,6 @@
 import { BASE_URL } from "../utility/constant";
 import authService from "./authService";
+import { apiErrorMessage } from "../utility/apiError";
 
 /**
  * Posting Rules and Account Determination (Master > Finance). Every call throws the server message on failure.
@@ -12,8 +13,7 @@ async function request(method, path, body) {
   });
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.success === false) {
-    const details = (data.errors || []).map((e) => e.message).filter(Boolean).join("; ");
-    throw new Error(`${data.message || `Request failed (${response.status})`}${details ? `: ${details}` : ""}`);
+    throw new Error(apiErrorMessage(data, response.status));
   }
   return data.data;
 }

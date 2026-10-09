@@ -1,5 +1,6 @@
 import React, { useImperativeHandle, forwardRef, useRef } from "react";
 import { Toast } from "primereact/toast";
+import { readableError } from "../../utility/apiError";
 import "./index.scss";
 
 const CustomToast = forwardRef((props, ref) => {
@@ -26,8 +27,8 @@ const CustomToast = forwardRef((props, ref) => {
       toastRef.current.show({
         severity,
         summary,
-        // an error never falls back to the screen's success message
-        detail: detail || (severity === "error" ? summary : message),
+        // an error never falls back to the screen's success message, and shows the field messages, not the raw text
+        detail: severity === "error" ? readableError(detail || summary) : detail || message,
         icon: `${icons[severity] || icons.success} custom-icon`,
         className: "custom-toast",
       });

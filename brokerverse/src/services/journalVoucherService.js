@@ -1,14 +1,15 @@
 import request from "../utility/interceptor";
 import { getRequest, postRequest } from "../utility/commonServices";
+import { apiErrorMessage as apiBodyMessage } from "../utility/apiError";
 
 const BASE = "journal-vouchers";
 
 /** Error text from an axios error raised by the API. */
-export const apiErrorMessage = (error, fallback = "Request failed") =>
-  error?.response?.data?.message ||
-  error?.response?.data?.error?.message ||
-  error?.message ||
-  fallback;
+export const apiErrorMessage = (error, fallback = "Request failed") => {
+  const body = error?.response?.data;
+  if (body?.message || body?.errors || body?.error) return apiBodyMessage(body, error.response.status, fallback);
+  return error?.message || fallback;
+};
 
 const journalVoucherService = {
   async getHistory(params = {}) {
