@@ -17,6 +17,7 @@ import { Calendar } from "primereact/calendar";
 import renewalsWorkspaceService, { periodRange, productLabel } from "../../../services/renewalsWorkspaceService";
 import SvgDot from "../../../assets/icons/SvgDot";
 import { calendarDateFormat } from "../../../utility/dateFormat";
+import { useChartTheme } from "../../../theme/chartTheme";
 import "./index.scss";
 import { currencySymbol } from "../../../utility/currencyConverter";
 import { formatPercent, formatWithUnit, progressValue } from "../../../utility/numberFormat";
@@ -34,6 +35,7 @@ const PerformanceTracking = () => {
   const [targets, setTargets] = useState({});
   const [chartData, setChartData] = useState({});
   const [chartOptions, setChartOptions] = useState({});
+  const chart = useChartTheme();
   const toast = useRef(null);
 
   const timeFilterOptions = [
@@ -76,7 +78,7 @@ const PerformanceTracking = () => {
 
   useEffect(() => {
     setupCharts();
-  }, [performanceData, productFilter]);
+  }, [performanceData, productFilter, chart]);
 
   const loadPerformanceData = async () => {
     setLoading(true);
@@ -95,10 +97,7 @@ const PerformanceTracking = () => {
   };
 
   const setupCharts = () => {
-    const primaryColor = '#3B82F6';
-    const successColor = '#10B981';
-    const warningColor = '#F59E0B';
-    const dangerColor = '#EF4444';
+    const [primaryColor, retainedColor] = chart.series(2);
 
     // Performance Trend Chart
     const trendData = {
@@ -108,7 +107,7 @@ const PerformanceTracking = () => {
           label: 'Renewal Rate (%)',
           data: performanceData.trends?.monthly?.map(item => item.rate) || [],
           borderColor: primaryColor,
-          backgroundColor: `${primaryColor}20`,
+          backgroundColor: chart.alpha(primaryColor, 0.12),
           tension: 0,
           fill: false
         }
@@ -128,7 +127,7 @@ const PerformanceTracking = () => {
         {
           label: 'Premium Retained (M)',
           data: performanceData.byAgent?.map(agent => agent.premiumRetained / 1000000) || [],
-          backgroundColor: successColor,
+          backgroundColor: retainedColor,
           borderRadius: 4,
           yAxisID: 'y1'
         }
@@ -141,8 +140,8 @@ const PerformanceTracking = () => {
       datasets: [
         {
           data: shownProducts.map(key => performanceData.byProduct[key]?.renewalRate || 0),
-          backgroundColor: [primaryColor, successColor, warningColor, dangerColor, '#8B5CF6'],
-          borderWidth: 0
+          backgroundColor: chart.series(shownProducts.length),
+          borderColor: chart.surface
         }
       ]
     };
@@ -168,7 +167,7 @@ const PerformanceTracking = () => {
     };
 
     setChartOptions({
-      trend: {
+      trend: chart.options({
         ...baseOptions,
         scales: {
           y: {
@@ -181,8 +180,8 @@ const PerformanceTracking = () => {
             }
           }
         }
-      },
-      agentComparison: {
+      }),
+      agentComparison: chart.options({
         ...baseOptions,
         scales: {
           y: {
@@ -212,8 +211,8 @@ const PerformanceTracking = () => {
             }
           }
         }
-      },
-      productPerformance: {
+      }),
+      productPerformance: chart.options({
         ...baseOptions,
         plugins: {
           ...baseOptions.plugins,
@@ -221,7 +220,7 @@ const PerformanceTracking = () => {
             position: 'right'
           }
         }
-      }
+      })
     });
   };
 

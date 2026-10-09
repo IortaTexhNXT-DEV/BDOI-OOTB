@@ -16,6 +16,7 @@ import dashboardService from "../../services/dashboardService";
 import reportsService from "../../services/reportsService";
 import "./index.scss";
 import { ChartSkeleton, KpiValueSkeleton } from "../../components/Skeletons";
+import { useChartTheme } from "../../theme/chartTheme";
 
 import { numberLocale } from "../../utility/currencyConverter";
 import { menuList } from "../../components/SideBar/list";
@@ -38,25 +39,11 @@ const rangeFor = (period) => {
 const QUICK_ACTIONS = [
   { label: "executiveDashboard.viewClaims", icon: "pi pi-file", path: "/claims/dashboard" },
   { label: "executiveDashboard.processing", icon: "pi pi-check-square", path: "/processing/dashboard" },
-  { label: "executiveDashboard.newQuote", icon: "pi pi-plus", severity: "success", path: "/agent/createlead" },
-  { label: "executiveDashboard.reports", icon: "pi pi-chart-bar", severity: "info", path: "/reports/operationalreports/production" },
+  { label: "executiveDashboard.newQuote", icon: "pi pi-plus", path: "/agent/createlead" },
+  { label: "executiveDashboard.reports", icon: "pi pi-chart-bar", path: "/reports/operationalreports/production" },
   { label: "executiveDashboard.policiesLabel", icon: "pi pi-briefcase", path: "/agent/policy" },
-  { label: "executiveDashboard.analytics", icon: "pi pi-chart-line", severity: "warning", path: "/sales/dashboard" },
+  { label: "executiveDashboard.analytics", icon: "pi pi-chart-line", path: "/sales/dashboard" },
 ];
-
-const CHART_COLORS = [
-  "#0066CC",
-  "#E65100",
-  "#4CAF50",
-  "#00C851",
-  "#FFA500",
-  "#9C27B0",
-  "#00BCD4",
-  "#FF5252",
-  "#607D8B",
-];
-
-const CLAIM_STATUS_COLORS = ["#00C851", "#FFA500", "#2196F3", "#FF5252", "#9C27B0", "#607D8B", "#00BCD4"];
 
 const CURRENCY_KPIS = ["totalRevenue", "newBusiness"];
 const PERCENT_KPIS = ["claimsRatio", "retentionRate", "customerSatisfaction"];
@@ -72,6 +59,7 @@ const ExecutiveDashboard = () => {
   const { t } = useTranslation();
   const { formatCurrency } = useFormatCurrency();
   const navigate = useNavigate();
+  const chart = useChartTheme();
   const [quickActions] = useState(() => {
     const roles = getUserRoles();
     return QUICK_ACTIONS.filter((a) => isPathAllowed(a.path, menuList, roles));
@@ -166,7 +154,8 @@ const ExecutiveDashboard = () => {
       {
         label: t("executiveDashboard.premium"),
         data: dashboard?.revenueByProduct?.data || [],
-        backgroundColor: CHART_COLORS,
+        backgroundColor: chart.series((dashboard?.revenueByProduct?.labels || []).length),
+        borderColor: chart.surface,
       },
     ],
   };
@@ -178,8 +167,9 @@ const ExecutiveDashboard = () => {
       {
         label: t("executiveDashboard.grossWrittenPremium"),
         data: dashboard?.monthlyTrend?.premium || [],
-        borderColor: "#0066CC",
-        backgroundColor: "rgba(0, 102, 204, 0.1)",
+        borderColor: chart.primary,
+        backgroundColor: chart.alpha(chart.primary, 0.1),
+        pointBackgroundColor: chart.primary,
         tension: 0,
         fill: false,
       },
@@ -197,7 +187,8 @@ const ExecutiveDashboard = () => {
     datasets: [
       {
         data: claimsByStatus.map((row) => row.count),
-        backgroundColor: CLAIM_STATUS_COLORS,
+        backgroundColor: chart.statuses(claimsByStatus.map((row) => row.status)),
+        borderColor: chart.surface,
       },
     ],
   };
@@ -209,7 +200,7 @@ const ExecutiveDashboard = () => {
       {
         label: t("executiveDashboard.policies"),
         data: dashboard?.revenueByProduct?.policies || [],
-        backgroundColor: CHART_COLORS,
+        backgroundColor: chart.primary,
       },
     ],
   };
@@ -261,7 +252,6 @@ const ExecutiveDashboard = () => {
             <Button
               label={t("executiveDashboard.exportReport")}
               icon="pi pi-download"
-              severity="info"
               onClick={handleExport}
             />
             {canOpenSettings && (
@@ -288,7 +278,7 @@ const ExecutiveDashboard = () => {
             options={periodOptions}
             onChange={(e) => setSelectedPeriod(e.value)}
           />
-          <Button label={t("executiveDashboard.exportReport")} icon="pi pi-download" severity="info" onClick={handleExport} />
+          <Button label={t("executiveDashboard.exportReport")} icon="pi pi-download" onClick={handleExport} />
           {canOpenSettings && (
             <Button label={t("executiveDashboard.settings")} icon="pi pi-cog" severity="secondary" onClick={() => navigate(`${SETTINGS_PATH}?area=reports`)} />
           )}
@@ -370,7 +360,7 @@ const ExecutiveDashboard = () => {
             {!dashboard ? <ChartSkeleton height="350px" /> : <Chart
               type="line"
               data={monthlyTrendData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -412,7 +402,7 @@ const ExecutiveDashboard = () => {
                     tension: 0,
                   },
                 },
-              }}
+              })}
               style={{ height: "350px", width: "1200px" }}
             />}
           </div>
@@ -423,7 +413,7 @@ const ExecutiveDashboard = () => {
           {!dashboard ? <ChartSkeleton height="350px" /> : <Chart
             type="doughnut"
             data={revenueByProductData}
-            options={{
+            options={chart.options({
               maintainAspectRatio: false,
               responsive: true,
               plugins: {
@@ -438,7 +428,7 @@ const ExecutiveDashboard = () => {
                   },
                 },
               },
-            }}
+            })}
             style={{ height: "350px" }}
           />}
         </Card>
@@ -505,7 +495,7 @@ const ExecutiveDashboard = () => {
             {!claimsSummary ? <ChartSkeleton height="250px" /> : <Chart
               type="pie"
               data={claimsAnalytics}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -513,7 +503,7 @@ const ExecutiveDashboard = () => {
                     position: "bottom",
                   },
                 },
-              }}
+              })}
               style={{ height: "250px" }}
             />}
           </Card>
@@ -523,7 +513,7 @@ const ExecutiveDashboard = () => {
             {!dashboard ? <ChartSkeleton height="250px" /> : <Chart
               type="bar"
               data={customerSegmentData}
-              options={{
+              options={chart.options({
                 maintainAspectRatio: false,
                 responsive: true,
                 plugins: {
@@ -541,7 +531,7 @@ const ExecutiveDashboard = () => {
                     },
                   },
                 },
-              }}
+              })}
               style={{ height: "250px" }}
             />}
           </Card>
@@ -558,7 +548,7 @@ const ExecutiveDashboard = () => {
                   key={a.path}
                   label={t(a.label)}
                   icon={a.icon}
-                  severity={a.severity}
+                  outlined
                   onClick={() => navigate(a.path)}
                 />
               ))}

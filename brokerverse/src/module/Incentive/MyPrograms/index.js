@@ -19,6 +19,7 @@ import incentiveService from "../../../services/incentiveService";
 import { showError } from "../../Remittance/shared";
 import { formatDate as formatAppDate } from "../../../utility/dateFormat";
 import "./index.scss";
+import { useChartTheme } from "../../../theme/chartTheme";
 import { formatPercent, progressValue } from "../../../utility/numberFormat";
 
 const MyPrograms = () => {
@@ -27,6 +28,7 @@ const MyPrograms = () => {
   const toast = useRef(null);
 
   // State management
+  const chart = useChartTheme();
   const [agentData, setAgentData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
@@ -91,8 +93,6 @@ const MyPrograms = () => {
   };
 
   const initializeCharts = (programs) => {
-    const documentStyle = getComputedStyle(document.documentElement);
-
     // Achievement chart data
     const data = {
       labels: programs.map((p) => p.programName),
@@ -100,22 +100,13 @@ const MyPrograms = () => {
         {
           label: 'Achievement %',
           data: programs.map((p) => p.achievementPercent),
-          backgroundColor: [
-            documentStyle.getPropertyValue('--blue-500'),
-            documentStyle.getPropertyValue('--green-500'),
-            documentStyle.getPropertyValue('--yellow-500')
-          ],
-          borderColor: [
-            documentStyle.getPropertyValue('--blue-600'),
-            documentStyle.getPropertyValue('--green-600'),
-            documentStyle.getPropertyValue('--yellow-600')
-          ],
-          borderWidth: 1
+          backgroundColor: chart.primary,
+          borderWidth: 0
         }
       ]
     };
 
-    const options = {
+    const options = chart.options({
       maintainAspectRatio: false,
       aspectRatio: 0.8,
       plugins: {
@@ -135,7 +126,7 @@ const MyPrograms = () => {
           }
         }
       }
-    };
+    });
 
     setChartData(data);
     setChartOptions(options);
