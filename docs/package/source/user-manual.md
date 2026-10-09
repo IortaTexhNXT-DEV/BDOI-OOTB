@@ -1760,7 +1760,7 @@ The Claims team registers losses under the policies, sends the Preliminary Loss 
 | Menu | Items |
 |---|---|
 | Dashboard | Claims Dashboard |
-| Operations | Home, Clients, Policy, Fleet Schedules, Marine Open Covers, Claims, My Work, Claim Documents, Motor Claim Repairs |
+| Operations | Home, Clients, Policy, Fleet Schedules, Marine Open Covers, Claims, My Work, Claims Awaiting Documents, Motor Claim Repairs |
 | Reports | All Reports; Operational Reports; Report Builder |
 | Master | Insurance > Claim Document Checklist, Repair Shops |
 
@@ -1774,7 +1774,7 @@ The Claims role lands on the Claims Dashboard. Fleet Schedules and Marine Open C
 | Daily | Follow open claims with the insurer and adjuster | Operations > Claims |
 | Daily | Approve settlements entered by another Claims user | Notification; claim in Pending Approval |
 | Daily | Watch overdue claims and your own worklist | Claims Dashboard; My Work |
-| Daily | Chase missing claim documents; submit complete files to the insurer | Claim Documents |
+| Daily | Chase missing claim documents; submit complete files to the insurer | Claims Awaiting Documents; claim > **Documents** |
 | Daily | Record repair estimates, adjuster decisions and letters of authority | Motor Claim Repairs |
 | Weekly | Review the claims position and ageing | Reports > Operational Reports > Claims; Reports > All Reports > Claims Ageing |
 | As needed | Keep the claim document checklist and the accredited repair shops | Master > Insurance > Claim Document Checklist, Repair Shops |
@@ -1799,7 +1799,21 @@ Choose Operations > Claims. The figures count the open claims, the settlements t
 | Rejected | Refused, with the reason. |
 | Closed | File closed. |
 
-Every claim screen has the same frame: the claim number as the page title with the insured, the policy, the line of business and the status under it, **Close** to leave the claim, the claim journey (**Notification**, **Insurer advice**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval**, **Payment**; the steps passed are ticked), the key facts of the claim (policy, insured, insurer and its claim number, date and cause of loss, estimate, settlement) and the step in a card with its sections. Forms show three fields a row on a wide screen.
+Every claim screen has the same frame: the claim number as the page title with the insured, the policy, the line of business and the status under it, **Close** to leave the claim, the claim journey (**Notification**, **Insurer advice**, **Documents**, **Review**, **Adjuster**, **Assessment**, **Settlement**, **Approval**, **Payment**; the steps passed are ticked), the key facts of the claim (policy, insured, insurer and its claim number, date and cause of loss, estimate, settlement) and the step in a card with its sections. Forms show three fields a row on a wide screen.
+
+At the foot of every step the **Next step** panel says in one line what happens next and holds the button for it; it stays in view while a long form scrolls. It is amber while something is missing (for example required documents) and green when the claim is ready for the next step.
+
+| Step | Next step shown | Button |
+|---|---|---|
+| Notification | Advise the insurer of the loss | **Next** |
+| Insurer advice | Register the claim and send the advice to the insurer | **Register claim and send** |
+| Documents | *n* required documents missing: remind the claimant; or All required documents received: submit the claim file to the insurer | **Remind the claimant**, **Submit to insurer**, then **Continue to review** |
+| Review | Check what was reported, then start the adjuster report | **Proceed to adjuster report** |
+| Adjuster | Save the adjuster report, then assess the claim | **Save and continue** |
+| Assessment | Decide: go on to the settlement or reject the claim | **Proceed to settlement**, **Reject claim** |
+| Settlement | Submit the settlement for approval | **Submit settlement** |
+| Approval | Approve the settlement to settle the claim, or return it for correction | **Approve settlement**, **Return for correction** |
+| Payment | Record the funds still due from the insurers, pay the claimant, or nothing more to do | **View claim** |
 
 The sections follow the line of business of the policy (`claims.lob_fields`): the driver at the time of loss and the vehicle fields of the third party (plate number, vehicle unit, repair shop) appear for motor claims only. The causes of loss offered are those of the line (`claims.loss_causes`): for example Own Damage, Theft or Third Party Liability for motor, Death, Disability or Bodily Injury / Medical for Personal Accident, Death - Natural Causes / Illness for Credit Life.
 
@@ -1809,8 +1823,9 @@ The sections follow the line of business of the policy (`claims.lob_fields`): th
 2. Under **Policy and insured**, check **Insurance Company Name**, **Policy Number** and **Policy Holder Name**, and the **Insured's address**, which fill in from the policy.
 3. Under **Incident Details**, enter the fields below.
 4. Enter the **Driver at the time of loss** (motor) and the **Third party** (if applicable).
-5. Select **Next**. On **Advice to the insurer**, check the subject and message to the insurer, attach the documents and select **Register claim and send**.
-6. On **Review**, check what was reported (**Edit notification** goes back to correct it) and, once the insurer has acknowledged the claim, select **Proceed to adjuster report**: the claim moves to Processing.
+5. Select **Next**. On **Advice to the insurer**, check the subject and message to the insurer, attach the documents and select **Register claim and send**. The claim opens at **Documents** (see Claim documents).
+6. Once every required document is in, select **Submit to insurer**, then **Continue to review**.
+7. On **Review**, check what was reported (**Edit notification** goes back to correct it) and, once the insurer has acknowledged the claim, select **Proceed to adjuster report**: the claim moves to Processing.
 
 ![Claim Request](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-request.png)
 
@@ -1869,7 +1884,7 @@ When the settlement is paid through the broker, the insurer pays the broker and 
 
 ![Claim Details](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-detail.png)
 
-The claim page (eye on the claims list) shows the claim in sections: **Loss** (date, time, cause, place, reported date, priority, estimate, claims handler), **Policy and insured** (policy, product, insured, client code, period of cover, address), **Driver at the time of loss** (motor), **Third party** (or **Third party or witness**), **Adjuster report**, **Settlement details** and, for a co-insured policy, each insurer's share. **Continue** opens the step the claim is at; **History** opens the claim history.
+The claim page (eye on the claims list) shows the claim in sections: **Loss** (date, time, cause, place, reported date, priority, estimate, claims handler), **Policy and insured** (policy, product, insured, client code, period of cover, address), **Driver at the time of loss** (motor), **Third party** (or **Third party or witness**), **Adjuster report**, **Settlement details**, for a co-insured policy each insurer's share, and **Documents** (the claim's document checklist, worked as on the Documents step). The **Next step** panel at the foot says what the claim waits for and **Continue** opens the step the claim is at (**Settlement and payment** once it is approved); **History** opens the claim history.
 
 **Settlement and payment** (the claim once approved or settled) shows the settlement recorded and approved, the documents the system produces on the company letterhead (**Acknowledgment letter**, **Claims Discharge Voucher**, **Claims Data sheet** and **FIR**; the download icon opens each one) and, for a settlement paid through the broker, the settlement cash.
 
@@ -1877,16 +1892,22 @@ The claim history lists every event of the claim with user, time, source and the
 
 ![Claim audit trail](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-audit.png)
 
-## Claim document checklist
+## Claim documents
 
-Each claim has the list of documents it needs, taken from Master > Insurance > Claim Document Checklist by line of business and claim type (* for all), each one required or optional.
+The documents are a step of the claim: **Documents** comes after **Insurer advice**, once the claim is registered, and the same list is on the claim page. A claim lists only the documents of its line of business and its cause of loss, taken from Master > Insurance > Claim Document Checklist: a document applies when its line is the claim's (or * for all) and its claim type is * or names the claim type or words of the cause of loss (for example Theft, Third Party, Collision, Death; several separated by ;). A theft claim therefore asks for the Affidavit of Theft, a third-party claim for the third party's licence and OR/CR, a Personal Accident death claim for the death certificate.
 
-![Operations > Claim Documents](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-documents.png)
+![Claim > Documents](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-documents.png)
 
-1. Choose Operations > Claim Documents and select the claim on the left.
-2. For each document: **Received** (or upload a copy with the upload icon; an uploaded claim document with the same name is marked received by itself), **Waive** with a reason when it does not apply, or **Reopen**. **Add document** adds one the checklist does not list.
-3. **Remind the claimant** e-mails the documents still missing (e-mail template `claim_missing_documents`). The daily job **Missing claim documents** sends the same reminder every `claims.document_reminder_days` days (3; 0 switches it off) to claimants of open claims with a required document missing.
-4. **Submit to insurer** records that the claim file went to the insurer (the reference is written to the claim history). While a required document is missing the button is disabled and the server refuses it (`claims.require_documents_before_submission`).
+1. The top line says how many required documents are in (for example 15 of 18 required documents in) with a bar, what is missing and the optional documents not received.
+2. Each document is one row: the document (optional ones marked), its status (**Received**, **Waived**, **Missing**, **Not received** for an optional one), the date it came in or was waived with the reason, the file, and **More actions**: **Upload a copy** (the document is marked received), **Mark received**, **Waive** (a reason is required) and **Mark as missing**. An uploaded claim document with the same name is marked received by itself. **Add document** adds one the checklist does not list.
+3. The **Next step** panel: while required documents are missing, **Remind the claimant** e-mails the list (e-mail template `claim_missing_documents`; the daily job **Missing claim documents** repeats it every `claims.document_reminder_days` days, 3; 0 switches it off). Once they are in, **Submit to insurer** records that the claim file went to the insurer with its reference (written to the claim history). While a required document is missing the server refuses the submission (`claims.require_documents_before_submission`); when that setting is off the panel offers both.
+4. **Continue to review** goes on to the Review step. **Reminders sent** lists the reminders with the documents asked for.
+
+## Claims awaiting documents
+
+![Operations > Claims Awaiting Documents](/home/user/BDOI-OOTB/docs/package/source/manual-images/c-claim-documents-queue.png)
+
+Operations > Claims Awaiting Documents is the work queue of open claims whose file has not gone to the insurer yet. The figures count the claims missing documents, the claims ready to submit, the documents outstanding and the claims not reminded yet; select one of the first two to show those claims. Each row shows the claim and claimant, the policy, the line and cause of loss, when it was reported, the required documents in (with a bar), how many are missing and the last reminder. The claim number or the folder icon opens the claim's **Documents** step; **More actions** > **Remind the claimant** sends the reminder from the queue.
 
 ## Motor claim repairs and letters of authority
 
@@ -2889,7 +2910,7 @@ The landing page of every role after sign-in: My Work with the role preset (cate
 | Claims | Claims (CLM-) and their journey. | Date of loss inside the policy period and not in the future; blocked while premium unpaid; settlement maker-checker; statuses Pending, Processing, Pending Approval, Approved, Settled, Rejected, Closed. | Claims |
 | Fleet Schedules | One motor policy covering many vehicles (FLT-). | Vehicles priced one by one (own damage, acts of nature, excess liability, CTPL by class, taxes); **Issue policy**; add or delete a vehicle by endorsement pro-rata; `fleet.minimum_vehicles`. | Distribution, programmes and products |
 | Marine Open Covers | A client's cargo shipments for a period (MOC-, MIC-, MDC-). | Rate and limit per conveyance, mark-up on invoice, minimum premium per certificate; certificates and declared shipments; monthly or quarterly declarations billed on the open policy. | Distribution, programmes and products |
-| Claim Documents | The checklist of documents of each claim. | Required and optional documents by line and claim type; **Received**, **Waive**, **Add document**, **Remind the claimant**, **Submit to insurer** (refused while a required document is missing). | Claims |
+| Claims Awaiting Documents | Open claims whose file has not gone to the insurer, with the documents in and missing. | The documents are a step of the claim (**Documents**): by line and cause of loss; **Upload a copy**, **Mark received**, **Waive** with a reason, **Add document**, **Remind the claimant**, **Submit to insurer** (refused while a required document is missing). | Claims |
 | Motor Claim Repairs | Repair estimates, adjuster decisions, letters of authority (LOA-) and vehicle release. | Accredited repair shops; participation and parts depreciation from `motor_claims.*`; supplementary estimates and letters. | Claims |
 
 ### Renewals

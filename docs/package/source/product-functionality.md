@@ -253,7 +253,7 @@ Every business event posts a balanced journal through its posting rule. On a co-
 - Claims paid through the broker: funds received from each insurer and payment to the claimant, each posted with its journal.
 - Claim letters on the letterhead: Acknowledgment letter, Claims Discharge Voucher, Claims Data sheet and FIR.
 - Claim Audit Trail and field change history.
-- Claim document checklist by line of business and claim type (Master > Insurance Management > Claim Document Checklist), received / waived status, missing-document reminders to the claimant (manual and daily), submission to the insurer refused while a required document is missing (`claims.require_documents_before_submission`).
+- Claim documents as a step of the claim (after the insurer advice, and on the claim page) with a Next step panel on every claim step: checklist by line of business and claim type or cause of loss (Master > Insurance Management > Claim Document Checklist), progress (x of y required in), received / waived status, the work queue Claims Awaiting Documents, missing-document reminders to the claimant (manual and daily), submission to the insurer refused while a required document is missing (`claims.require_documents_before_submission`).
 - Motor claim repairs: estimates of accredited repair shops, the adjuster's decision, supplementary estimates, letter of authority (LOA-) with the insured's participation (`motor_claims.participation`) and the vehicle release acknowledgement.
 - Accounts > Claims Settlements: funds received from insurers and payment to the claimant from the Accounting menu, with the claim payment voucher (CPV-) and the release and quitclaim.
 

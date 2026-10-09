@@ -460,7 +460,7 @@ A loss is registered under the policy, the insurer is advised, the documents are
 |---|---|
 | Trigger | A client reports a loss |
 | Roles | Client or claimant; Claims (maker); another Claims user (checker); Accounting; insurer; BrokerVerse |
-| Screens | Operations > Policy > **More actions** > **Claim**; Operations > Claims, Claim Documents, Motor Claim Repairs; Accounts > Claims Settlements; Reinsurance > Claims Recovery |
+| Screens | Operations > Policy > **More actions** > **Claim**; Operations > Claims (claim > Documents), Claims Awaiting Documents, Motor Claim Repairs; Accounts > Claims Settlements; Reinsurance > Claims Recovery |
 | Postings | claim.settlement.paid_through_broker; claim.funds_received; claim.paid_to_claimant |
 | Documents | Preliminary Loss Advice to the insurer, missing document reminders, Acknowledgment letter, Claims Discharge Voucher, Claims Data sheet, FIR, letter of authority (LOA-), release acknowledgement, claim payment voucher (CPV-), release and quitclaim |
 | Controls | Date of loss inside the policy period (`claims.validate_loss_date`); no claim while premium is unpaid (`claims.block_unpaid_premium`); submission to the insurer refused while a required document is missing; settlement maker-checker (`claims.settlement_maker_checker`); AML screening of the payee at payout; SoD rule SOD-CLM-ACCT |
@@ -468,7 +468,7 @@ A loss is registered under the policy, the insurer is advised, the documents are
 1. **Client.** Reports a loss.
 2. **Claims.** On the policy **More actions** > **Claim**: date and time of the incident, location, cause (`claims.loss_causes`), estimated amount, insurer claim number if known, driver (motor), third party, documents (PNG, JPEG or PDF, 2 MB each). The claim takes its number CLM-YYYY-NNNNN with status Pending.
 3. **BrokerVerse.** E-mails the Preliminary Loss Advice to the insurer (`claims.pla_enabled`), notifies the Claims users and the policy owner, sets the due date 20 days after reporting (`claims.sla_days`) and builds the claim's document checklist from Master > Insurance > Claim Document Checklist (line and claim type).
-4. **Claims.** Operations > Claim Documents: **Received** (or upload), **Waive** with a reason, **Add document**; **Remind the claimant** e-mails what is missing (the daily job repeats it every 3 days, `claims.document_reminder_days`); **Submit to insurer** once every required document is in.
+4. **Claims.** The claim's **Documents** step (after the insurer advice; the queue Operations > Claims Awaiting Documents lists the claims still collecting documents): the documents of the claim's line and cause of loss, **Mark received** (or upload), **Waive** with a reason, **Add document**; **Remind the claimant** e-mails what is missing (the daily job repeats it every 3 days, `claims.document_reminder_days`); **Submit to insurer** once every required document is in.
 5. **Insurer.** Assigns an adjuster and gives its claim number.
 6. **Claims.** **Adjuster** report: adjuster, insurer claim number, dates, place, driver, third party, proof of loss. The claim is Processing.
 7. **Claims.** Decision: a motor claim with a repair?
