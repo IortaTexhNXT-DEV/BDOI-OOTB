@@ -29,8 +29,8 @@ export const periodRow = (p) => p && ({ period: p.period, fiscalYear: p.fiscal_y
   softClosedBy: p.soft_closed_by, softClosedAt: p.soft_closed_at, reopenedBy: p.reopened_by, reopenedAt: p.reopened_at, lockedAt: p.locked_at, remarks: p.remarks });
 
 async function startMonth() {
-  const m = Number(await getSetting('accounting.fiscal_year_start_month', 1));
-  return Number.isInteger(m) && m >= 1 && m <= 12 ? m : 1;
+  const m = Number(await getSetting('accounting.fiscal_year_start_month', 4));
+  return Number.isInteger(m) && m >= 1 && m <= 12 ? m : 4;
 }
 
 /** Start date of the fiscal year (per the configured start month) that contains `date`. */
