@@ -226,7 +226,7 @@ async function packDrift(pack) {
   const company = await primaryCompany().catch(() => null);
   const refs = {
     logo: str(await getSetting('branding.logo_url', '')),
-    favicon: str(await getSetting('branding.favicon_url', '')),
+    favicon: str(await getSetting('branding.favicon_url', '/favicon.ico')),
     loginPanel: str(current.login.panelImageUrl),
     documentLogo: str(company?.data?.Logo),
   };
@@ -235,7 +235,7 @@ async function packDrift(pack) {
   const differences = screenDifferences(current, theme);
   if (differences.length) reasons.push(`the theme differs (${differences.slice(0, 6).join(', ')}${differences.length > 6 ? ', ...' : ''})`);
   const systemName = str(pack.manifest.systemName).slice(0, 120);
-  const nameNow = str(await getSetting('general.system_name', ''));
+  const nameNow = str(await getSetting('general.system_name', 'BrokerVerse'));
   if (systemName && nameNow !== systemName) reasons.push(`the application name is "${nameNow}"`);
   const reuse = {};
   for (const [role, file] of Object.entries(pack.manifest.assets || {})) {

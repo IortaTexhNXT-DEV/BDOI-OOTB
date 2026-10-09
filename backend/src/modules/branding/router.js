@@ -49,7 +49,7 @@ async function requestedTheme(body, systemName) {
   for (const section of Object.keys(svc.SCHEMA)) if (isObj(input[section])) merged[section] = { ...current[section], ...input[section] };
   const { theme, errors } = svc.validateTheme(merged);
   const locked = errors.length ? [] : bundled.screenDifferences(theme, current);
-  if (systemName !== undefined && systemName !== await getSetting('general.system_name', '')) locked.push('systemName');
+  if (systemName !== undefined && systemName !== await getSetting('general.system_name', 'BrokerVerse')) locked.push('systemName');
   if (locked.length) {
     throw badRequest(`The look of the screens and the application name come from the brand pack of the deployment (BRAND_PACK=${packId}); only the e-mail and document layouts can be changed`,
       locked.map((p) => ({ path: p, message: 'set by the brand pack of the deployment' })));
