@@ -35,7 +35,7 @@ describe('parsing and comparing', () => {
     const table = [['Title'], ['Pol #', 'Assured', 'Gross', 'Comm'], ['P-1', 'Juan', '1,000.00', '150'], ['P-2', 'Maria', 'abc', '10'], ['', '', '', ''], ['Grand total', '', '1000', '150']];
     const out = parseRows(table, { code: 'X', skip_rows: 1, has_header: true, columns: { policyNo: 'pol', insured: 'assured', grossPremium: 'gross', commission: 'comm' }, date_format: 'YYYY-MM-DD', skip_pattern: '^grand total' });
     expect(out.lines).toEqual([expect.objectContaining({ policyNo: 'P-1', insured: 'Juan', grossPremium: 1000, commission: 150 })]);
-    expect(out.errors).toEqual([expect.objectContaining({ row: 4 })]);
+    expect(out.errors).toEqual([{ row: 4, message: 'Gross premium "abc" is not a number' }]);
     expect(normPolicy('pol-2026 / 001')).toBe('POL2026001');
     const st = { tolerance: 1, statement_type: 'premium' };
     expect(compare({ gross_premium: 1000.5, commission: 150, taxes: 0, amount_paid: 0 }, { grossPremium: 1000, commission: 150, taxes: 9, amount: 850 }, st).status).toBe('matched');

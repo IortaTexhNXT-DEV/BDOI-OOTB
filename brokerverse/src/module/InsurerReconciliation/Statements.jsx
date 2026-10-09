@@ -12,6 +12,8 @@ import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import service from "../../services/insurerReconciliationService";
 import { IrTag, PageHeader, date, insurerOptions, money, showError, showSuccess } from "./common";
+import importService from "../../services/importService";
+import { calendarDateFormat } from "../../utility/dateFormat";
 
 const STATUSES = ["draft", "submitted", "approved", "cancelled"];
 const iso = (d) => (d ? new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10) : "");
@@ -115,6 +117,8 @@ const Statements = () => {
       <Dialog className="pe-dialog" header={t("insurerRec.importStatement")} visible={!!form} style={{ width: "min(900px, 96vw)" }} onHide={() => setForm(null)}
         footer={(
           <div>
+            <Button label={t("insurerRec.downloadTemplate")} icon="pi pi-download" text
+              onClick={() => importService.downloadTemplate("/insurer-reconciliation/statements/template").catch((e) => showError(toast, e))} />
             <Button label={t("insurerRec.cancel")} text onClick={() => setForm(null)} />
             <Button label={t("insurerRec.preview")} icon="pi pi-eye" outlined onClick={runPreview} disabled={!ready || busy} />
             <Button label={t("insurerRec.import")} icon="pi pi-check" onClick={runImport} disabled={!ready || busy || (preview && preview.errors.length > 0)} loading={busy} />
@@ -127,9 +131,9 @@ const Statements = () => {
             <div className="col-12 md:col-6"><label>{t("insurerRec.type")} *</label>
               <Dropdown value={form.statementType} options={["premium", "commission"].map((x) => ({ label: t(`insurerRec.type_${x}`), value: x }))} onChange={(e) => setForm({ ...form, statementType: e.value })} className="w-full" /></div>
             <div className="col-12 md:col-3"><label>{t("insurerRec.periodFrom")} *</label>
-              <Calendar value={form.periodFrom} onChange={(e) => setForm({ ...form, periodFrom: e.value })} showIcon className="w-full" /></div>
+              <Calendar value={form.periodFrom} onChange={(e) => setForm({ ...form, periodFrom: e.value })} showIcon dateFormat={calendarDateFormat()} className="w-full" /></div>
             <div className="col-12 md:col-3"><label>{t("insurerRec.periodTo")} *</label>
-              <Calendar value={form.periodTo} onChange={(e) => setForm({ ...form, periodTo: e.value })} showIcon className="w-full" /></div>
+              <Calendar value={form.periodTo} onChange={(e) => setForm({ ...form, periodTo: e.value })} showIcon dateFormat={calendarDateFormat()} className="w-full" /></div>
             <div className="col-12 md:col-3"><label>{t("insurerRec.insurerReference")}</label>
               <InputText value={form.statementRef} onChange={(e) => setForm({ ...form, statementRef: e.target.value })} className="w-full" /></div>
             <div className="col-12 md:col-3"><label>{t("insurerRec.tolerance")}</label>

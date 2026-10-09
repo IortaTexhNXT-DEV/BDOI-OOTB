@@ -12,6 +12,7 @@ import { round2 } from '../../lib/money.js';
 
 export const COLUMN_KEYS = ['policyNo', 'insured', 'date', 'reference', 'grossPremium', 'commission', 'taxes', 'amountPaid'];
 const AMOUNT_KEYS = { grossPremium: 'gross', commission: 'commission', taxes: 'taxes', amountPaid: 'paid' };
+const AMOUNT_LABELS = { grossPremium: 'Gross premium', commission: 'Commission', taxes: 'Taxes', amountPaid: 'Amount paid' };
 export const STATEMENT_TYPES = { premium: 'Premium remittance confirmation', commission: 'Commission statement' };
 
 export const formatRow = (f) => f && ({
@@ -100,7 +101,7 @@ export function parseRows(table, format) {
     const amounts = {};
     for (const [k, out] of Object.entries(AMOUNT_KEYS)) {
       const a = cell(r, k) ? parseAmount(cell(r, k)) : 0;
-      if (Number.isNaN(a)) { errors.push({ row: rowNo, message: `${k} "${cell(r, k)}" is not a number` }); return; }
+      if (Number.isNaN(a)) { errors.push({ row: rowNo, message: `${AMOUNT_LABELS[k]} "${cell(r, k)}" is not a number` }); return; }
       amounts[out] = a;
     }
     const policyNo = cell(r, 'policyNo');

@@ -597,11 +597,13 @@ export async function reconciliation() {
 
 export async function importBankTransactions(list, user) {
   if (!Array.isArray(list) || !list.length) throw badRequest('transactions must be a non-empty array');
+  // the whole file is checked first: one line without a date, reference or amount refuses it
+  const rows = list.map((t) => ({ ...t, amount: toNumber(t.amount, NaN), d: isoDate(t.transDate) }));
+  const bad = rows.map((t, i) => (!Number.isFinite(t.amount) || !t.d || !t.reference ? { path: `transactions.${i}`, message: `Line ${i + 1}: needs TransDate, Reference and Amount` } : null)).filter(Boolean);
+  if (bad.length) throw badRequest('Validation failed: nothing was imported', bad);
   const out = [];
-  for (const t of list) {
-    const amount = toNumber(t.amount, NaN);
-    const d = isoDate(t.transDate);
-    if (!Number.isFinite(amount) || !d || !t.reference) throw badRequest('Validation failed', [{ path: 'transactions', message: 'Each transaction needs transDate, reference and amount' }]);
+  for (const t of rows) {
+    const { amount, d } = t;
     if (await one('SELECT 1 FROM bank_statement_lines WHERE source = \'remittance\' AND status = \'active\' AND reference = $1', [String(t.reference)])) continue;
     const ref = await nextDocumentNumber('bank_txn');
     const x = await one(`INSERT INTO bank_statement_lines(txn_number, txn_date, description, reference, debit, credit, amount, source, created_by, updated_by)

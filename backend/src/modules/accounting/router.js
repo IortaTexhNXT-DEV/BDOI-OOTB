@@ -13,7 +13,7 @@ import { notifyDecision } from '../notifications/approvals.js';
 import { isCoInsured, policyParticipants } from './lib/coinsurance.js';
 import { today } from '../../lib/dates.js';
 import { getSetting } from '../../lib/settings.js';
-import { mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
+import { issueText, mapColumns, parseUploadedRows, uploadFile } from '../documents/tabular.js';
 import { sendTemplate } from '../documents/uploadTemplates.js';
 
 const { router, define } = moduleRouter('Accounting', '/accounting');
@@ -257,7 +257,7 @@ define({
         await audit(req, { entity: 'gl_account', entityId: a.code, action: before ? 'bulk-update' : 'bulk-create', before: before || undefined, after: a });
         if (before) updated += 1; else added += 1;
       } catch (e) {
-        errors.push({ row: i + 2, message: e.issues ? e.issues.map((x) => `${x.path.join('.')}: ${x.message}`).join('; ') : e.message });
+        errors.push({ row: i + 2, message: e.issues ? issueText(e.issues, svc.ACCOUNT_UPLOAD_COLUMNS) : e.message });
       }
     }
     const data = { message: `Processed ${rows.length} rows: ${added} created, ${updated} updated, ${errors.length} failed`, total: rows.length, created: added, updated, failed: errors.length, errors };

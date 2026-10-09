@@ -69,6 +69,7 @@ export async function motorFixedCovers(v, tariff = null) {
   const cls = vehicleClass(t, vehicleType);
   const out = { vehicleType: cls?.value || vehicleType || null, ctplCoveragePremium: 0, ctplCoverageRate: '' };
   if (wantsCtpl(v)) {
+    if (!cls && vehicleType) throw badRequest(`Vehicle type "${vehicleType}" is not an Insurance Commission vehicle class of the motor tariff (${t.vehicleTypes.map((x) => x.value).join(', ')})`);
     if (!cls || cls.ctplPremium === null) throw badRequest('CTPL needs the vehicle type (Insurance Commission vehicle class) of the vehicle');
     const years = num(v.ctplTermYears) === 3 ? 3 : 1;
     if (years === 3 && cls.ctplPremium3Year === null) throw badRequest(`No 3-year CTPL tariff is configured for ${cls.label}`);

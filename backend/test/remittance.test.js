@@ -257,6 +257,10 @@ describe('work items', () => {
     expect(un.status).toBe(200);
     const imp = await ctx.api('post', '/remittance/reconciliation/bank-transactions').send({ transactions: [{ transDate: '2026-09-27', reference: 'PSN-1', amount: 1000 }] });
     expect(imp.body.data).toHaveLength(1);
+    const bad = await ctx.api('post', '/remittance/reconciliation/bank-transactions').send({ transactions: [{ transDate: '2026-09-28', reference: 'PSN-2', amount: '500' }, { transDate: '2026-09-28', reference: 'PSN-3', amount: '' }] });
+    expect(bad.status).toBe(400);
+    expect(bad.body.errors).toEqual([{ path: 'transactions.1', message: 'Line 2: needs TransDate, Reference and Amount' }]);
+    expect((await pool.query("SELECT count(*)::int AS n FROM bank_statement_lines WHERE reference IN ('PSN-2', 'PSN-3')")).rows[0].n).toBe(0);
   });
   it('analytics, history, audit, logs and master overview', async () => {
     const a = await ctx.api('get', '/remittance/analytics?from=2025-01-01&to=2026-12-31');

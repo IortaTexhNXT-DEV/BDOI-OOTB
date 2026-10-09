@@ -5,12 +5,15 @@ import "../quotationModule/index.scss";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { Button } from "primereact/button";
 import SvgDot from "../../assets/agentIcon/SvgDots";
-import BulkUploadModal from "./BulkUploadModal";
+import ImportDialog from "../../components/ImportDialog";
 import { useNavigate } from "react-router-dom";
 import QuoteStatsCards from "../quoteModule/quoteListing/QuoteStatsCards";
 import { RFQ_PATH, entryOf, rfqState } from "../../module/Sales/salesProducts";
 import { prospectFormState } from "../leadModule/leadListing/useProspectStart";
 import { ProductPickerDialog } from "../../module/Sales/ProductPicker";
+
+/** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
+const UPLOAD_TARGETS = [{ label: "Quotations", templatePath: "/quotations/bulk-upload/template", uploadPath: "/quotations/bulk-upload" }];
 
 const ClientListingCard = () => {
   const { t } = useTranslation();
@@ -88,10 +91,12 @@ const ClientListingCard = () => {
           {/* </Card> */}
         </div>
       </div>
-      <BulkUploadModal
+      <ImportDialog
         visible={showBulkUpload}
         onHide={() => setShowBulkUpload(false)}
-        onUploadSuccess={handleBulkUploadSuccess}
+        title={t("bulkUploadQuotations.header")}
+        targets={UPLOAD_TARGETS}
+        onDone={handleBulkUploadSuccess}
       />
     </div>
   );

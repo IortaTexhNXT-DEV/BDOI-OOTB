@@ -20,7 +20,7 @@ import { createApp } from '../src/app.js';
 import { withCalendarFiscalYear } from './helpers.js';
 import { pool, query, withTransaction } from '../src/db/pool.js';
 import { cancelJournal, createJournal } from '../src/modules/accounting/lib/ledger.js';
-import { readXlsx } from '../src/modules/documents/xlsx.js';
+import { readWorkbook, readXlsx } from '../src/modules/documents/xlsx.js';
 import { mapColumns, normKey, parseUploadedRows } from '../src/modules/documents/tabular.js';
 import { camel, readSheet } from '../src/modules/accounting/lib/sheet.js';
 import { parseRows, readTable } from '../src/modules/bank-reconciliation/statements.js';
@@ -62,6 +62,7 @@ const upload = (route, name, fields = {}, buffer = null) => {
   return req.attach('file', buffer || fs.readFileSync(path.join(outDir, name)), name);
 };
 const csvBuffer = (rows) => Buffer.from(rows.map((r) => r.join(',')).join('\r\n'));
+const binary = (res, cb) => { const chunks = []; res.on('data', (c) => chunks.push(c)); res.on('end', () => cb(null, Buffer.concat(chunks))); };
 
 describe('generated upload templates', () => {
   it('builds one workbook per upload, Data sheet first, with the importer headers and no duplicate header', () => {
@@ -187,13 +188,35 @@ describe('upload coverage', () => {
     expect(fs.existsSync(path.join(repo, 'docs', 'templates'))).toBe(false);
   });
 
-  it('the CSV templates the bulk upload screens offer have the importer headers', () => {
-    const src = fs.readFileSync(path.join(repo, 'brokerverse', 'src', 'agentModule', 'component', 'bulkUploadTemplate.js'), 'utf8');
-    for (const id of ['leads', 'quotations', 'policies', 'receipts', 'disbursements']) {
-      const block = src.match(new RegExp(`\\b${id}: \\{[\\s\\S]*?columns: \\[([\\s\\S]*?)\\]`))[1];
-      const headers = [...block.matchAll(/"([^"]+)"/g)].map((m) => m[1]);
-      expect(headers, id).toEqual(defs.find((d) => d.id === id).columns.map((c) => c.header));
+  it('the bulk upload screens download the importer\'s workbook (Data, Columns, Instructions) from the API', async () => {
+    const screens = {
+      leads: 'agentModule/leadModule/leadListing/index.js', quotations: 'agentModule/quotationModule/index.jsx', policies: 'agentModule/policyModule/index.jsx',
+      receipts: 'module/Receipts/PolicyReceipts/index.js', disbursements: 'module/PaymentVoucher/index.js',
+    };
+    for (const [id, screen] of Object.entries(screens)) {
+      const src = fs.readFileSync(path.join(repo, 'brokerverse', 'src', screen), 'utf8');
+      expect(src, screen).toContain(`templatePath: "/${id}/bulk-upload/template"`);
+      const r = await api('get', `/${id}/bulk-upload/template`).buffer(true).parse(binary);
+      expect(r.status, id).toBe(200);
+      expect(r.headers['content-disposition'], id).toContain(defs.find((d) => d.id === id).file);
+      const sheets = readWorkbook(r.body);
+      expect(sheets.map((x) => x.name), id).toEqual(['Data', 'Columns', 'Instructions']);
+      expect(sheets[0].rows[0], id).toEqual(defs.find((d) => d.id === id).columns.map((c) => c.header));
     }
+  });
+
+  it('the statement imports and the remittance bulk upload offer their template on the screen', async () => {
+    for (const [route, id] of [['/bank-reconciliation/statements/template', 'bank-statement'], ['/insurer-reconciliation/statements/template', 'insurer-statement'], ['/remittance/bulk/template', 'remittance-bulk']]) {
+      const r = await api('get', route).buffer(true).parse(binary);
+      expect(r.status, route).toBe(200);
+      const sheets = readWorkbook(r.body);
+      expect(sheets.map((x) => x.name), route).toEqual(['Data', 'Columns', 'Instructions']);
+      expect(sheets[0].rows[0], route).toEqual(defs.find((d) => d.id === id).columns.map((c) => c.header));
+    }
+    expect((await api('get', '/remittance/bulk/template?configCode=NO-SUCH')).status).toBe(400);
+    const csv = await api('get', '/remittance/reconciliation/bank-transactions/template');
+    expect(csv.status).toBe(200);
+    expect(csv.text.split('\r\n')[0]).toBe(defs.find((d) => d.id === 'remittance-bank-transactions').columns.map((c) => c.header).join(','));
   });
 
   it('the sample rows of every master template are accepted by the master upload', async () => {
@@ -246,6 +269,7 @@ describe('master upload and template download', () => {
     ]));
     expect(r.status, JSON.stringify(r.body)).toBe(200);
     expect(r.body.data).toMatchObject({ created: 2, updated: 1, failed: 1 });
+    expect(r.body.data.errors[0]).toMatchObject({ row: 5, message: expect.stringMatching(/^Account Code: /) });
     const sub = (await query('SELECT parent_code, is_open_item, allow_manual FROM gl_accounts WHERE code = \'4401031001\'')).rows[0];
     expect(sub).toEqual({ parent_code: '4401031', is_open_item: false, allow_manual: true });
     expect((await query('SELECT name FROM gl_accounts WHERE code = \'4401002\'')).rows[0].name).toBe('Advertising and Promotions');
@@ -318,6 +342,13 @@ describe('go-live imports', () => {
     expect((await query('SELECT count(*)::int AS n FROM journal_vouchers WHERE policy_id = $1', [p.id])).rows[0].n).toBe(0);
     expect((await query('SELECT count(*)::int AS n FROM commissions WHERE policy_id = $1', [p.id])).rows[0].n).toBe(0);
     expect((await upload('/policies/bulk-upload', 'x.csv', { mode: 'legacy' }, csvBuffer([['Policy Number'], ['A']]))).status).toBe(400);
+    const incomplete = await upload('/policies/bulk-upload', 'x.csv', { mode: 'go-live' }, csvBuffer([
+      ['Policy Number', 'Insured Name', 'Insurance Company', 'Inception Date', 'Expiry Date', 'Gross Premium'],
+      ['', 'No Number', 'MALAYAN', '2026-03-01', '2027-03-01', '1000'],
+      ['GL-X-2', 'Unknown Insurer', 'Nowhere Assurance', '2026-03-01', '2027-03-01', '1000'],
+    ]));
+    expect(incomplete.body.data).toMatchObject({ created: 0, failed: 2 });
+    expect(incomplete.body.data.errors.map((e) => e.message)).toEqual(['An existing policy (go-live) needs Policy Number', 'Insurance Company "Nowhere Assurance" is not in the Insurance Company master']);
 
     const items = await upload('/receipts/opening-items/import', 'Open_Items_Upload_Template.xlsx', { goLiveDate: '2026-01-01' });
     expect(items.status, JSON.stringify(items.body)).toBe(200);

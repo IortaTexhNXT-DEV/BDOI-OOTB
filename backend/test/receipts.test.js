@@ -110,7 +110,8 @@ describe('receipts', () => {
     expect(up.status).toBe(200);
     expect(up.body.data.created).toBe(1);
     expect(up.body.data.failed).toBe(1);
-    expect(up.body.data.errors[0].row).toBe(3);
+    expect(up.body.data.message).toBe('Processed 2 rows: 1 created, 1 failed');
+    expect(up.body.data.errors[0]).toMatchObject({ row: 3, message: expect.stringContaining('POL-NOPE') });
   });
 
   it('add receipt against an open endorsement bill: open-receivables lists it, partial 2,000 then 3,010, excess refused, journals balanced', async () => {

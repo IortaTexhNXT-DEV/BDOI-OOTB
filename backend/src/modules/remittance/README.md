@@ -84,6 +84,10 @@ before approval).
   finance user approves, or `finance.maker_checker_enabled` is switched off (small offices only).
 - A direct-bill policy has no premium bill: that is expected. Direct-bill policies are billed by the insurer, so the
   broker has no receivable and no collection reminders.
+- Templates on the screens: Bulk Processing downloads the workbook of its configuration's field mappings
+  (`GET /remittance/bulk/template?configCode=`), Reconciliation the CSV of the bank transactions import
+  (`GET /remittance/reconciliation/bank-transactions/template`). The bank transactions import is checked as a whole: a
+  line without a date, reference or amount refuses the file and nothing is imported.
 - The Remittance > Reconciliation screen matches bank transactions for remittances only. The bank reconciliation of the
   cash accounts is the separate bank-reconciliation module.
 - "... is above your approval authority": the approver's Authority Matrix limit for `remittance` or

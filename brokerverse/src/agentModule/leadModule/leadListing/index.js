@@ -10,10 +10,13 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dialog } from "primereact/dialog";
 import { useNavigate } from "react-router-dom";
-import BulkUploadModal from "./BulkUploadModal";
+import ImportDialog from "../../../components/ImportDialog";
 import leadService from "../../../services/leadService";
 import CreateProspectDialog from "./CreateProspectDialog";
 import useProspectStart from "./useProspectStart";
+
+/** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
+const UPLOAD_TARGETS = [{ label: "Prospects", templatePath: "/leads/bulk-upload/template", uploadPath: "/leads/bulk-upload" }];
 
 const LeadListing = () => {
   const { t } = useTranslation();
@@ -152,10 +155,12 @@ const LeadListing = () => {
       <LeadStatsCards />
       <ProspectTable key={refreshKey} />
       <CreateProspectDialog visible={showCreate} onHide={() => setShowCreate(false)} onProduct={openProduct} onSkip={skipProduct} productRequired={productRequired} />
-      <BulkUploadModal
+      <ImportDialog
         visible={showBulkUpload}
         onHide={() => setShowBulkUpload(false)}
-        onUploadSuccess={handleBulkUploadSuccess}
+        title={"Bulk upload prospects"}
+        targets={UPLOAD_TARGETS}
+        onDone={handleBulkUploadSuccess}
       />
       <Dialog
         visible={showReportModal}

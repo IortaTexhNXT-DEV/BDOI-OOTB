@@ -7,6 +7,7 @@ import { canRead, canWrite, sendList } from '../masters/helpers.js';
 import * as masters from '../masters/service.js';
 import * as svc from './service.js';
 import * as items from './items.js';
+import { remittanceUpload, sendWorkbook, staticUploads, templateCsv } from '../documents/uploadTemplates.js';
 import * as directBill from './directbill.js';
 import * as clientPayments from './clientPayments.js';
 import { pool, withTransaction } from '../../db/pool.js';
@@ -571,6 +572,14 @@ define({
   handler: async (req, res) => listOf(req, res, 'upload', items.bulkOut),
 });
 define({
+  method: 'GET', path: '/bulk/template', summary: 'Remittance bulk upload template of a bulk-processing configuration (configCode; default: the first active one): the columns of its field mappings (XLSX: Data, Columns and Instructions sheets)',
+  screen: S('Bulk Processing > Upload File > Download template'), middleware: read, query: { configCode: 'ARM-001' }, response: '(xlsx file)',
+  handler: async (req, res) => {
+    const { cfg, maps } = await items.bulkConfig(req.query.configCode || null);
+    sendWorkbook(res, remittanceUpload(maps, cfg.code));
+  },
+});
+define({
   method: 'POST', path: '/bulk/upload', summary: 'Upload a remittance file (multipart file + configCode); validates against the bulk-processing master', screen: S('Bulk Processing > Upload / Validate'), middleware: [...write, singleFile],
   request: { file: '(CSV: PolicyNo,Premium,Commission)', configCode: 'BFM-001' }, response: { success: true, data: { totalRecords: 2, successCount: 1, errorCount: 1, errors: [{ row: 3, field: 'policy_number', message: 'Policy not found' }], status: 'Validated' } },
   handler: async (req, res) => {
@@ -590,6 +599,16 @@ define({
   method: 'GET', path: '/reconciliation', summary: 'Bank vs system transactions, exceptions and match summary', screen: S('Reconciliation'), middleware: read,
   response: { success: true, data: { bankTransactions: [{ id: 'rmi_7', transDate: '2026-09-20', reference: 'BNK-2026-00001', amount: 38250, status: 'matched' }], systemTransactions: [{ id: 'rm_1', policyNo: 'POL-2026-00001', premium: 38250, transDate: '2026-09-18', reference: 'REM-2026-00001', status: 'matched' }], exceptions: [], summary: { matched: 1, unmatched: 0, successRate: 100 } } },
   handler: async (_req, res) => ok(res, await items.reconciliation()),
+});
+define({
+  method: 'GET', path: '/reconciliation/bank-transactions/template', summary: 'Bank transactions import template (CSV: TransDate, Reference, Amount, Description)',
+  screen: S('Reconciliation > Import > Template'), middleware: read, response: '(csv file)',
+  handler: async (_req, res) => {
+    const def = staticUploads().find((d) => d.id === 'remittance-bank-transactions');
+    res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+    res.setHeader('Content-Disposition', `attachment; filename="${def.csv}"`);
+    res.send(templateCsv(def));
+  },
 });
 define({
   method: 'POST', path: '/reconciliation/bank-transactions', summary: 'Import bank statement lines', screen: S('Reconciliation > Import'), middleware: write,

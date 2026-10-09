@@ -9,6 +9,7 @@ import { Dropdown } from "primereact/dropdown";
 import { InputNumber } from "primereact/inputnumber";
 import { InputText } from "primereact/inputtext";
 import bankReconciliationService from "../../services/bankReconciliationService";
+import importService from "../../services/importService";
 import { Amount, BrTag, date, money } from "./common";
 
 /**
@@ -68,6 +69,8 @@ const ImportStatementDialog = ({ visible, onHide, account, formats, onImported }
           <Dropdown inputId="br-imp-format" value={format} onChange={(e) => { setFormat(e.value); setPreview(null); }} className="w-full"
             options={formats.map((f) => ({ label: `${f.code} – ${f.name}`, value: f.code }))} />
           {chosen && <div className="pe-muted mt-1">{chosen.dateFormat} · {chosen.fileType.toUpperCase()}{chosen.skipRows ? ` · ${t("bankReconciliation.skipRowsShort", { count: chosen.skipRows })}` : ""}{chosen.isExample ? ` · ${t("bankReconciliation.status.example")}` : ""}</div>}
+          <Button type="button" text size="small" icon="pi pi-download" className="p-0 mt-1" label={t("bankReconciliation.downloadTemplate")}
+            onClick={() => importService.downloadTemplate("/bank-reconciliation/statements/template").catch((e) => setError(e.message))} />
         </div>
         <div className="col-12 md:col-4">
           <label htmlFor="br-imp-file">{t("bankReconciliation.file")} *</label>

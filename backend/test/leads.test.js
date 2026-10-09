@@ -145,7 +145,8 @@ describe('leads', () => {
     const csv = 'First Name,Last Name,Email,Contact Number,City,Category\nAriel,Gomez,ariel@example.ph,0917111,Pasig,Retail\n"Dela Paz, Jr.",Ronaldo,bad-email,0917222,Manila,Retail\n';
     const r = await sales('post', '/leads/bulk-upload').attach('file', Buffer.from(csv), 'leads.csv');
     expect(r.body.data).toMatchObject({ total: 2, created: 1, failed: 1 });
-    expect(r.body.data.errors[0].row).toBe(3);
+    expect(r.body.data.errors[0]).toEqual({ row: 3, message: 'Email must be a valid e-mail' });
+    expect(r.body.data.message).toBe('Processed 2 rows: 1 created, 1 failed');
     const xlsx = writeXlsx(['firstName', 'lastName', 'emailId', 'lob'], [['Hazel', 'Uy', 'hazel@example.ph', 'IAR'], ['Marco', 'Lim', '', 'Motor']]);
     const x = await sales('post', '/leads/bulk-upload').attach('file', xlsx, 'leads.xlsx');
     expect(x.body.data.created).toBe(2);

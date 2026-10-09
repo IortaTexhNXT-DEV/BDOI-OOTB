@@ -11,7 +11,8 @@ import * as payments from './payments.js';
 import { config } from '../../config.js';
 import { badRequest, forbidden } from '../../lib/errors.js';
 import { sendEntity, actor } from '../documents/common.js';
-import { uploadFile, parseUploadedRows } from '../documents/tabular.js';
+import { uploadFile, parseUploadedRows, columnMessage, uploadResult } from '../documents/tabular.js';
+import { sendTemplate } from '../documents/uploadTemplates.js';
 import { buildPdf, sendPdf } from '../documents/pdf.js';
 import { placingSlipDoc, printablePolicy } from '../documents/templates.js';
 import { ownRecord, withScope } from '../../lib/scope.js';
@@ -36,6 +37,10 @@ define({
   },
 });
 define({
+  method: 'GET', path: '/bulk-upload/template', summary: 'Policies upload template (XLSX: Data, Columns and Instructions sheets)', screen: `${SCREEN} > Bulk Upload > Download template`,
+  middleware: canRead, response: '(xlsx file)', handler: async (_req, res) => sendTemplate(res, 'policies'),
+});
+define({
   method: 'POST', path: '/bulk-upload', summary: 'Bulk upload issued policies from CSV / XLSX (policy number, insured, product, insurer, inception, expiry, premiums); mode=go-live loads in-force policies of the old system without bill, journal or commission', screen: `${SCREEN} > Bulk Upload`,
   middleware: [...canWrite, uploadFile], request: 'multipart/form-data file', response: { success: true, data: { message: 'Processed 2 rows: 2 created, 0 failed', created: 2, failed: 0, errors: [] } },
   handler: async (req, res) => {
@@ -50,9 +55,9 @@ define({
         const r = await withTransaction((db) => svc.importPolicy(db, svc.policyFromRow(row), actor(req), { migration }));
         await audit(req, { entity: 'policy', entityId: r.policyId, action: migration ? 'go-live-migration' : 'bulk-create', after: { policyId: r.policyId, billNumber: r.receivable?.bill_number ?? null } });
         created += 1;
-      } catch (e) { errors.push({ row: i + 2, message: e.message }); }
+      } catch (e) { errors.push({ row: i + 2, message: columnMessage(e.details?.length ? e.details.map((d) => d.message).join('; ') : e.message, svc.POLICY_UPLOAD_COLUMNS) }); }
     }
-    const data = { message: `Processed ${rows.length} rows: ${created} created, ${errors.length} failed`, total: rows.length, created, failed: errors.length, errors };
+    const data = uploadResult(rows.length, created, errors);
     res.json({ success: true, message: data.message, data });
   },
 });

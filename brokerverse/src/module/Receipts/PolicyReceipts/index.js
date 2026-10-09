@@ -33,9 +33,12 @@ import { Calendar } from "primereact/calendar";
 import LabelWrapper from "../../../components/LabelWrapper";
 import { Toast } from "primereact/toast";
 import clientService from "../../../services/clientService";
-import BulkUploadModal from "../BulkUploadModal";
-import { calendarDateFormat, formatDate as formatAppDate } from "../../../utility/dateFormat";
+import ImportDialog from "../../../components/ImportDialog";
+import { calendarDateFormat, formatDate as formatAppDate, toIsoDate } from "../../../utility/dateFormat";
 import logger from "../../../utility/logger";
+
+/** Bulk upload: template and importer of the API (Data, Columns and Instructions sheets; failed rows listed). */
+const UPLOAD_TARGETS = [{ label: "Official receipts", templatePath: "/receipts/bulk-upload/template", uploadPath: "/receipts/bulk-upload" }];
 
 const CONVERTED = "Converted";
 
@@ -451,8 +454,8 @@ const PolicyReceipts = () => {
     const filters = {
       customerCodeFrom: customerCodeString,
       customerCodeTo: customerCodeToString,
-      createdAtFrom: dateFrom.toISOString().split("T")[0], // Format as YYYY-MM-DD
-      createdAtTo: dateTo.toISOString().split("T")[0], // Format as YYYY-MM-DD
+      createdAtFrom: toIsoDate(dateFrom),
+      createdAtTo: toIsoDate(dateTo),
     };
 
     try {
@@ -1097,10 +1100,12 @@ const PolicyReceipts = () => {
       </div>
 
       {/* Bulk Upload Modal */}
-      <BulkUploadModal
+      <ImportDialog
         visible={visibleBulkUploadPopup}
         onHide={() => setVisibleBulkUploadPopup(false)}
-        onUploadSuccess={handleBulkUploadSuccess}
+        title={"Bulk upload receipts"}
+        targets={UPLOAD_TARGETS}
+        onDone={handleBulkUploadSuccess}
       />
 
       <Toast ref={toast} />
